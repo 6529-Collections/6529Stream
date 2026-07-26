@@ -1785,16 +1785,18 @@ Acceptance criteria:
    artifacts, changelog, and autonomous run state include the new satellites
    without claiming production readiness.
 
-Follow-up: issue #690 owns the first fail-closed planning slice. Its checked
-inventory pins five mutation selectors, eight authorization classes, fourteen
-record-family groups, and eight known fail-open behaviors, while its inventory,
-retained-evidence, and strict grant-map schemas plus the planning template keep
-classifier, candidate, grant-map, snapshot-intersection, authority-lifecycle,
-phase, and independent-review evidence explicitly missing. `RISK-GOV-002`
-remains `open_blocker`; neither the inventory, template, nor an admin ceremony
-substitutes for family-scoped contract enforcement. Both public-beta and
-production release mode remain hard stopped, and this planning slice does not
-close #690 or change readiness.
+Follow-up: issue #690 now has the source-enforcement layer. Its closed-world
+registry pins fourteen family IDs and eight authority classes, admits only
+exact record types, resolves live signer providers or family-specific grants,
+and is immutably enforced by both generic record hosts. Snapshot publication
+requires a `SNAPSHOT`-family payload plus authority over every declared exact
+record type. The schema-validated source catalog binds the semantic commit,
+source digests, interfaces, hosts, and tests; the earlier inventory remains a
+historical pre-remediation baseline. Exact candidate/profile binding,
+production admission/provider/grant configuration, deployed runtime/codehash
+evidence, non-local lifecycle exercise, and independent review remain missing.
+`RISK-GOV-002` remains `open_blocker`; both public-beta and production release
+mode remain hard stopped, and the source slice does not change readiness.
 
 ### CON-016: Add Mint Gate Interface And Module Registry Foundation
 

@@ -31,12 +31,15 @@ interface IStreamCollectionMetadata is IERC165 {
         address writer;
         uint64 updatedAt;
         bool locked;
+        uint8 authorizationClass;
     }
 
     /// @notice Reverts when Core is not a deployed 6529Stream Core.
     error InvalidCoreContract();
     /// @notice Reverts when the admin dependency is not a StreamAdmins contract.
     error InvalidAdminContract();
+    /// @notice Reverts when the family classifier is not the required deployed registry.
+    error InvalidRecordFamilyRegistry();
     /// @notice Reverts when caller lacks global or target-scoped function authority.
     error FunctionAdminUnauthorized(address caller, bytes4 selector);
     /// @notice Reverts when metadata mutation pause is active.
@@ -59,6 +62,10 @@ interface IStreamCollectionMetadata is IERC165 {
     error InvalidSnapshotId(bytes32 snapshotId);
     /// @notice Reverts when a snapshot identifier already exists.
     error CollectionSnapshotAlreadyPublished(uint256 collectionId, bytes32 snapshotId);
+    /// @notice Reverts when a snapshot does not declare a strict nonempty family set.
+    error InvalidSnapshotFamilySet(uint256 index, bytes32 recordType);
+    /// @notice Reverts when the snapshot payload is not an admitted SNAPSHOT-family record.
+    error InvalidSnapshotRecordType(bytes32 recordType);
 
     /// @notice Emitted when the admin dependency changes.
     event CollectionMetadataAdminContractUpdated(
@@ -72,7 +79,8 @@ interface IStreamCollectionMetadata is IERC165 {
         CollectionMetadataRecord record,
         bytes32 recordHash,
         uint64 revision,
-        address admin
+        address recorder,
+        uint8 authorizationClass
     );
     /// @notice Emitted when a snapshot manifest record is published.
     event CollectionMetadataSnapshotPublished(
@@ -81,17 +89,32 @@ interface IStreamCollectionMetadata is IERC165 {
         bytes32 indexed schemaId,
         CollectionMetadataRecord record,
         bytes32 snapshotHash,
-        address admin
+        bytes32 coveredRecordTypesHash,
+        address recorder,
+        uint8 authorizationClass
+    );
+    /// @notice Emitted once for every exact record type covered by a snapshot.
+    event CollectionMetadataSnapshotFamilyAuthorized(
+        uint256 indexed collectionId,
+        bytes32 indexed snapshotId,
+        bytes32 indexed recordType,
+        uint8 authorizationClass,
+        address recorder
     );
     /// @notice Emitted when a record type is locked against mutation.
     event CollectionMetadataLockedEvent(
-        uint256 indexed collectionId, bytes32 indexed recordType, address indexed admin
+        uint256 indexed collectionId,
+        bytes32 indexed recordType,
+        address indexed recorder,
+        uint8 authorizationClass
     );
 
     /// @notice Returns the Core contract this metadata module extends.
     function streamCore() external view returns (address);
     /// @notice Returns the active StreamAdmins dependency.
     function adminsContract() external view returns (address);
+    /// @notice Returns the immutable exact record-family classifier/authority host.
+    function recordFamilyRegistry() external view returns (address);
     /// @notice Returns true for deployment validation.
     function isStreamCollectionMetadata() external pure returns (bool);
     /// @notice Returns the module family beacon.
@@ -115,12 +138,14 @@ interface IStreamCollectionMetadata is IERC165 {
         CollectionMetadataRecord calldata record,
         uint64 expectedRevision
     ) external returns (bytes32 recordHash);
-    /// @notice Publishes an immutable snapshot record.
+    /// @notice Publishes an immutable SNAPSHOT-family record.
     /// @dev Snapshot publication is blocked by `METADATA_ALL`, `SNAPSHOTS`, or the snapshot
-    /// record's own `recordType` lock.
+    /// record's own `recordType` lock. The caller must also hold authority for every exact
+    /// record type in `coveredRecordTypes`.
     function publishCollectionSnapshot(
         uint256 collectionId,
         bytes32 snapshotId,
+        bytes32[] calldata coveredRecordTypes,
         CollectionMetadataRecord calldata snapshot
     ) external returns (bytes32 snapshotHash);
     /// @notice Locks a record type against mutation.
@@ -145,6 +170,11 @@ interface IStreamCollectionMetadata is IERC165 {
         returns (bytes32);
     /// @notice Returns a published snapshot hash by identifier.
     function snapshotHash(uint256 collectionId, bytes32 snapshotId) external view returns (bytes32);
+    /// @notice Returns the ordered covered-record-type commitment for a snapshot.
+    function snapshotCoveredRecordTypesHash(uint256 collectionId, bytes32 snapshotId)
+        external
+        view
+        returns (bytes32);
     /// @notice Returns a published snapshot view by identifier.
     function collectionSnapshot(uint256 collectionId, bytes32 snapshotId)
         external

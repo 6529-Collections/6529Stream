@@ -240,7 +240,7 @@ class ProtocolSurfaceReportTests(unittest.TestCase):
             self.assertIn(interface_name, interface_ids["interface_ids"])
             self.assertIn(interface_name, interface_ids["interfaces"])
 
-        self.assertLessEqual(aggregate_functions, 80)
+        self.assertLessEqual(aggregate_functions, 85)
 
     def test_report_contains_functions_events_and_custom_errors(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir, patched_cast():

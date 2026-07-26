@@ -34,6 +34,13 @@ GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     "6529stream.record-family-authorization-inventory.v1"
 )
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA = (
+    "6529stream.record-family-authorization-source-catalog.v1"
+)
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID = (
+    "https://6529.io/schemas/"
+    "record-family-authorization-source-catalog.v1.schema.json"
+)
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
     "https://6529.io/schemas/"
     "record-family-authorization-inventory.v1.schema.json"
@@ -67,6 +74,13 @@ GENESIS_DEPLOYMENT_PROFILE_PATH = (
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH = (
     "release-artifacts/record-family-authorization-inventory.json"
 )
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH = (
+    "release-artifacts/record-family-authorization-source-catalog.json"
+)
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH = (
+    "release-artifacts/schema/"
+    "record-family-authorization-source-catalog.v1.schema.json"
+)
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH = (
     "release-artifacts/schema/"
     "record-family-authorization-inventory.v1.schema.json"
@@ -84,10 +98,18 @@ RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH = (
     "record-family-authorization-grant-map.v1.schema.json"
 )
 RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS = (
+    "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+    "smart-contracts/IStreamRecordFamilyRegistry.sol",
+    "smart-contracts/StreamRecordFamilyRegistry.sol",
     "smart-contracts/StreamCollectionMetadata.sol",
     "smart-contracts/IStreamCollectionMetadata.sol",
     "smart-contracts/StreamPreservationRecords.sol",
     "smart-contracts/IStreamPreservationRecords.sol",
+    "script/RehearseDeployment.s.sol",
+    "test/StreamRecordFamilyAuthorization.t.sol",
+    "test/StreamCollectionMetadata.t.sol",
+    "test/StreamPreservationRecords.t.sol",
+    "test/StreamDeploymentManifest.t.sol",
 )
 RELEASE_TOOL_CALL_POLICY_PATH = (
     "release-artifacts/release-tool-call-policy.json"
@@ -277,6 +299,8 @@ scripts/generate_release_candidate_lockfile.py|check_record_family_authorization
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_GRANT_MAP_SCHEMA|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.EVIDENCE_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.EVIDENCE_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.GRANT_MAP_SCHEMA_ID|<none>|Assign.value
@@ -284,6 +308,8 @@ scripts/generate_release_candidate_lockfile.py|check_record_family_authorization
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.INVENTORY_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.INVENTORY_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.JSON_SCHEMA_DRAFT|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_ID|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_release_signatures.EVIDENCE_SCHEMA|local:require_schema|arg:1
 scripts/generate_release_candidate_lockfile.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_PATH|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA|<none>|Assign.value
@@ -332,6 +358,8 @@ scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_E
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_GRANT_MAP_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.EVIDENCE_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.EVIDENCE_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.GRANT_MAP_SCHEMA_ID|<none>|Assign.value
@@ -339,6 +367,8 @@ scripts/generate_release_manifest.py|check_record_family_authorization.GRANT_MAP
 scripts/generate_release_manifest.py|check_record_family_authorization.INVENTORY_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.INVENTORY_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.JSON_SCHEMA_DRAFT|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_ID|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_PATH|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA_ID|<none>|Assign.value
@@ -374,6 +404,9 @@ scripts/test_record_family_authorization.py|check_record_family_authorization.DE
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Set.elts
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY|local:_read|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Set.elts
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Set.elts
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|local:_read|arg:0
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Set.elts
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_AUTHORIZATION_CLASSES|local:enumerate|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_FAMILY_GROUPS|<none>|comprehension.iter
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_FAMILY_GROUPS|local:enumerate|arg:0
@@ -447,19 +480,19 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "bff2c28950b224413a9fc5fd7aa3a9008ff4b5023930ad0d593a1666fbc37a66",
-        85_698,
+        "f2a8dae3f0b50e88630164aff32768859ae7e9b5116d723e6917158e9caf569f",
+        100_553,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "96c70d8c7e22b29923426112f2c2b4b191ff410722186461b164e6f704845e47",
+        "223de8d925885bb55e7a6bc572dbefa5f50b0553fddb1a4e76331619ccebe530",
         46_534,
     ),
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 244
+CANONICAL_COVERED_PATH_COUNT = 253
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "3142e15d9c66ed823bf84af3907501bc505b82b71b5f6e0d6cc7b2f03c0a32a0"
+    "34e0261852c49f6ff502be3c7a552f31f84097720e1d94437aa44bd17dab1732"
 )
 
 
@@ -3690,6 +3723,8 @@ def verify_record_family_authorization_bindings(
         "release-manifest.release_artifacts.record_family_authorization",
     )
     expected_manifest_keys = {
+        "source_catalog",
+        "source_catalog_schema",
         "inventory",
         "inventory_schema",
         "evidence_schema",
@@ -3699,10 +3734,19 @@ def verify_record_family_authorization_bindings(
     if set(manifest_group) != expected_manifest_keys:
         raise ReleaseArtifactVerificationError(
             "release-manifest record-family authorization keys must be exactly "
-            "inventory, inventory_schema, evidence_schema, grant_map_schema, "
-            "and evidence_template"
+            "source_catalog, source_catalog_schema, inventory, "
+            "inventory_schema, evidence_schema, grant_map_schema, and "
+            "evidence_template"
         )
 
+    manifest_source_catalog = require_dict(
+        manifest_group.get("source_catalog"),
+        "release-manifest.record_family_authorization.source_catalog",
+    )
+    manifest_source_catalog_schema = require_dict(
+        manifest_group.get("source_catalog_schema"),
+        "release-manifest.record_family_authorization.source_catalog_schema",
+    )
     manifest_inventory = require_dict(
         manifest_group.get("inventory"),
         "release-manifest.record_family_authorization.inventory",
@@ -3727,6 +3771,15 @@ def verify_record_family_authorization_bindings(
         locked_inputs.get("record_family_authorization_inventory"),
         "release-candidate-lockfile.record_family_authorization_inventory",
     )
+    lock_source_catalog = require_dict(
+        locked_inputs.get("record_family_authorization_source_catalog"),
+        "release-candidate-lockfile.record_family_authorization_source_catalog",
+    )
+    lock_source_catalog_schema = require_dict(
+        locked_inputs.get("record_family_authorization_source_catalog_schema"),
+        "release-candidate-lockfile."
+        "record_family_authorization_source_catalog_schema",
+    )
     lock_inventory_schema = require_dict(
         locked_inputs.get("record_family_authorization_inventory_schema"),
         "release-candidate-lockfile.record_family_authorization_inventory_schema",
@@ -3743,6 +3796,45 @@ def verify_record_family_authorization_bindings(
         locked_inputs.get("record_family_authorization_grant_map_schema"),
         "release-candidate-lockfile.record_family_authorization_grant_map_schema",
     )
+
+    _require_exact_file_record(
+        manifest_source_catalog,
+        source="release-manifest record-family authorization source catalog",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA,
+    )
+    _require_exact_file_record(
+        lock_source_catalog,
+        source=(
+            "release-candidate-lockfile record-family authorization "
+            "source catalog"
+        ),
+        expected_path=RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA,
+    )
+    for source, record in (
+        (
+            "release-manifest record-family authorization source-catalog schema",
+            manifest_source_catalog_schema,
+        ),
+        (
+            "release-candidate-lockfile record-family authorization "
+            "source-catalog schema",
+            lock_source_catalog_schema,
+        ),
+    ):
+        _require_exact_file_record(
+            record,
+            source=source,
+            expected_path=RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH,
+            expected_schema=JSON_SCHEMA_DRAFT,
+            expected_fields={
+                "schema_id": RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID,
+                "document_schema_version": (
+                    RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                ),
+            },
+        )
 
     _require_exact_file_record(
         manifest_inventory,
@@ -3835,6 +3927,12 @@ def verify_record_family_authorization_bindings(
             },
         )
     for label, manifest_record, lock_record in (
+        ("source catalog", manifest_source_catalog, lock_source_catalog),
+        (
+            "source-catalog schema",
+            manifest_source_catalog_schema,
+            lock_source_catalog_schema,
+        ),
         ("inventory", manifest_inventory, lock_inventory),
         (
             "inventory schema",

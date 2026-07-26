@@ -5,6 +5,7 @@ import "./ERC165.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamCore.sol";
 import "./IStreamPreservationRecords.sol";
+import "./IStreamRecordFamilyRegistry.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
@@ -20,15 +21,17 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
 
     bytes32 private constant _MODULE_FAMILY = keccak256("6529stream.module.preservation-records");
     bytes32 private constant _MODULE_VERSION =
-        keccak256("6529stream.module.preservation-records.v1");
+        keccak256("6529stream.module.preservation-records.v2");
     bytes32 private constant _MODULE_SCHEMA_HASH =
-        keccak256("6529stream.preservation-records.schema.v1");
-    bytes32 private constant _RECORD_HASH_DOMAIN = keccak256("6529stream.preservation-record.v1");
+        keccak256("6529stream.preservation-records.schema.v2");
+    bytes32 private constant _RECORD_HASH_DOMAIN = keccak256("6529stream.preservation-record.v2");
     bytes32 private constant _FIELD_RECORD_URI = "recordURI";
 
     address public immutable override streamCore;
+    address public immutable override recordFamilyRegistry;
     address private immutable _moduleSupersedes;
     IStreamAdmins private _adminsContract;
+    IStreamRecordFamilyRegistry private immutable _recordFamilyRegistry;
 
     mapping(bytes32 => CollectionRecordSummary) private _records;
     mapping(bytes32 => CollectionRecord) private _recordPayloads;
@@ -44,11 +47,18 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         _;
     }
 
-    constructor(address core, address admins, address supersedes) {
+    constructor(address core, address admins, address familyRegistry, address supersedes) {
         StreamMetadataRenderer.requireContractMarker(
             core, IStreamCore.isCoreContract.selector, InvalidCoreContract.selector
         );
         streamCore = core;
+        StreamMetadataRenderer.requireContractMarker(
+            familyRegistry,
+            IStreamRecordFamilyRegistry.isStreamRecordFamilyRegistry.selector,
+            InvalidRecordFamilyRegistry.selector
+        );
+        recordFamilyRegistry = familyRegistry;
+        _recordFamilyRegistry = IStreamRecordFamilyRegistry(familyRegistry);
         _moduleSupersedes = supersedes;
         _setAdminContract(admins);
     }
@@ -91,12 +101,14 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
     function recordCollectionRecord(uint256 collectionId, CollectionRecord calldata record)
         external
         override
-        FunctionAdminRequired(this.recordCollectionRecord.selector)
         returns (bytes32 recordHash)
     {
         _requireMetadataMutationNotPaused();
         _requireKnownCollection(collectionId);
         _validateRecord(record);
+        uint8 authorizationClass = _recordFamilyRegistry.requireRecordWriter(
+            collectionId, record.subjectId, record.recordType, msg.sender, bytes("")
+        );
         recordHash = _deriveCollectionRecordHash(collectionId, record);
         if (_records[recordHash].collectionId != 0) {
             revert CollectionRecordAlreadyExists(recordHash);
@@ -119,13 +131,20 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
             signatureHashCanonicalizationId: record.signatureHash.canonicalizationId,
             effectiveAt: record.effectiveAt,
             recorder: msg.sender,
-            recordedAt: uint64(block.timestamp)
+            recordedAt: uint64(block.timestamp),
+            authorizationClass: authorizationClass
         });
         _records[recordHash] = summary;
         _recordPayloads[recordHash] = record;
         _latestRecordHash[collectionId][record.recordType][record.subjectId] = recordHash;
         emit CollectionRecordRecorded(
-            collectionId, record.recordType, record.subjectId, record, recordHash, msg.sender
+            collectionId,
+            record.recordType,
+            record.subjectId,
+            record,
+            recordHash,
+            msg.sender,
+            authorizationClass
         );
     }
 

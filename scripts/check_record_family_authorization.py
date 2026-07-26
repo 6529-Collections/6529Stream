@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the planning-only record-family authorization inventory and evidence."""
+"""Validate record-family authorization source, inventory, and release evidence."""
 
 from __future__ import annotations
 
@@ -29,6 +29,13 @@ DEFAULT_INVENTORY: Final = Path(
 )
 DEFAULT_INVENTORY_SCHEMA: Final = Path(
     "release-artifacts/schema/record-family-authorization-inventory.v1.schema.json"
+)
+DEFAULT_SOURCE_CATALOG: Final = Path(
+    "release-artifacts/record-family-authorization-source-catalog.json"
+)
+DEFAULT_SOURCE_CATALOG_SCHEMA: Final = Path(
+    "release-artifacts/schema/"
+    "record-family-authorization-source-catalog.v1.schema.json"
 )
 DEFAULT_EVIDENCE_TEMPLATE: Final = Path(
     "deployments/record-family-authorization/record-family-authorization-evidence-template.json"
@@ -63,6 +70,9 @@ EXPECTED_EVIDENCE_PATHS: Final = {
 INVENTORY_SCHEMA_VERSION: Final = (
     "6529stream.record-family-authorization-inventory.v1"
 )
+SOURCE_CATALOG_SCHEMA_VERSION: Final = (
+    "6529stream.record-family-authorization-source-catalog.v1"
+)
 EVIDENCE_SCHEMA_VERSION: Final = (
     "6529stream.record-family-authorization-evidence.v1"
 )
@@ -71,6 +81,10 @@ GRANT_MAP_SCHEMA_VERSION: Final = (
 )
 INVENTORY_SCHEMA_ID: Final = (
     "https://6529.io/schemas/record-family-authorization-inventory.v1.schema.json"
+)
+SOURCE_CATALOG_SCHEMA_ID: Final = (
+    "https://6529.io/schemas/"
+    "record-family-authorization-source-catalog.v1.schema.json"
 )
 EVIDENCE_SCHEMA_ID: Final = (
     "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/"
@@ -100,14 +114,52 @@ AS_BUILT_SOURCE_SHA256: Final = {
     ),
 }
 
-# This is deliberately code-owned. JSON, CLI flags, environment variables,
-# risk acceptances, and template edits cannot turn the planning slice into
-# implementation or retained evidence.
+# Source implementation is now present, but a source catalog cannot substitute
+# for candidate-bound deployment configuration or reviewed retained evidence.
 IMPLEMENTATION_COMPLETION_SUPPORTED: Final = False
 COMPLETION_BLOCKER: Final = (
-    "implementation_not_supported_in_this_slice: issue #690 remains an open "
-    "public-beta and production blocker until family-scoped contract "
-    "enforcement and exact candidate-bound reviewed evidence are merged"
+    "candidate_bound_record_family_evidence_not_available: issue #690 remains "
+    "an open public-beta and production blocker until the exact candidate, "
+    "admitted record-type set, live providers and grants, deployed runtime "
+    "codehashes, lifecycle exercise, and independent review are retained"
+)
+
+SOURCE_IMPLEMENTATION_COMMIT: Final = (
+    "522ec69adc075b6514ca96b410926128cfdfe1b0"
+)
+EXPECTED_SOURCE_BINDINGS: Final = (
+    (
+        "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+        "eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f",
+    ),
+    (
+        "smart-contracts/IStreamRecordFamilyRegistry.sol",
+        "82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95",
+    ),
+    (
+        "smart-contracts/StreamRecordFamilyRegistry.sol",
+        "9ffb6e90c1905f8eebf91039f4c947b08d07730038b115f9204a348e52c85bb2",
+    ),
+    (
+        "smart-contracts/IStreamCollectionMetadata.sol",
+        "f22398c6650c3de6599c2e6edc48068d251cab782cc2f1f931ea96fdd9877295",
+    ),
+    (
+        "smart-contracts/StreamCollectionMetadata.sol",
+        "5324ff8e8791ce0bfff46649c7969a9884d4c0ef4249b54daf597d93218270d7",
+    ),
+    (
+        "smart-contracts/IStreamPreservationRecords.sol",
+        "bdfbddab0249e6048ab644b7c0f833ca1ed261e706973742b54636089fbdfc54",
+    ),
+    (
+        "smart-contracts/StreamPreservationRecords.sol",
+        "c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8",
+    ),
+    (
+        "script/RehearseDeployment.s.sol",
+        "492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b",
+    ),
 )
 
 EXPECTED_INVENTORY_KEYS: Final = (
@@ -235,6 +287,150 @@ EXPECTED_AUTHORIZATION_CLASSES: Final = (
     "PRESERVATION_ADMIN",
     "METADATA_ADMIN",
     "GLOBAL_ADMIN",
+)
+EXPECTED_SOURCE_AUTHORIZATION_CLASSES: Final = (
+    (1, "ARTIST_SIGNER", "live_provider"),
+    (2, "OWNER_SIGNER", "live_provider"),
+    (3, "CURATOR_SIGNER", "family_grant"),
+    (4, "INSTITUTION_SIGNER", "live_provider"),
+    (5, "INDEPENDENT_ATTESTOR", "direct_self_attributed"),
+    (6, "PRESERVATION_ADMIN", "family_grant"),
+    (7, "METADATA_ADMIN", "family_grant"),
+    (8, "GLOBAL_ADMIN", "family_grant"),
+)
+EXPECTED_SOURCE_FAMILY_GROUPS: Final = (
+    (
+        "ARTIST",
+        "6529STREAM_RECORD_FAMILY_ARTIST_V1",
+        "0x3d8f31ee46ecb9b89fee34e6abc6987daf40ec43650ca838df8f4d4440985fbf",
+        (1,),
+        True,
+    ),
+    (
+        "OWNER",
+        "6529STREAM_RECORD_FAMILY_OWNER_V1",
+        "0xc7de3ac1b2e3c40a8c1b3e435f7c65fa15c202d9679c69ee855ef9f5b0725606",
+        (2,),
+        True,
+    ),
+    (
+        "INDEPENDENT",
+        "6529STREAM_RECORD_FAMILY_INDEPENDENT_V1",
+        "0x3d6783a53e9ee408332f476190214259f17b7658b5c78835ef36a3297ca949e4",
+        (5,),
+        True,
+    ),
+    (
+        "CURATOR",
+        "6529STREAM_RECORD_FAMILY_CURATOR_V1",
+        "0xeeac19d70c3d1ed563ebf5a18bc84d214bf13390dc2c45ec701a679bb51a465c",
+        (3, 8),
+        False,
+    ),
+    (
+        "INSTITUTION",
+        "6529STREAM_RECORD_FAMILY_INSTITUTION_V1",
+        "0x3f08fa07a7a50519532a7a1d38176090f0fe3658aa24e2a93a808fda6b167bdd",
+        (4,),
+        True,
+    ),
+    (
+        "RIGHTS",
+        "6529STREAM_RECORD_FAMILY_RIGHTS_V1",
+        "0x0ac4845ea7c71ae24076ac125aece1fbe555ad3772b9d4321a8ddfaf72fb1182",
+        (7, 8),
+        False,
+    ),
+    (
+        "ARCHIVE",
+        "6529STREAM_RECORD_FAMILY_ARCHIVE_V1",
+        "0x7fe99c2d5382e3f222f07476408e839f3c760fc3bb919399c36210500621cada",
+        (6, 8),
+        False,
+    ),
+    (
+        "FIXITY",
+        "6529STREAM_RECORD_FAMILY_FIXITY_V1",
+        "0x371df78414259ffae7f400fb3684d32b79a85ab55ede6d87a9a65cf6719cb47d",
+        (4, 6, 8),
+        False,
+    ),
+    (
+        "C2PA",
+        "6529STREAM_RECORD_FAMILY_C2PA_V1",
+        "0xd3afd2b1425b71c3926c945fbd6843d447300ff86666083430b8b6bdd8358dd2",
+        (4, 6, 8),
+        False,
+    ),
+    (
+        "IIIF",
+        "6529STREAM_RECORD_FAMILY_IIIF_V1",
+        "0xd079063dbc54d66071a3941cbbb4b013656d970173035f810d1cf9ad90bc34f2",
+        (6, 7, 8),
+        False,
+    ),
+    (
+        "MEDIA_RELATIONSHIP",
+        "6529STREAM_RECORD_FAMILY_MEDIA_RELATIONSHIP_V1",
+        "0x01c3e3e144bf723d69bcf723c514c628e82d7d3d971b21830a1d436df414adb6",
+        (6, 7),
+        False,
+    ),
+    (
+        "IDENTITY_DISPLAY",
+        "6529STREAM_RECORD_FAMILY_IDENTITY_DISPLAY_V1",
+        "0x574230e8aa599708bb647ce64cbe59441a63558adf38401987fd75dbd3a2a977",
+        (7, 8),
+        False,
+    ),
+    (
+        "SNAPSHOT",
+        "6529STREAM_RECORD_FAMILY_SNAPSHOT_V1",
+        "0xadc9589adaf8b5c94bffd82dd7d6b973f1bfa1ad6bbb3e6a269d0d39eb266352",
+        (7, 8),
+        False,
+    ),
+    (
+        "AGENT",
+        "6529STREAM_RECORD_FAMILY_AGENT_V1",
+        "0x4dbe05954884f7cc073a27786ddb9783d7fe47369ab6faf2cbcb66eb55f72b99",
+        (7, 8),
+        False,
+    ),
+)
+EXPECTED_SOURCE_HOST_BINDINGS: Final = (
+    (
+        "StreamCollectionMetadata",
+        "smart-contracts/StreamCollectionMetadata.sol",
+        "smart-contracts/IStreamCollectionMetadata.sol",
+        "0x2c2422f4",
+        "immutable",
+        True,
+    ),
+    (
+        "StreamPreservationRecords",
+        "smart-contracts/StreamPreservationRecords.sol",
+        "smart-contracts/IStreamPreservationRecords.sol",
+        "0x45cc434d",
+        "immutable",
+        True,
+    ),
+)
+EXPECTED_SOURCE_TESTS: Final = (
+    "test/StreamRecordFamilyAuthorization.t.sol",
+    "test/StreamCollectionMetadata.t.sol",
+    "test/StreamPreservationRecords.t.sol",
+    "test/StreamDeploymentManifest.t.sol",
+)
+EXPECTED_SOURCE_BLOCKERS: Final = (
+    "exact_candidate_binding_not_available",
+    "genesis_profile_binding_not_available",
+    "production_record_type_admission_set_not_available",
+    "artist_owner_institution_provider_bindings_not_available",
+    "candidate_grant_map_not_available",
+    "deployed_runtime_codehash_evidence_not_available",
+    "non_local_rotation_revocation_evidence_not_available",
+    "independent_security_review_not_available",
 )
 AUTHORIZATION_CLASS_HOME: Final = {
     "path": "docs/collection-metadata-contract.md",
@@ -731,14 +927,12 @@ def _assert_source_unchanged_from_commit(
         "as-built source file set does not match the code-owned provenance inventory",
     )
     has_git_metadata = (repo_root / ".git").exists()
+    if not has_git_metadata:
+        # The v1 planning inventory is retained as a historical baseline.
+        # Exported/test fixtures without Git metadata are validated through
+        # the live source catalog instead.
+        return
     for relative in sorted(relative_set):
-        current_path = resolve_repo_file(repo_root, relative, relative)
-        _expect(
-            _sha256(current_path) == AS_BUILT_SOURCE_SHA256[relative],
-            f"{relative} digest drifted from current_implementation.source_commit {commit}",
-        )
-        if not has_git_metadata:
-            continue
         completed = subprocess.run(
             ["git", "show", f"{commit}:{relative}"],
             cwd=repo_root,
@@ -750,10 +944,11 @@ def _assert_source_unchanged_from_commit(
             completed.returncode == 0,
             f"cannot read {relative} at current_implementation.source_commit",
         )
-        current = current_path.read_bytes()
         _expect(
-            completed.stdout == current,
-            f"{relative} drifted from current_implementation.source_commit {commit}",
+            hashlib.sha256(completed.stdout).hexdigest()
+            == AS_BUILT_SOURCE_SHA256[relative],
+            f"{relative} historical digest drifted at "
+            f"current_implementation.source_commit {commit}",
         )
 
 
@@ -784,6 +979,232 @@ def _assert_candidate_source_at_commit(
         f"{label} digest does not match candidate source_commit {commit}",
     )
     return path
+
+
+def _validate_source_catalog_semantics(
+    catalog: dict[str, Any],
+    repo_root: Path,
+) -> None:
+    _expect_keys(
+        catalog,
+        (
+            "schema_version",
+            "status",
+            "tracking_issue",
+            "source_commit",
+            "source_bindings",
+            "classifier",
+            "authorization_classes",
+            "family_groups",
+            "host_bindings",
+            "snapshot_policy",
+            "source_tests",
+            "remaining_blockers",
+        ),
+        "source catalog",
+    )
+    _expect(
+        catalog["schema_version"] == SOURCE_CATALOG_SCHEMA_VERSION,
+        "source catalog schema_version mismatch",
+    )
+    _expect(
+        catalog["status"] == "source_implemented_candidate_unbound",
+        "source catalog status mismatch",
+    )
+    _expect(
+        catalog["tracking_issue"] == TRACKING_ISSUE,
+        "source catalog tracking_issue mismatch",
+    )
+    _expect(
+        catalog["source_commit"] == SOURCE_IMPLEMENTATION_COMMIT,
+        "source implementation commit mismatch",
+    )
+
+    bindings = catalog["source_bindings"]
+    actual_bindings = tuple(
+        (row["path"], row["sha256"]) for row in bindings
+    )
+    _expect(
+        actual_bindings == EXPECTED_SOURCE_BINDINGS,
+        "source binding paths/digests/order mismatch",
+    )
+    for index, (relative, digest) in enumerate(EXPECTED_SOURCE_BINDINGS):
+        _assert_candidate_source_at_commit(
+            repo_root,
+            SOURCE_IMPLEMENTATION_COMMIT,
+            relative,
+            digest,
+            f"source_bindings[{index}]",
+        )
+
+    classifier = catalog["classifier"]
+    _expect(
+        classifier
+        == {
+            "contract": "StreamCollectionMetadata",
+            "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+            "implementation_source_path": (
+                "smart-contracts/StreamRecordFamilyRegistry.sol"
+            ),
+            "interface_path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
+            "authority_provider_interface_path": (
+                "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol"
+            ),
+            "interface_id": "0xb19a79de",
+            "marker_selector": "0x20e9f458",
+            "schema_version": 1,
+            "record_type_admission": "append_only_exact_bytes32",
+            "wildcard_admission": False,
+            "configuration_authority": "stream_admins_owner",
+            "deployment_model": "embedded_in_collection_metadata_host",
+            "candidate_binding_status": "not_available",
+        },
+        "classifier source binding mismatch",
+    )
+
+    classes = tuple(
+        (row["id"], row["name"], row["mode"])
+        for row in catalog["authorization_classes"]
+    )
+    _expect(
+        classes == EXPECTED_SOURCE_AUTHORIZATION_CLASSES,
+        "source authorization class catalog mismatch",
+    )
+
+    families = tuple(
+        (
+            row["name"],
+            row["id_preimage"],
+            row["id"],
+            tuple(row["allowed_authorization_class_ids"]),
+            row["admin_authority_rejected"],
+        )
+        for row in catalog["family_groups"]
+    )
+    _expect(
+        families == EXPECTED_SOURCE_FAMILY_GROUPS,
+        "source family catalog mismatch",
+    )
+
+    hosts = tuple(
+        (
+            row["contract"],
+            row["source_path"],
+            row["interface_path"],
+            row["interface_id"],
+            row["registry_binding"],
+            row["authorization_class_persisted"],
+        )
+        for row in catalog["host_bindings"]
+    )
+    _expect(hosts == EXPECTED_SOURCE_HOST_BINDINGS, "source host bindings mismatch")
+
+    _expect(
+        catalog["snapshot_policy"]
+        == {
+            "abi": (
+                "publishCollectionSnapshot(uint256,bytes32,bytes32[],"
+                "(bytes32,bytes32,string,bytes32,bytes32,uint64))"
+            ),
+            "selector": "0xfc57068f",
+            "covered_record_types": "strictly_ascending_nonempty_exact_ids",
+            "every_record_type_authority_revalidated": True,
+            "covered_record_types_hash_stored": True,
+            "per_record_type_authorization_event": True,
+        },
+        "snapshot source policy mismatch",
+    )
+    _expect(
+        tuple(catalog["source_tests"]) == EXPECTED_SOURCE_TESTS,
+        "source test set/order mismatch",
+    )
+    for index, relative in enumerate(EXPECTED_SOURCE_TESTS):
+        resolve_repo_file(repo_root, relative, f"source_tests[{index}]")
+    _expect(
+        tuple(catalog["remaining_blockers"]) == EXPECTED_SOURCE_BLOCKERS,
+        "source catalog blocker set/order mismatch",
+    )
+
+    registry_host_source = resolve_repo_file(
+        repo_root,
+        classifier["source_path"],
+        "classifier host source",
+    ).read_text(encoding="utf-8")
+    registry_source = resolve_repo_file(
+        repo_root,
+        classifier["implementation_source_path"],
+        "classifier implementation source",
+    ).read_text(encoding="utf-8")
+    registry_interface = resolve_repo_file(
+        repo_root,
+        classifier["interface_path"],
+        "classifier interface",
+    ).read_text(encoding="utf-8")
+    provider_interface = resolve_repo_file(
+        repo_root,
+        classifier["authority_provider_interface_path"],
+        "authority provider interface",
+    ).read_text(encoding="utf-8")
+    for class_id, class_name, _ in EXPECTED_SOURCE_AUTHORIZATION_CLASSES:
+        _expect(
+            f"AUTHORIZATION_CLASS_{class_name} = {class_id}" in registry_source,
+            f"source authorization class {class_name} constant mismatch",
+        )
+    for name, preimage, _, _, _ in EXPECTED_SOURCE_FAMILY_GROUPS:
+        _expect(
+            f'keccak256("{preimage}")' in registry_source,
+            f"source family {name} preimage missing",
+        )
+    for anchor in (
+        "function admitRecordType",
+        "function setRecordFamilyGrant",
+        "function setAuthorityProvider",
+        "function requireRecordWriter",
+        "provider.codehash != expectedCodeHash",
+        "provider.staticcall(",
+        "revert RecordTypeNotAdmitted(recordType)",
+    ):
+        _expect(anchor in registry_source, f"classifier source anchor missing: {anchor}")
+    _expect(
+        "isAuthorizedRecordWriter" in provider_interface,
+        "authority-provider predicate missing",
+    )
+    _expect(
+        "StreamRecordFamilyRegistry" in registry_host_source
+        and "recordFamilyRegistry = address(this)" in registry_host_source,
+        "classifier must remain embedded in the collection metadata host",
+    )
+    _expect(
+        "function recordTypePolicy" in registry_interface,
+        "exact record-type policy read missing",
+    )
+
+    metadata_source = resolve_repo_file(
+        repo_root,
+        "smart-contracts/StreamCollectionMetadata.sol",
+        "metadata host source",
+    ).read_text(encoding="utf-8")
+    preservation_source = resolve_repo_file(
+        repo_root,
+        "smart-contracts/StreamPreservationRecords.sol",
+        "preservation host source",
+    ).read_text(encoding="utf-8")
+    for anchor in (
+        "_recordFamilyRegistry.requireRecordWriter",
+        "_requireSnapshotFamilyIntersection",
+        "InvalidSnapshotRecordType",
+        "_snapshotCoveredRecordTypesHashes",
+        "authorizationClass: authorizationClass",
+    ):
+        _expect(anchor in metadata_source, f"metadata host anchor missing: {anchor}")
+    for anchor in (
+        "_recordFamilyRegistry.requireRecordWriter",
+        "authorizationClass: authorizationClass",
+    ):
+        _expect(
+            anchor in preservation_source,
+            f"preservation host anchor missing: {anchor}",
+        )
 
 
 def _validate_inventory_semantics(inventory: dict[str, Any], repo_root: Path) -> None:
@@ -855,7 +1276,6 @@ def _validate_inventory_semantics(inventory: dict[str, Any], repo_root: Path) ->
         interface_text = interface.read_text(encoding="utf-8")
         _expect(f"function {row['function']}" in interface_text, f"{row['function']} missing from interface")
         _expect(f"function {row['function']}" in source_text, f"{row['function']} missing from implementation")
-        _expect(f"FunctionAdminRequired(this.{row['function']}.selector)" in source_text, f"{row['function']} no longer has the recorded whole-selector authorization")
         source_paths.extend((row["source_path"], row["interface_path"]))
 
     failures = current["known_fail_open_behaviors"]
@@ -866,7 +1286,6 @@ def _validate_inventory_semantics(inventory: dict[str, Any], repo_root: Path) ->
         _expect(row["status"] == "open_blocker", f"known_fail_open_behaviors[{index}] must remain open_blocker")
         _expect(isinstance(row["description"], str) and bool(row["description"]), f"known_fail_open_behaviors[{index}] description required")
         path = resolve_repo_file(repo_root, row["source_path"], f"known_fail_open_behaviors[{index}].source_path")
-        _expect(row["source_anchor"] in path.read_text(encoding="utf-8"), f"known_fail_open_behaviors[{index}] source anchor missing")
         source_paths.append(row["source_path"])
     _assert_source_unchanged_from_commit(
         repo_root,
@@ -1944,6 +2363,8 @@ def validate_package(
     evidence_template_path: Path = DEFAULT_EVIDENCE_TEMPLATE,
     evidence_schema_path: Path = DEFAULT_EVIDENCE_SCHEMA,
     grant_map_schema_path: Path = DEFAULT_GRANT_MAP_SCHEMA,
+    source_catalog_path: Path = DEFAULT_SOURCE_CATALOG,
+    source_catalog_schema_path: Path = DEFAULT_SOURCE_CATALOG_SCHEMA,
     *,
     require_complete: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -1957,12 +2378,30 @@ def validate_package(
         grant_map_schema_path.as_posix(),
         "grant-map schema",
     )
+    source_catalog_file = resolve_repo_file(
+        root,
+        source_catalog_path.as_posix(),
+        "source catalog",
+    )
+    source_catalog_schema_file = resolve_repo_file(
+        root,
+        source_catalog_schema_path.as_posix(),
+        "source catalog schema",
+    )
 
     inventory = load_json(inventory_file, "record-family authorization inventory")
     inventory_schema = load_json(inventory_schema_file, "record-family inventory schema")
     evidence = load_json(evidence_file, "record-family evidence template")
     evidence_schema = load_json(evidence_schema_file, "record-family evidence schema")
     grant_map_schema = load_json(grant_map_schema_file, "record-family grant-map schema")
+    source_catalog = load_json(
+        source_catalog_file,
+        "record-family authorization source catalog",
+    )
+    source_catalog_schema = load_json(
+        source_catalog_schema_file,
+        "record-family authorization source catalog schema",
+    )
     evidence_relative = evidence_file.relative_to(root).as_posix()
     _reject_forbidden_transit(
         evidence,
@@ -1970,12 +2409,19 @@ def validate_package(
         allowed_reserved_paths=_allowed_reserved_transit_paths(evidence),
     )
     _validate_schema(inventory_schema, inventory, expected_id=INVENTORY_SCHEMA_ID, label="inventory")
+    _validate_schema(
+        source_catalog_schema,
+        source_catalog,
+        expected_id=SOURCE_CATALOG_SCHEMA_ID,
+        label="source catalog",
+    )
     _validate_schema(evidence_schema, evidence, expected_id=EVIDENCE_SCHEMA_ID, label="evidence")
     _validate_schema_definition(
         grant_map_schema,
         expected_id=GRANT_MAP_SCHEMA_ID,
         label="grant map",
     )
+    _validate_source_catalog_semantics(source_catalog, root)
     _validate_inventory_semantics(inventory, root)
     if evidence["record_type"] == "template":
         _validate_template_semantics(evidence, inventory, inventory_file)
@@ -1991,9 +2437,8 @@ def validate_package(
         )
 
     if require_complete:
-        # Intentionally unconditional. Even a caller that monkey-patches the
-        # exported descriptive constant cannot turn this planning schema into
-        # a completion gate.
+        # Source implementation alone cannot satisfy a candidate-bound release
+        # evidence gate.
         _fail(COMPLETION_BLOCKER)
     return inventory, evidence
 
@@ -2005,6 +2450,8 @@ def completion_blockers(
     evidence_template_path: Path = DEFAULT_EVIDENCE_TEMPLATE,
     evidence_schema_path: Path = DEFAULT_EVIDENCE_SCHEMA,
     grant_map_schema_path: Path = DEFAULT_GRANT_MAP_SCHEMA,
+    source_catalog_path: Path = DEFAULT_SOURCE_CATALOG,
+    source_catalog_schema_path: Path = DEFAULT_SOURCE_CATALOG_SCHEMA,
 ) -> list[str]:
     validate_package(
         repo_root,
@@ -2013,6 +2460,8 @@ def completion_blockers(
         evidence_template_path,
         evidence_schema_path,
         grant_map_schema_path,
+        source_catalog_path,
+        source_catalog_schema_path,
     )
     return [COMPLETION_BLOCKER]
 
@@ -2025,6 +2474,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--evidence-template", type=Path, default=DEFAULT_EVIDENCE_TEMPLATE)
     parser.add_argument("--evidence-schema", type=Path, default=DEFAULT_EVIDENCE_SCHEMA)
     parser.add_argument("--grant-map-schema", type=Path, default=DEFAULT_GRANT_MAP_SCHEMA)
+    parser.add_argument("--source-catalog", type=Path, default=DEFAULT_SOURCE_CATALOG)
+    parser.add_argument(
+        "--source-catalog-schema",
+        type=Path,
+        default=DEFAULT_SOURCE_CATALOG_SCHEMA,
+    )
     parser.add_argument("--require-complete", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -2035,6 +2490,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             args.evidence_template,
             args.evidence_schema,
             args.grant_map_schema,
+            args.source_catalog,
+            args.source_catalog_schema,
             require_complete=args.require_complete,
         )
     except RecordFamilyAuthorizationError as exc:
@@ -2045,7 +2502,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         f"{len(inventory['authorization_classes'])} classes, "
         f"{len(inventory['family_groups'])} family groups, "
         f"{len(inventory['current_implementation']['mutation_surfaces'])} "
-        "as-built mutation surfaces; planning only"
+        "historical fail-open mutation surfaces; source implemented, "
+        "candidate unbound"
     )
     return 0
 

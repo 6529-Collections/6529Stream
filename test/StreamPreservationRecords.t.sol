@@ -4,9 +4,11 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/IStreamPreservationRecords.sol";
 import "../smart-contracts/IERC165.sol";
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
+import "../smart-contracts/StreamRecordFamilyRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
@@ -26,12 +28,11 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
     bytes32 private constant SUBJECT_ID = keccak256("collection:1");
     bytes32 private constant SCHEMA_ID = keccak256("premis.v3.json");
     bytes32 private constant CANONICALIZATION_ID = keccak256("RFC8785_JCS");
+    uint8 private constant AUTH_PRESERVATION_ADMIN = 6;
 
     function testModuleMarkersInterfacesAndAdminState() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
 
         records.streamCore().assertEq(address(deployed.core), "core not retained");
         records.adminsContract().assertEq(address(deployed.admins), "admins not retained");
@@ -48,9 +49,8 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testRecordsGenericPremisC2paAndFixityRecordWithLatestSummaryAndEvent() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         IStreamPreservationRecords.CollectionRecord memory record = _record();
         bytes32 expectedHash = records.deriveCollectionRecordHash(COLLECTION_ID, record);
 
@@ -82,40 +82,55 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
         logs[0].topics.length.assertEq(4, "record log topic count");
         logs[0].topics[0].assertEq(
             keccak256(
-                "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)"
+                "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)"
             ),
             "record event signature"
         );
         logs[0].topics[1].assertEq(bytes32(COLLECTION_ID), "event collection topic");
         logs[0].topics[2].assertEq(RECORD_TYPE, "event record type topic");
         logs[0].topics[3].assertEq(SUBJECT_ID, "event subject topic");
-        (IStreamPreservationRecords.CollectionRecord memory eventRecord, bytes32 eventHash,) = abi.decode(
-            logs[0].data, (IStreamPreservationRecords.CollectionRecord, bytes32, address)
+        (
+            IStreamPreservationRecords.CollectionRecord memory eventRecord,
+            bytes32 eventHash,,
+            uint8 authorizationClass
+        ) = abi.decode(
+            logs[0].data, (IStreamPreservationRecords.CollectionRecord, bytes32, address, uint8)
         );
         eventHash.assertEq(recordHash, "event hash");
         eventRecord.uri.assertEq(record.uri, "event uri");
         eventRecord.schemaId.assertEq(record.schemaId, "event schema");
+        uint256(authorizationClass).assertEq(AUTH_PRESERVATION_ADMIN, "event authorization class");
     }
 
     function testFunctionAdminPauseUnauthorizedAndMissingCollectionPaths() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         deployed.admins
             .registerFunctionAdmin(
                 FUNCTION_ADMIN, address(records), records.recordCollectionRecord.selector, true
+            );
+        StreamRecordFamilyRegistry(records.recordFamilyRegistry())
+            .setRecordFamilyGrant(
+                StreamRecordFamilyRegistry(records.recordFamilyRegistry()).FAMILY_ARCHIVE(),
+                AUTH_PRESERVATION_ADMIN,
+                FUNCTION_ADMIN,
+                true
             );
 
         vm.prank(FUNCTION_ADMIN);
         records.recordCollectionRecord(COLLECTION_ID, _record());
 
+        bytes32 archiveFamily =
+            StreamRecordFamilyRegistry(records.recordFamilyRegistry()).FAMILY_ARCHIVE();
         vm.prank(address(0xBAD));
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamPreservationRecords.FunctionAdminUnauthorized.selector,
+                IStreamRecordFamilyRegistry.RecordFamilyUnauthorized.selector,
                 address(0xBAD),
-                records.recordCollectionRecord.selector
+                RECORD_TYPE,
+                archiveFamily,
+                uint16(1) << AUTH_PRESERVATION_ADMIN
             )
         );
         records.recordCollectionRecord(COLLECTION_ID, _recordWithSubject(keccak256("other")));
@@ -135,9 +150,8 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testUpdateAdminContractRequiresCurrentAdminValidMarkerAndUnpaused() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         StreamAdmins replacementAdmins = new StreamAdmins(address(this));
         PreservationEmptyMarker emptyMarker = new PreservationEmptyMarker();
 
@@ -171,9 +185,7 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testHashUriDuplicateAndSignatureValidation() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
 
         IStreamPreservationRecords.CollectionRecord memory badDigest = _record();
         badDigest.contentHash.digest = hex"1234";
@@ -287,9 +299,8 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testSignatureCommitmentAndLatestRecordedSemantics() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         IStreamPreservationRecords.CollectionRecord memory signedRecord = _record();
         signedRecord.signatureScheme = keccak256("C2PA_MANIFEST_SIGNATURE");
         signedRecord.signatureHash = _hashRef(records.HASH_SHA256(), _digest("signature"));
@@ -317,9 +328,7 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testVariableLengthHashRefsAreOpaqueButBounded() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
 
         IStreamPreservationRecords.CollectionRecord memory maxMultihash =
             _recordWithSubject(keccak256("max-multihash"));
@@ -378,9 +387,8 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
 
     function testAcceptsCreatedCollectionBeforeCoreSupplyData() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         uint256 preservationFirstCollectionId = _createCollectionWithoutData(deployed);
 
         bytes32 recordHash =
@@ -393,23 +401,29 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
     function testConstructorRejectsInvalidCoreAndAdminContracts() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         PreservationEmptyMarker emptyMarker = new PreservationEmptyMarker();
+        StreamCollectionMetadata registry = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamPreservationRecords.InvalidCoreContract.selector)
         );
-        new StreamPreservationRecords(address(0x1234), address(deployed.admins), address(0));
+        new StreamPreservationRecords(
+            address(0x1234), address(deployed.admins), address(registry), address(0)
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamPreservationRecords.InvalidAdminContract.selector)
         );
-        new StreamPreservationRecords(address(deployed.core), address(emptyMarker), address(0));
+        new StreamPreservationRecords(
+            address(deployed.core), address(emptyMarker), address(registry), address(0)
+        );
     }
 
     function testPreservationRecordsRemainAppendOnlyAfterCoreFreeze() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamPreservationRecords records = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamPreservationRecords records = _deployRecords(deployed);
+
         _freezeCollection(deployed);
 
         bytes32 recordHash = records.recordCollectionRecord(COLLECTION_ID, _record());
@@ -422,6 +436,24 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
         returns (IStreamPreservationRecords.CollectionRecord memory record)
     {
         return _recordWithSubject(SUBJECT_ID);
+    }
+
+    function _deployRecords(DeployedStream memory deployed)
+        private
+        returns (StreamPreservationRecords records)
+    {
+        StreamCollectionMetadata registry = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
+        registry.admitRecordType(
+            RECORD_TYPE, registry.FAMILY_ARCHIVE(), uint16(1) << AUTH_PRESERVATION_ADMIN
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_ARCHIVE(), AUTH_PRESERVATION_ADMIN, address(this), true
+        );
+        records = new StreamPreservationRecords(
+            address(deployed.core), address(deployed.admins), address(registry), address(0)
+        );
     }
 
     function _recordWithSubject(bytes32 subjectId)

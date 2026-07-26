@@ -45,9 +45,12 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
         inventory = _read(ROOT / checker.DEFAULT_INVENTORY)
+        source_catalog = _read(ROOT / checker.DEFAULT_SOURCE_CATALOG)
         required: set[Path] = {
             checker.DEFAULT_INVENTORY,
             checker.DEFAULT_INVENTORY_SCHEMA,
+            checker.DEFAULT_SOURCE_CATALOG,
+            checker.DEFAULT_SOURCE_CATALOG_SCHEMA,
             checker.DEFAULT_EVIDENCE_TEMPLATE,
             checker.DEFAULT_EVIDENCE_SCHEMA,
             checker.DEFAULT_GRANT_MAP_SCHEMA,
@@ -60,6 +63,10 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             required.add(Path(row["interface_path"]))
         for row in current["known_fail_open_behaviors"]:
             required.add(Path(row["source_path"]))
+        for row in source_catalog["source_bindings"]:
+            required.add(Path(row["path"]))
+        for relative in source_catalog["source_tests"]:
+            required.add(Path(relative))
         for relative in sorted(required):
             target = root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -785,7 +792,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         try:
             with self.assertRaisesRegex(
                 checker.RecordFamilyAuthorizationError,
-                "implementation_not_supported_in_this_slice",
+                "candidate_bound_record_family_evidence_not_available",
             ):
                 checker.validate_package(ROOT, require_complete=True)
             self.assertEqual(
@@ -924,13 +931,16 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             text = target.read_text(encoding="utf-8")
             target.write_text(
                 text.replace(
-                    "FunctionAdminRequired(this.setCollectionRecord.selector)",
-                    "FunctionAdminRequired(bytes4(0))",
+                    "_recordFamilyRegistry.requireRecordWriter",
+                    "_recordFamilyRegistry.requireRecordWriterDrifted",
                     1,
                 ),
                 encoding="utf-8",
             )
-            with self.assertRaisesRegex(checker.RecordFamilyAuthorizationError, "whole-selector"):
+            with self.assertRaisesRegex(
+                checker.RecordFamilyAuthorizationError,
+                "source_bindings.*digest",
+            ):
                 checker.validate_package(root)
         finally:
             temporary.cleanup()
@@ -957,7 +967,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     )
                     with self.assertRaisesRegex(
                         checker.RecordFamilyAuthorizationError,
-                        "drifted from current_implementation.source_commit",
+                        "source_bindings.*digest",
                     ):
                         checker.validate_package(root)
                 finally:

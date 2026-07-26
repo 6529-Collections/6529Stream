@@ -153,7 +153,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 244)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 253)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -255,7 +255,7 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST),
-            213,
+            224,
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_SHADOW_ALLOWLIST),
@@ -3148,11 +3148,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 244)
-        self.assertEqual(len(manifest["files"]), 410)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 253)
+        self.assertEqual(len(manifest["files"]), 420)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            410,
+            420,
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
@@ -3436,7 +3436,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 410)
+        self.assertEqual(len(classifications), 420)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

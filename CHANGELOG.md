@@ -7,6 +7,47 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Reserved the external-call gas inventory's `artist-authority` call lane for
+  the exact future issue #670
+  `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
+  fail-closed field-policy matrix covering path, site, kind, operation,
+  expression, count, path class, lane, issue, disposition, missing rows, and
+  duplicate calls/rows. Literal declarations cannot use the reserved lane,
+  while the exact Yul `gas()` exemption and generic unexpected-call rejection
+  remain unchanged. This issue #669 checker-support slice adds neither the
+  artist registry source nor its inventory row and does not claim GGP
+  provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or
+  release readiness.
+- Centralized recursive JSON no-secret scanning for public-beta evidence,
+  non-local release evidence, drop-authorization signing evidence, and signer
+  custody readiness. The shared scanner preserves checker-specific exception
+  types, reports nested JSON paths, and applies the strict union of the migrated
+  secret-key and assignment-looking value patterns. Direct helper tests,
+  release-tool call-policy coverage, the offline verifier, and canonical
+  checksums now bind the shared policy. This tooling-only change does not add
+  retained non-local evidence or change public-beta or production readiness;
+  issue #609 tracks the work.
+- Implemented the source layer of record-family authorization under issue
+  #690. `StreamCollectionMetadata` now embeds the
+  `StreamRecordFamilyRegistry` implementation, preserving the accepted genesis
+  role count while providing append-only exact record-type
+  admission, fourteen pinned family IDs, eight typed authority classes,
+  family-specific grants, live signer providers with codehash revalidation,
+  provider rotation/revocation, and fail-closed unknown-type handling.
+  `StreamCollectionMetadata` and `StreamPreservationRecords` bind the registry
+  immutably, persist and emit the actual authorization class, reject
+  whole-selector authority for ordinary record writes, and make snapshots
+  declare a strict exact record-type set whose full authority intersection is
+  revalidated. Snapshot payloads must themselves use the `SNAPSHOT` family.
+  A schema-validated source catalog pins the semantic source commit and
+  digests, interfaces, family/class map, hosts, and focused adversarial tests;
+  the pre-remediation planning inventory remains retained as a historical
+  fail-open baseline. Exact candidate/profile binding, the production
+  admission set, live provider/grant configuration, deployed codehashes,
+  non-local lifecycle evidence, and independent review are still unavailable.
+  `RISK-GOV-002` therefore remains `open_blocker`; public-beta and production
+  release modes remain fail closed, and protocol maturity/readiness are
+  unchanged.
 - Accepted ADR 0021's immutable revenue-resolver validation-adapter
   architecture for pre-genesis implementation. Source work remains blocked
   until the complete normative interface appendix and freeze commit are

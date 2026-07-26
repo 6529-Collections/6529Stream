@@ -37,6 +37,7 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
     for path in (
         verifier.GIT_ATTRIBUTES_PATH,
         verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+        verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
         *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
     )
 )
@@ -49,11 +50,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 244
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 244
+    len(TEST_CANONICAL_COVERED_PATHS) != 253
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 253
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 244 unique coverage roots"
+        "canonical verifier fixtures require exactly 253 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("scripts/generate_risk_register.py"),
@@ -116,6 +117,24 @@ def record_family_inventory_schema_record(root: Path) -> dict[str, object]:
         "schema_id": verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID,
         "document_schema_version": (
             verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+        ),
+    }
+
+
+def record_family_source_catalog_schema_record(
+    root: Path,
+) -> dict[str, object]:
+    return {
+        **file_record(
+            root,
+            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH,
+        ),
+        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+        "schema_id": (
+            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+        ),
+        "document_schema_version": (
+            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
         ),
     }
 
@@ -428,6 +447,8 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
 def seed_record_family_authorization_tree(root: Path) -> None:
     source_root = SCRIPT_PATH.parent.parent
     for relative_path in (
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH),
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH),
         Path(verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH),
         Path(verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH),
         Path(verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH),
@@ -471,6 +492,18 @@ def seed_release_bundle(root: Path) -> None:
                     "schema_version": verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
                 },
                 "record_family_authorization": {
+                    "source_catalog": {
+                        **file_record(
+                            root,
+                            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+                        ),
+                        "schema_version": (
+                            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                        ),
+                    },
+                    "source_catalog_schema": (
+                        record_family_source_catalog_schema_record(root)
+                    ),
                     "inventory": {
                         **file_record(
                             root,
@@ -559,6 +592,18 @@ def seed_release_bundle(root: Path) -> None:
                         verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
                     ),
                 },
+                "record_family_authorization_source_catalog": {
+                    **file_record(
+                        root,
+                        verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+                    ),
+                    "schema_version": (
+                        verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                    ),
+                },
+                "record_family_authorization_source_catalog_schema": (
+                    record_family_source_catalog_schema_record(root)
+                ),
                 "record_family_authorization_inventory_schema": (
                     record_family_inventory_schema_record(root)
                 ),
@@ -599,6 +644,8 @@ def seed_release_bundle(root: Path) -> None:
             verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
             verifier.GENESIS_DEPLOYMENT_PROFILE_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+            verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
@@ -648,8 +695,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 244)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 244)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 253)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 253)
         self.assertTrue(
             set(REQUIRED_CANONICAL_FIXTURE_PATHS).issubset(
                 TEST_CANONICAL_COVERED_PATHS
@@ -1358,11 +1405,11 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 8_999,
             ),
             Path("scripts/check_record_family_authorization.py"): (
-                "bff2c28950b224413a9fc5fd7aa3a9008ff4b5023930ad0d593a1666fbc37a66",
-                85_698,
+                "f2a8dae3f0b50e88630164aff32768859ae7e9b5116d723e6917158e9caf569f",
+                100_553,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "96c70d8c7e22b29923426112f2c2b4b191ff410722186461b164e6f704845e47",
+                "223de8d925885bb55e7a6bc572dbefa5f50b0553fddb1a4e76331619ccebe530",
                 46_534,
             ),
         }
@@ -2262,8 +2309,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 410)
-        self.assertEqual(summary.checksum_manifest_records, 410)
+        self.assertEqual(summary.checksum_entries, 420)
+        self.assertEqual(summary.checksum_manifest_records, 420)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2275,8 +2322,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 410)
-        self.assertEqual(data["checksum_manifest_records"], 410)
+        self.assertEqual(data["checksum_entries"], 420)
+        self.assertEqual(data["checksum_manifest_records"], 420)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2881,8 +2928,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "keys must be exactly inventory, inventory_schema, "
-                "evidence_schema, grant_map_schema, and evidence_template",
+                "keys must be exactly source_catalog, source_catalog_schema, "
+                "inventory, inventory_schema, evidence_schema, grant_map_schema, "
+                "and evidence_template",
             ):
                 verifier.verify_record_family_authorization_bindings(
                     release_manifest,

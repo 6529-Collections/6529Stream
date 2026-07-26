@@ -112,6 +112,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     record_family_inventory = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
     )
+    record_family_source_catalog = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG
+    )
+    record_family_source_catalog_schema = (
+        root
+        / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    )
     record_family_inventory_schema = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
     )
@@ -252,6 +259,30 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         governed_parameter_inventory,
         {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
+    )
+    write_json(
+        record_family_source_catalog,
+        {
+            "schema_version": (
+                generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+            )
+        },
+    )
+    write_json(
+        record_family_source_catalog_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": (
+                generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+            ),
+            "properties": {
+                "schema_version": {
+                    "const": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                    )
+                }
+            },
+        },
     )
     write_json(
         record_family_inventory,
@@ -1347,6 +1378,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "genesis_deployment_profile": genesis_deployment_profile,
         "governed_parameter_inventory": governed_parameter_inventory,
         "record_family_inventory": record_family_inventory,
+        "record_family_source_catalog": record_family_source_catalog,
+        "record_family_source_catalog_schema": (
+            record_family_source_catalog_schema
+        ),
         "record_family_inventory_schema": record_family_inventory_schema,
         "record_family_evidence_schema": record_family_evidence_schema,
         "record_family_evidence_template": record_family_evidence_template,
@@ -1547,17 +1582,39 @@ class ReleaseManifestTests(unittest.TestCase):
                     generator.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
                 ),
             }
+            expected_source_catalog_schema = {
+                **generator.file_record(
+                    paths["record_family_source_catalog_schema"],
+                    root,
+                ),
+                "schema_id": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+                ),
+                "document_schema_version": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                ),
+            }
 
         self.record_family_validator.assert_called_once_with(root)
         self.assertEqual(
             set(records),
             {
+                "source_catalog",
+                "source_catalog_schema",
                 "inventory",
                 "inventory_schema",
                 "evidence_schema",
                 "grant_map_schema",
                 "evidence_template",
             },
+        )
+        self.assertEqual(
+            records["source_catalog"]["path"],
+            paths["record_family_source_catalog"].relative_to(root).as_posix(),
+        )
+        self.assertEqual(
+            records["source_catalog_schema"],
+            expected_source_catalog_schema,
         )
         self.assertEqual(
             records["inventory"]["path"],
@@ -1881,6 +1938,25 @@ class ReleaseManifestTests(unittest.TestCase):
             (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
         )
         expected = {
+            "source_catalog": generator.file_record(
+                repo_root
+                / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG,
+                repo_root,
+                schema_required=True,
+            ),
+            "source_catalog_schema": {
+                **generator.file_record(
+                    repo_root
+                    / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA,
+                    repo_root,
+                ),
+                "schema_id": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+                ),
+                "document_schema_version": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                ),
+            },
             "inventory": generator.file_record(
                 repo_root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY,
                 repo_root,
