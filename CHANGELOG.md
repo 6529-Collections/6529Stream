@@ -48,6 +48,15 @@ the release policy in `docs/release-policy.md`.
   `RISK-GOV-002` therefore remains `open_blocker`; public-beta and production
   release modes remain fail closed, and protocol maturity/readiness are
   unchanged.
+- Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver
+  architecture: one registered, state-owning `StreamRevenueResolver` plus one
+  immutable, stateless, implementation-private validation adapter. The
+  proposal preserves the permanent Core ABI and royalty-resolver pointer,
+  prohibits proxy, delegatecall, mutable-implementation, and second-authority
+  shapes, and pins exact-code, canonical-transcript, available-gas, private
+  dependency, sizing, deployment, and historical-evidence requirements. The
+  ADR remains Proposed, authorizes no implementation, changes no contract or
+  deployment profile, and does not advance maturity or release readiness.
 - Added proposed ADR 0020 for issue #667's executor-only, append-only artwork
   finality recovery architecture. The proposal assigns pending-action
   lifecycle ownership to Governance V2, uses a dedicated Core discovery
