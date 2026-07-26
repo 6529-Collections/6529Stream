@@ -254,8 +254,8 @@ reads enumerated by the approved callgraph. The intended set is:
 The accepted implementation may use a strict subset. A new target or selector
 requires a reviewed architecture change.
 
-Registry-to-adapter validation forwards available gas and has a closed issue
-#669 inventory row. ERC-1271 verification retains the existing
+Registry-to-adapter validation forwards available gas and has a closed
+inventory row for issue `#669`. ERC-1271 verification retains the existing
 `ARTIST_ERC1271_VERIFY_GAS` Governed Gas Parameter and its #684 host row; the
 registry authenticates and commits the live value, and the adapter may use
 only that exact value at the one approved signer callsite. No new GGP,
@@ -381,13 +381,14 @@ funds and cannot affect payout custody.
 
 ## Release Impact
 
-This ADR PR changes only this record and the ADR index. It does not change
-source, ABI, specs, catalogs, profiles, candidates, deployment scripts,
-manifests, checksums, maturity, or readiness.
+This ADR PR adds this record and its ADR index row, updates the changelog and
+release-integrity source lists, and refreshes generated release metadata. It
+does not change contract source, ABI, normative specs, catalogs, profiles,
+candidates, deployment scripts, non-release manifests, maturity, or readiness.
 
 If accepted, the implementation affects the artist-registry constructor,
 implementation-private interface, private-dependency inventory and versioned
-contract set, deployment order, external-call inventory, dual size proof,
+contract set, deployment order, external-call inventory, dual-size proof,
 source verification, rehearsal, candidate, manifest, lockfile, and checksums.
 The Permanent artist interfaces, Core ABI/bytecode, 37 ordinary profile rows,
 and artist module type remain unchanged.
