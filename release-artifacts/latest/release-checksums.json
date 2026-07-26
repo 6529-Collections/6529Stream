@@ -264,7 +264,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9b5d34a0f5fa3a2feb2452e209aff412c5575ce14bbc5fd46bf4275ad6e2350c"
+    "sha256": "sha256:73bffdd392c234c8f0b1bd475d985873184fc48fd5d07c7a9447c67f73c5c853"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1403,7 +1403,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:67dc612696ad5b27dbaf5bb71d8381f407c17a7c40831624adaf245d339bd839",
+      "sha256": "sha256:be2dfcb1f2f5622bfc2f4403bccf0064e805bbe54b6afa7b497693e22e3ecdea",
       "size_bytes": 150689
     },
     {
@@ -1433,7 +1433,7 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:ced789df1d34a57e4f516d6e7730da4839d1f4914497f2dce5b1afcd58e3bd53",
+      "sha256": "sha256:01f04226d4821735bac2657341a8e07d863ef246cdb293a4054f4165c668a475",
       "size_bytes": 2913
     },
     {
@@ -1468,7 +1468,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:92202da15638b9078a4f7220eb937eae4695a5d96c61ded495a725fa71bd6ecb",
+      "sha256": "sha256:a82b95a42cfcf565dbeefcad27f4dd6ca928f6a4ca78be5ce4750c581d42525e",
       "size_bytes": 13603
     },
     {
@@ -1518,7 +1518,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:9afcd060afa6348b7c903cbd26f2276fc946dabe204f840db7f9ec4189670bb4",
+      "sha256": "sha256:f8b33bfd9d24d314af7df67566b8f072bb92d24d4e2d4672c546dfd84169199d",
       "size_bytes": 146031
     },
     {
@@ -1548,7 +1548,7 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:aa58c3e9e64afb0f44a97de2e4e324be432e47b490e4c43d9ed0f025d91c29fc",
+      "sha256": "sha256:49db234e7f6dedff67ce977ea4cf13d2c57e7b76fd8cc089db785b32fb33b199",
       "size_bytes": 8272
     },
     {

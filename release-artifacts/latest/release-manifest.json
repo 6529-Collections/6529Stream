@@ -232,7 +232,7 @@
     },
     "one_of_one_permanence_manifest": {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:ced789df1d34a57e4f516d6e7730da4839d1f4914497f2dce5b1afcd58e3bd53",
+      "sha256": "sha256:01f04226d4821735bac2657341a8e07d863ef246cdb293a4054f4165c668a475",
       "size_bytes": 2913,
       "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1"
     },
