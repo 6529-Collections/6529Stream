@@ -7,6 +7,27 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Implemented the source layer of record-family authorization under issue
+  #690. `StreamCollectionMetadata` now embeds the
+  `StreamRecordFamilyRegistry` implementation, preserving the accepted genesis
+  role count while providing append-only exact record-type
+  admission, fourteen pinned family IDs, eight typed authority classes,
+  family-specific grants, live signer providers with codehash revalidation,
+  provider rotation/revocation, and fail-closed unknown-type handling.
+  `StreamCollectionMetadata` and `StreamPreservationRecords` bind the registry
+  immutably, persist and emit the actual authorization class, reject
+  whole-selector authority for ordinary record writes, and make snapshots
+  declare a strict exact record-type set whose full authority intersection is
+  revalidated. Snapshot payloads must themselves use the `SNAPSHOT` family.
+  A schema-validated source catalog pins the semantic source commit and
+  digests, interfaces, family/class map, hosts, and focused adversarial tests;
+  the pre-remediation planning inventory remains retained as a historical
+  fail-open baseline. Exact candidate/profile binding, the production
+  admission set, live provider/grant configuration, deployed codehashes,
+  non-local lifecycle evidence, and independent review are still unavailable.
+  `RISK-GOV-002` therefore remains `open_blocker`; public-beta and production
+  release modes remain fail closed, and protocol maturity/readiness are
+  unchanged.
 - Added proposed ADR 0020 for issue #667's executor-only, append-only artwork
   finality recovery architecture. The proposal assigns pending-action
   lifecycle ownership to Governance V2, uses a dedicated Core discovery

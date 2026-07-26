@@ -381,7 +381,7 @@ The current local baseline includes:
   size, and schema identity/version; both checksum indexes cover them, the
   offline verifier consumes immutable covered-file snapshots, and public-beta
   plus production release mode fail closed when validation fails. The revised
-  canonical projection is exactly 242 configured roots and 408 covered-file
+  canonical projection is exactly 247 configured roots and 414 covered-file
   entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
@@ -391,8 +391,10 @@ The current local baseline includes:
   `scripts/check_governed_parameter_inventory.py` pair. The ordinary check
   proves exact policy and honest incompleteness; it does not satisfy the
   production-only `--require-complete` decision;
-- the planning-only record-family authorization inventory, schemas, and
-  template under
+- the record-family authorization source implementation catalog, retained
+  historical inventory, schemas, and template under
+  [`release-artifacts/record-family-authorization-source-catalog.json`](../release-artifacts/record-family-authorization-source-catalog.json),
+  [`release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json`](../release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json),
   [`release-artifacts/record-family-authorization-inventory.json`](../release-artifacts/record-family-authorization-inventory.json),
   [`release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`](../release-artifacts/schema/record-family-authorization-inventory.v1.schema.json),
   [`deployments/schema/record-family-authorization-evidence.v1.schema.json`](../deployments/schema/record-family-authorization-evidence.v1.schema.json),
@@ -406,21 +408,27 @@ The current local baseline includes:
   `production-release-record-family-authorization-grant-map.json` artifact in
   `deployments/record-family-authorization/`; production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
-  Record-family semantic revalidation binds exactly four contract inputs:
+  Record-family semantic revalidation binds exactly eight source inputs:
+  `smart-contracts/IStreamRecordFamilyAuthorityProvider.sol`,
+  `smart-contracts/IStreamRecordFamilyRegistry.sol`,
+  `smart-contracts/StreamRecordFamilyRegistry.sol`,
   `smart-contracts/StreamCollectionMetadata.sol`,
   `smart-contracts/IStreamCollectionMetadata.sol`,
-  `smart-contracts/StreamPreservationRecords.sol`, and
-  `smart-contracts/IStreamPreservationRecords.sol`. These are four exact
+  `smart-contracts/StreamPreservationRecords.sol`,
+  `smart-contracts/IStreamPreservationRecords.sol`, and
+  `script/RehearseDeployment.s.sol`. These are eight exact
   checksum roots and entries, not broad `smart-contracts/` coverage. The
-  offline verifier snapshots the complete 408-entry canonical set, materializes
-  it under a temporary root, and loads the checker and all four inputs there;
+  offline verifier snapshots the complete canonical set, materializes
+  it under a temporary root, and loads the checker and all eight inputs there;
   record-family semantic validation has no live-path fallback after snapshot
   acquisition.
-  The release manifest and candidate lockfile both bind the inventory,
-  inventory schema, evidence schema, grant-map schema, and template records.
+  The release manifest and candidate lockfile both bind the source catalog,
+  source-catalog schema, historical inventory, inventory schema, evidence
+  schema, grant-map schema, and template records.
   The checksum bundle binds the package plus checker/tests, and the
   offline verifier revalidates both semantic and cross-artifact bindings. These
-  are planning controls, not implementation or readiness evidence;
+  prove source implementation but are not candidate-bound deployment or
+  readiness evidence;
 - protocol surface report guidance and generated output under
   [`docs/protocol-surface.md`](protocol-surface.md) and
   [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json),

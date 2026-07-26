@@ -38,6 +38,12 @@ DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
     record_family_authorization_checker.DEFAULT_INVENTORY
 )
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG = (
+    record_family_authorization_checker.DEFAULT_SOURCE_CATALOG
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA = (
+    record_family_authorization_checker.DEFAULT_SOURCE_CATALOG_SCHEMA
+)
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA
 )
@@ -66,6 +72,12 @@ RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
 )
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA = (
+    record_family_authorization_checker.SOURCE_CATALOG_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID = (
+    record_family_authorization_checker.SOURCE_CATALOG_SCHEMA_ID
 )
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
     record_family_authorization_checker.INVENTORY_SCHEMA_ID
@@ -487,6 +499,12 @@ def build_lockfile(
     record_family_inventory_path = (
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
     )
+    record_family_source_catalog_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG
+    )
+    record_family_source_catalog_schema_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    )
     record_family_inventory_schema_path = (
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
     )
@@ -498,6 +516,55 @@ def build_lockfile(
     )
     record_family_grant_map_schema_path = (
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+    )
+    record_family_source_catalog_schema_document = require_dict(
+        load_json(record_family_source_catalog_schema_path),
+        str(record_family_source_catalog_schema_path),
+    )
+    if (
+        record_family_source_catalog_schema_document.get("$schema")
+        != JSON_SCHEMA_DRAFT
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization source-catalog schema must use JSON "
+            f"Schema {JSON_SCHEMA_DRAFT}"
+        )
+    if (
+        record_family_source_catalog_schema_document.get("$id")
+        != RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization source-catalog schema must use schema "
+            f"ID {RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID}"
+        )
+    record_family_source_catalog_properties = require_dict(
+        record_family_source_catalog_schema_document.get("properties"),
+        f"{record_family_source_catalog_schema_path}.properties",
+    )
+    record_family_source_catalog_schema_version = require_dict(
+        record_family_source_catalog_properties.get("schema_version"),
+        f"{record_family_source_catalog_schema_path}.properties.schema_version",
+    )
+    if (
+        record_family_source_catalog_schema_version.get("const")
+        != RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization source-catalog schema must pin "
+            f"document version {RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA}"
+        )
+    record_family_source_catalog_schema_record = file_record(
+        record_family_source_catalog_schema_path,
+        repo_root,
+    )
+    record_family_source_catalog_schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID,
+            "document_schema_version": (
+                RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+            ),
+        }
     )
     record_family_inventory_schema_document = require_dict(
         load_json(record_family_inventory_schema_path),
@@ -722,6 +789,14 @@ def build_lockfile(
                 record_family_inventory_path,
                 repo_root,
                 schema_required=True,
+            ),
+            "record_family_authorization_source_catalog": file_record(
+                record_family_source_catalog_path,
+                repo_root,
+                schema_required=True,
+            ),
+            "record_family_authorization_source_catalog_schema": (
+                record_family_source_catalog_schema_record
             ),
             "record_family_authorization_inventory_schema": (
                 record_family_inventory_schema_record

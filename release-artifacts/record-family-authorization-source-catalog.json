@@ -2,7 +2,7 @@
   "schema_version": "6529stream.record-family-authorization-source-catalog.v1",
   "status": "source_implemented_candidate_unbound",
   "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/690",
-  "source_commit": "fac120cb2dc677de7b8c8cfe3a41bea3236caeb5",
+  "source_commit": "ae81b9164e8ea497ed6cc821cdfa61899f14227a",
   "source_bindings": [
     {
       "path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
@@ -10,19 +10,19 @@
     },
     {
       "path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
-      "sha256": "864ab0e282e82bbf21c614ffaba08d60614574761a0e12aafbb942ee90c0e8a2"
+      "sha256": "82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
     },
     {
       "path": "smart-contracts/StreamRecordFamilyRegistry.sol",
-      "sha256": "d655da69d5b95d1c481191bda4b267a89eddd55be4091bbabc828d5776a80d93"
+      "sha256": "9ffb6e90c1905f8eebf91039f4c947b08d07730038b115f9204a348e52c85bb2"
     },
     {
       "path": "smart-contracts/IStreamCollectionMetadata.sol",
-      "sha256": "a7d5af26a0ac35d6581539566f764a83e2d6c37d4faf42558ba9d965d7fb624a"
+      "sha256": "f22398c6650c3de6599c2e6edc48068d251cab782cc2f1f931ea96fdd9877295"
     },
     {
       "path": "smart-contracts/StreamCollectionMetadata.sol",
-      "sha256": "dfb639468f8f57e86ee6db2e787f5daeb0eb17df827c689ab01c5a4f4e3c275a"
+      "sha256": "5324ff8e8791ce0bfff46649c7969a9884d4c0ef4249b54daf597d93218270d7"
     },
     {
       "path": "smart-contracts/IStreamPreservationRecords.sol",
@@ -34,12 +34,13 @@
     },
     {
       "path": "script/RehearseDeployment.s.sol",
-      "sha256": "6793aa9d9370fbb61719ba96feefd4f7e245d39fe8997b2e86464f705be01d75"
+      "sha256": "492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b"
     }
   ],
   "classifier": {
-    "contract": "StreamRecordFamilyRegistry",
-    "source_path": "smart-contracts/StreamRecordFamilyRegistry.sol",
+    "contract": "StreamCollectionMetadata",
+    "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+    "implementation_source_path": "smart-contracts/StreamRecordFamilyRegistry.sol",
     "interface_path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
     "authority_provider_interface_path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
     "interface_id": "0xb19a79de",
@@ -48,6 +49,7 @@
     "record_type_admission": "append_only_exact_bytes32",
     "wildcard_admission": false,
     "configuration_authority": "stream_admins_owner",
+    "deployment_model": "embedded_in_collection_metadata_host",
     "candidate_binding_status": "not_available"
   },
   "authorization_classes": [

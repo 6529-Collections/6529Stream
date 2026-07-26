@@ -647,15 +647,19 @@ Before a deployment can become public-beta eligible:
 - Confirm the deployer address.
 - Confirm the Safe/multisig address.
 - Configure global admin and function-admin policy.
-- Treat the as-built `StreamCollectionMetadata` selector/global-admin grants for
+- Do not recreate the historical whole-selector writer grants for
   `setCollectionRecord`, `setCollectionRecordWithRevision`,
-  `publishCollectionSnapshot`, and `lockCollectionRecord`, plus the
-  `StreamPreservationRecords.recordCollectionRecord` grant, as nonconformant
-  fail-open surfaces. They do not enforce record-family authority and cannot be
-  used for a public-beta or production deployment.
-- Validate the planning-only record-family package with
+  `publishCollectionSnapshot`, or `recordCollectionRecord`. Ordinary writes
+  resolve through the immutable record-family registry; only reserved broad
+  lock administration retains the dedicated admin path.
+- Validate the record-family source and evidence package with
   `python scripts/test_record_family_authorization.py` followed by
-  `python scripts/check_record_family_authorization.py`. The exact inventory is
+  `python scripts/check_record_family_authorization.py`. The exact source
+  catalog is
+  `release-artifacts/record-family-authorization-source-catalog.json`; its
+  schema is
+  `release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json`.
+  The retained historical inventory is
   `release-artifacts/record-family-authorization-inventory.json`; its schema is
   `release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`.
   The retained-evidence schema is
@@ -671,11 +675,13 @@ Before a deployment can become public-beta eligible:
   `deployments/record-family-authorization/production-release-record-family-authorization-grant-map.json`
   artifact, not to the inventory or template. Production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
-- Do not treat the planning inventory, evidence template, admin ceremony, or
-  reviewed ceremony metadata as implementation or retained authorization
-  evidence. `RISK-GOV-002` remains an `open_blocker`, and both public-beta and
-  production release mode retain a hard stop until issue #690's family-scoped
-  contract enforcement and exact candidate-bound reviewed evidence are merged.
+- Do not treat the historical inventory, source tests, evidence template,
+  admin ceremony, or reviewed ceremony metadata as candidate-bound retained
+  authorization evidence. Source enforcement is present, but
+  `RISK-GOV-002` remains an `open_blocker`, and both public-beta and production
+  release mode retain a hard stop until issue #690's exact candidate-bound
+  admission/provider/grant/runtime/lifecycle evidence and independent review
+  are merged.
 - Configure pause guardians and unpause admins.
 - Configure emergency recipient.
 - Configure signer manager and drop signer.

@@ -74,10 +74,18 @@ RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_bytecode_release_proof.py"),
 )
 RELEASE_TOOL_SEMANTIC_SOURCE_PATHS = (
+    Path("smart-contracts/IStreamRecordFamilyAuthorityProvider.sol"),
+    Path("smart-contracts/IStreamRecordFamilyRegistry.sol"),
+    Path("smart-contracts/StreamRecordFamilyRegistry.sol"),
     Path("smart-contracts/StreamCollectionMetadata.sol"),
     Path("smart-contracts/IStreamCollectionMetadata.sol"),
     Path("smart-contracts/StreamPreservationRecords.sol"),
     Path("smart-contracts/IStreamPreservationRecords.sol"),
+    Path("script/RehearseDeployment.s.sol"),
+    Path("test/StreamRecordFamilyAuthorization.t.sol"),
+    Path("test/StreamCollectionMetadata.t.sol"),
+    Path("test/StreamPreservationRecords.t.sol"),
+    Path("test/StreamDeploymentManifest.t.sol"),
 )
 REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
@@ -225,6 +233,8 @@ scripts/generate_release_candidate_lockfile.py|check_record_family_authorization
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_GRANT_MAP_SCHEMA|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.EVIDENCE_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.EVIDENCE_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.GRANT_MAP_SCHEMA_ID|<none>|Assign.value
@@ -232,6 +242,8 @@ scripts/generate_release_candidate_lockfile.py|check_record_family_authorization
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.INVENTORY_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.INVENTORY_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.JSON_SCHEMA_DRAFT|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_ID|<none>|Assign.value
+scripts/generate_release_candidate_lockfile.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|check_release_signatures.EVIDENCE_SCHEMA|local:require_schema|arg:1
 scripts/generate_release_candidate_lockfile.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_PATH|<none>|Assign.value
 scripts/generate_release_candidate_lockfile.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA|<none>|Assign.value
@@ -280,6 +292,8 @@ scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_E
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_GRANT_MAP_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.EVIDENCE_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.EVIDENCE_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.GRANT_MAP_SCHEMA_ID|<none>|Assign.value
@@ -287,6 +301,8 @@ scripts/generate_release_manifest.py|check_record_family_authorization.GRANT_MAP
 scripts/generate_release_manifest.py|check_record_family_authorization.INVENTORY_SCHEMA_ID|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.INVENTORY_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|check_record_family_authorization.JSON_SCHEMA_DRAFT|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_ID|<none>|Assign.value
+scripts/generate_release_manifest.py|check_record_family_authorization.SOURCE_CATALOG_SCHEMA_VERSION|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_PATH|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA|<none>|Assign.value
 scripts/generate_release_manifest.py|generate_release_checksums.RELEASE_TOOL_CALL_POLICY_SCHEMA_ID|<none>|Assign.value
@@ -322,6 +338,9 @@ scripts/test_record_family_authorization.py|check_record_family_authorization.DE
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY|<none>|Set.elts
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY|local:_read|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_INVENTORY_SCHEMA|<none>|Set.elts
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|<none>|Set.elts
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG|local:_read|arg:0
+scripts/test_record_family_authorization.py|check_record_family_authorization.DEFAULT_SOURCE_CATALOG_SCHEMA|<none>|Set.elts
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_AUTHORIZATION_CLASSES|local:enumerate|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_FAMILY_GROUPS|<none>|comprehension.iter
 scripts/test_record_family_authorization.py|check_record_family_authorization.EXPECTED_FAMILY_GROUPS|local:enumerate|arg:0
@@ -395,18 +414,18 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "bff2c28950b224413a9fc5fd7aa3a9008ff4b5023930ad0d593a1666fbc37a66",
-        85_698,
+        "ddd7a4a09b8477fbe1711c5bdbc2d7f17fc3de119001dfd22d8f038d2b2d1f77",
+        100_553,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "96c70d8c7e22b29923426112f2c2b4b191ff410722186461b164e6f704845e47",
+        "74a451d2557e7fd7696621b7bd819ebd465e8ed26b7073f7e35ca09c7f0108bb",
         46_534,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "17d53924abd70a6b3d927e0b9a6396ff9d15d6ae5c9b7f593fe412135d205957",
-        164_192,
+        "d3552016c2211afefe54d571a7d8f78f4d5416c647fb2b4c857210d177326e4c",
+        169_071,
     ),
 }
 
@@ -462,6 +481,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/governed-parameter-inventory.json"),
     Path("release-artifacts/record-family-authorization-inventory.json"),
+    Path("release-artifacts/record-family-authorization-source-catalog.json"),
     RELEASE_TOOL_CALL_POLICY_PATH,
     Path("release-artifacts/stream-core-permanent-interface.json"),
     Path("release-artifacts/system-manifest-payload-vector.json"),

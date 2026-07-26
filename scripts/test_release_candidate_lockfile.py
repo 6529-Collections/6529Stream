@@ -60,6 +60,13 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     record_family_inventory = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
     )
+    record_family_source_catalog = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG
+    )
+    record_family_source_catalog_schema = (
+        root
+        / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    )
     record_family_inventory_schema = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
     )
@@ -157,6 +164,30 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         governed_parameter_inventory,
         {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
+    )
+    write_json(
+        record_family_source_catalog,
+        {
+            "schema_version": (
+                generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+            )
+        },
+    )
+    write_json(
+        record_family_source_catalog_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": (
+                generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+            ),
+            "properties": {
+                "schema_version": {
+                    "const": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                    )
+                }
+            },
+        },
     )
     write_json(
         record_family_inventory,
@@ -326,6 +357,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "bytecode_proof": latest / "bytecode-release-proof.json",
         "governed_parameter_inventory": governed_parameter_inventory,
         "record_family_inventory": record_family_inventory,
+        "record_family_source_catalog": record_family_source_catalog,
+        "record_family_source_catalog_schema": (
+            record_family_source_catalog_schema
+        ),
         "record_family_inventory_schema": record_family_inventory_schema,
         "record_family_evidence_schema": record_family_evidence_schema,
         "record_family_evidence_template": record_family_evidence_template,
@@ -414,6 +449,34 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
                         "governed_parameter_inventory"
                     ].stat().st_size,
                     "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+                },
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"][
+                    "record_family_authorization_source_catalog"
+                ],
+                generator.file_record(
+                    paths["record_family_source_catalog"],
+                    root,
+                    schema_required=True,
+                ),
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"][
+                    "record_family_authorization_source_catalog_schema"
+                ],
+                {
+                    **generator.file_record(
+                        paths["record_family_source_catalog_schema"],
+                        root,
+                    ),
+                    "schema_version": generator.JSON_SCHEMA_DRAFT,
+                    "schema_id": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+                    ),
+                    "document_schema_version": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                    ),
                 },
             )
             self.assertEqual(
@@ -1094,6 +1157,14 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
         record_family_inventory = (
             repo_root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
         )
+        record_family_source_catalog = (
+            repo_root
+            / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG
+        )
+        record_family_source_catalog_schema = (
+            repo_root
+            / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+        )
         record_family_inventory_schema = (
             repo_root
             / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
@@ -1109,6 +1180,34 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
         record_family_grant_map_schema = (
             repo_root
             / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"][
+                "record_family_authorization_source_catalog"
+            ],
+            generator.file_record(
+                record_family_source_catalog,
+                repo_root,
+                schema_required=True,
+            ),
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"][
+                "record_family_authorization_source_catalog_schema"
+            ],
+            {
+                **generator.file_record(
+                    record_family_source_catalog_schema,
+                    repo_root,
+                ),
+                "schema_version": generator.JSON_SCHEMA_DRAFT,
+                "schema_id": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+                ),
+                "document_schema_version": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+                ),
+            },
         )
         self.assertEqual(
             lockfile["locked_inputs"]["record_family_authorization_inventory"],

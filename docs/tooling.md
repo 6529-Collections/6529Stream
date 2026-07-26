@@ -676,7 +676,7 @@ The committed local baseline explicitly keeps the final commit/tag/signature
 lock in `not_locked_until_signed_release_tag` status until a real release
 ceremony supplies production signatures and a signed tag.
 
-The record-family authorization planning step validates:
+The record-family authorization source and evidence package validates:
 
 ```sh
 python scripts/test_record_family_authorization.py
@@ -684,6 +684,9 @@ python scripts/check_record_family_authorization.py
 ```
 
 The checker reads
+`release-artifacts/record-family-authorization-source-catalog.json` against
+`release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json`,
+reads the retained historical baseline in
 `release-artifacts/record-family-authorization-inventory.json` against
 `release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`
 and reads
@@ -692,9 +695,10 @@ against
 `deployments/schema/record-family-authorization-evidence.v1.schema.json`. A
 future candidate-specific grant map is separately validated against
 `deployments/schema/record-family-authorization-grant-map.v1.schema.json`. The
-inventory pins the five current mutation selectors, eight authorization
-classes, fourteen family groups, eight known fail-open behaviors, and the
-honestly missing classifier/candidate/evidence bindings. A future complete
+source catalog pins the implementation commit/digests, exact fourteen family
+IDs, eight authorization classes, immutable host bindings, and strict snapshot
+intersection. The inventory preserves the five pre-remediation mutation
+selectors and eight historical fail-open behaviors. A future complete
 evidence envelope must use its schema-governed `grant_map.path` to bind the
 separate phase- and candidate-specific
 `deployments/record-family-authorization/public-beta-record-family-authorization-grant-map.json`
@@ -704,31 +708,40 @@ the inventory or template cannot stand in for those artifacts. Production
 evidence additionally hash-binds and fully revalidates the canonical
 public-beta retained envelope.
 
-Release-manifest generation records the inventory, inventory schema, evidence
-schema, grant-map schema, and template; the release-candidate lockfile
-independently binds the same five records. Canonical checksum generation covers
-the package plus its checker, hostile tests, and exactly four contract-semantic
+Release-manifest generation records the source catalog and schema, historical
+inventory and schema, evidence schema, grant-map schema, and template; the
+release-candidate lockfile independently binds the same seven records.
+Canonical checksum generation covers the package plus its checker, hostile
+tests, and exactly twelve source-semantic
 inputs:
 
+- `smart-contracts/IStreamRecordFamilyAuthorityProvider.sol`
+- `smart-contracts/IStreamRecordFamilyRegistry.sol`
+- `smart-contracts/StreamRecordFamilyRegistry.sol`
 - `smart-contracts/StreamCollectionMetadata.sol`
 - `smart-contracts/IStreamCollectionMetadata.sol`
 - `smart-contracts/StreamPreservationRecords.sol`
 - `smart-contracts/IStreamPreservationRecords.sol`
+- `script/RehearseDeployment.s.sol`
+- `test/StreamRecordFamilyAuthorization.t.sol`
+- `test/StreamCollectionMetadata.t.sol`
+- `test/StreamPreservationRecords.t.sol`
+- `test/StreamDeploymentManifest.t.sol`
 
-These are four exact file roots, not broad `smart-contracts/` directory
+These are twelve exact file roots, not broad `smart-contracts/` directory
 coverage. The offline verifier reconstructs the required trust set, acquires
 immutable snapshots for every covered file, materializes those snapshots in a
-temporary root, and loads the record-family checker plus all four semantic
+temporary root, and loads the record-family checker plus all twelve semantic
 inputs from that root. Record-family semantic revalidation has no live-path
 fallback after snapshot acquisition. It then checks exact
 manifest/lockfile/hash/size agreement. Both public-beta and production release
-mode consume the checker's code-owned completion blocker. No CLI flag,
+mode consume the checker's candidate-evidence completion blocker. No CLI flag,
 environment variable, JSON status, risk acceptance, evidence template, or
-admin ceremony can clear it. The as-built selector/global-admin grants remain
-nonconformant, `RISK-GOV-002` remains `open_blocker`, and issue #690 stays open
-until family-scoped contract enforcement and exact candidate-bound reviewed
-evidence are merged. This tooling is fail-closed planning evidence, not an
-implementation or readiness claim.
+admin ceremony can clear it. Source enforcement is present, but
+`RISK-GOV-002` remains `open_blocker`, and issue #690 stays open until exact
+candidate-bound admission/provider/grant/runtime/lifecycle evidence and
+independent review are merged. This tooling proves the source slice, not
+deployment completeness or readiness.
 
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at
@@ -1384,7 +1397,7 @@ The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
 address-book, schema, ceremony evidence, governed-parameter inventory,
-record-family authorization inventory/evidence package, release-manifest,
+record-family authorization source/inventory/evidence package, release-manifest,
 bytecode proof, and release-candidate lockfile outputs, plus the checked
 governed-parameter and record-family authorization checker/tests, the canonical
 non-generated release-tool call policy and its schema, mint-manager domain
@@ -1412,11 +1425,11 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 244 configured roots,
-expanding to exactly 410 covered-file entries in each checksum index. The four
-record-family contract-semantic inputs above account for four exact roots and
-four exact entries; they do not imply coverage of any other file under
-`smart-contracts/`.
+The revised canonical projection contains exactly 253 configured roots,
+expanding to exactly 420 covered-file entries in each checksum index. The twelve
+record-family source-semantic inputs above account for twelve exact roots and
+twelve exact entries; they do not imply coverage of any other file under
+`smart-contracts/` or `script/`.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
@@ -1979,10 +1992,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `55a2e817876eac754355a14ae3907053e3d3deed` on
-`2026-07-24T04:58:03Z` records 3,017 findings: 47 High, 728 Medium, 1,212 Low,
-990 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/27/30`, vendored `1/9/10`, test `43/685/728`, script
+at source commit `ae81b9164e8ea497ed6cc821cdfa61899f14227a` on
+`2026-07-26T11:35:26Z` records 3,035 findings: 47 High, 740 Medium, 1,216 Low,
+992 Informational, and 40 Optimization. Its High/Medium scope totals are
+first-party production `3/27/30`, vendored `1/9/10`, test `43/697/740`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

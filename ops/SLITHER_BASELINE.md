@@ -9,21 +9,21 @@ public beta or production. All 30 current rows remain `Open` under issue #658.
 
 | Field | Value |
 | --- | --- |
-| Analyzed commit | `55a2e817876eac754355a14ae3907053e3d3deed` |
-| Captured at | `2026-07-24T04:58:03Z` |
+| Analyzed commit | `ae81b9164e8ea497ed6cc821cdfa61899f14227a` |
+| Captured at | `2026-07-26T11:35:26Z` |
 | Slither | `0.11.5` |
 | crytic-compile | `0.3.11` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
 | Foundry | `1.7.1` |
-| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:6e0f6b677c3958058b411a23ac0b55e93a93735e994c41e5c2da07c9ef513fbb` |
+| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:dc50458baf60407b80b4f8ac4568780a92fbb681f2c6c6b41da342cb12f158b7` |
 | Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
 | Foundry config | `sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313` |
 | Current gate tool requirements | `sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771` |
 | Capture command | `python -m slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
 | Gate command | `python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
-| Capture process | Native exit `1`; JSON `success=true`; `300288371` bytes |
-| Raw JSON SHA-256 | `sha256:e9f127cfbaa7b63cfd73991b46720de08e91c1740d5ac1141fef5c8b02c28628` |
+| Capture process | Native exit `1`; JSON `success=true`; `301875347` bytes |
+| Raw JSON SHA-256 | `sha256:4b0bfaf3efd373e2836fc17dbbb20d8a2b22141324a60fc696efb5a26178e310` |
 
 The default Slither process exit is non-zero while findings exist. The checked
 gate uses `--fail-none`, then independently requires native success, JSON
@@ -34,11 +34,11 @@ gate uses `--fail-none`, then independently requires native success, JSON
 | Impact | Count |
 | --- | ---: |
 | High | 47 |
-| Medium | 728 |
-| Low | 1212 |
-| Informational | 990 |
+| Medium | 740 |
+| Low | 1216 |
+| Informational | 992 |
 | Optimization | 40 |
-| Total | 3017 |
+| Total | 3035 |
 
 ## High/Medium Scope Separation
 
@@ -49,7 +49,7 @@ test, and script rows stay visible as separately classified diagnostic input.
 | --- | ---: | ---: | ---: |
 | first party production | 3 | 27 | 30 |
 | vendored | 1 | 9 | 10 |
-| test | 43 | 685 | 728 |
+| test | 43 | 697 | 740 |
 | script | 0 | 7 | 7 |
 | other | 0 | 0 | 0 |
 

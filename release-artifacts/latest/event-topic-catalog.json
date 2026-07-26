@@ -272,6 +272,66 @@
       ]
     },
     {
+      "topic0": "0x0cf31fd070c965df9e1d59536a11a3beeef59103e660acbdb4c14d7510103676",
+      "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
+      "name": "CollectionRecordRecorded",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "subjectId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamPreservationRecords.CollectionRecord"
+        },
+        {
+          "index": 4,
+          "name": "recordHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "recorder",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 6,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamPreservationRecords"
+      ]
+    },
+    {
       "topic0": "0x10ac9f0bb365b5d22d7bec500408692f23fdf83eadfec71615ef88b4c1134f0e",
       "signature": "AuctionCancelled(uint256,address)",
       "name": "AuctionCancelled",
@@ -333,59 +393,6 @@
       ],
       "emitted_by": [
         "StreamAuctions"
-      ]
-    },
-    {
-      "topic0": "0x13322d9d5005930f00daaa828d458dc34561bb2664a7daa1dfca20cf949fd830",
-      "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
-      "name": "CollectionMetadataSnapshotPublished",
-      "anonymous": false,
-      "inputs": [
-        {
-          "index": 0,
-          "name": "collectionId",
-          "type": "uint256",
-          "indexed": true,
-          "internal_type": "uint256"
-        },
-        {
-          "index": 1,
-          "name": "snapshotId",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 2,
-          "name": "schemaId",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 3,
-          "name": "record",
-          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
-          "indexed": false,
-          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
-        },
-        {
-          "index": 4,
-          "name": "snapshotHash",
-          "type": "bytes32",
-          "indexed": false,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 5,
-          "name": "admin",
-          "type": "address",
-          "indexed": false,
-          "internal_type": "address"
-        }
-      ],
-      "emitted_by": [
-        "StreamCollectionMetadata"
       ]
     },
     {
@@ -803,6 +810,66 @@
       ]
     },
     {
+      "topic0": "0x1cfcee8993237bddc4a24328ce8d74d01ec1c1cb8bfbf6154892cf36decd74b3",
+      "signature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+      "name": "RecordFamilyAuthorityProviderUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 2,
+          "name": "oldProvider",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "newProvider",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "newProviderCodeHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "revision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 6,
+          "name": "authority",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x1e77a85657976ce31303b0b7c1ff2e0bda4f1d15aac95425f2757a3ff973823c",
       "signature": "SettlementCallerUpdated(address,bool,address)",
       "name": "SettlementCallerUpdated",
@@ -984,6 +1051,52 @@
       ],
       "emitted_by": [
         "StreamMinter"
+      ]
+    },
+    {
+      "topic0": "0x27fd79ea58212a48f6789a48a83e925c80caa6b003504cd812fb59b2a43920ff",
+      "signature": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+      "name": "CollectionMetadataSnapshotFamilyAuthorized",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "snapshotId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 4,
+          "name": "recorder",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -1511,38 +1624,6 @@
       ]
     },
     {
-      "topic0": "0x3afeeaf431a5d15f72a27546faa57418b4c9ad6017cae5305f1703f4259a5909",
-      "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
-      "name": "CollectionMetadataLockedEvent",
-      "anonymous": false,
-      "inputs": [
-        {
-          "index": 0,
-          "name": "collectionId",
-          "type": "uint256",
-          "indexed": true,
-          "internal_type": "uint256"
-        },
-        {
-          "index": 1,
-          "name": "recordType",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 2,
-          "name": "admin",
-          "type": "address",
-          "indexed": true,
-          "internal_type": "address"
-        }
-      ],
-      "emitted_by": [
-        "StreamCollectionMetadata"
-      ]
-    },
-    {
       "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe",
       "signature": "SignerEpochChanged(uint256,uint256)",
       "name": "SignerEpochChanged",
@@ -1777,6 +1858,45 @@
       ]
     },
     {
+      "topic0": "0x597aeef07e17f129586ea02e2cd8994223d0a8aa0bb810e332422bc1f4b20c6a",
+      "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
+      "name": "CollectionMetadataLockedEvent",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "recorder",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x5aa381c998833b1dd4263e146e2e5e8098b463f9f975bb0f9c6d167c0d44a323",
       "signature": "AuctionExtended(uint256,uint256,uint256)",
       "name": "AuctionExtended",
@@ -1983,59 +2103,6 @@
       ],
       "emitted_by": [
         "StreamMintLedger"
-      ]
-    },
-    {
-      "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72",
-      "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
-      "name": "CollectionRecordRecorded",
-      "anonymous": false,
-      "inputs": [
-        {
-          "index": 0,
-          "name": "collectionId",
-          "type": "uint256",
-          "indexed": true,
-          "internal_type": "uint256"
-        },
-        {
-          "index": 1,
-          "name": "recordType",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 2,
-          "name": "subjectId",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 3,
-          "name": "record",
-          "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
-          "indexed": false,
-          "internal_type": "struct IStreamPreservationRecords.CollectionRecord"
-        },
-        {
-          "index": 4,
-          "name": "recordHash",
-          "type": "bytes32",
-          "indexed": false,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 5,
-          "name": "recorder",
-          "type": "address",
-          "indexed": false,
-          "internal_type": "address"
-        }
-      ],
-      "emitted_by": [
-        "StreamPreservationRecords"
       ]
     },
     {
@@ -2941,6 +3008,59 @@
       ]
     },
     {
+      "topic0": "0xa0b0a2b25e3580f59ce88b32cc5c210edaf14deb244714413f8f9355ed532639",
+      "signature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+      "name": "RecordTypeAdmitted",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "familyId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "authorizationClassMask",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 4,
+          "name": "revision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 5,
+          "name": "authority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0xa26a565fb7b765d82314f2acbbdc45f04e62ad24536797471d46c27ec9e0d4d8",
       "signature": "EmergencyWithdrawal(address,address,bytes32,uint256,uint256)",
       "name": "EmergencyWithdrawal",
@@ -3676,6 +3796,66 @@
       ]
     },
     {
+      "topic0": "0xc65761ebcb4f79b29e338643f2a6d4f91e7c6088e98dd6bb4f8bd822738f8379",
+      "signature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+      "name": "RecordFamilyGrantUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "familyId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 3,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 5,
+          "name": "revision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 6,
+          "name": "authority",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0xc811cb1f3e4d0329bd50ef54ae5824d9339edcd7e47031f7babbbef5abfb2773",
       "signature": "RandomnessPostProcessingRetried(uint256,uint256,uint256,address,uint256,uint256,bytes32,bytes32)",
       "name": "RandomnessPostProcessingRetried",
@@ -3741,6 +3921,73 @@
       "emitted_by": [
         "NextGenRandomizerRNG",
         "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0xca3b2caa92dd1ef485d8555494667d8dd6f5d6339d0a5f2e5be523331bae6e2e",
+      "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
+      "name": "CollectionMetadataSnapshotPublished",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "snapshotId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "schemaId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+        },
+        {
+          "index": 4,
+          "name": "snapshotHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "coveredRecordTypesHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "recorder",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 7,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -4252,66 +4499,6 @@
       ]
     },
     {
-      "topic0": "0xecb5b842c93eca3427bdca25dc93520cb3668649e99bb79f3383832a3b519d2f",
-      "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
-      "name": "CollectionMetadataRecordSet",
-      "anonymous": false,
-      "inputs": [
-        {
-          "index": 0,
-          "name": "collectionId",
-          "type": "uint256",
-          "indexed": true,
-          "internal_type": "uint256"
-        },
-        {
-          "index": 1,
-          "name": "recordType",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 2,
-          "name": "schemaId",
-          "type": "bytes32",
-          "indexed": true,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 3,
-          "name": "record",
-          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
-          "indexed": false,
-          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
-        },
-        {
-          "index": 4,
-          "name": "recordHash",
-          "type": "bytes32",
-          "indexed": false,
-          "internal_type": "bytes32"
-        },
-        {
-          "index": 5,
-          "name": "revision",
-          "type": "uint64",
-          "indexed": false,
-          "internal_type": "uint64"
-        },
-        {
-          "index": 6,
-          "name": "admin",
-          "type": "address",
-          "indexed": false,
-          "internal_type": "address"
-        }
-      ],
-      "emitted_by": [
-        "StreamCollectionMetadata"
-      ]
-    },
-    {
       "topic0": "0xed5a80d57e86051fa6af452e8509124711acd649df4f972309adbdb4419c5465",
       "signature": "CuratorCreditCreated(address,uint256,uint256)",
       "name": "CuratorCreditCreated",
@@ -4583,6 +4770,73 @@
       ],
       "emitted_by": [
         "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xf6d36945aea5ede82f1a08c2c2182852e4abb33e26e9a104b038766be83273fe",
+      "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
+      "name": "CollectionMetadataRecordSet",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "schemaId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+        },
+        {
+          "index": 4,
+          "name": "recordHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "revision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 6,
+          "name": "recorder",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 7,
+          "name": "authorizationClass",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -6667,8 +6921,8 @@
         },
         {
           "name": "CollectionMetadataLockedEvent",
-          "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
-          "topic0": "0x3afeeaf431a5d15f72a27546faa57418b4c9ad6017cae5305f1703f4259a5909",
+          "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
+          "topic0": "0x597aeef07e17f129586ea02e2cd8994223d0a8aa0bb810e332422bc1f4b20c6a",
           "anonymous": false,
           "inputs": [
             {
@@ -6687,17 +6941,24 @@
             },
             {
               "index": 2,
-              "name": "admin",
+              "name": "recorder",
               "type": "address",
               "indexed": true,
               "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
             }
           ]
         },
         {
           "name": "CollectionMetadataRecordSet",
-          "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
-          "topic0": "0xecb5b842c93eca3427bdca25dc93520cb3668649e99bb79f3383832a3b519d2f",
+          "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
+          "topic0": "0xf6d36945aea5ede82f1a08c2c2182852e4abb33e26e9a104b038766be83273fe",
           "anonymous": false,
           "inputs": [
             {
@@ -6744,7 +7005,57 @@
             },
             {
               "index": 6,
-              "name": "admin",
+              "name": "recorder",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 7,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "CollectionMetadataSnapshotFamilyAuthorized",
+          "signature": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+          "topic0": "0x27fd79ea58212a48f6789a48a83e925c80caa6b003504cd812fb59b2a43920ff",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "snapshotId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "recordType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "recorder",
               "type": "address",
               "indexed": false,
               "internal_type": "address"
@@ -6753,8 +7064,8 @@
         },
         {
           "name": "CollectionMetadataSnapshotPublished",
-          "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
-          "topic0": "0x13322d9d5005930f00daaa828d458dc34561bb2664a7daa1dfca20cf949fd830",
+          "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
+          "topic0": "0xca3b2caa92dd1ef485d8555494667d8dd6f5d6339d0a5f2e5be523331bae6e2e",
           "anonymous": false,
           "inputs": [
             {
@@ -6794,9 +7105,187 @@
             },
             {
               "index": 5,
-              "name": "admin",
+              "name": "coveredRecordTypesHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "recorder",
               "type": "address",
               "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 7,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyAuthorityProviderUpdated",
+          "signature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+          "topic0": "0x1cfcee8993237bddc4a24328ce8d74d01ec1c1cb8bfbf6154892cf36decd74b3",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "oldProvider",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "newProvider",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "newProviderCodeHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 6,
+              "name": "authority",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyGrantUpdated",
+          "signature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+          "topic0": "0xc65761ebcb4f79b29e338643f2a6d4f91e7c6088e98dd6bb4f8bd822738f8379",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "familyId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 5,
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 6,
+              "name": "authority",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "RecordTypeAdmitted",
+          "signature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+          "topic0": "0xa0b0a2b25e3580f59ce88b32cc5c210edaf14deb244714413f8f9355ed532639",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "familyId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "authorizationClassMask",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 4,
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 5,
+              "name": "authority",
+              "type": "address",
+              "indexed": true,
               "internal_type": "address"
             }
           ]
@@ -9105,8 +9594,8 @@
       "events": [
         {
           "name": "CollectionRecordRecorded",
-          "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
-          "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72",
+          "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
+          "topic0": "0x0cf31fd070c965df9e1d59536a11a3beeef59103e660acbdb4c14d7510103676",
           "anonymous": false,
           "inputs": [
             {
@@ -9150,6 +9639,13 @@
               "type": "address",
               "indexed": false,
               "internal_type": "address"
+            },
+            {
+              "index": 6,
+              "name": "authorizationClass",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
             }
           ]
         },

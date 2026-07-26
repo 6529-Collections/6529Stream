@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/record-family-authorization-source-catalog.v1.schema.json",
+  "title": "6529Stream Record-Family Authorization Source Catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "tracking_issue",
+    "source_commit",
+    "source_bindings",
+    "classifier",
+    "authorization_classes",
+    "family_groups",
+    "host_bindings",
+    "snapshot_policy",
+    "source_tests",
+    "remaining_blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.record-family-authorization-source-catalog.v1"
+    },
+    "status": {
+      "const": "source_implemented_candidate_unbound"
+    },
+    "tracking_issue": {
+      "const": "https://github.com/6529-Collections/6529Stream/issues/690"
+    },
+    "source_commit": {
+      "$ref": "#/$defs/commit"
+    },
+    "source_bindings": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/sourceBinding"
+      }
+    },
+    "classifier": {
+      "$ref": "#/$defs/classifier"
+    },
+    "authorization_classes": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/authorizationClass"
+      }
+    },
+    "family_groups": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "$ref": "#/$defs/familyGroup"
+      }
+    },
+    "host_bindings": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/hostBinding"
+      }
+    },
+    "snapshot_policy": {
+      "$ref": "#/$defs/snapshotPolicy"
+    },
+    "source_tests": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/repoPath"
+      }
+    },
+    "remaining_blockers": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "bytes32": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "selector": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{8}$"
+    },
+    "repoPath": {
+      "type": "string",
+      "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)\\.\\.?(?:/|$)).+$"
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "classifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "source_path",
+        "implementation_source_path",
+        "interface_path",
+        "authority_provider_interface_path",
+        "interface_id",
+        "marker_selector",
+        "schema_version",
+        "record_type_admission",
+        "wildcard_admission",
+        "configuration_authority",
+        "deployment_model",
+        "candidate_binding_status"
+      ],
+      "properties": {
+        "contract": {
+          "const": "StreamCollectionMetadata"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "implementation_source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "authority_provider_interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_id": {
+          "$ref": "#/$defs/selector"
+        },
+        "marker_selector": {
+          "$ref": "#/$defs/selector"
+        },
+        "schema_version": {
+          "const": 1
+        },
+        "record_type_admission": {
+          "const": "append_only_exact_bytes32"
+        },
+        "wildcard_admission": {
+          "const": false
+        },
+        "configuration_authority": {
+          "const": "stream_admins_owner"
+        },
+        "deployment_model": {
+          "const": "embedded_in_collection_metadata_host"
+        },
+        "candidate_binding_status": {
+          "const": "not_available"
+        }
+      }
+    },
+    "authorizationClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "mode"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "mode": {
+          "enum": [
+            "live_provider",
+            "family_grant",
+            "direct_self_attributed"
+          ]
+        }
+      }
+    },
+    "familyGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "id_preimage",
+        "id",
+        "allowed_authorization_class_ids",
+        "admin_authority_rejected"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "id_preimage": {
+          "type": "string",
+          "pattern": "^6529STREAM_RECORD_FAMILY_[A-Z0-9_]+_V1$"
+        },
+        "id": {
+          "$ref": "#/$defs/bytes32"
+        },
+        "allowed_authorization_class_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          }
+        },
+        "admin_authority_rejected": {
+          "type": "boolean"
+        }
+      }
+    },
+    "hostBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "source_path",
+        "interface_path",
+        "interface_id",
+        "registry_binding",
+        "authorization_class_persisted"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_id": {
+          "$ref": "#/$defs/selector"
+        },
+        "registry_binding": {
+          "const": "immutable"
+        },
+        "authorization_class_persisted": {
+          "const": true
+        }
+      }
+    },
+    "snapshotPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "abi",
+        "selector",
+        "covered_record_types",
+        "every_record_type_authority_revalidated",
+        "covered_record_types_hash_stored",
+        "per_record_type_authorization_event"
+      ],
+      "properties": {
+        "abi": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selector": {
+          "$ref": "#/$defs/selector"
+        },
+        "covered_record_types": {
+          "const": "strictly_ascending_nonempty_exact_ids"
+        },
+        "every_record_type_authority_revalidated": {
+          "const": true
+        },
+        "covered_record_types_hash_stored": {
+          "const": true
+        },
+        "per_record_type_authorization_event": {
+          "const": true
+        }
+      }
+    }
+  }
+}
