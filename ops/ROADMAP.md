@@ -2860,7 +2860,7 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `ae81b9164e8ea497ed6cc821cdfa61899f14227a`.
+- Source commit: `522ec69adc075b6514ca96b410926128cfdfe1b0`.
 - Captured at: `2026-07-26T11:35:26Z`.
 - Live gate: `python scripts/check_slither_baseline.py --run-slither`.
 - Status: exact normalized drift is gated; all 30 first-party production rows

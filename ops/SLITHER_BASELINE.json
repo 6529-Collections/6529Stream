@@ -1,7 +1,7 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "ae81b9164e8ea497ed6cc821cdfa61899f14227a",
+    "analyzed_commit": "522ec69adc075b6514ca96b410926128cfdfe1b0",
     "captured_at_utc": "2026-07-26T11:35:26Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",

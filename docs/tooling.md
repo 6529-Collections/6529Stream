@@ -1992,7 +1992,7 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `ae81b9164e8ea497ed6cc821cdfa61899f14227a` on
+at source commit `522ec69adc075b6514ca96b410926128cfdfe1b0` on
 `2026-07-26T11:35:26Z` records 3,035 findings: 47 High, 740 Medium, 1,216 Low,
 992 Informational, and 40 Optimization. Its High/Medium scope totals are
 first-party production `3/27/30`, vendored `1/9/10`, test `43/697/740`, script

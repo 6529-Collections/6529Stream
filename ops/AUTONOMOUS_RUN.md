@@ -95,7 +95,7 @@ before either PR is published, and neither lane may modify Core for this edge.
   or fallback distinctness, so issue #656 remains a production blocker. ADR
   0017 removes parameter-probe bindings from the canonical 37-entry target.
 - PR #662 merged the canonical normalized Slither gate. The fresh unfiltered
-  capture at source commit `ae81b9164e8ea497ed6cc821cdfa61899f14227a` on
+  capture at source commit `522ec69adc075b6514ca96b410926128cfdfe1b0` on
   `2026-07-26T11:35:26Z` records 3,035 findings across all impacts/scopes and
   normalizes to 30 Open first-party production High/Medium rows under issue
   #658: 3 High, 27 Medium, one confirmed gap, five design-review rows, and 24

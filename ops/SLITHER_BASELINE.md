@@ -9,7 +9,7 @@ public beta or production. All 30 current rows remain `Open` under issue #658.
 
 | Field | Value |
 | --- | --- |
-| Analyzed commit | `ae81b9164e8ea497ed6cc821cdfa61899f14227a` |
+| Analyzed commit | `522ec69adc075b6514ca96b410926128cfdfe1b0` |
 | Captured at | `2026-07-26T11:35:26Z` |
 | Slither | `0.11.5` |
 | crytic-compile | `0.3.11` |

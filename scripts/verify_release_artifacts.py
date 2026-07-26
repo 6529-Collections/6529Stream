@@ -480,11 +480,11 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "ddd7a4a09b8477fbe1711c5bdbc2d7f17fc3de119001dfd22d8f038d2b2d1f77",
+        "f2a8dae3f0b50e88630164aff32768859ae7e9b5116d723e6917158e9caf569f",
         100_553,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "74a451d2557e7fd7696621b7bd819ebd465e8ed26b7073f7e35ca09c7f0108bb",
+        "223de8d925885bb55e7a6bc572dbefa5f50b0553fddb1a4e76331619ccebe530",
         46_534,
     ),
 }
