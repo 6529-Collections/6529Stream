@@ -9,10 +9,11 @@ inline are resolved by
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
 [ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by accepted
-[ADR 0017](adr/0017-raise-only-parameter-governance.md). Proposed
-[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the
-candidate operation-identity amendment and remains unaccepted. The decisions
-are recorded in
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). Accepted
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
+pre-genesis target operation-identity amendment. Its atomic source cutover
+remains unimplemented and is not current as-built or readiness evidence. The
+decisions are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for

@@ -68,14 +68,14 @@ The current Gate A smoke baseline proves:
   cutover now requires a single permanent target ABI and zero-Core-delta or
   measured net-negative slices until the complete hook build is at or below
   22,576 bytes.
-  Proposed ADR 0018 describes the required pre-genesis operation-identity
+  Accepted ADR 0018 defines the required pre-genesis operation-identity
   cutover: one manager batch root is replay-protected in the ledger, exactly one
   unique operation ID identifies each token transition, and Core eventually
-  retains only its current prepared-pair equality lock. The ADR is not accepted
-  and does not close #688; exact typed primary settlement and repeated-sale
+  retains only its current prepared-pair equality lock. Acceptance does not
+  close #688; exact typed primary settlement and repeated-sale
   replay remain ADR 0019 / #694 blockers. Current Solidity still derives its
   prepared-only root after ledger consumption, the ledger carries no root, and
-  Core retains lifetime operation-ID replay storage; the proposal is not
+  Core retains lifetime operation-ID replay storage; the decision is not
   implementation evidence. The subsequent Core measurement must also
   include the target restricted ERC-4906 single/batch refresh emitters required
   by #667. Their selectors exist in the permanent target artifact, but current

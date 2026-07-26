@@ -177,9 +177,9 @@ contributors who start from the README.
   API: satellite-only slices must keep zero Core delta and Core-changing slices
   must measure net-negative until the complete linked production-profile
   `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement. Proposed ADR 0018 describes one ledger-owned root
-  plus `N` token operation IDs, but is not accepted and current source still
-  calls the rootless ledger
+  not a bytecode measurement. Accepted ADR 0018 defines one ledger-owned root
+  plus `N` token operation IDs, but its atomic source cutover remains
+  unimplemented and current source still calls the rootless ledger
   before deriving its prepared-only root and retains lifetime replay storage in
   Core. The sequential #688 -> #672 -> #654 lane must implement and validate
   that cutover, prove post-entropy completion gas, and include the real

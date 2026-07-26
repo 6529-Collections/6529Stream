@@ -487,26 +487,26 @@ class MintManagerDomainConstantTests(unittest.TestCase):
                 ):
                     checker.validate_operation_identity_fragments(mutated)
 
-    def test_rejects_accepted_adr0018_status(self) -> None:
+    def test_rejects_proposed_adr0018_status(self) -> None:
         documents = committed_operation_documents()
         documents[checker.ADR_0018_PATH] = documents[
             checker.ADR_0018_PATH
         ].replace(
+            "Accepted for pre-genesis implementation on 2026-07-26",
             "Proposed only for the pre-genesis production target",
-            "Accepted for the pre-genesis production target",
             1,
         )
 
         with self.assertRaises(checker.MintManagerDomainError):
             checker.validate_operation_identity_fragments(documents)
 
-    def test_rejects_accepted_adr0018_index_status(self) -> None:
+    def test_rejects_proposed_adr0018_index_status(self) -> None:
         documents = committed_operation_documents()
         documents[checker.ADR_INDEX_PATH] = documents[
             checker.ADR_INDEX_PATH
         ].replace(
-            "| Proposed |",
-            "| Accepted |",
+            "(0018-batch-operation-root-and-token-identity.md) | Accepted |",
+            "(0018-batch-operation-root-and-token-identity.md) | Proposed |",
             1,
         )
 
