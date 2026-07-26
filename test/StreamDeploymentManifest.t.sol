@@ -19,6 +19,7 @@ import "../smart-contracts/StreamMintManager.sol";
 import "../smart-contracts/StreamMintModuleRegistry.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
+import "../smart-contracts/StreamRecordFamilyRegistry.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -161,6 +162,8 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             StreamCollectionMetadata(result.collectionMetadata);
         StreamPreservationRecords preservationRecords =
             StreamPreservationRecords(result.preservationRecords);
+        StreamRecordFamilyRegistry recordFamilyRegistry =
+            StreamRecordFamilyRegistry(result.recordFamilyRegistry);
 
         Assertions.assertEq(
             collectionMetadata.streamCore(), result.core, "collection metadata core"
@@ -172,6 +175,11 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             collectionMetadata.isStreamCollectionMetadata(), "collection metadata marker"
         );
         Assertions.assertEq(
+            collectionMetadata.recordFamilyRegistry(),
+            result.recordFamilyRegistry,
+            "collection metadata family registry"
+        );
+        Assertions.assertEq(
             preservationRecords.streamCore(), result.core, "preservation records core"
         );
         Assertions.assertEq(
@@ -179,6 +187,17 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         );
         Assertions.assertTrue(
             preservationRecords.isStreamPreservationRecords(), "preservation records marker"
+        );
+        Assertions.assertEq(
+            preservationRecords.recordFamilyRegistry(),
+            result.recordFamilyRegistry,
+            "preservation records family registry"
+        );
+        Assertions.assertEq(
+            recordFamilyRegistry.adminsContract(), result.admins, "record family registry admins"
+        );
+        Assertions.assertTrue(
+            recordFamilyRegistry.isStreamRecordFamilyRegistry(), "record family registry marker"
         );
     }
 
@@ -218,16 +237,18 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             "preservation records address reused"
         );
         Assertions.assertTrue(first.manifestHash != second.manifestHash, "manifest hash not bound");
-        StreamCollectionMetadata reboundCollection =
-            new StreamCollectionMetadata(first.core, first.admins, address(0));
+        StreamCollectionMetadata reboundCollection = new StreamCollectionMetadata(
+            first.core, first.admins, first.recordFamilyRegistry, address(0)
+        );
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(
                 config, first, address(reboundCollection), first.preservationRecords
             ) != first.manifestHash,
             "collection metadata identity not bound"
         );
-        StreamPreservationRecords reboundPreservation =
-            new StreamPreservationRecords(first.core, first.admins, address(0));
+        StreamPreservationRecords reboundPreservation = new StreamPreservationRecords(
+            first.core, first.admins, first.recordFamilyRegistry, address(0)
+        );
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(
                 config, first, first.collectionMetadata, address(reboundPreservation)
@@ -487,6 +508,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
                 _contractBinding(result.dependencyRegistry),
                 _contractBinding(result.core),
                 _contractBinding(result.contractMetadata),
+                _contractBinding(result.recordFamilyRegistry),
                 _collectionMetadataBinding(collectionMetadata),
                 _preservationRecordsBinding(preservationRecords)
             )
@@ -496,7 +518,13 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
     function _collectionMetadataBinding(address collectionMetadata) private view returns (bytes32) {
         if (collectionMetadata.code.length == 0) {
             return keccak256(
-                abi.encode(_contractBinding(collectionMetadata), address(0), address(0), address(0))
+                abi.encode(
+                    _contractBinding(collectionMetadata),
+                    address(0),
+                    address(0),
+                    address(0),
+                    address(0)
+                )
             );
         }
         StreamCollectionMetadata metadata = StreamCollectionMetadata(collectionMetadata);
@@ -505,6 +533,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
                 _contractBinding(collectionMetadata),
                 metadata.streamCore(),
                 metadata.adminsContract(),
+                metadata.recordFamilyRegistry(),
                 metadata.streamModuleSupersedes()
             )
         );
@@ -518,7 +547,11 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         if (preservationRecords.code.length == 0) {
             return keccak256(
                 abi.encode(
-                    _contractBinding(preservationRecords), address(0), address(0), address(0)
+                    _contractBinding(preservationRecords),
+                    address(0),
+                    address(0),
+                    address(0),
+                    address(0)
                 )
             );
         }
@@ -528,6 +561,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
                 _contractBinding(preservationRecords),
                 records.streamCore(),
                 records.adminsContract(),
+                records.recordFamilyRegistry(),
                 records.streamModuleSupersedes()
             )
         );

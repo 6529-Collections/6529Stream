@@ -46,12 +46,15 @@ interface IStreamPreservationRecords is IERC165 {
         uint64 effectiveAt;
         address recorder;
         uint64 recordedAt;
+        uint8 authorizationClass;
     }
 
     /// @notice Reverts when Core is not a deployed 6529Stream Core.
     error InvalidCoreContract();
     /// @notice Reverts when the admin dependency is not a StreamAdmins contract.
     error InvalidAdminContract();
+    /// @notice Reverts when the family classifier is not the required deployed registry.
+    error InvalidRecordFamilyRegistry();
     /// @notice Reverts when caller lacks global or target-scoped function authority.
     error FunctionAdminUnauthorized(address caller, bytes4 selector);
     /// @notice Reverts when preservation mutation pause is active.
@@ -78,13 +81,16 @@ interface IStreamPreservationRecords is IERC165 {
         bytes32 indexed subjectId,
         CollectionRecord record,
         bytes32 recordHash,
-        address recorder
+        address recorder,
+        uint8 authorizationClass
     );
 
     /// @notice Returns the Core contract this preservation module extends.
     function streamCore() external view returns (address);
     /// @notice Returns the active StreamAdmins dependency.
     function adminsContract() external view returns (address);
+    /// @notice Returns the immutable exact record-family classifier/authority host.
+    function recordFamilyRegistry() external view returns (address);
     /// @notice Returns true for deployment validation.
     function isStreamPreservationRecords() external pure returns (bool);
     /// @notice Returns the module family beacon.

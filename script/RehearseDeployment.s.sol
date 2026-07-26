@@ -19,6 +19,7 @@ import "../smart-contracts/StreamMintManager.sol";
 import "../smart-contracts/StreamMintModuleRegistry.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
+import "../smart-contracts/StreamRecordFamilyRegistry.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "../smart-contracts/StreamSplitFactory.sol";
 
@@ -63,6 +64,7 @@ contract RehearseDeployment {
         address dependencyRegistry;
         address core;
         address contractMetadata;
+        address recordFamilyRegistry;
         address collectionMetadata;
         address preservationRecords;
         address curatorsPool;
@@ -169,6 +171,7 @@ contract RehearseDeployment {
         DependencyRegistry dependencyRegistry;
         StreamCore core;
         StreamContractMetadata contractMetadata;
+        StreamRecordFamilyRegistry recordFamilyRegistry;
         StreamCollectionMetadata collectionMetadata;
         StreamPreservationRecords preservationRecords;
         StreamCuratorsPool curatorsPool;
@@ -198,11 +201,18 @@ contract RehearseDeployment {
         deployed.contractMetadata = new StreamContractMetadata(
             address(deployed.core), address(deployed.admins), config.contractMetadataURI
         );
+        deployed.recordFamilyRegistry = new StreamRecordFamilyRegistry(address(deployed.admins));
         deployed.collectionMetadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.recordFamilyRegistry),
+            address(0)
         );
         deployed.preservationRecords = new StreamPreservationRecords(
-            address(deployed.core), address(deployed.admins), address(0)
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.recordFamilyRegistry),
+            address(0)
         );
         deployed.curatorsPool = new StreamCuratorsPool(address(deployed.admins), config.delegation);
         deployed.minter =
@@ -305,6 +315,7 @@ contract RehearseDeployment {
             dependencyRegistry: address(deployed.dependencyRegistry),
             core: address(deployed.core),
             contractMetadata: address(deployed.contractMetadata),
+            recordFamilyRegistry: address(deployed.recordFamilyRegistry),
             collectionMetadata: address(deployed.collectionMetadata),
             preservationRecords: address(deployed.preservationRecords),
             curatorsPool: address(deployed.curatorsPool),
@@ -379,6 +390,7 @@ contract RehearseDeployment {
                 _contractBinding(address(deployed.dependencyRegistry)),
                 _contractBinding(address(deployed.core)),
                 _contractBinding(address(deployed.contractMetadata)),
+                _contractBinding(address(deployed.recordFamilyRegistry)),
                 _collectionMetadataBinding(deployed.collectionMetadata),
                 _preservationRecordsBinding(deployed.preservationRecords)
             )
@@ -395,6 +407,7 @@ contract RehearseDeployment {
                 _contractBinding(address(collectionMetadata)),
                 collectionMetadata.streamCore(),
                 collectionMetadata.adminsContract(),
+                collectionMetadata.recordFamilyRegistry(),
                 collectionMetadata.streamModuleSupersedes()
             )
         );
@@ -410,6 +423,7 @@ contract RehearseDeployment {
                 _contractBinding(address(preservationRecords)),
                 preservationRecords.streamCore(),
                 preservationRecords.adminsContract(),
+                preservationRecords.recordFamilyRegistry(),
                 preservationRecords.streamModuleSupersedes()
             )
         );

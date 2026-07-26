@@ -7,6 +7,7 @@ import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
+import "../smart-contracts/StreamRecordFamilyRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
@@ -36,12 +37,12 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
     bytes32 private constant SCHEMA_ID = keccak256("6529stream.collection.schema.v1");
     bytes32 private constant SNAPSHOT_ID = keccak256("snapshot.2026-06-25");
     bytes32 private constant SNAPSHOT_ID_2 = keccak256("snapshot.2026-06-26");
+    uint8 private constant AUTH_PRESERVATION_ADMIN = 6;
+    uint8 private constant AUTH_METADATA_ADMIN = 7;
 
     function testModuleMarkersInterfacesAndAdminState() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         metadata.streamCore().assertEq(address(deployed.core), "core not retained");
         metadata.adminsContract().assertEq(address(deployed.admins), "admins not retained");
@@ -58,9 +59,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testStoresTypedMuseumRecordsSnapshotsAndLatestHashes() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         bytes32 identityHash = metadata.setCollectionRecord(
             COLLECTION_ID, _record(RECORD_IDENTITY, "ipfs://identity")
@@ -87,10 +86,12 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
         IStreamCollectionMetadata.CollectionMetadataRecord memory snapshot =
             _record(keccak256("metadata.snapshot"), "ar://snapshot");
-        bytes32 snapshotHash =
-            metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID, snapshot);
-        bytes32 secondSnapshotHash =
-            metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID_2, snapshot);
+        bytes32 snapshotHash = metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID, _snapshotRecordTypes(), snapshot
+        );
+        bytes32 secondSnapshotHash = metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID_2, _snapshotRecordTypes(), snapshot
+        );
         (snapshotHash != secondSnapshotHash).assertTrue("snapshot id not hashed");
         metadata.snapshotHash(COLLECTION_ID, SNAPSHOT_ID).assertEq(snapshotHash, "snapshot hash");
         metadata.collectionSnapshot(COLLECTION_ID, SNAPSHOT_ID).locked.assertTrue("snapshot lock");
@@ -102,23 +103,34 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testFunctionAdminPauseAndUnauthorizedPaths() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
+
         deployed.admins
             .registerFunctionAdmin(
                 FUNCTION_ADMIN, address(metadata), metadata.setCollectionRecord.selector, true
+            );
+        StreamRecordFamilyRegistry(metadata.recordFamilyRegistry())
+            .setRecordFamilyGrant(
+                StreamRecordFamilyRegistry(metadata.recordFamilyRegistry())
+                    .FAMILY_IDENTITY_DISPLAY(),
+                AUTH_METADATA_ADMIN,
+                FUNCTION_ADMIN,
+                true
             );
 
         vm.prank(FUNCTION_ADMIN);
         metadata.setCollectionRecord(COLLECTION_ID, _record(RECORD_IDENTITY, "ipfs://identity"));
 
+        bytes32 rightsFamily =
+            StreamRecordFamilyRegistry(metadata.recordFamilyRegistry()).FAMILY_RIGHTS();
         vm.prank(address(0xBAD));
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamCollectionMetadata.FunctionAdminUnauthorized.selector,
+                IStreamRecordFamilyRegistry.RecordFamilyUnauthorized.selector,
                 address(0xBAD),
-                metadata.setCollectionRecord.selector
+                RECORD_RIGHTS,
+                rightsFamily,
+                uint16(1) << AUTH_METADATA_ADMIN
             )
         );
         metadata.setCollectionRecord(COLLECTION_ID, _record(RECORD_RIGHTS, "ipfs://rights"));
@@ -133,9 +145,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testLocksRevisionChecksMissingCollectionAndFreezeBlockRenderMetadata() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.CollectionDoesNotExist.selector, 999)
@@ -193,9 +203,8 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testUpdateAdminContractRequiresCurrentAdminValidMarkerAndUnpaused() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
+
         StreamAdmins replacementAdmins = new StreamAdmins(address(this));
         CollectionMetadataEmptyMarker emptyMarker = new CollectionMetadataEmptyMarker();
 
@@ -233,9 +242,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testLocksCoverGlobalAndSnapshotWritesAndRemainEnumerable() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -279,7 +286,10 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
             )
         );
         metadata.publishCollectionSnapshot(
-            COLLECTION_ID, SNAPSHOT_ID, _record(keccak256("metadata.snapshot"), "ipfs://snapshot")
+            COLLECTION_ID,
+            SNAPSHOT_ID,
+            _snapshotRecordTypes(),
+            _record(keccak256("metadata.snapshot"), "ipfs://snapshot")
         );
 
         metadata.lockCollectionRecord(COLLECTION_ID, LOCK_METADATA_ALL);
@@ -300,7 +310,10 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
             )
         );
         metadata.publishCollectionSnapshot(
-            COLLECTION_ID, SNAPSHOT_ID, _record(keccak256("metadata.snapshot"), "ipfs://snapshot")
+            COLLECTION_ID,
+            SNAPSHOT_ID,
+            _snapshotRecordTypes(),
+            _record(keccak256("metadata.snapshot"), "ipfs://snapshot")
         );
 
         vm.expectRevert(
@@ -324,19 +337,25 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testRecordTypeCapReservesTerminalLockSlots() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         uint256 ordinarySlots = metadata.MAX_RECORD_TYPES() - 2;
+        StreamRecordFamilyRegistry registry =
+            StreamRecordFamilyRegistry(metadata.recordFamilyRegistry());
         for (uint256 i = 0; i < ordinarySlots; i++) {
             bytes32 recordType = keccak256(abi.encode("metadata.type", i));
+            registry.admitRecordType(
+                recordType, registry.FAMILY_IDENTITY_DISPLAY(), uint16(1) << AUTH_METADATA_ADMIN
+            );
             metadata.setCollectionRecord(COLLECTION_ID, _record(recordType, "ipfs://type"));
         }
 
         metadata.collectionRecordTypeCount(COLLECTION_ID)
             .assertEq(ordinarySlots, "ordinary record slots not filled");
         bytes32 overflowType = keccak256("metadata.overflow");
+        registry.admitRecordType(
+            overflowType, registry.FAMILY_IDENTITY_DISPLAY(), uint16(1) << AUTH_METADATA_ADMIN
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionMetadata.MetadataRecordTypeLimitExceeded.selector,
@@ -349,6 +368,10 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         metadata.lockCollectionRecord(COLLECTION_ID, LOCK_SNAPSHOTS);
         metadata.collectionRecordTypeCount(COLLECTION_ID)
             .assertEq(metadata.MAX_RECORD_TYPES() - 1, "snapshot lock slot missing");
+        bytes32 secondOverflow = keccak256("metadata.second-overflow");
+        registry.admitRecordType(
+            secondOverflow, registry.FAMILY_IDENTITY_DISPLAY(), uint16(1) << AUTH_METADATA_ADMIN
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionMetadata.MetadataRecordTypeLimitExceeded.selector,
@@ -357,7 +380,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
             )
         );
         metadata.setCollectionRecord(
-            COLLECTION_ID, _record(keccak256("metadata.second-overflow"), "ipfs://second-overflow")
+            COLLECTION_ID, _record(secondOverflow, "ipfs://second-overflow")
         );
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -369,6 +392,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         metadata.publishCollectionSnapshot(
             COLLECTION_ID,
             SNAPSHOT_ID,
+            _snapshotRecordTypes(),
             _record(keccak256("metadata.snapshot.cap"), "ipfs://snapshot-cap")
         );
 
@@ -387,15 +411,15 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testSnapshotsCanPublishAfterCoreFreezeWithoutMutatingRecords() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
+
         _freezeCollection(deployed);
 
         IStreamCollectionMetadata.CollectionMetadataRecord memory snapshot =
             _record(keccak256("metadata.snapshot"), "ipfs://post-freeze-snapshot");
-        bytes32 snapshotHash =
-            metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID, snapshot);
+        bytes32 snapshotHash = metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID, _snapshotRecordTypes(), snapshot
+        );
 
         metadata.latestCollectionSnapshotHash(COLLECTION_ID)
             .assertEq(snapshotHash, "post-freeze snapshot missing");
@@ -413,7 +437,9 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
                 snapshot.recordType
             )
         );
-        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID_2, snapshot);
+        metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID_2, _snapshotRecordTypes(), snapshot
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -437,9 +463,8 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testAcceptsCreatedCollectionBeforeCoreSupplyData() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
+
         uint256 metadataFirstCollectionId = _createCollectionWithoutData(deployed);
 
         bytes32 recordHash = metadata.setCollectionRecord(
@@ -452,9 +477,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
     function testInvalidRecordsUnsafeUrisAndDuplicateSnapshotsRevert() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
 
         IStreamCollectionMetadata.CollectionMetadataRecord memory invalid =
             _record(RECORD_IDENTITY, "ipfs://identity");
@@ -517,9 +540,13 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.InvalidSnapshotId.selector, bytes32(0))
         );
-        metadata.publishCollectionSnapshot(COLLECTION_ID, bytes32(0), snapshot);
+        metadata.publishCollectionSnapshot(
+            COLLECTION_ID, bytes32(0), _snapshotRecordTypes(), snapshot
+        );
 
-        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID, snapshot);
+        metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID, _snapshotRecordTypes(), snapshot
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionMetadata.CollectionSnapshotAlreadyPublished.selector,
@@ -527,14 +554,15 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
                 SNAPSHOT_ID
             )
         );
-        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID, snapshot);
+        metadata.publishCollectionSnapshot(
+            COLLECTION_ID, SNAPSHOT_ID, _snapshotRecordTypes(), snapshot
+        );
     }
 
     function testEventsCanReconstructTypedMetadataRecord() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        StreamCollectionMetadata metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(0)
-        );
+        StreamCollectionMetadata metadata = _deployMetadata(deployed);
+
         IStreamCollectionMetadata.CollectionMetadataRecord memory record =
             _record(RECORD_IIIF_VIEW, "ipfs://iiif");
 
@@ -547,7 +575,7 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         logs[0].topics.length.assertEq(4, "record log topic count");
         logs[0].topics[0].assertEq(
             keccak256(
-                "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)"
+                "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)"
             ),
             "record event signature"
         );
@@ -558,31 +586,39 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
             IStreamCollectionMetadata.CollectionMetadataRecord memory eventRecord,
             bytes32 eventHash,
             uint64 revision,
-            address admin
+            address admin,
+            uint8 authorizationClass
         ) = abi.decode(
             logs[0].data,
-            (IStreamCollectionMetadata.CollectionMetadataRecord, bytes32, uint64, address)
+            (IStreamCollectionMetadata.CollectionMetadataRecord, bytes32, uint64, address, uint8)
         );
         eventRecord.recordType.assertEq(record.recordType, "event record type");
         eventRecord.uri.assertEq(record.uri, "event uri");
         eventHash.assertEq(recordHash, "event hash");
         uint256(revision).assertEq(1, "event revision");
         admin.assertEq(address(this), "event admin");
+        uint256(authorizationClass).assertEq(AUTH_METADATA_ADMIN, "event authorization class");
     }
 
     function testConstructorRejectsInvalidCoreAndAdminContracts() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         CollectionMetadataEmptyMarker emptyMarker = new CollectionMetadataEmptyMarker();
+        StreamRecordFamilyRegistry registry =
+            new StreamRecordFamilyRegistry(address(deployed.admins));
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.InvalidCoreContract.selector)
         );
-        new StreamCollectionMetadata(address(0x1234), address(deployed.admins), address(0));
+        new StreamCollectionMetadata(
+            address(0x1234), address(deployed.admins), address(registry), address(0)
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.InvalidAdminContract.selector)
         );
-        new StreamCollectionMetadata(address(deployed.core), address(emptyMarker), address(0));
+        new StreamCollectionMetadata(
+            address(deployed.core), address(emptyMarker), address(registry), address(0)
+        );
     }
 
     function _record(bytes32 recordType, string memory uri)
@@ -598,6 +634,55 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
             auxiliaryHash: keccak256("auxiliary"),
             effectiveAt: 1_782_345_600
         });
+    }
+
+    function _deployMetadata(DeployedStream memory deployed)
+        private
+        returns (StreamCollectionMetadata metadata)
+    {
+        StreamRecordFamilyRegistry registry =
+            new StreamRecordFamilyRegistry(address(deployed.admins));
+        _admit(registry, RECORD_IDENTITY, registry.FAMILY_IDENTITY_DISPLAY());
+        _admit(registry, RECORD_RIGHTS, registry.FAMILY_RIGHTS());
+        _admit(registry, RECORD_IIIF_VIEW, registry.FAMILY_IIIF());
+        registry.admitRecordType(
+            RECORD_C2PA, registry.FAMILY_C2PA(), uint16(1) << AUTH_PRESERVATION_ADMIN
+        );
+        _admit(registry, RECORD_CUSTOM_GATE, registry.FAMILY_AGENT());
+        _admit(registry, keccak256("metadata.snapshot"), registry.FAMILY_SNAPSHOT());
+        _admit(registry, keccak256("metadata.snapshot.cap"), registry.FAMILY_SNAPSHOT());
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_IDENTITY_DISPLAY(), AUTH_METADATA_ADMIN, address(this), true
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_RIGHTS(), AUTH_METADATA_ADMIN, address(this), true
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_IIIF(), AUTH_METADATA_ADMIN, address(this), true
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_C2PA(), AUTH_PRESERVATION_ADMIN, address(this), true
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_AGENT(), AUTH_METADATA_ADMIN, address(this), true
+        );
+        registry.setRecordFamilyGrant(
+            registry.FAMILY_SNAPSHOT(), AUTH_METADATA_ADMIN, address(this), true
+        );
+        metadata = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(registry), address(0)
+        );
+    }
+
+    function _admit(StreamRecordFamilyRegistry registry, bytes32 recordType, bytes32 familyId)
+        private
+    {
+        registry.admitRecordType(recordType, familyId, uint16(1) << AUTH_METADATA_ADMIN);
+    }
+
+    function _snapshotRecordTypes() private pure returns (bytes32[] memory recordTypes) {
+        recordTypes = new bytes32[](1);
+        recordTypes[0] = RECORD_IDENTITY;
     }
 
     function _contentUri(uint256 length) private pure returns (string memory) {

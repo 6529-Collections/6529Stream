@@ -5,6 +5,7 @@ import "./ERC165.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamCollectionMetadata.sol";
 import "./IStreamCore.sol";
+import "./IStreamRecordFamilyRegistry.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
 
@@ -14,26 +15,29 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
 
     bytes32 private constant _MODULE_FAMILY = keccak256("6529stream.module.collection-metadata");
     bytes32 private constant _MODULE_VERSION =
-        keccak256("6529stream.module.collection-metadata.v1");
+        keccak256("6529stream.module.collection-metadata.v2");
     bytes32 private constant _MODULE_SCHEMA_HASH =
-        keccak256("6529stream.collection-metadata.schema.v1");
+        keccak256("6529stream.collection-metadata.schema.v2");
     bytes32 private constant _RECORD_HASH_DOMAIN =
-        keccak256("6529stream.collection-metadata-record.v1");
+        keccak256("6529stream.collection-metadata-record.v2");
     bytes32 private constant _SNAPSHOT_HASH_DOMAIN =
-        keccak256("6529stream.collection-metadata-snapshot.v1");
+        keccak256("6529stream.collection-metadata-snapshot.v2");
     bytes32 private constant _LOCK_METADATA_ALL = keccak256("METADATA_ALL");
     bytes32 private constant _LOCK_SNAPSHOTS = keccak256("SNAPSHOTS");
     bytes32 private constant _FIELD_METADATA_URI = "metadataURI";
 
     address public immutable override streamCore;
+    address public immutable override recordFamilyRegistry;
     address private immutable _moduleSupersedes;
     IStreamAdmins private _adminsContract;
+    IStreamRecordFamilyRegistry private immutable _recordFamilyRegistry;
 
     mapping(uint256 => mapping(bytes32 => CollectionMetadataRecordView)) private _records;
     mapping(uint256 => mapping(bytes32 => bool)) private _knownRecordTypes;
     mapping(uint256 => bytes32[]) private _recordTypes;
     mapping(uint256 => mapping(bytes32 => CollectionMetadataRecordView)) private _snapshots;
     mapping(uint256 => mapping(bytes32 => bytes32)) private _snapshotHashes;
+    mapping(uint256 => mapping(bytes32 => bytes32)) private _snapshotCoveredRecordTypesHashes;
     mapping(uint256 => bytes32) private _latestSnapshotIds;
     mapping(uint256 => bytes32) private _latestSnapshotHashes;
 
@@ -47,11 +51,18 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         _;
     }
 
-    constructor(address core, address admins, address supersedes) {
+    constructor(address core, address admins, address familyRegistry, address supersedes) {
         StreamMetadataRenderer.requireContractMarker(
             core, IStreamCore.isCoreContract.selector, InvalidCoreContract.selector
         );
         streamCore = core;
+        StreamMetadataRenderer.requireContractMarker(
+            familyRegistry,
+            IStreamRecordFamilyRegistry.isStreamRecordFamilyRegistry.selector,
+            InvalidRecordFamilyRegistry.selector
+        );
+        recordFamilyRegistry = familyRegistry;
+        _recordFamilyRegistry = IStreamRecordFamilyRegistry(familyRegistry);
         _moduleSupersedes = supersedes;
         _setAdminContract(admins);
     }
@@ -94,7 +105,6 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
     function setCollectionRecord(uint256 collectionId, CollectionMetadataRecord calldata record)
         external
         override
-        FunctionAdminRequired(this.setCollectionRecord.selector)
         returns (bytes32 recordHash)
     {
         return _setCollectionRecord(collectionId, record, false, 0);
@@ -104,35 +114,32 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         uint256 collectionId,
         CollectionMetadataRecord calldata record,
         uint64 expectedRevision
-    )
-        external
-        override
-        FunctionAdminRequired(this.setCollectionRecordWithRevision.selector)
-        returns (bytes32 recordHash)
-    {
+    ) external override returns (bytes32 recordHash) {
         return _setCollectionRecord(collectionId, record, true, expectedRevision);
     }
 
     function publishCollectionSnapshot(
         uint256 collectionId,
         bytes32 snapshotId,
+        bytes32[] calldata coveredRecordTypes,
         CollectionMetadataRecord calldata snapshot
-    )
-        external
-        override
-        FunctionAdminRequired(this.publishCollectionSnapshot.selector)
-        returns (bytes32 hash)
-    {
+    ) external override returns (bytes32 hash) {
         if (snapshotId == bytes32(0)) {
             revert InvalidSnapshotId(snapshotId);
         }
+        uint8 authorizationClass =
+            _requireRecordWriter(collectionId, bytes32(collectionId), snapshot.recordType);
+        bytes32 coveredRecordTypesHash =
+            _requireSnapshotFamilyIntersection(collectionId, snapshotId, coveredRecordTypes);
         _requireSnapshotPublicationAllowed(collectionId, snapshot.recordType);
         _validateRecord(snapshot);
         if (_snapshotHashes[collectionId][snapshotId] != bytes32(0)) {
             revert CollectionSnapshotAlreadyPublished(collectionId, snapshotId);
         }
 
-        hash = _deriveCollectionSnapshotHash(collectionId, snapshotId, snapshot);
+        hash = _deriveCollectionSnapshotHash(
+            collectionId, snapshotId, coveredRecordTypesHash, snapshot
+        );
         CollectionMetadataRecordView memory stored = CollectionMetadataRecordView({
             recordType: snapshot.recordType,
             schemaId: snapshot.schemaId,
@@ -144,31 +151,40 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
             effectiveAt: snapshot.effectiveAt,
             writer: msg.sender,
             updatedAt: uint64(block.timestamp),
-            locked: true
+            locked: true,
+            authorizationClass: authorizationClass
         });
         _snapshotHashes[collectionId][snapshotId] = hash;
+        _snapshotCoveredRecordTypesHashes[collectionId][snapshotId] = coveredRecordTypesHash;
         _snapshots[collectionId][snapshotId] = stored;
         _latestSnapshotIds[collectionId] = snapshotId;
         _latestSnapshotHashes[collectionId] = hash;
         emit CollectionMetadataSnapshotPublished(
-            collectionId, snapshotId, snapshot.schemaId, snapshot, hash, msg.sender
+            collectionId,
+            snapshotId,
+            snapshot.schemaId,
+            snapshot,
+            hash,
+            coveredRecordTypesHash,
+            msg.sender,
+            authorizationClass
         );
     }
 
-    function lockCollectionRecord(uint256 collectionId, bytes32 recordType)
-        external
-        override
-        FunctionAdminRequired(this.lockCollectionRecord.selector)
-    {
+    function lockCollectionRecord(uint256 collectionId, bytes32 recordType) external override {
         if (recordType == bytes32(0)) {
             revert InvalidMetadataRecord(recordType, bytes32(0), bytes32(0));
         }
+        uint8 authorizationClass = _isReservedLock(recordType)
+            ? _requireFunctionAdmin(this.lockCollectionRecord.selector)
+            : _requireRecordWriter(collectionId, bytes32(collectionId), recordType);
         _requireLockMutationAllowed(collectionId, recordType);
         _rememberRecordType(collectionId, recordType);
         CollectionMetadataRecordView storage current = _records[collectionId][recordType];
         current.recordType = recordType;
         current.locked = true;
-        emit CollectionMetadataLockedEvent(collectionId, recordType, msg.sender);
+        current.authorizationClass = authorizationClass;
+        emit CollectionMetadataLockedEvent(collectionId, recordType, msg.sender, authorizationClass);
     }
 
     function collectionRecord(uint256 collectionId, bytes32 recordType)
@@ -214,6 +230,15 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         returns (bytes32)
     {
         return _snapshotHashes[collectionId][snapshotId];
+    }
+
+    function snapshotCoveredRecordTypesHash(uint256 collectionId, bytes32 snapshotId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _snapshotCoveredRecordTypesHashes[collectionId][snapshotId];
     }
 
     function collectionSnapshot(uint256 collectionId, bytes32 snapshotId)
@@ -284,8 +309,10 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         bool checkRevision,
         uint64 expectedRevision
     ) private returns (bytes32 recordHash) {
-        _requireMutableCollection(collectionId, record.recordType);
         _validateRecord(record);
+        uint8 authorizationClass =
+            _requireRecordWriter(collectionId, bytes32(collectionId), record.recordType);
+        _requireMutableCollection(collectionId, record.recordType);
 
         CollectionMetadataRecordView storage current = _records[collectionId][record.recordType];
         if (checkRevision && current.revision != expectedRevision) {
@@ -309,7 +336,8 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
             effectiveAt: record.effectiveAt,
             writer: msg.sender,
             updatedAt: uint64(block.timestamp),
-            locked: false
+            locked: false,
+            authorizationClass: authorizationClass
         });
         emit CollectionMetadataRecordSet(
             collectionId,
@@ -318,7 +346,8 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
             record,
             recordHash,
             nextRevision,
-            msg.sender
+            msg.sender,
+            authorizationClass
         );
     }
 
@@ -328,7 +357,9 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         if (IStreamCore(streamCore).collectionFreezeStatus(collectionId)) {
             revert CollectionMetadataFrozen(collectionId);
         }
-        _requireUnlocked(collectionId, _LOCK_METADATA_ALL);
+        if (!_recordFamilyRegistry.recordTypeRejectsAdminAuthority(recordType)) {
+            _requireUnlocked(collectionId, _LOCK_METADATA_ALL);
+        }
         if (recordType != bytes32(0)) _requireUnlocked(collectionId, recordType);
     }
 
@@ -438,15 +469,62 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
     function _deriveCollectionSnapshotHash(
         uint256 collectionId,
         bytes32 snapshotId,
+        bytes32 coveredRecordTypesHash,
         CollectionMetadataRecord calldata snapshot
     ) private view returns (bytes32) {
         return keccak256(
             abi.encode(
                 _SNAPSHOT_HASH_DOMAIN,
                 snapshotId,
+                coveredRecordTypesHash,
                 _deriveCollectionRecordHash(collectionId, snapshot, 1)
             )
         );
+    }
+
+    function _requireRecordWriter(uint256 collectionId, bytes32 subjectId, bytes32 recordType)
+        private
+        view
+        returns (uint8 authorizationClass)
+    {
+        return _recordFamilyRegistry.requireRecordWriter(
+            collectionId, subjectId, recordType, msg.sender, bytes("")
+        );
+    }
+
+    function _requireSnapshotFamilyIntersection(
+        uint256 collectionId,
+        bytes32 snapshotId,
+        bytes32[] calldata coveredRecordTypes
+    ) private returns (bytes32 coveredRecordTypesHash) {
+        uint256 count = coveredRecordTypes.length;
+        if (count == 0) revert InvalidSnapshotFamilySet(0, bytes32(0));
+        bytes32 previous;
+        for (uint256 i = 0; i < count; i++) {
+            bytes32 recordType = coveredRecordTypes[i];
+            if (recordType == bytes32(0) || (i != 0 && recordType <= previous)) {
+                revert InvalidSnapshotFamilySet(i, recordType);
+            }
+            uint8 authorizationClass =
+                _requireRecordWriter(collectionId, bytes32(collectionId), recordType);
+            emit CollectionMetadataSnapshotFamilyAuthorized(
+                collectionId, snapshotId, recordType, authorizationClass, msg.sender
+            );
+            previous = recordType;
+        }
+        return keccak256(abi.encode(coveredRecordTypes));
+    }
+
+    function _requireFunctionAdmin(bytes4 selector)
+        private
+        view
+        returns (uint8 authorizationClass)
+    {
+        if (_adminsContract.retrieveGlobalAdmin(msg.sender)) {
+            return 8;
+        }
+        if (_adminsContract.retrieveFunctionAdmin(msg.sender, address(this), selector)) return 7;
+        revert FunctionAdminUnauthorized(msg.sender, selector);
     }
 
     function _requireMetadataMutationNotPaused() private view {
