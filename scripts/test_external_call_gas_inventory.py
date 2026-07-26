@@ -47,40 +47,90 @@ def base_inventory(
 def open_call(
     expression: str,
     *,
+    path: str = "smart-contracts/Fixture.sol",
     site: str = "f",
     kind: str = "call-option",
     operation: str = "external-call",
     count: int = 1,
+    path_class: str = "user-path",
+    lane: str = "minting",
 ) -> dict[str, Any]:
     return {
-        "path": "smart-contracts/Fixture.sol",
+        "path": path,
         "site": site,
         "kind": kind,
         "operation": operation,
         "expression": expression,
         "expected_count": count,
-        "path_class": "user-path",
-        "lane": "minting",
+        "path_class": path_class,
+        "lane": lane,
         "issue": "#669",
         "disposition": "open-remediation-required",
     }
 
 
-def literal_declaration(identifier: str, value: int) -> dict[str, Any]:
+def literal_declaration(
+    identifier: str,
+    value: int,
+    *,
+    path: str = "smart-contracts/Fixture.sol",
+    lane: str = "minting",
+) -> dict[str, Any]:
     return {
-        "path": "smart-contracts/Fixture.sol",
+        "path": path,
         "identifier": identifier,
         "value": value,
         "expected_count": 1,
         "path_class": "user-path",
-        "lane": "minting",
+        "lane": lane,
         "issue": "#669",
         "disposition": "open-remediation-required",
     }
 
 
-def write_tree(root: Path, source: str, inventory: dict[str, Any]) -> None:
-    source_path = root / "smart-contracts/Fixture.sol"
+def artist_authority_call(**overrides: Any) -> dict[str, Any]:
+    row = {
+        "path": "smart-contracts/StreamArtistRegistry.sol",
+        "site": "_verifySignature",
+        "kind": "yul-call",
+        "operation": "staticcall",
+        "expression": "gasCap",
+        "expected_count": 1,
+        "path_class": "user-path",
+        "lane": "artist-authority",
+        "issue": "#669",
+        "disposition": "open-remediation-required",
+    }
+    row.update(overrides)
+    return row
+
+
+def artist_authority_source(*, calls: int = 1) -> str:
+    call_lines = "\n".join(
+        "pop(staticcall(gasCap, artist, 0, 0, 0, 0))" for _ in range(calls)
+    )
+    return f"""
+        contract StreamArtistRegistry {{
+            function _verifySignature(
+                address artist,
+                uint256 gasCap
+            ) private view {{
+                assembly {{
+                    {call_lines}
+                }}
+            }}
+        }}
+    """
+
+
+def write_tree(
+    root: Path,
+    source: str,
+    inventory: dict[str, Any],
+    *,
+    source_path: str = "smart-contracts/Fixture.sol",
+) -> None:
+    source_path = root / source_path
     source_path.parent.mkdir(parents=True, exist_ok=True)
     source_path.write_text(source, encoding="utf-8", newline="\n")
     write_json(root / checker.DEFAULT_INVENTORY, inventory)
@@ -360,6 +410,183 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.GasInventoryError, "unexpected call-gas expression"
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_exact_reserved_artist_authority_call_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(),
+                base_inventory(calls=[artist_authority_call()]),
+                source_path="smart-contracts/StreamArtistRegistry.sol",
+            )
+
+            checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_reserved_artist_authority_call_fields_are_exact(self) -> None:
+        cases = {
+            "path": "smart-contracts/OtherArtistRegistry.sol",
+            "site": "verifySignature",
+            "kind": "call-option",
+            "operation": "call",
+            "expression": "verifyGas",
+            "expected_count": 2,
+            "path_class": "live-control-plane",
+            "lane": "minting",
+            "issue": "#670",
+            "disposition": "accepted-risk",
+        }
+        for field, replacement in cases.items():
+            with (
+                self.subTest(field=field),
+                tempfile.TemporaryDirectory() as temp_dir,
+            ):
+                root = Path(temp_dir)
+                write_tree(
+                    root,
+                    artist_authority_source(),
+                    base_inventory(
+                        calls=[artist_authority_call(**{field: replacement})]
+                    ),
+                    source_path="smart-contracts/StreamArtistRegistry.sol",
+                )
+
+                with self.assertRaisesRegex(
+                    checker.GasInventoryError,
+                    rf"reserved for the exact artist-authority call row; "
+                    rf"drifted fields: {field}",
+                ):
+                    checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_artist_authority_lane_on_another_call_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                """
+                contract Fixture {
+                    function f(address target, uint256 gasCap) external view {
+                        assembly {
+                            pop(staticcall(gasCap, target, 0, 0, 0, 0))
+                        }
+                    }
+                }
+                """,
+                base_inventory(
+                    calls=[
+                        open_call(
+                            "gasCap",
+                            kind="yul-call",
+                            operation="staticcall",
+                            lane="artist-authority",
+                        )
+                    ]
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "reserved for the exact artist-authority call row",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_artist_authority_lane_is_prohibited_on_literal_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                "contract Fixture { uint256 constant READ_GAS_LIMIT = 30_000; }",
+                base_inventory(
+                    declarations=[
+                        literal_declaration(
+                            "READ_GAS_LIMIT",
+                            30_000,
+                            lane="artist-authority",
+                        )
+                    ]
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                r"open_literal_gas_declarations\[0\]\.lane must be one of",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_artist_authority_lane_typo_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                "contract Fixture {}",
+                base_inventory(
+                    calls=[
+                        open_call(
+                            "gasCap",
+                            lane="artist_authority",
+                        )
+                    ]
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                r"open_call_gas_expressions\[0\]\.lane must be one of",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_artist_authority_source_without_inventory_row_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(),
+                base_inventory(),
+                source_path="smart-contracts/StreamArtistRegistry.sol",
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "unexpected call-gas expression",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_second_artist_authority_call_fails_exact_count(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(calls=2),
+                base_inventory(calls=[artist_authority_call()]),
+                source_path="smart-contracts/StreamArtistRegistry.sol",
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "unexpected call-gas expression",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_duplicate_artist_authority_inventory_row_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(),
+                base_inventory(
+                    calls=[
+                        artist_authority_call(),
+                        artist_authority_call(),
+                    ]
+                ),
+                source_path="smart-contracts/StreamArtistRegistry.sol",
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "duplicate call inventory row",
             ):
                 checker.check_repository(root, checker.DEFAULT_INVENTORY)
 

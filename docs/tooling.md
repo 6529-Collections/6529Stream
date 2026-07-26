@@ -1578,7 +1578,17 @@ The canonical inventory is
 Its finality, minting, and revenue rows are temporary open remediation work
 tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
-inventory is strict duplicate-free I-JSON: object keys are exact, floats,
+call-row taxonomy also reserves `artist-authority` for one exact future
+`StreamArtistRegistry._verifySignature` Yul `staticcall`: expression `gasCap`,
+count `1`, `user-path`, issue `#669`, and
+`open-remediation-required`. The source and row remain absent until issue #670
+lands them together. Either the reserved path or lane activates exact-field
+validation, while literal-declaration rows cannot use the
+`artist-authority` lane. This reservation does not prove GGP provenance,
+candidate deployment binding, a safe parent reserve, or ERC-1271
+gas-exhaustion behavior; those remain required #669/#684 remediation and
+evidence. The inventory is strict duplicate-free I-JSON: object keys are
+exact, floats,
 non-finite values, unsafe integers, and Unicode surrogates fail closed. The
 v1 `explicit_probe_call_gas_expressions` member is retained for schema
 compatibility but must be exactly empty; the checker rejects every attempted
