@@ -1,5 +1,108 @@
 # Run Log
 
+## 2026-07-26
+
+- Received an explicit shipping mandate to resume immediately and own issues
+  `#672`, `#671`, and `#654` through review-ready PRs, leaving merge authority
+  with the coordinator.
+- Deleted the obsolete ten-minute `#672` release-wait heartbeat.
+- Verified the preserved #688 worktree was clean, fetched `origin`, and found
+  current `origin/main` still at merged #688 squash
+  `063605ea4fe906b229fd6ae51294fe96f384e698`.
+- Created `codex/issue-672-post-entropy-completion-gas` from that exact main.
+- Re-read the autonomous-manager and PR skills, live issue bodies/comments,
+  roadmap/backlog/maturity/tooling authority, ADR 0007, ADR 0010, ADR 0017,
+  the entropy-registration spec, target architecture, conformance matrix, and
+  current Core mint path.
+- Confirmed current `StreamCore` has no entropy-coordinator registration seam:
+  prepared mint still `_safeMint`s and then calls the legacy randomizer.
+  Therefore #672 will produce a zero-Core-delta production-profile target
+  fixture, exact EIP-150-plus-tail planning terms, pure predicate boundaries,
+  a separate high-parent-gas full-stipend path, rollback tests, and
+  checksum-bound planning evidence. The complete low-level-call boundary,
+  exact forwarding proof, real Core enforcement, and exact remeasurement
+  remain in #654.
+- Read PR #696's exact 40-path #690 scope. It overlaps changelog, tooling,
+  backlog, release generators, and the canonical release tail but not the
+  focused #672 Solidity target fixture or entropy/conformance spec homes.
+  Continue useful non-overlapping work now; rebase merged #690 before shared
+  release-input wiring, regeneration, or publication.
+- Confirmed PR #696 merged as
+  `e73d4b9cb15c3c868a76b99aa3f438d4e9e75cb8`, stashed the complete #672
+  working tree by name, rebased to that exact `origin/main`, restored it
+  without conflicts, and dropped the temporary stash.
+- Added the zero-Core-delta #672 target fixture, production-profile via-IR
+  snapshot, generator, checker, hostile tests, and normative entropy/target/
+  conformance mirrors. The measured first-mint EOA post-coordinator tail is
+  128,886 gas; the pinned 25% margin and 1,000-gas rounding derive a 162,000-gas
+  reserve.
+- Focused checks pass: 10/10 Foundry under via IR, 10/10 under the default
+  profile, 11/11 Python hostile evidence tests, direct checker, generated
+  artifact currentness, and the dedicated snapshot check. Coordinator and
+  receiver failure tests prove identity/metadata/supply/ownership rollback;
+  contract-recipient callback gas remains explicitly outside the fixed EOA
+  guarantee.
+- Reconciled the #672 gate into merged #690 shared inputs: Make/Windows/Linux
+  aggregate checks, changelog, tooling, roadmap/backlog, six exact checksum
+  roots, and independent verifier coverage policy. Canonical release
+  regeneration and the full Windows gate remain pending.
+- Corrected the admission-boundary evidence after independent review: the
+  128,886-gas fixture is a planning measurement for the post-coordinator EOA
+  tail, not an as-built proof of the complete ABI/setup/CALL admission
+  boundary. Expanded the fail-closed evidence checker to 26 hostile tests and
+  kept exact call-boundary proof/enforcement in #654.
+- Preserved the frozen #672 source bytes while reconciling shared-tail merges
+  `#609`, `#694`, `#691`, and `#693`. The exact local freeze base is
+  `6b5d0ba3eed4758c4e3521470233266540c95a45`; only generated release-tail
+  conflicts were resolved from upstream and regenerated in canonical order.
+- Final-base focused validation on that snapshot passed: 10/10 via-IR Foundry
+  tests plus the exact 128,886-gas snapshot, 26/26 evidence tests, 112/112
+  checksum tests, 114/114 verifier tests, offline verification at 417/417,
+  16/16 Markdown tests, 6/6 changelog tests, Python compilation, and
+  CRLF-aware diff hygiene. StreamCore remained unchanged at the transitional
+  24,152-byte runtime.
+- Captured two later-base authoritative Windows gates to terminal: exit `0` in
+  3,237.757 seconds on
+  `29d96466e49f7c72c02234c9b271a1fa2828db88`, and exit `0` in 3,268.179
+  seconds on `6b5d0ba3eed4758c4e3521470233266540c95a45`. Both are diagnostic because
+  the shared tail advanced after their base was selected.
+- Current remote main is
+  `018c8788750980e143c38ace0666684bf641ec4f` after merged `#700` and
+  concrete `#690` / PR `#699`; PR `#701` is the sole open shared-tail PR.
+  Freeze the reviewed #672 slice locally, wait only for #701 to merge, then
+  reconcile once, regenerate once, and run the single publication-authorizing
+  Windows gate.
+- Issue #688 is reopened because Proposed ADR 0018 did not implement its
+  atomic operation-root source cutover. After #672 merges, prioritize that
+  Solidity/test/as-built implementation before #671 and #654 so #670 can rely
+  on prepared operation identity and `isManagerOperationRootUsed`.
+- PR `#701` merged at
+  `513bd7e079eafe109df6ae1ae21bfbca6fec6786`. Rebased the frozen #672 commit
+  exactly once onto that final serialization point, preserved every reviewed
+  #672 source hash, retained zero `StreamCore` diff, and reconciled the
+  combined release-tool policy to 260 configured paths and 428 records.
+- Final-base focused validation passed: 26/26 Python evidence tests, direct
+  checker, 10/10 via-IR Foundry tests, exact 128,886-gas snapshot, 29/29 risk
+  tests, 10/10 release-note tests, 39/39 manifest tests, 9/9 bytecode-proof
+  tests, 21/21 lockfile tests, 113/113 checksum tests, 114/114 verifier tests,
+  428/428 offline records, 43/43 release-mode tests, 14/14 signed-tag tests,
+  16/16 Markdown tests, 6/6 changelog tests, Python compilation, and
+  `codex-diff-check`.
+- Direct final-base size validation passed the documented build sequence: 53
+  canonical isolated targets, 36/36 release-build tests, 13/13 size-budget
+  tests, and 15/15 Core-bytecode policy tests. `StreamCore` remains exactly
+  24,152 bytes with 424 bytes current margin and no #672 source or runtime
+  delta; the complete target remains at most 22,576 bytes and the objective at
+  most 22,184 bytes.
+- The one final-base publication-authorizing Windows `scripts/check.ps1` tree
+  ran from `2026-07-26T20:07:36.9901476Z` through
+  `2026-07-26T21:03:10.6197954Z` and exited `0` in 3,333.63 seconds. It
+  completed the full Foundry suite at 1,099/1,099, the #672 via-IR suite at
+  10/10, checksums at 113/113, the verifier at 114/114 with 428/428 records,
+  and every deployment rehearsal without a duplicate wrapper or compiler
+  tree. The branch is ready for final workstream-only checks, commit, push,
+  draft PR publication, and CI/CodeRabbit review.
+
 ## 2026-07-24
 
 - Created the unbudgeted long-running goal for `#688 -> #672 -> #654`.

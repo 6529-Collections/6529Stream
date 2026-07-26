@@ -424,7 +424,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "8e562027c21cf92ae6d9a85cc6cbcbf92723a2f3bf83464eff60b364c9cdd7b0",
+        "3c4f55cca49507fb722759a9a5bc348277241b01052dc9ab5891cacaaaeb4c95",
         169_071,
     ),
 }
@@ -472,6 +472,9 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_risk_register.py"),
     Path("scripts/check_record_family_authorization.py"),
     Path("scripts/test_record_family_authorization.py"),
+    Path("scripts/generate_post_entropy_completion_gas.py"),
+    Path("scripts/check_post_entropy_completion_gas.py"),
+    Path("scripts/test_post_entropy_completion_gas.py"),
     *RELEASE_TOOL_SEMANTIC_SOURCE_PATHS,
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/test_release_evidence_issue_links.py"),
@@ -482,6 +485,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/governed-parameter-inventory.json"),
     Path("release-artifacts/record-family-authorization-inventory.json"),
     Path("release-artifacts/record-family-authorization-source-catalog.json"),
+    Path("release-artifacts/post-entropy-mint-completion-gas.json"),
     RELEASE_TOOL_CALL_POLICY_PATH,
     Path("release-artifacts/stream-core-permanent-interface.json"),
     Path("release-artifacts/system-manifest-payload-vector.json"),
@@ -600,6 +604,8 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/randomizer-operations"),
     Path("test/fixtures/drop-authorization"),
     Path("test/fixtures/warning-dispositions"),
+    Path("test/StreamPostEntropyCompletionGas.t.sol"),
+    Path("test/helpers/StreamPostEntropyCompletionGasHarness.sol"),
     Path("CHANGELOG.md"),
     Path("README.md"),
     Path("slither.config.json"),

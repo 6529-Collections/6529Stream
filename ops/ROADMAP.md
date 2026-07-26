@@ -134,8 +134,13 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   `N` token operation IDs and the atomic
   removal proof for Core lifetime replay storage; issue
   [#672](https://github.com/6529-Collections/6529Stream/issues/672) then proves
-  and enforces post-entropy completion gas; only that merged predecessor state
-  may feed #654's complete-target measurement. The real restricted Core
+  and enforces post-entropy completion gas through a zero-Core-delta,
+  checksum-bound target fixture with an EIP-150-plus-tail planning predicate,
+  a separate high-parent-gas full-stipend path, rollback, and
+  EOA-versus-callback boundaries; only that merged predecessor state may feed
+  #654's complete low-level-call admission proof, actual-seam implementation,
+  and complete-target remeasurement.
+  The real restricted Core
   ERC-4906 single/batch refresh emitters required by #667 also compile in the
   #654 stage; their already-pinned selectors are not evidence that current Core
   source implements them, and their runtime cost must be present before the

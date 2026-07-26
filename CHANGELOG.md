@@ -121,6 +121,22 @@ the release policy in `docs/release-policy.md`.
   checksums now bind the shared policy. This tooling-only change does not add
   retained non-local evidence or change public-beta or production readiness;
   issue #609 tracks the work.
+- Added the zero-`StreamCore`-delta planning and measurement slice for issue
+  #672. A dedicated production-profile via-IR target fixture measures the
+  first-mint, all-zero-to-nonzero EOA-recipient post-entropy completion tail at
+  128,886 gas and derives a 162,000-gas parent reserve using a 25% margin
+  rounded up to the next 1,000 gas. Pure below/at/above planning-predicate
+  boundaries, a separate high-parent-gas full-stipend path, coordinator and
+  receiver rollback, and the unbounded contract-receiver callback budget are
+  covered by focused Solidity and hostile evidence tests. The predicate is not
+  an exact as-built threshold: #654 must account for ABI setup, memory
+  expansion, low-level `CALL` costs, and intervening source work and prove
+  exact stipend forwarding at the candidate-instance boundary. The checksum-bound
+  artifact, snapshot, generator/checker/tests, aggregate gates, and offline
+  verifier remain planning-only: current `StreamCore` stays at the transitional
+  24,152-byte runtime, and #654 must implement and remeasure the actual seam
+  while delivering the complete target at or below 22,576 bytes (objective
+  22,184). No production-readiness or #684 measurement claim is made.
 - Added the first fail-closed planning slice for record-family authorization
   under issue #690. A schema-validated inventory now pins the five as-built
   collection-metadata and preservation mutation selectors, eight authorization

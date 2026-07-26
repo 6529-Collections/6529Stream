@@ -1867,8 +1867,13 @@ Acceptance criteria:
    operation IDs, exact event joins, and whole-transaction rollback proof
    (#688).
 7. After #688 merges, prove and enforce the post-entropy completion tail gas
-   required by #672; only its merged predecessor state may be measured by
-   #654.
+   required by #672. The zero-Core-delta planning slice must bind the via-IR
+   first-mint EOA target fixture, pure EIP-150-plus-tail below/at/above policy
+   predicates, a separate high-parent-gas full-stipend path, callback
+   separation, and atomic rollback. Only that merged evidence may be consumed
+   by #654, which owns the complete low-level-call admission measurement and
+   enforcement, actual Core seam, exact-forwarding proof, and as-built
+   remeasurement.
 8. Implement the already-targeted restricted
    `emitMetadataUpdate(uint256,bytes32)` and
    `emitBatchMetadataUpdate(uint256,uint256,bytes32)` Core helpers needed by
