@@ -41,6 +41,8 @@ adapter implementation.
 - payer-scoped replay and revocation views
 - canonical EOA and bounded ERC-1271 signature behavior
 - payer, asset, amount, sale reference, policy hash, nonce, and deadline binding
+- exact ADR-0018 operation-root plus current/bound mint-policy propagation,
+  including current-only consent, module, gate, counter, and cap enforcement
 - checks-effects-interactions before every allowance pull
 - exact token deltas, active asset policy, accounting, and atomic rollback
 - replay, expiry, revocation, substitution, signer separation, malformed

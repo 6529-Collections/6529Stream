@@ -140,6 +140,8 @@ struct ERC20SettlementCandidate {
     address asset;
     uint8 orchestrationOrder;
     bytes32 operationIdentityCommitment;
+    bytes32 currentPolicyHash;
+    bytes32 boundPolicyHash;
     bytes32 saleExecutionHash;
 }
 
@@ -154,6 +156,8 @@ struct PrimarySettlementResult {
     bytes32 executionId;
     bool escrowed;
     bytes32 operationIdentityCommitment;
+    bytes32 currentPolicyHash;
+    bytes32 boundPolicyHash;
 }
 ```
 
@@ -174,6 +178,8 @@ keccak256(
         candidate.asset,
         candidate.orchestrationOrder,
         candidate.operationIdentityCommitment,
+        candidate.currentPolicyHash,
+        candidate.boundPolicyHash,
         candidate.saleExecutionHash
     )
 )
@@ -187,13 +193,44 @@ STREAM_ERC20_SETTLEMENT_CANDIDATE_V1 =
 ```
 
 `orchestrationOrder` is one of `PRE_REVENUE_SINGLE_STEP` or `PREPARED_MINT`.
-For `PRE_REVENUE_SINGLE_STEP`, `operationIdentityCommitment` is zero. For
-`PREPARED_MINT`, it binds the exact final operation identity defined by ADR
-0018 / issue #688. This ADR deliberately does not define that preimage or
-choose between an operation root and per-token operation IDs. The placeholder
-field name and shape remain provisional until ADR 0018 is accepted; before ADR
-0019 can be frozen, this field must be replaced with or derived from the exact
-#688-owned typed identity without lossy re-encoding.
+For both orders, `operationIdentityCommitment` is the exact nonzero
+ADR-0018 `operationRoot`. `PRE_REVENUE_SINGLE_STEP` takes it from the
+manager-owned preview and compares it with the manager's execution return;
+`PREPARED_MINT` carries the root established by the manager/ledger prepared
+path. A token-scoped settlement additionally carries the corresponding exact
+per-token `operationId` through its typed callback, settlement, result, and
+event surfaces. This ADR does not redefine either preimage or create a parallel
+replay namespace. The provisional field name remains subject to the final ABI
+freeze, but its value cannot be zero, locally re-hashed, or lossily re-encoded.
+
+`currentPolicyHash` and `boundPolicyHash` import ADR 0018's policy
+identity boundary without changing its ownership:
+
+- `boundPolicyHash` is exactly `MintBatch.expectedPolicyHash`, accepted for
+  both configured and ungated paths only when it equals the current registered
+  mint-policy hash or the exact unexpired immediate predecessor with adjacent
+  revision. A second rotation invalidates the older predecessor.
+- `currentPolicyHash` is the live hash independently recomputed by the
+  manager and loaded by the ledger for the exact manager, collection, and
+  phase. It alone controls artist consent, live mint modules and gate
+  evaluation, counter policies, caps, and increments.
+- The `operationRoot` commits `currentPolicyHash` and then
+  `boundPolicyHash`. The manager preview returns the root and token
+  operation IDs, not either hash separately; the candidate commits the two
+  exact identities used by that preview and execution.
+- A predecessor-bound request authorizes continuity only. It does not revive
+  predecessor economics or consent, bypass current modules or gates, weaken
+  current caps, revive a deprecated sale/payment adapter, or substitute for
+  the independently current approved-asset and primary-revenue policies.
+
+These mint-policy fields are distinct from
+`sale.expectedPrimaryPolicyHash`, which remains the exact primary-revenue
+policy identity. No participant may substitute one policy namespace for the
+other. The candidate fields are comparison evidence, not caller authority:
+the manager still recomputes current policy, the ledger still loads it from the
+registered manager/collection/phase tuple, and the sale adapter rejects any
+preview or execution whose root and returned identities do not match the
+candidate.
 
 The complete `PrimarySale` tuple is part of the commitment. The exact
 sale-adapter address, authenticated top-level executor, sale reference, payer,
@@ -201,8 +238,8 @@ asset, charged amount, expected primary-policy hash, policy mode,
 collection/token context, revenue class, poster, beneficiary, adapter-local
 sale-program nonce, per-execution identity and nonce, authority mode, signed
 authorization digest or its required zero value, paid-mint order, final #688
-operation identity, and callback payload are therefore immutable throughout one
-operation.
+operation root, current and bound mint-policy identities, and callback payload
+are therefore immutable throughout one operation.
 
 `sale.settlementId` and `sale.saleNonce` identify the durable sale program.
 They are not a purchase replay key and are never consumed or terminally closed
@@ -241,6 +278,8 @@ keccak256(
         candidate.executionBinding.executionNonce,
         candidate.executionBinding.authorityMode,
         candidate.executionBinding.saleAuthorizationDigest,
+        candidate.currentPolicyHash,
+        candidate.boundPolicyHash,
         candidate.operationIdentityCommitment
     )
 )
@@ -326,10 +365,11 @@ function executeERC20PreparedMint(
 ```
 
 The required magic is the selector of the exact function called. The first
-selector requires `orchestrationOrder == PRE_REVENUE_SINGLE_STEP` and a zero
-#688 operation identity. The second requires
-`orchestrationOrder == PREPARED_MINT` and the exact nonzero operation identity
-defined by ADR 0018.
+selector requires `orchestrationOrder == PRE_REVENUE_SINGLE_STEP` and the exact
+nonzero operation root returned by the ADR-0018 manager preview. The second
+requires `orchestrationOrder == PREPARED_MINT` and the exact nonzero operation
+root established by the ADR-0018 prepared path. Both require the root's exact
+current/bound mint-policy identities.
 
 The target must have the sale-adapter module type, expected interface, and
 matching runtime code registered under `[SSA-REGISTRY]`. Registry lifecycle is
@@ -526,7 +566,8 @@ token, or receiver call, it atomically:
 1. creates an execution record keyed by
    `candidate.executionBinding.executionId`, binding the durable sale ID,
    execution nonce, payer, executor, authority mode, candidate commitment,
-   operation-identity commitment, and the mode-correct authorization digest;
+   operation root, current and bound mint-policy identities, and the
+   mode-correct authorization digest;
 2. marks only that execution record `SETTLEMENT_IN_PROGRESS`;
 3. for `SIGNED_SALE_AUTHORIZATION` only, consumes the exact verified
    authorization digest in its append-only adapter-scoped store and emits the
@@ -541,14 +582,17 @@ event SaleExecutionStatusChanged(
     uint16 schemaVersion,
     bytes32 indexed saleId,
     bytes32 indexed executionId,
+    bytes32 indexed operationRoot,
+    bytes32 currentPolicyHash,
+    bytes32 boundPolicyHash,
     uint8 previousStatus,
     uint8 newStatus,
     bytes32 reasonHash
 );
 ```
 
-with `(1, saleId, executionId, UNSET, SETTLEMENT_IN_PROGRESS,
-candidateCommitment)`.
+with `(1, saleId, executionId, operationRoot, currentPolicyHash,
+boundPolicyHash, UNSET, SETTLEMENT_IN_PROGRESS, candidateCommitment)`.
 
 The durable sale program remains active after this effect. Its `saleId`,
 sale-program nonce, immutable configuration, lifecycle binding, and ordinary
@@ -584,11 +628,12 @@ Replay or reentry fails at this boundary before another downstream call. Only
 after the exact contract-`9` result and the required mint completion have both
 succeeded may the adapter change that execution record
 `SETTLEMENT_IN_PROGRESS -> SETTLED` and emit
-`SaleExecutionStatusChanged(1, saleId, executionId,
-SETTLEMENT_IN_PROGRESS, SETTLED, settlementKey)`. It does not emit a terminal
-`SaleStatusChanged` for the durable program. Any downstream revert removes the
-execution record, restores any signed-authorization consumption and
-sale-specific counters, and rolls back every execution/authorization event.
+`SaleExecutionStatusChanged(1, saleId, executionId, operationRoot,
+currentPolicyHash, boundPolicyHash, SETTLEMENT_IN_PROGRESS, SETTLED,
+settlementKey)`. It does not emit a terminal `SaleStatusChanged` for the durable
+program. Any downstream revert removes the execution record, restores any
+signed-authorization consumption and sale-specific counters, and rolls back
+every execution/authorization event.
 
 The two callback orderings are distinct:
 
@@ -596,7 +641,8 @@ The two callback orderings are distinct:
 PRE_REVENUE_SINGLE_STEP
   -> validate sale state, signed-or-public authority branch, price, payer,
      authenticated top-level executor, asset, amount, recipients, policy
-     hashes, unique execution identity/nonce, and deadline
+     hashes, exact previewed operation root, current/bound mint-policy identity,
+     unique execution identity/nonce, and deadline
   -> create and mark only the unique execution SETTLEMENT_IN_PROGRESS;
      consume/emit SaleAuthorization only on the signed branch
   -> call contract 9 directly with the calling payment adapter and candidate
@@ -610,7 +656,7 @@ PRE_REVENUE_SINGLE_STEP
 
 PREPARED_MINT
   -> validate the same sale/payment/executor/authority/execution facts and exact
-     ADR-0018 operation identity
+     ADR-0018 operation root plus current/bound mint-policy identity
   -> create and mark only the unique execution SETTLEMENT_IN_PROGRESS;
      consume/emit SaleAuthorization only on the signed branch
   -> call manager and ledger
@@ -634,10 +680,13 @@ funding callback, a returned settlement key different from the key accepted
 during funding, or a result that differs from contract `9`'s recorded result
 for that key.
 
-The seam introduces no `operationRoot`, per-token `operationId`, mint-ledger
-replay key, or prepared-mint replay rule. It imports and binds the final
+The seam introduces no new `operationRoot`, per-token `operationId`,
+mint-ledger replay key, or prepared-mint replay rule. It imports and binds the
 ADR-0018 identity byte-for-byte; all derivation and replay semantics remain
-owned by issue #688 and the mint-policy specification.
+owned by issue #688 and the mint-policy specification. It also cannot narrow
+ADR 0018 into an ungated-current-only rule: configured and ungated settlement
+paths accept the same current-or-valid-immediate-predecessor bound identity,
+while all live consent, module, gate, counter, and cap decisions remain current.
 
 ### 3. Contract 9 Authenticates Replaceable Contract-20 Instances
 
@@ -699,8 +748,9 @@ the new entry. Contract `9`:
 1. validates the sale-adapter caller, payment adapter, complete candidate, and
    active asset;
 2. rejects a consumed settlement key;
-3. resolves or materializes the exact primary assignment and enforces the
-   expected policy hash/mode;
+3. verifies the candidate's operation root plus current/bound mint-policy
+   identities, resolves or materializes the exact primary assignment, and
+   independently enforces the expected primary-revenue policy hash/mode;
 4. consumes the settlement key under checks-effects-interactions;
 5. snapshots its own asset balance;
 6. requests exactly the committed funds from the authenticated
@@ -760,14 +810,21 @@ Contract `9` independently verifies its snapshot around the funding callback,
 records `msg.sender` as the real settlement caller, and stores the exact
 `PrimarySettlementResult` under the settlement key so contract `20` can compare
 the sale callback's returned tuple after control returns. The result's
-`executor` and `executionId` must equal the candidate. The target
-`PrimaryRevenueSettlementContext` event adds `address executor` and
-`bytes32 executionId` immediately after `address settlementCaller`; those
-fields and the result view make the authenticated top-level initiator and
-per-purchase identity reconstructable without mislabeling contract `20`, the
-sale adapter, or the durable sale program. The exact event selector,
-schema-version treatment, and updated fixed returndata length remain part of
-the provisional freeze/golden work.
+`executor`, `executionId`, `operationIdentityCommitment`,
+`currentPolicyHash`, and `boundPolicyHash` must equal the candidate.
+The target `PrimaryRevenueSettlementContext` event adds `address executor`,
+`bytes32 executionId`, `bytes32 operationRoot`,
+`bytes32 currentPolicyHash`, and `bytes32 boundPolicyHash` immediately
+after `address settlementCaller`; those fields and the result view make the
+authenticated top-level initiator, per-purchase identity, live policy, and
+grace-bound request identity reconstructable without mislabeling contract `20`,
+the sale adapter, or the durable sale program. Central
+`MintBatchExecuted`/`MintLedgerOperationRootConsumed` evidence exposes the same
+current/bound pair. Authorization, nullifier, counter-consumption, and other
+subordinate consumption evidence carries `boundPolicyHash` and joins
+through `operationRoot`; it cannot present the predecessor as live economics or
+consent. The exact event selector, schema-version treatment, and updated fixed
+returndata length remain part of the provisional freeze/golden work.
 Contract `9` never initiates or performs a payer pull, and contract `20` never
 writes official-revenue or escrow accounting.
 
@@ -835,11 +892,14 @@ EIP-150 parent-gas precheck, reads the exact asset policy under that cap, and
 requires `ACTIVE`. A hard-coded cap, caller-supplied registry, cached success,
 or policy read from another deployment line is nonconformant.
 
-Contract `9` independently repeats the current-policy check before consuming
-the settlement key or requesting funds. The revenue escrow independently
-repeats it before accepting an ERC-20 credit. These are separate fail-closed
-checks; success at contract `20` cannot be inherited by contract `9` or the
-escrow.
+Contract `9` independently repeats the current approved-asset-policy check
+before consuming the settlement key or requesting funds. The revenue escrow
+independently repeats it before accepting an ERC-20 credit. These are separate
+fail-closed checks; success at contract `20` cannot be inherited by contract
+`9` or the escrow. They do not replace the separate mint-policy rule above:
+the accepted `boundPolicyHash` may be the live immediate predecessor, but
+the current mint policy alone supplies consent, module/gate behavior, counters,
+caps, and increments.
 
 Every hop has its own balance snapshots and exact-delta proof:
 
@@ -914,7 +974,8 @@ When the typed sale-adapter callback returns, contract `20` requires:
 - the exact order-specific magic;
 - exactly one completed funding callback;
 - the returned `candidateCommitment`, settlement key, execution ID, asset,
-  amount, executor, and operation identity equal the active context;
+  amount, executor, operation root, `currentPolicyHash`, and
+  `boundPolicyHash` equal the active context;
 - the full returned result equal contract `9`'s recorded result; and
 - contract `20` and contract `9` retain no balance from this operation.
 
@@ -1234,6 +1295,14 @@ complete #688 operation identity in:
 - split-wallet or escrow deposit/credit context; and
 - reconstructable official settlement events and result views.
 
+A frozen revision must carry the exact `operationRoot`,
+`currentPolicyHash`, and `boundPolicyHash` through every applicable
+surface above. It must preserve configured and ungated current-or-valid-
+immediate-predecessor acceptance, current-only consent/modules/gate/counter/cap
+evaluation, central current/bound evidence, and root-joined subordinate bound
+evidence. An ungated-current-only settlement branch or any treatment of the
+predecessor as live economics/consent is nonconformant.
+
 A bare `saleExecutionHash` is not sufficient for any participant required to
 reject an operation-identity mismatch. Contract `20`, the sale adapter,
 contract `9`, and the wallet/escrow route must each receive or derive the typed
@@ -1251,7 +1320,8 @@ The frozen revision must publish and golden-test:
   string preimages plus computed hashes;
 - the exact `SaleExecutionBinding` tuple, signed/public authority-mode numeric
   values, nonzero execution ID/nonce rules, atomic execution preimage,
-  canonical-`purchaseId` branch, and ADR-0018/revenue-key derivation;
+  current/bound mint-policy fields, canonical-`purchaseId` branch, and
+  ADR-0018/revenue-key derivation;
 - the active authorization context's exact top-level selector, funding mode,
   and typed permit-input hash, with mode/substitution negatives and separate
   direct, EIP-2612, and pinned-Permit2 funding vectors;
@@ -1274,8 +1344,9 @@ The frozen revision must publish and golden-test:
   `PrimaryRevenueSettlementContext` event ABI;
 - the adapter-owned `STREAM_ERC20_SALE_EXECUTION_V1` preimage, exact signed-only
   `SaleAuthorizationConsumed` and all-mode `SaleExecutionStatusChanged`
-  arguments, provisional execution-status numeric values, the five exact
-  sale-side errors, and execution-record transition order from `UNSET` through
+  operation-root/current-policy/bound-policy arguments, provisional
+  execution-status numeric values, the five exact sale-side errors, and
+  execution-record transition order from `UNSET` through
   `SETTLEMENT_IN_PROGRESS` to `SETTLED` without terminally closing the durable
   sale program;
 - the execution-data hash check before the first external read or call;
@@ -1407,6 +1478,17 @@ The implementation PRs must prove:
 - replayed, revoked, expired, wrong-chain, wrong-verifier, wrong-payer,
   wrong-asset, wrong-sale, wrong-policy, and over-cap intents fail without
   lasting state or balance effects;
+- configured and ungated paths accept `boundPolicyHash` only as the current
+  hash or one live immediate predecessor; zero, expired, non-immediate,
+  second-rotation-invalidated, gate-mismatched, and substituted hashes fail,
+  including one second before, exactly at, and one second after the grace
+  deadline;
+- predecessor-bound execution still uses current artist consent, modules, gate
+  results, counter policies, caps, and increments. Preview/execution rotation,
+  substitution, omission, and replay vectors prove that the operation root,
+  sale execution record, settlement result, and central events expose the same
+  current/bound pair, while subordinate consumption facts expose the bound hash
+  and join through the root;
 - EOA zero recovery, high-`s`, bad-`v`, wrong signer, signer separation,
   EIP-7702 observation, maximum supported ERC-1271 wallet classes, malformed
   return, oversized return, wrong magic, revert, and gas exhaustion;

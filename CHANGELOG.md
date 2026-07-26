@@ -7,6 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added proposed ADR 0019 for issue #664's payer-bound ERC-20 settlement
+  orchestration. The provisional boundary separates contract `20` payer
+  authorization/funding from sale-adapter authority and contract `9`
+  revenue/escrow accounting, pins two typed paid-mint orders with atomic
+  rollback, and imports ADR 0018's exact operation-root policy identity:
+  configured and ungated paths accept the current or one valid immediate
+  predecessor as the bound identity while current consent, modules, gates,
+  counters, caps, and increments remain authoritative. Settlement preview,
+  execution, replay, results, and event evidence carry the operation root plus
+  current/bound identities without treating predecessor policy as live
+  economics or consent. The ADR remains Proposed, freezes no ABI, changes no
+  contract, and does not advance maturity or release readiness.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
   `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a

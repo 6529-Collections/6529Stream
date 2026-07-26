@@ -9,8 +9,9 @@ partial Proposed ADR 0019 review surface; it does not complete issue #664.
 ## Branch
 
 `codex/payment-intent-adapter`, created from fetched `origin/main` at
-`b4af30a58c22f79bafad241c6e4fab7a4a76063b` and rebased after #687 to
-`06f36150c4b5be05851f8081c520e98a6703a0c3`.
+`b4af30a58c22f79bafad241c6e4fab7a4a76063b` and finally rebased after #688,
+#669, and their serialized prerequisites to
+`f7100716be652b3dc4aa2eed1ef7d109b3216e7a`.
 
 ## Current State
 
@@ -29,6 +30,9 @@ partial Proposed ADR 0019 review surface; it does not complete issue #664.
 - `IStreamSplitFactory` exposes no governed gas-parameter host, although
   `[RSR-1271]` requires the verifier to read the current
   `ERC_1271_GAS_LIMIT` from the factory line.
+- Proposed ADR 0018 is now present on the final base. ADR 0019 imports its exact
+  current/bound mint-policy identity without altering #688-owned derivation,
+  manager/ledger replay, or Core semantics.
 
 ## Constraints
 
@@ -36,7 +40,6 @@ partial Proposed ADR 0019 review surface; it does not complete issue #664.
 - Do not alter issues #684, #685, #669, #671, or #673 governance/gas surfaces.
 - Do not alter issue #670's `StreamRevenueResolver` or
   `IStreamRoyaltyResolver` ownership.
-- Rebase from current `origin/main` before final artifact generation.
 - Stop at a review-ready draft PR; do not merge or deploy.
 - Keep pre-audit and not-production-ready language unchanged.
 
@@ -102,6 +105,14 @@ completion. Repeatable fixed-price/open-edition programs remain open under their
 own close rules. Final execution/purchase and revenue settlement-key derivation
 remains an explicit ADR-0018/#688 prerequisite.
 
+The imported mint-policy boundary is exact: configured and ungated paths bind
+`MintBatch.expectedPolicyHash` as the current hash or one valid immediate
+predecessor; the operation root and settlement records carry both the live
+`currentPolicyHash` and accepted `boundPolicyHash`. Current artist
+consent, modules, gate behavior, counters, caps, and increments always govern.
+The predecessor supplies authorization continuity only and cannot be treated as
+live economics or consent.
+
 Contract 20 remains the sole protocol payer boundary and pull initiator. It
 calls the token directly on allowance/EIP-2612 paths; pinned Permit2 is the
 actual ERC-20 `transferFrom` caller on its SignatureTransfer branch, for which
@@ -117,14 +128,13 @@ remains open.
 
 ## Next Actions
 
-1. Obtain coordinator approval or corrections for the rebased partial Proposed
-   ADR source; do not publish it while review remains open.
-2. After approval, rerun the proportional documentation validation ladder and
-   amend only the approved review slice.
-3. Push, open a draft PR, request CodeRabbit, and iterate review/CI until the
-   Proposed ADR slice is review-ready.
-4. Wait for coordinator merge before starting a dependent slice from current
+1. Regenerate the canonical release tail from the final rebased inputs and run
+   the proportional documentation plus full Windows validation ladder.
+2. Push the rebased draft PR with lease and iterate CI or actionable review
+   findings until the Proposed ADR slice is review-ready.
+3. Wait for coordinator merge before starting a dependent slice from current
    `origin/main`.
-5. After #688 and #684 land and the RSR/#669 lifecycle-read exception is
-   accepted, replace placeholders, freeze/golden-test the exact ABI, reconcile
-   approved normative specs, and only then begin contract implementation.
+4. After ADR 0018 is accepted, #684 lands, and the RSR/#669 lifecycle-read
+   exception is accepted, replace placeholders, freeze/golden-test the exact
+   ABI, reconcile approved normative specs, and only then begin contract
+   implementation.

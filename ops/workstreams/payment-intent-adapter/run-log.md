@@ -116,3 +116,14 @@
   EIP-2612-created allowance and exact Permit2 signed/requested transfer amounts
   are mandatory without falsely requiring the payer's preexisting
   payer-to-Permit2 approval itself to equal the transfer amount.
+- Rebased the review branch onto `f7100716be652b3dc4aa2eed1ef7d109b3216e7a`
+  after proposed ADR 0018 and the issue #669 artist-authority lane merged. The
+  only source conflict was the ADR index; it was resolved additively by retaining
+  both ADR rows.
+- Imported ADR 0018's exact policy-identity boundary into ADR 0019: both paid
+  orders carry the nonzero operation root; configured and ungated paths accept
+  current or one valid immediate predecessor as `boundPolicyHash`; current
+  consent/modules/gate/counters/caps remain authoritative; and candidate,
+  execution/replay, result, and event evidence carries the root plus
+  current/bound identities without treating predecessor policy as live
+  economics or consent.
