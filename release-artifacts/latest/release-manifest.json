@@ -156,14 +156,14 @@
     },
     "protocol_surface_report": {
       "path": "release-artifacts/latest/protocol-surface-report.json",
-      "sha256": "sha256:850a17ffd953c2f537676efed677a32d6c43ccc4689909d7757dc894449dbe00",
-      "size_bytes": 343553,
+      "sha256": "sha256:95d3e1bf536799ac8eec5d5b78848a92681129ef4a232e45dea2b09b947b2b10",
+      "size_bytes": 363133,
       "schema_version": "6529stream.protocol-surface-report.v1"
     },
     "custom_error_catalog": {
       "path": "release-artifacts/latest/custom-error-catalog.json",
-      "sha256": "sha256:bfa9e783a632a5a1a38a344a4c80398ef7e9fb5d32528af103649dc09ce5cab2",
-      "size_bytes": 243953,
+      "sha256": "sha256:fd939cccf516c2d094b9db13e0ba0aad0fdb901609177dc35c14e1157df76e23",
+      "size_bytes": 263478,
       "schema_version": "6529stream.custom-error-catalog.v1"
     },
     "release_notes": {
@@ -1978,8 +1978,8 @@
     },
     "natspec_coverage_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
-      "sha256": "sha256:f7c68a4a3fed3f22747f33ebde58bd15042a4ec774693add149911141670115b",
-      "size_bytes": 471080,
+      "sha256": "sha256:c938c7de3a3027b4617556ec762e2a1f3ae9cbdeab0ae5e0d26257e1fcb8e1c5",
+      "size_bytes": 508881,
       "schema_version": "6529stream.natspec-coverage-baseline.v1"
     }
   },
@@ -2712,7 +2712,7 @@
       },
       {
         "path": "docs/natspec-coverage.md",
-        "sha256": "sha256:48ca40f1ede8cc02bed2e16fe74b133ad6e61b7b7620655a351a90929965953c",
+        "sha256": "sha256:aea2b968deea62bc7698ec95b4c054470e57301a1fe18dc2c73b31820fbdd1c1",
         "size_bytes": 3825
       },
       {
