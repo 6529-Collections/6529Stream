@@ -2862,15 +2862,15 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `55a2e817876eac754355a14ae3907053e3d3deed`.
-- Captured at: `2026-07-24T04:58:03Z`.
+- Source commit: `522ec69adc075b6514ca96b410926128cfdfe1b0`.
+- Captured at: `2026-07-26T11:35:26Z`.
 - Live gate: `python scripts/check_slither_baseline.py --run-slither`.
 - Status: exact normalized drift is gated; all 30 first-party production rows
   remain Open under issue #658.
-- Raw analyzed run: 3,017 findings across all impacts/scopes: 47 High, 728
-  Medium, 1,212 Low, 990 Informational, and 40 Optimization. High/Medium scope
+- Raw analyzed run: 3,035 findings across all impacts/scopes: 47 High, 740
+  Medium, 1,216 Low, 992 Informational, and 40 Optimization. High/Medium scope
   totals are first-party production `3/27/30`, vendored `1/9/10`, test
-  `43/685/728`, script `0/7/7`, and other `0/0/0`.
+  `43/697/740`, script `0/7/7`, and other `0/0/0`.
 - Bounded assembly makes the Governance Executor's proposal-selected
   native-value call invisible to Slither's `arbitrary-send-eth` detector
   without removing the authority. The issue #685 slice adds the closed-world
@@ -2883,7 +2883,7 @@ Impact summary:
 | Impact | Count |
 | --- | ---: |
 | High | 3 |
-| Medium | 30 |
+| Medium | 27 |
 
 Classification summary:
 
@@ -2891,7 +2891,7 @@ Classification summary:
 | --- | ---: | --- | --- |
 | Confirmed gap | 1 | Open | Remediate with focused regression and issue-linked evidence |
 | Design review | 5 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
-| Pending disposition | 27 | Open | Complete row-level review; no implicit acceptance or suppression |
+| Pending disposition | 24 | Open | Complete row-level review; no implicit acceptance or suppression |
 
 ## Appendix B: Test Matrix
 

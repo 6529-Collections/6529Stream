@@ -78,6 +78,7 @@
         "constructor_args": [
           "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
           "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+          "0x2000000000000000000000000000000000000011",
           "0x0000000000000000000000000000000000000000"
         ],
         "verification_status": "not_applicable"

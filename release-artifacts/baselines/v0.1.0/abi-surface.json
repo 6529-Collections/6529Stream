@@ -6630,13 +6630,13 @@
     "StreamCollectionMetadata": {
       "source": "smart-contracts/StreamCollectionMetadata.sol",
       "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
-      "abi_sha256": "sha256:0ce856dd9d298ad115754dc7e78eb3d3eca9b5d2d173f682069ff41bd3a25c44",
-      "abi_entries": 43,
+      "abi_sha256": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
+      "abi_entries": 100,
       "entry_counts": {
         "constructors": 1,
-        "functions": 25,
-        "events": 4,
-        "errors": 13,
+        "functions": 62,
+        "events": 8,
+        "errors": 29,
         "fallbacks": 0,
         "receives": 0
       },
@@ -6668,6 +6668,336 @@
         ],
         "functions": [
           {
+            "key": "AUTHORIZATION_CLASS_ARTIST_SIGNER()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_ARTIST_SIGNER",
+            "signature": "AUTHORIZATION_CLASS_ARTIST_SIGNER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_CURATOR_SIGNER()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_CURATOR_SIGNER",
+            "signature": "AUTHORIZATION_CLASS_CURATOR_SIGNER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_GLOBAL_ADMIN()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_GLOBAL_ADMIN",
+            "signature": "AUTHORIZATION_CLASS_GLOBAL_ADMIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_INDEPENDENT_ATTESTOR()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_INDEPENDENT_ATTESTOR",
+            "signature": "AUTHORIZATION_CLASS_INDEPENDENT_ATTESTOR()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_INSTITUTION_SIGNER()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_INSTITUTION_SIGNER",
+            "signature": "AUTHORIZATION_CLASS_INSTITUTION_SIGNER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_METADATA_ADMIN()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_METADATA_ADMIN",
+            "signature": "AUTHORIZATION_CLASS_METADATA_ADMIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_OWNER_SIGNER()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_OWNER_SIGNER",
+            "signature": "AUTHORIZATION_CLASS_OWNER_SIGNER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "AUTHORIZATION_CLASS_PRESERVATION_ADMIN()",
+            "kind": "function",
+            "name": "AUTHORIZATION_CLASS_PRESERVATION_ADMIN",
+            "signature": "AUTHORIZATION_CLASS_PRESERVATION_ADMIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_AGENT()",
+            "kind": "function",
+            "name": "FAMILY_AGENT",
+            "signature": "FAMILY_AGENT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_ARCHIVE()",
+            "kind": "function",
+            "name": "FAMILY_ARCHIVE",
+            "signature": "FAMILY_ARCHIVE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_ARTIST()",
+            "kind": "function",
+            "name": "FAMILY_ARTIST",
+            "signature": "FAMILY_ARTIST()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_C2PA()",
+            "kind": "function",
+            "name": "FAMILY_C2PA",
+            "signature": "FAMILY_C2PA()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_CURATOR()",
+            "kind": "function",
+            "name": "FAMILY_CURATOR",
+            "signature": "FAMILY_CURATOR()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_FIXITY()",
+            "kind": "function",
+            "name": "FAMILY_FIXITY",
+            "signature": "FAMILY_FIXITY()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_IDENTITY_DISPLAY()",
+            "kind": "function",
+            "name": "FAMILY_IDENTITY_DISPLAY",
+            "signature": "FAMILY_IDENTITY_DISPLAY()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_IIIF()",
+            "kind": "function",
+            "name": "FAMILY_IIIF",
+            "signature": "FAMILY_IIIF()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_INDEPENDENT()",
+            "kind": "function",
+            "name": "FAMILY_INDEPENDENT",
+            "signature": "FAMILY_INDEPENDENT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_INSTITUTION()",
+            "kind": "function",
+            "name": "FAMILY_INSTITUTION",
+            "signature": "FAMILY_INSTITUTION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_MEDIA_RELATIONSHIP()",
+            "kind": "function",
+            "name": "FAMILY_MEDIA_RELATIONSHIP",
+            "signature": "FAMILY_MEDIA_RELATIONSHIP()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_OWNER()",
+            "kind": "function",
+            "name": "FAMILY_OWNER",
+            "signature": "FAMILY_OWNER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_RIGHTS()",
+            "kind": "function",
+            "name": "FAMILY_RIGHTS",
+            "signature": "FAMILY_RIGHTS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "FAMILY_SNAPSHOT()",
+            "kind": "function",
+            "name": "FAMILY_SNAPSHOT",
+            "signature": "FAMILY_SNAPSHOT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "MAX_RECORD_TYPES()",
             "kind": "function",
             "name": "MAX_RECORD_TYPES",
@@ -6698,6 +7028,21 @@
             "state_mutability": "view"
           },
           {
+            "key": "SCHEMA_VERSION()",
+            "kind": "function",
+            "name": "SCHEMA_VERSION",
+            "signature": "SCHEMA_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "adminsContract()",
             "kind": "function",
             "name": "adminsContract",
@@ -6708,6 +7053,62 @@
                 "name": "",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "admitRecordType(bytes32,bytes32,uint16)",
+            "kind": "function",
+            "name": "admitRecordType",
+            "signature": "admitRecordType(bytes32,bytes32,uint16)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "authorityProvider(uint8)",
+            "kind": "function",
+            "name": "authorityProvider",
+            "signature": "authorityProvider(uint8)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "providerCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
               }
             ],
             "state_mutability": "view"
@@ -6732,7 +7133,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool,uint8)",
                 "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
                 "components": [
                   {
@@ -6789,6 +7190,11 @@
                     "name": "locked",
                     "type": "bool",
                     "internal_type": "bool"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -6862,7 +7268,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool,uint8)",
                 "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
                 "components": [
                   {
@@ -6919,6 +7325,11 @@
                     "name": "locked",
                     "type": "bool",
                     "internal_type": "bool"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -6989,6 +7400,48 @@
             "state_mutability": "view"
           },
           {
+            "key": "familyAllowedAuthorizationClassMask(bytes32)",
+            "kind": "function",
+            "name": "familyAllowedAuthorizationClassMask",
+            "signature": "familyAllowedAuthorizationClassMask(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "familyRejectsAdminAuthority(bytes32)",
+            "kind": "function",
+            "name": "familyRejectsAdminAuthority",
+            "signature": "familyRejectsAdminAuthority(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
             "key": "isLocked(uint256,bytes32)",
             "kind": "function",
             "name": "isLocked",
@@ -7019,6 +7472,21 @@
             "kind": "function",
             "name": "isStreamCollectionMetadata",
             "signature": "isStreamCollectionMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isStreamRecordFamilyRegistry()",
+            "kind": "function",
+            "name": "isStreamRecordFamilyRegistry",
+            "signature": "isStreamRecordFamilyRegistry()",
             "inputs": [],
             "outputs": [
               {
@@ -7118,10 +7586,10 @@
             "state_mutability": "nonpayable"
           },
           {
-            "key": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "key": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
             "kind": "function",
             "name": "publishCollectionSnapshot",
-            "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "signature": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
             "inputs": [
               {
                 "name": "collectionId",
@@ -7132,6 +7600,11 @@
                 "name": "snapshotId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              },
+              {
+                "name": "coveredRecordTypes",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
               },
               {
                 "name": "snapshot",
@@ -7178,6 +7651,198 @@
                 "internal_type": "bytes32"
               }
             ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "recordFamilyGrant(bytes32,uint8,address)",
+            "kind": "function",
+            "name": "recordFamilyGrant",
+            "signature": "recordFamilyGrant(bytes32,uint8,address)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordFamilyRegistry()",
+            "kind": "function",
+            "name": "recordFamilyRegistry",
+            "signature": "recordFamilyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypePolicy(bytes32)",
+            "kind": "function",
+            "name": "recordTypePolicy",
+            "signature": "recordTypePolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,uint16,bool)",
+                "internal_type": "struct IStreamRecordFamilyRegistry.RecordTypePolicy",
+                "components": [
+                  {
+                    "name": "familyId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "authorizationClassMask",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "admitted",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeRejectsAdminAuthority(bytes32)",
+            "kind": "function",
+            "name": "recordTypeRejectsAdminAuthority",
+            "signature": "recordTypeRejectsAdminAuthority(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeRevision(bytes32)",
+            "kind": "function",
+            "name": "recordTypeRevision",
+            "signature": "recordTypeRevision(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "kind": "function",
+            "name": "requireRecordWriter",
+            "signature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizationData",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setAuthorityProvider(uint8,address)",
+            "kind": "function",
+            "name": "setAuthorityProvider",
+            "signature": "setAuthorityProvider(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
             "state_mutability": "nonpayable"
           },
           {
@@ -7300,6 +7965,62 @@
               }
             ],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+            "kind": "function",
+            "name": "setRecordFamilyGrant",
+            "signature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "snapshotCoveredRecordTypesHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "snapshotCoveredRecordTypesHash",
+            "signature": "snapshotCoveredRecordTypesHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "snapshotHash(uint256,bytes32)",
@@ -7468,10 +8189,10 @@
             ]
           },
           {
-            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataLockedEvent",
-            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -7487,18 +8208,24 @@
                 "indexed": true
               },
               {
-                "name": "admin",
+                "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
               }
             ]
           },
           {
-            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataRecordSet",
-            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -7570,7 +8297,52 @@
                 "indexed": false
               },
               {
-                "name": "admin",
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+            "kind": "event",
+            "name": "CollectionMetadataSnapshotFamilyAuthorized",
+            "signature": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": false
@@ -7578,10 +8350,10 @@
             ]
           },
           {
-            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataSnapshotPublished",
-            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -7647,15 +8419,210 @@
                 "indexed": false
               },
               {
-                "name": "admin",
+                "name": "coveredRecordTypesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+            "kind": "event",
+            "name": "RecordFamilyAuthorityProviderUpdated",
+            "signature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "oldProvider",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newProvider",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newProviderCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": false
               }
             ]
+          },
+          {
+            "key": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+            "kind": "event",
+            "name": "RecordFamilyGrantUpdated",
+            "signature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+            "kind": "event",
+            "name": "RecordTypeAdmitted",
+            "signature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
           }
         ],
         "errors": [
+          {
+            "key": "AuthorityProviderCallFailed(uint8,address)",
+            "kind": "error",
+            "name": "AuthorityProviderCallFailed",
+            "signature": "AuthorityProviderCallFailed(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "AuthorityProviderNoOp(uint8,address)",
+            "kind": "error",
+            "name": "AuthorityProviderNoOp",
+            "signature": "AuthorityProviderNoOp(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
           {
             "key": "CollectionDoesNotExist(uint256)",
             "kind": "error",
@@ -7744,6 +8711,47 @@
             "inputs": []
           },
           {
+            "key": "InvalidAuthorityProvider(uint8,address)",
+            "kind": "error",
+            "name": "InvalidAuthorityProvider",
+            "signature": "InvalidAuthorityProvider(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+            "kind": "error",
+            "name": "InvalidAuthorizationClassMask",
+            "signature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "allowed",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ]
+          },
+          {
             "key": "InvalidCoreContract()",
             "kind": "error",
             "name": "InvalidCoreContract",
@@ -7774,6 +8782,44 @@
             ]
           },
           {
+            "key": "InvalidRecordFamilyRegistry()",
+            "kind": "error",
+            "name": "InvalidRecordFamilyRegistry",
+            "signature": "InvalidRecordFamilyRegistry()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidRecordType(bytes32)",
+            "kind": "error",
+            "name": "InvalidRecordType",
+            "signature": "InvalidRecordType(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSnapshotFamilySet(uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotFamilySet",
+            "signature": "InvalidSnapshotFamilySet(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
             "key": "InvalidSnapshotId(bytes32)",
             "kind": "error",
             "name": "InvalidSnapshotId",
@@ -7781,6 +8827,19 @@
             "inputs": [
               {
                 "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSnapshotRecordType(bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotRecordType",
+            "signature": "InvalidSnapshotRecordType(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
                 "type": "bytes32",
                 "internal_type": "bytes32"
               }
@@ -7849,6 +8908,150 @@
                 "name": "maximum",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+            "kind": "error",
+            "name": "RecordFamilyGrantNoOp",
+            "signature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+            "kind": "error",
+            "name": "RecordFamilyGrantNotAllowed",
+            "signature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyRegistryOwnerRequired(address)",
+            "kind": "error",
+            "name": "RecordFamilyRegistryOwnerRequired",
+            "signature": "RecordFamilyRegistryOwnerRequired(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+            "kind": "error",
+            "name": "RecordFamilyUnauthorized",
+            "signature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+            "inputs": [
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeAlreadyAdmitted(bytes32)",
+            "kind": "error",
+            "name": "RecordTypeAlreadyAdmitted",
+            "signature": "RecordTypeAlreadyAdmitted(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeNotAdmitted(bytes32)",
+            "kind": "error",
+            "name": "RecordTypeNotAdmitted",
+            "signature": "RecordTypeNotAdmitted(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnknownAuthorizationClass(uint8)",
+            "kind": "error",
+            "name": "UnknownAuthorizationClass",
+            "signature": "UnknownAuthorizationClass(uint8)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "UnknownRecordFamily(bytes32)",
+            "kind": "error",
+            "name": "UnknownRecordFamily",
+            "signature": "UnknownRecordFamily(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ]
           }
@@ -17837,22 +19040,22 @@
     "StreamPreservationRecords": {
       "source": "smart-contracts/StreamPreservationRecords.sol",
       "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
-      "abi_sha256": "sha256:f89faa370ddd0e771063a3213ff758029cc94843b13b1b402b26d4450f03afae",
-      "abi_entries": 34,
+      "abi_sha256": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
+      "abi_entries": 36,
       "entry_counts": {
         "constructors": 1,
-        "functions": 22,
+        "functions": 23,
         "events": 2,
-        "errors": 9,
+        "errors": 10,
         "fallbacks": 0,
         "receives": 0
       },
       "entries": {
         "constructors": [
           {
-            "key": "constructor(address,address,address)",
+            "key": "constructor(address,address,address,address)",
             "kind": "constructor",
-            "signature": "constructor(address,address,address)",
+            "signature": "constructor(address,address,address,address)",
             "inputs": [
               {
                 "name": "core",
@@ -17861,6 +19064,11 @@
               },
               {
                 "name": "admins",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "familyRegistry",
                 "type": "address",
                 "internal_type": "address"
               },
@@ -18121,7 +19329,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64)",
+                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64,uint8)",
                 "internal_type": "struct IStreamPreservationRecords.CollectionRecordSummary",
                 "components": [
                   {
@@ -18208,6 +19416,11 @@
                     "name": "recordedAt",
                     "type": "uint64",
                     "internal_type": "uint64"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -18465,6 +19678,21 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "recordFamilyRegistry()",
+            "kind": "function",
+            "name": "recordFamilyRegistry",
+            "signature": "recordFamilyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "streamCore()",
             "kind": "function",
             "name": "streamCore",
@@ -18578,10 +19806,10 @@
         ],
         "events": [
           {
-            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionRecordRecorded",
-            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -18694,6 +19922,12 @@
                 "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
                 "indexed": false
               }
             ]
@@ -18825,6 +20059,13 @@
                 "internal_type": "uint256"
               }
             ]
+          },
+          {
+            "key": "InvalidRecordFamilyRegistry()",
+            "kind": "error",
+            "name": "InvalidRecordFamilyRegistry",
+            "signature": "InvalidRecordFamilyRegistry()",
+            "inputs": []
           },
           {
             "key": "MetadataMutationPaused()",
@@ -28129,13 +29370,13 @@
     "IStreamCollectionMetadata": {
       "source": "smart-contracts/IStreamCollectionMetadata.sol",
       "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
-      "abi_sha256": "sha256:a62f6c3524655d3421d1c465dea83c4300ebb93116817d8da6d96da37fe90f8f",
-      "abi_entries": 40,
+      "abi_sha256": "sha256:6cfc024fdabf15f1576a48ddec800f421356fbc5da17ab4b64e86c7cd15d93d1",
+      "abi_entries": 46,
       "entry_counts": {
         "constructors": 0,
-        "functions": 23,
-        "events": 4,
-        "errors": 13,
+        "functions": 25,
+        "events": 5,
+        "errors": 16,
         "fallbacks": 0,
         "receives": 0
       },
@@ -28177,7 +29418,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool,uint8)",
                 "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
                 "components": [
                   {
@@ -28234,6 +29475,11 @@
                     "name": "locked",
                     "type": "bool",
                     "internal_type": "bool"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -28307,7 +29553,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool,uint8)",
                 "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
                 "components": [
                   {
@@ -28364,6 +29610,11 @@
                     "name": "locked",
                     "type": "bool",
                     "internal_type": "bool"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -28563,10 +29814,10 @@
             "state_mutability": "nonpayable"
           },
           {
-            "key": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "key": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
             "kind": "function",
             "name": "publishCollectionSnapshot",
-            "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "signature": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
             "inputs": [
               {
                 "name": "collectionId",
@@ -28577,6 +29828,11 @@
                 "name": "snapshotId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              },
+              {
+                "name": "coveredRecordTypes",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
               },
               {
                 "name": "snapshot",
@@ -28624,6 +29880,21 @@
               }
             ],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "recordFamilyRegistry()",
+            "kind": "function",
+            "name": "recordFamilyRegistry",
+            "signature": "recordFamilyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
@@ -28745,6 +30016,32 @@
               }
             ],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "snapshotCoveredRecordTypesHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "snapshotCoveredRecordTypesHash",
+            "signature": "snapshotCoveredRecordTypesHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "snapshotHash(uint256,bytes32)",
@@ -28913,10 +30210,10 @@
             ]
           },
           {
-            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataLockedEvent",
-            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -28932,18 +30229,24 @@
                 "indexed": true
               },
               {
-                "name": "admin",
+                "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
               }
             ]
           },
           {
-            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataRecordSet",
-            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -29015,7 +30318,52 @@
                 "indexed": false
               },
               {
-                "name": "admin",
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+            "kind": "event",
+            "name": "CollectionMetadataSnapshotFamilyAuthorized",
+            "signature": "CollectionMetadataSnapshotFamilyAuthorized(uint256,bytes32,bytes32,uint8,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": false
@@ -29023,10 +30371,10 @@
             ]
           },
           {
-            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionMetadataSnapshotPublished",
-            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -29092,9 +30440,21 @@
                 "indexed": false
               },
               {
-                "name": "admin",
+                "name": "coveredRecordTypesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
                 "indexed": false
               }
             ]
@@ -29219,6 +30579,31 @@
             ]
           },
           {
+            "key": "InvalidRecordFamilyRegistry()",
+            "kind": "error",
+            "name": "InvalidRecordFamilyRegistry",
+            "signature": "InvalidRecordFamilyRegistry()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidSnapshotFamilySet(uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotFamilySet",
+            "signature": "InvalidSnapshotFamilySet(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
             "key": "InvalidSnapshotId(bytes32)",
             "kind": "error",
             "name": "InvalidSnapshotId",
@@ -29226,6 +30611,19 @@
             "inputs": [
               {
                 "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSnapshotRecordType(bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotRecordType",
+            "signature": "InvalidSnapshotRecordType(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
                 "type": "bytes32",
                 "internal_type": "bytes32"
               }
@@ -39244,13 +40642,13 @@
     "IStreamPreservationRecords": {
       "source": "smart-contracts/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
-      "abi_sha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
-      "abi_entries": 25,
+      "abi_sha256": "sha256:a7633c3559877537dac328bda542b6a73d12c426d990c6b4cb8f96c6134aa9bb",
+      "abi_entries": 27,
       "entry_counts": {
         "constructors": 0,
-        "functions": 14,
+        "functions": 15,
         "events": 2,
-        "errors": 9,
+        "errors": 10,
         "fallbacks": 0,
         "receives": 0
       },
@@ -39384,7 +40782,7 @@
             "outputs": [
               {
                 "name": "",
-                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64)",
+                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64,uint8)",
                 "internal_type": "struct IStreamPreservationRecords.CollectionRecordSummary",
                 "components": [
                   {
@@ -39471,6 +40869,11 @@
                     "name": "recordedAt",
                     "type": "uint64",
                     "internal_type": "uint64"
+                  },
+                  {
+                    "name": "authorizationClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
                   }
                 ]
               }
@@ -39728,6 +41131,21 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "recordFamilyRegistry()",
+            "kind": "function",
+            "name": "recordFamilyRegistry",
+            "signature": "recordFamilyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "streamCore()",
             "kind": "function",
             "name": "streamCore",
@@ -39841,10 +41259,10 @@
         ],
         "events": [
           {
-            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
             "kind": "event",
             "name": "CollectionRecordRecorded",
-            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address,uint8)",
             "anonymous": false,
             "inputs": [
               {
@@ -39957,6 +41375,12 @@
                 "name": "recorder",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
                 "indexed": false
               }
             ]
@@ -40088,6 +41512,13 @@
                 "internal_type": "uint256"
               }
             ]
+          },
+          {
+            "key": "InvalidRecordFamilyRegistry()",
+            "kind": "error",
+            "name": "InvalidRecordFamilyRegistry",
+            "signature": "InvalidRecordFamilyRegistry()",
+            "inputs": []
           },
           {
             "key": "MetadataMutationPaused()",

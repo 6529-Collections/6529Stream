@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "6cb05e1e36772fbd56acd313bf5e88ec8271cc01",
-    "captured_at_utc": "2026-07-26T17:33:48Z",
+    "analyzed_commit": "522ec69adc075b6514ca96b410926128cfdfe1b0",
+    "captured_at_utc": "2026-07-26T11:35:26Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 1,
     "capture_json_success": true,
-    "raw_json_size_bytes": 317162917,
-    "raw_json_sha256": "sha256:bad5b46f6ea539621312515e9c5d480af458ebd347d10856c449098dce8b9eeb",
-    "solidity_tree_sha256": "sha256:77d8035e88dd2ea838bfa21b1dc810b2a8e674dcb84440f9c9b1c15ffe22e14f",
+    "raw_json_size_bytes": 301875347,
+    "raw_json_sha256": "sha256:4b0bfaf3efd373e2836fc17dbbb20d8a2b22141324a60fc696efb5a26178e310",
+    "solidity_tree_sha256": "sha256:dc50458baf60407b80b4f8ac4568780a92fbb681f2c6c6b41da342cb12f158b7",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -36,12 +36,12 @@
     "classification_rule": "classify by the primary Slither source element; unknown smart-contracts paths fail closed as first-party production"
   },
   "capture_counts": {
-    "High": 49,
-    "Medium": 742,
-    "Low": 1231,
-    "Informational": 996,
+    "High": 47,
+    "Medium": 740,
+    "Low": 1216,
+    "Informational": 992,
     "Optimization": 40,
-    "total": 3058
+    "total": 3035
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
@@ -55,9 +55,9 @@
       "total": 10
     },
     "test": {
-      "High": 45,
-      "Medium": 699,
-      "total": 744
+      "High": 43,
+      "Medium": 697,
+      "total": 740
     },
     "script": {
       "High": 0,

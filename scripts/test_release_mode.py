@@ -547,7 +547,7 @@ class ReleaseModeTests(unittest.TestCase):
                 for phase in ("public-beta", "production-release"):
                     with self.subTest(phase=phase), self.assertRaisesRegex(
                         checker.ReleaseModeError,
-                        "implementation_not_supported_in_this_slice",
+                        "candidate_bound_record_family_evidence_not_available",
                     ):
                         checker.validate_release_mode(
                             repo_root / checker.DEFAULT_EVIDENCE,

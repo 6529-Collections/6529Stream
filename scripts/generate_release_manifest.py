@@ -32,6 +32,12 @@ GOVERNANCE_ACTION_POLICY_SCHEMA = "6529stream.governance-action-policy.v1"
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
 )
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA = (
+    record_family_authorization_checker.SOURCE_CATALOG_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID = (
+    record_family_authorization_checker.SOURCE_CATALOG_SCHEMA_ID
+)
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
     record_family_authorization_checker.INVENTORY_SCHEMA_ID
 )
@@ -75,6 +81,12 @@ DEFAULT_GOVERNANCE_ACTION_POLICY = Path(
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
     record_family_authorization_checker.DEFAULT_INVENTORY
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG = (
+    record_family_authorization_checker.DEFAULT_SOURCE_CATALOG
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA = (
+    record_family_authorization_checker.DEFAULT_SOURCE_CATALOG_SCHEMA
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA
@@ -450,13 +462,72 @@ def governed_parameter_inventory_record(
 def record_family_authorization_records(
     repo_root: Path,
 ) -> dict[str, dict[str, Any]]:
-    """Validate and bind the honest planning-only #690 package."""
+    """Validate and bind the source plus candidate-evidence #690 package."""
     try:
         record_family_authorization_checker.validate_package(repo_root)
     except record_family_authorization_checker.RecordFamilyAuthorizationError as exc:
         raise ReleaseManifestError(
             f"invalid record-family authorization package: {exc}"
         ) from exc
+
+    source_catalog = file_record(
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG,
+        repo_root,
+        schema_required=True,
+    )
+    if (
+        source_catalog["schema_version"]
+        != RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    ):
+        raise ReleaseManifestError(
+            "record-family authorization source catalog must use schema "
+            f"{RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA}"
+        )
+    source_catalog_schema_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    )
+    source_catalog_schema_document = require_dict(
+        load_json(source_catalog_schema_path),
+        str(source_catalog_schema_path),
+    )
+    if source_catalog_schema_document.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseManifestError(
+            "record-family authorization source-catalog schema must use JSON "
+            f"Schema {JSON_SCHEMA_DRAFT}"
+        )
+    if (
+        source_catalog_schema_document.get("$id")
+        != RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID
+    ):
+        raise ReleaseManifestError(
+            "record-family authorization source-catalog schema must use schema "
+            f"ID {RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID}"
+        )
+    source_catalog_schema_properties = require_dict(
+        source_catalog_schema_document.get("properties"),
+        f"{source_catalog_schema_path}.properties",
+    )
+    source_catalog_schema_version = require_dict(
+        source_catalog_schema_properties.get("schema_version"),
+        f"{source_catalog_schema_path}.properties.schema_version",
+    )
+    if (
+        source_catalog_schema_version.get("const")
+        != RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+    ):
+        raise ReleaseManifestError(
+            "record-family authorization source-catalog schema must pin "
+            f"document version {RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA}"
+        )
+    source_catalog_schema = file_record(source_catalog_schema_path, repo_root)
+    source_catalog_schema.update(
+        {
+            "schema_id": RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_ID,
+            "document_schema_version": (
+                RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA
+            ),
+        }
+    )
 
     inventory = file_record(
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY,
@@ -614,6 +685,8 @@ def record_family_authorization_records(
         }
     )
     return {
+        "source_catalog": source_catalog,
+        "source_catalog_schema": source_catalog_schema,
         "inventory": inventory,
         "inventory_schema": inventory_schema,
         "evidence_schema": evidence_schema,

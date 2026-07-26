@@ -19,7 +19,7 @@
     "IStreamArtworkFinalityRegistry": "0x47291ea1",
     "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
-    "IStreamCollectionMetadata": "0x6e0fb84e",
+    "IStreamCollectionMetadata": "0x2ddbeb53",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xba77d620",
@@ -33,7 +33,7 @@
     "IStreamMintManager": "0xfc2559eb",
     "IStreamMintModuleRegistry": "0x4eb81941",
     "IStreamMinter": "0x0f48ec25",
-    "IStreamPreservationRecords": "0xad590280",
+    "IStreamPreservationRecords": "0x44338aea",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRevenueResolver": "0x3503c22e",
     "IStreamSplitFactory": "0x1748deee",
@@ -589,10 +589,10 @@
     "IStreamCollectionMetadata": {
       "source": "smart-contracts/IStreamCollectionMetadata.sol",
       "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
-      "abi_sha256": "sha256:a62f6c3524655d3421d1c465dea83c4300ebb93116817d8da6d96da37fe90f8f",
-      "interface_id": "0x6e0fb84e",
+      "abi_sha256": "sha256:6cfc024fdabf15f1576a48ddec800f421356fbc5da17ab4b64e86c7cd15d93d1",
+      "interface_id": "0x2ddbeb53",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x6e0fb84e",
+      "computed_selector_xor": "0x2ddbeb53",
       "function_selectors": [
         {
           "signature": "adminsContract()",
@@ -643,8 +643,12 @@
           "selector": "0xe4c05429"
         },
         {
-          "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
-          "selector": "0xf2d67fbd"
+          "signature": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+          "selector": "0xfc57068f"
+        },
+        {
+          "signature": "recordFamilyRegistry()",
+          "selector": "0xe96a886a"
         },
         {
           "signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
@@ -653,6 +657,10 @@
         {
           "signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
           "selector": "0x0dd00ba6"
+        },
+        {
+          "signature": "snapshotCoveredRecordTypesHash(uint256,bytes32)",
+          "selector": "0xa43fa245"
         },
         {
           "signature": "snapshotHash(uint256,bytes32)",
@@ -1429,10 +1437,10 @@
     "IStreamPreservationRecords": {
       "source": "smart-contracts/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
-      "abi_sha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
-      "interface_id": "0xad590280",
+      "abi_sha256": "sha256:a7633c3559877537dac328bda542b6a73d12c426d990c6b4cb8f96c6134aa9bb",
+      "interface_id": "0x44338aea",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0xad590280",
+      "computed_selector_xor": "0x44338aea",
       "function_selectors": [
         {
           "signature": "adminsContract()",
@@ -1461,6 +1469,10 @@
         {
           "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
           "selector": "0xc3434532"
+        },
+        {
+          "signature": "recordFamilyRegistry()",
+          "selector": "0xe96a886a"
         },
         {
           "signature": "streamCore()",
