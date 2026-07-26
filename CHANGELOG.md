@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Clarified ADR 0017's resolution of issue #673: the retired royalty probe
+  record has no launch-v1 authorization role, and the multiplicative Core
+  precheck remains safe for either ordering of monotonic
+  `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises.
+  Separate measurement references must describe the same candidate and
+  complete proposed tuple; actual candidate-bound measurements remain blocked
+  on issues #684 and #671, so maturity and release readiness are unchanged.
 - Rebound the issue #690 record-family source catalog and checker to the
   merged #699 source commit so candidate-source replay verifies the complete
   interface, registry, metadata, preservation, and rehearsal binding set.

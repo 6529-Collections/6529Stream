@@ -151,6 +151,27 @@ class and avoids adding the superseded permanent machinery to `StreamCore`.
 11. A parameter that must be tightened after launch requires a reviewed
     successor host or deployment line. The release manifest and operator
     procedures must make this one-way posture explicit before genesis.
+12. Issue #673's royalty-pair probe-record model is retired rather than
+    repaired. `ROYALTY_RESOLVER_GAS_LIMIT` and
+    `ROYALTY_RETURN_GAS_BUFFER` remain independently committed GGP rows, but
+    no run record authorizes either mutation. Reproducible measurements are
+    review and release evidence for the complete proposed Core tuple under
+    [RSR-2981-GAS].6; separate per-row evidence references are conformant only
+    when they identify the same candidate and measure the affected reads at
+    that tuple. The multiplicative precheck
+    `(ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63
+    + ROYALTY_RETURN_GAS_BUFFER` makes every reachable ordering explicit:
+    raising only the buffer increases parent completion reserve; raising only
+    the resolver limit raises the live threshold so every call that passes
+    still delivers the full new limit while retaining the unchanged buffer;
+    raising both in either order is the composition of those two safe
+    intermediate cases; and the final tuple is independent of the order.
+    Same-value revision changes, lowering, and conditional re-lowering do not
+    exist, so there is no stale proof to reuse after the paired row changes.
+    Fixed-stipend compatibility and measured buffer sufficiency remain
+    release gates for every proposed tuple; this ordering proof does not turn
+    measurement evidence into mutation authority or claim that candidate
+    evidence already exists.
 
 ## Security And Bytecode Impact
 
