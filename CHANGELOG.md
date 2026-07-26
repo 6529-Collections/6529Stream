@@ -7,9 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
-- Clarified ADR 0017's resolution of issue #673: the retired royalty probe
-  record has no launch-v1 authorization role, and the multiplicative Core
-  precheck remains safe for either ordering of monotonic
+- Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
+  probe-record model and every related authorization path, and the
+  overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic
   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises.
   Separate measurement references must describe the same candidate and
   complete proposed tuple; actual candidate-bound measurements remain blocked

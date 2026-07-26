@@ -42,7 +42,7 @@
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
-      "sha256": "sha256:4c0fa115e1ea7630e2db18ef3437e1aa3e09b66727c74ce916a38de9e38ba4d9"
+      "sha256": "sha256:3270cf84f2132af6c677108d181006dac7a91cde8696701b06953c50fc72a3b8"
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
@@ -350,7 +350,7 @@
       "evidence": [
         {
           "path": "docs/adr/0017-raise-only-parameter-governance.md",
-          "sha256": "sha256:4c0fa115e1ea7630e2db18ef3437e1aa3e09b66727c74ce916a38de9e38ba4d9"
+          "sha256": "sha256:3270cf84f2132af6c677108d181006dac7a91cde8696701b06953c50fc72a3b8"
         },
         {
           "path": "docs/launch-v1-target-architecture.md",
