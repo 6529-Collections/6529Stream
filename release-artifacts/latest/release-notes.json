@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:52da9e228ac8e062e9613abac31a3c71fd7ed86962a1f8b87301efc178fbd43c",
-      "size_bytes": 129693
+      "sha256": "sha256:f3170ec1b0eb607acc9e2d277334f309333b1ea3f9a270e9948d2e2ab9502114",
+      "size_bytes": 130024
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Accepted ADR 0021's immutable revenue-resolver validation-adapter architecture for pre-genesis implementation. Source work remains blocked until the complete normative interface appendix and freeze commit are independently approved; acceptance changes no contract, ABI, profile, deployment, maturity, or readiness state.",
       "Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver architecture: one registered, state-owning `StreamRevenueResolver` plus one immutable, stateless, implementation-private validation adapter. The proposal preserves the permanent Core ABI and royalty-resolver pointer, prohibits proxy, delegatecall, mutable-implementation, and second-authority shapes, and pins exact-code, canonical-transcript, available-gas, private dependency, sizing, deployment, and historical-evidence requirements. The ADR remains Proposed, authorizes no implementation, changes no contract or deployment profile, and does not advance maturity or release readiness.",
       "Added proposed ADR 0020 for issue #667's executor-only, append-only artwork finality recovery architecture. The proposal assigns pending-action lifecycle ownership to Governance V2, uses a dedicated Core discovery pointer and recovery-aware metadata-router serving path, and pins route lineage, artist-consent, owner-notice, permanent-verification, and indexer migration requirements for later implementation. Current LTA/LCM recovery semantics remain authoritative: the ADR freezes no ABI, changes no contract, and does not advance maturity or release readiness.",
       "Added proposed ADR 0019 for issue #664's payer-bound ERC-20 settlement orchestration. The provisional boundary separates contract `20` payer authorization/funding from sale-adapter authority and contract `9` revenue/escrow accounting, pins two typed paid-mint orders with atomic rollback, and imports ADR 0018's exact operation-root policy identity: configured and ungated paths accept the current or one valid immediate predecessor as the bound identity while current consent, modules, gates, counters, caps, and increments remain authoritative. Settlement preview, execution, replay, results, and event evidence carry the operation root plus current/bound identities without treating predecessor policy as live economics or consent. The exact manager-owned single-step preview selector, adapter-as-caller semantics, configured-gate equality, ungated zero/NONE/empty-nullifier normalization, preview-before-effect order, and full root/operation-ID-vector comparison are pinned for later implementation. The ADR remains Proposed, freezes no ABI, changes no contract, and does not advance maturity or release readiness.",

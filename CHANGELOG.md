@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Accepted ADR 0021's immutable revenue-resolver validation-adapter
+  architecture for pre-genesis implementation. Source work remains blocked
+  until the complete normative interface appendix and freeze commit are
+  independently approved; acceptance changes no contract, ABI, profile,
+  deployment, maturity, or readiness state.
 - Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver
   architecture: one registered, state-owning `StreamRevenueResolver` plus one
   immutable, stateless, implementation-private validation adapter. The
