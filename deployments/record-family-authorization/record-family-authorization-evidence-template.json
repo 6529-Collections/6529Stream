@@ -1,0 +1,105 @@
+{
+  "schema_version": "6529stream.record-family-authorization-evidence.v1",
+  "record_type": "template",
+  "review_status": "unreviewed",
+  "evidence_id": "record-family-authorization-evidence-template",
+  "target_phase": null,
+  "inventory_binding": {
+    "status": "planning_bound",
+    "path": "release-artifacts/record-family-authorization-inventory.json",
+    "schema_version": "6529stream.record-family-authorization-inventory.v1",
+    "sha256": "50d96a4b8356266d04c72847080125a394a0efbed3327b9ddba43409d9e7c170"
+  },
+  "candidate_binding": {
+    "status": "not_available",
+    "candidate_id": null,
+    "candidate_identity_sha256": null,
+    "candidate_identity_keccak256": null,
+    "candidate_identity_path": null,
+    "source_commit": null,
+    "release_build": null,
+    "genesis_profile_sha256": null
+  },
+  "profile_binding": {
+    "status": "missing",
+    "path": "release-artifacts/genesis-deployment-profile.json",
+    "schema_version": "6529stream.genesis-deployment-profile.v2",
+    "sha256": null
+  },
+  "classifier_binding": {
+    "status": "missing",
+    "host_address": null,
+    "contract_address": null,
+    "module_type": null,
+    "interface_id": null,
+    "marker": null,
+    "schema": null,
+    "revision": null,
+    "runtime_codehash": null,
+    "grant_map_sha256": null
+  },
+  "implementation_bindings": {
+    "status": "missing",
+    "review_status": "unreviewed",
+    "contracts": []
+  },
+  "grant_map": {
+    "status": "missing",
+    "review_status": "unreviewed",
+    "path": null,
+    "schema_path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+    "schema_version": "6529stream.record-family-authorization-grant-map.v1",
+    "sha256": null,
+    "family_group_count": null,
+    "authorization_class_count": null,
+    "candidate_identity_sha256": null
+  },
+  "snapshot_intersection": {
+    "status": "missing",
+    "review_status": "unreviewed",
+    "covered_family_groups": [],
+    "evidence_path": null,
+    "evidence_sha256": null
+  },
+  "authority_lifecycle": {
+    "status": "missing",
+    "review_status": "unreviewed",
+    "rotation_revision": null,
+    "revocation_revision": null,
+    "observed_at_commit": null,
+    "evidence_path": null,
+    "evidence_sha256": null
+  },
+  "phases": [
+    {
+      "phase": "public_beta",
+      "status": "missing",
+      "review_status": "unreviewed",
+      "evidence_path": null,
+      "evidence_sha256": null
+    },
+    {
+      "phase": "production_release",
+      "status": "missing",
+      "review_status": "unreviewed",
+      "evidence_path": null,
+      "evidence_sha256": null
+    }
+  ],
+  "review": {
+    "reviewer": null,
+    "reviewed_at": null,
+    "reference": null
+  },
+  "redaction_policy": {
+    "no_secrets": true,
+    "redacted_fields": [
+      "private_key",
+      "mnemonic",
+      "seed_phrase",
+      "api_key",
+      "rpc_url"
+    ]
+  },
+  "template_notice": "This planning template is not retained evidence and cannot satisfy public-beta or production release mode. Candidate-bound runtime, classifier, grant-map, snapshot-intersection, lifecycle, phase, and independent-review evidence must be captured in a separate phase-specific artifact."
+}

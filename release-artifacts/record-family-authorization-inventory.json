@@ -1,0 +1,512 @@
+{
+  "schema_version": "6529stream.record-family-authorization-inventory.v1",
+  "status": "planning",
+  "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/690",
+  "normative_sources": [
+    {
+      "path": "docs/collection-metadata-contract.md",
+      "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"
+    },
+    {
+      "path": "docs/adr/0010-world-class-spec-pass.md",
+      "anchor": "The CON-015 whole-module writer exception is retired"
+    },
+    {
+      "path": "docs/stream-artist-authority.md",
+      "anchor": "## Record Discipline And Write Authority [AA-RECORDS]"
+    },
+    {
+      "path": "docs/launch-conformance-matrix.md",
+      "anchor": "| Owner records |"
+    }
+  ],
+  "current_implementation": {
+    "status": "as_built_fail_open",
+    "source_commit": "063605ea4fe906b229fd6ae51294fe96f384e698",
+    "contracts": [
+      {
+        "name": "StreamCollectionMetadata",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "mutation_surface_count": 4
+      },
+      {
+        "name": "StreamPreservationRecords",
+        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+        "mutation_surface_count": 1
+      }
+    ],
+    "mutation_surfaces": [
+      {
+        "contract": "StreamCollectionMetadata",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "function": "setCollectionRecord",
+        "canonical_signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+        "selector": "0xcf51f66a",
+        "record_type_source": "record.recordType",
+        "authorization_model": "selector_or_global_admin",
+        "function_admin_authorized": true,
+        "global_admin_authorized": true,
+        "family_classifier_enforced": false,
+        "family_authorization_enforced": false,
+        "authorization_class_emitted": false,
+        "normative_status": "nonconformant",
+        "blockers": [
+          "family_classifier_missing",
+          "family_authorization_missing",
+          "authorization_class_event_missing"
+        ]
+      },
+      {
+        "contract": "StreamCollectionMetadata",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "function": "setCollectionRecordWithRevision",
+        "canonical_signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+        "selector": "0x0dd00ba6",
+        "record_type_source": "record.recordType",
+        "authorization_model": "selector_or_global_admin",
+        "function_admin_authorized": true,
+        "global_admin_authorized": true,
+        "family_classifier_enforced": false,
+        "family_authorization_enforced": false,
+        "authorization_class_emitted": false,
+        "normative_status": "nonconformant",
+        "blockers": [
+          "family_classifier_missing",
+          "family_authorization_missing",
+          "authorization_class_event_missing"
+        ]
+      },
+      {
+        "contract": "StreamCollectionMetadata",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "function": "publishCollectionSnapshot",
+        "canonical_signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+        "selector": "0xf2d67fbd",
+        "record_type_source": "snapshot.recordType",
+        "authorization_model": "selector_or_global_admin",
+        "function_admin_authorized": true,
+        "global_admin_authorized": true,
+        "family_classifier_enforced": false,
+        "family_authorization_enforced": false,
+        "authorization_class_emitted": false,
+        "normative_status": "nonconformant",
+        "blockers": [
+          "snapshot_family_set_not_observable",
+          "family_authorization_missing",
+          "authorization_class_event_missing"
+        ]
+      },
+      {
+        "contract": "StreamCollectionMetadata",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "function": "lockCollectionRecord",
+        "canonical_signature": "lockCollectionRecord(uint256,bytes32)",
+        "selector": "0xe4c05429",
+        "record_type_source": "recordType",
+        "authorization_model": "selector_or_global_admin",
+        "function_admin_authorized": true,
+        "global_admin_authorized": true,
+        "family_classifier_enforced": false,
+        "family_authorization_enforced": false,
+        "authorization_class_emitted": false,
+        "normative_status": "nonconformant",
+        "blockers": [
+          "arbitrary_record_type_lock",
+          "record_type_capacity_exhaustion",
+          "family_authorization_missing",
+          "authorization_class_event_missing"
+        ]
+      },
+      {
+        "contract": "StreamPreservationRecords",
+        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+        "function": "recordCollectionRecord",
+        "canonical_signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+        "selector": "0xc3434532",
+        "record_type_source": "record.recordType",
+        "authorization_model": "selector_or_global_admin",
+        "function_admin_authorized": true,
+        "global_admin_authorized": true,
+        "family_classifier_enforced": false,
+        "family_authorization_enforced": false,
+        "authorization_class_emitted": false,
+        "normative_status": "nonconformant",
+        "blockers": [
+          "family_classifier_missing",
+          "family_authorization_missing",
+          "signature_verification_missing",
+          "authorization_class_event_missing"
+        ]
+      }
+    ],
+    "known_fail_open_behaviors": [
+      {
+        "id": "arbitrary_metadata_record_type",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_anchor": "_validateRecord",
+        "status": "open_blocker",
+        "description": "Any nonzero, nonreserved bytes32 record type passes structural validation without a declared family."
+      },
+      {
+        "id": "arbitrary_preservation_record_type",
+        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "source_anchor": "_validateRecord",
+        "status": "open_blocker",
+        "description": "Any nonzero bytes32 record type passes structural validation without a declared family."
+      },
+      {
+        "id": "opaque_snapshot_family_set",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_anchor": "publishCollectionSnapshot",
+        "status": "open_blocker",
+        "description": "The runtime observes one snapshot.recordType and cannot prove authority over every family represented by opaque manifest bytes."
+      },
+      {
+        "id": "arbitrary_lock_record_type",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_anchor": "lockCollectionRecord",
+        "status": "open_blocker",
+        "description": "A selector or global admin can permanently lock an undeclared record type."
+      },
+      {
+        "id": "record_type_capacity_exhaustion",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_anchor": "_rememberRecordType",
+        "status": "open_blocker",
+        "description": "With MAX_RECORD_TYPES 128 and two reserved locks, 126 arbitrary nonreserved locks can exhaust all future legitimate record-type slots."
+      },
+      {
+        "id": "optional_unverified_preservation_signature",
+        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "source_anchor": "_validateRecord",
+        "status": "open_blocker",
+        "description": "Signature fields are optional or hash-only and are not verified for signer-verified families."
+      },
+      {
+        "id": "authorization_class_event_absent",
+        "source_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_anchor": "CollectionMetadataRecordSet",
+        "status": "open_blocker",
+        "description": "Current metadata and preservation record events do not persist an authorization class."
+      },
+      {
+        "id": "selector_global_admin_family_authority",
+        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_anchor": "FunctionAdminRequired",
+        "status": "open_blocker",
+        "description": "Current metadata mutation surfaces admit a whole-selector admin or global admin without enforcing record-family-scoped authority."
+      }
+    ]
+  },
+  "authorization_classes": [
+    {
+      "name": "ARTIST_SIGNER",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "OWNER_SIGNER",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "CURATOR_SIGNER",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "INSTITUTION_SIGNER",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "INDEPENDENT_ATTESTOR",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "PRESERVATION_ADMIN",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "METADATA_ADMIN",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    },
+    {
+      "name": "GLOBAL_ADMIN",
+      "normative_source": {
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "### V1 Onchain Record Primitive"
+      },
+      "onchain_id": null,
+      "status": "planning",
+      "blockers": ["authorization_class_id_not_pinned"]
+    }
+  ],
+  "family_groups": [
+    {
+      "name": "ARTIST",
+      "normative_patterns": ["ARTIST_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned", "admin_rejection_not_implemented"]
+    },
+    {
+      "name": "OWNER",
+      "normative_patterns": ["OWNER_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned", "admin_rejection_not_implemented"]
+    },
+    {
+      "name": "INDEPENDENT",
+      "normative_patterns": ["INDEPENDENT_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned", "admin_rejection_not_implemented"]
+    },
+    {
+      "name": "CURATOR",
+      "normative_patterns": ["CURATOR_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "INSTITUTION",
+      "normative_patterns": ["INSTITUTION_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "RIGHTS",
+      "normative_patterns": ["RIGHTS_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "ARCHIVE",
+      "normative_patterns": ["ARCHIVE_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "FIXITY",
+      "normative_patterns": ["FIXITY_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "C2PA",
+      "normative_patterns": ["C2PA_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "IIIF",
+      "normative_patterns": ["IIIF_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "MEDIA_RELATIONSHIP",
+      "normative_patterns": ["MEDIA_RELATIONSHIP_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "IDENTITY_DISPLAY",
+      "normative_patterns": ["IDENTITY_*", "DISPLAY_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    },
+    {
+      "name": "SNAPSHOT",
+      "normative_patterns": ["SNAPSHOT_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned", "snapshot_family_intersection_not_observable"]
+    },
+    {
+      "name": "AGENT",
+      "normative_patterns": ["AGENT_*"],
+      "normative_source": {"path": "docs/collection-metadata-contract.md", "anchor": "Record-family-scoped authorization [CMC-AUTHZ]:"},
+      "declared_record_type_ids": [],
+      "authorization_classes": [],
+      "classification_status": "unresolved",
+      "implementation_status": "not_implemented",
+      "blockers": ["record_type_ids_not_pinned", "family_to_authorization_class_mapping_not_pinned"]
+    }
+  ],
+  "snapshot_policy": {
+    "normative_every_family_authority_required": true,
+    "runtime_record_type_source": "snapshot.recordType",
+    "manifest_family_set_observable": false,
+    "family_authorization_enforced": false,
+    "locks_checked": ["METADATA_ALL", "SNAPSHOTS", "recordType"],
+    "status": "planning",
+    "blockers": [
+      "opaque_manifest_family_set",
+      "all_family_authority_intersection_not_implemented"
+    ]
+  },
+  "classifier_binding": {
+    "status": "missing",
+    "classifier_host": null,
+    "classifier_contract": null,
+    "module_type": null,
+    "interface_id": null,
+    "marker": null,
+    "schema": null,
+    "revision": null,
+    "runtime_codehash": null,
+    "grant_map_binding": null,
+    "record_type_registry": null,
+    "unknown_family_disposition": "currently_accepted",
+    "wildcard_derivation": null,
+    "blockers": [
+      "classifier_host_not_pinned",
+      "classifier_interface_marker_revision_not_pinned",
+      "record_type_ids_not_pinned",
+      "unknown_family_rejection_not_implemented"
+    ]
+  },
+  "candidate_binding": {
+    "status": "not_available",
+    "candidate_id": null,
+    "candidate_identity_sha256": null,
+    "candidate_identity_keccak256": null,
+    "source_commit": null,
+    "release_build": null,
+    "genesis_profile_sha256": null,
+    "grant_map_sha256": null,
+    "blockers": [
+      "structured_candidate_identity_not_available",
+      "candidate_bound_grant_map_not_available",
+      "deployed_runtime_bindings_not_available"
+    ]
+  },
+  "retained_evidence": [
+    {
+      "phase": "public_beta",
+      "status": "missing",
+      "path": "deployments/record-family-authorization/public-beta-record-family-authorization-evidence.json",
+      "schema_version": "6529stream.record-family-authorization-evidence.v1",
+      "template_path": "deployments/record-family-authorization/record-family-authorization-evidence-template.json",
+      "blockers": ["reviewed_public_beta_evidence_not_available"]
+    },
+    {
+      "phase": "production_release",
+      "status": "missing",
+      "path": "deployments/record-family-authorization/production-release-record-family-authorization-evidence.json",
+      "schema_version": "6529stream.record-family-authorization-evidence.v1",
+      "template_path": "deployments/record-family-authorization/record-family-authorization-evidence-template.json",
+      "blockers": ["reviewed_production_evidence_not_available"]
+    }
+  ],
+  "blockers": [
+    "implementation_not_supported_in_this_slice",
+    "record_type_ids_not_pinned",
+    "authorization_class_ids_not_pinned",
+    "family_to_authorization_class_mapping_not_pinned",
+    "classifier_host_interface_marker_revision_not_pinned",
+    "snapshot_family_intersection_not_observable",
+    "grant_map_not_available",
+    "candidate_binding_not_available",
+    "deployed_runtime_evidence_not_available",
+    "rotation_revocation_evidence_not_available",
+    "independent_review_not_available",
+    "whole_module_authorization_present"
+  ]
+}

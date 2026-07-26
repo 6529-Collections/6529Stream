@@ -39,8 +39,10 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: canonical-deployment-plan-check
 .PHONY: governed-parameter-identifiers-check
 .PHONY: governed-parameter-inventory-check
+.PHONY: record-family-authorization-check
 check: governed-parameter-identifiers-check
 check: governed-parameter-inventory-check
+check: record-family-authorization-check
 
 build:
 	forge build
@@ -574,6 +576,10 @@ governed-parameter-identifiers-check:
 governed-parameter-inventory-check:
 	$(PYTHON) scripts/test_governed_parameter_inventory.py
 	$(PYTHON) scripts/check_governed_parameter_inventory.py
+
+record-family-authorization-check:
+	$(PYTHON) scripts/test_record_family_authorization.py
+	$(PYTHON) scripts/check_record_family_authorization.py
 
 system-manifest-payload-vector: genesis-deployment-profile-check governed-parameter-identifiers-check
 	$(PYTHON) scripts/generate_system_manifest_payload_vector.py

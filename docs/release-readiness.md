@@ -187,17 +187,19 @@ Current maturity:
   evidence; current CON-015 fork deployment, fork ceremony, and fork randomizer
   artifacts are pending re-review after deployment/release artifacts changed.
 - Public beta status: blocked by 30 Open first-party production Slither
-  High/Medium findings, High open Governance risk `RISK-GOV-003`, missing
-  external audit, pending fork deployment review, missing testnet deployment
-  evidence, pending fork ceremony review, pending fork randomizer review,
-  verified deployed addresses, and explorer verification.
+  High/Medium findings, open record-family authorization risk `RISK-GOV-002`,
+  High open Governance risk `RISK-GOV-003`, missing external audit, pending fork
+  deployment review, missing testnet deployment evidence, pending fork ceremony
+  review, pending fork randomizer review, verified deployed addresses, and
+  explorer verification.
 - Production release status: blocked by the same 30 Open Slither findings and
-  `RISK-GOV-003`, sub-threshold Core headroom and its confirmed state gap,
-  incomplete instance-aware genesis evidence, an honestly incomplete checked
-  governed-parameter inventory whose concrete host/value/floor/evidence
-  bindings remain unavailable under #684 and `RISK-GOV-004`, missing production signatures,
-  signed Git tags, verified deployed addresses, explorer verification, non-local
-  retained evidence, and post-audit remediation evidence.
+  `RISK-GOV-002` / `RISK-GOV-003`, sub-threshold Core headroom and its confirmed
+  state gap, incomplete instance-aware genesis evidence, an honestly incomplete
+  checked governed-parameter inventory whose concrete
+  host/value/floor/evidence bindings remain unavailable under #684 and
+  `RISK-GOV-004`, missing production signatures, signed Git tags, verified
+  deployed addresses, explorer verification, non-local retained evidence, and
+  post-audit remediation evidence.
 
 This dashboard covers release-readiness evidence only. It does not perform a
 real release, does not create production signatures, and does not assert that
@@ -244,6 +246,17 @@ and independent review tracked by
 [#685](https://github.com/6529-Collections/6529Stream/issues/685) are complete.
 The Governance V2 foundation is pre-audit and not production-ready.
 
+Both release phases also run the record-family authorization checker and
+consume its code-owned hard completion blocker. The current metadata and
+preservation writer model is `as_built_fail_open`: its five mutation selectors
+accept selector/global-admin grants without enforcing the exact record-family
+  authority required by `[CMC-AUTHZ]`. The planning inventory, its schema, the
+  retained-evidence and grant-map schemas, and the template make the missing
+  implementation and evidence explicit, but no JSON edit, environment
+  variable, accepted risk, template, or admin ceremony can waive the stop. Issue
+[#690](https://github.com/6529-Collections/6529Stream/issues/690) and
+`RISK-GOV-002` therefore block both public beta and production.
+
 Strict release mode now proves whether the implementation catalog satisfies the
 canonical
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
@@ -275,6 +288,7 @@ that stricter decision, so #684 and `RISK-GOV-004` remain open.
 | StreamCore deployment headroom | The last committed measurement passes the ordinary development floor at 24,152 runtime bytes and 424 bytes of EIP-170 margin. ADR 0017 avoids planned bytecode growth but does not shrink that Core; the normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
 | Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory now pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, sale-adapter/delegate-gate coverage, callback-provider coverage, and the shared Core completion buffer. Its candidate bindings remain honestly `not_available` and its guarded-consumer lists remain `planning`; production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are not yet complete. Self-reported complete candidates remain categorically rejected until #656 supplies the structured candidate reconciliation model, and self-reported complete evidence is rejected until #684 adds candidate-instance-bound measurement/cadence, reproduction, and reachable-raise-chain semantics. Issue #684 stays open; the shared-buffer code/tests/evidence remain open under #671; and `RISK-GOV-004` plus `--require-complete` make this a non-waivable production gate | No | Yes |
+| Record-family authorization | The checked planning inventory pins five selector/global-admin mutation surfaces, eight authorization classes, fourteen family groups, and eight fail-open behaviors. The retained-evidence and strict grant-map schemas plus the template require candidate, classifier, grant-map, snapshot-intersection, lifecycle, phase, runtime, and independent-review bindings, but current contracts enforce none of that family-scoped policy; issue #690 and `RISK-GOV-002` remain open | Yes | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
@@ -355,6 +369,20 @@ The current local baseline includes:
   ADR 0017 is a direct release-manifest governance document and a direct
   checksum-generator input, so any change to the raise-only target invalidates
   both artifacts until their canonical regeneration;
+- the canonical, non-generated release-tool call policy and schema under
+  `release-artifacts/release-tool-call-policy.json`
+  and
+  [`release-artifacts/schema/release-tool-call-policy.v1.schema.json`](../release-artifacts/schema/release-tool-call-policy.v1.schema.json).
+  The policy binds the exact 21 runtime and nine focused-test source rows by
+  role, hash, size, and reviewed import/member/call multisets. Code separately
+  pins the seven roots, those exact 30 paths, and allowed dangerous-capability
+  membership, so the policy cannot expand its own authority. The release
+  manifest and candidate lockfile bind both files by exact path, SHA-256, byte
+  size, and schema identity/version; both checksum indexes cover them, the
+  offline verifier consumes immutable covered-file snapshots, and public-beta
+  plus production release mode fail closed when validation fails. The revised
+  canonical projection is exactly 242 configured roots and 408 covered-file
+  entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
   its
@@ -363,6 +391,36 @@ The current local baseline includes:
   `scripts/check_governed_parameter_inventory.py` pair. The ordinary check
   proves exact policy and honest incompleteness; it does not satisfy the
   production-only `--require-complete` decision;
+- the planning-only record-family authorization inventory, schemas, and
+  template under
+  [`release-artifacts/record-family-authorization-inventory.json`](../release-artifacts/record-family-authorization-inventory.json),
+  [`release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`](../release-artifacts/schema/record-family-authorization-inventory.v1.schema.json),
+  [`deployments/schema/record-family-authorization-evidence.v1.schema.json`](../deployments/schema/record-family-authorization-evidence.v1.schema.json),
+  [`deployments/schema/record-family-authorization-grant-map.v1.schema.json`](../deployments/schema/record-family-authorization-grant-map.v1.schema.json),
+  and
+  [`deployments/record-family-authorization/record-family-authorization-evidence-template.json`](../deployments/record-family-authorization/record-family-authorization-evidence-template.json).
+  Run `python scripts/test_record_family_authorization.py` and
+  `python scripts/check_record_family_authorization.py`. A future complete
+  envelope must bind its `grant_map.path` to the separate phase- and
+  candidate-bound `public-beta-record-family-authorization-grant-map.json` or
+  `production-release-record-family-authorization-grant-map.json` artifact in
+  `deployments/record-family-authorization/`; production evidence also
+  hash-binds and fully revalidates the canonical public-beta retained envelope.
+  Record-family semantic revalidation binds exactly four contract inputs:
+  `smart-contracts/StreamCollectionMetadata.sol`,
+  `smart-contracts/IStreamCollectionMetadata.sol`,
+  `smart-contracts/StreamPreservationRecords.sol`, and
+  `smart-contracts/IStreamPreservationRecords.sol`. These are four exact
+  checksum roots and entries, not broad `smart-contracts/` coverage. The
+  offline verifier snapshots the complete 408-entry canonical set, materializes
+  it under a temporary root, and loads the checker and all four inputs there;
+  record-family semantic validation has no live-path fallback after snapshot
+  acquisition.
+  The release manifest and candidate lockfile both bind the inventory,
+  inventory schema, evidence schema, grant-map schema, and template records.
+  The checksum bundle binds the package plus checker/tests, and the
+  offline verifier revalidates both semantic and cross-artifact bindings. These
+  are planning controls, not implementation or readiness evidence;
 - protocol surface report guidance and generated output under
   [`docs/protocol-surface.md`](protocol-surface.md) and
   [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json),
@@ -386,8 +444,9 @@ The current local baseline includes:
   covered by `python scripts/test_release_candidate_lockfile.py` and
   `python scripts/generate_release_candidate_lockfile.py --check`, which ties
   release manifest, bytecode proof, evidence status, risk register, blocker
-  reports, release notes, release-signature evidence, and explicit non-release
-  commit/tag/signature status without claiming launch readiness;
+  reports, release notes, release-signature evidence, the release-tool call
+  policy/schema records, and explicit non-release commit/tag/signature status
+  without claiming launch readiness;
 - generated risk register under
   [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json),
   backed by
@@ -895,6 +954,11 @@ python scripts/check_non_local_release_evidence.py
 ```
 
 Run the release evidence drift checks:
+
+The release-tool call policy and schema are manually reviewed upstream inputs,
+not generated outputs. Review any required policy update before running the
+canonical generated tail in dependency order: risk register, release notes,
+release manifest, bytecode proof, candidate lockfile, then checksum bundle.
 
 ```sh
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md

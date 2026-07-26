@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/release-tool-call-policy.v1.schema.json",
+  "title": "6529Stream Release Tool Call Policy v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generator_version",
+    "runtime_roots",
+    "external_modules",
+    "reviewed_paths"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.release-tool-call-policy.v1"
+    },
+    "generator_version": {
+      "const": "1"
+    },
+    "runtime_roots": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "prefixItems": [
+        {"const": "scripts/generate_risk_register.py"},
+        {"const": "scripts/generate_release_notes.py"},
+        {"const": "scripts/generate_release_manifest.py"},
+        {"const": "scripts/generate_bytecode_release_proof.py"},
+        {"const": "scripts/generate_release_candidate_lockfile.py"},
+        {"const": "scripts/generate_release_checksums.py"},
+        {"const": "scripts/verify_release_artifacts.py"}
+      ],
+      "items": false
+    },
+    "external_modules": {
+      "type": "array",
+      "minItems": 29,
+      "maxItems": 29,
+      "uniqueItems": true,
+      "prefixItems": [
+        {"const": "Crypto.Hash"},
+        {"const": "__future__"},
+        {"const": "argparse"},
+        {"const": "ast"},
+        {"const": "collections"},
+        {"const": "contextlib"},
+        {"const": "copy"},
+        {"const": "datetime"},
+        {"const": "eth_hash.auto"},
+        {"const": "filecmp"},
+        {"const": "hashlib"},
+        {"const": "importlib"},
+        {"const": "importlib.util"},
+        {"const": "io"},
+        {"const": "json"},
+        {"const": "jsonschema"},
+        {"const": "jsonschema.exceptions"},
+        {"const": "os"},
+        {"const": "pathlib"},
+        {"const": "re"},
+        {"const": "shlex"},
+        {"const": "shutil"},
+        {"const": "stat"},
+        {"const": "subprocess"},
+        {"const": "sys"},
+        {"const": "tempfile"},
+        {"const": "typing"},
+        {"const": "unicodedata"},
+        {"const": "unittest"}
+      ],
+      "items": false
+    },
+    "reviewed_paths": {
+      "type": "array",
+      "minItems": 30,
+      "maxItems": 30,
+      "uniqueItems": true,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_admin_ceremony_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_changelog.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_drop_authorization_signing_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_identifiers.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_inventory.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_non_local_release_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_public_beta_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_record_family_authorization.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_release_evidence_issue_links.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_release_signatures.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_risk_register.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_signer_custody_readiness.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_slither_baseline.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_bytecode_release_proof.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_candidate_lockfile.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_checksums.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_manifest.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_notes.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_risk_register.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/release_evidence_paths.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_admin_ceremony_evidence.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_bytecode_release_proof.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_changelog_check.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_drop_authorization_signing_evidence.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_non_local_release_evidence.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_record_family_authorization.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_release_notes.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_release_signatures.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_signer_custody_readiness.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/verify_release_artifacts.py"}, "role": {"const": "runtime"}}}
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "reviewedPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "role",
+        "source_sha256",
+        "size_bytes",
+        "imports",
+        "members",
+        "calls"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^scripts/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\\.py$"
+        },
+        "role": {
+          "enum": [
+            "runtime",
+            "focused-test"
+          ]
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "imports": {
+          "$ref": "#/$defs/recordMultiset"
+        },
+        "members": {
+          "$ref": "#/$defs/recordMultiset"
+        },
+        "calls": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/callRecord"
+          }
+        }
+      }
+    },
+    "recordMultiset": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/countRecord"
+      }
+    },
+    "countRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record",
+        "count"
+      ],
+      "properties": {
+        "record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "callRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target",
+        "shape",
+        "ast_sha256",
+        "count"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "shape": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ast_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    }
+  }
+}

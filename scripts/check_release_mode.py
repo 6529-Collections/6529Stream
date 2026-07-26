@@ -12,8 +12,10 @@ from typing import Any
 import check_public_beta_evidence as evidence_checker
 import check_genesis_deployment_profile as genesis_profile_checker
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import check_record_family_authorization as record_family_authorization_checker
 import check_risk_register as risk_register_checker
 import check_slither_baseline as slither_baseline_checker
+import generate_release_checksums as release_checksum_policy
 
 
 DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
@@ -26,6 +28,12 @@ DEFAULT_GOVERNED_PARAMETER_INVENTORY = (
 DEFAULT_RISK_REGISTER = risk_register_checker.DEFAULT_REGISTER
 DEFAULT_SLITHER_BASELINE = slither_baseline_checker.DEFAULT_BASELINE
 DEFAULT_SLITHER_MARKDOWN = slither_baseline_checker.DEFAULT_MARKDOWN
+DEFAULT_RELEASE_TOOL_CALL_POLICY = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_PATH
+)
+DEFAULT_RELEASE_TOOL_CALL_POLICY_SCHEMA = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH
+)
 PUBLIC_BETA_PHASE = evidence_checker.PUBLIC_BETA_PHASE
 PRODUCTION_PHASE = evidence_checker.PRODUCTION_PHASE
 
@@ -238,6 +246,11 @@ def governed_parameter_completeness_blockers(
     ]
 
 
+def record_family_authorization_blockers(repo_root: Path) -> list[str]:
+    """Validate #690's canonical package and retain its hard release stop."""
+    return record_family_authorization_checker.completion_blockers(repo_root)
+
+
 def accepted_risk_blocker(
     requirement: dict[str, Any], as_of: date
 ) -> str | None:
@@ -321,12 +334,14 @@ def validate_release_mode(
 ) -> None:
     """Require retained evidence to satisfy the selected release mode."""
     normalized_phase = normalize_phase(phase)
+    release_checksum_policy.validate_release_tool_call_policy(repo_root)
     data = load_validated_evidence(path, repo_root)
     blockers = release_mode_blockers(data, normalized_phase, as_of=as_of)
     blockers.extend(
         slither_baseline_blockers(slither_baseline, slither_markdown, repo_root)
     )
     blockers.extend(governance_native_value_blockers(risk_register, repo_root))
+    blockers.extend(record_family_authorization_blockers(repo_root))
     if normalized_phase == PRODUCTION_PHASE:
         governed_parameter_inventory_checker.validate_inventory(
             repo_root,
@@ -433,8 +448,10 @@ def main(argv: list[str] | None = None) -> int:
         evidence_checker.PublicBetaEvidenceError,
         genesis_profile_checker.GenesisProfileError,
         governed_parameter_inventory_checker.GovernedParameterInventoryError,
+        record_family_authorization_checker.RecordFamilyAuthorizationError,
         risk_register_checker.RiskRegisterError,
         slither_baseline_checker.SlitherBaselineError,
+        release_checksum_policy.ChecksumError,
         ReleaseModeError,
     ) as exc:
         print(f"release mode check failed: {exc}", file=sys.stderr)
