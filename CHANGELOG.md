@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added proposed ADR 0020 for issue #667's executor-only, append-only artwork
+  finality recovery architecture. The proposal assigns pending-action
+  lifecycle ownership to Governance V2, uses a dedicated Core discovery
+  pointer and recovery-aware metadata-router serving path, and pins route
+  lineage, artist-consent, owner-notice, permanent-verification, and indexer
+  migration requirements for later implementation. Current LTA/LCM recovery
+  semantics remain authoritative: the ADR freezes no ABI, changes no contract,
+  and does not advance maturity or release readiness.
 - Added proposed ADR 0019 for issue #664's payer-bound ERC-20 settlement
   orchestration. The provisional boundary separates contract `20` payer
   authorization/funding from sale-adapter authority and contract `9`
