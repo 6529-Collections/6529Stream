@@ -35,6 +35,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0019-payment-intent-orchestration.md`](0019-payment-intent-orchestration.md) | Proposed | [#664](https://github.com/6529-Collections/6529Stream/issues/664) contract-20 payer boundary and narrow sale/revenue settlement callbacks |
 | [`0020-executor-only-finality-recovery.md`](0020-executor-only-finality-recovery.md) | Proposed | [#667](https://github.com/6529-Collections/6529Stream/issues/667); executor-only append-only recovery with dedicated Core pointer and recovery-aware serving; owner evidence and serving integration remain acceptance blockers; current LTA/LCM remain authoritative |
 | [`0021-immutable-revenue-resolver-validation-adapter.md`](0021-immutable-revenue-resolver-validation-adapter.md) | Accepted | [#670](https://github.com/6529-Collections/6529Stream/issues/670); source implementation remains blocked pending the independently approved normative interface freeze |
+| [`0022-immutable-artist-registry-validation-adapter.md`](0022-immutable-artist-registry-validation-adapter.md) | Proposed | [#670](https://github.com/6529-Collections/6529Stream/issues/670); artist-registry implementation remains blocked pending explicit architecture acceptance and interface freeze |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

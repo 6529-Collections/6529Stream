@@ -58,6 +58,16 @@ the release policy in `docs/release-policy.md`.
   until the complete normative interface appendix and freeze commit are
   independently approved; acceptance changes no contract, ABI, profile,
   deployment, maturity, or readiness state.
+- Added proposed ADR 0022 for issue #670's size-feasible artist-registry
+  architecture: one registered, state-owning `StreamArtistRegistry` plus one
+  immutable, stateless, implementation-private validation adapter. The
+  proposal preserves the Permanent artist interfaces and Core ABI, forbids
+  advertised zero stubs and multiple state owners, and pins exact-code,
+  canonical-transcript, bounded-dynamic-input, gas-governance, deployment, and
+  dual-size requirements. Release-manifest and checksum source policies now
+  bind the ADR directly, expanding the canonical projection to 254 roots and
+  421 files. The ADR remains Proposed, authorizes no implementation, and
+  changes no contract, profile, maturity, or readiness state.
 - Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver
   architecture: one registered, state-owning `StreamRevenueResolver` plus one
   immutable, stateless, implementation-private validation adapter. The

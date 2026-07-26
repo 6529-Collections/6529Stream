@@ -424,7 +424,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "5e955953a42793500ef82be9aa8846fb4576f4798f0b02d7252c02f66c36baa5",
+        "8e562027c21cf92ae6d9a85cc6cbcbf92723a2f3bf83464eff60b364c9cdd7b0",
         169_071,
     ),
 }
@@ -620,6 +620,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/adr/0016-core-native-only-erc721.md"),
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
+    Path("docs/adr/0022-immutable-artist-registry-validation-adapter.md"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),

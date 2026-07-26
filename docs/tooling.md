@@ -1425,8 +1425,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 253 configured roots,
-expanding to exactly 420 covered-file entries in each checksum index. The twelve
+The revised canonical projection contains exactly 254 configured roots,
+expanding to exactly 421 covered-file entries in each checksum index. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
 `smart-contracts/` or `script/`.

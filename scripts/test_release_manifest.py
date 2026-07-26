@@ -2075,6 +2075,32 @@ class ReleaseManifestTests(unittest.TestCase):
             ],
         )
 
+    def test_default_governance_docs_cover_artist_adapter_adr(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        relative_path = Path(
+            "docs/adr/0022-immutable-artist-registry-validation-adapter.md"
+        )
+        self.assertIn(relative_path, generator.DEFAULT_GOVERNANCE_DOCS)
+        absolute_path = repo_root / relative_path
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+        matching_records = [
+            record
+            for record in manifest["release_notes_and_policy"]["governance_docs"]
+            if record["path"] == relative_path.as_posix()
+        ]
+        self.assertEqual(
+            matching_records,
+            [
+                {
+                    "path": relative_path.as_posix(),
+                    "sha256": generator.file_sha256(absolute_path),
+                    "size_bytes": absolute_path.stat().st_size,
+                }
+            ],
+        )
+
     def test_default_governance_docs_close_genesis_normative_anchors(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         profile = json.loads(

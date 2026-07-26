@@ -105,8 +105,8 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:40dbc029c53f3e69f6554b720bbf93a795f14dc5a4d0e27a4db58ffd1e8d588c",
-        "size_bytes": 2159128,
+        "sha256": "sha256:a7904760aa76d707bcd9b765d35e6403bdfa16d3da3af0ff12f3f4a88d1bfd88",
+        "size_bytes": 2159578,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
       "schema": {
@@ -169,14 +169,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:d4cc153bddb5855717696b40fed3a119201804ef532b7416a76109975e72b44b",
-        "size_bytes": 134412,
+        "sha256": "sha256:9e3ce75916401f49de84ab96203d97c394fa856f1950af29508517ec00330871",
+        "size_bytes": 135136,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:b4e1dfc64a8e863bde853d2097be3f452a20fe455c19e4e7b18db363572b2a3b",
-        "size_bytes": 130995
+        "sha256": "sha256:82cf90c1bba2fc039eaac167133c5c5b207d96078172db0be674c69a22f37f3d",
+        "size_bytes": 131712
       }
     },
     "release_candidate_lockfile": {
@@ -253,7 +253,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:1c952670e5401ac1fa234717985d85ccd2847bbad13fc6da4f225f9e73f1a8b6",
+      "sha256": "sha256:bc5242e3b0b9cefb6d21cbd222dce4113831054ddb0905a4362330520a46d73e",
       "size_bytes": 32843,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2451,8 +2451,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:8c1f0487559c4e9eae8f27f58fba52b1b69b757dd067ece83add65be5b76d5ea",
-      "size_bytes": 133185
+      "sha256": "sha256:123662974527047c49bb158796eed2a9f43197865efec0b1a522bdbe829a9eab",
+      "size_bytes": 133920
     },
     "governance_docs": [
       {
@@ -2547,8 +2547,8 @@
       },
       {
         "path": "docs/adr/README.md",
-        "sha256": "sha256:010bc2b65bc34e64b2de0671035c6d4e180731f4f1414e3f6942e7bd81e1aebf",
-        "size_bytes": 4572
+        "sha256": "sha256:aec8ed5549ac22face417cbcaa80ee7e5b84bdc9d16d0c427f2444faaedd60c2",
+        "size_bytes": 4876
       },
       {
         "path": "docs/adr/0004-admin-governance.md",
@@ -2609,6 +2609,11 @@
         "path": "docs/adr/0018-batch-operation-root-and-token-identity.md",
         "sha256": "sha256:26f76965c30e7c18bd9fa4ca56198b9886a91b6c24ced520ceef68645220fe23",
         "size_bytes": 24512
+      },
+      {
+        "path": "docs/adr/0022-immutable-artist-registry-validation-adapter.md",
+        "sha256": "sha256:427b2aa053501b8bc286a9e0d44612f9270e0ea9b8b4381694724ae42c7c6cb0",
+        "size_bytes": 24297
       },
       {
         "path": "docs/revenue-splits-and-royalties.md",
@@ -2732,7 +2737,7 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:f3a3bc9fc153e3d77a611da5e2179eaab55c125a9a4456c9c4c82ef8db1bb0d3",
+        "sha256": "sha256:17aed469eebb8d5d27fa2448ccde6d71ca293b8433045cd397d5a901aaef9fc5",
         "size_bytes": 78390
       },
       {
@@ -2848,7 +2853,7 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:87f64ca2dde87360500280dcdaad21a772b6644d691a8416a3b3387ff065b071",
+        "sha256": "sha256:f1831d027ec9fe33cc81af72b81e463ff37be2da7a8373f16d17a6882eac5bc4",
         "size_bytes": 119098
       },
       {
