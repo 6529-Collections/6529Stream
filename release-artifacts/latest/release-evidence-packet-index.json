@@ -9,7 +9,7 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:64799f5e2858af8e862079dba5b139ac742186e55b355d82a94ad59b7169e508",
+      "sha256": "sha256:3dc9234b7f2d744b4c1d7265a00ab56bab2bc3f7a55c2313a4c3b2281bf71402",
       "size_bytes": 10255
     },
     "public_beta_blocker_report": {
@@ -442,7 +442,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:5f14ad5d2925ed6c721bc3c1a54d4583822eb060085f0d691174d62d451091ab",
+        "sha256": "sha256:e4475aabfe6629d9f338575e9a414d297848f9a710e1206954644330b5b6ab10",
         "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
         "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."
