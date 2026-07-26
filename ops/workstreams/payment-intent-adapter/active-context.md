@@ -113,6 +113,15 @@ consent, modules, gate behavior, counters, caps, and increments always govern.
 The predecessor supplies authorization continuity only and cannot be treated as
 live economics or consent.
 
+For `PRE_REVENUE_SINGLE_STEP`, the sale adapter calls exact manager preview
+selector `0xa5651f13` before its execution record, authorization consumption,
+or settlement effects. The manager observes the adapter as `msg.sender`,
+validates configured gate equality or exact ungated zero/NONE/empty-nullifier
+normalization, and returns the root plus the full operation-ID vector. The
+adapter later compares the manager execution return byte-for-byte and any
+preview, gate, race, root, length, value, or ordering mismatch rolls the whole
+transaction back.
+
 Contract 20 remains the sole protocol payer boundary and pull initiator. It
 calls the token directly on allowance/EIP-2612 paths; pinned Permit2 is the
 actual ERC-20 `transferFrom` caller on its SignatureTransfer branch, for which

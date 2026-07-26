@@ -17,8 +17,12 @@ the release policy in `docs/release-policy.md`.
   counters, caps, and increments remain authoritative. Settlement preview,
   execution, replay, results, and event evidence carry the operation root plus
   current/bound identities without treating predecessor policy as live
-  economics or consent. The ADR remains Proposed, freezes no ABI, changes no
-  contract, and does not advance maturity or release readiness.
+  economics or consent. The exact manager-owned single-step preview selector,
+  adapter-as-caller semantics, configured-gate equality, ungated
+  zero/NONE/empty-nullifier normalization, preview-before-effect order, and
+  full root/operation-ID-vector comparison are pinned for later implementation.
+  The ADR remains Proposed, freezes no ABI, changes no contract, and does not
+  advance maturity or release readiness.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
   `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a

@@ -43,6 +43,8 @@ adapter implementation.
 - payer, asset, amount, sale reference, policy hash, nonce, and deadline binding
 - exact ADR-0018 operation-root plus current/bound mint-policy propagation,
   including current-only consent, module, gate, counter, and cap enforcement
+- exact manager preview selector/caller/return semantics, configured-gate
+  equality, ungated normalization, and full preview/execution vector comparison
 - checks-effects-interactions before every allowance pull
 - exact token deltas, active asset policy, accounting, and atomic rollback
 - replay, expiry, revocation, substitution, signer separation, malformed

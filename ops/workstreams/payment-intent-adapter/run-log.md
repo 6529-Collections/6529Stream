@@ -127,3 +127,10 @@
   execution/replay, result, and event evidence carries the root plus
   current/bound identities without treating predecessor policy as live
   economics or consent.
+- Independent incremental review found that the first import omitted the exact
+  manager-owned single-step preview ABI/caller/order and configured/ungated gate
+  normalization. Corrected ADR 0019 to pin selector `0xa5651f13`, exact
+  `(operationRoot, operationIds)` return, adapter-as-`msg.sender` identity,
+  configured authorization-ID/authorizer/address-kind equality, ungated
+  zero/NONE/zero/zero plus empty-nullifier normalization, preview-before-effect
+  ordering, and whole-transaction rollback on root or full-vector mismatch.

@@ -203,6 +203,31 @@ event surfaces. This ADR does not redefine either preimage or create a parallel
 replay namespace. The provisional field name remains subject to the final ABI
 freeze, but its value cannot be zero, locally re-hashed, or lossily re-encoded.
 
+The imported single-step preview ABI is exact:
+
+```solidity
+function previewSingleStepMintOperation(
+    MintBatch calldata batch,
+    bytes calldata gateData
+) external view returns (
+    bytes32 operationRoot,
+    bytes32[] memory operationIds
+);
+```
+
+Its selector is `0xa5651f13`, derived from
+`previewSingleStepMintOperation((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)`.
+The sale adapter calls this manager-owned view before any sale execution record,
+sale-authorization consumption, settlement-key consumption, deposit, payer
+pull, or mint effect. The manager therefore observes the adapter itself as
+`msg.sender` and binds that address as executor; it never binds the adapter's
+external caller, payer, relayer, or `tx.origin`. The preview invokes the
+configured gate and resolvers from the manager, reads the current
+`nextOperationNonce`, and uses byte-identical normalization and identity
+derivation with execution. It is `STATICCALL`-safe, emits and writes nothing,
+consumes no replay state, and returns exactly `batch.beneficiaries.length`
+operation IDs.
+
 `currentPolicyHash` and `boundPolicyHash` import ADR 0018's policy
 identity boundary without changing its ownership:
 
@@ -222,6 +247,18 @@ identity boundary without changing its ownership:
   predecessor economics or consent, bypass current modules or gates, weaken
   current caps, revive a deprecated sale/payment adapter, or substitute for
   the independently current approved-asset and primary-revenue policies.
+- With a configured gate, the normalized result requires
+  `GateResult.authorizationId == MintBatch.authorizationId`,
+  `GateResult.authorizer == MintBatch.authorizer`, and an authorizer kind valid
+  for that same address; the gate's signed payload and validated result bind
+  `MintBatch.expectedPolicyHash`. Without a gate, normalized authorizer,
+  authorizer kind, maximum quantity, and gate hash are exactly
+  `(address(0), AuthorizerKind.NONE, 0, bytes32(0))`; `MintBatch.authorizer` is
+  zero and canonical nullifiers are empty. Ungated execution never infers an
+  authorizer or kind from caller, payer, account code, or phase data.
+  `MintBatch.authorizationId` remains explicit and nonzero in both cases; an
+  ungated path consumes that request value and never infers it from the root,
+  context, or presentation bytes.
 
 These mint-policy fields are distinct from
 `sale.expectedPrimaryPolicyHash`, which remains the exact primary-revenue
@@ -639,10 +676,19 @@ The two callback orderings are distinct:
 
 ```text
 PRE_REVENUE_SINGLE_STEP
-  -> validate sale state, signed-or-public authority branch, price, payer,
-     authenticated top-level executor, asset, amount, recipients, policy
-     hashes, exact previewed operation root, current/bound mint-policy identity,
-     unique execution identity/nonce, and deadline
+  -> validate the immutable sale/payment/executor inputs needed to construct the
+     exact MintBatch and gateData, without writing an execution record or
+     consuming sale authorization
+  -> sale adapter calls manager preview selector 0xa5651f13; manager observes
+     the adapter as msg.sender, validates current/bound policy identity,
+     configured GateResult equality or exact ungated normalization, and all
+     canonical gate/resolver results
+  -> require nonzero preview root equal to the candidate operation root and
+     exactly N nonzero, pairwise-distinct operationIds; retain the full vector
+     for the later execution comparison
+  -> finish sale state, signed-or-public authority, price, payer, authenticated
+     top-level executor, asset, amount, recipients, unique execution
+     identity/nonce, and deadline validation
   -> create and mark only the unique execution SETTLEMENT_IN_PROGRESS;
      consume/emit SaleAuthorization only on the signed branch
   -> call contract 9 directly with the calling payment adapter and candidate
@@ -650,8 +696,10 @@ PRE_REVENUE_SINGLE_STEP
      fundERC20PrimarySale exactly once
   -> contract 9 routes and records official revenue
   -> call manager, ledger, and Core single-step mint
-  -> verify exact contract-9 result, mark the execution SETTLED, and emit its
-     terminal status without closing the durable sale program
+  -> require the manager return to match the exact previewed root and the full
+     operationIds vector byte-for-byte; verify the exact contract-9 result,
+     mark the execution SETTLED, and emit its terminal status without closing
+     the durable sale program
   -> return the pre-revenue callback magic and exact contract-9 result
 
 PREPARED_MINT
@@ -678,7 +726,11 @@ minting before official revenue settlement is nonconformant. Contract `20`
 rejects missing or malformed callback return data, the other order's magic, no
 funding callback, a returned settlement key different from the key accepted
 during funding, or a result that differs from contract `9`'s recorded result
-for that key.
+for that key. Any preview failure, configured-gate mismatch, ungated
+normalization mismatch, nonce/policy/gate/resolver race, manager root mismatch,
+or operation-ID length/value/order mismatch reverts the whole transaction and
+leaves no execution record, authorization consumption, settlement, payment, or
+mint effect.
 
 The seam introduces no new `operationRoot`, per-token `operationId`,
 mint-ledger replay key, or prepared-mint replay rule. It imports and binds the
@@ -1312,6 +1364,16 @@ The frozen revision must publish and golden-test:
 
 - exact Solidity interfaces, canonical tuple field names
   (`saleNonce`, `expectedPrimaryPolicyHash`), signatures, and numeric selectors;
+- exact manager preview selector `0xa5651f13`, canonical
+  `previewSingleStepMintOperation(MintBatch,bytes)` tuple signature, return
+  order `(operationRoot, operationIds)`, adapter-as-`msg.sender` executor
+  semantics, `STATICCALL`-safe no-write/no-event/no-consumption behavior, and
+  exactly-`N` operation-ID cardinality;
+- preview-before-execution-record ordering, configured
+  `GateResult.authorizationId`/authorizer/address-kind equality, exact ungated
+  `(address(0), AuthorizerKind.NONE, 0, bytes32(0))` plus empty-nullifier
+  normalization, and the final byte-for-byte preview-versus-manager
+  root/full-vector comparison with whole-transaction rollback;
 - ERC-165 interface IDs;
 - module types, module versions, schema hashes, and callback magic values;
 - the exact fixed returndata length for each order-specific callback and every
@@ -1489,6 +1551,20 @@ The implementation PRs must prove:
   sale execution record, settlement result, and central events expose the same
   current/bound pair, while subordinate consumption facts expose the bound hash
   and join through the root;
+- selector `0xa5651f13` decodes only the exact
+  `previewSingleStepMintOperation(MintBatch,bytes)` ABI and returns one nonzero
+  root plus exactly `N` nonzero, pairwise-distinct operation IDs without state,
+  event, nonce, authorization, nullifier, or counter consumption. Caller
+  substitution proves the executor is the sale adapter, never payer, relayer,
+  the adapter's external caller, or `tx.origin`;
+- configured preview rejects mismatched `GateResult.authorizationId`,
+  authorizer, address-kind, expected-policy binding, gate result, and nullifier
+  data. Ungated preview rejects a nonzero authorizer, non-`NONE` kind, nonzero
+  normalized maximum/hash, or nonempty canonical nullifiers;
+- preview/gate/resolver failure occurs before the sale execution record or
+  signed-authorization consumption. A nonce/policy/gate/resolver race,
+  manager-returned root mismatch, or any full-vector length/value/order mismatch
+  reverts the settlement, payment, execution/replay, and mint state together;
 - EOA zero recovery, high-`s`, bad-`v`, wrong signer, signer separation,
   EIP-7702 observation, maximum supported ERC-1271 wallet classes, malformed
   return, oversized return, wrong magic, revert, and gas exhaustion;
