@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from no_secret_scanner import NoSecretScanError, scan_json_no_secrets
+
 
 EVIDENCE_SCHEMA = "6529stream.drop-authorization-signing-evidence.v1"
 PAYLOAD_SCHEMA = "6529stream.drop-authorization-payload.v1"
@@ -129,27 +131,6 @@ GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 HEX32_RE = re.compile(r"^0x[0-9a-fA-F]{64}$")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
-SECRET_KEY_RE = re.compile(
-    r"(^|[_\-\s])("
-    r"private[_\-\s]?key|mnemonic|seed[_\-\s]?phrase|rpc[_\-\s]?url|"
-    r"api[_\-\s]?key|password|unreleased[_\-\s]?drop[_\-\s]?payload|"
-    r"raw[_\-\s]?signature|bearer[_\-\s]?token"
-    r")([_\-\s]|$)"
-    r"|(^|[_\-\s])client[_\-\s]?secret([_\-\s]|$)"
-    r"|(^|[_\-\s])secret$",
-    re.IGNORECASE,
-)
-# NOTE: SECRET_KEY_RE intentionally catches any key whose final segment is
-# "secret". Add legitimate metadata keys such as "no_secret" here before use.
-SAFE_SECRET_POLICY_KEYS = frozenset({"redaction_policy", "no_secrets", "redacted_fields"})
-SECRET_VALUE_RE = re.compile(
-    r"\b(private[_ -]?key|mnemonic|seed[_ -]?phrase|rpc[_ -]?url|api[_ -]?key|"
-    r"password|client[_ -]?secret|bearer[_ -]?token|raw[_ -]?signature|"
-    r"unreleased[_ -]?drop[_ -]?payload)\s*[:=]",
-    re.IGNORECASE,
-)
-
-
 class DropAuthorizationSigningEvidenceError(RuntimeError):
     """Raised when drop authorization signing evidence is invalid."""
 
@@ -359,20 +340,10 @@ def validate_redaction_policy(value: Any) -> None:
 
 def scan_for_secret_like_data(value: Any, path: str = "$") -> None:
     """Reject secret-shaped keys and values in committed evidence."""
-    if isinstance(value, dict):
-        for key, item in value.items():
-            key_text = str(key)
-            key_lower = key_text.lower()
-            if key_lower not in SAFE_SECRET_POLICY_KEYS and SECRET_KEY_RE.search(key_text):
-                raise DropAuthorizationSigningEvidenceError(
-                    f"secret-like key found at {path}.{key_text}"
-                )
-            scan_for_secret_like_data(item, f"{path}.{key_text}")
-    elif isinstance(value, list):
-        for index, item in enumerate(value):
-            scan_for_secret_like_data(item, f"{path}[{index}]")
-    elif isinstance(value, str) and SECRET_VALUE_RE.search(value):
-        raise DropAuthorizationSigningEvidenceError(f"secret-like value found at {path}")
+    try:
+        scan_json_no_secrets(value, path)
+    except NoSecretScanError as exc:
+        raise DropAuthorizationSigningEvidenceError(str(exc)) from exc
 
 
 def stringified(value: Any) -> str:

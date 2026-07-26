@@ -132,6 +132,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/generate_release_manifest.py"),
     Path("scripts/generate_release_notes.py"),
     Path("scripts/generate_risk_register.py"),
+    Path("scripts/no_secret_scanner.py"),
     Path("scripts/release_evidence_paths.py"),
     Path("scripts/verify_release_artifacts.py"),
 )
@@ -223,7 +224,6 @@ scripts/check_changelog.py|subprocess.PIPE|subprocess.run|keyword:stderr
 scripts/check_changelog.py|subprocess.PIPE|subprocess.run|keyword:stdout
 scripts/check_changelog.py|sys.stderr|local:print|keyword:file
 scripts/check_drop_authorization_signing_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_drop_authorization_signing_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_drop_authorization_signing_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_drop_authorization_signing_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_governed_parameter_identifiers.py|pathlib.Path|local:parser.add_argument|keyword:type
@@ -240,12 +240,10 @@ scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PRODUCTIO
 scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PUBLIC_BETA_REQUIREMENTS|local:frozenset|arg:0
 scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PUBLIC_BETA_REQUIREMENTS|local:set|arg:0
 scripts/check_non_local_release_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_non_local_release_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_non_local_release_evidence.py|re.MULTILINE|re.compile|arg:1
 scripts/check_non_local_release_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_non_local_release_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_public_beta_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_public_beta_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_public_beta_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_public_beta_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_record_family_authorization.py|jsonschema.Draft202012Validator|<none>|Compare.left
@@ -264,7 +262,6 @@ scripts/check_risk_register.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_risk_register.py|sys.argv|local:main|arg:0
 scripts/check_risk_register.py|sys.stderr|local:print|keyword:file
 scripts/check_signer_custody_readiness.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_signer_custody_readiness.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_signer_custody_readiness.py|sys.argv|local:parse_args|arg:0
 scripts/check_signer_custody_readiness.py|sys.stderr|local:print|keyword:file
 scripts/check_slither_baseline.py|pathlib.Path|local:mode.add_argument|keyword:type
@@ -361,6 +358,7 @@ scripts/generate_risk_register.py|check_slither_baseline.IMPACTS|<none>|comprehe
 scripts/generate_risk_register.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/generate_risk_register.py|sys.argv|local:main|arg:0
 scripts/generate_risk_register.py|sys.stderr|local:print|keyword:file
+scripts/no_secret_scanner.py|re.IGNORECASE|re.compile|arg:1
 scripts/test_record_family_authorization.py|check_record_family_authorization.ADMIN_REJECTION_FAMILY_GROUPS|<none>|Compare.comparators
 scripts/test_record_family_authorization.py|check_record_family_authorization.ADMIN_REJECTION_FAMILY_GROUP_BLOCKERS|local:expected.extend|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.AUTHORIZATION_CLASS_HOME|expression:Subscript:eb818dd54cbe2594957bcb6fa36c5f79070833f16f47ca2c5c2b5f090179ea58.__setitem__|arg:1
@@ -459,9 +457,9 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 242
+CANONICAL_COVERED_PATH_COUNT = 244
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "0f65ab5e3fe0a37886c3096cf8b0b7443e2e6fae796ca1931141ebe4ca073430"
+    "3142e15d9c66ed823bf84af3907501bc505b82b71b5f6e0d6cc7b2f03c0a32a0"
 )
 
 
@@ -2432,8 +2430,8 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 30,
-                "maxItems": 30,
+                "minItems": 31,
+                "maxItems": 31,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
@@ -2749,9 +2747,9 @@ def verify_release_tool_call_policy(
             for path in REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
         },
     }
-    if len(roles) != 30:
+    if len(roles) != 31:
         raise ReleaseArtifactVerificationError(
-            "release-tool call policy requires exactly 21 runtime and 9 "
+            "release-tool call policy requires exactly 22 runtime and 9 "
             "focused-test paths"
         )
     if (

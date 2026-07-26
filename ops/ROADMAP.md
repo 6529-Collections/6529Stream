@@ -103,8 +103,10 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   artifact checker, shared symlink-hardened release evidence retained-path
   helper coverage for non-local, signature, marketplace/indexer, live
   deployment-manifest, live metadata-browser, and production broadcast
-  evidence checkers, and admin ceremony evidence schema/template/checker exist for follow-up evidence
-  retention, while reviewed testnet rehearsals, reviewed admin ceremony
+  evidence checkers, and a shared JSON no-secret scanner for public-beta,
+  non-local, drop-authorization signing, and signer-custody evidence checkers,
+  plus an admin ceremony evidence schema/template/checker, exist for follow-up
+  evidence retention. Reviewed testnet rehearsals, reviewed admin ceremony
   evidence, production broadcast retention, live artifact verification, and
   fork/testnet/live ceremony evidence contents remain open.
   Near-term `StreamCore` bytecode headroom remains a tracked release discipline

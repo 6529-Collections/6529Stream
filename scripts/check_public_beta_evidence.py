@@ -12,6 +12,8 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from no_secret_scanner import NoSecretScanError, scan_json_no_secrets
+
 
 EVIDENCE_SCHEMA = "6529stream.public-beta-evidence.v1"
 DEFAULT_EVIDENCE = Path("release-artifacts/latest/public-beta-evidence.json")
@@ -122,22 +124,6 @@ REDACTION_POLICY_FIELDS = frozenset({"no_secrets", "redacted_fields"})
 GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-SECRET_KEY_RE = re.compile(
-    r"(^|[_\-\s])("
-    r"private[_\-\s]?key|mnemonic|seed[_\-\s]?phrase|rpc[_\-\s]?url|"
-    r"api[_\-\s]?key|password|unreleased[_\-\s]?drop[_\-\s]?payload"
-    r")([_\-\s]|$)"
-    r"|(^|[_\-\s])client[_\-\s]?secret([_\-\s]|$)"
-    r"|(^|[_\-\s])secret$",
-    re.IGNORECASE,
-)
-SAFE_SECRET_POLICY_KEYS = frozenset({"redaction_policy", "no_secrets", "redacted_fields"})
-SECRET_VALUE_RE = re.compile(
-    r"\b(private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|api[_ -]?key|password|unreleased[_ -]?drop[_ -]?payload)\s*[:=]",
-    re.IGNORECASE,
-)
-
-
 class PublicBetaEvidenceError(RuntimeError):
     """Raised when public-beta evidence is missing, stale, or unsafe."""
 
@@ -530,18 +516,10 @@ def validate_overall_status(
 
 def scan_for_secret_like_data(value: Any, path: str = "$") -> None:
     """Reject secret-shaped keys and values in committed evidence."""
-    if isinstance(value, dict):
-        for key, item in value.items():
-            key_text = str(key)
-            key_lower = key_text.lower()
-            if key_lower not in SAFE_SECRET_POLICY_KEYS and SECRET_KEY_RE.search(key_text):
-                raise PublicBetaEvidenceError(f"secret-like key found at {path}.{key_text}")
-            scan_for_secret_like_data(item, f"{path}.{key_text}")
-    elif isinstance(value, list):
-        for index, item in enumerate(value):
-            scan_for_secret_like_data(item, f"{path}[{index}]")
-    elif isinstance(value, str) and SECRET_VALUE_RE.search(value):
-        raise PublicBetaEvidenceError(f"secret-like value found at {path}")
+    try:
+        scan_json_no_secrets(value, path)
+    except NoSecretScanError as exc:
+        raise PublicBetaEvidenceError(str(exc)) from exc
 
 
 def validate_evidence_document(data: Any, repo_root: Path, label: str) -> None:

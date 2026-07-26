@@ -361,6 +361,12 @@ The signer custody readiness checker validates the no-secret template under
 artifact references to current hashes, and rejects non-local placeholder
 signer custody, signer-service, lifecycle, monitoring, reviewer, path, and
 secret-shaped states.
+The public-beta, non-local, drop-authorization signing, and signer-custody JSON
+evidence checkers share `scripts/no_secret_scanner.py` for recursive key/value
+scanning. The helper reports nested object/list paths, permits only the explicit
+no-secret policy keys, and applies the strict union of the migrated
+secret-shaped key and assignment-looking value patterns. Each checker wraps
+helper failures in its existing checker-specific exception type.
 The admin ceremony evidence checker validates the no-secret template under
 `deployments/admin-ceremony/`, ties the retained artifact checklist and schema
 to current hashes, and rejects reviewed evidence that still contains template
@@ -1393,10 +1399,10 @@ would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
 
 Canonical checksum generation uses the exact reviewed covered-path inventory
-and independently pins the seven release-tool roots, 21-module runtime closure,
+and independently pins the seven release-tool roots, 22-module runtime closure,
 and nine focused trust-policy tests as ordinary, in-repository files. The
 canonical, manually reviewed
-`release-artifacts/release-tool-call-policy.json` records exactly those 30
+`release-artifacts/release-tool-call-policy.json` records exactly those 31
 runtime and focused-test paths, including each source SHA-256 and byte size plus
 its import, member, and call multisets. Its schema is
 `release-artifacts/schema/release-tool-call-policy.v1.schema.json`. The
@@ -1406,8 +1412,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 242 configured roots,
-expanding to exactly 408 covered-file entries in each checksum index. The four
+The revised canonical projection contains exactly 244 configured roots,
+expanding to exactly 410 covered-file entries in each checksum index. The four
 record-family contract-semantic inputs above account for four exact roots and
 four exact entries; they do not imply coverage of any other file under
 `smart-contracts/`.
@@ -1716,7 +1722,7 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline.
 
 The release-tool call policy and its schema are reviewed inputs, not generated
-outputs. Any change to one of the 30 reviewed tool/test sources or to an allowed
+outputs. Any change to one of the 31 reviewed tool/test sources or to an allowed
 dangerous exception must update and review the policy before the generated
 tail. Preserve the canonical tail order: risk register, release notes, release
 manifest, bytecode proof, candidate lockfile, then checksum bundle. This keeps

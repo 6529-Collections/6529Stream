@@ -99,6 +99,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/generate_release_manifest.py"),
     Path("scripts/generate_release_notes.py"),
     Path("scripts/generate_risk_register.py"),
+    Path("scripts/no_secret_scanner.py"),
     Path("scripts/release_evidence_paths.py"),
     Path("scripts/verify_release_artifacts.py"),
 )
@@ -171,7 +172,6 @@ scripts/check_changelog.py|subprocess.PIPE|subprocess.run|keyword:stderr
 scripts/check_changelog.py|subprocess.PIPE|subprocess.run|keyword:stdout
 scripts/check_changelog.py|sys.stderr|local:print|keyword:file
 scripts/check_drop_authorization_signing_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_drop_authorization_signing_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_drop_authorization_signing_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_drop_authorization_signing_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_governed_parameter_identifiers.py|pathlib.Path|local:parser.add_argument|keyword:type
@@ -188,12 +188,10 @@ scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PRODUCTIO
 scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PUBLIC_BETA_REQUIREMENTS|local:frozenset|arg:0
 scripts/check_non_local_release_evidence.py|check_public_beta_evidence.PUBLIC_BETA_REQUIREMENTS|local:set|arg:0
 scripts/check_non_local_release_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_non_local_release_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_non_local_release_evidence.py|re.MULTILINE|re.compile|arg:1
 scripts/check_non_local_release_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_non_local_release_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_public_beta_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_public_beta_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_public_beta_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_public_beta_evidence.py|sys.stderr|local:print|keyword:file
 scripts/check_record_family_authorization.py|jsonschema.Draft202012Validator|<none>|Compare.left
@@ -212,7 +210,6 @@ scripts/check_risk_register.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_risk_register.py|sys.argv|local:main|arg:0
 scripts/check_risk_register.py|sys.stderr|local:print|keyword:file
 scripts/check_signer_custody_readiness.py|pathlib.Path|local:parser.add_argument|keyword:type
-scripts/check_signer_custody_readiness.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_signer_custody_readiness.py|sys.argv|local:parse_args|arg:0
 scripts/check_signer_custody_readiness.py|sys.stderr|local:print|keyword:file
 scripts/check_slither_baseline.py|pathlib.Path|local:mode.add_argument|keyword:type
@@ -309,6 +306,7 @@ scripts/generate_risk_register.py|check_slither_baseline.IMPACTS|<none>|comprehe
 scripts/generate_risk_register.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/generate_risk_register.py|sys.argv|local:main|arg:0
 scripts/generate_risk_register.py|sys.stderr|local:print|keyword:file
+scripts/no_secret_scanner.py|re.IGNORECASE|re.compile|arg:1
 scripts/test_record_family_authorization.py|check_record_family_authorization.ADMIN_REJECTION_FAMILY_GROUPS|<none>|Compare.comparators
 scripts/test_record_family_authorization.py|check_record_family_authorization.ADMIN_REJECTION_FAMILY_GROUP_BLOCKERS|local:expected.extend|arg:0
 scripts/test_record_family_authorization.py|check_record_family_authorization.AUTHORIZATION_CLASS_HOME|expression:Subscript:eb818dd54cbe2594957bcb6fa36c5f79070833f16f47ca2c5c2b5f090179ea58.__setitem__|arg:1
@@ -407,8 +405,8 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "9b1b961faaf7b9106b394890830c8c0e06e404cf97b3aaa10d2469e78eb3214e",
-        164_391,
+        "17d53924abd70a6b3d927e0b9a6396ff9d15d6ae5c9b7f593fe412135d205957",
+        164_192,
     ),
 }
 
@@ -441,6 +439,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_release_signatures.py"),
     Path("scripts/check_signer_custody_readiness.py"),
     Path("scripts/test_signer_custody_readiness.py"),
+    Path("scripts/no_secret_scanner.py"),
+    Path("scripts/test_no_secret_scanner.py"),
     Path("scripts/generate_bytecode_release_proof.py"),
     Path("scripts/test_bytecode_release_proof.py"),
     Path("scripts/generate_release_manifest.py"),
@@ -3012,9 +3012,9 @@ def build_release_tool_call_policy(
             "release-tool call policy role sets overlap: "
             f"{overlap}"
         )
-    if len(runtime_paths) != 21 or len(focused_paths) != 9:
+    if len(runtime_paths) != 22 or len(focused_paths) != 9:
         raise ChecksumError(
-            "release-tool call policy requires exactly 21 runtime and 9 "
+            "release-tool call policy requires exactly 22 runtime and 9 "
             f"focused-test paths, got {len(runtime_paths)} and "
             f"{len(focused_paths)}"
         )
@@ -3220,8 +3220,8 @@ def _validate_release_tool_call_policy_schema_document(
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 30,
-                "maxItems": 30,
+                "minItems": 31,
+                "maxItems": 31,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
