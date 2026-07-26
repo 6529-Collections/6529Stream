@@ -26,7 +26,7 @@
     "IStreamCoreFinalityAdapter": "0xebf35615",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamGasParameterHost": "0xc5eef2ab",
-    "IStreamGovernanceExecutor": "0x1e0c9ab7",
+    "IStreamGovernanceExecutor": "0x4bc45fd4",
     "IStreamGovernedParameterAuthority": "0xd9f8d48c",
     "IStreamMintGate": "0xa5d7921d",
     "IStreamMintLedger": "0x79bc7192",
@@ -991,18 +991,18 @@
     "IStreamGovernanceExecutor": {
       "source": "smart-contracts/IStreamGovernanceExecutor.sol",
       "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
-      "abi_sha256": "sha256:45d4e15112d46ca5ef35df433fb96ce00af8bf9e4b4c088878398e0ae3d6637b",
-      "interface_id": "0x1e0c9ab7",
+      "abi_sha256": "sha256:4bafda7790c33152e5d6ef0a1d975f664878cef3eae682bbc2f1c56c0c01608c",
+      "interface_id": "0x4bc45fd4",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x1e0c9ab7",
+      "computed_selector_xor": "0x4bc45fd4",
       "function_selectors": [
         {
           "signature": "approvedNativeReceiverConfig(address)",
           "selector": "0x8688cbd7"
         },
         {
-          "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
-          "selector": "0x32212927"
+          "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]))",
+          "selector": "0x67e9ec44"
         },
         {
           "signature": "cancelGovernanceAction(bytes32,bytes32)",

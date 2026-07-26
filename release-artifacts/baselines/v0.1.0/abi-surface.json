@@ -31228,13 +31228,13 @@
     "IStreamGovernanceExecutor": {
       "source": "smart-contracts/IStreamGovernanceExecutor.sol",
       "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
-      "abi_sha256": "sha256:45d4e15112d46ca5ef35df433fb96ce00af8bf9e4b4c088878398e0ae3d6637b",
-      "abi_entries": 162,
+      "abi_sha256": "sha256:4bafda7790c33152e5d6ef0a1d975f664878cef3eae682bbc2f1c56c0c01608c",
+      "abi_entries": 174,
       "entry_counts": {
         "constructors": 0,
         "functions": 51,
-        "events": 17,
-        "errors": 94,
+        "events": 19,
+        "errors": 104,
         "fallbacks": 0,
         "receives": 0
       },
@@ -31273,14 +31273,14 @@
             "state_mutability": "view"
           },
           {
-            "key": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
+            "key": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]))",
             "kind": "function",
             "name": "bindSystemManifestBootstrap",
-            "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
+            "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]))",
             "inputs": [
               {
                 "name": "binding",
-                "type": "(address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[])",
+                "type": "(address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])",
                 "internal_type": "struct SystemManifestBootstrapBinding",
                 "components": [
                   {
@@ -31364,6 +31364,68 @@
                     "name": "registries",
                     "type": "address[]",
                     "internal_type": "address[]"
+                  },
+                  {
+                    "name": "actionPolicyCandidateProfileHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedActionPolicyCatalogHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "actionPolicies",
+                    "type": "(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]",
+                    "internal_type": "struct GovernanceActionPolicyEntry[]",
+                    "components": [
+                      {
+                        "name": "actionClass",
+                        "type": "uint8",
+                        "internal_type": "uint8"
+                      },
+                      {
+                        "name": "target",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "selector",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "targetCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "targetProfileHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "callType",
+                        "type": "uint8",
+                        "internal_type": "uint8"
+                      },
+                      {
+                        "name": "valuePolicy",
+                        "type": "uint8",
+                        "internal_type": "uint8"
+                      },
+                      {
+                        "name": "valueLimit",
+                        "type": "uint256",
+                        "internal_type": "uint256"
+                      },
+                      {
+                        "name": "valueSemanticsHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
                   }
                 ]
               }
@@ -32634,6 +32696,21 @@
                 "name": "sealedPayloadPointer",
                 "type": "address",
                 "internal_type": "address"
+              },
+              {
+                "name": "actionPolicyCandidateProfileHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionPolicyCatalogHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionPolicyEntryCount",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ],
             "state_mutability": "view"
@@ -33257,6 +33334,78 @@
                 "name": "materializer",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+            "kind": "event",
+            "name": "GovernanceActionPolicyBound",
+            "signature": "GovernanceActionPolicyBound(uint16,bytes32,bytes32,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "candidateProfileHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "catalogHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "entryCount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyValidated(uint16,bytes32,uint8,bytes32,bytes32)",
+            "kind": "event",
+            "name": "GovernanceActionPolicyValidated",
+            "signature": "GovernanceActionPolicyValidated(uint16,bytes32,uint8,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "phase",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "candidateProfileHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "catalogHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
                 "indexed": false
               }
             ]
@@ -34321,6 +34470,174 @@
             ]
           },
           {
+            "key": "GovernanceActionPolicyCallTypeMismatch(uint256,uint8,uint8)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyCallTypeMismatch",
+            "signature": "GovernanceActionPolicyCallTypeMismatch(uint256,uint8,uint8)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedCallType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualCallType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyCatalogHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyCatalogHashMismatch",
+            "signature": "GovernanceActionPolicyCatalogHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyEntriesNotSorted(uint256)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyEntriesNotSorted",
+            "signature": "GovernanceActionPolicyEntriesNotSorted(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyNotBound()",
+            "kind": "error",
+            "name": "GovernanceActionPolicyNotBound",
+            "signature": "GovernanceActionPolicyNotBound()",
+            "inputs": []
+          },
+          {
+            "key": "GovernanceActionPolicySnapshotMismatch(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionPolicySnapshotMismatch",
+            "signature": "GovernanceActionPolicySnapshotMismatch(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scheduledCatalogHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "currentCatalogHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyTargetCodeHashMismatch(uint256,address,bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyTargetCodeHashMismatch",
+            "signature": "GovernanceActionPolicyTargetCodeHashMismatch(uint256,address,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyUnknown(uint256,uint8,address,bytes4)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyUnknown",
+            "signature": "GovernanceActionPolicyUnknown(uint256,uint8,address,bytes4)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyValueRejected(uint256,uint8,uint256,uint256)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyValueRejected",
+            "signature": "GovernanceActionPolicyValueRejected(uint256,uint8,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "valuePolicy",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "valueLimit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
             "key": "GovernanceActionUnknown(bytes32)",
             "kind": "error",
             "name": "GovernanceActionUnknown",
@@ -34674,6 +34991,32 @@
                 "name": "authority",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidGovernanceActionPolicyCandidate(bytes32)",
+            "kind": "error",
+            "name": "InvalidGovernanceActionPolicyCandidate",
+            "signature": "InvalidGovernanceActionPolicyCandidate(bytes32)",
+            "inputs": [
+              {
+                "name": "candidateProfileHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidGovernanceActionPolicyEntry(uint256)",
+            "kind": "error",
+            "name": "InvalidGovernanceActionPolicyEntry",
+            "signature": "InvalidGovernanceActionPolicyEntry(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ]
           },

@@ -21937,7 +21937,7 @@
     {
       "path": "scripts/check_slither_baseline.py",
       "role": "runtime",
-      "source_sha256": "96c70d8c7e22b29923426112f2c2b4b191ff410722186461b164e6f704845e47",
+      "source_sha256": "77178511eb4c45d7a4015f8e6c256d61b20323e04c318fbdbb740483babc834c",
       "size_bytes": 46534,
       "imports": [
         {
@@ -28541,7 +28541,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "6c2e97f3a4b34198e97dce51daea25c86d7a1dd875a669a5006004c14bd3c8dd",
+      "source_sha256": "2ad31453a93c5cf1eff00196aa436864064d3a392a9debae5dd7599b8c4c3bff",
       "size_bytes": 175073,
       "imports": [
         {
@@ -40749,8 +40749,8 @@
     {
       "path": "scripts/generate_risk_register.py",
       "role": "runtime",
-      "source_sha256": "727f1ccf343ed92c96d6c19ab6b8f6c93b5fdfe86cdd86993b034e7403f8c6dd",
-      "size_bytes": 33738,
+      "source_sha256": "72b150ce12ade30cb3512e02d7a330765871b01362b6a74fbd52ff7729f8a875",
+      "size_bytes": 33811,
       "imports": [
         {
           "record": "{\"alias\":\"checker\",\"binding\":\"checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_risk_register\"}",
@@ -48543,7 +48543,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "17d53924abd70a6b3d927e0b9a6396ff9d15d6ae5c9b7f593fe412135d205957",
+      "source_sha256": "103684b026bd16e1e91f7e34b507f90f96010559079055e860bf008ccda4e5a7",
       "size_bytes": 164192,
       "imports": [
         {

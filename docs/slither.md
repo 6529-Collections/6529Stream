@@ -23,24 +23,25 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced at source commit
-`55a2e817876eac754355a14ae3907053e3d3deed` on
-`2026-07-24T04:58:03Z`. It contains 3,017 findings across all impacts and
-scopes: 47 High, 728 Medium, 1,212 Low, 990 Informational, and 40
+`6cb05e1e36772fbd56acd313bf5e88ec8271cc01` on
+`2026-07-26T17:33:48Z`. It contains 3,058 findings across all impacts and
+scopes: 49 High, 742 Medium, 1,231 Low, 996 Informational, and 40
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | First-party production | 3 | 27 | 30 |
 | Vendored | 1 | 9 | 10 |
-| Test | 43 | 685 | 728 |
+| Test | 45 | 699 | 744 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
 All 30 retained first-party High/Medium fingerprints are unchanged from the
-prior canonical baseline, and the refresh added no row. Exactly three Medium
-`incorrect-equality` rows disappeared because ADR 0017 retired
-`StreamCadenceProbe`; source retirement is not finding acceptance or a claim
-that the removed probe behavior was remediated.
+prior canonical baseline, and this refresh added no production row. The 16
+additional High/Medium rows are confined to the expanded governance policy
+tests. The prior refresh removed three Medium `incorrect-equality` rows when
+ADR 0017 retired `StreamCadenceProbe`; source retirement is not finding
+acceptance or a claim that the removed probe behavior was remediated.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to

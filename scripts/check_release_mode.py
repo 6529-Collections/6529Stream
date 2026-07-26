@@ -217,7 +217,7 @@ def governance_native_value_blockers(
         f"{risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID} remains "
         "open_blocker: Governance Executor proposal-selected native-value "
         "authority requires closed-world target/selector/value policy, deployment "
-        "binding, and independent review; see issues #658 and #685"
+        "binding, and independent review; see issues #656 and #658"
     ]
 
 
