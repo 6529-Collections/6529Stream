@@ -381,7 +381,7 @@ The current local baseline includes:
   size, and schema identity/version; both checksum indexes cover them, the
   offline verifier consumes immutable covered-file snapshots, and public-beta
   plus production release mode fail closed when validation fails. The revised
-  canonical projection is exactly 247 configured roots and 414 covered-file
+  canonical projection is exactly 253 configured roots and 420 covered-file
   entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
@@ -408,18 +408,22 @@ The current local baseline includes:
   `production-release-record-family-authorization-grant-map.json` artifact in
   `deployments/record-family-authorization/`; production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
-  Record-family semantic revalidation binds exactly eight source inputs:
+  Record-family semantic revalidation binds exactly twelve source inputs:
   `smart-contracts/IStreamRecordFamilyAuthorityProvider.sol`,
   `smart-contracts/IStreamRecordFamilyRegistry.sol`,
   `smart-contracts/StreamRecordFamilyRegistry.sol`,
   `smart-contracts/StreamCollectionMetadata.sol`,
   `smart-contracts/IStreamCollectionMetadata.sol`,
   `smart-contracts/StreamPreservationRecords.sol`,
-  `smart-contracts/IStreamPreservationRecords.sol`, and
-  `script/RehearseDeployment.s.sol`. These are eight exact
+  `smart-contracts/IStreamPreservationRecords.sol`,
+  `script/RehearseDeployment.s.sol`, plus the catalog-named suites
+  `test/StreamRecordFamilyAuthorization.t.sol`,
+  `test/StreamCollectionMetadata.t.sol`,
+  `test/StreamPreservationRecords.t.sol`, and
+  `test/StreamDeploymentManifest.t.sol`. These are twelve exact
   checksum roots and entries, not broad `smart-contracts/` coverage. The
   offline verifier snapshots the complete canonical set, materializes
-  it under a temporary root, and loads the checker and all eight inputs there;
+  it under a temporary root, and loads the checker and all twelve inputs there;
   record-family semantic validation has no live-path fallback after snapshot
   acquisition.
   The release manifest and candidate lockfile both bind the source catalog,

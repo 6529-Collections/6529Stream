@@ -7,6 +7,26 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Reserved the external-call gas inventory's `artist-authority` call lane for
+  the exact future issue #670
+  `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
+  fail-closed field-policy matrix covering path, site, kind, operation,
+  expression, count, path class, lane, issue, disposition, missing rows, and
+  duplicate calls/rows. Literal declarations cannot use the reserved lane,
+  while the exact Yul `gas()` exemption and generic unexpected-call rejection
+  remain unchanged. This issue #669 checker-support slice adds neither the
+  artist registry source nor its inventory row and does not claim GGP
+  provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or
+  release readiness.
+- Centralized recursive JSON no-secret scanning for public-beta evidence,
+  non-local release evidence, drop-authorization signing evidence, and signer
+  custody readiness. The shared scanner preserves checker-specific exception
+  types, reports nested JSON paths, and applies the strict union of the migrated
+  secret-key and assignment-looking value patterns. Direct helper tests,
+  release-tool call-policy coverage, the offline verifier, and canonical
+  checksums now bind the shared policy. This tooling-only change does not add
+  retained non-local evidence or change public-beta or production readiness;
+  issue #609 tracks the work.
 - Implemented the source layer of record-family authorization under issue
   #690. `StreamCollectionMetadata` now embeds the
   `StreamRecordFamilyRegistry` implementation, preserving the accepted genesis
