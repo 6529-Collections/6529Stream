@@ -418,13 +418,13 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         100_553,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "223de8d925885bb55e7a6bc572dbefa5f50b0553fddb1a4e76331619ccebe530",
+        "ddc10bcef157fe71ef6c6cf366746cb0a05fe8de5a8b67485ee2f995cabc8e72",
         46_534,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "5e955953a42793500ef82be9aa8846fb4576f4798f0b02d7252c02f66c36baa5",
+        "2537c4ee358a7206a9c48cda91a5dbdeecf10f173806de544eb4d14b762b484c",
         169_071,
     ),
 }

@@ -23,24 +23,24 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced at source commit
-`522ec69adc075b6514ca96b410926128cfdfe1b0` on
-`2026-07-26T11:35:26Z`. It contains 3,035 findings across all impacts and
-scopes: 47 High, 740 Medium, 1,216 Low, 992 Informational, and 40
+`a4b3cfe920489f2d4004c989eb210b7b2e11e8cc` on
+`2026-07-26T19:28:30Z`. It contains 3,076 findings across all impacts and
+scopes: 49 High, 754 Medium, 1,235 Low, 998 Informational, and 40
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | First-party production | 3 | 27 | 30 |
 | Vendored | 1 | 9 | 10 |
-| Test | 43 | 697 | 740 |
+| Test | 45 | 711 | 756 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
 All 30 retained first-party High/Medium fingerprints are unchanged from the
 prior canonical baseline, and the refresh added or removed no production row.
-The higher all-scope totals come from the new record-family source and
-adversarial-test surfaces in separately classified diagnostic scopes; they do
-not reduce or accept any production finding.
+The higher all-scope totals come from the combined record-family and governance
+policy adversarial-test surfaces in separately classified diagnostic scopes;
+they do not reduce or accept any production finding.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to

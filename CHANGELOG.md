@@ -289,17 +289,18 @@ the release policy in `docs/release-policy.md`.
   target/selector/native-value boundary. This does not clear the static-analysis
   blocker in #658 and is not a production-readiness claim.
 - Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
-  `6cb05e1e36772fbd56acd313bf5e88ec8271cc01` on
-  `2026-07-26T17:33:48Z`. The exact first-party production High/Medium
+  `a4b3cfe920489f2d4004c989eb210b7b2e11e8cc` on
+  `2026-07-26T19:28:30Z`. The exact first-party production High/Medium
   inventory is now 30 Open rows (3 High, 27 Medium; one confirmed gap, five
   design-review rows, and 24 pending dispositions). All 30 retained semantic
-  fingerprints are unchanged and no new production row appeared. The 16
-  additional High/Medium rows are test-only governance policy findings. The
+  fingerprints are unchanged and no new production row appeared. The 30
+  additional High/Medium rows are test-only record-family and governance
+  policy findings. The
   prior refresh's three retired `StreamCadenceProbe` equality rows record
   source retirement under ADR 0017, not finding acceptance. Bounded assembly
   still hides the Executor's proposal-selected native-value call from
   `arbitrary-send-eth`, so mandatory High open blocker `RISK-GOV-003` preserves
-  that authority under issues #656 and #658. The full 3,058-row capture,
+  that authority under issues #656 and #658. The full 3,076-row capture,
   normalized scope counts, provenance hashes, deterministic reviewer mirror,
   release-mode blocker, and generated risk/release evidence are checked
   together. This refresh is not an audit or readiness claim.
