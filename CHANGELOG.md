@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Rebound the issue #690 record-family source catalog and checker to the
+  merged #699 source commit so candidate-source replay verifies the complete
+  interface, registry, metadata, preservation, and rehearsal binding set.
+  Candidate-bound deployment evidence remains unavailable and both release
+  modes remain fail-closed.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
   `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
