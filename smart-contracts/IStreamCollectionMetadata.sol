@@ -64,6 +64,8 @@ interface IStreamCollectionMetadata is IERC165 {
     error CollectionSnapshotAlreadyPublished(uint256 collectionId, bytes32 snapshotId);
     /// @notice Reverts when a snapshot does not declare a strict nonempty family set.
     error InvalidSnapshotFamilySet(uint256 index, bytes32 recordType);
+    /// @notice Reverts when the snapshot payload is not an admitted SNAPSHOT-family record.
+    error InvalidSnapshotRecordType(bytes32 recordType);
 
     /// @notice Emitted when the admin dependency changes.
     event CollectionMetadataAdminContractUpdated(
@@ -136,9 +138,10 @@ interface IStreamCollectionMetadata is IERC165 {
         CollectionMetadataRecord calldata record,
         uint64 expectedRevision
     ) external returns (bytes32 recordHash);
-    /// @notice Publishes an immutable snapshot record.
+    /// @notice Publishes an immutable SNAPSHOT-family record.
     /// @dev Snapshot publication is blocked by `METADATA_ALL`, `SNAPSHOTS`, or the snapshot
-    /// record's own `recordType` lock.
+    /// record's own `recordType` lock. The caller must also hold authority for every exact
+    /// record type in `coveredRecordTypes`.
     function publishCollectionSnapshot(
         uint256 collectionId,
         bytes32 snapshotId,

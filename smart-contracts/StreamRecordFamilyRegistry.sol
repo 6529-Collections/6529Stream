@@ -107,8 +107,13 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
             return _classBit(AUTHORIZATION_CLASS_METADATA_ADMIN)
                 | _classBit(AUTHORIZATION_CLASS_GLOBAL_ADMIN);
         }
-        if (familyId == FAMILY_ARCHIVE || familyId == FAMILY_FIXITY) {
+        if (familyId == FAMILY_ARCHIVE) {
             return _classBit(AUTHORIZATION_CLASS_PRESERVATION_ADMIN)
+                | _classBit(AUTHORIZATION_CLASS_GLOBAL_ADMIN);
+        }
+        if (familyId == FAMILY_FIXITY) {
+            return _classBit(AUTHORIZATION_CLASS_INSTITUTION_SIGNER)
+                | _classBit(AUTHORIZATION_CLASS_PRESERVATION_ADMIN)
                 | _classBit(AUTHORIZATION_CLASS_GLOBAL_ADMIN);
         }
         if (familyId == FAMILY_C2PA) {

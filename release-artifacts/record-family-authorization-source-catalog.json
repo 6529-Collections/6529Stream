@@ -2,6 +2,41 @@
   "schema_version": "6529stream.record-family-authorization-source-catalog.v1",
   "status": "source_implemented_candidate_unbound",
   "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/690",
+  "source_commit": "fac120cb2dc677de7b8c8cfe3a41bea3236caeb5",
+  "source_bindings": [
+    {
+      "path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+      "sha256": "eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
+    },
+    {
+      "path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
+      "sha256": "864ab0e282e82bbf21c614ffaba08d60614574761a0e12aafbb942ee90c0e8a2"
+    },
+    {
+      "path": "smart-contracts/StreamRecordFamilyRegistry.sol",
+      "sha256": "d655da69d5b95d1c481191bda4b267a89eddd55be4091bbabc828d5776a80d93"
+    },
+    {
+      "path": "smart-contracts/IStreamCollectionMetadata.sol",
+      "sha256": "a7d5af26a0ac35d6581539566f764a83e2d6c37d4faf42558ba9d965d7fb624a"
+    },
+    {
+      "path": "smart-contracts/StreamCollectionMetadata.sol",
+      "sha256": "dfb639468f8f57e86ee6db2e787f5daeb0eb17df827c689ab01c5a4f4e3c275a"
+    },
+    {
+      "path": "smart-contracts/IStreamPreservationRecords.sol",
+      "sha256": "bdfbddab0249e6048ab644b7c0f833ca1ed261e706973742b54636089fbdfc54"
+    },
+    {
+      "path": "smart-contracts/StreamPreservationRecords.sol",
+      "sha256": "c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8"
+    },
+    {
+      "path": "script/RehearseDeployment.s.sol",
+      "sha256": "6793aa9d9370fbb61719ba96feefd4f7e245d39fe8997b2e86464f705be01d75"
+    }
+  ],
   "classifier": {
     "contract": "StreamRecordFamilyRegistry",
     "source_path": "smart-contracts/StreamRecordFamilyRegistry.sol",
@@ -79,7 +114,7 @@
       "name": "FIXITY",
       "id_preimage": "6529STREAM_RECORD_FAMILY_FIXITY_V1",
       "id": "0x371df78414259ffae7f400fb3684d32b79a85ab55ede6d87a9a65cf6719cb47d",
-      "allowed_authorization_class_ids": [6, 8],
+      "allowed_authorization_class_ids": [4, 6, 8],
       "admin_authority_rejected": false
     },
     {

@@ -24,6 +24,7 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         keccak256("6529stream.collection-metadata-snapshot.v2");
     bytes32 private constant _LOCK_METADATA_ALL = keccak256("METADATA_ALL");
     bytes32 private constant _LOCK_SNAPSHOTS = keccak256("SNAPSHOTS");
+    bytes32 private constant _FAMILY_SNAPSHOT = keccak256("6529STREAM_RECORD_FAMILY_SNAPSHOT_V1");
     bytes32 private constant _FIELD_METADATA_URI = "metadataURI";
 
     address public immutable override streamCore;
@@ -126,6 +127,11 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
     ) external override returns (bytes32 hash) {
         if (snapshotId == bytes32(0)) {
             revert InvalidSnapshotId(snapshotId);
+        }
+        IStreamRecordFamilyRegistry.RecordTypePolicy memory snapshotRecordPolicy =
+            _recordFamilyRegistry.recordTypePolicy(snapshot.recordType);
+        if (!snapshotRecordPolicy.admitted || snapshotRecordPolicy.familyId != _FAMILY_SNAPSHOT) {
+            revert InvalidSnapshotRecordType(snapshot.recordType);
         }
         uint8 authorizationClass =
             _requireRecordWriter(collectionId, bytes32(collectionId), snapshot.recordType);

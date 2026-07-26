@@ -193,8 +193,8 @@ contract StreamRecordFamilyAuthorizationTest is CharacterizationTestBase, Stream
 
         setup.provider.setAuthorized(address(this), true);
         bytes32 snapshotId = keccak256("snapshot-authorized");
-        bytes32 snapshotHash = setup.metadata
-        .publishCollectionSnapshot(COLLECTION_ID, snapshotId, covered, snapshot);
+        bytes32 snapshotHash =
+            setup.metadata.publishCollectionSnapshot(COLLECTION_ID, snapshotId, covered, snapshot);
         (snapshotHash != bytes32(0)).assertTrue("snapshot missing");
         setup.metadata.snapshotCoveredRecordTypesHash(COLLECTION_ID, snapshotId)
             .assertEq(keccak256(abi.encode(covered)), "family-set commitment");
@@ -222,6 +222,24 @@ contract StreamRecordFamilyAuthorizationTest is CharacterizationTestBase, Stream
         setup.metadata
             .publishCollectionSnapshot(
                 COLLECTION_ID, keccak256("snapshot-unknown"), unknown, snapshot
+            );
+    }
+
+    function testSnapshotPayloadMustUseSnapshotFamily() public {
+        Setup memory setup = _setup();
+        bytes32[] memory covered = new bytes32[](1);
+        covered[0] = RIGHTS_TYPE;
+        IStreamCollectionMetadata.CollectionMetadataRecord memory nonSnapshot =
+            _record(RIGHTS_TYPE, "ipfs://not-a-snapshot");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionMetadata.InvalidSnapshotRecordType.selector, RIGHTS_TYPE
+            )
+        );
+        setup.metadata
+            .publishCollectionSnapshot(
+                COLLECTION_ID, keccak256("wrong-family"), covered, nonSnapshot
             );
     }
 
