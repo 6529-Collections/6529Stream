@@ -76,6 +76,32 @@
   atomic operation-root source cutover. After #672 merges, prioritize that
   Solidity/test/as-built implementation before #671 and #654 so #670 can rely
   on prepared operation identity and `isManagerOperationRootUsed`.
+- PR `#701` merged at
+  `513bd7e079eafe109df6ae1ae21bfbca6fec6786`. Rebased the frozen #672 commit
+  exactly once onto that final serialization point, preserved every reviewed
+  #672 source hash, retained zero `StreamCore` diff, and reconciled the
+  combined release-tool policy to 260 configured paths and 428 records.
+- Final-base focused validation passed: 26/26 Python evidence tests, direct
+  checker, 10/10 via-IR Foundry tests, exact 128,886-gas snapshot, 29/29 risk
+  tests, 10/10 release-note tests, 39/39 manifest tests, 9/9 bytecode-proof
+  tests, 21/21 lockfile tests, 113/113 checksum tests, 114/114 verifier tests,
+  428/428 offline records, 43/43 release-mode tests, 14/14 signed-tag tests,
+  16/16 Markdown tests, 6/6 changelog tests, Python compilation, and
+  `codex-diff-check`.
+- Direct final-base size validation passed the documented build sequence: 53
+  canonical isolated targets, 36/36 release-build tests, 13/13 size-budget
+  tests, and 15/15 Core-bytecode policy tests. `StreamCore` remains exactly
+  24,152 bytes with 424 bytes current margin and no #672 source or runtime
+  delta; the complete target remains at most 22,576 bytes and the objective at
+  most 22,184 bytes.
+- The one final-base publication-authorizing Windows `scripts/check.ps1` tree
+  ran from `2026-07-26T20:07:36.9901476Z` through
+  `2026-07-26T21:03:10.6197954Z` and exited `0` in 3,333.63 seconds. It
+  completed the full Foundry suite at 1,099/1,099, the #672 via-IR suite at
+  10/10, checksums at 113/113, the verifier at 114/114 with 428/428 records,
+  and every deployment rehearsal without a duplicate wrapper or compiler
+  tree. The branch is ready for final workstream-only checks, commit, push,
+  draft PR publication, and CI/CodeRabbit review.
 
 ## 2026-07-24
 

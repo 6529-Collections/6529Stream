@@ -7,17 +7,15 @@
   merge/closure.
 - Active issue: `#672`.
 - Active branch: `codex/issue-672-post-entropy-completion-gas`.
-- Local freeze base:
-  `6b5d0ba3eed4758c4e3521470233266540c95a45` (merged PR `#693`).
-  The reviewed #672 source/spec/test bytes were preserved through the
-  `#609 -> #694 -> #691 -> #693` shared-tail sequence; only generated release
-  files required deterministic regeneration.
-- Current remote serialization point:
-  `origin/main@018c8788750980e143c38ace0666684bf641ec4f` after merged
-  PRs `#700` and `#699` / issue `#690`. PR `#701` is the sole open
-  shared-tail PR. Keep the local freeze commit unpublished until #701 merges,
-  then reconcile once onto the resulting main, regenerate the canonical tail,
-  and run the one publication-authorizing Windows gate.
+- Final publication base and current `origin/main`:
+  `513bd7e079eafe109df6ae1ae21bfbca6fec6786` after merged PR `#701`.
+  The reviewed #672 source/spec/test bytes were preserved through the complete
+  shared-tail sequence; only the exact combined release-tool binding and
+  deterministic generated release files changed during final reconciliation.
+- Current committed source head:
+  `274f3a67ed03fb946fd4e74e482506602c2f9ca1`. The final generated tail and
+  this terminal-state context remain to be committed together before
+  publication.
 - #672 is a zero-`StreamCore`-delta target-fixture/spec/measurement slice. It
   may pin the EIP-150 admission formula, worst-case post-coordinator EOA tail,
   pure policy-predicate boundaries, a separate high-parent-gas full-stipend
@@ -44,13 +42,20 @@
   Focused validation is 10/10 Foundry tests under via IR, 26/26 Python hostile
   tests, direct checker current, and the one-test snapshot current.
 - Exact frozen evidence remains byte-for-byte stable with zero
-  `smart-contracts/StreamCore.sol` diff. The canonical bundle has 250
-  configured paths and 417 records in each checksum index.
-- Diagnostic authoritative Windows gates exited `0` on
+  `smart-contracts/StreamCore.sol` diff. The canonical bundle has 260
+  configured paths and 428 records in each checksum index.
+- Earlier diagnostic authoritative Windows gates exited `0` on
   `29d96466e49f7c72c02234c9b271a1fa2828db88` in 3,237.757 seconds and on
   `6b5d0ba3eed4758c4e3521470233266540c95a45` in 3,268.179 seconds. They prove
   the preserved slice is green but do not authorize publication because the
   shared tail advanced afterward.
+- The single final-base publication-authorizing Windows `scripts/check.ps1`
+  gate ran from `2026-07-26T20:07:36.9901476Z` through
+  `2026-07-26T21:03:10.6197954Z` and exited `0` in 3,333.63 seconds. It
+  includes 1,099/1,099 Foundry tests, 10/10 #672 via-IR tests, the exact
+  128,886-gas snapshot, 113/113 checksum tests, 114/114 verifier tests,
+  428/428 offline records, the canonical 53-target release build, direct
+  24,152-byte Core size proof, and all deployment rehearsals.
 - After #672 merges, prioritize the reopened #688 atomic operation-root
   Solidity/test/as-built cutover before #671 and #654. Proposed ADR 0018 did
   not implement the source cutover, and #670 depends on the prepared-operation
@@ -58,20 +63,28 @@
 
 ## Current Slice
 
-- Issue: `#688`
-- Branch: `codex/issue-688-operation-identity`
-- Baseline at branch creation:
-  `b4af30a58c22f79bafad241c6e4fab7a4a76063b`
-- Current rebased base:
-  `1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`
-- Current committed draft-PR head:
-  `c39b178b9fb7d4ed92816c4ff11f08eac589d43c`
-- Intended result: a focused Proposed ADR and checked specification for one
-  manager batch operation root, one per-token operation ID for each batch
-  element, ledger-owned manager-scoped root replay, exact event/ABI ownership,
-  single-step identity, rollback requirements, and the atomic implementation
-  cutover that permits later Core lifetime replay-state removal. The slice does
-  not accept the ADR, close #688, or claim settlement/readiness completion.
+- Issue: `#672`
+- Branch: `codex/issue-672-post-entropy-completion-gas`
+- Base: `513bd7e079eafe109df6ae1ae21bfbca6fec6786`
+- Result: a checksum-bound planning measurement and target fixture for the
+  post-entropy EOA completion tail, with zero StreamCore bytecode delta. It
+  does not claim that the current Core implements the admission boundary or
+  that #684 candidate measurement binding exists.
+- Publication state: final authoritative local validation is green. Record the
+  terminal milestone, run lightweight workstream-only checks, commit, push,
+  open the draft PR, and obtain CI and substantive CodeRabbit review.
+- Closure state: merge the #672 evidence PR first, but keep issue #672 open
+  until #654 implements and remeasures the actual entropy-coordinator cutover.
+
+## Next Slice
+
+- Issue: reopened `#688`.
+- Required result: implement the Proposed ADR 0018 atomic operation-root
+  source cutover in Solidity, Foundry tests, and as-built documentation,
+  including the prepared-operation identity and
+  `isManagerOperationRootUsed` seam needed by #670.
+- Keep #671 and #654 separate; #671 follows #688, and #654 remains the final
+  entropy-coordinator Core implementation and remeasurement slice.
 
 ## Integration Gate
 
