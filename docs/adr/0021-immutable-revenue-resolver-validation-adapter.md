@@ -2,13 +2,13 @@
 
 ## Status
 
-Proposed for pre-genesis review on 2026-07-24.
+Accepted for pre-genesis implementation on 2026-07-26.
 
-This ADR does not authorize implementation while it remains `Proposed`.
-Acceptance, implementation, normative-spec reconciliation, generated-artifact
-regeneration, and deployment evidence are separate gates. In particular, this
-ADR does not make the protocol production-ready and does not authorize a
-deployment.
+Acceptance authorizes only the separately frozen normative interface packet
+and a conforming implementation. Normative-spec reconciliation,
+generated-artifact regeneration, independent implementation review, and
+deployment evidence remain separate gates. In particular, this ADR does not
+make the protocol production-ready and does not authorize a deployment.
 
 ## Metadata
 
@@ -18,7 +18,7 @@ deployment.
 | Related work | [#669](https://github.com/6529-Collections/6529Stream/issues/669), [#684](https://github.com/6529-Collections/6529Stream/issues/684), [#656](https://github.com/6529-Collections/6529Stream/issues/656), [#677](https://github.com/6529-Collections/6529Stream/issues/677), [#658](https://github.com/6529-Collections/6529Stream/issues/658) |
 | Related ADRs | [ADR 0004](0004-admin-governance.md), [ADR 0007](0007-upgrade-redeployment.md), [ADR 0008](0008-revenue-splits-and-royalty-resolver.md), [ADR 0009](0009-protocol-v1-open-question-resolutions.md), [ADR 0017](0017-raise-only-parameter-governance.md) |
 | Permanence class | Replaceable genesis royalty-resolver implementation topology; no change to the Permanent Core ABI or royalty-pointer interface |
-| Implementation gate | A separately reviewed acceptance change must move this ADR to `Accepted` before source implementation begins |
+| Implementation gate | Accepted architecture only; source implementation remains blocked until the complete normative interface appendix and freeze commit are independently approved |
 
 ## Problem
 
@@ -71,7 +71,7 @@ parameter to justify an otherwise fixed external-call cap.
 
 ## Decision
 
-If accepted, issue #670 will use one registered `StreamRevenueResolver` and one
+Issue #670 will use one registered `StreamRevenueResolver` and one
 unregistered, implementation-private
 `StreamRevenueResolverValidationAdapter`. The following decisions are one
 indivisible architecture contract.
@@ -327,11 +327,10 @@ enforcer: it authenticates the relayer and exact recorded artist-authorization
 context, commits the request, and accepts or rejects the transition after
 checking the returned transcript. The adapter performs the physical
 implementation-private `STATICCALL`, so the artist registry observes the
-adapter as `msg.sender`. If this ADR is accepted, the later normative appendix
-must reconcile the current "resolver must call" wording for economics consent
-and royalty freeze to mean this resolver-owned enforcement with an exact
-adapter-mediated observation; this Proposed ADR does not rewrite that
-normative text.
+adapter as `msg.sender`. The normative interface appendix must reconcile the
+current "resolver must call" wording for economics consent and royalty freeze
+to mean this resolver-owned enforcement with an exact adapter-mediated
+observation and must rewrite that normative text.
 
 The accepted implementation may use a strict subset of this list. Adding a
 target, selector, callback, or observation outside the accepted list requires
@@ -599,7 +598,7 @@ source, ABI artifacts, specifications, catalogs, profiles, candidates,
 deployment scripts, manifests, checksums, release notes, maturity language, or
 readiness state.
 
-If accepted, the later implementation and normative-reconciliation changes
+The later implementation and normative-reconciliation changes
 will affect at least the resolver constructor and implementation-private
 interface, the new implementation-private dependency inventory/instance
 surface and its versioned contract-set schema/checkers, candidate dependency
@@ -701,7 +700,7 @@ returndata is the narrower design.
 
 ## Accepted Risks
 
-These risks are proposed, not accepted, until this ADR is explicitly accepted:
+The accepted architecture carries these implementation risks:
 
 - One additional exact-code dependency increases deployment, verification,
   audit, and monitoring surface.
