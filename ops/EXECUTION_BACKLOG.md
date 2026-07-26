@@ -1008,9 +1008,11 @@ Dependencies: `GOV-001`.
 Status: Foundation merged in PR #683 and issue #665 closed. PR #686 merged ADR
 0017's raise-only gas/time target. The first #684 follow-up now provides an
 exact, honestly incomplete governed-parameter inventory and production
-completeness gate; concrete parameter host/evidence bindings (#684), the
-closed-world action/native-value policy (#685), deployment, non-local rehearsal,
-and audit evidence remain open.
+completeness gate. The issue #685 implementation slice now adds the immutable
+closed-world action/native-value catalog, schedule/execution enforcement,
+machine policy, adversarial tests, monitoring contract, and release binding.
+Concrete parameter host/evidence bindings (#684), exact candidate expansion
+under #656, deployment, non-local rehearsal, and audit evidence remain open.
 
 Gate: C/E/F/G.
 
@@ -1034,9 +1036,9 @@ Acceptance criteria:
 4. Instance-aware deployment inputs, holder/bootstrap ceremonies, non-local
    rehearsal, release-catalog/event/error/ABI evidence, and independent review
    are retained before ownership cutover.
-5. Issues #684 and #685 plus `RISK-GOV-003` and `RISK-GOV-004` remain open until
-   those full cutover criteria are met; closing #665's foundation scope is not
-   production readiness.
+5. Issue #684 plus `RISK-GOV-003` and `RISK-GOV-004` remain open until those
+   full cutover criteria are met; completing #665 and #685 implementation scope
+   is not production readiness.
 
 ### ADV-001: Add End-To-End Protocol State-Machine Harness
 
@@ -1924,10 +1926,11 @@ concrete discovery, sanction, and deployment candidates remain incomplete.
 PR #683 completed the Governance V2 foundation tracked by #665, and PR #686
 merged ADR 0017's raise-only parameter hosts. The current #684 slice adds the
 exact schema-validated planning inventory and strict production-completeness boundary
-without pretending unavailable candidate bindings are complete. Issues #684
-and #685 still own the remaining governed-parameter and action-policy cutover
-work; measured net-negative Core cutover work remains required to complete
-issue `#654`.
+without pretending unavailable candidate bindings are complete. The #685 slice
+adds the closed-world action-policy implementation and release catalog; #684,
+#656 candidate binding, non-local evidence, and independent review still own
+the remaining cutover work. Measured net-negative Core cutover work remains
+required to complete issue `#654`.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -4138,9 +4141,9 @@ unless an external dependency changes.
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | Merged in PR #517; issue #516 closed completed |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
-| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | PR #683 merged the foundation and #665 closed; PR #686 merged ADR 0017's raise-only target. #684 parameter bindings, #685 action/native-value policy, deployment/rehearsal evidence, and independent review remain |
+| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | PR #683 merged the foundation and #665 closed; PR #686 merged ADR 0017's raise-only target. The #685 slice adds the immutable action/native-value catalog and local/release gates; #684 parameter bindings, #656 exact candidate expansion, deployment/rehearsal evidence, and independent review remain |
 | `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Active PR #687 / issue #684 on branch `codex/governed-parameter-inventory`; the first slice adds the exact 50-binding schema-validated policy inventory and production `--require-complete` gate, but candidate bindings remain `not_available`, guarded-consumer lists remain `planning`, candidate completion is blocked pending #656 structured instance/linked-library reconciliation, and #684/`RISK-GOV-004` stay open |
-| `GOV-013` | Enforce the closed-world Governance V2 target/selector/native-value action policy | C/E/F/G | Open issue #685; `RISK-GOV-003` remains High and non-waivable |
+| `GOV-013` | Enforce the closed-world Governance V2 target/selector/native-value action policy | C/E/F/G | Implemented by the issue #685 slice: one-way catalog bind, exact tuple/runtime/value checks at schedule and execution, typed value semantics, hostile-route tests, monitoring events, machine catalog, and release-checksum binding. Exact candidate deployment/rehearsal/review evidence remains blocked on #656, so `RISK-GOV-003` stays High and non-waivable |
 
 ### Integration Readiness
 
@@ -4162,7 +4165,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture has 30 Open rows under issue #658: one confirmed gap, five design-review rows, and 24 pending dispositions. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issues #658 and #685 remain blockers |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture has 30 Open rows under issue #658: one confirmed gap, five design-review rows, and 24 pending dispositions. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; #658 plus the #656 candidate/evidence dependency remain blockers |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |

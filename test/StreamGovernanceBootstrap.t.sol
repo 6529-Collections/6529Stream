@@ -5,6 +5,7 @@ import "../smart-contracts/IStreamGovernanceExecutor.sol";
 import "../smart-contracts/IStreamModuleRegistry.sol";
 import "../smart-contracts/IStreamRoleRegistry.sol";
 import "../smart-contracts/StreamGovernanceBootstrap.sol";
+import "../smart-contracts/StreamGovernanceActionPolicy.sol";
 import "../smart-contracts/StreamGovernanceEvidence.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
 import "../smart-contracts/StreamGovernancePolicy.sol";
@@ -2733,6 +2734,69 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
         setup.executor.bindSystemManifestBootstrap(setup.binding);
     }
 
+    function testBindRejectsZeroActionPolicyCandidateAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        setup.binding.actionPolicyCandidateProfileHash = bytes32(0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidGovernanceActionPolicyCandidate.selector,
+                bytes32(0)
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
+    function testBindRejectsWrongActionPolicyCatalogHashAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        bytes32 computedHash = setup.binding.expectedActionPolicyCatalogHash;
+        setup.binding.expectedActionPolicyCatalogHash = keccak256("wrong-policy-root");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyCatalogHashMismatch.selector,
+                keccak256("wrong-policy-root"),
+                computedHash
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
+    function testBindRejectsUnsortedActionPolicyAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        GovernanceActionPolicyEntry memory first = setup.binding.actionPolicies[0];
+        setup.binding.actionPolicies[0] = setup.binding.actionPolicies[1];
+        setup.binding.actionPolicies[1] = first;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyEntriesNotSorted.selector, 1
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
+    function testBindRejectsZeroActionPolicyProfileAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        setup.binding.actionPolicies[0].targetProfileHash = bytes32(0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry.selector, 0
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
+    function _assertActionPolicyUnbound(StreamGovernanceExecutor executor) private view {
+        (bool bound, bytes32 candidate, bytes32 catalogHash, uint256 entryCount) =
+            _actionPolicyBootstrapState(executor);
+        require(!bound, "failed bind policy remains unbound");
+        require(candidate == bytes32(0), "failed bind candidate rolled back");
+        require(catalogHash == bytes32(0), "failed bind catalog rolled back");
+        require(entryCount == 0, "failed bind entries rolled back");
+    }
+
     function testBindRejectsZeroCodelessWrongAndAllTrueRoleRegistries() public {
         BindSetup memory setup = _buildBindSetup(false);
         address original = setup.binding.roleRegistry;
@@ -2977,8 +3041,21 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
         PayloadFixture memory fixture = _uniformPayload(1, 2);
         BindSetup memory setup = _buildBindSetup(false);
         setup.binding.expectedManifestHash = fixture.manifestHash;
-        setup.binding.systemManifestSatellite = address(
+        address originalManifest = setup.binding.systemManifestSatellite;
+        address primedManifest = address(
             new StreamGovernanceBootstrapPrimedManifestMock(setup.binding.core, setup.executor)
+        );
+        setup.binding.systemManifestSatellite = primedManifest;
+        for (uint256 i = 0; i < setup.binding.actionPolicies.length; i++) {
+            if (setup.binding.actionPolicies[i].target != originalManifest) continue;
+            setup.binding.actionPolicies[i].target = primedManifest;
+            setup.binding.actionPolicies[i].targetCodeHash = primedManifest.codehash;
+        }
+        _sortActionPolicies(setup.binding.actionPolicies);
+        setup.binding.expectedActionPolicyCatalogHash = _actionPolicyCatalogHash(
+            address(setup.executor),
+            setup.binding.actionPolicyCandidateProfileHash,
+            setup.binding.actionPolicies
         );
         setup.executor.bindSystemManifestBootstrap(setup.binding);
         BootstrapArtifacts memory artifacts = _boundArtifacts(setup, fixture);
@@ -3159,6 +3236,9 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
         artifacts.inventoryCount = setup.binding.expectedInventoryLeafCount;
         artifacts.triggerSetHash = state.triggerSetHash;
         artifacts.triggerCount = state.triggerCount;
+        artifacts.actionPolicyCandidateProfileHash = state.actionPolicyCandidateProfileHash;
+        artifacts.actionPolicyCatalogHash = state.actionPolicyCatalogHash;
+        artifacts.actionPolicyEntryCount = state.actionPolicyEntryCount;
     }
 
     function _buildBindSetup(bool duplicateFinalTrigger) private returns (BindSetup memory setup) {
@@ -3216,6 +3296,32 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
 
         (bytes32 inventoryRoot, uint64 inventoryCount) =
             _expectedInventory(setup.executor, address(core), pointerTypes, registries);
+        GovernanceActionPolicyEntry[] memory actionPolicies = new GovernanceActionPolicyEntry[](2);
+        actionPolicies[0] = _zeroPolicy(
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            address(manifest),
+            bytes4(0x09b1b5c6),
+            keccak256("BIND_GAS_SYSTEM_MANIFEST")
+        );
+        actionPolicies[1] = _zeroPolicy(
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            address(setup.executor),
+            setup.executor.sealSystemManifestBootstrap.selector,
+            keccak256("BIND_GAS_GOVERNANCE_EXECUTOR")
+        );
+        _sortActionPolicies(actionPolicies);
+        bytes32 actionPolicyCandidateProfileHash = keccak256(
+            abi.encode(
+                "6529STREAM_BIND_GAS_ACTION_POLICY_CANDIDATE_V1",
+                block.chainid,
+                address(setup.executor),
+                address(core),
+                address(manifest)
+            )
+        );
+        bytes32 actionPolicyCatalogHash = _actionPolicyCatalogHash(
+            address(setup.executor), actionPolicyCandidateProfileHash, actionPolicies
+        );
         setup.binding = SystemManifestBootstrapBinding({
             roleRegistry: address(roleRegistry),
             governanceRoot: address(governanceRoot),
@@ -3228,7 +3334,10 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
             expectedInventoryLeafCount: inventoryCount,
             expectedTriggers: triggers,
             pointerTypes: pointerTypes,
-            registries: registries
+            registries: registries,
+            actionPolicyCandidateProfileHash: actionPolicyCandidateProfileHash,
+            expectedActionPolicyCatalogHash: actionPolicyCatalogHash,
+            actionPolicies: actionPolicies
         });
     }
 

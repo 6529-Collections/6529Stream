@@ -28541,8 +28541,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "22a68deb11ebf2184b03c34ec0f0625c86655a14aa600e047e64e09d3b7553b0",
-      "size_bytes": 174903,
+      "source_sha256": "6c2e97f3a4b34198e97dce51daea25c86d7a1dd875a669a5006004c14bd3c8dd",
+      "size_bytes": 175073,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -28908,7 +28908,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 324
+          "count": 327
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -33625,6 +33625,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "1b57c8ab21ac2eb40132fc95f6fa8088470b8aba5667854909b9bb81d1e4a33c",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "1d8b86d7e98b84150507cea1a8399adbee26173210e622717d044a304b92d5fa",
           "count": 4
         },
@@ -33823,6 +33829,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "3a6e412c9a8cc10f568676b834e5175d82ece392d96aa910a0ea3acbc38355ac",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "3ab08786d7f2f95de120e8f0b5cd1bbe69ee6ced794e851082b80a88b1d93137",
           "count": 1
         },
@@ -33938,6 +33950,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "4c9e1c7288c80725891b121b8040b4505d0b9a91fab33ed6675527fd8eff4051",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "4de5913320fac9d720574d6d2b118703069f903ab49a1426aa233f75a17ec406",
           "count": 1
         },
         {
@@ -35109,8 +35127,8 @@
     {
       "path": "scripts/generate_release_manifest.py",
       "role": "runtime",
-      "source_sha256": "63415335a4a509593e41c027db56945556dc56861e578b52b5c02aca76486b03",
-      "size_bytes": 81789,
+      "source_sha256": "55801cb334a560139db727cb2600b009f20a676ab17e4372717e929c1241fe2c",
+      "size_bytes": 82156,
       "imports": [
         {
           "record": "{\"alias\":\"admin_ceremony_checker\",\"binding\":\"admin_ceremony_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_admin_ceremony_evidence\"}",
@@ -35492,7 +35510,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 104
+          "count": 105
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -36570,6 +36588,12 @@
           "target": "local:file_record",
           "shape": "positional=2;starred=0;keywords=schema_required",
           "ast_sha256": "a1da42bbab836d447ff37e506943160d561ca708ee9ac711fbf66f44ca466f3a",
+          "count": 1
+        },
+        {
+          "target": "local:file_record",
+          "shape": "positional=2;starred=0;keywords=schema_required",
+          "ast_sha256": "a79afed4606628820145db2054630d8608325d332e7987595c88d9b3bf9d3408",
           "count": 1
         },
         {
@@ -38868,6 +38892,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "14b4ca58b5c1d21d81949a55acedb3d7343ba8590a11ebabb442e3ca127355a8",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "1b57c8ab21ac2eb40132fc95f6fa8088470b8aba5667854909b9bb81d1e4a33c",
           "count": 1
         },
         {

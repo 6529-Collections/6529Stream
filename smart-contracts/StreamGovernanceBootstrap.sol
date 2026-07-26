@@ -320,6 +320,7 @@ library StreamGovernanceBootstrap {
         bytes[] memory callDatas,
         bytes4 sealSelector
     ) public view returns (uint256 totalValue) {
+        validateActionClass(actionClass);
         totalValue = 0;
         if (calls.length == 0) revert IStreamGovernanceExecutor.EmptyGovernanceBatch();
         if (callDatas.length != calls.length) {

@@ -109,6 +109,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     governed_parameter_inventory = (
         root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
     )
+    governance_action_policy = root / generator.DEFAULT_GOVERNANCE_ACTION_POLICY
     record_family_inventory = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
     )
@@ -252,6 +253,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         governed_parameter_inventory,
         {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
+    )
+    write_json(
+        governance_action_policy,
+        {"schema_version": generator.GOVERNANCE_ACTION_POLICY_SCHEMA},
     )
     write_json(
         record_family_inventory,
@@ -1346,6 +1351,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "contract_config": contract_config,
         "genesis_deployment_profile": genesis_deployment_profile,
         "governed_parameter_inventory": governed_parameter_inventory,
+        "governance_action_policy": governance_action_policy,
         "record_family_inventory": record_family_inventory,
         "record_family_inventory_schema": record_family_inventory_schema,
         "record_family_evidence_schema": record_family_evidence_schema,
@@ -1961,6 +1967,23 @@ class ReleaseManifestTests(unittest.TestCase):
                 "sha256": generator.file_sha256(inventory_path),
                 "size_bytes": inventory_path.stat().st_size,
                 "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+            },
+        )
+
+    def test_committed_manifest_binds_governance_action_policy(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        policy_path = repo_root / generator.DEFAULT_GOVERNANCE_ACTION_POLICY
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            manifest["release_artifacts"]["governance_action_policy"],
+            {
+                "path": "release-artifacts/governance-action-policy.json",
+                "sha256": generator.file_sha256(policy_path),
+                "size_bytes": policy_path.stat().st_size,
+                "schema_version": generator.GOVERNANCE_ACTION_POLICY_SCHEMA,
             },
         )
 

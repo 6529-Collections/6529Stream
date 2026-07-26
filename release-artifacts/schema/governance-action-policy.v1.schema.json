@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/governance-action-policy.v1.schema.json",
+  "title": "6529Stream Governance V2 action policy",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "production_readiness_evidence",
+    "runtime_enforcement",
+    "value_semantics",
+    "action_classes",
+    "source_catalog",
+    "forbidden_routes",
+    "candidate_binding",
+    "release_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.governance-action-policy.v1"
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "production_readiness_evidence": {
+      "const": false
+    },
+    "runtime_enforcement": {
+      "type": "object",
+      "required": [
+        "max_entries",
+        "lookup_key",
+        "schedule_validation",
+        "execution_validation",
+        "runtime_code_hash_validation",
+        "scheduled_catalog_snapshot_validation",
+        "unknown_tuple_policy",
+        "default_value_policy",
+        "batch_policy",
+        "surplus_policy",
+        "domains"
+      ],
+      "properties": {
+        "max_entries": {
+          "const": 1024
+        }
+      }
+    },
+    "value_semantics": {
+      "type": "object",
+      "required": [
+        "zero_only",
+        "exact",
+        "bounded"
+      ]
+    },
+    "action_classes": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "source_catalog": {
+      "type": "object",
+      "required": [
+        "entries",
+        "candidate_trigger_expansion",
+        "native_value_entries"
+      ]
+    },
+    "forbidden_routes": {
+      "type": "object",
+      "required": [
+        "target_kinds",
+        "function_names",
+        "fallback_selector",
+        "policy"
+      ]
+    },
+    "candidate_binding": {
+      "type": "object",
+      "required": [
+        "status",
+        "chain_id",
+        "executor",
+        "candidate_profile_hash",
+        "catalog_hash",
+        "entry_count",
+        "entries"
+      ]
+    },
+    "release_gate": {
+      "type": "object",
+      "required": [
+        "risk_id",
+        "status",
+        "required_before_closure"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

@@ -34,7 +34,7 @@ artifact generators in canonical order.
 | Genesis deployment profile | Blocked | The canonical profile has 37 entries and rejects probes, but the implementation catalog still must prove deployment-instance identity and fallback distinctness; issue #656 owns reconciliation |
 | Governed parameter inventory | Checked planning artifact; production blocked | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding policy and host-profile coverage, but its concrete candidate bindings are honestly unavailable and its guarded-consumer lists remain planning. Production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and addresses remain open under issue #684; any self-reported complete candidate is rejected until #656 supplies structured candidate reconciliation, complete evidence is rejected until #684 supplies candidate-instance-bound measurement/reproduction/raise-chain semantics, the shared Core buffer implementation/tests/evidence remain open under #671, and `RISK-GOV-004` plus `python scripts/check_governed_parameter_inventory.py --require-complete` fail closed |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 30 Open production rows (3 High, 27 Medium): one confirmed gap, five design-review rows, and 24 pending dispositions; issue #658 owns remediation and reviewed disposition |
-| Governance Executor native-value authority | Blocked | Bounded assembly makes the proposal-selected value-bearing call invisible to Slither without removing the authority; High open blocker `RISK-GOV-003` requires a closed-world target/selector/value policy, deployment binding, adversarial tests, and independent review under issues #658 and #685 |
+| Governance Executor native-value authority | Blocked | The issue #685 slice binds and revalidates a closed-world target/selector/value catalog and adds adversarial tests, but bounded assembly still makes the value-bearing call invisible to Slither. High open blocker `RISK-GOV-003` now requires exact #656-bound candidate deployment/rehearsal evidence and independent review under #658 |
 | Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
 | Production release mode | Blocked | External evidence, Core headroom, genesis and governed-parameter completeness, open Slither findings, and `RISK-GOV-003` must all fail closed before production release |
 
@@ -105,8 +105,10 @@ Before any public beta or production-release claim:
    every `not_available` governed-parameter candidate binding with exact
    production hosts, values, floors, exhaustive guarded-consumer review,
    evidence, and fixed-stipend compatibility under issue #684 and pass the
-   inventory checker with `--require-complete`,
-   and complete the closed-world action/native-value policy under issue #685.
+   inventory checker with `--require-complete`, expand the issue #685
+   closed-world action catalog to those exact candidate addresses/code hashes,
+   retain deployment and rehearsal reconciliation, and obtain independent
+   review.
 5. Complete the public-beta evidence rows in the generated blocker report.
 6. Run `python scripts/check_release_mode.py --phase public-beta`; it must pass
    before production-release execution starts.

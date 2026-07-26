@@ -40,6 +40,21 @@ the release policy in `docs/release-policy.md`.
   full root/operation-ID-vector comparison are pinned for later implementation.
   The ADR remains Proposed, freezes no ABI, changes no contract, and does not
   advance maturity or release readiness.
+- Bound Governance V2 to an immutable, checksum-covered closed-world action
+  catalog keyed by exact action class, target, and selector, with target runtime
+  and reviewed profile hashes plus zero, exact, or bounded native-value
+  semantics. Scheduling now rehashes full catalog integrity; execution checks
+  the immutable scheduled catalog snapshot and revalidates exact target code,
+  call type, and value bounds;
+  unknown tuples, unregistered modules, generic proxy/multicall/fallback/
+  delegatecall routes, and unreviewed native transfers fail closed. Added
+  hostile target, target-drift, typed-value, refund, reentrancy, and mixed-value
+  atomic rollback tests; bootstrap/catalog monitoring events; machine schema,
+  policy checker, release-manifest/checksum integration, and monitoring/docs
+  updates for issue #685. The committed candidate binding remains explicitly
+  unavailable until issue #656 supplies exact addresses and code hashes, so
+  `RISK-GOV-003` remains High and open pending deployment, non-local rehearsal,
+  monitoring, and independent review; this is not a readiness claim.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
   `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a

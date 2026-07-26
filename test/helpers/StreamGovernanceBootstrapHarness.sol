@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/IStreamGovernanceExecutor.sol";
 import "../../smart-contracts/IStreamModuleRegistry.sol";
 import "../../smart-contracts/SSTORE2.sol";
+import "../../smart-contracts/StreamGovernanceActionPolicy.sol";
 import "../../smart-contracts/StreamGovernanceBootstrap.sol";
 import "../../smart-contracts/StreamGovernanceEvidence.sol";
 import "../../smart-contracts/StreamGovernanceExecutor.sol";
@@ -423,8 +424,8 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
     uint8 internal constant BOOTSTRAP_FAULT_DELEGATED_REGISTRY_ONLY_MODULE = 11;
     bytes32 internal constant BOOTSTRAP_SCOPE_V1 =
         0xace275f08856e822491961304b01cdc9423d7d16c05518327353df5cd02e33f8;
-    bytes32 internal constant BOOTSTRAP_STATE_V1 =
-        0x96decef116f307400b4d1826658d33976ec923ce136ead67b736b8becbe781ef;
+    bytes32 internal constant BOOTSTRAP_STATE_V2 =
+        keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2");
     bytes32 internal constant BOOTSTRAP_TRIGGER_V1 =
         0x9927dc0a368efe3d99880bb180d83938664a29ad399291c4544e4cab70c84548;
     bytes32 internal constant INVENTORY_LEAF_V1 =
@@ -473,6 +474,9 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
         uint64 inventoryCount;
         bytes32 triggerSetHash;
         uint256 triggerCount;
+        bytes32 actionPolicyCandidateProfileHash;
+        bytes32 actionPolicyCatalogHash;
+        uint256 actionPolicyEntryCount;
     }
 
     struct ScheduledBootstrapSeal {
@@ -509,6 +513,9 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
         uint256 inventoryLeafCount;
         address bootstrapAuthority;
         address sealedPayloadPointer;
+        bytes32 actionPolicyCandidateProfileHash;
+        bytes32 actionPolicyCatalogHash;
+        uint256 actionPolicyEntryCount;
     }
 
     function _deployBoundBootstrap(address authority)
@@ -857,6 +864,21 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
             );
         }
         artifacts.triggerCount = triggerCount;
+        GovernanceActionPolicyEntry[] memory actionPolicies =
+            _initialActionPolicies(artifacts, triggers);
+        artifacts.actionPolicyCandidateProfileHash = keccak256(
+            abi.encode(
+                "6529STREAM_TEST_GOVERNANCE_ACTION_POLICY_CANDIDATE_V1",
+                block.chainid,
+                address(artifacts.executor),
+                address(artifacts.core),
+                address(artifacts.manifest)
+            )
+        );
+        artifacts.actionPolicyCatalogHash = _actionPolicyCatalogHash(
+            address(artifacts.executor), artifacts.actionPolicyCandidateProfileHash, actionPolicies
+        );
+        artifacts.actionPolicyEntryCount = actionPolicies.length;
         SystemManifestBootstrapBinding memory binding = SystemManifestBootstrapBinding({
             roleRegistry: address(artifacts.roleRegistry),
             governanceRoot: authority,
@@ -869,7 +891,10 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
             expectedInventoryLeafCount: artifacts.inventoryCount,
             expectedTriggers: triggers,
             pointerTypes: pointerTypes,
-            registries: registries
+            registries: registries,
+            actionPolicyCandidateProfileHash: artifacts.actionPolicyCandidateProfileHash,
+            expectedActionPolicyCatalogHash: artifacts.actionPolicyCatalogHash,
+            actionPolicies: actionPolicies
         });
         vm.prank(artifacts.bootstrapAuthority);
         artifacts.executor.bindSystemManifestBootstrap(binding);
@@ -880,6 +905,208 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
         artifacts.initialGuardianSetHash = state.initialGuardianSetHash;
         artifacts.terminalFreezeVetoMutationChain = state.terminalFreezeVetoMutationChain;
         artifacts.terminalFreezeVetoMutationRevision = state.terminalFreezeVetoMutationRevision;
+    }
+
+    function _initialActionPolicies(
+        BootstrapArtifacts memory artifacts,
+        SystemManifestBootstrapTriggerExpectation[] memory triggers
+    ) private returns (GovernanceActionPolicyEntry[] memory entries) {
+        GovernanceActionPolicyEntry[] memory extra = _additionalActionPolicies(artifacts);
+        uint256 maximumCount = 27 + triggers.length * 4 + extra.length;
+        GovernanceActionPolicyEntry[] memory unsorted =
+            new GovernanceActionPolicyEntry[](maximumCount);
+        uint256 count;
+
+        for (uint8 actionClass = 0; actionClass < 4; actionClass++) {
+            unsorted[count++] = _zeroPolicy(
+                actionClass,
+                address(artifacts.manifest),
+                bytes4(0x09b1b5c6),
+                keccak256("TEST_SYSTEM_MANIFEST")
+            );
+        }
+        for (uint256 i = 0; i < triggers.length; i++) {
+            for (uint8 actionClass = 0; actionClass < 4; actionClass++) {
+                if ((triggers[i].allowedActionClassMask & uint8(1 << actionClass)) == 0) continue;
+                unsorted[count++] = _zeroPolicy(
+                    actionClass,
+                    triggers[i].triggerTarget,
+                    triggers[i].triggerSelector,
+                    keccak256("TEST_BOOTSTRAP_TRIGGER")
+                );
+            }
+        }
+
+        bytes4[7] memory executorSelectors = [
+            artifacts.executor.registerProposer.selector,
+            artifacts.executor.registerCanceller.selector,
+            artifacts.executor.setApprovedNativeReceiver.selector,
+            artifacts.executor.setTighteningCall.selector,
+            artifacts.executor.registerFreezeSelector.selector,
+            artifacts.executor.rotateGovernanceRoot.selector,
+            artifacts.executor.registerSystemManifestTailTrigger.selector
+        ];
+        for (uint256 i = 0; i < 5; i++) {
+            unsorted[count++] = _zeroPolicy(
+                0,
+                address(artifacts.executor),
+                executorSelectors[i],
+                keccak256("TEST_GOVERNANCE_EXECUTOR")
+            );
+            unsorted[count++] = _zeroPolicy(
+                1,
+                address(artifacts.executor),
+                executorSelectors[i],
+                keccak256("TEST_GOVERNANCE_EXECUTOR")
+            );
+        }
+        unsorted[count++] = _zeroPolicy(
+            3,
+            address(artifacts.executor),
+            executorSelectors[5],
+            keccak256("TEST_GOVERNANCE_EXECUTOR")
+        );
+        unsorted[count++] = _zeroPolicy(
+            2,
+            address(artifacts.executor),
+            executorSelectors[6],
+            keccak256("TEST_GOVERNANCE_EXECUTOR")
+        );
+        unsorted[count++] = _zeroPolicy(
+            3,
+            address(artifacts.executor),
+            artifacts.executor.sealSystemManifestBootstrap.selector,
+            keccak256("TEST_GOVERNANCE_EXECUTOR")
+        );
+
+        bytes4[5] memory registrySelectors = [
+            IStreamRoleRegistry.grantRole.selector,
+            IStreamRoleRegistry.revokeRole.selector,
+            IStreamRoleRegistry.grantScopedRole.selector,
+            IStreamRoleRegistry.revokeScopedRole.selector,
+            IStreamRoleRegistry.registerRoleManager.selector
+        ];
+        for (uint256 i = 0; i < registrySelectors.length; i++) {
+            unsorted[count++] = _zeroPolicy(
+                0,
+                address(artifacts.roleRegistry),
+                registrySelectors[i],
+                keccak256("TEST_ROLE_REGISTRY")
+            );
+            unsorted[count++] = _zeroPolicy(
+                1,
+                address(artifacts.roleRegistry),
+                registrySelectors[i],
+                keccak256("TEST_ROLE_REGISTRY")
+            );
+        }
+        for (uint256 i = 0; i < extra.length; i++) {
+            unsorted[count++] = extra[i];
+        }
+        require(count <= maximumCount, "action policy sizing");
+
+        entries = new GovernanceActionPolicyEntry[](count);
+        for (uint256 i = 0; i < count; i++) {
+            entries[i] = unsorted[i];
+        }
+        _sortActionPolicies(entries);
+    }
+
+    function _additionalActionPolicies(BootstrapArtifacts memory)
+        internal
+        virtual
+        returns (GovernanceActionPolicyEntry[] memory entries)
+    {
+        entries = new GovernanceActionPolicyEntry[](0);
+    }
+
+    function _zeroPolicy(
+        uint8 actionClass,
+        address policyTarget,
+        bytes4 selector,
+        bytes32 targetProfileHash
+    ) internal view returns (GovernanceActionPolicyEntry memory entry) {
+        entry = GovernanceActionPolicyEntry({
+            actionClass: actionClass,
+            target: policyTarget,
+            selector: selector,
+            targetCodeHash: policyTarget.codehash,
+            targetProfileHash: targetProfileHash,
+            callType: 1,
+            valuePolicy: 0,
+            valueLimit: 0,
+            valueSemanticsHash: bytes32(0)
+        });
+    }
+
+    function _valuePolicy(
+        uint8 actionClass,
+        address policyTarget,
+        bytes4 selector,
+        bytes32 targetProfileHash,
+        uint8 valuePolicy,
+        uint256 valueLimit
+    ) internal view returns (GovernanceActionPolicyEntry memory entry) {
+        entry = GovernanceActionPolicyEntry({
+                actionClass: actionClass,
+                target: policyTarget,
+                selector: selector,
+                targetCodeHash: policyTarget.code.length == 0 ? bytes32(0) : policyTarget.codehash,
+                targetProfileHash: targetProfileHash,
+                callType: selector == bytes4(0) ? 2 : 1,
+                valuePolicy: valuePolicy,
+                valueLimit: valueLimit,
+                valueSemanticsHash: keccak256(
+                    "6529STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1"
+                )
+            });
+    }
+
+    function _sortActionPolicies(GovernanceActionPolicyEntry[] memory entries) internal pure {
+        for (uint256 i = 1; i < entries.length; i++) {
+            GovernanceActionPolicyEntry memory entry = entries[i];
+            bytes32 key = keccak256(abi.encode(entry.actionClass, entry.target, entry.selector));
+            uint256 j = i;
+            while (j != 0) {
+                GovernanceActionPolicyEntry memory prior = entries[j - 1];
+                bytes32 priorKey =
+                    keccak256(abi.encode(prior.actionClass, prior.target, prior.selector));
+                if (uint256(priorKey) < uint256(key)) break;
+                entries[j] = prior;
+                j--;
+            }
+            entries[j] = entry;
+        }
+    }
+
+    function _actionPolicyCatalogHash(
+        address executor,
+        bytes32 candidateProfileHash,
+        GovernanceActionPolicyEntry[] memory entries
+    ) internal view returns (bytes32 catalogHash) {
+        return StreamGovernanceActionPolicy.expectedCatalogHash(
+                executor, candidateProfileHash, entries
+            );
+    }
+
+    function _actionPolicyBootstrapState(StreamGovernanceExecutor executor)
+        internal
+        view
+        returns (bool bound, bytes32 candidateProfileHash, bytes32 catalogHash, uint256 entryCount)
+    {
+        (bool success, bytes memory encoded) = address(executor)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamGovernanceExecutor.systemManifestBootstrapState.selector
+                )
+            );
+        require(success && encoded.length == 29 * 32, "bootstrap state read failed");
+        assembly ("memory-safe") {
+            bound := iszero(iszero(mload(add(encoded, 0x20))))
+            candidateProfileHash := mload(add(encoded, 0x360))
+            catalogHash := mload(add(encoded, 0x380))
+            entryCount := mload(add(encoded, 0x3a0))
+        }
     }
 
     function _filledString(uint256 length) private pure returns (string memory value) {
@@ -1049,8 +1276,11 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
         state.inventoryLeafCount = artifacts.inventoryCount;
         state.bootstrapAuthority = artifacts.bootstrapAuthority;
         state.sealedPayloadPointer = sealedPayloadPointer;
+        state.actionPolicyCandidateProfileHash = artifacts.actionPolicyCandidateProfileHash;
+        state.actionPolicyCatalogHash = artifacts.actionPolicyCatalogHash;
+        state.actionPolicyEntryCount = artifacts.actionPolicyEntryCount;
         return keccak256(
-            bytes.concat(abi.encode(BOOTSTRAP_STATE_V1, bootstrapScope), abi.encode(state))
+            bytes.concat(abi.encode(BOOTSTRAP_STATE_V2, bootstrapScope), abi.encode(state))
         );
     }
 

@@ -238,12 +238,13 @@ current 30 Open rows therefore keep public beta and production red under
 
 The bounded assembly call in `StreamGovernanceExecutor` prevents returndata
 bombs but makes proposal-selected native-value authority invisible to Slither's
-`arbitrary-send-eth` detector. `RISK-GOV-003` preserves that authority as a
-separate High open blocker. It cannot clear until the closed-world
-target/selector/value policy, deployment binding, adversarial value-flow tests,
-and independent review tracked by
-[#658](https://github.com/6529-Collections/6529Stream/issues/658) and
-[#685](https://github.com/6529-Collections/6529Stream/issues/685) are complete.
+`arbitrary-send-eth` detector. The Executor now binds and revalidates a
+checksum-covered closed-world action/target/selector/value catalog at scheduling
+and execution, with zero value as the default and explicit typed semantics for
+any nonzero row. `RISK-GOV-003` remains a separate High open blocker until issue
+[#656](https://github.com/6529-Collections/6529Stream/issues/656) provides exact
+candidate addresses and code hashes and the deployment, system-manifest,
+non-local rehearsal, monitoring, and independent-review evidence is complete.
 The Governance V2 foundation is pre-audit and not production-ready.
 
 Both release phases also run the record-family authorization checker and
@@ -373,15 +374,15 @@ The current local baseline includes:
   `release-artifacts/release-tool-call-policy.json`
   and
   [`release-artifacts/schema/release-tool-call-policy.v1.schema.json`](../release-artifacts/schema/release-tool-call-policy.v1.schema.json).
-  The policy binds the exact 21 runtime and nine focused-test source rows by
+  The policy binds the exact 22 runtime and nine focused-test source rows by
   role, hash, size, and reviewed import/member/call multisets. Code separately
-  pins the seven roots, those exact 30 paths, and allowed dangerous-capability
+  pins the seven roots, those exact 31 paths, and allowed dangerous-capability
   membership, so the policy cannot expand its own authority. The release
   manifest and candidate lockfile bind both files by exact path, SHA-256, byte
   size, and schema identity/version; both checksum indexes cover them, the
   offline verifier consumes immutable covered-file snapshots, and public-beta
   plus production release mode fail closed when validation fails. The revised
-  canonical projection is exactly 242 configured roots and 408 covered-file
+  canonical projection is exactly 247 configured roots and 414 covered-file
   entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),

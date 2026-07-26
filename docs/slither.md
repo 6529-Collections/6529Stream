@@ -45,10 +45,10 @@ that the removed probe behavior was remediated.
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to
 Slither's `arbitrary-send-eth` detector. The row's disappearance is not a
-remediation or acceptance: High open blocker `RISK-GOV-003` preserves the
-semantic risk until closed-world target/selector/value policy, deployment
-binding, adversarial value-flow tests, and independent review are complete
-under issues #658 and #685.
+remediation or acceptance. The closed-world target/selector/value runtime,
+machine catalog, and adversarial value-flow tests now exist, but High open
+blocker `RISK-GOV-003` preserves the semantic risk until #656-bound candidate
+deployment/rehearsal evidence and independent review under #658 are complete.
 
 The reproducible Linux CI/release path installs the hashed lock before selecting
 the compiler:

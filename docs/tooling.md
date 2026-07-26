@@ -1412,8 +1412,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 244 configured roots,
-expanding to exactly 410 covered-file entries in each checksum index. The four
+The revised canonical projection contains exactly 247 configured roots,
+expanding to exactly 414 covered-file entries in each checksum index. The four
 record-family contract-semantic inputs above account for four exact roots and
 four exact entries; they do not imply coverage of any other file under
 `smart-contracts/`.
@@ -1551,6 +1551,42 @@ tests are checksum-covered, and release-manifest generation/check depends on
 the ordinary inventory target so stale policy cannot enter the generated tail.
 The offline release verifier additionally requires the release manifest and
 candidate lockfile to carry matching canonical inventory records.
+
+## Governance V2 Action Policy
+
+Run the closed-world action/native-value gate with:
+
+```bash
+make governance-action-policy-check
+```
+
+The target runs:
+
+```bash
+python scripts/test_governance_action_policy.py
+python scripts/check_governance_action_policy.py
+```
+
+The checker validates
+[`release-artifacts/governance-action-policy.json`](../release-artifacts/governance-action-policy.json)
+and its
+[`governance-action-policy.v1.schema.json`](../release-artifacts/schema/governance-action-policy.v1.schema.json)
+schema. It pins the exact source-level action-class, target-profile, and selector
+tuples, requires the zero-value default, rejects generic proxy, multicall,
+fallback-dispatch, delegatecall, and unregistered-module routes, and verifies
+that the Executor validates the immutable catalog at scheduling and execution
+with the same 1,024-entry ceiling recorded by the artifact.
+For a complete candidate it also requires policy-key ordering, rejects routes
+that do not expand from the reviewed source/native catalogs, and independently
+recomputes the ABI-encoded onchain catalog commitment from the chain ID, exact
+Executor address, candidate profile, target addresses, runtime code hashes, and
+value-policy rows.
+Candidate binding remains honestly unavailable until issue #656 supplies exact
+addresses and runtime hashes. The ordinary gate accepts that explicit blocker
+but rejects a fabricated or commitment-inconsistent complete candidate;
+`RISK-GOV-003` cannot close until
+candidate deployment, rehearsal, monitoring, and independent-review evidence
+are linked.
 
 ## External-Call Gas Inventory
 

@@ -93,6 +93,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_governed_parameter_identifiers.py"
 & $pythonPath @pythonArgs "scripts\test_governed_parameter_inventory.py"
 & $pythonPath @pythonArgs "scripts\check_governed_parameter_inventory.py"
+& $pythonPath @pythonArgs "scripts\test_governance_action_policy.py"
+& $pythonPath @pythonArgs "scripts\check_governance_action_policy.py"
 & $pythonPath @pythonArgs "scripts\test_record_family_authorization.py"
 & $pythonPath @pythonArgs "scripts\check_record_family_authorization.py"
 & $pythonPath @pythonArgs "scripts\test_system_manifest_payload_vector.py"

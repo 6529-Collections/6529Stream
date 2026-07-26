@@ -326,6 +326,8 @@ jobs:
             scripts/test_governed_parameter_identifiers.py \
             scripts/check_governed_parameter_inventory.py \
             scripts/test_governed_parameter_inventory.py \
+            scripts/check_governance_action_policy.py \
+            scripts/test_governance_action_policy.py \
             scripts/generate_system_manifest_payload_vector.py \
             scripts/check_system_manifest_payload_vector.py \
             scripts/test_system_manifest_payload_vector.py \
@@ -836,6 +838,8 @@ jobs:
           python3 scripts/check_governed_parameter_identifiers.py 2>&1 | tee ci-logs/governed-parameter-identifiers-check.log
           python3 scripts/test_governed_parameter_inventory.py 2>&1 | tee ci-logs/governed-parameter-inventory-tests.log
           python3 scripts/check_governed_parameter_inventory.py 2>&1 | tee ci-logs/governed-parameter-inventory-check.log
+          python3 scripts/test_governance_action_policy.py 2>&1 | tee ci-logs/governance-action-policy-tests.log
+          python3 scripts/check_governance_action_policy.py 2>&1 | tee ci-logs/governance-action-policy-check.log
           python3 scripts/test_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-tests.log
           python3 scripts/check_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-check.log
           python3 scripts/test_system_manifest_payload_vector_reference.py 2>&1 | tee ci-logs/system-manifest-payload-vector-reference-tests.log

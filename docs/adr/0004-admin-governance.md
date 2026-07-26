@@ -1207,11 +1207,13 @@ The exact domain and durable configuration-key values are:
 
 These configuration keys are durable permission identifiers, not replaceable
 display labels. The machine governance action-policy catalog required by
-[GOV-WINDOWS] must carry these exact rows and must also cover every downstream
+[GOV-WINDOWS] carries these exact rows and must also cover every downstream
 protected selector before any downstream ownership is transferred to the
-Executor. Until that closed-world catalog, target enforcement, deployment
-checker, and release evidence exist, Governance V2 foundation code does not
-satisfy [GOV-V2-CUTOVER] and no production ownership cutover is permitted.
+Executor. The one-way bootstrap now binds and runtime-enforces that closed
+world. Exact production candidate expansion, deployment/system-manifest
+reconciliation, non-local rehearsal, monitoring, and independent-review
+evidence remain required before Governance V2 satisfies [GOV-V2-CUTOVER]; no
+production ownership cutover is permitted before those gates complete.
 
 The security-critical Governance V2 error ABI added by this foundation is
 exact:
@@ -1236,6 +1238,16 @@ exact:
 | `TerminalFreezeProposerLiveActionCapExceeded(bytes32,address,uint256)` | `0xea2c035f` |
 | `TerminalFreezePageCursorOutOfBounds(bytes32,uint256,uint256)` | `0x204cb92b` |
 | `TerminalFreezePageLimitExceeded(uint256,uint256)` | `0x83beaacb` |
+| `GovernanceActionPolicyNotBound()` | `0xa5b742e2` |
+| `InvalidGovernanceActionPolicyCandidate(bytes32)` | `0xe520f60d` |
+| `InvalidGovernanceActionPolicyEntry(uint256)` | `0xd6b8cb68` |
+| `GovernanceActionPolicyEntriesNotSorted(uint256)` | `0x6acf28fc` |
+| `GovernanceActionPolicyCatalogHashMismatch(bytes32,bytes32)` | `0xf107e7a1` |
+| `GovernanceActionPolicyUnknown(uint256,uint8,address,bytes4)` | `0x67318682` |
+| `GovernanceActionPolicyCallTypeMismatch(uint256,uint8,uint8)` | `0x0ffdba41` |
+| `GovernanceActionPolicyTargetCodeHashMismatch(uint256,address,bytes32,bytes32)` | `0x25ccae3e` |
+| `GovernanceActionPolicyValueRejected(uint256,uint8,uint256,uint256)` | `0xdd09ff18` |
+| `GovernanceActionPolicySnapshotMismatch(bytes32,bytes32,bytes32)` | `0xc9c602c5` |
 
 Batch rules [GOV-BATCH]:
 
@@ -1556,6 +1568,18 @@ struct SystemManifestBootstrapTriggerExpectation {
     uint8 allowedActionClassMask;
 }
 
+struct GovernanceActionPolicyEntry {
+    uint8 actionClass;
+    address target;
+    bytes4 selector;
+    bytes32 targetCodeHash;
+    bytes32 targetProfileHash;
+    uint8 callType;
+    uint8 valuePolicy;
+    uint256 valueLimit;
+    bytes32 valueSemanticsHash;
+}
+
 struct SystemManifestBootstrapBinding {
     address roleRegistry;
     address governanceRoot;
@@ -1569,6 +1593,9 @@ struct SystemManifestBootstrapBinding {
     SystemManifestBootstrapTriggerExpectation[] expectedTriggers;
     bytes32[] pointerTypes;
     address[] registries;
+    bytes32 actionPolicyCandidateProfileHash;
+    bytes32 expectedActionPolicyCatalogHash;
+    GovernanceActionPolicyEntry[] actionPolicies;
 }
 
 function bindSystemManifestBootstrap(
@@ -1606,7 +1633,10 @@ function systemManifestBootstrapState()
         bytes32 inventoryStateRoot,
         uint256 inventoryLeafCount,
         address genesisBootstrapAuthority,
-        address sealedPayloadPointer
+        address sealedPayloadPointer,
+        bytes32 actionPolicyCandidateProfileHash,
+        bytes32 actionPolicyCatalogHash,
+        uint256 actionPolicyEntryCount
     );
 
 function sealSystemManifestBootstrap() external;
@@ -1640,9 +1670,24 @@ event SystemManifestBootstrapBound(
     bytes32 terminalFreezeVetoMutationChain,
     uint64 terminalFreezeVetoMutationRevision
 );
+
+event GovernanceActionPolicyBound(
+    uint16 schemaVersion,
+    bytes32 indexed candidateProfileHash,
+    bytes32 indexed catalogHash,
+    uint256 entryCount
+);
+
+event GovernanceActionPolicyValidated(
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint8 indexed phase,
+    bytes32 indexed candidateProfileHash,
+    bytes32 catalogHash
+);
 ```
 
-The bind, pending-count, state, and seal selectors are `0x32212927`,
+The bind, pending-count, state, and seal selectors are `0x67e9ec44`,
 `0x20662991`, `0x8a2d979b`, and `0xbd1f39cd`, respectively.
 The bind event topic is
 `0x0af9f59ce766b6c1564dcbc54493155eaac34589421982b2521a49b0fd056a44`
@@ -1654,7 +1699,12 @@ indexed. The seal event topic is
 for
 `SystemManifestBootstrapSealed(uint16,bytes32,uint256,address,bytes32,bytes32)`;
 schema version is `1`, and trigger-set hash, root pointer, and action ID are
-indexed. Bootstrap transition hashes are:
+indexed. The action-policy bind and validation topics are
+`0x8ec697c733bbf3d789554695334e5cc0ad382caff7d4e7c8f7c5b0ea874ca1bf`
+and
+`0x579d494f73bf0eda7cb3c7d3e498bb407007a400ae9000e19ec572a48190ec48`,
+respectively; validation phase `1` means scheduling and phase `2` means
+execution. Bootstrap transition hashes are:
 
 Before `bound == true`, every scheduling, execution, cancellation, registration,
 and seal path reverts; read-only inspection and the
@@ -1742,6 +1792,9 @@ bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1 =
 bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1 =
     0x96decef116f307400b4d1826658d33976ec923ce136ead67b736b8becbe781ef;
     // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2 =
+    0x9217c521443c5f03514316d2b2ad0dea3b73d13654494d9c0cf467a347776878;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2")
 bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1 =
     0x9927dc0a368efe3d99880bb180d83938664a29ad399291c4544e4cab70c84548;
     // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1")
@@ -1761,7 +1814,7 @@ bytes32 bootstrapScopeHash = keccak256(abi.encode(
     address(governanceExecutor)
 ));
 bytes32 bootstrapStateHash = keccak256(abi.encode(
-    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1,
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2,
     bootstrapScopeHash,
     bound,
     sealed,
@@ -1788,9 +1841,51 @@ bytes32 bootstrapStateHash = keccak256(abi.encode(
     inventoryStateRoot,
     inventoryLeafCount,
     genesisBootstrapAuthority,
-    sealedPayloadPointer
+    sealedPayloadPointer,
+    actionPolicyCandidateProfileHash,
+    actionPolicyCatalogHash,
+    actionPolicyEntryCount
 ));
 ```
+
+The V1 bootstrap-state domain is historical and rejected by the V2
+implementation. V2 appends the action-policy candidate identity, exact catalog
+commitment, and materialized entry count; it does not reinterpret a V1 hash.
+The policy entries are sorted by
+`keccak256(abi.encode(actionClass, target, selector))`, are immutable after the
+bind, and are capped at 1,024 entries. That ceiling accommodates all 128
+bootstrap triggers under every pre-seal action class plus the fixed governance
+surfaces while retaining an explicit bound on schedule/execution revalidation.
+The catalog uses these domains:
+
+```solidity
+bytes32 constant STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1 =
+    0x17497217a4a2920f9d71e4eb21f2e6c4e1807ebc94efc840b803a082c1923b7e;
+bytes32 constant STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1 =
+    0x10d1e55c75d9ea0c727e0d8b25139c0a44b8960214ae155228429067e7c49620;
+bytes32 constant STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1 =
+    0xba5f75b790daceafedd59e5aa5b3e7e55d939e3909f4ac95b32a8611997bc31a;
+bytes32 constant STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1 =
+    0x9734d6cd59791593409e4cc12cae8ad5c2c0fa8cd606deffc0814fbf58109aea;
+```
+
+Each entry commits the exact action class, target, selector, target runtime code
+hash, reviewed target-profile hash, call type, value-policy type, value limit,
+and value-semantics hash. Unknown tuples reject. Direct calls require the exact
+live runtime code hash and reject EIP-7702 delegated EOAs. Empty-calldata native
+transfers require an exact catalog row as well as the existing approved-native-
+receiver policy. Value policy `0` means exactly zero; `1` means the exact
+nonzero limit; `2` means `0 < value <= limit`. Nonzero policies use the single
+caller-funded, exact-target, exact-batch-sum, atomic-revert, surplus-rejection
+semantics hash above.
+
+Scheduling recomputes the complete catalog chain and commitment before storing
+the action snapshot. Because bootstrap binding is one-way and exposes no
+catalog mutation entrypoint, execution compares that immutable snapshot in
+constant time, then revalidates every selected tuple, live target code hash,
+call type, and value policy before any downstream mutation. This avoids a
+catalog-wide execution loop that would violate the cold-seal gas envelope
+without weakening the exact-call boundary.
 
 The one-way bind stores the complete nonempty ascending list of actual Core
 pointer types and the complete nonempty ascending list of registry instances
@@ -2231,12 +2326,15 @@ Execution rules:
    tail/eligibility rules, and action ID match. The first-call target/selector
    fields retained for indexing are never execution authority, and arbitrary
    caller-selected bytes cannot execute.
-   The bounded-returndata assembly call used for execution does not remove the
-   underlying authority risk of forwarding proposal-selected native value;
-   it only prevents a returndata bomb. Slither no longer recognizes that
-   assembly call as `arbitrary-send-eth`, so issue #658 and the closed-world
-   action-policy/deployment gate remain the manual fail-closed security record
-   for destination, value, balance-source, and rollback review.
+   The bounded-returndata assembly call used for execution does not by itself
+   remove the authority risk of forwarding proposal-selected native value; it
+   only prevents a returndata bomb. The independently committed action catalog
+   now revalidates the exact class/target/selector/runtime/value tuple at
+   scheduling and execution and snapshots the catalog hash per scheduled
+   action. Slither still does not recognize the assembly call as
+   `arbitrary-send-eth`, so issue #658 plus the candidate deployment and review
+   gates remain the fail-closed security record for destination, value,
+   balance-source, and rollback review.
 8. A successful execution stores `EXECUTED`, records `executor`, emits
    `GovernanceActionExecuted`, and cannot be replayed.
 9. Cancellation is allowed only while stored status is `SCHEDULED`, before

@@ -1,0 +1,163 @@
+{
+  "schema_version": "6529stream.governance-action-policy.v1",
+  "status": "implementation_complete_candidate_binding_blocked",
+  "production_readiness_evidence": false,
+  "normative_sources": [
+    "docs/adr/0004-admin-governance.md",
+    "docs/adr/0017-raise-only-parameter-governance.md",
+    "ops/ROADMAP.md#L587",
+    "https://github.com/6529-Collections/6529Stream/issues/685"
+  ],
+  "runtime_enforcement": {
+    "contract": "StreamGovernanceExecutor",
+    "binding": "one_way_system_manifest_bootstrap",
+    "max_entries": 1024,
+    "lookup_key": [
+      "action_class",
+      "target",
+      "selector"
+    ],
+    "schedule_validation": true,
+    "execution_validation": true,
+    "runtime_code_hash_validation": true,
+    "scheduled_catalog_snapshot_validation": true,
+    "unknown_tuple_policy": "revert",
+    "default_value_policy": "zero_only",
+    "batch_policy": "atomic_exact_msg_value_sum",
+    "surplus_policy": "revert",
+    "domains": {
+      "entry": {
+        "preimage": "6529STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1",
+        "keccak256": "0x17497217a4a2920f9d71e4eb21f2e6c4e1807ebc94efc840b803a082c1923b7e"
+      },
+      "chain": {
+        "preimage": "6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1",
+        "keccak256": "0x10d1e55c75d9ea0c727e0d8b25139c0a44b8960214ae155228429067e7c49620"
+      },
+      "catalog": {
+        "preimage": "6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1",
+        "keccak256": "0xba5f75b790daceafedd59e5aa5b3e7e55d939e3909f4ac95b32a8611997bc31a"
+      }
+    }
+  },
+  "value_semantics": {
+    "zero_only": {
+      "id": 0,
+      "value_limit": "0",
+      "semantics_hash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "exact": {
+      "id": 1,
+      "source": "executeGovernanceBatch caller msg.value",
+      "destination": "the exact catalog-bound target",
+      "accounting": "descriptor value included once in exact batch sum",
+      "refund_policy": "any executor balance after the batch reverts the entire batch",
+      "failure_policy": "target failure reverts the entire batch",
+      "semantics_preimage": "6529STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1",
+      "semantics_hash": "0x9734d6cd59791593409e4cc12cae8ad5c2c0fa8cd606deffc0814fbf58109aea"
+    },
+    "bounded": {
+      "id": 2,
+      "source": "executeGovernanceBatch caller msg.value",
+      "destination": "the exact catalog-bound target",
+      "bound": "0 < descriptor value <= value_limit",
+      "accounting": "descriptor value included once in exact batch sum",
+      "refund_policy": "any executor balance after the batch reverts the entire batch",
+      "failure_policy": "target failure reverts the entire batch",
+      "semantics_preimage": "6529STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1",
+      "semantics_hash": "0x9734d6cd59791593409e4cc12cae8ad5c2c0fa8cd606deffc0814fbf58109aea"
+    }
+  },
+  "action_classes": [
+    { "id": 0, "name": "IMMEDIATE_TIGHTENING" },
+    { "id": 1, "name": "DELAYED_LOOSENING" },
+    { "id": 2, "name": "TERMINAL_FREEZE" },
+    { "id": 3, "name": "POINTER_REPLACEMENT" },
+    { "id": 4, "name": "FUNDS_RECOVERY" },
+    { "id": 5, "name": "SUCCESSOR_DECLARATION" }
+  ],
+  "source_catalog": {
+    "entry_semantics": "Each source row expands to one exact candidate address and runtime code hash. No row authorizes a proxy, fallback, delegatecall, arbitrary-call, or multicall route.",
+    "entries": [
+      { "action_class": 0, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerProposer(address,bool)", "selector": "0x0794ec84", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerProposer(address,bool)", "selector": "0x0794ec84", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerCanceller(address,bool)", "selector": "0xcb585072", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerCanceller(address,bool)", "selector": "0xcb585072", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "setApprovedNativeReceiver(address,bool)", "selector": "0x31ac9e82", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "setApprovedNativeReceiver(address,bool)", "selector": "0x31ac9e82", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "setTighteningCall(address,bytes4,bool)", "selector": "0x250885fb", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "setTighteningCall(address,bytes4,bool)", "selector": "0x250885fb", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerFreezeSelector(address,bytes4,bool)", "selector": "0xb1b73b69", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerFreezeSelector(address,bytes4,bool)", "selector": "0xb1b73b69", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 3, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "rotateGovernanceRoot(address,bytes32)", "selector": "0x46bf8975", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 2, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "registerSystemManifestTailTrigger(address,bytes4,uint8)", "selector": "0xc64f0807", "call_type": "direct", "value_policy": "zero_only", "bootstrap_only": true },
+      { "action_class": 3, "target_profile": "GOVERNANCE_EXECUTOR", "signature": "sealSystemManifestBootstrap()", "selector": "0xbd1f39cd", "call_type": "direct", "value_policy": "zero_only", "bootstrap_only": true },
+      { "action_class": 1, "target_profile": "ROLE_REGISTRY", "signature": "grantRole(bytes32,address)", "selector": "0x2f2ff15d", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "ROLE_REGISTRY", "signature": "revokeRole(bytes32,address)", "selector": "0xd547741f", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "ROLE_REGISTRY", "signature": "grantScopedRole(bytes32,bytes32,address)", "selector": "0x4c5ceedb", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "ROLE_REGISTRY", "signature": "revokeScopedRole(bytes32,bytes32,address)", "selector": "0x2862c0f1", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "ROLE_REGISTRY", "signature": "registerRoleManager(address,bool)", "selector": "0x148fed8e", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "ROLE_REGISTRY", "signature": "registerRoleManager(address,bool)", "selector": "0x148fed8e", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "MODULE_REGISTRY", "signature": "registerModule(address,bytes32,bytes4,bytes32,bytes32,string,uint256)", "selector": "0x03eb8dea", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 0, "target_profile": "MODULE_REGISTRY", "signature": "setModuleStatus(address,uint8)", "selector": "0x1dfaba7c", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "MODULE_REGISTRY", "signature": "setModuleStatus(address,uint8)", "selector": "0x1dfaba7c", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "MODULE_REGISTRY", "signature": "setModuleRegistryManifest(bytes32,string)", "selector": "0x7ba46615", "call_type": "direct", "value_policy": "zero_only" },
+      { "action_class": 1, "target_profile": "GOVERNED_GAS_PARAMETER_HOST", "signature": "raiseGasParameter(bytes32,uint256)", "selector": "0x5c0df7da", "call_type": "direct", "value_policy": "zero_only", "expand_from": "release-artifacts/governed-parameter-inventory.json#candidate_binding.host_bindings.GGP" },
+      { "action_class": 1, "target_profile": "GOVERNED_TIME_PARAMETER_HOST", "signature": "raiseTimeParameter(bytes32,uint256)", "selector": "0x046e1fd5", "call_type": "direct", "value_policy": "zero_only", "expand_from": "release-artifacts/governed-parameter-inventory.json#candidate_binding.host_bindings.GTP" },
+      { "action_class": 0, "target_profile": "SYSTEM_MANIFEST_SATELLITE", "signature": "SYSTEM_MANIFEST_PUBLISH", "selector": "0x09b1b5c6", "call_type": "direct", "value_policy": "zero_only", "tail_only": true },
+      { "action_class": 1, "target_profile": "SYSTEM_MANIFEST_SATELLITE", "signature": "SYSTEM_MANIFEST_PUBLISH", "selector": "0x09b1b5c6", "call_type": "direct", "value_policy": "zero_only", "tail_only": true },
+      { "action_class": 2, "target_profile": "SYSTEM_MANIFEST_SATELLITE", "signature": "SYSTEM_MANIFEST_PUBLISH", "selector": "0x09b1b5c6", "call_type": "direct", "value_policy": "zero_only", "tail_only": true },
+      { "action_class": 3, "target_profile": "SYSTEM_MANIFEST_SATELLITE", "signature": "SYSTEM_MANIFEST_PUBLISH", "selector": "0x09b1b5c6", "call_type": "direct", "value_policy": "zero_only", "tail_only": true }
+    ],
+    "candidate_trigger_expansion": {
+      "rule": "Every system-manifest trigger tuple expands once for each allowed action-class bit, with the exact target address, selector, and runtime code hash.",
+      "source": "SystemManifestBootstrapBinding.expectedTriggers"
+    },
+    "native_value_entries": []
+  },
+  "forbidden_routes": {
+    "target_kinds": [
+      "generic_proxy",
+      "generic_multicall",
+      "generic_fallback_dispatcher",
+      "generic_delegatecall_router",
+      "unregistered_module"
+    ],
+    "function_names": [
+      "aggregate",
+      "batch",
+      "delegate",
+      "delegateCall",
+      "execute",
+      "executeBatch",
+      "forward",
+      "multicall",
+      "proxy"
+    ],
+    "fallback_selector": "0x00000000",
+    "policy": "candidate generation and checking fail closed"
+  },
+  "candidate_binding": {
+    "status": "not_available",
+    "blocked_by_issue": "https://github.com/6529-Collections/6529Stream/issues/656",
+    "reason": "The launch deployment candidate with exact addresses and runtime code hashes does not exist. A candidate-specific expansion must be generated, rehearsed, independently reviewed, and checksum-bound before this artifact can become readiness evidence.",
+    "chain_id": null,
+    "executor": null,
+    "candidate_profile_hash": null,
+    "catalog_hash": null,
+    "entry_count": 0,
+    "entries": []
+  },
+  "release_gate": {
+    "risk_id": "RISK-GOV-003",
+    "status": "open",
+    "required_before_closure": [
+      "candidate_binding.status == complete",
+      "candidate entries equal the onchain bootstrap catalog",
+      "candidate catalog hash is included in deployment and system-manifest evidence",
+      "fork and testnet rehearsals cover schedule and execution validation",
+      "monitoring consumes GovernanceActionPolicyBound and GovernanceActionPolicyValidated",
+      "independent security review is linked"
+    ]
+  }
+}

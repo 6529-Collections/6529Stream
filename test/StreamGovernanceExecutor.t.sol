@@ -108,6 +108,28 @@ contract GovernedReentrantTargetMock {
     }
 }
 
+contract GovernedGenericDispatchMock {
+    fallback() external payable { }
+    receive() external payable { }
+
+    function forward(address target_, bytes calldata callData) external payable {
+        (bool ok,) = target_.call{ value: msg.value }(callData);
+        require(ok, "forward");
+    }
+
+    function multicall(bytes[] calldata callDatas) external payable {
+        for (uint256 i = 0; i < callDatas.length; i++) {
+            (bool ok,) = address(this).delegatecall(callDatas[i]);
+            require(ok, "multicall");
+        }
+    }
+
+    function delegate(address implementation, bytes calldata callData) external payable {
+        (bool ok,) = implementation.delegatecall(callData);
+        require(ok, "delegate");
+    }
+}
+
 contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     using Assertions for address;
     using Assertions for bool;
@@ -247,6 +269,16 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     StreamRoleRegistry private roleRegistry;
     StreamGovernanceExecutor private executor;
     GovernedTargetMock private target;
+    GovernedTargetMock private secondTarget;
+    GovernedTargetMock private thirdTarget;
+    GovernedTargetMock private payableTargetOne;
+    GovernedTargetMock private payableTargetTwo;
+    GovernedTargetMock private boundedPayableTarget;
+    GovernedRefundingMock private refundingTarget;
+    GovernedReturndataMock private returndataTarget;
+    GovernedReentrantTargetMock private reentrantTarget;
+    GovernedContextProbeMock private contextProbeOne;
+    GovernedContextProbeMock private contextProbeTwo;
     BootstrapArtifacts private bootstrap;
 
     address private proposer = address(0xA11CE);
@@ -259,9 +291,115 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         bootstrap = _deploySealedExecutor(address(this));
         executor = bootstrap.executor;
         roleRegistry = bootstrap.roleRegistry;
-        target = new GovernedTargetMock();
         guardian = bootstrap.initialGuardians[0];
         vm.deal(address(this), 1_000 ether);
+    }
+
+    function _additionalActionPolicies(BootstrapArtifacts memory artifacts)
+        internal
+        override
+        returns (GovernanceActionPolicyEntry[] memory entries)
+    {
+        target = new GovernedTargetMock();
+        secondTarget = new GovernedTargetMock();
+        thirdTarget = new GovernedTargetMock();
+        payableTargetOne = new GovernedTargetMock();
+        payableTargetTwo = new GovernedTargetMock();
+        boundedPayableTarget = new GovernedTargetMock();
+        refundingTarget = new GovernedRefundingMock();
+        returndataTarget = new GovernedReturndataMock();
+        reentrantTarget =
+            new GovernedReentrantTargetMock(IStreamGovernanceExecutor(address(artifacts.executor)));
+        contextProbeOne = new GovernedContextProbeMock(artifacts.executor);
+        contextProbeTwo = new GovernedContextProbeMock(artifacts.executor);
+
+        entries = new GovernanceActionPolicyEntry[](28);
+        uint256 index;
+        for (uint8 actionClass = 0; actionClass <= 5; actionClass++) {
+            entries[index++] = _zeroPolicy(
+                actionClass,
+                address(target),
+                GovernedTargetMock.setValue.selector,
+                keccak256("TEST_GOVERNED_TARGET_PRIMARY")
+            );
+            entries[index++] = _zeroPolicy(
+                actionClass,
+                address(secondTarget),
+                GovernedTargetMock.setValue.selector,
+                keccak256("TEST_GOVERNED_TARGET_SECONDARY")
+            );
+            entries[index++] = _zeroPolicy(
+                actionClass,
+                address(thirdTarget),
+                GovernedTargetMock.setValue.selector,
+                keccak256("TEST_GOVERNED_TARGET_TERTIARY")
+            );
+        }
+        entries[index++] = _valuePolicy(
+            1,
+            address(payableTargetOne),
+            GovernedTargetMock.setValue.selector,
+            keccak256("TEST_PAYABLE_TARGET_ONE"),
+            1,
+            1 ether
+        );
+        entries[index++] = _valuePolicy(
+            1,
+            address(payableTargetTwo),
+            GovernedTargetMock.setValue.selector,
+            keccak256("TEST_PAYABLE_TARGET_TWO"),
+            1,
+            2 ether
+        );
+        entries[index++] = _valuePolicy(
+            1,
+            address(boundedPayableTarget),
+            GovernedTargetMock.setValue.selector,
+            keccak256("TEST_BOUNDED_PAYABLE_TARGET"),
+            2,
+            2 ether
+        );
+        entries[index++] = _valuePolicy(
+            1,
+            address(refundingTarget),
+            GovernedRefundingMock.refund.selector,
+            keccak256("TEST_REFUNDING_TARGET"),
+            1,
+            1 ether
+        );
+        entries[index++] = _zeroPolicy(
+            1,
+            address(returndataTarget),
+            GovernedReturndataMock.succeedWithReturndata.selector,
+            keccak256("TEST_RETURNDATA_TARGET")
+        );
+        entries[index++] = _zeroPolicy(
+            1,
+            address(returndataTarget),
+            GovernedReturndataMock.revertWithReturndata.selector,
+            keccak256("TEST_RETURNDATA_TARGET")
+        );
+        entries[index++] = _zeroPolicy(
+            1,
+            address(reentrantTarget),
+            GovernedReentrantTargetMock.attack.selector,
+            keccak256("TEST_REENTRANT_TARGET")
+        );
+        entries[index++] = _zeroPolicy(
+            1,
+            address(contextProbeOne),
+            GovernedContextProbeMock.probe.selector,
+            keccak256("TEST_CONTEXT_PROBE_ONE")
+        );
+        entries[index++] = _zeroPolicy(
+            1,
+            address(contextProbeTwo),
+            GovernedContextProbeMock.probe.selector,
+            keccak256("TEST_CONTEXT_PROBE_TWO")
+        );
+        entries[index++] = _valuePolicy(
+            1, address(0xE0A), bytes4(0), keccak256("TEST_NATIVE_RECEIVER"), 1, 1 ether
+        );
     }
 
     // ---------------------------------------------------------------- helpers
@@ -931,7 +1069,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     function _assertIsolatedExecutorControlRejected(bytes memory callData, uint8 actionClass)
         private
     {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = callData;
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (777));
@@ -1515,7 +1653,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             tighteningActionId
         );
 
-        GovernedTargetMock freezeTarget = new GovernedTargetMock();
+        GovernedTargetMock freezeTarget = thirdTarget;
         vm.recordLogs();
         bytes32 freezeActionId = _setFreezeSelector(address(freezeTarget), selector, true);
         logs = vm.getRecordedLogs();
@@ -2477,7 +2615,18 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
-        Vm.Log memory scheduled = logs[logs.length - 1];
+        Vm.Log memory scheduled;
+        bool foundScheduled;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].topics.length != 0 && logs[i].topics[0] == GOVERNANCE_ACTION_SCHEDULED_TOPIC
+            ) {
+                scheduled = logs[i];
+                foundScheduled = true;
+                break;
+            }
+        }
+        foundScheduled.assertTrue("scheduled event found");
         scheduled.emitter.assertEq(address(executor), "scheduled event emitter");
         scheduled.topics.length.assertEq(4, "scheduled topic count");
         scheduled.topics[0].assertEq(GOVERNANCE_ACTION_SCHEDULED_TOPIC, "scheduled topic0");
@@ -2991,7 +3140,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testExecuteRejectsReorderedAndMutatedDescriptorsBeforeAnyTargetCall() public {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (11));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (22));
@@ -3042,7 +3191,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
         executor.executeGovernanceBatch(actionId, mutatedCalls, mutatedCallDatas);
 
-        GovernedTargetMock third = new GovernedTargetMock();
+        GovernedTargetMock third = thirdTarget;
         mutatedCalls = _cloneCalls(calls);
         mutatedCalls[1].target = address(third);
         vm.expectRevert(
@@ -3089,13 +3238,13 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testBatchValueSemantics() public {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = payableTargetTwo;
         GovernanceCall[] memory calls = new GovernanceCall[](2);
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (1));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (2));
         calls[0] = GovernanceCall({
-            target: address(target),
+            target: address(payableTargetOne),
             value: 1 ether,
             selector: GovernedTargetMock.setValue.selector,
             callDataHash: keccak256(callDatas[0]),
@@ -3132,15 +3281,250 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.executeGovernanceBatch{ value: 1 ether }(actionId, calls, callDatas);
 
         executor.executeGovernanceBatch{ value: 3 ether }(actionId, calls, callDatas);
-        target.lastPaidValue().assertEq(1 ether, "first call exact wei");
+        payableTargetOne.lastPaidValue().assertEq(1 ether, "first call exact wei");
         second.lastPaidValue().assertEq(2 ether, "second call exact wei");
-        address(target).balance.assertEq(1 ether, "first target balance");
+        address(payableTargetOne).balance.assertEq(1 ether, "first target balance");
         address(second).balance.assertEq(2 ether, "second target balance");
         address(executor).balance.assertEq(0, "no value stranded in executor");
     }
 
+    function testActionPolicyBootstrapStateAndScheduledValidationAreInspectable() public {
+        (bool bound, bytes32 candidateProfileHash, bytes32 catalogHash, uint256 entryCount) =
+            _actionPolicyBootstrapState(executor);
+        bound.assertTrue("action policy bound");
+        candidateProfileHash.assertEq(
+            bootstrap.actionPolicyCandidateProfileHash, "candidate profile"
+        );
+        catalogHash.assertEq(bootstrap.actionPolicyCatalogHash, "catalog hash");
+        entryCount.assertEq(bootstrap.actionPolicyEntryCount, "entry count");
+
+        vm.recordLogs();
+        bytes32 actionId =
+            _scheduleDefault(abi.encodeCall(GovernedTargetMock.setValue, (uint256(61))));
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 validationTopic =
+            keccak256("GovernanceActionPolicyValidated(uint16,bytes32,uint8,bytes32,bytes32)");
+        bool foundScheduledValidation;
+        for (uint256 i = 0; i < logs.length; i++) {
+            Vm.Log memory log = logs[i];
+            if (
+                log.emitter != address(executor) || log.topics.length != 4
+                    || log.topics[0] != validationTopic || log.topics[1] != actionId
+                    || log.topics[2] != bytes32(uint256(1)) || log.topics[3] != candidateProfileHash
+            ) {
+                continue;
+            }
+            (uint16 schemaVersion, bytes32 scheduledCatalogHash) =
+                abi.decode(log.data, (uint16, bytes32));
+            uint256(schemaVersion).assertEq(1, "policy event schema");
+            scheduledCatalogHash.assertEq(catalogHash, "scheduled policy snapshot");
+            foundScheduledValidation = true;
+        }
+        foundScheduledValidation.assertTrue("scheduled policy validation event");
+    }
+
+    function testActionPolicyRejectsUnknownTargetSelectorAndClassTuples() public {
+        GovernedTargetMock unregistered = new GovernedTargetMock();
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(1)));
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        bytes[] memory callDatas = new bytes[](1);
+        calls[0] = _governanceCall(address(unregistered), callData, keccak256("unknown-target"));
+        callDatas[0] = callData;
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector,
+                0,
+                StreamGovernanceActionClasses.DELAYED_LOOSENING,
+                address(unregistered),
+                GovernedTargetMock.setValue.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+
+        callData = abi.encodeCall(GovernedTargetMock.setShouldRevert, (true));
+        calls[0] = _governanceCall(address(target), callData, keccak256("unknown-selector"));
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector,
+                0,
+                StreamGovernanceActionClasses.DELAYED_LOOSENING,
+                address(target),
+                GovernedTargetMock.setShouldRevert.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+
+        calls[0] = _governanceCall(
+            address(payableTargetOne),
+            abi.encodeCall(GovernedTargetMock.setValue, (uint256(2))),
+            keccak256("unknown-class")
+        );
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (uint256(2)));
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector,
+                0,
+                StreamGovernanceActionClasses.SUCCESSOR_DECLARATION,
+                address(payableTargetOne),
+                GovernedTargetMock.setValue.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.SUCCESSOR_DECLARATION,
+            calls,
+            uint64(block.timestamp) + 30 days,
+            uint64(block.timestamp) + 37 days
+        );
+    }
+
+    function testActionPolicyRejectsDefaultAndTypedValueViolations() public {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(1)));
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        bytes[] memory callDatas = new bytes[](1);
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+
+        calls[0] = _governanceCall(address(target), callData, keccak256("zero-only-value"));
+        calls[0].value = 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyValueRejected.selector, 0, 0, 1, 0
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+
+        calls[0] =
+            _governanceCall(address(payableTargetOne), callData, keccak256("wrong-exact-value"));
+        calls[0].value = 2 ether;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyValueRejected.selector,
+                0,
+                1,
+                2 ether,
+                1 ether
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+
+        calls[0] =
+            _governanceCall(address(boundedPayableTarget), callData, keccak256("zero-bounded"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyValueRejected.selector,
+                0,
+                2,
+                0,
+                2 ether
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+
+        calls[0].value = 2 ether + 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyValueRejected.selector,
+                0,
+                2,
+                2 ether + 1,
+                2 ether
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+    }
+
+    function testBoundedValuePolicyDeliversExactDescriptorValue() public {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(73)));
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        bytes[] memory callDatas = new bytes[](1);
+        calls[0] =
+            _governanceCall(address(boundedPayableTarget), callData, keccak256("bounded-value"));
+        calls[0].value = 15 ether / 10;
+        callDatas[0] = callData;
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch{ value: 15 ether / 10 }(actionId, calls, callDatas);
+        boundedPayableTarget.lastPaidValue().assertEq(15 ether / 10, "bounded exact delivery");
+        address(boundedPayableTarget).balance.assertEq(15 ether / 10, "bounded destination balance");
+        address(executor).balance.assertEq(0, "bounded execution no surplus");
+    }
+
+    function testActionPolicyDetectsTargetBinaryDriftAtSchedule() public {
+        bytes32 expectedCodeHash = address(target).codehash;
+        vm.etch(address(target), hex"60006000f3");
+        bytes32 actualCodeHash = address(target).codehash;
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyTargetCodeHashMismatch.selector,
+                0,
+                address(target),
+                expectedCodeHash,
+                actualCodeHash
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+    }
+
+    function testActionPolicyDetectsTargetBinaryDriftAtExecution() public {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        bytes32 expectedCodeHash = address(target).codehash;
+        vm.etch(address(target), hex"60006000f3");
+        bytes32 actualCodeHash = address(target).codehash;
+        vm.warp(notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyTargetCodeHashMismatch.selector,
+                0,
+                address(target),
+                expectedCodeHash,
+                actualCodeHash
+            )
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+    }
+
     function testBatchRefundSurplusReverts() public {
-        GovernedRefundingMock refunder = new GovernedRefundingMock();
+        GovernedRefundingMock refunder = refundingTarget;
         bytes memory callData = abi.encodeCall(GovernedRefundingMock.refund, ());
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         calls[0] = GovernanceCall({
@@ -3172,7 +3556,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testBatchExecutionIsAtomic() public {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         second.setShouldRevert(true);
         GovernanceCall[] memory calls = new GovernanceCall[](2);
         bytes[] memory callDatas = new bytes[](2);
@@ -3222,8 +3606,37 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         second.value().assertEq(22, "second call applied");
     }
 
+    function testMixedValueBatchFailureRollsBackValueAndStateAtomically() public {
+        secondTarget.setShouldRevert(true);
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (uint256(81)));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (uint256(82)));
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        calls[0] = _governanceCall(address(payableTargetOne), callDatas[0], keccak256("paid-first"));
+        calls[0].value = 1 ether;
+        calls[1] = _governanceCall(address(secondTarget), callDatas[1], keccak256("failing-second"));
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+
+        vm.expectRevert(bytes("target revert"));
+        executor.executeGovernanceBatch{ value: 1 ether }(actionId, calls, callDatas);
+        payableTargetOne.value().assertEq(0, "paid target state rolled back");
+        payableTargetOne.lastPaidValue().assertEq(0, "paid value accounting rolled back");
+        address(payableTargetOne).balance.assertEq(0, "paid target balance rolled back");
+        address(executor).balance.assertEq(0, "executor balance rolled back");
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(uint256(uint8(GovernanceActionStatus.SCHEDULED)), "action remains scheduled");
+    }
+
     function testGovernedCallIgnoresOversizedSuccessReturndata() public {
-        GovernedReturndataMock returner = new GovernedReturndataMock();
+        GovernedReturndataMock returner = returndataTarget;
         bytes memory callData =
             abi.encodeCall(GovernedReturndataMock.succeedWithReturndata, (uint256(128 * 1024)));
         GovernanceCall[] memory calls = new GovernanceCall[](1);
@@ -3247,7 +3660,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testOversizedGovernedRevertIsBoundedAndBatchRemainsAtomic() public {
-        GovernedReturndataMock returner = new GovernedReturndataMock();
+        GovernedReturndataMock returner = returndataTarget;
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (77));
         callDatas[1] =
@@ -3294,8 +3707,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             expiresAfter
         );
 
-        GovernedReentrantTargetMock reentrant =
-            new GovernedReentrantTargetMock(IStreamGovernanceExecutor(address(executor)));
+        GovernedReentrantTargetMock reentrant = reentrantTarget;
         reentrant.arm(
             abi.encodeCall(
                 executor.executeGovernanceBatch, (nestedActionId, nestedCalls, nestedCallDatas)
@@ -3379,6 +3791,79 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         vm.warp(notBefore);
         executor.executeGovernanceBatch{ value: 1 ether }(actionId, calls, callDatas);
         receiver.balance.assertEq(1 ether, "native transfer delivered");
+    }
+
+    function testApprovedButUnregisteredNativeReceiverStillFailsClosed() public {
+        address payable receiver = payable(address(0xE0B));
+        _setNativeReceiver(receiver, true);
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        bytes[] memory callDatas = new bytes[](1);
+        calls[0] = GovernanceCall({
+            target: receiver,
+            value: 1 ether,
+            selector: bytes4(0),
+            callDataHash: keccak256(""),
+            scopeHash: SCOPE,
+            oldValueHash: OLD_VALUE,
+            newValueHash: NEW_VALUE
+        });
+        callDatas[0] = "";
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector,
+                0,
+                StreamGovernanceActionClasses.DELAYED_LOOSENING,
+                receiver,
+                bytes4(0)
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+        );
+    }
+
+    function testGenericProxyMulticallFallbackAndDelegateRoutesFailClosed() public {
+        GovernedGenericDispatchMock dispatch = new GovernedGenericDispatchMock();
+        bytes[] memory forbidden = new bytes[](4);
+        forbidden[0] = abi.encodeCall(
+            GovernedGenericDispatchMock.forward,
+            (address(target), abi.encodeCall(GovernedTargetMock.setValue, (uint256(1))))
+        );
+        bytes[] memory nested = new bytes[](1);
+        nested[0] = abi.encodeCall(
+            GovernedGenericDispatchMock.forward,
+            (address(target), abi.encodeCall(GovernedTargetMock.setValue, (uint256(2))))
+        );
+        forbidden[1] = abi.encodeCall(GovernedGenericDispatchMock.multicall, (nested));
+        forbidden[2] = abi.encodeCall(
+            GovernedGenericDispatchMock.delegate,
+            (address(target), abi.encodeCall(GovernedTargetMock.setValue, (uint256(3))))
+        );
+        forbidden[3] = hex"deadbeef";
+
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        for (uint256 i = 0; i < forbidden.length; i++) {
+            GovernanceCall[] memory calls = new GovernanceCall[](1);
+            bytes[] memory callDatas = new bytes[](1);
+            calls[0] =
+                _governanceCall(address(dispatch), forbidden[i], keccak256(abi.encode("route", i)));
+            callDatas[0] = forbidden[i];
+            executor.publishGovernanceCallData(callDatas);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector,
+                    0,
+                    StreamGovernanceActionClasses.DELAYED_LOOSENING,
+                    address(dispatch),
+                    calls[0].selector
+                )
+            );
+            _scheduleClass(
+                StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
+            );
+        }
     }
 
     function testExecuteCodelessTargetWithCalldataReverts() public {
@@ -3765,7 +4250,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testSingleCallExecuteWrapperRejectsMultiCallBatch() public {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         GovernanceCall[] memory calls = new GovernanceCall[](2);
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (1));
@@ -3900,7 +4385,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testCurrentActionContextDuringExecution() public {
-        GovernedContextProbeMock probe = new GovernedContextProbeMock(executor);
+        GovernedContextProbeMock probe = contextProbeOne;
         bytes memory callData = abi.encodeCall(GovernedContextProbeMock.probe, ());
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         calls[0] = GovernanceCall({
@@ -3950,8 +4435,8 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     }
 
     function testCurrentActionRotatesPerCallAndClearsAfterBatch() public {
-        GovernedContextProbeMock first = new GovernedContextProbeMock(executor);
-        GovernedContextProbeMock second = new GovernedContextProbeMock(executor);
+        GovernedContextProbeMock first = contextProbeOne;
+        GovernedContextProbeMock second = contextProbeTwo;
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedContextProbeMock.probe, ());
         callDatas[1] = abi.encodeCall(GovernedContextProbeMock.probe, ());
@@ -4077,7 +4562,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
 
     function testFreezeSelectorInAnyBatchPositionForcesTerminalFreeze() public {
         _grantGlobalVetoGuardian();
-        GovernedTargetMock freezeTarget = new GovernedTargetMock();
+        GovernedTargetMock freezeTarget = thirdTarget;
         _setFreezeSelector(address(freezeTarget), GovernedTargetMock.setValue.selector, true);
 
         // A two-call batch where only the SECOND call is a freeze still forces
@@ -4175,7 +4660,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         private
         returns (GovernanceCall[] memory calls, bytes[] memory callDatas)
     {
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (101));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (202));
@@ -4190,7 +4675,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         _grantGlobalVetoGuardian();
         bytes32 scopeA = keccak256("guardian-formula-a");
         bytes32 scopeB = keccak256("guardian-formula-b");
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](3);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (11));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (12));
@@ -4661,7 +5146,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         bytes32 lateB = _scheduleFreeze(scopeB, lateDeadline);
         vm.warp(earlyDeadline);
 
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](2);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (111));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (222));
@@ -4868,7 +5353,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         _setProposer(proposer, true);
         bytes32 scopeA = keccak256("terminal-dedup-a");
         bytes32 scopeB = keccak256("terminal-dedup-b");
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](3);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (701));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (702));
@@ -5190,7 +5675,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         bytes32 scopeA = keccak256("terminal-scope-a");
         bytes32 scopeB = keccak256("terminal-scope-b");
         address guardianB = address(new StreamGovernanceRootMock());
-        GovernedTargetMock second = new GovernedTargetMock();
+        GovernedTargetMock second = secondTarget;
         bytes[] memory callDatas = new bytes[](3);
         callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (1));
         callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (2));

@@ -28,6 +28,7 @@ RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
     "6529stream.governed-parameter-inventory.v1"
 )
+GOVERNANCE_ACTION_POLICY_SCHEMA = "6529stream.governance-action-policy.v1"
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
 )
@@ -68,6 +69,9 @@ DEFAULT_GENESIS_DEPLOYMENT_PROFILE = Path(
 )
 DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
     "release-artifacts/governed-parameter-inventory.json"
+)
+DEFAULT_GOVERNANCE_ACTION_POLICY = Path(
+    "release-artifacts/governance-action-policy.json"
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
     record_family_authorization_checker.DEFAULT_INVENTORY
@@ -1505,6 +1509,11 @@ def build_manifest(
             "governed_parameter_inventory": governed_parameter_inventory_record(
                 repo_root / DEFAULT_GOVERNED_PARAMETER_INVENTORY,
                 repo_root,
+            ),
+            "governance_action_policy": file_record(
+                repo_root / DEFAULT_GOVERNANCE_ACTION_POLICY,
+                repo_root,
+                schema_required=True,
             ),
             "record_family_authorization": record_family_authorization_records(
                 repo_root
