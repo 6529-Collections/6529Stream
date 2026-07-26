@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c5a60c6d58acdc090e3830c4422a868ea473998b6183adb69966b3dd5b33fb38",
-      "size_bytes": 125916
+      "sha256": "sha256:77a5a0fe8db1111547c64240a4a81cc6e74b1c3aecac2356a1134b763389fe77",
+      "size_bytes": 126643
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:156b646e1f044be55175b855ced9c9a5806adf3521db65513b555b58a5f44714",
+      "sha256": "sha256:7e58d5867121c9690bbb3702483b8d868836f853f28954084289921af02ffcaf",
       "size_bytes": 32843
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Reserved the external-call gas inventory's `artist-authority` call lane for the exact future issue #670 `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a fail-closed field-policy matrix covering path, site, kind, operation, expression, count, path class, lane, issue, disposition, missing rows, and duplicate calls/rows. Literal declarations cannot use the reserved lane, while the exact Yul `gas()` exemption and generic unexpected-call rejection remain unchanged. This issue #669 checker-support slice adds neither the artist registry source nor its inventory row and does not claim GGP provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or release readiness.",
       "Added the first fail-closed planning slice for record-family authorization under issue #690. A schema-validated inventory now pins the five as-built collection-metadata and preservation mutation selectors, eight authorization classes, fourteen family groups, and eight known fail-open behaviors; a separate retained-evidence schema, strict grant-map schema, and template require candidate, classifier, grant-map, snapshot-intersection, lifecycle, phase, runtime, and independent review bindings without treating template fields as evidence. The checker, hostile tests, release manifest, candidate lockfile, checksum trust set, offline verifier, aggregate gates, and both release-mode phases fail closed around the package. The current whole-selector/global-admin grants remain nonconformant and cannot be used for public beta or production; `RISK-GOV-002` remains `open_blocker`. This slice changes no contract, authorization enforcement, maturity, or readiness claim, and issue #690 remains open.",
       "Added proposed ADR 0018 and checked target-spec semantics for mint operation identity: the proposal defines one manager-scoped ledger operation root and one unique operation ID per token; nonpayable asset-agnostic manager ABI, a manager-owned caller-sensitive single-step preview, typed request/result commitments, signer-bound token content, current-versus-grace-bound policy identity, exact ledger/manager event ownership, schema-first royalty snapshot events, nonce reservation, and rollback requirements are checker-pinned. The proposed ledger call now receives explicit collection/phase identity, loads current policy from that registered manager tuple, and permits zero-counter phases without inferring scope. Canonical checksum generation and offline verification independently bind the reviewed 20-file release-tool runtime closure plus eight focused tests, reject broad/substituted coverage and alternate importer escapes, and reserve custom subsets for explicit noncanonical outputs. Exact typed primary-settlement integration and repeat-sale replay remain ADR 0019 / #694 blockers. This is a spec-first pre-genesis proposal for [issue #688](https://github.com/6529-Collections/6529Stream/issues/688); current Solidity and generated as-built ABI/event catalogs remain unchanged and #688 is not closed. Protocol maturity and production readiness are unchanged.",
       "Corrected five external-evidence risk rows to derive their tracker provenance from the canonical open evidence-issue registry, and hash-bound that registry into the generated risk register. This does not change evidence status, maturity, or release readiness; issue #689 tracks the correction.",

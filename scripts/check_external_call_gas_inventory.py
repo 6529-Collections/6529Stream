@@ -21,7 +21,27 @@ INVENTORY_NOTE = (
     "Open rows are exact temporary inventory, not accepted risk or permanent "
     "exceptions. Remove or govern them through #669 follow-up slices."
 )
-OPEN_LANES = {"finality", "minting", "revenue"}
+ARTIST_AUTHORITY_PATH = "smart-contracts/StreamArtistRegistry.sol"
+ARTIST_AUTHORITY_LANE = "artist-authority"
+ARTIST_AUTHORITY_CALL_ROW = {
+    "path": ARTIST_AUTHORITY_PATH,
+    "site": "_verifySignature",
+    "kind": "yul-call",
+    "operation": "staticcall",
+    "expression": "gasCap",
+    "expected_count": 1,
+    "path_class": "user-path",
+    "lane": ARTIST_AUTHORITY_LANE,
+    "issue": "#669",
+    "disposition": "open-remediation-required",
+}
+OPEN_CALL_LANES = {
+    "finality",
+    "minting",
+    "revenue",
+    ARTIST_AUTHORITY_LANE,
+}
+OPEN_LITERAL_LANES = {"finality", "minting", "revenue"}
 PATH_CLASSES = {
     "deployment-constructor",
     "live-control-plane",
@@ -788,6 +808,27 @@ def load_inventory(path: Path) -> dict[str, Any]:
     return inventory
 
 
+def validate_reserved_artist_authority_call(
+    row: dict[str, Any], location: str
+) -> None:
+    if (
+        row.get("path") != ARTIST_AUTHORITY_PATH
+        and row.get("lane") != ARTIST_AUTHORITY_LANE
+    ):
+        return
+
+    drifted_fields = [
+        field
+        for field, expected in ARTIST_AUTHORITY_CALL_ROW.items()
+        if type(row.get(field)) is not type(expected) or row.get(field) != expected
+    ]
+    if drifted_fields:
+        raise GasInventoryError(
+            f"{location} is reserved for the exact artist-authority call row; "
+            f"drifted fields: {', '.join(drifted_fields)}"
+        )
+
+
 def expected_calls(inventory: dict[str, Any]) -> Counter[CallUse]:
     expected: Counter[CallUse] = Counter()
     group = "open_call_gas_expressions"
@@ -795,6 +836,7 @@ def expected_calls(inventory: dict[str, Any]) -> Counter[CallUse]:
         location = f"{group}[{index}]"
         row = require_dict(raw, location)
         require_exact_keys(row, OPEN_CALL_FIELDS, location)
+        validate_reserved_artist_authority_call(row, location)
         use = CallUse(
             require_string(row.get("path"), f"{location}.path"),
             require_string(row.get("site"), f"{location}.site"),
@@ -817,9 +859,10 @@ def expected_calls(inventory: dict[str, Any]) -> Counter[CallUse]:
                 f"{', '.join(sorted(PATH_CLASSES))}"
             )
         lane = require_string(row.get("lane"), f"{location}.lane")
-        if lane not in OPEN_LANES:
+        if lane not in OPEN_CALL_LANES:
             raise GasInventoryError(
-                f"{location}.lane must be one of {', '.join(sorted(OPEN_LANES))}"
+                f"{location}.lane must be one of "
+                f"{', '.join(sorted(OPEN_CALL_LANES))}"
             )
         if row.get("issue") != "#669":
             raise GasInventoryError(f"{location}.issue must be #669")
@@ -866,9 +909,10 @@ def expected_declarations(
                 f"{', '.join(sorted(PATH_CLASSES))}"
             )
         lane = require_string(row.get("lane"), f"{location}.lane")
-        if lane not in OPEN_LANES:
+        if lane not in OPEN_LITERAL_LANES:
             raise GasInventoryError(
-                f"{location}.lane must be one of {', '.join(sorted(OPEN_LANES))}"
+                f"{location}.lane must be one of "
+                f"{', '.join(sorted(OPEN_LITERAL_LANES))}"
             )
         if row.get("issue") != "#669":
             raise GasInventoryError(f"{location}.issue must be #669")

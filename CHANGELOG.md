@@ -7,6 +7,17 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Reserved the external-call gas inventory's `artist-authority` call lane for
+  the exact future issue #670
+  `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
+  fail-closed field-policy matrix covering path, site, kind, operation,
+  expression, count, path class, lane, issue, disposition, missing rows, and
+  duplicate calls/rows. Literal declarations cannot use the reserved lane,
+  while the exact Yul `gas()` exemption and generic unexpected-call rejection
+  remain unchanged. This issue #669 checker-support slice adds neither the
+  artist registry source nor its inventory row and does not claim GGP
+  provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or
+  release readiness.
 - Added the first fail-closed planning slice for record-family authorization
   under issue #690. A schema-validated inventory now pins the five as-built
   collection-metadata and preservation mutation selectors, eight authorization
