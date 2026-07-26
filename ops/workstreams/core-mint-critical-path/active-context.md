@@ -1,5 +1,61 @@
 # Active Context
 
+## 2026-07-26 Shipping Resumption
+
+- Explicit protocol-owner shipping mandate releases this workstream to own
+  `#672`, `#671`, and `#654` through review-ready PRs and coordinator-managed
+  merge/closure.
+- Active issue: `#672`.
+- Active branch: `codex/issue-672-post-entropy-completion-gas`.
+- Local freeze base:
+  `6b5d0ba3eed4758c4e3521470233266540c95a45` (merged PR `#693`).
+  The reviewed #672 source/spec/test bytes were preserved through the
+  `#609 -> #694 -> #691 -> #693` shared-tail sequence; only generated release
+  files required deterministic regeneration.
+- Current remote serialization point:
+  `origin/main@018c8788750980e143c38ace0666684bf641ec4f` after merged
+  PRs `#700` and `#699` / issue `#690`. PR `#701` is the sole open
+  shared-tail PR. Keep the local freeze commit unpublished until #701 merges,
+  then reconcile once onto the resulting main, regenerate the canonical tail,
+  and run the one publication-authorizing Windows gate.
+- #672 is a zero-`StreamCore`-delta target-fixture/spec/measurement slice. It
+  may pin the EIP-150 admission formula, worst-case post-coordinator EOA tail,
+  pure policy-predicate boundaries, a separate high-parent-gas full-stipend
+  path, rollback, and checksum-bound planning evidence. It does not prove an
+  exact executable threshold at the low-level call. It must not edit
+  `StreamCore`, claim current implementation conformance, fill #684 candidate
+  measurement bindings, or close the actual Core seam.
+- #671 is the next separate slice. It owns the shared
+  `ROYALTY_RETURN_GAS_BUFFER` Core-read semantics and proof but must not add a
+  23rd GGP or edit #684's missing candidate/evidence facts opportunistically.
+- #654 remains the final Core slice. Missing entropy-coordinator, metadata
+  router, restricted ERC-4906 emitters, and interface-support seams are work to
+  implement and measure there rather than reasons to idle now.
+- Size control is unchanged: current transitional Core is 24,152 bytes; every
+  pre-#654 slice is bytecode-neutral, and every Core-changing slice must prove
+  an exact net-negative runtime. The complete target must be at most 22,576
+  bytes for the exact 2,000-byte EIP-170 margin; the objective is at most
+  22,184 bytes. The historical 21,792-byte low-water mark is non-additive.
+- The ten-minute serialization heartbeat was deleted when the shipping mandate
+  explicitly released the lane.
+- Current #672 measurement: 128,886 gas for the via-IR first-mint,
+  all-zero-to-nonzero EOA-recipient post-coordinator tail. A 25% margin rounded
+  up to the next 1,000 gas derives `POST_ENTROPY_PARENT_RESERVE = 162,000`.
+  Focused validation is 10/10 Foundry tests under via IR, 26/26 Python hostile
+  tests, direct checker current, and the one-test snapshot current.
+- Exact frozen evidence remains byte-for-byte stable with zero
+  `smart-contracts/StreamCore.sol` diff. The canonical bundle has 250
+  configured paths and 417 records in each checksum index.
+- Diagnostic authoritative Windows gates exited `0` on
+  `29d96466e49f7c72c02234c9b271a1fa2828db88` in 3,237.757 seconds and on
+  `6b5d0ba3eed4758c4e3521470233266540c95a45` in 3,268.179 seconds. They prove
+  the preserved slice is green but do not authorize publication because the
+  shared tail advanced afterward.
+- After #672 merges, prioritize the reopened #688 atomic operation-root
+  Solidity/test/as-built cutover before #671 and #654. Proposed ADR 0018 did
+  not implement the source cutover, and #670 depends on the prepared-operation
+  identity and `isManagerOperationRootUsed` seam.
+
 ## Current Slice
 
 - Issue: `#688`

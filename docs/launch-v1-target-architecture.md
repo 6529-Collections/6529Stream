@@ -569,6 +569,19 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    | 7 | Land the governed collection burn-block writer and guards in a net-negative Core slice | [CMC-BURN] selector, event, terminal-freeze, scope/value hash, veto, replay, height, boolean-equivalence, and controlled-burn tests pass |
    | 8 | Land any remaining Permanent hooks, remove superseded ABI, and refresh release artifacts once against the complete target | Full production size proof is at or below 22,576 bytes and all interface/event/manifest gates agree |
 
+   Step 6 consumes the checksum-bound #672 post-entropy completion-gas
+   planning evidence before implementation. That predecessor pins the
+   EIP-150-plus-tail planning lower bound, the measured first-mint EOA tail,
+   pure policy-predicate boundaries, a separate high-parent-gas full-stipend
+   path, rollback, and the contract-receiver callback exclusion with zero
+   `StreamCore` runtime delta. It does not prove the exact executable admission
+   threshold at the low-level `CALL`. The artifact is not as-built Core
+   evidence: #654 implements the coordinator call and guard, accounts for ABI
+   setup, memory expansion, `CALL` upfront and dynamic costs, and intervening
+   source work, then supplies the complete pre-call cost and exact-forwarding
+   proof against the actual linked Core and includes the result in the
+   complete-target size measurement.
+
    In particular, the target contains no
    `emergencyRaiseGasParameter(bytes32,uint256)` selector or class-`6`
    eligibility registry. The executor rejects ID `6`, every parameter host

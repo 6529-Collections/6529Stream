@@ -153,7 +153,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 254)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 260)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3148,17 +3148,34 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 254)
-        self.assertEqual(len(manifest["files"]), 421)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 260)
+        self.assertEqual(len(manifest["files"]), 428)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            421,
+            428,
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
         expected_paths = {
             Path("scripts/materialize_canonical_deployment_plan.py"),
             Path("scripts/test_materialize_canonical_deployment_plan.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_committed_checksums_cover_post_entropy_completion_gas_evidence(
+        self,
+    ) -> None:
+        expected_paths = {
+            Path("release-artifacts/post-entropy-mint-completion-gas.json"),
+            Path(
+                "release-artifacts/baselines/v0.1.0/"
+                "post-entropy-completion-gas.snap"
+            ),
+            Path("scripts/generate_post_entropy_completion_gas.py"),
+            Path("scripts/check_post_entropy_completion_gas.py"),
+            Path("scripts/test_post_entropy_completion_gas.py"),
+            Path("test/StreamPostEntropyCompletionGas.t.sol"),
+            Path("test/helpers/StreamPostEntropyCompletionGasHarness.sol"),
         }
         self.assert_committed_checksums_cover(expected_paths)
 
@@ -3443,7 +3460,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 421)
+        self.assertEqual(len(classifications), 428)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

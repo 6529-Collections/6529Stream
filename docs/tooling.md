@@ -743,6 +743,33 @@ candidate-bound admission/provider/grant/runtime/lifecycle evidence and
 independent review are merged. This tooling proves the source slice, not
 deployment completeness or readiness.
 
+The post-entropy completion-gas planning gate runs:
+
+```sh
+make post-entropy-completion-gas-check
+```
+
+The target validates the generated planning artifact and its hostile tests,
+runs the focused target fixture under the pinned via-IR compiler profile, and
+checks the dedicated one-test snapshot:
+
+```sh
+python scripts/test_post_entropy_completion_gas.py
+python scripts/generate_post_entropy_completion_gas.py --check
+python scripts/check_post_entropy_completion_gas.py
+forge test --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -vvv
+forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --check release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap
+```
+
+The artifact records the measured EOA-recipient post-coordinator tail and the
+measurement-derived parent reserve, but its admission formula is only the
+EIP-150-plus-tail planning lower bound. The predicate excludes ABI setup,
+memory expansion, low-level `CALL` costs, and intervening source work; its
+separate high-parent-gas test does not prove exact-threshold forwarding. The
+artifact remains target-fixture planning evidence, changes no production Core
+bytecode, and cannot substitute for #654's complete call-boundary enforcement
+and as-built remeasurement of the actual Core seam.
+
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at
 `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`:
@@ -1401,7 +1428,8 @@ record-family authorization source/inventory/evidence package, release-manifest,
 bytecode proof, and release-candidate lockfile outputs, plus the checked
 governed-parameter and record-family authorization checker/tests, the canonical
 non-generated release-tool call policy and its schema, mint-manager domain
-constant spec, and Python toolchain provenance. The release manifest and
+constant spec, post-entropy completion-gas planning package, and Python
+toolchain provenance. The release manifest and
 candidate lockfile bind the policy and schema by exact path, SHA-256, byte size,
 and schema identity/version before the checksum bundle binds both files. This
 gives maintainers a deterministic, signable checksum bundle. The
@@ -1425,11 +1453,14 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 254 configured roots,
-expanding to exactly 421 covered-file entries in each checksum index. The twelve
+The revised canonical projection contains exactly 260 configured roots,
+expanding to exactly 428 covered-file entries in each checksum index. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
-`smart-contracts/` or `script/`.
+`smart-contracts/` or `script/`. The #672 planning package adds six exact roots
+for its artifact, generator/checker/tests, and two Solidity target-fixture
+sources; its dedicated via-IR snapshot is the seventh new record under the
+already covered baseline directory.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
