@@ -603,22 +603,16 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
     function testConstructorRejectsInvalidCoreAndAdminContracts() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         CollectionMetadataEmptyMarker emptyMarker = new CollectionMetadataEmptyMarker();
-        StreamRecordFamilyRegistry registry =
-            new StreamRecordFamilyRegistry(address(deployed.admins));
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.InvalidCoreContract.selector)
         );
-        new StreamCollectionMetadata(
-            address(0x1234), address(deployed.admins), address(registry), address(0)
-        );
+        new StreamCollectionMetadata(address(0x1234), address(deployed.admins), address(0));
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamCollectionMetadata.InvalidAdminContract.selector)
         );
-        new StreamCollectionMetadata(
-            address(deployed.core), address(emptyMarker), address(registry), address(0)
-        );
+        new StreamCollectionMetadata(address(deployed.core), address(emptyMarker), address(0));
     }
 
     function _record(bytes32 recordType, string memory uri)
@@ -640,8 +634,10 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         private
         returns (StreamCollectionMetadata metadata)
     {
-        StreamRecordFamilyRegistry registry =
-            new StreamRecordFamilyRegistry(address(deployed.admins));
+        metadata = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
+        StreamRecordFamilyRegistry registry = StreamRecordFamilyRegistry(address(metadata));
         _admit(registry, RECORD_IDENTITY, registry.FAMILY_IDENTITY_DISPLAY());
         _admit(registry, RECORD_RIGHTS, registry.FAMILY_RIGHTS());
         _admit(registry, RECORD_IIIF_VIEW, registry.FAMILY_IIIF());
@@ -668,9 +664,6 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         );
         registry.setRecordFamilyGrant(
             registry.FAMILY_SNAPSHOT(), AUTH_METADATA_ADMIN, address(this), true
-        );
-        metadata = new StreamCollectionMetadata(
-            address(deployed.core), address(deployed.admins), address(registry), address(0)
         );
     }
 

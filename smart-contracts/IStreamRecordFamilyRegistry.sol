@@ -11,7 +11,6 @@ interface IStreamRecordFamilyRegistry is IERC165 {
         bool admitted;
     }
 
-    error InvalidAdminContract();
     error RecordFamilyRegistryOwnerRequired(address caller);
     error UnknownRecordFamily(bytes32 familyId);
     error UnknownAuthorizationClass(uint8 authorizationClass);

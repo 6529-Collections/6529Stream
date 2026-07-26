@@ -201,17 +201,17 @@ contract RehearseDeployment {
         deployed.contractMetadata = new StreamContractMetadata(
             address(deployed.core), address(deployed.admins), config.contractMetadataURI
         );
-        deployed.recordFamilyRegistry = new StreamRecordFamilyRegistry(address(deployed.admins));
         deployed.collectionMetadata = new StreamCollectionMetadata(
             address(deployed.core),
             address(deployed.admins),
-            address(deployed.recordFamilyRegistry),
             address(0)
         );
+        deployed.recordFamilyRegistry =
+            StreamRecordFamilyRegistry(address(deployed.collectionMetadata));
         deployed.preservationRecords = new StreamPreservationRecords(
             address(deployed.core),
             address(deployed.admins),
-            address(deployed.recordFamilyRegistry),
+            address(deployed.collectionMetadata),
             address(0)
         );
         deployed.curatorsPool = new StreamCuratorsPool(address(deployed.admins), config.delegation);

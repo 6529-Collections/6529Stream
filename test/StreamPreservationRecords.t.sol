@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/IStreamPreservationRecords.sol";
 import "../smart-contracts/IERC165.sol";
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
@@ -400,8 +401,9 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
     function testConstructorRejectsInvalidCoreAndAdminContracts() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         PreservationEmptyMarker emptyMarker = new PreservationEmptyMarker();
-        StreamRecordFamilyRegistry registry =
-            new StreamRecordFamilyRegistry(address(deployed.admins));
+        StreamCollectionMetadata registry = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamPreservationRecords.InvalidCoreContract.selector)
@@ -440,8 +442,9 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
         private
         returns (StreamPreservationRecords records)
     {
-        StreamRecordFamilyRegistry registry =
-            new StreamRecordFamilyRegistry(address(deployed.admins));
+        StreamCollectionMetadata registry = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
         registry.admitRecordType(
             RECORD_TYPE, registry.FAMILY_ARCHIVE(), uint16(1) << AUTH_PRESERVATION_ADMIN
         );

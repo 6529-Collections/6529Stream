@@ -180,6 +180,11 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             "collection metadata family registry"
         );
         Assertions.assertEq(
+            result.recordFamilyRegistry,
+            result.collectionMetadata,
+            "family registry must be embedded in collection metadata"
+        );
+        Assertions.assertEq(
             preservationRecords.streamCore(), result.core, "preservation records core"
         );
         Assertions.assertEq(
@@ -237,9 +242,8 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             "preservation records address reused"
         );
         Assertions.assertTrue(first.manifestHash != second.manifestHash, "manifest hash not bound");
-        StreamCollectionMetadata reboundCollection = new StreamCollectionMetadata(
-            first.core, first.admins, first.recordFamilyRegistry, address(0)
-        );
+        StreamCollectionMetadata reboundCollection =
+            new StreamCollectionMetadata(first.core, first.admins, address(0));
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(
                 config, first, address(reboundCollection), first.preservationRecords

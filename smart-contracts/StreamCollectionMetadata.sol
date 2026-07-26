@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./ERC165.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamCollectionMetadata.sol";
 import "./IStreamCore.sol";
 import "./IStreamRecordFamilyRegistry.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamPauseDomains.sol";
+import "./StreamRecordFamilyRegistry.sol";
 
-contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
+contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollectionMetadata {
     uint256 public constant MAX_URI_BYTES = 2_048;
     uint256 public constant MAX_RECORD_TYPES = 128;
 
@@ -52,24 +52,26 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         _;
     }
 
-    constructor(address core, address admins, address familyRegistry, address supersedes) {
+    constructor(address core, address admins, address supersedes)
+        StreamRecordFamilyRegistry(admins)
+    {
         StreamMetadataRenderer.requireContractMarker(
             core, IStreamCore.isCoreContract.selector, InvalidCoreContract.selector
         );
         streamCore = core;
-        StreamMetadataRenderer.requireContractMarker(
-            familyRegistry,
-            IStreamRecordFamilyRegistry.isStreamRecordFamilyRegistry.selector,
-            InvalidRecordFamilyRegistry.selector
-        );
-        recordFamilyRegistry = familyRegistry;
-        _recordFamilyRegistry = IStreamRecordFamilyRegistry(familyRegistry);
+        recordFamilyRegistry = address(this);
+        _recordFamilyRegistry = IStreamRecordFamilyRegistry(address(this));
         _moduleSupersedes = supersedes;
         _setAdminContract(admins);
     }
 
-    function adminsContract() external view override returns (address) {
-        return address(_adminsContract);
+    function adminsContract()
+        public
+        view
+        override(StreamRecordFamilyRegistry, IStreamCollectionMetadata)
+        returns (address)
+    {
+        return StreamRecordFamilyRegistry.adminsContract();
     }
 
     function isStreamCollectionMetadata() external pure override returns (bool) {
@@ -295,7 +297,7 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC165, IERC165)
+        override(StreamRecordFamilyRegistry, IERC165)
         returns (bool)
     {
         return interfaceId == type(IStreamCollectionMetadata).interfaceId
@@ -307,6 +309,7 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
             admins, IStreamAdmins.isAdminContract.selector, InvalidAdminContract.selector
         );
         _adminsContract = IStreamAdmins(admins);
+        _setRecordFamilyAdminContract(admins);
     }
 
     function _setCollectionRecord(

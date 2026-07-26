@@ -11,7 +11,7 @@ import "./StreamMetadataRenderer.sol";
 /// @dev Exact record types are append-only. Authority providers and grants are mutable only by
 ///      the StreamAdmins root, allowing Governance V2 ownership to rotate/revoke authority without
 ///      making a function admin or global admin a record writer.
-contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
+abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
     uint16 public constant SCHEMA_VERSION = 1;
 
     uint8 public constant AUTHORIZATION_CLASS_ARTIST_SIGNER = 1;
@@ -42,7 +42,7 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
     bytes32 public constant FAMILY_SNAPSHOT = keccak256("6529STREAM_RECORD_FAMILY_SNAPSHOT_V1");
     bytes32 public constant FAMILY_AGENT = keccak256("6529STREAM_RECORD_FAMILY_AGENT_V1");
 
-    IStreamAdmins private immutable _admins;
+    IStreamAdmins private _admins;
 
     mapping(bytes32 => RecordTypePolicy) private _recordTypePolicies;
     mapping(bytes32 => uint64) private _recordTypeRevisions;
@@ -53,9 +53,6 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
     mapping(uint8 => uint64) private _authorityProviderRevisions;
 
     constructor(address admins) {
-        StreamMetadataRenderer.requireContractMarker(
-            admins, IStreamAdmins.isAdminContract.selector, InvalidAdminContract.selector
-        );
         _admins = IStreamAdmins(admins);
     }
 
@@ -68,7 +65,7 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
         return true;
     }
 
-    function adminsContract() external view override returns (address) {
+    function adminsContract() public view virtual override returns (address) {
         return address(_admins);
     }
 
@@ -290,6 +287,7 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
     function supportsInterface(bytes4 interfaceId)
         public
         view
+        virtual
         override(ERC165, IERC165)
         returns (bool)
     {
@@ -348,5 +346,9 @@ contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
         unchecked {
             return revision + 1;
         }
+    }
+
+    function _setRecordFamilyAdminContract(address admins) internal {
+        _admins = IStreamAdmins(admins);
     }
 }

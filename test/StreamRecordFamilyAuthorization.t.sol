@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/IStreamRecordFamilyAuthorityProvider.sol";
 import "../smart-contracts/IStreamRecordFamilyRegistry.sol";
 import "../smart-contracts/StreamCollectionMetadata.sol";
-import "../smart-contracts/StreamRecordFamilyRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
@@ -59,7 +58,7 @@ contract StreamRecordFamilyAuthorizationTest is CharacterizationTestBase, Stream
 
     struct Setup {
         DeployedStream deployed;
-        StreamRecordFamilyRegistry registry;
+        StreamCollectionMetadata registry;
         StreamCollectionMetadata metadata;
         RecordFamilyAuthorityProviderMock provider;
     }
@@ -260,7 +259,10 @@ contract StreamRecordFamilyAuthorizationTest is CharacterizationTestBase, Stream
 
     function _setup() private returns (Setup memory setup) {
         setup.deployed = deployStream(address(0xBEEF), address(0xCAFE));
-        setup.registry = new StreamRecordFamilyRegistry(address(setup.deployed.admins));
+        setup.metadata = new StreamCollectionMetadata(
+            address(setup.deployed.core), address(setup.deployed.admins), address(0)
+        );
+        setup.registry = setup.metadata;
         setup.provider = new RecordFamilyAuthorityProviderMock();
         setup.registry.setAuthorityProvider(ARTIST_CLASS, address(setup.provider));
         setup.registry
@@ -281,12 +283,6 @@ contract StreamRecordFamilyAuthorizationTest is CharacterizationTestBase, Stream
             .setRecordFamilyGrant(
                 setup.registry.FAMILY_SNAPSHOT(), METADATA_CLASS, address(this), true
             );
-        setup.metadata = new StreamCollectionMetadata(
-            address(setup.deployed.core),
-            address(setup.deployed.admins),
-            address(setup.registry),
-            address(0)
-        );
     }
 
     function _record(bytes32 recordType, string memory uri)
