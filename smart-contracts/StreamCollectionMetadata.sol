@@ -508,7 +508,7 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
     ) private returns (bytes32 coveredRecordTypesHash) {
         uint256 count = coveredRecordTypes.length;
         if (count == 0) revert InvalidSnapshotFamilySet(0, bytes32(0));
-        bytes32 previous;
+        bytes32 previous = bytes32(0);
         for (uint256 i = 0; i < count; i++) {
             bytes32 recordType = coveredRecordTypes[i];
             if (recordType == bytes32(0) || (i != 0 && recordType <= previous)) {
