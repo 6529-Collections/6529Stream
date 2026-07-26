@@ -53,7 +53,7 @@
     "record_family_authorization": {
       "source_catalog": {
         "path": "release-artifacts/record-family-authorization-source-catalog.json",
-        "sha256": "sha256:c5f94f31b2275192498cb2529282495ce95a90f5940936415d8bd24ad4cdebc9",
+        "sha256": "sha256:c3cb5cc265c740b9a1b5c0ed9ccdc06f06513db9c6bb8ede6041eb86d16d4cde",
         "size_bytes": 8423,
         "schema_version": "6529stream.record-family-authorization-source-catalog.v1"
       },
@@ -105,7 +105,7 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:40dbc029c53f3e69f6554b720bbf93a795f14dc5a4d0e27a4db58ffd1e8d588c",
+        "sha256": "sha256:e15accd40934469a3a7c99e0911e4be43adac6664223a3bac25a7c98f7cc4a23",
         "size_bytes": 2159128,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
@@ -169,14 +169,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:d4cc153bddb5855717696b40fed3a119201804ef532b7416a76109975e72b44b",
-        "size_bytes": 134412,
+        "sha256": "sha256:e837bb0c25e4b4a9fe6d534d04d18f7328b26f35d7f5d2bd412f78e53bae3a13",
+        "size_bytes": 134674,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:b4e1dfc64a8e863bde853d2097be3f452a20fe455c19e4e7b18db363572b2a3b",
-        "size_bytes": 130995
+        "sha256": "sha256:c936715e85e9d4a7cef4518b1fc71d53b3c43eff47fccc8e2f8b7eb6d28a20b2",
+        "size_bytes": 131257
       }
     },
     "release_candidate_lockfile": {
@@ -2451,8 +2451,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:8c1f0487559c4e9eae8f27f58fba52b1b69b757dd067ece83add65be5b76d5ea",
-      "size_bytes": 133185
+      "sha256": "sha256:28873656d18d3876d52dde3c0f9cddaa651323b2c1ba6cedd2d3adf2d525c5ec",
+      "size_bytes": 133455
     },
     "governance_docs": [
       {
@@ -2547,8 +2547,8 @@
       },
       {
         "path": "docs/adr/README.md",
-        "sha256": "sha256:010bc2b65bc34e64b2de0671035c6d4e180731f4f1414e3f6942e7bd81e1aebf",
-        "size_bytes": 4572
+        "sha256": "sha256:aec8ed5549ac22face417cbcaa80ee7e5b84bdc9d16d0c427f2444faaedd60c2",
+        "size_bytes": 4876
       },
       {
         "path": "docs/adr/0004-admin-governance.md",
