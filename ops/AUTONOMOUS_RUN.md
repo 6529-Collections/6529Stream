@@ -161,10 +161,12 @@ before either PR is published, and neither lane may modify Core for this edge.
   and fail-closed completeness boundary; later #684 work must replace every
   unavailable candidate binding with reviewed production facts.
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
-  runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
-  hooks while the legacy Drops/Minter path remained live, producing the current
-  24,152-byte transitional Core. The current build is already non-enumerable and
-  is not a complete mandatory-hook proof.
+  runtime bytes; CON-012 then added roughly 2,360 bytes of manager/prepared-mint
+  hooks while the legacy Drops/Minter path remained live, producing the
+  24,152-byte pre-cutover transitional Core. The atomic operation-identity
+  cutover retires that duplicate path and the Core lifetime root replay map,
+  producing the current 24,135-byte runtime and 441-byte margin. The current
+  build is already non-enumerable and is not a complete mandatory-hook proof.
 - PR #663's authoritative final-follow-up local gate passed in 1,021.7 seconds,
   and latest-head Windows, Slither, Foundry, CodeRabbit, and independent review
   were clean before merge. Earlier independent review found

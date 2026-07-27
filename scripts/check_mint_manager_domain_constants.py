@@ -259,6 +259,9 @@ ADR_INDEX_PATH = Path("docs/adr/README.md")
 CONFORMANCE_PATH = Path("docs/launch-conformance-matrix.md")
 ENTROPY_SPEC_PATH = Path("docs/stream-entropy-coordinator.md")
 BACKLOG_PATH = Path("ops/EXECUTION_BACKLOG.md")
+STATUS_PATH = Path("docs/status.md")
+KNOWN_BLOCKERS_PATH = Path("docs/known-blockers.md")
+CHANGELOG_PATH = Path("CHANGELOG.md")
 OPERATION_DOMAIN_MARKER = "Identity-domain constants [MPA-OPERATION-DOMAINS]:"
 OPERATION_DOMAIN_END_MARKER = "\n```solidity"
 ARCHITECTURE_OPERATION_DOMAIN_MARKER = (
@@ -1773,8 +1776,9 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
         "Accepted\n"
         "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
-        "pre-genesis target mint operation-identity and replay-ownership amendment. Its\n"
-        "atomic source cutover remains unimplemented",
+        "pre-genesis mint operation-identity and replay-ownership amendment. Its atomic\n"
+        "manager/ledger/Core source cutover is implemented in the current as-built\n"
+        "surfaces.",
         "Every batch of quantity `N` has one batch",
         "`operationRoot` and exactly `N` per-token `operationId` values.",
         "Both manager entries are nonpayable and asset-agnostic.",
@@ -1873,12 +1877,18 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "Core authenticates only the current singleton",
         "stores no lifetime operation-ID replay.",
         "Entropy registration  owns tokenId plus mintCommitment; receives no root or operationId",
+        "The checker binds the\n"
+        "   normative home and protocol-v1 mirror to the manager and identity-library\n"
+        "   domain constants",
+        "Foundry's\n"
+        "   `testCompositeHashVectorsUseDocumentedFieldOrder` independently reconstructs\n"
+        "   the runtime composite values with the exact field order above.",
     ),
     REVENUE_DOC_PATH: (
         "Accepted\n"
         "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
-        "pre-genesis target operation-identity amendment. Its atomic source cutover\n"
-        "remains unimplemented",
+        "pre-genesis operation-identity amendment. Its atomic manager/ledger/Core source\n"
+        "cutover is implemented in the current as-built surfaces.",
         "bytes32 operationRoot,\n    bytes32 operationId,\n    bytes32 revenueClass,",
         "event TokenRoyaltySnapshotted(",
         "Completion-time entropy registration correlates",
@@ -1908,8 +1918,10 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     ADR_0018_PATH: (
         "# ADR 0018: Batch Operation Root And Token Identity",
         "Accepted for pre-genesis implementation on 2026-07-26",
-        "Acceptance authorizes only the conforming atomic source cutover",
-        "It does not close issue #688",
+        "The conforming atomic manager/ledger/Core source cutover described below is\n"
+        "implemented in the current Solidity and generated as-built surfaces.",
+        "This\n"
+        "implementation does not accept ADR 0019",
         "Every successful manager batch of quantity `N > 0`",
         "The manager entrypoints are nonpayable and asset-agnostic.",
         "`MintBatch.authorizationId` is a required nonzero typed request field.",
@@ -1947,7 +1959,8 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "compares\n"
         "the returned root and token operation ID vector with the preview.",
         "## Atomic Cutover And Core Replay Removal",
-        "The generated event catalog remains an as-built artifact",
+        "The generated event catalog is an as-built artifact and publishes these rows\n"
+        "only because the atomic implementation cutover now defines them in Solidity.",
     ),
     ADR_0008_PATH: (
         "`operationRoot` plus per-token `operationId` binding, as accepted in ADR 0018,",
@@ -1972,7 +1985,8 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     CONFORMANCE_PATH: (
         "Accepted\n"
         "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies the\n"
-        "target mint-operation identity and replay gates. They remain unimplemented",
+        "mint-operation identity and replay gates implemented in the current as-built\n"
+        "manager/ledger/Core surfaces.",
         "exactly one root plus `N` token operation IDs",
         "full normalized request/result/root/token preimage mutation coverage",
         "adapter preview uses its own `address(this)` as manager executor",
@@ -1985,18 +1999,28 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     DOC_PATH: (
         "Accepted\n"
         "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
-        "pre-genesis target operation-identity amendment; its atomic source cutover\n"
-        "remains unimplemented",
+        "pre-genesis operation-identity amendment. Its atomic manager/ledger/Core\n"
+        "source cutover is implemented in the current as-built surfaces.",
+        "The checker pins the normative and protocol-v1 rows to the manager and\n"
+        "fixed-library domain constants.",
+        "Foundry's\n"
+        "`testCompositeHashVectorsUseDocumentedFieldOrder` reconstructs the runtime\n"
+        "request/result/root/token values with the exact documented field order.",
     ),
     ADR_INDEX_PATH: (
         "| [`0018-batch-operation-root-and-token-identity.md`]"
         "(0018-batch-operation-root-and-token-identity.md) | Accepted | "
         "[#688](https://github.com/6529-Collections/6529Stream/issues/688): "
-        "accepted one manager batch root, `N` token operation IDs",
+        "one manager batch root, `N` token operation IDs, ledger-owned root replay, "
+        "and the atomic Core replay-state cutover are implemented",
     ),
 }
 OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
+        "atomic source cutover remains unimplemented",
+        "The checker binds the\n"
+        "   normative home, protocol-v1 mirror, manager constants, and every hash\n"
+        "   preimage duplicated in the identity library together",
         "bytes calldata settlementData",
         "path, and its own caller\n   address",
         "changes the token ID.",
@@ -2011,6 +2035,8 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "function consume(\n    CounterConsumption[] calldata consumptions,",
     ),
     ADR_0018_PATH: (
+        "current source still lacks ledger\n  root replay",
+        "Generated current-as-built catalogs intentionally lag the target spec",
         "Proposed only for the pre-genesis production target",
         "## Accepted Risks",
         "exact request contents",
@@ -2028,14 +2054,67 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "every emitted sale, mint, or consumption\n   policy hash are the same value",
     ),
     CONFORMANCE_PATH: (
+        "They remain unimplemented\n"
+        "deployment blockers",
         "exactly one root plus `N` token IDs",
+    ),
+    DOC_PATH: (
+        "The same checker also pins every duplicated preimage in the fixed\n"
+        "`StreamMintOperationIdentity` linked library",
     ),
     BACKLOG_PATH: (
         "one root plus `N` token IDs",
     ),
     ADR_INDEX_PATH: (
+        "implementation and settlement integration remain blocked on the atomic "
+        "source cutover",
         "| [`0018-batch-operation-root-and-token-identity.md`]"
         "(0018-batch-operation-root-and-token-identity.md) | Proposed |",
+    ),
+}
+
+IMPLEMENTATION_STATUS_FRAGMENTS: dict[Path, tuple[str, ...]] = {
+    STATUS_PATH: (
+        "Accepted ADR 0018 is now implemented in the current pre-genesis source",
+        "derivation and nonce\n"
+        "  reservation precede ledger consumption",
+        "Exact typed primary settlement and repeated-sale\n"
+        "  replay remain ADR 0019 / #694 blockers",
+        "24,135 bytes, leaving\n"
+        "  441 bytes of EIP-170",
+    ),
+    KNOWN_BLOCKERS_PATH: (
+        "Accepted ADR 0018's atomic cutover now implements\n"
+        "  one ledger-owned root plus `N` token operation IDs",
+        "The measured\n"
+        "  17-byte Core reduction is net-negative but does not satisfy the complete\n"
+        "  target.",
+        "Exact typed primary settlement\n"
+        "  and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /\n"
+        "  #694",
+    ),
+    CHANGELOG_PATH: (
+        "Implemented accepted ADR 0018's pre-genesis atomic operation-identity\n"
+        "  cutover",
+        "The exact\n"
+        "  typed primary-settlement callback and execution-ID-bound repeated-sale key\n"
+        "  remain ADR 0019 / #694 blockers",
+        "Generated as-built and release surfaces are refreshed\n"
+        "  without promoting protocol maturity or readiness.",
+    ),
+}
+IMPLEMENTATION_STATUS_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
+    STATUS_PATH: (
+        "Current Solidity still derives its\n  prepared-only root after ledger consumption",
+        "Core retains lifetime operation-ID replay storage",
+    ),
+    KNOWN_BLOCKERS_PATH: (
+        "its atomic source cutover remains\n  unimplemented",
+        "current source still calls the rootless ledger",
+    ),
+    CHANGELOG_PATH: (
+        "accepted-but-unimplemented semantics",
+        "Issue #688 remains\n  open until the ledger",
     ),
 }
 OPERATION_IDENTITY_EXACT_COUNTS: dict[
@@ -2163,6 +2242,35 @@ def validate_operation_identity_fragments(documents: dict[Path, str]) -> None:
                 )
 
 
+def validate_implementation_status_fragments(documents: dict[Path, str]) -> None:
+    for path, fragments in IMPLEMENTATION_STATUS_FRAGMENTS.items():
+        text = documents.get(path)
+        if text is None:
+            raise MintManagerDomainError(
+                f"missing operation identity implementation-status document: {path}"
+            )
+        normalized_text = " ".join(text.split())
+        for fragment in fragments:
+            if " ".join(fragment.split()) not in normalized_text:
+                raise MintManagerDomainError(
+                    f"operation identity implementation status drifted in {path}: "
+                    f"missing {fragment!r}"
+                )
+    for path, forbidden_fragments in IMPLEMENTATION_STATUS_FORBIDDEN_FRAGMENTS.items():
+        text = documents.get(path)
+        if text is None:
+            raise MintManagerDomainError(
+                f"missing operation identity implementation-status document: {path}"
+            )
+        normalized_text = " ".join(text.split())
+        for fragment in forbidden_fragments:
+            if " ".join(fragment.split()) in normalized_text:
+                raise MintManagerDomainError(
+                    f"operation identity stale implementation status in {path}: "
+                    f"found {fragment!r}"
+                )
+
+
 def validate_repo(repo_root: Path) -> None:
     docs_text = (repo_root / DOC_PATH).read_text(encoding="utf-8")
     source_text = (repo_root / SOURCE_PATH).read_text(encoding="utf-8")
@@ -2191,6 +2299,11 @@ def validate_repo(repo_root: Path) -> None:
     validate_operation_identity_fragments(operation_documents)
     validate_sale_authorization_typehash(operation_documents)
     validate_operation_events(operation_documents)
+    status_documents = {
+        path: (repo_root / path).read_text(encoding="utf-8")
+        for path in IMPLEMENTATION_STATUS_FRAGMENTS
+    }
+    validate_implementation_status_fragments(status_documents)
 
 
 def parse_args() -> argparse.Namespace:

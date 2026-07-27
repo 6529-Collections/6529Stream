@@ -159,8 +159,8 @@ contributors who start from the README.
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  current target-isolated `StreamCore` runtime measurement at 24,152 bytes with
-  424 bytes of EIP-170 headroom,
+  current target-isolated `StreamCore` runtime measurement at 24,135 bytes with
+  441 bytes of EIP-170 headroom,
   which passes deployability and the interim 384-byte development floor but
   sits below the 512-byte warning threshold and the normative 2,000-byte
   production deployment minimum. The accepted CON-012 development exception
@@ -177,14 +177,15 @@ contributors who start from the README.
   API: satellite-only slices must keep zero Core delta and Core-changing slices
   must measure net-negative until the complete linked production-profile
   `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement. Accepted ADR 0018 defines one ledger-owned root
-  plus `N` token operation IDs, but its atomic source cutover remains
-  unimplemented and current source still calls the rootless ledger
-  before deriving its prepared-only root and retains lifetime replay storage in
-  Core. The sequential #688 -> #672 -> #654 lane must implement and validate
-  that cutover, prove post-entropy completion gas, and include the real
-  restricted Core ERC-4906 single/batch refresh emitters required by #667
-  before the exact production margin can pass. Exact typed primary settlement
+  not a bytecode measurement. Accepted ADR 0018's atomic cutover now implements
+  one ledger-owned root plus `N` token operation IDs, derive/reserve-before-
+  ledger ordering, manager-scoped replay, whole-transaction rollback, and Core
+  current-pair equality without lifetime operation-ID storage. The measured
+  17-byte Core reduction is net-negative but does not satisfy the complete
+  target. The remaining #654 lane must implement and remeasure the actual
+  post-entropy admission boundary and the restricted Core ERC-4906
+  single/batch refresh emitters required by #667 before the exact production
+  margin can pass. Exact typed primary settlement
   and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /
   #694; operation-root uniqueness does not close them. The final Core recovery seam is
   the canonical `IStreamFinalityRecoveryCore` interface:

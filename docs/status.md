@@ -49,8 +49,8 @@ The current Gate A smoke baseline proves:
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
   the pre-audit, not-production-ready posture is unchanged. The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the current
-  target-isolated `StreamCore` production runtime size as 24,152 bytes, leaving
-  424 bytes of EIP-170
+  target-isolated `StreamCore` production runtime size as 24,135 bytes, leaving
+  441 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes EIP-170 and
   the interim 384-byte development floor, but it is below the 512-byte warning
   threshold and fails the normative 2,000-byte production deployment minimum.
@@ -59,24 +59,24 @@ The current Gate A smoke baseline proves:
   blocks production release until real headroom is recovered. ADR 0017 avoids
   adding the superseded probe/lower/emergency/conditional/rebinding machinery
   to the target; that machinery was not present in the measured Core, so the
-  decision does not reduce the 24,152-byte baseline. A separate measured Core
+  decision did not reduce the 24,152-byte pre-cutover baseline. The ADR 0018
+  atomic cutover removes 17 bytes by deleting lifetime prepared-operation
+  replay storage while retaining current-pair equality; a larger measured Core
   refactor is still required. Historical
   artifacts show the extraction work did reduce Core to 21,792 bytes; the later
   manager/prepared-mint slice added roughly 2,330 bytes before the legacy mint
-  path was retired. The 24,152-byte baseline is therefore a duplicated,
+  path was retired. The 24,152-byte baseline was therefore a duplicated,
   incomplete transition rather than the promised post-extraction target. The
-  cutover now requires a single permanent target ABI and zero-Core-delta or
-  measured net-negative slices until the complete hook build is at or below
-  22,576 bytes.
-  Accepted ADR 0018 defines the required pre-genesis operation-identity
-  cutover: one manager batch root is replay-protected in the ledger, exactly one
-  unique operation ID identifies each token transition, and Core eventually
-  retains only its current prepared-pair equality lock. Acceptance does not
-  close #688; exact typed primary settlement and repeated-sale
-  replay remain ADR 0019 / #694 blockers. Current Solidity still derives its
-  prepared-only root after ledger consumption, the ledger carries no root, and
-  Core retains lifetime operation-ID replay storage; the decision is not
-  implementation evidence. The subsequent Core measurement must also
+  remaining train still requires zero-Core-delta or measured net-negative
+  slices until the complete hook build is at or below 22,576 bytes, with
+  restoration to the approved 22,184-byte baseline as the objective.
+  Accepted ADR 0018 is now implemented in the current pre-genesis source:
+  one manager batch root is replay-protected in the ledger, exactly one unique
+  operation ID identifies each token transition, derivation and nonce
+  reservation precede ledger consumption, and Core retains only its current
+  prepared-pair equality lock. Exact typed primary settlement and repeated-sale
+  replay remain ADR 0019 / #694 blockers; operation-root uniqueness does not
+  close them. The subsequent Core measurement must also
   include the target restricted ERC-4906 single/batch refresh emitters required
   by #667. Their selectors exist in the permanent target artifact, but current
   Core source does not yet implement the restricted external helpers.

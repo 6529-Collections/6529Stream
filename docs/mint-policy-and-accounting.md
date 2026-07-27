@@ -16,10 +16,12 @@ amend this document). Those accepted decisions are superseded in part by
 [ADR 0017](adr/0017-raise-only-parameter-governance.md) for Governed Gas
 Parameter mutation and evidence surfaces. Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
-pre-genesis target mint operation-identity and replay-ownership amendment. Its
-atomic source cutover remains unimplemented, and the target sections it
-introduces are deployment blockers rather than implementation or readiness
-evidence. The decisions are recorded in
+pre-genesis mint operation-identity and replay-ownership amendment. Its atomic
+manager/ledger/Core source cutover is implemented in the current as-built
+surfaces. Exact typed primary settlement, execution-ID-bound repeated-sale
+replay, and the complete Core production-headroom target remain deployment
+blockers, so this implementation is not readiness evidence. The decisions are
+recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -826,9 +828,11 @@ Requirements [MPA-OPERATION]:
    execution so the manager remains deployable; their addresses are immutable
    link references, expose no caller-selected target/selector/value/callback
    surface, and execute in the manager context. The checker binds the
-   normative home, protocol-v1 mirror, manager constants, and every hash
-   preimage duplicated in the identity library together and rejects the
-   superseded CON-014 `OPERATION_DOMAIN` as co-live legacy surface. ABI/event
+   normative home and protocol-v1 mirror to the manager and identity-library
+   domain constants and rejects the superseded CON-014 `OPERATION_DOMAIN` as a
+   co-live legacy surface. Foundry's
+   `testCompositeHashVectorsUseDocumentedFieldOrder` independently reconstructs
+   the runtime composite values with the exact field order above. ABI/event
    catalogs and release artifacts re-pin in the same implementation change.
 2. Every state- or economics-affecting value inside the manager/ledger mint
    boundary is bound either directly in the normalized preimages above or
@@ -1980,19 +1984,20 @@ ledger owns the final cap checks and writes, so counter accounting has a single
 durable enforcement point and any later revert rolls the whole transaction
 back.
 
-The CON-014 genesis manager implements this static path as
+The CON-014 genesis manager implements this boundary as
 `StreamMintManager`: owners configure phase policy and ordered static counters,
-grant per-phase executors, optionally pause phases, register each active
-`policyHash` with `StreamMintLedger`, build bounded batch counter consumptions,
-enforce named v1 hard caps for batch size and counter count, require callers
-to bind the active `policyHash`, consume a nonzero authorization ID with the
-ledger, derive prepared-only operation roots after that consumption, then
-execute Core's prepared mint pair atomically. That ordering is as-built
-evidence and must be replaced by the ADR 0018 derive/reserve-before-ledger
-cutover. The implemented manager slice does not
-yet route existing `StreamDrops` or auction flows, execute payment settlement,
-or consult gates; dynamic resolver caps/deltas and callable nullifiers are
-protocol v1 exclusions until their own ADRs are accepted.
+grant per-phase executors, optionally pause phases, and register each current
+`policyHash` with `StreamMintLedger`. For both execution paths the manager
+validates the configured gate or exact ungated result, builds bounded batch
+counter consumptions, computes the normalized request/result transcript,
+derives one root plus `N` token operation IDs, and reserves the nonce range
+before the ledger consumes the explicit phase/root/authorization/nullifier
+tuple. The ledger independently loads current policy, owns manager-scoped root
+replay, and all later manager/Core failure unwinds the ledger writes and nonce
+reservation. Core retains only the current prepared-pair operation-ID equality
+lock. The implemented manager slice does not yet route existing `StreamDrops`
+or auction flows or execute typed payment settlement; dynamic resolver
+caps/deltas remain protocol v1 exclusions until their own ADRs are accepted.
 
 Ledger events. These are production-exact signatures (ADR 0013
 decision U7): every event carries a leading `uint16 schemaVersion` and

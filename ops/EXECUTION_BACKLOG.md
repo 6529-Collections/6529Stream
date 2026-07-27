@@ -179,7 +179,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has 424 bytes of EIP-170 headroom at the current 24,152-byte runtime: the interim development floor passes under an accepted exception, but the normative 2,000-byte production deployment rule fails; historical evidence shows the refactor reached 21,792 bytes before a roughly 2,330-byte manager/prepared-mint addition landed alongside the still-live legacy path | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; lock the permanent pre-genesis target ABI, migrate satellites/callers, retire duplicated legacy responsibilities, and compile every mandatory hook together; allow only zero-Core-delta satellite slices or measured net-negative Core slices until the complete build is at or below 22,576 bytes |
+| `StreamCore` has 441 bytes of EIP-170 headroom at the current 24,135-byte runtime: the atomic operation-identity cutover is 17 bytes net-negative relative to the duplicated 24,152-byte pre-cutover baseline, so the interim development floor passes under an accepted exception but the normative 2,000-byte production deployment rule still fails; historical evidence shows the refactor reached 21,792 bytes before the manager/prepared-mint addition landed alongside the then-live legacy path | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; compile every remaining mandatory hook together, retire remaining duplicated legacy responsibilities, and allow only zero-Core-delta satellite slices or measured net-negative Core slices until the complete build is at or below 22,576 bytes |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -1843,9 +1843,11 @@ merged in PR #666. Measured net-negative Core retirement work remains.
 
 Gate: C/E/G.
 
-Problem: the current 24,152-byte `StreamCore` is a transitional build. It spent
-roughly 2,330 bytes on the manager/prepared-mint boundary while the legacy mint
-and product path remained live, and it still omits mandatory launch hooks. The
+Problem: the current 24,135-byte `StreamCore` is a transitional build. The
+pre-cutover 24,152-byte baseline spent roughly 2,360 bytes on the
+manager/prepared-mint boundary while the legacy mint and product path remained
+live. The atomic operation-identity cutover removed that duplication for a
+17-byte net reduction, but the current build still omits mandatory launch hooks. The
 production ceiling is 22,576 bytes, so neither the temporary size exception nor
 a partial deletion experiment is release evidence.
 
@@ -1922,9 +1924,9 @@ the finality registry, preview, and tests away from the retired aggregate and
 facade seams. Discovery is mandatory; burn and freeze gates are read from the
 actual Core; collection supply and expected leaf counts remain `uint256`; and
 the registry binds the actual Core, metadata, and adapter independently. The
-focused 97-test finality set and full 891-test Foundry suite pass, while the
-production-profile `StreamCore` remains exactly 24,152 runtime bytes with 424
-bytes of EIP-170 margin.
+focused 97-test finality set and full 891-test Foundry suite pass, while that
+pre-operation-identity production-profile `StreamCore` remained exactly 24,152
+runtime bytes with 424 bytes of EIP-170 margin.
 
 This evidence does not make the system production- or audit-ready. The current
 Core lacks the granular target getters and target one-way freeze semantic, the
@@ -3847,7 +3849,7 @@ Status: Merged in PR #427; issue #426 closed completed.
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom; the
-current runtime is 24,152 bytes with 424 bytes of margin under accepted
+current runtime is 24,135 bytes with 441 bytes of margin under accepted
 development exception `CORE-SPEND-2026-06-24-001`, while the approved spend
 ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. The
 normative production deployment gate requires 2,000 bytes and does not admit

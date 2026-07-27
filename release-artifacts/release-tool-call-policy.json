@@ -42873,7 +42873,7 @@
     {
       "path": "scripts/generate_risk_register.py",
       "role": "runtime",
-      "source_sha256": "72b150ce12ade30cb3512e02d7a330765871b01362b6a74fbd52ff7729f8a875",
+      "source_sha256": "e0afd07e817b26fd9820f0789c2097b5b76aa4647659f02fcf3d5d3b85909785",
       "size_bytes": 33811,
       "imports": [
         {

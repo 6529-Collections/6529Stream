@@ -13,9 +13,11 @@ inline are resolved by
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
-pre-genesis target operation-identity amendment; its atomic source cutover
-remains unimplemented, and its target mirror rows are deployment blockers
-rather than current as-built or readiness evidence.
+pre-genesis operation-identity amendment. Its atomic manager/ledger/Core
+source cutover is implemented in the current as-built surfaces. Exact typed
+primary settlement, execution-ID-bound repeated-sale replay, and the complete
+Core production-headroom target remain separate deployment blockers; the
+cutover is not a readiness claim.
 
 This document is the normative protocol v1 specification for 6529Stream. It
 reconciles the revenue, mint, metadata, and entropy specs into one protocol
@@ -513,8 +515,8 @@ Implementation evidence (non-normative). Current artifact-backed
 CON-012-lineage Core hook proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. New measured `StreamCore` runtime: 24,152 bytes.
-3. EIP-170 margin: 424 bytes.
+2. Current measured `StreamCore` runtime: 24,135 bytes.
+3. EIP-170 margin: 441 bytes.
 4. The margin remains above the interim 384-byte development floor but below
    the 512-byte warning threshold and the normative 2,000-byte production
    deployment requirement.
@@ -525,8 +527,8 @@ CON-012-lineage Core hook proof:
 6. This build inherits plain, non-enumerable `ERC721` and contains no
    `ERC721Enumerable` index storage. ADR 0012 decision T10 is already reflected
    and offers no remaining implementation savings.
-7. The current build is 1,576 bytes above the 22,576-byte deployment ceiling
-   and 3,152 bytes above the 21,000-byte planning allocation. The Core size
+7. The current build is 1,559 bytes above the 22,576-byte deployment ceiling
+   and 3,135 bytes above the 21,000-byte planning allocation. The Core size
    reconciliation workstream in
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
    (Genesis Deployment Profile), tracked by
@@ -549,8 +551,8 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    and produce a net-negative measured Core delta. The final implementation PR
    must compile every mandatory hook in [PV1-HOOKS] together; a partial build
    below the ceiling is not the passing proof.
-3. From the current 24,152-byte evidence, the minimum full-stack recovery is
-   `1,576 + A` bytes, where `A` is the measured net runtime cost of all
+3. From the current 24,135-byte evidence, the minimum full-stack recovery is
+   `1,559 + A` bytes, where `A` is the measured net runtime cost of all
    mandatory Core hooks absent from that evidence after any same-PR removals.
    Scratch deletions and individually measured experiments are non-additive
    under via-IR and never satisfy this equation. Only the final linked runtime
@@ -838,9 +840,12 @@ values together with the manager constants and this checker at
 implementation time. The ADR 0018 request/result/root/token/path domains are
 the exact extension-mirror rows below and are checker-bound directly to the
 atomic Solidity implementation; the superseded CON-014 `OPERATION_DOMAIN` is
-absent. The same checker also pins every duplicated preimage in the fixed
-`StreamMintOperationIdentity` linked library; the library address is an
-immutable compile-time link, not an arbitrary delegatecall surface.
+absent. The checker pins the normative and protocol-v1 rows to the manager and
+fixed-library domain constants. Foundry's
+`testCompositeHashVectorsUseDocumentedFieldOrder` reconstructs the runtime
+request/result/root/token values with the exact documented field order. The
+`StreamMintOperationIdentity` library address is an immutable compile-time
+link, not an arbitrary delegatecall surface.
 `gateGasLimit` inside
 `GATE_CONFIG_DOMAIN` has
 exactly one deterministic meaning, pinned in the mint spec ([MPA-GATES]
