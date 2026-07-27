@@ -1,5 +1,25 @@
 # Run Log
 
+## 2026-07-27
+
+- Rebased the reopened issue `#688` atomic operation-root cutover onto exact
+  merged-`#685` main
+  `0bc295d845e556ebb98e4fe59d891434a11072c9`.
+- Committed the typed manager/ledger/Core cutover, manager-scoped replay,
+  fixed libraries, rollback and preimage tests, and as-built status/checker
+  reconciliation as `d3407803`, `f555cbfc`, and `8b7ce863`. The frozen
+  via-IR Core runtime is 24,128 bytes, 24 bytes smaller than the 24,152-byte
+  pre-cutover transitional build, with 448 bytes of EIP-170 headroom.
+- Focused operation tests pass 126/126, the semantic checker passes 62/62, and
+  the full retained Slither 0.11.5 replay introduces no new first-party
+  production High/Medium finding. Two explicit/fully-assigned local fixes
+  remove prior analyzer rows, leaving 28 Open findings (3 High, 25 Medium);
+  none is accepted or marked false positive.
+- Canonical source-artifact and release-tail regeneration, post-generation
+  verification, the authoritative Windows gate, publication, and latest-head
+  review/CI remain in progress. ADR 0019/#694 settlement and repeated-sale
+  blockers and #654's complete-Core/headroom blocker remain open.
+
 ## 2026-07-26
 
 - Received an explicit shipping mandate to resume immediately and own issues

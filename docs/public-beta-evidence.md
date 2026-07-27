@@ -329,7 +329,7 @@ Both release phases also validate the canonical normalized first-party
 production Slither baseline and its Markdown mirror. Open High/Medium findings
 are technical blockers outside the evidence-manifest requirement rows and
 cannot be waived by marking an external-evidence row `accepted_risk`. The
-current 3 High and 27 Medium rows remain Open under issue #658; an exact live
+current 3 High and 25 Medium rows remain Open under issue #658; an exact live
 baseline match proves inventory consistency, not acceptance. The separate High
 open blocker `RISK-GOV-003` preserves the Governance Executor's
 proposal-selected native-value authority after bounded assembly made that call
@@ -345,9 +345,10 @@ and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget),
 tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
 The requirement is a non-waivable deployment rule, not an evidence-manifest
 row. Missing, malformed, inconsistent, or sub-threshold artifact fields fail
-closed. The last committed measurement is 24,152 bytes with 424 bytes of
-margin. ADR 0017 avoids adding superseded target machinery, but that machinery
-was not in the measured Core and the ADR does not shrink this baseline. A
+closed. The current measured runtime is 24,128 bytes with 448 bytes of margin;
+the atomic operation-identity cutover removed 24 net bytes from the prior
+24,152-byte transitional baseline. ADR 0017 avoids adding superseded target
+machinery, but that machinery was not in the measured Core. A
 separate refactor and regenerated canonical checksum-covered proof must
 demonstrate at least 2,000 bytes of headroom before production release mode can
 pass.

@@ -23657,7 +23657,7 @@
     {
       "path": "scripts/check_slither_baseline.py",
       "role": "runtime",
-      "source_sha256": "052ccda0c60bcd597cd6c1d7901ade55bbf56c644dc0cf79bed06e30ce749096",
+      "source_sha256": "80b8bfa57f552520e7fbc345259b0a9fa8d940233aae986bab9ba6b5f7c7f926",
       "size_bytes": 46536,
       "imports": [
         {
@@ -30373,7 +30373,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "8461786b2a8a345329fedd3273e7764a6db19303781311071b8f763c2ffaa580",
+      "source_sha256": "c907f62c81e4d7a092031cda03ced091c62394bcaa213b249c823b181495787a",
       "size_bytes": 177513,
       "imports": [
         {
@@ -42873,7 +42873,7 @@
     {
       "path": "scripts/generate_risk_register.py",
       "role": "runtime",
-      "source_sha256": "72b150ce12ade30cb3512e02d7a330765871b01362b6a74fbd52ff7729f8a875",
+      "source_sha256": "5e7f421eeeee34329bef657a341495e10c2a99e12977fab5bbbfd413bb47f5dd",
       "size_bytes": 33811,
       "imports": [
         {
@@ -50697,7 +50697,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "ba02f06d4433b45408a504fb670b87e7900067ec42c111e7c95035da2db68c85",
+      "source_sha256": "3c115ea241bae3bb9a435454a5c836cfe0d4254e5e0c5e2cf6a261078882fa35",
       "size_bytes": 169204,
       "imports": [
         {

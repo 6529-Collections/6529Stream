@@ -4,9 +4,11 @@
 
 Accepted for pre-genesis implementation on 2026-07-26 under
 [issue #688](https://github.com/6529-Collections/6529Stream/issues/688).
-Acceptance authorizes only the conforming atomic source cutover described
-below. It does not close issue #688, change current Solidity or generated
-as-built surfaces, or provide production-readiness evidence.
+The conforming atomic manager/ledger/Core source cutover described below is
+implemented in the current Solidity and generated as-built surfaces. This
+implementation does not accept ADR 0019, close typed primary-settlement or
+repeated-sale replay blockers, satisfy the final Core production-headroom
+target, or provide production-readiness evidence.
 
 This ADR amends the legacy paid-mint operation binding delegated by ADR 0008,
 the prepared-mint identity decisions recorded by ADR 0012 decision T6, and the
@@ -230,7 +232,9 @@ and exposes no callback, settlement, value, or delegatecall surface. Because
 the adapter calls it, the executor term is exactly the adapter's
 `address(this)`; it is never an external caller, payer, relayer, or `tx.origin`.
 Direct and relayed adapter calls carrying the same valid signed request
-therefore preview the same identity. The adapter records that root with the
+therefore preview the same identity for the same live manager state. The
+preview matches execution only while the nonce, phase policy/grace state, and
+gate/resolver result remain unchanged. The adapter records that root with the
 settlement, calls the manager in the same top-level transaction, and compares
 the returned root and token operation ID vector with the preview. A caller
 substitution, nonce race, changed policy/gate/resolver result, any request
@@ -283,9 +287,10 @@ required facts are:
 7. token ID and mint commitment, not a synthetic operation identity, on the
    entropy registration boundary.
 
-The generated event catalog remains an as-built artifact until the atomic
-implementation cutover. This ADR and its owning specs define the target; they
-do not cause a spec-only PR to publish unimplemented ABI or event rows.
+The generated event catalog is an as-built artifact and publishes these rows
+only because the atomic implementation cutover now defines them in Solidity.
+ADR text alone never authorizes a spec-only PR to publish unimplemented ABI or
+event rows.
 
 `TokenRoyaltySnapshotted` is a newly introduced event, so its declaration
 starts with `uint16 schemaVersion`. Its token operation ID, token ID, and root
@@ -334,10 +339,11 @@ and provides no stronger replay guarantee than one consumed root.
 
 ### Core Retains Lifetime Replay Storage
 
-Rejected for the production target. It spends permanent Core bytecode and one
+Rejected for the production target. It spent permanent Core bytecode and one
 storage slot per prepared token to compensate for missing batch replay at the
-ledger boundary. The mapping remains in current source until the complete
-cutover proof exists.
+ledger boundary. The atomic cutover removes that lifetime mapping after the
+ledger assumes manager-scoped root replay; Core retains only current
+prepared-pair equality.
 
 ### Authorization ID Is The Batch Replay Key
 
@@ -360,12 +366,12 @@ prevents cross-path identity confusion. Validation-before-write and EVM atomic
 rollback preserve counters, authorizations, nullifiers, manager nonces,
 prepared state, revenue, and entropy state on every downstream failure.
 
-This ADR itself changes no Solidity bytecode. The later implementation is
-expected to add ledger/manager code and remove Core replay code. Any Core size
-claim must come from deterministic release-bytecode evidence after all
+The decision text itself changed no Solidity bytecode. Its atomic
+implementation adds ledger/manager code and removes Core replay code. Any Core
+size claim comes from deterministic release-bytecode evidence after all
 mandatory hooks compile together. The exact production requirement remains at
 least 2,000 bytes of EIP-170 headroom (`StreamCore` runtime at or below 22,576
-bytes).
+bytes), with restoration to the approved 22,184-byte baseline as the objective.
 
 ## Release Impact
 
@@ -373,17 +379,11 @@ This is an accepted pre-genesis MAJOR target correction. No production
 deployment used the superseded prepared-only domains, rootless ledger ABI, or
 ambiguous shared-operation language.
 
-The spec slice updates the ADR/spec/checker and planning inputs and therefore
-regenerates the risk register, release notes, release manifest, bytecode release
-proof, release-candidate lockfile, and checksum bundle in documented order.
-The bytecode proof refreshes release linkage only; contract bytecode is
-unchanged. This slice does not rewrite the generated current-as-built ABI,
-event catalog, protocol surface, release-build bytecode, or source-verification
-inputs as though the contract cutover had landed.
-
-The later implementation cutover must regenerate all ABI-, event-, source-,
-bytecode-, protocol-surface-, release-, lockfile-, and checksum-dependent
-artifacts from canonical generators.
+The earlier acceptance slice updated the ADR/spec/checker and planning inputs
+without changing contract bytecode. The atomic implementation cutover now
+regenerates every ABI-, event-, source-, bytecode-, protocol-surface-,
+release-, lockfile-, and checksum-dependent artifact from the canonical
+generators in documented order.
 
 ## Test Plan
 
@@ -465,7 +465,7 @@ readiness claim.
 
 ## Non-Goals
 
-- No Solidity implementation in this ADR/spec slice.
+- No typed primary-settlement callback or execution-ID-bound repeated-sale key.
 - No new Core external selector or Core event.
 - No entropy replay or settlement-policy redesign.
 - No governance/gas work owned by issues `#684`, `#685`, `#669`, `#671`, or
@@ -474,11 +474,12 @@ readiness claim.
 
 ## Known Risks
 
-- Until the implementation cutover lands, current source still lacks ledger
-  root replay and retains Core lifetime replay storage.
 - Pre-manager single-step root preview can race another transaction; the safe
   outcome is full transaction revert and caller retry.
 - Manager and ledger storage grow outside Core to preserve the smaller
   permanent Core boundary.
-- Generated current-as-built catalogs intentionally lag the target spec until
-  the source cutover is atomic.
+- Exact typed primary settlement and execution-ID-bound repeated-sale replay
+  remain ADR 0019 / issue #694 blockers.
+- The final complete Core build still must include every mandatory hook and
+  measure at or below 22,576 bytes; this cutover alone is not production-size
+  conformance.

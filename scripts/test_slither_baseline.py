@@ -92,8 +92,8 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 3, "Medium": 27, "total": 30})
-        self.assertEqual(len(data["findings"]), 30)
+        self.assertEqual(data["counts"], {"High": 3, "Medium": 25, "total": 28})
+        self.assertEqual(len(data["findings"]), 28)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )

@@ -5,8 +5,10 @@ enforces. This document follows [`docs/spec-policy.md`](spec-policy.md).
 Governed gas/time parameter and action-class gates incorporate
 [ADR 0017](adr/0017-raise-only-parameter-governance.md). Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies the
-target mint-operation identity and replay gates. They remain unimplemented
-deployment blockers, not current as-built or readiness evidence.
+mint-operation identity and replay gates implemented in the current as-built
+manager/ledger/Core surfaces. Exact typed settlement, repeated-sale replay, and
+the complete Core production-headroom target remain deployment blockers, so
+this cutover is not readiness evidence.
 
 This document turns the Stream protocol specification into deployment gates.
 It is not a roadmap. A production deployment is conformant only when every
@@ -698,16 +700,16 @@ interface, two binding getters, ERC-165 surface, and publication event consume
 no Core target entry or Core budget group.
 
 Non-normative reconciliation note: the current artifact-backed transitional
-build remains 24,152 runtime bytes with 424 bytes of EIP-170 headroom. It
-exceeds the 22,576-byte deployment ceiling by 1,576 bytes before the net cost of
+build is 24,128 runtime bytes with 448 bytes of EIP-170 headroom. It
+exceeds the 22,576-byte deployment ceiling by 1,552 bytes before the net cost of
 any missing mandatory target work. Closing that measured gap is the engineering
 workstream tracked by
 [#654](https://github.com/6529-Collections/6529Stream/issues/654); target-surface
 deletions are not counted as savings until a complete linked build realizes
 them. The first passing complete build is published as release evidence.
 
-The complete-stack size equation is fail-closed: starting from this 24,152-byte
-evidence, gross recovery must cover at least `1,576 + A`, where `A` is the
+The complete-stack size equation is fail-closed: starting from this 24,128-byte
+evidence, gross recovery must cover at least `1,552 + A`, where `A` is the
 measured net runtime cost of every mandatory Core hook absent from that
 evidence after same-build removals. Via-IR optimization makes isolated scratch
 deltas non-additive, so no spreadsheet sum, partial-hook build, compiler-only
@@ -1460,9 +1462,11 @@ indexed field families:
 
 ADR 0018 target operation-event topic mirror [LCM-OPERATION-EVENTS]. The owning
 mint, revenue, and entropy specs define field names and indexed masks; this
-checked table pins canonical type signatures and `topic0` values without
-publishing them into the generated current-as-built event catalog before the
-atomic source cutover:
+checked table pins canonical type signatures and `topic0` values. The mint
+manager and mint ledger rows are published by the atomic source cutover in the
+generated current-as-built event catalog. `TokenRoyaltySnapshotted`,
+`PrimaryRevenueSettlementContext`, and `EntropyRegistered` remain target-only
+goldens until their owning source cutovers and are not current catalog entries:
 
 | Canonical event signature | `topic0` | Indexed fields | Owner |
 | --- | --- | --- | --- |

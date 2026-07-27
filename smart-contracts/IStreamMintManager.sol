@@ -18,6 +18,14 @@ interface IStreamMintManager {
         CONTEXT
     }
 
+    /// @notice Explicit verification path for a normalized batch authorizer.
+    enum AuthorizerKind {
+        NONE,
+        EOA_712,
+        ERC1271_712,
+        CALLER_ADAPTER
+    }
+
     /// @notice Phase policy fields owned by the manager, not Core.
     struct MintPhaseConfig {
         bool paused;
@@ -49,20 +57,20 @@ interface IStreamMintManager {
         uint32 gateGasLimit;
     }
 
-    /// @notice Prepared mint request executed atomically after ledger consumption.
-    struct MintRequest {
+    /// @notice Canonical batch request shared by single-step and prepared execution.
+    struct MintBatch {
         uint256 collectionId;
         bytes32 phaseId;
         address payer;
         address authorizer;
         address[] initialRecipients;
         address[] beneficiaries;
-        string[] tokenData;
-        uint256[] salts;
+        bytes[] tokenData;
+        bytes32[] mintCommitments;
+        bytes32 expectedPolicyHash;
         bytes32 authorizationId;
         bytes32 contextHash;
-        bytes32 expectedPolicyHash;
-        bytes gateData;
+        bytes resolverData;
     }
 
     /// @notice Reverts when the Core dependency is not a valid StreamCore.
@@ -125,6 +133,8 @@ interface IStreamMintManager {
     error MintGateValidationFailed(address gate);
     /// @notice Reverts when a gate returns unsupported nullifiers.
     error MintGateNullifiersUnsupported(bytes32 nullifier);
+    /// @notice Reverts when a gate returns more nullifiers than the launch hard cap.
+    error MintGateNullifierCountExceeded(uint256 count, uint256 maximum);
     /// @notice Reverts when a gate returns too small a quantity limit.
     error MintGateQuantityExceeded(uint256 quantity, uint256 maxQuantity);
     /// @notice Reverts when request and gate authorization IDs conflict.
@@ -135,6 +145,16 @@ interface IStreamMintManager {
     error MintGateAuthorizerMismatch(address requestAuthorizer, address gateAuthorizer);
     /// @notice Reverts when a gate returns no durable evidence hash.
     error MintGateHashRequired(address gate);
+    /// @notice Reverts when the normalized authorizer kind/address pair is invalid.
+    error MintInvalidAuthorizerKind(uint8 kind, address authorizer);
+    /// @notice Reverts when an operation nonce range would overflow.
+    error MintOperationNonceOverflow(uint256 firstOperationNonce, uint256 quantity);
+    /// @notice Reverts when a derived batch root is zero.
+    error MintOperationRootRequired();
+    /// @notice Reverts when a derived token operation ID is zero.
+    error MintOperationIdRequired(uint256 tokenIndex);
+    /// @notice Reverts when two token indices derive the same operation ID.
+    error MintOperationIdDuplicate(uint256 firstIndex, uint256 secondIndex);
 
     /// @notice Emitted when a phase is configured and registered in the ledger.
     event MintPhaseConfigured(
@@ -202,28 +222,65 @@ interface IStreamMintManager {
         bytes32 gateHash,
         bytes32 policyHash
     );
-    /// @notice Emitted once per prepared batch after all tokens complete.
-    event MintPreparedBatchExecuted(
+    /// @notice Emitted once after every successful manager batch.
+    event MintBatchExecuted(
+        uint16 schemaVersion,
         bytes32 indexed operationRoot,
         uint256 indexed collectionId,
         bytes32 indexed phaseId,
-        bytes32 policyHash,
-        bytes32 authorizationId,
         address executor,
+        address payer,
+        address authorizer,
+        uint256 firstTokenId,
         uint256 quantity,
-        bytes32 contextHash
+        bytes32 contextHash,
+        bytes32 gateHash,
+        bytes32 currentPolicyHash,
+        bytes32 boundPolicyHash
     );
-    /// @notice Emitted once per prepared token completed by the manager.
-    event MintPreparedTokenExecuted(
+    /// @notice Emitted with manager phase context for authorization consumption.
+    event MintAuthorizationConsumed(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        bytes32 indexed authorizationId,
+        bytes32 boundPolicyHash,
+        bytes32 operationRoot
+    );
+    /// @notice Emitted once per immediate single-step token.
+    event MintTokenExecuted(
+        uint16 schemaVersion,
         bytes32 indexed operationId,
         uint256 indexed tokenId,
-        uint256 indexed collectionId,
+        bytes32 indexed operationRoot,
+        uint256 collectionId,
         bytes32 phaseId,
-        uint256 collectionSerial,
+        uint256 tokenIndex,
         address initialRecipient,
         address beneficiary,
         bytes32 tokenDataHash,
-        bytes32 policyHash
+        bytes32 mintCommitment
+    );
+    /// @notice Emitted after Core records a prepared token.
+    event PreparedMintStarted(
+        uint16 schemaVersion,
+        bytes32 indexed operationId,
+        uint256 indexed tokenId,
+        uint256 indexed collectionId,
+        bytes32 operationRoot,
+        uint256 collectionSerial,
+        address beneficiary,
+        bytes32 tokenDataHash,
+        bytes32 mintCommitment
+    );
+    /// @notice Emitted after Core completes a prepared token.
+    event PreparedMintCompleted(
+        uint16 schemaVersion,
+        bytes32 indexed operationId,
+        uint256 indexed tokenId,
+        uint256 indexed collectionId,
+        bytes32 operationRoot,
+        address initialRecipient
     );
 
     /// @notice Returns true for deployment validation.
@@ -242,10 +299,22 @@ interface IStreamMintManager {
         external;
     /// @notice Pauses or unpauses a configured phase.
     function setPhasePaused(uint256 collectionId, bytes32 phaseId, bool paused) external;
-    /// @notice Consumes ledger counters, prepares, and completes a mint batch atomically.
-    function mintPrepared(MintRequest calldata request)
+    /// @notice Executes the immediate Core manager path atomically.
+    function executeSingleStepMint(MintBatch calldata batch, bytes calldata gateData)
         external
-        returns (uint256 firstTokenId, uint256 lastTokenId);
+        returns (uint256[] memory tokenIds, bytes32 operationRoot, bytes32[] memory operationIds);
+    /// @notice Executes the prepared Core manager path atomically.
+    function executePreparedMint(MintBatch calldata batch, bytes calldata gateData)
+        external
+        returns (uint256[] memory tokenIds, bytes32 operationRoot, bytes32[] memory operationIds);
+    /// @notice Previews the single-step identity transcript for the current manager state.
+    /// @dev Matches execution only while the nonce, phase policy/grace, and gate result stay unchanged.
+    function previewSingleStepMintOperation(MintBatch calldata batch, bytes calldata gateData)
+        external
+        view
+        returns (bytes32 operationRoot, bytes32[] memory operationIds);
+    /// @notice Returns the first unreserved manager operation nonce.
+    function nextOperationNonce() external view returns (uint256);
     /// @notice Returns immutable phase config plus existence.
     function phase(uint256 collectionId, bytes32 phaseId)
         external
@@ -253,6 +322,17 @@ interface IStreamMintManager {
         returns (bool exists, MintPhaseConfig memory config);
     /// @notice Returns the active manager policy hash for a phase.
     function phasePolicyHash(uint256 collectionId, bytes32 phaseId) external view returns (bytes32);
+    /// @notice Returns manager-scoped authorization replay state independent of the caller.
+    function isAuthorizationUsed(bytes32 authorizationId) external view returns (bool);
+    /// @notice Returns manager-scoped nullifier replay state independent of the caller.
+    function isNullifierUsed(bytes32 nullifier) external view returns (bool);
+    /// @notice Returns manager-scoped operation-root replay state independent of the caller.
+    function isOperationRootUsed(bytes32 operationRoot) external view returns (bool);
+    /// @notice Returns the immediate predecessor policy and its grace expiry.
+    function phasePolicyGrace(uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        returns (bytes32 previousPolicyHash, uint64 graceUntil);
     /// @notice Returns whether an executor may call a phase.
     function phaseExecutor(uint256 collectionId, bytes32 phaseId, address executor)
         external

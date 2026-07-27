@@ -16,10 +16,12 @@ amend this document). Those accepted decisions are superseded in part by
 [ADR 0017](adr/0017-raise-only-parameter-governance.md) for Governed Gas
 Parameter mutation and evidence surfaces. Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
-pre-genesis target mint operation-identity and replay-ownership amendment. Its
-atomic source cutover remains unimplemented, and the target sections it
-introduces are deployment blockers rather than implementation or readiness
-evidence. The decisions are recorded in
+pre-genesis mint operation-identity and replay-ownership amendment. Its atomic
+manager/ledger/Core source cutover is implemented in the current as-built
+surfaces. Exact typed primary settlement, execution-ID-bound repeated-sale
+replay, and the complete Core production-headroom target remain deployment
+blockers, so this implementation is not readiness evidence. The decisions are
+recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -818,15 +820,20 @@ Requirements [MPA-OPERATION]:
    same rule (ADR 0012 decision T6); all operation domains are mirrored in the
    protocol v1 domain-constants table.
 
-   Implementation evidence (non-normative). The CON-014 slice computes
-   a prepared-only root after ledger consumption, computes the request
-   commitment without the target leading domain, and computes per-token
-   operation IDs without `MINT_TOKEN_OPERATION_ID_DOMAIN`. The
-   checker-pinned `OPERATION_DOMAIN` protocol mirror remains as-built
-   evidence until implementation alignment. Deployment requires the
-   target domains and ordering above; the as-built mirror, manager
-   constants, ABI/event catalogs, and release artifacts re-pin together
-   only in the atomic implementation cutover.
+   Implementation evidence (non-normative). The atomic issue #688 cutover
+   computes the request/result transcript and root before ledger consumption,
+   reserves one root plus `N` token operation IDs, and uses the exact leading
+   domains and ordering above. Fixed compiler-linked libraries own pure
+   identity/counter derivation, closed-world gate validation, and Core token
+   execution so the manager remains deployable; their addresses are immutable
+   link references, expose no caller-selected target/selector/value/callback
+   surface, and execute in the manager context. The checker binds the
+   normative home and protocol-v1 mirror to the manager and identity-library
+   domain constants and rejects the superseded CON-014 `OPERATION_DOMAIN` as a
+   co-live legacy surface. Foundry's
+   `testCompositeHashVectorsUseDocumentedFieldOrder` independently reconstructs
+   the runtime composite values with the exact field order above. ABI/event
+   catalogs and release artifacts re-pin in the same implementation change.
 2. Every state- or economics-affecting value inside the manager/ledger mint
    boundary is bound either directly in the normalized preimages above or
    transitively through a typed digest that is itself bound there. In a signed
@@ -874,7 +881,9 @@ Requirements [MPA-OPERATION]:
    with execution, and reads the current `nextOperationNonce`. It emits no
    event, writes or consumes no state, and exposes no callback, settlement,
    value, or delegatecall surface; it is safe for `STATICCALL` and returns
-   exactly `batch.beneficiaries.length` operation IDs. Because the adapter calls
+   exactly `batch.beneficiaries.length` operation IDs. The returned identity
+   matches a later execution only while the nonce, phase policy/grace state,
+   and gate/resolver result remain unchanged. Because the adapter calls
    the preview, the
    executor term is exactly the adapter's `address(this)`; it is never the
    adapter's external caller, payer, relayer, or `tx.origin`. A direct payer
@@ -1977,19 +1986,20 @@ ledger owns the final cap checks and writes, so counter accounting has a single
 durable enforcement point and any later revert rolls the whole transaction
 back.
 
-The CON-014 genesis manager implements this static path as
+The CON-014 genesis manager implements this boundary as
 `StreamMintManager`: owners configure phase policy and ordered static counters,
-grant per-phase executors, optionally pause phases, register each active
-`policyHash` with `StreamMintLedger`, build bounded batch counter consumptions,
-enforce named v1 hard caps for batch size and counter count, require callers
-to bind the active `policyHash`, consume a nonzero authorization ID with the
-ledger, derive prepared-only operation roots after that consumption, then
-execute Core's prepared mint pair atomically. That ordering is as-built
-evidence and must be replaced by the ADR 0018 derive/reserve-before-ledger
-cutover. The implemented manager slice does not
-yet route existing `StreamDrops` or auction flows, execute payment settlement,
-or consult gates; dynamic resolver caps/deltas and callable nullifiers are
-protocol v1 exclusions until their own ADRs are accepted.
+grant per-phase executors, optionally pause phases, and register each current
+`policyHash` with `StreamMintLedger`. For both execution paths the manager
+validates the configured gate or exact ungated result, builds bounded batch
+counter consumptions, computes the normalized request/result transcript,
+derives one root plus `N` token operation IDs, and reserves the nonce range
+before the ledger consumes the explicit phase/root/authorization/nullifier
+tuple. The ledger independently loads current policy, owns manager-scoped root
+replay, and all later manager/Core failure unwinds the ledger writes and nonce
+reservation. Core retains only the current prepared-pair operation-ID equality
+lock. The implemented manager slice does not yet route existing `StreamDrops`
+or auction flows or execute typed payment settlement; dynamic resolver
+caps/deltas remain protocol v1 exclusions until their own ADRs are accepted.
 
 Ledger events. These are production-exact signatures (ADR 0013
 decision U7): every event carries a leading `uint16 schemaVersion` and
@@ -3505,6 +3515,7 @@ error MintOperationIdDuplicate(uint256 firstIndex, uint256 secondIndex);
 error MintAuthorizationAlreadyUsed(bytes32 authorizationId);
 error MintNullifierAlreadyUsed(bytes32 nullifier);
 error MintGateQuantityExceeded(uint256 requested, uint256 maxAllowed);
+error MintGateNullifierCountExceeded(uint256 count, uint256 maximum);
 error MintSignatureExpired(uint256 deadline);
 error MintInvalidSignature();
 error MintInvalidAuthorizerKind(uint8 kind, address authorizer);
@@ -3970,14 +3981,15 @@ Status: CON-013 and CON-014 implement the static v1 foundation:
    of `CounterKeyMode`. (An earlier revision of this note claimed an
    `authorizer` key mode; no such mode exists in `CounterKeyMode`, and
    the claim was a defect, ADR 0012 decision T6.)
-4. `mintPrepared` requires a nonzero `expectedPolicyHash` and nonzero
-   `authorizationId` so production execution cannot bypass stale-policy
-   detection or ledger replay protection. `authorizationId` is a replay key
-   supplied by the allowlisted executor; it is not, by itself, cryptographic
-   signature verification. A buggy or compromised allowlisted executor can
-   choose the request contents for any unused `authorizationId`, so untrusted
-   sale, drop, or gate flows must bind `authorizationId` to their own reviewed
-   signed commitment before they receive executor rights.
+4. `executeSingleStepMint` and `executePreparedMint` require a nonzero
+   `expectedPolicyHash` and nonzero `authorizationId`, derive one batch
+   `operationRoot` plus one distinct `operationId` per token, and consume the
+   root through the ledger before Core execution. `authorizationId` is a replay
+   key supplied by the allowlisted executor; it is not, by itself,
+   cryptographic signature verification. A buggy or compromised allowlisted
+   executor can choose the request contents for any unused `authorizationId`,
+   so untrusted sale, drop, or gate flows must bind `authorizationId` to their
+   own reviewed signed commitment before they receive executor rights.
 5. Gates, payment settlement, sale/auction routing, `GLOBAL` scope
    derivation, the `MERKLE_STATIC` cap mode, grace windows, revocation,
    succession import, and burn-gate nullifier consumption remain later

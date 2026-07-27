@@ -12,7 +12,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `local transcript captured 2026-06-14T14:39Z; PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; collection metadata/preservation PR review pending for changed CON-015 artifacts`
+- CI run or operator transcript: `local transcript captured 2026-06-14T14:39Z; PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; operation-identity PR #707 review pending for the changed deployment artifacts`
 - Fork block number: `25316366`
 - Fork block hash: `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`
@@ -21,8 +21,8 @@
 
 - Sanitized command transcript: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
 - Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:f778fb20d24bda64bf256b75850613f779f44283e22a69428adf815cd3f7452c`
-- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:e470a734009a77abd823c1a558fee08f925c3005fbc5fc2cd162754fe2d426d5`
-- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:df552b68e1c0acd39d7212004891eed49891f1c8d03b67f41217ecbaa97f2ea1`
+- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:9df336b00d0217f73cd159394e6d308c25faae8952a787b147e50b9d4818b838`
+- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:954f30e30c63e10b4012f5adb1f370b742b71be0e91497e24a93de38b6668575`
 - Verification status: `not_applicable_for_local_fork; source verification inputs remain retained separately and explorer verification remains a separate public-beta blocker`
 - Gas or invariant summary: `estimated_total_gas_used=32521731; all retained deployment receipts status=0x1; release CI will rerun build, tests, gas snapshot, size, and deployment rehearsal gates`
 - Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and release-artifacts/latest/SHA256SUMS regenerated in this PR`
@@ -38,7 +38,7 @@
 ## Review
 
 - Operator: `Codex autonomous operator`
-- Reviewer: `pending collection metadata/preservation PR review; historical CodeRabbit status success on PR #347 and PR #349`
+- Reviewer: `pending operation-identity PR #707 review; historical CodeRabbit status success on PR #347 and PR #349`
 - Review decision: `pending_review`
 
 ## Redaction
@@ -53,7 +53,7 @@
 ```sh
 python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous operator" --reviewer "pending collection metadata/preservation PR review; historical CodeRabbit status success on PR #347 and PR #349" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; collection metadata/preservation PR review pending" --operator-notes "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous operator" --reviewer "pending operation-identity PR #707 review; historical CodeRabbit status success on PR #347 and PR #349" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; operation-identity PR #707 review pending" --operator-notes "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check

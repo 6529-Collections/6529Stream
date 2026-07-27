@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:e470a734009a77abd823c1a558fee08f925c3005fbc5fc2cd162754fe2d426d5",
+    "deployment_manifest_sha256": "sha256:9df336b00d0217f73cd159394e6d308c25faae8952a787b147e50b9d4818b838",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -89,8 +89,8 @@
       "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out-release/StreamCore.sol/StreamCore.json",
-      "abi_hash": "sha256:3fac75f1ecce40be43b8dc5ae7a91f77d3566213634c6242eb1ce93332edf1bc",
-      "runtime_bytecode_hash": "sha256:f998cd1bffdfe593e584ad1e416c2ed84b9f7af2c6d882c0c132e19b70c5a5b5",
+      "abi_hash": "sha256:f77cb3e3701b4e4083bee8ebb02d688d27dede1e46a0e9a5b35566d434faede4",
+      "runtime_bytecode_hash": "sha256:1f491d559d24887232bb1e60d3a64831b1b7a22dc5f2814644cb12034ede2121",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -113,16 +113,16 @@
       "address": "0x200000000000000000000000000000000000000f",
       "source": "smart-contracts/StreamMintLedger.sol",
       "artifact_path": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
-      "abi_hash": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
-      "runtime_bytecode_hash": "sha256:20991c54d275d7ece363037ecdbc25ecf640093654fbe479702bd1eb23c6d502",
+      "abi_hash": "sha256:94327f9a2721f154d76a8f1b889b6094c3a08a8c342987a6086b2e1313c75cae",
+      "runtime_bytecode_hash": "sha256:847b27f3f0eaa02b1e97fc1b17f80fb6baac149d5c37cb4e6dfa1b71cdd49c67",
       "verification_status": "not_applicable"
     },
     "StreamMintManager": {
       "address": "0x2000000000000000000000000000000000000010",
       "source": "smart-contracts/StreamMintManager.sol",
       "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
-      "abi_hash": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f",
-      "runtime_bytecode_hash": "sha256:741322932580d7b935697c97191c897e4e8da0cbb18ce2cf9c376af17b60a37d",
+      "abi_hash": "sha256:7b3399fede76194f9b11b330dc7127faf34ff591634861a8062416e57d132784",
+      "runtime_bytecode_hash": "sha256:f35591830691a4f50f058bfca14cb0bfd6ffab4dea8f5528496c72a5a1d7b520",
       "verification_status": "not_applicable"
     },
     "StreamMintModuleRegistry": {

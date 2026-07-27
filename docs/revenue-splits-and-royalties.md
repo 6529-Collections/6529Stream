@@ -11,8 +11,10 @@ inline are resolved by
 [ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by accepted
 [ADR 0017](adr/0017-raise-only-parameter-governance.md). Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
-pre-genesis target operation-identity amendment. Its atomic source cutover
-remains unimplemented and is not current as-built or readiness evidence. The
+pre-genesis operation-identity amendment. Its atomic manager/ledger/Core source
+cutover is implemented in the current as-built surfaces. The exact typed
+primary-settlement callback and execution-ID-bound repeated-sale key remain
+ADR 0019 / issue #694 blockers, so the cutover is not readiness evidence. The
 decisions are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
@@ -1237,7 +1239,8 @@ Requirements [RSR-ORCHESTRATION]:
    execution. It returns the `MINT_EXECUTION_PATH_SINGLE_STEP` root and exactly
    `N` token operation IDs, commits both `currentPolicyHash` and the signed
    `batch.expectedPolicyHash` accepted as `boundPolicyHash`, and emits, writes,
-   and consumes nothing.
+   and consumes nothing. The preview matches execution only while the nonce,
+   phase policy/grace state, and gate/resolver result remain unchanged.
 4. Sale adapter materializes the split profile if needed and deposits the
    accepted settlement asset — native ETH, or an approved standard
    ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —

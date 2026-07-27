@@ -13,9 +13,11 @@ inline are resolved by
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 Accepted
 [ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
-pre-genesis target operation-identity amendment; its atomic source cutover
-remains unimplemented, and its target mirror rows are deployment blockers
-rather than current as-built or readiness evidence.
+pre-genesis operation-identity amendment. Its atomic manager/ledger/Core
+source cutover is implemented in the current as-built surfaces. Exact typed
+primary settlement, execution-ID-bound repeated-sale replay, and the complete
+Core production-headroom target remain separate deployment blockers; the
+cutover is not a readiness claim.
 
 This document is the normative protocol v1 specification for 6529Stream. It
 reconciles the revenue, mint, metadata, and entropy specs into one protocol
@@ -513,8 +515,8 @@ Implementation evidence (non-normative). Current artifact-backed
 CON-012-lineage Core hook proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. New measured `StreamCore` runtime: 24,152 bytes.
-3. EIP-170 margin: 424 bytes.
+2. Current measured `StreamCore` runtime: 24,128 bytes.
+3. EIP-170 margin: 448 bytes.
 4. The margin remains above the interim 384-byte development floor but below
    the 512-byte warning threshold and the normative 2,000-byte production
    deployment requirement.
@@ -525,8 +527,8 @@ CON-012-lineage Core hook proof:
 6. This build inherits plain, non-enumerable `ERC721` and contains no
    `ERC721Enumerable` index storage. ADR 0012 decision T10 is already reflected
    and offers no remaining implementation savings.
-7. The current build is 1,576 bytes above the 22,576-byte deployment ceiling
-   and 3,152 bytes above the 21,000-byte planning allocation. The Core size
+7. The current build is 1,552 bytes above the 22,576-byte deployment ceiling
+   and 3,135 bytes above the 21,000-byte planning allocation. The Core size
    reconciliation workstream in
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
    (Genesis Deployment Profile), tracked by
@@ -549,8 +551,8 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    and produce a net-negative measured Core delta. The final implementation PR
    must compile every mandatory hook in [PV1-HOOKS] together; a partial build
    below the ceiling is not the passing proof.
-3. From the current 24,152-byte evidence, the minimum full-stack recovery is
-   `1,576 + A` bytes, where `A` is the measured net runtime cost of all
+3. From the current 24,128-byte evidence, the minimum full-stack recovery is
+   `1,552 + A` bytes, where `A` is the measured net runtime cost of all
    mandatory Core hooks absent from that evidence after any same-PR removals.
    Scratch deletions and individually measured experiments are non-additive
    under via-IR and never satisfy this equation. Only the final linked runtime
@@ -823,29 +825,28 @@ neighboring family is not a posture record.
 
 ### StreamMintManager Domain Constants
 
-The CON-014 manager slice records these static phase policy domains in this
+The manager records its static phase-policy domains in this
 checked spec table, which CI verifies row-for-row against
 `StreamMintManager.sol`. The normative home of the mint-manager hash
 family is [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
-([MPA-POLICY-HASH], [MPA-OPERATION]); this table pins the as-built CON-014
-constants — the home's labeled non-normative implementation evidence,
+([MPA-POLICY-HASH], [MPA-OPERATION]); this table pins the as-built
+phase-policy constants — the home's labeled non-normative implementation evidence,
 including the V1 phase-config row that still hashes `paused` — and must
 match that evidence exactly. The deployment-required V2 preimages, which
 move pause out of policy identity and add the codehash pin modes
 (ADR 0011 decisions R6 and R12), are defined at the home and mirrored in
 the extension mirror rows below; the as-built rows here re-pin to the V2
 values together with the manager constants and this checker at
-implementation time. In the as-built row, `operationId` values are derived
-from `OPERATION_DOMAIN` through `operationRoot` and then bind
-`operationRoot`, `operationNonce`, `tokenIndex`, `tokenDataHash`, and `salt`.
-The ADR 0018 target root/token/path domains are separate extension-mirror rows
-below; their implementation cutover re-pins this table and the Solidity
-constants atomically.
-Three input labels below are historical aliases pinned by the CI
-checker: `tokenDataHash` and `saltsHash` inside `requestCommitmentHash`,
-and the per-token `salt`, name the values the mint spec calls
-`tokenDataArrayHash`, `mintCommitmentsHash`, and `mintCommitment`
-respectively ([MPA-OPERATION] rule 1). `gateGasLimit` inside
+implementation time. The ADR 0018 request/result/root/token/path domains are
+the exact extension-mirror rows below and are checker-bound directly to the
+atomic Solidity implementation; the superseded CON-014 `OPERATION_DOMAIN` is
+absent. The checker pins the normative and protocol-v1 rows to the manager and
+fixed-library domain constants. Foundry's
+`testCompositeHashVectorsUseDocumentedFieldOrder` reconstructs the runtime
+request/result/root/token values with the exact documented field order. The
+`StreamMintOperationIdentity` library address is an immutable compile-time
+link, not an arbitrary delegatecall surface.
+`gateGasLimit` inside
 `GATE_CONFIG_DOMAIN` has
 exactly one deterministic meaning, pinned in the mint spec ([MPA-GATES]
 rule 6): the manager forwards `max(gateGasLimit, MINT_GATE_GAS_LIMIT)` to
@@ -861,7 +862,6 @@ the gate, so a value hashed into policy identity commits to real behavior
 | `EXECUTOR_SET_DOMAIN` | `6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1` | `0x4dad062b9c5507613f6c9369756e27d94df429cf5650fe9b9d375032d1d5397a` | `StreamMintManager` | `1` | `EXECUTOR_SET_DOMAIN; sorted phase executor addresses` |
 | `SUBJECT_DOMAIN` | `6529STREAM_MINT_COUNTER_SUBJECT_V1` | `0x5028c63429e55461bc7922fe859628bd9266f6b029ad3e4124268a4877151a05` | `StreamMintManager` | `1` | `SUBJECT_DOMAIN; uint256(block.chainid); address(mintLedger); keyMode; constant mode: collectionId, phaseId, counterId; address modes: account; context mode: contextHash` |
 | `RESOLUTION_DOMAIN` | `6529STREAM_MINT_COUNTER_RESOLUTION_V1` | `0x3503c231385e25d95f9119b4e72118f42b0c7c1e7854b990a249a44c64f6a196` | `StreamMintManager` | `1` | `RESOLUTION_DOMAIN; uint256(block.chainid); address(this); address(mintLedger); collectionId; phaseId; counterId; subjectKey; tokenIndex; counterConfigHash` |
-| `OPERATION_DOMAIN` | `6529STREAM_PREPARED_MINT_OPERATION_V1` | `0x7ae97476527ee55636a9869c4580294d9b3d15d19fa357df5e2e41301584d0d9` | `StreamMintManager` | `1` | `OPERATION_DOMAIN; uint256(block.chainid); address(this); address(core); address(mintLedger); collectionId; phaseId; policyHash; authorizationId; requestCommitmentHash(payer, authorizer, initialRecipientsHash, beneficiariesHash, tokenDataHash, saltsHash); contextHash; msg.sender; operationNonce; quantity` |
 
 Reserved derivation constants documented with the rows above:
 `COLLECTION_SCOPE_PHASE_ID = 0` (ADR 0009 decision 11) and

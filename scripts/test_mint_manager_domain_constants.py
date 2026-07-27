@@ -72,6 +72,14 @@ def committed_operation_documents() -> dict[Path, str]:
     }
 
 
+def committed_implementation_status_documents() -> dict[Path, str]:
+    repo_root = SCRIPT_PATH.parent.parent
+    return {
+        path: (repo_root / path).read_text(encoding="utf-8")
+        for path in checker.IMPLEMENTATION_STATUS_FRAGMENTS
+    }
+
+
 def mutate_table_row_cell(
     markdown: str,
     row_key: str,
@@ -203,6 +211,80 @@ class MintManagerDomainConstantTests(unittest.TestCase):
                 documents[checker.DOC_PATH],
             )
 
+    def test_rejects_target_operation_solidity_preimage_drift(self) -> None:
+        documents = committed_operation_documents()
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        stale_source = source.replace(preimage, f"{preimage}_DRIFT", 1)
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} Solidity implementation preimage/cardinality drifted",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                documents[checker.DOC_PATH],
+                source_text=stale_source,
+            )
+
+    def test_rejects_superseded_operation_domain_in_solidity(self) -> None:
+        documents = committed_operation_documents()
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.SOURCE_PATH).read_text(encoding="utf-8")
+        stale_source = source.replace(
+            "contract StreamMintManager",
+            "bytes32 public constant OPERATION_DOMAIN = "
+            'keccak256("6529STREAM_PREPARED_MINT_OPERATION_V1");\n'
+            "contract StreamMintManager",
+            1,
+        )
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "superseded OPERATION_DOMAIN remains co-live",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                documents[checker.DOC_PATH],
+                source_text=stale_source,
+            )
+
+    def test_rejects_linked_identity_library_preimage_drift(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.IDENTITY_SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.IDENTITY_LIBRARY_DOMAINS[0]
+        stale_source = source.replace(preimage, f"{preimage}_DRIFT", 1)
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} linked identity-library preimage/cardinality drifted",
+        ):
+            checker.validate_identity_library_domains(stale_source)
+
+    def test_rejects_missing_linked_identity_library_domain(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.IDENTITY_SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.IDENTITY_LIBRARY_DOMAINS[-1]
+        assignment = re.search(
+            rf'\bbytes32\s+private\s+constant\s+{re.escape(name)}\s*=\s*'
+            rf'keccak256\(\s*"{re.escape(preimage)}"\s*\)\s*;',
+            source,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment)
+        assert assignment is not None
+        stale_source = source[: assignment.start()] + source[assignment.end() :]
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} linked identity-library preimage/cardinality drifted",
+        ):
+            checker.validate_identity_library_domains(stale_source)
+
     def test_rejects_missing_operation_identity_contract_fragment(self) -> None:
         documents = {
             path: "\n".join(fragments)
@@ -217,6 +299,84 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             "operation identity contract drifted",
         ):
             checker.validate_operation_identity_fragments(documents)
+
+    def test_rejects_gate_nullifier_launch_cap_drift(self) -> None:
+        documents = committed_operation_documents()
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        stale_spec = mint_spec.replace(
+            "`MAX_GATE_NULLIFIERS = 16`",
+            "`MAX_GATE_NULLIFIERS = 17`",
+            1,
+        )
+        self.assertNotEqual(stale_spec, mint_spec)
+        documents[checker.MINT_SPEC_PATH] = stale_spec
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity contract drifted",
+        ):
+            checker.validate_operation_identity_fragments(documents)
+
+    def test_rejects_stale_operation_identity_implementation_status(self) -> None:
+        documents = committed_implementation_status_documents()
+        mutations = (
+            (
+                checker.STATUS_PATH,
+                "Accepted ADR 0018 is now implemented in the current pre-genesis source",
+                "Accepted ADR 0018 remains unimplemented in current source",
+            ),
+            (
+                checker.KNOWN_BLOCKERS_PATH,
+                "Accepted ADR 0018's atomic cutover now implements",
+                "Accepted ADR 0018's atomic source cutover remains unimplemented",
+            ),
+            (
+                checker.CHANGELOG_PATH,
+                "Implemented accepted ADR 0018's pre-genesis atomic operation-identity",
+                "Accepted-but-unimplemented ADR 0018 operation identity",
+            ),
+        )
+        for path, current, stale in mutations:
+            with self.subTest(path=path):
+                mutated = dict(documents)
+                mutated[path] = documents[path].replace(current, stale, 1)
+                self.assertNotEqual(mutated[path], documents[path])
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    "implementation status",
+                ):
+                    checker.validate_implementation_status_fragments(mutated)
+
+    def test_rejects_checker_overclaim_for_runtime_preimage_order(self) -> None:
+        documents = committed_operation_documents()
+        mutations = (
+            (
+                checker.MINT_SPEC_PATH,
+                "The checker binds the\n"
+                "   normative home and protocol-v1 mirror to the manager and "
+                "identity-library\n"
+                "   domain constants",
+                "The checker binds the\n"
+                "   normative home, protocol-v1 mirror, manager constants, and every "
+                "hash\n"
+                "   preimage duplicated in the identity library together",
+            ),
+            (
+                checker.DOC_PATH,
+                "The checker pins the normative and protocol-v1 rows to the manager "
+                "and\n"
+                "fixed-library domain constants.",
+                "The same checker also pins every duplicated preimage in the fixed\n"
+                "`StreamMintOperationIdentity` linked library.",
+            ),
+        )
+        for path, accurate, overclaim in mutations:
+            with self.subTest(path=path):
+                mutated = dict(documents)
+                mutated[path] = documents[path].replace(accurate, overclaim, 1)
+                self.assertNotEqual(mutated[path], documents[path])
+                with self.assertRaises(checker.MintManagerDomainError):
+                    checker.validate_operation_identity_fragments(mutated)
 
     def test_rejects_target_operation_selector_drift(self) -> None:
         mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]

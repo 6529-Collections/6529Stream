@@ -30,13 +30,13 @@
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:fd1134e4200e50edf13dda3bd85f45cd19c122d9c7cb9d6c888676a72f0ebe2c",
-      "size_bytes": 137997
+      "sha256": "sha256:3e386a592412a29616a725ae4c92c4812467d2935d86ecfef740cab938714f82",
+      "size_bytes": 138333
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:ecc57eadb973a43aefb55dc38ac7da4f09d44153959a3d0c1239685f64bb80bb",
-      "size_bytes": 162113
+      "sha256": "sha256:4f1269651e84ae155d67e38e807deddda4e9e2d180463803c405f1469bcf9e2d",
+      "size_bytes": 161695
     }
   ],
   "measurement": {
@@ -89,11 +89,11 @@
     "implementation_status": "target_fixture_only",
     "stream_core_source": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:7a41520f3792ebe398d0c0ad60835e0410dcd8eee29a645d2f9ccd8b308d3918",
-      "size_bytes": 70651
+      "sha256": "sha256:4e90f9ae1bb3b4979f055b8cf92362ffb7033e73be89df84cad1c1c3315f525f",
+      "size_bytes": 70421
     },
-    "stream_core_runtime_bytes": 24152,
-    "stream_core_eip170_margin_bytes": 424,
+    "stream_core_runtime_bytes": 24128,
+    "stream_core_eip170_margin_bytes": 448,
     "stream_core_delta_bytes": 0,
     "production_complete_runtime_ceiling_bytes": 22576,
     "approved_runtime_objective_bytes": 22184,

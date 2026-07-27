@@ -324,8 +324,8 @@ negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
 under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,152 bytes
-with 424 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 24,128 bytes
+with 448 bytes of EIP-170 margin.
 This CON-014 branch also refreshes via-IR bytecode hashes for contracts whose
 source files are otherwise unchanged in the diff. `StreamCore` changes because
 its imported `IStreamMintManager` source expands from the prior marker-only
@@ -1008,7 +1008,7 @@ The non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
-The current 424-byte margin intentionally leaves production release mode red
+The current 448-byte margin intentionally leaves production release mode red
 until the tracked slimming work lands; ordinary `make check` remains usable for
 development.
 
@@ -2060,15 +2060,15 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 30 open findings: 3 High and 27 Medium. The
+The current checked baseline has 28 open findings: 3 High and 25 Medium. The
 compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `93527f72ec7911f2e473053bccb5cd07c8cb311e` on
-`2026-07-27T03:45:25Z` records 3,096 findings: 49 High, 761 Medium, 1,249 Low,
+at source commit `7c17e7644ca39257602cc5667f547026d22e855a` on
+`2026-07-27T19:21:24Z` records 3,132 findings: 49 High, 795 Medium, 1,251 Low,
 997 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/27/30`, vendored `1/9/10`, test `45/718/763`, script
+first-party production `3/25/28`, vendored `1/9/10`, test `45/754/799`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

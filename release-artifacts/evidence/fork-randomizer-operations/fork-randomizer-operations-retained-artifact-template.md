@@ -13,7 +13,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI passed before this evidence PR; collection metadata/preservation PR review pending for changed CON-015 artifacts`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI passed before this evidence PR; operation-identity PR #707 review pending for the changed deployment artifacts`
 - Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 - Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`
@@ -55,9 +55,9 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:e470a734009a77abd823c1a558fee08f925c3005fbc5fc2cd162754fe2d426d5`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:df552b68e1c0acd39d7212004891eed49891f1c8d03b67f41217ecbaa97f2ea1`
-- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:467d7ed89cac8f9a8fc1e0010eaf0f429ceab7794a03496585ee20fe362fabf2`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:9df336b00d0217f73cd159394e6d308c25faae8952a787b147e50b9d4818b838`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:954f30e30c63e10b4012f5adb1f370b742b71be0e91497e24a93de38b6668575`
+- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:1394a08f201f72f3596f95df29e12c32475f6b0eaf2f290cbebd3eb7fd858530`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
 - Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`
@@ -66,7 +66,7 @@
 ## Review
 
 - Operator: `Codex autonomous implementer`
-- Reviewer: `pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220`
+- Reviewer: `pending operation-identity PR #707 review; historical Codex autonomous maintainer evidence review for issue #220`
 - Review decision: `pending_review`
 
 ## Redaction
@@ -85,7 +85,7 @@
 python scripts/test_fork_randomizer_operations_evidence.py
 python scripts/check_fork_randomizer_operations_evidence.py
 python scripts/check_randomizer_operations.py deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; collection metadata/preservation PR review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending operation-identity PR #707 review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; operation-identity PR #707 review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -94,7 +94,7 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- This retained artifact is pending collection metadata/preservation PR review
+- This retained artifact is pending operation-identity PR #707 review
   for the `fork_testnet_randomizer_operations_evidence` row because the CON-015
   branch changes the deployment manifest and address book it references. It still uses
   the committed no-secret mainnet fork broadcast from block `25316366` plus

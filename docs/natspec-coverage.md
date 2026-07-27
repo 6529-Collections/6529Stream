@@ -35,10 +35,10 @@ Current baseline summary:
 | Status | Count | Meaning |
 | --- | ---: | --- |
 | `missing_natspec` | 339 | First-party function, event, or custom error declaration lacks nearby NatSpec |
-| `public_variable_getter_missing_natspec` | 123 | Compiler-generated public getter lacks NatSpec on the state variable |
-| `declaration_not_in_source` | 401 | ABI entry is inherited or otherwise not declared in the first-party source body |
+| `public_variable_getter_missing_natspec` | 137 | Compiler-generated public getter lacks NatSpec on the state variable |
+| `declaration_not_in_source` | 415 | ABI entry is inherited or otherwise not declared in the first-party source body |
 
-The checker reports 136 documented release-surface entries and 863 explicit
+The checker reports 142 documented release-surface entries and 891 explicit
 exclusions in this baseline. That is not acceptable as a final documentation
 standard; it is a machine-readable starting line for audit preparation.
 

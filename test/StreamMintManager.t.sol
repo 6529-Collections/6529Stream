@@ -45,8 +45,8 @@ contract ReentrantMintManagerReceiver is IERC721Receiver {
     }
 
     function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4) {
-        IStreamMintManager.MintRequest memory request = _request();
-        try manager.mintPrepared(request) { }
+        IStreamMintManager.MintBatch memory request = _request();
+        try manager.executePreparedMint(request, request.resolverData) { }
         catch (bytes memory revertData) {
             reentryRejected = true;
             if (revertData.length >= 4) {
@@ -60,16 +60,16 @@ contract ReentrantMintManagerReceiver is IERC721Receiver {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function _request() private view returns (IStreamMintManager.MintRequest memory request) {
+    function _request() private view returns (IStreamMintManager.MintBatch memory request) {
         address[] memory initialRecipients = new address[](1);
         initialRecipients[0] = address(this);
         address[] memory beneficiaries = new address[](1);
         beneficiaries[0] = address(this);
-        string[] memory tokenData = new string[](1);
+        bytes[] memory tokenData = new bytes[](1);
         tokenData[0] = "reentrant-token";
-        uint256[] memory salts = new uint256[](1);
-        salts[0] = 99;
-        request = IStreamMintManager.MintRequest({
+        bytes32[] memory mintCommitments = new bytes32[](1);
+        mintCommitments[0] = bytes32(uint256(99));
+        request = IStreamMintManager.MintBatch({
             collectionId: collectionId,
             phaseId: phaseId,
             payer: address(this),
@@ -77,11 +77,11 @@ contract ReentrantMintManagerReceiver is IERC721Receiver {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: keccak256("reentrant-auth"),
             contextHash: bytes32(0),
             expectedPolicyHash: manager.phasePolicyHash(collectionId, phaseId),
-            gateData: ""
+            resolverData: ""
         });
     }
 }
@@ -116,6 +116,39 @@ contract MutatingMintManagerReceiver is IERC721Receiver {
     }
 }
 
+contract MintOperationAdapter {
+    IStreamMintManager private immutable manager;
+
+    constructor(IStreamMintManager manager_) {
+        manager = manager_;
+    }
+
+    function preview(IStreamMintManager.MintBatch calldata batch, bytes calldata gateData)
+        external
+        view
+        returns (bytes32 operationRoot, bytes32[] memory operationIds)
+    {
+        return manager.previewSingleStepMintOperation(batch, gateData);
+    }
+
+    function execute(IStreamMintManager.MintBatch calldata batch, bytes calldata gateData)
+        external
+        returns (uint256[] memory tokenIds, bytes32 operationRoot, bytes32[] memory operationIds)
+    {
+        return manager.executeSingleStepMint(batch, gateData);
+    }
+}
+
+contract MintOperationRelayer {
+    function preview(
+        MintOperationAdapter adapter,
+        IStreamMintManager.MintBatch calldata batch,
+        bytes calldata gateData
+    ) external view returns (bytes32 operationRoot, bytes32[] memory operationIds) {
+        return adapter.preview(batch, gateData);
+    }
+}
+
 contract MockMintGate is ERC165 {
     bytes32 public authorizationId;
     address public gateAuthorizer;
@@ -126,6 +159,7 @@ contract MockMintGate is ERC165 {
     bytes32 public expectedCallDataHash;
 
     bytes32 private _nullifier;
+    uint256 private _nullifierCount;
 
     function setResult(
         bytes32 authorizationId_,
@@ -145,6 +179,12 @@ contract MockMintGate is ERC165 {
 
     function setNullifier(bytes32 nullifier) external {
         _nullifier = nullifier;
+        _nullifierCount = nullifier == bytes32(0) ? 0 : 1;
+    }
+
+    function setNullifierCount(uint256 count) external {
+        _nullifier = bytes32(0);
+        _nullifierCount = count;
     }
 
     function setAdvertisesInterface(bool advertisesInterface_) external {
@@ -165,14 +205,17 @@ contract MockMintGate is ERC165 {
         if (expectedCallDataHash != bytes32(0) && keccak256(msg.data) != expectedCallDataHash) {
             revert("unexpected gate calldata");
         }
-        bytes32[] memory nullifiers = new bytes32[](_nullifier == bytes32(0) ? 0 : 1);
-        if (_nullifier != bytes32(0)) {
-            nullifiers[0] = _nullifier;
+        bytes32[] memory nullifiers = new bytes32[](_nullifierCount);
+        for (uint256 i = 0; i < _nullifierCount; i++) {
+            nullifiers[i] = _nullifier == bytes32(0) ? bytes32(i + 1) : _nullifier;
         }
         IStreamMintGate.GateResult memory result = IStreamMintGate.GateResult({
             authorizationId: authorizationId,
             nullifiers: nullifiers,
             authorizer: gateAuthorizer,
+            authorizerKind: gateAuthorizer == address(0)
+                ? uint8(IStreamMintManager.AuthorizerKind.NONE)
+                : uint8(IStreamMintManager.AuthorizerKind.EOA_712),
             maxQuantity: maxQuantity,
             gateHash: gateHash
         });
@@ -269,15 +312,20 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         bytes32 gateHash,
         bytes32 policyHash
     );
-    event MintPreparedBatchExecuted(
+    event MintBatchExecuted(
+        uint16 schemaVersion,
         bytes32 indexed operationRoot,
         uint256 indexed collectionId,
         bytes32 indexed phaseId,
-        bytes32 policyHash,
-        bytes32 authorizationId,
         address executor,
+        address payer,
+        address authorizer,
+        uint256 firstTokenId,
         uint256 quantity,
-        bytes32 contextHash
+        bytes32 contextHash,
+        bytes32 gateHash,
+        bytes32 currentPolicyHash,
+        bytes32 boundPolicyHash
     );
 
     uint256 private constant COLLECTION_ID = 1;
@@ -327,9 +375,32 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         bytes32 operationRoot;
         bytes32 operationId;
         bytes32 recipientResolutionHash;
+        bytes32 ledgerOperationRoot;
+        bytes32 preparedStartedRoot;
+        bytes32 preparedCompletedRoot;
         bool foundBatch;
         bool foundToken;
         bool foundRecipientResolution;
+        bool foundLedgerRoot;
+        bool foundPreparedStart;
+    }
+
+    struct ExpectedRootPreimage {
+        uint256 chainId;
+        address managerAddress;
+        address coreAddress;
+        address ledgerAddress;
+        bytes32 executionPath;
+        uint256 collectionId;
+        bytes32 phaseId;
+        bytes32 currentPolicyHash;
+        bytes32 boundPolicyHash;
+        bytes32 authorizationId;
+        bytes32 requestCommitmentHash;
+        bytes32 contextHash;
+        address executor;
+        uint256 firstOperationNonce;
+        uint256 quantity;
     }
 
     function setUp() public {
@@ -369,6 +440,23 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         new StreamMintManager(
             IStreamCore(address(core)), ledger, IStreamMintModuleRegistry(address(invalidRegistry))
         );
+    }
+
+    function testOperationIdentitySelectorsMatchAcceptedAbi() public pure {
+        uint256(uint32(IStreamMintManager.executeSingleStepMint.selector))
+            .assertEq(uint256(uint32(bytes4(0x286cd1d1))), "single-step selector");
+        uint256(uint32(IStreamMintManager.executePreparedMint.selector))
+            .assertEq(uint256(uint32(bytes4(0xc9281e5b))), "prepared selector");
+        uint256(uint32(IStreamMintManager.previewSingleStepMintOperation.selector))
+            .assertEq(uint256(uint32(bytes4(0xa5651f13))), "preview selector");
+        uint256(uint32(IStreamMintManager.nextOperationNonce.selector))
+            .assertEq(uint256(uint32(bytes4(0x37f8eaa5))), "nonce selector");
+        uint256(uint32(IStreamMintLedger.consume.selector))
+            .assertEq(uint256(uint32(bytes4(0x82e8f383))), "ledger consume selector");
+        uint256(uint32(IStreamMintLedger.isManagerOperationRootUsed.selector))
+            .assertEq(uint256(uint32(bytes4(0xe67d8006))), "ledger root-read selector");
+        uint256(uint32(IStreamMintManager.isOperationRootUsed.selector))
+            .assertEq(uint256(uint32(bytes4(0x12837042))), "manager root-read selector");
     }
 
     function testConfigurePhaseRegistersLedgerPolicyAndCounters() public {
@@ -656,11 +744,12 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         _configureGatedAuthorizerPhase(gate);
         gate.setResult(GATE_AUTHORIZATION_ID, AUTHORIZER, 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, bytes32(0), CONTEXT_HASH);
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, CONTEXT_HASH);
+        request.authorizer = AUTHORIZER;
         bytes32 activePolicy = manager.phasePolicyHash(COLLECTION_ID, PHASE_ID);
         request.expectedPolicyHash = activePolicy;
-        request.gateData = bytes("gate-proof");
+        request.resolverData = bytes("gate-proof");
         gate.setExpectedCallData(
             abi.encodeWithSelector(
                 IStreamMintGate.validateMint.selector,
@@ -669,19 +758,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
                 COLLECTION_ID,
                 PHASE_ID,
                 PAYER,
-                address(0),
+                AUTHORIZER,
                 request.initialRecipients,
                 request.beneficiaries,
                 CONTEXT_HASH,
                 activePolicy,
-                request.gateData
+                request.resolverData
             )
-        );
-
-        IStreamMintManager.MintRequest memory rootRequest = request;
-        rootRequest.authorizationId = GATE_AUTHORIZATION_ID;
-        bytes32 expectedRoot = _expectedOperationRoot(
-            rootRequest, activePolicy, manager.nextOperationNonce(), 1, EXECUTOR
         );
 
         vm.expectEmit(true, true, true, true);
@@ -696,19 +779,24 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             GATE_HASH,
             activePolicy
         );
-        vm.expectEmit(true, true, true, true);
-        emit MintPreparedBatchExecuted(
-            expectedRoot,
+        vm.expectEmit(false, true, true, true);
+        emit MintBatchExecuted(
+            1,
+            bytes32(0),
             COLLECTION_ID,
             PHASE_ID,
-            activePolicy,
-            GATE_AUTHORIZATION_ID,
             EXECUTOR,
+            PAYER,
+            AUTHORIZER,
+            FIRST_TOKEN_ID,
             1,
-            CONTEXT_HASH
+            CONTEXT_HASH,
+            GATE_HASH,
+            activePolicy,
+            activePolicy
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertTrue("gate authorization consumed");
@@ -729,12 +817,12 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "owner");
     }
 
-    function testGatedMintRequiresGateSuppliedAuthorizationId() public {
+    function testGatedMintRequiresExplicitAuthorizationAndExactGateMatch() public {
         MockMintGate gate = new MockMintGate();
         _configureGatedPhase(gate, 5, 3, 1);
         gate.setResult(bytes32(0), address(0), 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -742,17 +830,19 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
-        IStreamMintManager.MintRequest memory requestWithCallerId =
+        IStreamMintManager.MintBatch memory requestWithCallerId =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamMintManager.MintAuthorizationRequired.selector, COLLECTION_ID, PHASE_ID
+                IStreamMintManager.MintGateAuthorizationMismatch.selector,
+                AUTHORIZATION_ID,
+                bytes32(0)
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(requestWithCallerId);
+        manager.executePreparedMint(requestWithCallerId, requestWithCallerId.resolverData);
 
         core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
     }
@@ -762,7 +852,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         _configureGatedPhase(gate, 5, 3, 1);
         gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -772,7 +862,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertFalse("authorization not consumed");
@@ -785,13 +875,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
         gate.setAdvertisesInterface(false);
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(IStreamMintManager.MintGateNotActive.selector, address(gate))
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertFalse("authorization not consumed");
@@ -803,45 +893,83 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         _configureGatedPhase(gate, 5, 3, 1);
         gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
-        IStreamMintManager.MintRequest memory replay =
-            _singleRequest(OTHER_RECIPIENT, bytes32(0), bytes32(0));
+        IStreamMintManager.MintBatch memory replay =
+            _singleRequest(OTHER_RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamMintLedger.AuthorizationAlreadyConsumed.selector, GATE_AUTHORIZATION_ID
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(replay);
+        manager.executePreparedMint(replay, replay.resolverData);
 
         uint256(ledger.counterValue(_recipientValueKey(OTHER_RECIPIENT)))
             .assertEq(0, "replay recipient not consumed");
         core.viewCirSupply(COLLECTION_ID).assertEq(1, "no replay mint");
     }
 
-    function testGatedMintRejectsNullifiersUntilSupportedBeforeMutation() public {
+    function testGatedMintConsumesNullifierAndRejectsReplayAtomically() public {
         MockMintGate gate = new MockMintGate();
         _configureGatedPhase(gate, 5, 2, 1);
         gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
-        bytes32 nullifier = keccak256("unsupported-nullifier");
+        bytes32 nullifier = keccak256("gate-nullifier");
         gate.setNullifier(nullifier);
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
+        vm.prank(EXECUTOR);
+        manager.executePreparedMint(request, request.resolverData);
+
+        ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
+            .assertTrue("authorization consumed");
+        ledger.isManagerNullifierUsed(address(manager), nullifier).assertTrue("nullifier consumed");
+        vm.prank(OTHER_EXECUTOR);
+        manager.isNullifierUsed(nullifier).assertTrue("nullifier read caller-independent");
+        manager.nextOperationNonce().assertEq(1, "nonce advanced once");
+
+        gate.setResult(SECOND_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
+        IStreamMintManager.MintBatch memory replay =
+            _singleRequest(OTHER_RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamMintLedger.NullifierAlreadyConsumed.selector, nullifier)
+        );
+        vm.prank(EXECUTOR);
+        manager.executePreparedMint(replay, replay.resolverData);
+
+        ledger.isManagerAuthorizationUsed(address(manager), SECOND_AUTHORIZATION_ID)
+            .assertFalse("replay authorization rolled back");
+        uint256(ledger.counterValue(_recipientValueKey(OTHER_RECIPIENT)))
+            .assertEq(0, "replay recipient not consumed");
+        core.viewCirSupply(COLLECTION_ID).assertEq(1, "no replay mint");
+        manager.nextOperationNonce().assertEq(1, "replay nonce rolled back");
+    }
+
+    function testGatedMintRejectsNullifierCountAboveLaunchCapBeforeMutation() public {
+        MockMintGate gate = new MockMintGate();
+        _configureGatedPhase(gate, 5, 2, 1);
+        gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
+        gate.setNullifierCount(17);
+
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamMintManager.MintGateNullifiersUnsupported.selector, nullifier
+                IStreamMintManager.MintGateNullifierCountExceeded.selector,
+                uint256(17),
+                uint256(16)
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertFalse("authorization not consumed");
+        manager.nextOperationNonce().assertEq(0, "nonce not reserved");
         core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
     }
 
@@ -850,14 +978,15 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         _configureGatedPhase(gate, 5, 3, 2);
         gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request = _batchRequest(RECIPIENT, 2, bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _batchRequest(RECIPIENT, 2, GATE_AUTHORIZATION_ID);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamMintManager.MintGateQuantityExceeded.selector, uint256(2), uint256(1)
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertFalse("authorization not consumed");
@@ -873,13 +1002,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             _gateModuleInfo(gate, IStreamMintModuleRegistry.ModuleStatus.BLOCKED);
         moduleRegistry.setModule(address(gate), blockedInfo, "ipfs://blocked-gate");
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(IStreamMintManager.MintGateNotActive.selector, address(gate))
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         IStreamMintModuleRegistry.MintModuleInfo memory deprecatedInfo =
             _gateModuleInfo(gate, IStreamMintModuleRegistry.ModuleStatus.DEPRECATED);
@@ -888,7 +1017,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             abi.encodeWithSelector(IStreamMintManager.MintGateNotActive.selector, address(gate))
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         IStreamMintModuleRegistry.MintModuleInfo memory driftedInfo =
             _gateModuleInfo(gate, IStreamMintModuleRegistry.ModuleStatus.ACTIVE);
@@ -898,7 +1027,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             abi.encodeWithSelector(IStreamMintManager.MintGateNotActive.selector, address(gate))
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
             .assertFalse("authorization not consumed");
@@ -907,13 +1036,15 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testPreparedMintConsumesLedgerAndCompletesCoreMint() public {
         _configurePhase(5, 2, 2);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         bytes32 activePolicy = manager.phasePolicyHash(COLLECTION_ID, PHASE_ID);
         request.expectedPolicyHash = activePolicy;
 
         vm.prank(EXECUTOR);
-        (uint256 firstTokenId, uint256 lastTokenId) = manager.mintPrepared(request);
+        (uint256[] memory tokenIds,,) = manager.executePreparedMint(request, request.resolverData);
+        uint256 firstTokenId = tokenIds[0];
+        uint256 lastTokenId = tokenIds[tokenIds.length - 1];
 
         firstTokenId.assertEq(FIRST_TOKEN_ID, "first token");
         lastTokenId.assertEq(FIRST_TOKEN_ID, "last token");
@@ -924,6 +1055,121 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT))).assertEq(1, "recipient counter");
         ledger.isManagerAuthorizationUsed(address(manager), AUTHORIZATION_ID)
             .assertTrue("authorization consumed");
+    }
+
+    function testSingleStepPreviewIsReadOnlyAndExecutionMatchesTranscript() public {
+        _configurePhase(5, 2, 2);
+        IStreamMintManager.MintBatch memory request = _batchRequest(RECIPIENT, 2, AUTHORIZATION_ID);
+        request.contextHash = CONTEXT_HASH;
+
+        vm.recordLogs();
+        vm.prank(EXECUTOR);
+        (bytes32 previewRoot, bytes32[] memory previewIds) =
+            manager.previewSingleStepMintOperation(request, request.resolverData);
+        Vm.Log[] memory previewLogs = vm.getRecordedLogs();
+
+        (previewRoot != bytes32(0)).assertTrue("preview root");
+        previewIds.length.assertEq(2, "preview id count");
+        (previewIds[0] != previewIds[1]).assertTrue("preview ids unique");
+        previewLogs.length.assertEq(0, "preview emits nothing");
+        manager.nextOperationNonce().assertEq(0, "preview nonce unchanged");
+        manager.isAuthorizationUsed(AUTHORIZATION_ID).assertFalse("preview auth unused");
+        manager.isOperationRootUsed(previewRoot).assertFalse("preview root unused");
+        core.totalSupply().assertEq(0, "preview core unchanged");
+
+        vm.recordLogs();
+        vm.prank(EXECUTOR);
+        (uint256[] memory tokenIds, bytes32 executedRoot, bytes32[] memory executedIds) =
+            manager.executeSingleStepMint(request, request.resolverData);
+        Vm.Log[] memory executionLogs = vm.getRecordedLogs();
+
+        executedRoot.assertEq(previewRoot, "preview root matches execution");
+        executedIds.length.assertEq(previewIds.length, "execution id count");
+        tokenIds.length.assertEq(2, "token count");
+        for (uint256 i = 0; i < executedIds.length; i++) {
+            executedIds[i].assertEq(previewIds[i], "preview id matches execution");
+            tokenIds[i].assertEq(FIRST_TOKEN_ID + i, "sequential token");
+        }
+        _assertSingleStepOperationEvents(
+            executionLogs, executedRoot, executedIds, tokenIds, request
+        );
+        manager.nextOperationNonce().assertEq(2, "execution reserved both nonces");
+        manager.isAuthorizationUsed(AUTHORIZATION_ID).assertTrue("execution auth used");
+        manager.isOperationRootUsed(executedRoot).assertTrue("execution root used");
+        vm.prank(OTHER_EXECUTOR);
+        manager.isOperationRootUsed(executedRoot).assertTrue("root read caller-independent");
+        core.totalSupply().assertEq(2, "single-step tokens minted");
+    }
+
+    function testSingleStepPreviewIsCallerSensitiveAndNonceRaceChangesRoot() public {
+        _configurePhase(5, 3, 1);
+        manager.setPhaseExecutor(COLLECTION_ID, PHASE_ID, OTHER_EXECUTOR, true);
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, AUTHORIZATION_ID, CONTEXT_HASH);
+
+        vm.prank(EXECUTOR);
+        (bytes32 executorRoot,) =
+            manager.previewSingleStepMintOperation(request, request.resolverData);
+        vm.prank(OTHER_EXECUTOR);
+        (bytes32 otherExecutorRoot,) =
+            manager.previewSingleStepMintOperation(request, request.resolverData);
+        (executorRoot != otherExecutorRoot).assertTrue("executor is root-bound");
+
+        IStreamMintManager.MintBatch memory intervening =
+            _singleRequest(RECIPIENT, SECOND_AUTHORIZATION_ID, CONTEXT_HASH);
+        vm.prank(EXECUTOR);
+        manager.executeSingleStepMint(intervening, intervening.resolverData);
+
+        vm.prank(EXECUTOR);
+        (, bytes32 racedRoot,) = manager.executeSingleStepMint(request, request.resolverData);
+        (racedRoot != executorRoot).assertTrue("nonce race changes root");
+        manager.isOperationRootUsed(executorRoot).assertFalse("stale preview root unused");
+        manager.isOperationRootUsed(racedRoot).assertTrue("executed root used");
+    }
+
+    function testSingleStepAdapterPreviewIsRelayerIndependentAndMatchesExecution() public {
+        _configurePhase(5, 2, 2);
+        MintOperationAdapter adapter = new MintOperationAdapter(manager);
+        MintOperationRelayer relayer = new MintOperationRelayer();
+        manager.setPhaseExecutor(COLLECTION_ID, PHASE_ID, address(adapter), true);
+        IStreamMintManager.MintBatch memory request = _batchRequest(RECIPIENT, 2, AUTHORIZATION_ID);
+        request.contextHash = CONTEXT_HASH;
+
+        vm.prank(PAYER);
+        (bytes32 directRoot, bytes32[] memory directIds) =
+            adapter.preview(request, request.resolverData);
+        vm.prank(OTHER_EXECUTOR);
+        (bytes32 relayedRoot, bytes32[] memory relayedIds) =
+            relayer.preview(adapter, request, request.resolverData);
+
+        relayedRoot.assertEq(directRoot, "relayer cannot change adapter-bound root");
+        relayedIds.length.assertEq(directIds.length, "relayed id count");
+        for (uint256 i = 0; i < directIds.length; i++) {
+            relayedIds[i].assertEq(directIds[i], "relayer cannot change adapter-bound id");
+        }
+        manager.nextOperationNonce().assertEq(0, "adapter previews do not reserve nonce");
+        manager.isOperationRootUsed(directRoot).assertFalse("adapter preview root unused");
+
+        IStreamMintManager.MintBatch memory substitutedPayer =
+            _batchRequest(RECIPIENT, 2, AUTHORIZATION_ID);
+        substitutedPayer.contextHash = CONTEXT_HASH;
+        substitutedPayer.payer = OTHER_RECIPIENT;
+        vm.prank(OTHER_EXECUTOR);
+        (bytes32 substitutedPayerRoot,) =
+            relayer.preview(adapter, substitutedPayer, substitutedPayer.resolverData);
+        (substitutedPayerRoot != directRoot).assertTrue("payer remains root-bound");
+
+        vm.prank(OTHER_EXECUTOR);
+        (uint256[] memory tokenIds, bytes32 executedRoot, bytes32[] memory executedIds) =
+            adapter.execute(request, request.resolverData);
+        executedRoot.assertEq(directRoot, "adapter execution root");
+        executedIds.length.assertEq(directIds.length, "adapter execution id count");
+        tokenIds.length.assertEq(directIds.length, "adapter token count");
+        for (uint256 i = 0; i < directIds.length; i++) {
+            executedIds[i].assertEq(directIds[i], "adapter execution id");
+        }
+        manager.nextOperationNonce().assertEq(2, "adapter execution reserves nonce range");
+        manager.isOperationRootUsed(executedRoot).assertTrue("adapter execution consumes root");
     }
 
     function testCompositeHashVectorsUseDocumentedFieldOrder() public {
@@ -977,6 +1223,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
         bytes32 expectedRecipientValueKey = keccak256(
             abi.encode(
+                ledger.VALUE_KEY_DOMAIN(),
                 address(manager),
                 COLLECTION_ID,
                 PHASE_ID,
@@ -988,24 +1235,25 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
                 COLLECTION_ID, PHASE_ID, RECIPIENT_COUNTER_ID, expectedRecipientSubject
             ).assertEq(expectedRecipientValueKey, "value key vector");
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, CONTEXT_HASH);
         uint256 operationNonce = manager.nextOperationNonce();
         CapturedHashEvents memory captured = _captureMintHashEvents(request);
 
         bytes32 expectedOperationRoot =
-            _expectedOperationRoot(request, policyHash, operationNonce, 1, EXECUTOR);
+            _expectedOperationRoot(request, policyHash, operationNonce, 1, EXECUTOR, 7, 3);
         captured.operationRoot.assertEq(expectedOperationRoot, "operation root vector");
-        bytes32 expectedTokenDataHash = keccak256(bytes(request.tokenData[0]));
+        bytes32 expectedTokenDataHash = keccak256(request.tokenData[0]);
         captured.operationId
             .assertEq(
                 keccak256(
                     abi.encode(
+                        manager.MINT_TOKEN_OPERATION_ID_DOMAIN(),
                         expectedOperationRoot,
                         operationNonce,
                         uint256(0),
                         expectedTokenDataHash,
-                        777
+                        request.mintCommitments[0]
                     )
                 ),
                 "operation id vector"
@@ -1033,11 +1281,11 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function testSequentialMintsUseDistinctOperationIdsAndAdvanceNonce() public {
         _configurePhase(5, 2, 1);
 
-        IStreamMintManager.MintRequest memory firstRequest =
+        IStreamMintManager.MintBatch memory firstRequest =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, CONTEXT_HASH);
         CapturedHashEvents memory first = _captureMintHashEvents(firstRequest);
 
-        IStreamMintManager.MintRequest memory secondRequest =
+        IStreamMintManager.MintBatch memory secondRequest =
             _singleRequest(RECIPIENT, SECOND_AUTHORIZATION_ID, CONTEXT_HASH);
         CapturedHashEvents memory second = _captureMintHashEvents(secondRequest);
 
@@ -1053,6 +1301,8 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     }
 
     function testPayerExecutorAndAuthorizerCounterKeysConsumeExpectedSubjects() public {
+        MockMintGate gate = new MockMintGate();
+        IStreamMintManager.MintGateConfig memory gateConfig = _registerGate(gate);
         bytes32[] memory counterIds = new bytes32[](3);
         counterIds[0] = PAYER_COUNTER_ID;
         counterIds[1] = EXECUTOR_COUNTER_ID;
@@ -1078,16 +1328,17 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             AUTHORIZER_CONFIG_HASH
         );
         manager.configurePhase(
-            COLLECTION_ID, PHASE_ID, _phaseConfig(1), _emptyGateConfig(), counterIds, counterConfigs
+            COLLECTION_ID, PHASE_ID, _phaseConfig(1), gateConfig, counterIds, counterConfigs
         );
         manager.setPhaseExecutor(COLLECTION_ID, PHASE_ID, EXECUTOR, true);
+        gate.setResult(GATE_AUTHORIZATION_ID, AUTHORIZER, 1, GATE_HASH);
 
-        IStreamMintManager.MintRequest memory request =
-            _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
         request.authorizer = AUTHORIZER;
 
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(
                 ledger.counterValue(
@@ -1151,15 +1402,15 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             OTHER_RECIPIENT_CONFIG_HASH
         );
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
-        IStreamMintManager.MintRequest memory otherPhaseRequest =
+        IStreamMintManager.MintBatch memory otherPhaseRequest =
             _singleRequestForPhase(OTHER_PHASE_ID, RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(otherPhaseRequest);
+        manager.executePreparedMint(otherPhaseRequest, otherPhaseRequest.resolverData);
 
         uint256(ledger.counterValue(_recipientValueKeyForPhase(PHASE_ID, RECIPIENT)))
             .assertEq(1, "primary phase recipient counter");
@@ -1189,17 +1440,17 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             OTHER_RECIPIENT_CONFIG_HASH
         );
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
-        IStreamMintManager.MintRequest memory secondCollectionRequest =
+        IStreamMintManager.MintBatch memory secondCollectionRequest =
             _singleRequestForCollectionAndPhase(
                 secondCollectionId, PHASE_ID, RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0)
             );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(secondCollectionRequest);
+        manager.executePreparedMint(secondCollectionRequest, secondCollectionRequest.resolverData);
 
         uint256(ledger.counterValue(_recipientValueKeyForPhase(PHASE_ID, RECIPIENT)))
             .assertEq(1, "first collection recipient counter");
@@ -1216,10 +1467,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function testCounterValuesPersistAcrossPolicyRefresh() public {
         _configurePhase(5, 2, 1);
         bytes32 originalPolicyHash = manager.phasePolicyHash(COLLECTION_ID, PHASE_ID);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         manager.setPhaseExecutor(COLLECTION_ID, PHASE_ID, OTHER_EXECUTOR, true);
         bytes32 refreshedPolicyHash = manager.phasePolicyHash(COLLECTION_ID, PHASE_ID);
@@ -1227,10 +1478,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         ledger.registeredPhasePolicyHash(address(manager), COLLECTION_ID, PHASE_ID)
             .assertEq(refreshedPolicyHash, "ledger policy refreshed");
 
-        IStreamMintManager.MintRequest memory secondRequest =
+        IStreamMintManager.MintBatch memory secondRequest =
             _singleRequest(RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(secondRequest);
+        manager.executePreparedMint(secondRequest, secondRequest.resolverData);
 
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
             .assertEq(2, "counter persisted across refresh");
@@ -1239,7 +1490,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function testRevokedLedgerWriterBlocksMintWithoutCoreMutation() public {
         _configurePhase(5, 2, 1);
         ledger.setLedgerWriter(address(manager), false);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
 
         vm.expectRevert(
@@ -1248,7 +1499,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply not consumed");
         ledger.isManagerAuthorizationUsed(address(manager), AUTHORIZATION_ID)
@@ -1258,10 +1509,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testAuthorizationReplayAndStalePolicyDoNotMutate() public {
         _configurePhase(5, 2, 1);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1269,10 +1520,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(1, "replay no supply drift");
 
-        IStreamMintManager.MintRequest memory stale =
+        IStreamMintManager.MintBatch memory stale =
             _singleRequest(OTHER_RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
         stale.expectedPolicyHash = keccak256("stale-policy");
         vm.expectRevert(
@@ -1283,14 +1534,14 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(stale);
+        manager.executePreparedMint(stale, stale.resolverData);
         ledger.isManagerAuthorizationUsed(address(manager), SECOND_AUTHORIZATION_ID)
             .assertFalse("stale auth unused");
     }
 
     function testMissingPolicyHashAndAuthorizationDoNotMutate() public {
         _configurePhase(5, 2, 1);
-        IStreamMintManager.MintRequest memory missingPolicy =
+        IStreamMintManager.MintBatch memory missingPolicy =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         missingPolicy.expectedPolicyHash = bytes32(0);
         vm.expectRevert(
@@ -1299,9 +1550,9 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(missingPolicy);
+        manager.executePreparedMint(missingPolicy, missingPolicy.resolverData);
 
-        IStreamMintManager.MintRequest memory missingAuthorization =
+        IStreamMintManager.MintBatch memory missingAuthorization =
             _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1309,7 +1560,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(missingAuthorization);
+        manager.executePreparedMint(missingAuthorization, missingAuthorization.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply unchanged");
         ledger.isManagerAuthorizationUsed(address(manager), AUTHORIZATION_ID)
@@ -1319,7 +1570,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testDuplicateRecipientBatchCapRevertsThroughLedgerAndRollsBack() public {
         _configurePhase(5, 1, 2);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _twoTokenRequest(RECIPIENT, RECIPIENT, AUTHORIZATION_ID);
 
         bytes32 recipientValueKey = _recipientValueKey(RECIPIENT);
@@ -1329,7 +1580,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply rollback");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
@@ -1341,11 +1592,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testDuplicateRecipientBatchCanReachExactCap() public {
         _configurePhase(5, 2, 2);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _twoTokenRequest(RECIPIENT, RECIPIENT, AUTHORIZATION_ID);
 
         vm.prank(EXECUTOR);
-        (uint256 firstTokenId, uint256 lastTokenId) = manager.mintPrepared(request);
+        (uint256[] memory tokenIds,,) = manager.executePreparedMint(request, request.resolverData);
+        uint256 firstTokenId = tokenIds[0];
+        uint256 lastTokenId = tokenIds[tokenIds.length - 1];
 
         firstTokenId.assertEq(FIRST_TOKEN_ID, "first token");
         lastTokenId.assertEq(FIRST_TOKEN_ID + 1, "last token");
@@ -1357,11 +1610,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testMaxLaunchBatchCanReachExactCapWithRepeatedRecipient() public {
         _configurePhase(10, 10, uint32(manager.MAX_PHASE_BATCH_QUANTITY()));
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _batchRequest(RECIPIENT, uint256(manager.MAX_PHASE_BATCH_QUANTITY()), AUTHORIZATION_ID);
 
         vm.prank(EXECUTOR);
-        (uint256 firstTokenId, uint256 lastTokenId) = manager.mintPrepared(request);
+        (uint256[] memory tokenIds,,) = manager.executePreparedMint(request, request.resolverData);
+        uint256 firstTokenId = tokenIds[0];
+        uint256 lastTokenId = tokenIds[tokenIds.length - 1];
 
         firstTokenId.assertEq(FIRST_TOKEN_ID, "first token");
         lastTokenId.assertEq(FIRST_TOKEN_ID + 9, "last token");
@@ -1374,14 +1629,14 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testBatchQuantityLimitRejectsOverLimitBeforeLedgerConsumption() public {
         _configurePhase(5, 5, 2);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _threeTokenRequest(RECIPIENT, AUTHORIZATION_ID);
 
         vm.expectRevert(
             abi.encodeWithSelector(IStreamMintManager.MintBatchQuantityLimitExceeded.selector, 3, 2)
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply unchanged");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
@@ -1392,7 +1647,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     }
 
     function testPhaseGuardsRejectUnknownPausedWindowAndUnauthorizedExecutor() public {
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
 
         vm.expectRevert(
@@ -1401,7 +1656,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         _configurePhase(5, 2, 1);
         vm.expectRevert(
@@ -1413,7 +1668,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(address(0xBAD));
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         manager.setPhasePaused(COLLECTION_ID, PHASE_ID, true);
         vm.expectRevert(
@@ -1422,10 +1677,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         _configureWindowedPhase(uint64(block.timestamp + 10), uint64(block.timestamp + 20));
-        IStreamMintManager.MintRequest memory otherRequest =
+        IStreamMintManager.MintBatch memory otherRequest =
             _singleRequestForPhase(OTHER_PHASE_ID, RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1436,7 +1691,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(otherRequest);
+        manager.executePreparedMint(otherRequest, otherRequest.resolverData);
 
         vm.warp(block.timestamp + 21);
         vm.expectRevert(
@@ -1448,7 +1703,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(otherRequest);
+        manager.executePreparedMint(otherRequest, otherRequest.resolverData);
     }
 
     function testUnpauseRefreshesPolicyAndRestoresMinting() public {
@@ -1479,7 +1734,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         ledger.registeredPhasePolicyHash(address(manager), COLLECTION_ID, PHASE_ID)
             .assertEq(pausedPolicyHash, "paused policy registered");
 
-        IStreamMintManager.MintRequest memory pausedRequest =
+        IStreamMintManager.MintBatch memory pausedRequest =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1487,7 +1742,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(pausedRequest);
+        manager.executePreparedMint(pausedRequest, pausedRequest.resolverData);
 
         vm.expectEmit(true, true, false, true);
         emit MintPhasePausedEvent(COLLECTION_ID, PHASE_ID, false, activePolicyHash, address(this));
@@ -1497,10 +1752,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         ledger.registeredPhasePolicyHash(address(manager), COLLECTION_ID, PHASE_ID)
             .assertEq(unpausedPolicyHash, "unpaused policy registered");
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "mint restored");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT))).assertEq(1, "counter");
@@ -1531,7 +1786,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         ledger.registeredPhasePolicyHash(address(manager), COLLECTION_ID, PHASE_ID)
             .assertEq(policyAfterRemoval, "ledger policy refreshed");
 
-        IStreamMintManager.MintRequest memory removedExecutorRequest =
+        IStreamMintManager.MintBatch memory removedExecutorRequest =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1542,12 +1797,12 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(removedExecutorRequest);
+        manager.executePreparedMint(removedExecutorRequest, removedExecutorRequest.resolverData);
 
-        IStreamMintManager.MintRequest memory retainedExecutorRequest =
+        IStreamMintManager.MintBatch memory retainedExecutorRequest =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         vm.prank(OTHER_EXECUTOR);
-        manager.mintPrepared(retainedExecutorRequest);
+        manager.executePreparedMint(retainedExecutorRequest, retainedExecutorRequest.resolverData);
         core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "retained executor minted");
     }
 
@@ -1603,10 +1858,12 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         );
         manager.setPhaseExecutor(COLLECTION_ID, PHASE_ID, EXECUTOR, true);
 
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _twoTokenRequest(RECIPIENT, RECIPIENT, AUTHORIZATION_ID);
         vm.prank(EXECUTOR);
-        (uint256 firstTokenId, uint256 lastTokenId) = manager.mintPrepared(request);
+        (uint256[] memory tokenIds,,) = manager.executePreparedMint(request, request.resolverData);
+        uint256 firstTokenId = tokenIds[0];
+        uint256 lastTokenId = tokenIds[tokenIds.length - 1];
 
         firstTokenId.assertEq(FIRST_TOKEN_ID, "first token");
         lastTokenId.assertEq(FIRST_TOKEN_ID + 1, "last token");
@@ -1615,15 +1872,15 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testMintRejectsBadRequestArraysAndRecipients() public {
         _configurePhase(5, 2, 1);
-        IStreamMintManager.MintRequest memory mismatched =
+        IStreamMintManager.MintBatch memory mismatched =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         mismatched.beneficiaries = new address[](0);
 
         vm.expectRevert(abi.encodeWithSelector(IStreamMintManager.MintArrayLengthMismatch.selector));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(mismatched);
+        manager.executePreparedMint(mismatched, mismatched.resolverData);
 
-        IStreamMintManager.MintRequest memory zeroInitial =
+        IStreamMintManager.MintBatch memory zeroInitial =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         zeroInitial.initialRecipients[0] = address(0);
         vm.expectRevert(
@@ -1632,9 +1889,9 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(zeroInitial);
+        manager.executePreparedMint(zeroInitial, zeroInitial.resolverData);
 
-        IStreamMintManager.MintRequest memory zeroBeneficiary =
+        IStreamMintManager.MintBatch memory zeroBeneficiary =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         zeroBeneficiary.beneficiaries[0] = address(0);
         vm.expectRevert(
@@ -1643,7 +1900,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(zeroBeneficiary);
+        manager.executePreparedMint(zeroBeneficiary, zeroBeneficiary.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply unchanged");
         core.viewCirSupply(COLLECTION_ID).assertEq(0, "core unchanged");
@@ -1658,7 +1915,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             1,
             PAYER_CONFIG_HASH
         );
-        IStreamMintManager.MintRequest memory missingPayer =
+        IStreamMintManager.MintBatch memory missingPayer =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         missingPayer.payer = address(0);
         vm.expectRevert(
@@ -1669,7 +1926,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(missingPayer);
+        manager.executePreparedMint(missingPayer, missingPayer.resolverData);
 
         _configureSingleCounterPhase(
             OTHER_PHASE_ID,
@@ -1679,7 +1936,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             1,
             AUTHORIZER_CONFIG_HASH
         );
-        IStreamMintManager.MintRequest memory missingAuthorizer =
+        IStreamMintManager.MintBatch memory missingAuthorizer =
             _singleRequestForPhase(OTHER_PHASE_ID, RECIPIENT, SECOND_AUTHORIZATION_ID, bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1689,17 +1946,17 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(missingAuthorizer);
+        manager.executePreparedMint(missingAuthorizer, missingAuthorizer.resolverData);
     }
 
     function testRecipientCounterKeysBeneficiaryNotInitialRecipient() public {
         _configurePhase(5, 2, 1);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         request.beneficiaries[0] = OTHER_RECIPIENT;
 
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "token recipient owns token");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
@@ -1710,7 +1967,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testContextCounterRequiresNonzeroContextHash() public {
         _configureContextPhase();
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
 
         vm.expectRevert(
@@ -1721,22 +1978,21 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         request.contextHash = CONTEXT_HASH;
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
         uint256(ledger.counterValue(_contextValueKey(CONTEXT_HASH))).assertEq(1, "context counter");
     }
 
     function testContextCounterConsumesOncePerBatch() public {
         _configureContextPhase(2);
-        IStreamMintManager.MintRequest memory request =
-            _batchRequest(RECIPIENT, 2, AUTHORIZATION_ID);
+        IStreamMintManager.MintBatch memory request = _batchRequest(RECIPIENT, 2, AUTHORIZATION_ID);
         request.contextHash = CONTEXT_HASH;
 
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         bytes32 contextValueKey = _contextValueKey(CONTEXT_HASH);
         uint256(ledger.counterValue(contextValueKey)).assertEq(1, "single batch increment");
@@ -1744,7 +2000,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         core.ownerOf(FIRST_TOKEN_ID + 1).assertEq(RECIPIENT, "second token owner");
         core.totalSupply().assertEq(2, "two tokens minted");
 
-        IStreamMintManager.MintRequest memory replayContext =
+        IStreamMintManager.MintBatch memory replayContext =
             _singleRequest(RECIPIENT, SECOND_AUTHORIZATION_ID, CONTEXT_HASH);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1752,7 +2008,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(replayContext);
+        manager.executePreparedMint(replayContext, replayContext.resolverData);
 
         uint256(ledger.counterValue(contextValueKey)).assertEq(1, "context unchanged");
         ledger.isManagerAuthorizationUsed(address(manager), SECOND_AUTHORIZATION_ID)
@@ -1762,20 +2018,33 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function testCoreReceiverRevertRollsBackLedgerAuthAndPreparedState() public {
         _configurePhase(5, 2, 1);
         RevertingMintManagerReceiver receiver = new RevertingMintManagerReceiver();
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(address(receiver), AUTHORIZATION_ID, bytes32(0));
+        bytes32 expectedRoot = _expectedOperationRoot(
+            request,
+            manager.phasePolicyHash(COLLECTION_ID, PHASE_ID),
+            manager.nextOperationNonce(),
+            1,
+            EXECUTOR,
+            5,
+            2
+        );
 
         vm.expectRevert(
             abi.encodeWithSelector(RevertingMintManagerReceiver.ReceiverRejected.selector)
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply rolled back");
         uint256(ledger.counterValue(_recipientValueKey(address(receiver))))
             .assertEq(0, "recipient rolled back");
         ledger.isManagerAuthorizationUsed(address(manager), AUTHORIZATION_ID)
             .assertFalse("auth rolled back");
+        ledger.isManagerOperationRootUsed(address(manager), expectedRoot)
+            .assertFalse("root rolled back");
+        manager.isOperationRootUsed(expectedRoot).assertFalse("manager root read rolled back");
+        manager.nextOperationNonce().assertEq(0, "manager nonce rolled back");
         core.viewCirSupply(COLLECTION_ID).assertEq(0, "circulation rolled back");
         core.pendingPreparedMintTokenId().assertEq(0, "pending cleared");
         core.preparedMint(FIRST_TOKEN_ID).exists.assertFalse("prepared rolled back");
@@ -1784,14 +2053,14 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function testSecondTokenReceiverRevertRollsBackWholeBatch() public {
         _configurePhase(5, 2, 2);
         RevertingMintManagerReceiver receiver = new RevertingMintManagerReceiver();
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _twoTokenRequest(RECIPIENT, address(receiver), AUTHORIZATION_ID);
 
         vm.expectRevert(
             abi.encodeWithSelector(RevertingMintManagerReceiver.ReceiverRejected.selector)
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply rolled back");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
@@ -1809,10 +2078,10 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     function testOversizedTokenDataRollsBackLedgerAuthAndPreparedState() public {
         _configurePhase(5, 2, 1);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
         uint256 maximum = core.MAX_TOKEN_DATA_BYTES();
-        request.tokenData[0] = _asciiString(maximum + 1);
+        request.tokenData[0] = bytes(_asciiString(maximum + 1));
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1823,7 +2092,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             )
         );
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKey())).assertEq(0, "supply rolled back");
         uint256(ledger.counterValue(_recipientValueKey(RECIPIENT)))
@@ -1839,11 +2108,11 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         _configurePhase(5, 2, 1);
         ReentrantMintManagerReceiver receiver =
             new ReentrantMintManagerReceiver(manager, COLLECTION_ID, PHASE_ID);
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(address(receiver), AUTHORIZATION_ID, bytes32(0));
 
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         receiver.reentryRejected().assertTrue("reentry not rejected");
         uint256(uint32(receiver.reentrySelector()))
@@ -1861,11 +2130,11 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         MutatingMintManagerReceiver receiver =
             new MutatingMintManagerReceiver(manager, COLLECTION_ID, PHASE_ID);
         manager.transferOwnership(address(receiver));
-        IStreamMintManager.MintRequest memory request =
+        IStreamMintManager.MintBatch memory request =
             _singleRequest(address(receiver), AUTHORIZATION_ID, bytes32(0));
 
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         receiver.mutationRejected().assertTrue("mutation not rejected");
         uint256(uint32(receiver.mutationSelector()))
@@ -1891,13 +2160,13 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             2,
             SUPPLY_CONFIG_HASH
         );
-        IStreamMintManager.MintRequest memory request = _batchRequestForCollectionAndPhase(
+        IStreamMintManager.MintBatch memory request = _batchRequestForCollectionAndPhase(
             collectionId, PHASE_ID, RECIPIENT, 2, AUTHORIZATION_ID
         );
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.CollectionSupplyReached.selector));
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
 
         uint256(ledger.counterValue(_supplyValueKeyForCollectionAndPhase(collectionId, PHASE_ID)))
             .assertEq(0, "supply rolled back");
@@ -2324,7 +2593,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     function _singleRequest(address recipient, bytes32 authorizationId, bytes32 contextHash)
         private
         view
-        returns (IStreamMintManager.MintRequest memory)
+        returns (IStreamMintManager.MintBatch memory)
     {
         return _singleRequestForPhase(PHASE_ID, recipient, authorizationId, contextHash);
     }
@@ -2334,7 +2603,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         address recipient,
         bytes32 authorizationId,
         bytes32 contextHash
-    ) private view returns (IStreamMintManager.MintRequest memory request) {
+    ) private view returns (IStreamMintManager.MintBatch memory request) {
         return _singleRequestForCollectionAndPhase(
                 COLLECTION_ID, phaseId, recipient, authorizationId, contextHash
             );
@@ -2346,16 +2615,16 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         address recipient,
         bytes32 authorizationId,
         bytes32 contextHash
-    ) private view returns (IStreamMintManager.MintRequest memory request) {
+    ) private view returns (IStreamMintManager.MintBatch memory request) {
         address[] memory initialRecipients = new address[](1);
         initialRecipients[0] = recipient;
         address[] memory beneficiaries = new address[](1);
         beneficiaries[0] = recipient;
-        string[] memory tokenData = new string[](1);
+        bytes[] memory tokenData = new bytes[](1);
         tokenData[0] = "manager-token";
-        uint256[] memory salts = new uint256[](1);
-        salts[0] = 777;
-        request = IStreamMintManager.MintRequest({
+        bytes32[] memory mintCommitments = new bytes32[](1);
+        mintCommitments[0] = bytes32(uint256(777));
+        request = IStreamMintManager.MintBatch({
             collectionId: collectionId,
             phaseId: phaseId,
             payer: PAYER,
@@ -2363,11 +2632,11 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: authorizationId,
             contextHash: contextHash,
             expectedPolicyHash: manager.phasePolicyHash(collectionId, phaseId),
-            gateData: ""
+            resolverData: ""
         });
     }
 
@@ -2375,20 +2644,20 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         address firstRecipient,
         address secondRecipient,
         bytes32 authorizationId
-    ) private view returns (IStreamMintManager.MintRequest memory request) {
+    ) private view returns (IStreamMintManager.MintBatch memory request) {
         address[] memory initialRecipients = new address[](2);
         initialRecipients[0] = firstRecipient;
         initialRecipients[1] = secondRecipient;
         address[] memory beneficiaries = new address[](2);
         beneficiaries[0] = firstRecipient;
         beneficiaries[1] = secondRecipient;
-        string[] memory tokenData = new string[](2);
+        bytes[] memory tokenData = new bytes[](2);
         tokenData[0] = "manager-token-one";
         tokenData[1] = "manager-token-two";
-        uint256[] memory salts = new uint256[](2);
-        salts[0] = 777;
-        salts[1] = 778;
-        request = IStreamMintManager.MintRequest({
+        bytes32[] memory mintCommitments = new bytes32[](2);
+        mintCommitments[0] = bytes32(uint256(777));
+        mintCommitments[1] = bytes32(uint256(778));
+        request = IStreamMintManager.MintBatch({
             collectionId: COLLECTION_ID,
             phaseId: PHASE_ID,
             payer: PAYER,
@@ -2396,18 +2665,18 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: authorizationId,
             contextHash: bytes32(0),
             expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, PHASE_ID),
-            gateData: ""
+            resolverData: ""
         });
     }
 
     function _threeTokenRequest(address recipient, bytes32 authorizationId)
         private
         view
-        returns (IStreamMintManager.MintRequest memory request)
+        returns (IStreamMintManager.MintBatch memory request)
     {
         address[] memory initialRecipients = new address[](3);
         initialRecipients[0] = recipient;
@@ -2417,15 +2686,15 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         beneficiaries[0] = recipient;
         beneficiaries[1] = recipient;
         beneficiaries[2] = recipient;
-        string[] memory tokenData = new string[](3);
+        bytes[] memory tokenData = new bytes[](3);
         tokenData[0] = "manager-token-one";
         tokenData[1] = "manager-token-two";
         tokenData[2] = "manager-token-three";
-        uint256[] memory salts = new uint256[](3);
-        salts[0] = 777;
-        salts[1] = 778;
-        salts[2] = 779;
-        request = IStreamMintManager.MintRequest({
+        bytes32[] memory mintCommitments = new bytes32[](3);
+        mintCommitments[0] = bytes32(uint256(777));
+        mintCommitments[1] = bytes32(uint256(778));
+        mintCommitments[2] = bytes32(uint256(779));
+        request = IStreamMintManager.MintBatch({
             collectionId: COLLECTION_ID,
             phaseId: PHASE_ID,
             payer: PAYER,
@@ -2433,18 +2702,18 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: authorizationId,
             contextHash: bytes32(0),
             expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, PHASE_ID),
-            gateData: ""
+            resolverData: ""
         });
     }
 
     function _batchRequest(address recipient, uint256 quantity, bytes32 authorizationId)
         private
         view
-        returns (IStreamMintManager.MintRequest memory request)
+        returns (IStreamMintManager.MintBatch memory request)
     {
         return _batchRequestForCollectionAndPhase(
             COLLECTION_ID, PHASE_ID, recipient, quantity, authorizationId
@@ -2457,18 +2726,18 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         address recipient,
         uint256 quantity,
         bytes32 authorizationId
-    ) private view returns (IStreamMintManager.MintRequest memory request) {
+    ) private view returns (IStreamMintManager.MintBatch memory request) {
         address[] memory initialRecipients = new address[](quantity);
         address[] memory beneficiaries = new address[](quantity);
-        string[] memory tokenData = new string[](quantity);
-        uint256[] memory salts = new uint256[](quantity);
+        bytes[] memory tokenData = new bytes[](quantity);
+        bytes32[] memory mintCommitments = new bytes32[](quantity);
         for (uint256 i = 0; i < quantity; i++) {
             initialRecipients[i] = recipient;
             beneficiaries[i] = recipient;
             tokenData[i] = "manager-token";
-            salts[i] = 777 + i;
+            mintCommitments[i] = bytes32(uint256(777 + i));
         }
-        request = IStreamMintManager.MintRequest({
+        request = IStreamMintManager.MintBatch({
             collectionId: collectionId,
             phaseId: phaseId,
             payer: PAYER,
@@ -2476,31 +2745,36 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: authorizationId,
             contextHash: bytes32(0),
             expectedPolicyHash: manager.phasePolicyHash(collectionId, phaseId),
-            gateData: ""
+            resolverData: ""
         });
     }
 
-    function _captureMintHashEvents(IStreamMintManager.MintRequest memory request)
+    function _captureMintHashEvents(IStreamMintManager.MintBatch memory request)
         private
         returns (CapturedHashEvents memory captured)
     {
         bytes32 batchTopic = keccak256(
-            "MintPreparedBatchExecuted(bytes32,uint256,bytes32,bytes32,bytes32,address,uint256,bytes32)"
+            "MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32,bytes32)"
         );
-        bytes32 tokenTopic = keccak256(
-            "MintPreparedTokenExecuted(bytes32,uint256,uint256,bytes32,uint256,address,address,bytes32,bytes32)"
+        bytes32 tokenTopic =
+            keccak256("PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)");
+        bytes32 preparedStartTopic = keccak256(
+            "PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)"
+        );
+        bytes32 ledgerRootTopic = keccak256(
+            "MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32,bytes32)"
         );
         bytes32 counterContextTopic = keccak256(
-            "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)"
+            "MintLedgerCounterConsumptionContext(uint16,bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)"
         );
 
         vm.recordLogs();
         vm.prank(EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         for (uint256 i = 0; i < logs.length; i++) {
@@ -2513,37 +2787,106 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             }
             if (logs[i].emitter == address(manager) && logs[i].topics[0] == tokenTopic) {
                 captured.operationId = logs[i].topics[1];
+                (uint16 schemaVersion, bytes32 preparedRoot,) =
+                    abi.decode(logs[i].data, (uint16, bytes32, address));
+                uint256(schemaVersion).assertEq(1, "prepared completion schema");
+                captured.preparedCompletedRoot = preparedRoot;
                 captured.foundToken = true;
+            }
+            if (logs[i].emitter == address(manager) && logs[i].topics[0] == preparedStartTopic) {
+                (uint16 schemaVersion, bytes32 preparedRoot,,,,) =
+                    abi.decode(logs[i].data, (uint16, bytes32, uint256, address, bytes32, bytes32));
+                uint256(schemaVersion).assertEq(1, "prepared start schema");
+                captured.preparedStartedRoot = preparedRoot;
+                captured.foundPreparedStart = true;
+            }
+            if (logs[i].emitter == address(ledger) && logs[i].topics[0] == ledgerRootTopic) {
+                captured.ledgerOperationRoot = logs[i].topics[1];
+                captured.foundLedgerRoot = true;
             }
             if (
                 logs[i].emitter == address(ledger) && logs[i].topics[0] == counterContextTopic
                     && logs[i].topics[2] == RECIPIENT_COUNTER_ID
             ) {
-                (
-                    address observedManager,
-                    address observedPayer,
-                    address observedRecipient,
-                    address observedAuthorizer,
-                    address observedExecutor,
-                    bytes32 observedContextHash,
-                    bytes32 observedResolutionHash
-                ) = abi.decode(
-                    logs[i].data, (address, address, address, address, address, bytes32, bytes32)
-                );
-                observedManager.assertEq(address(manager), "context manager");
-                observedPayer.assertEq(PAYER, "context payer");
-                observedRecipient.assertEq(RECIPIENT, "context recipient");
-                observedAuthorizer.assertEq(address(0), "context authorizer");
-                observedExecutor.assertEq(EXECUTOR, "context executor");
-                observedContextHash.assertEq(CONTEXT_HASH, "context hash");
-                captured.recipientResolutionHash = observedResolutionHash;
+                captured.recipientResolutionHash = _assertRecipientCounterContext(logs[i]);
                 captured.foundRecipientResolution = true;
             }
         }
 
         captured.foundBatch.assertTrue("batch event found");
         captured.foundToken.assertTrue("token event found");
+        captured.foundPreparedStart.assertTrue("prepared start event found");
+        captured.foundLedgerRoot.assertTrue("ledger root event found");
         captured.foundRecipientResolution.assertTrue("recipient resolution event found");
+        captured.ledgerOperationRoot.assertEq(captured.operationRoot, "ledger joins batch root");
+        captured.preparedStartedRoot.assertEq(captured.operationRoot, "prepared start joins batch");
+        captured.preparedCompletedRoot
+            .assertEq(captured.operationRoot, "prepared completion joins batch");
+    }
+
+    function _assertRecipientCounterContext(Vm.Log memory log)
+        private
+        view
+        returns (bytes32 observedResolutionHash)
+    {
+        (
+            uint16 observedSchemaVersion,
+            address observedManager,
+            address observedPayer,
+            address observedRecipient,
+            address observedAuthorizer,
+            address observedExecutor,
+            bytes32 observedContextHash,
+            bytes32 resolutionHash
+        ) = abi.decode(
+            log.data, (uint16, address, address, address, address, address, bytes32, bytes32)
+        );
+        uint256(observedSchemaVersion).assertEq(1, "context schema");
+        observedManager.assertEq(address(manager), "context manager");
+        observedPayer.assertEq(PAYER, "context payer");
+        observedRecipient.assertEq(RECIPIENT, "context recipient");
+        observedAuthorizer.assertEq(address(0), "context authorizer");
+        observedExecutor.assertEq(EXECUTOR, "context executor");
+        observedContextHash.assertEq(CONTEXT_HASH, "context hash");
+        return resolutionHash;
+    }
+
+    function _assertSingleStepOperationEvents(
+        Vm.Log[] memory logs,
+        bytes32 operationRoot,
+        bytes32[] memory operationIds,
+        uint256[] memory tokenIds,
+        IStreamMintManager.MintBatch memory request
+    ) private view {
+        bytes32 batchTopic = keccak256(
+            "MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32,bytes32)"
+        );
+        bytes32 tokenTopic = keccak256(
+            "MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)"
+        );
+        uint256 batchEvents;
+        uint256 tokenEvents;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != address(manager) || logs[i].topics.length == 0) {
+                continue;
+            }
+            if (logs[i].topics[0] == batchTopic) {
+                logs[i].topics.length.assertEq(4, "batch indexed fields");
+                logs[i].topics[1].assertEq(operationRoot, "batch root");
+                uint256(logs[i].topics[2]).assertEq(request.collectionId, "batch collection");
+                logs[i].topics[3].assertEq(request.phaseId, "batch phase");
+                batchEvents++;
+            } else if (logs[i].topics[0] == tokenTopic) {
+                logs[i].topics.length.assertEq(4, "token indexed fields");
+                uint256 index = tokenEvents;
+                logs[i].topics[1].assertEq(operationIds[index], "token operation id");
+                uint256(logs[i].topics[2]).assertEq(tokenIds[index], "token id");
+                logs[i].topics[3].assertEq(operationRoot, "token root");
+                tokenEvents++;
+            }
+        }
+        batchEvents.assertEq(1, "one batch event");
+        tokenEvents.assertEq(operationIds.length, "one token event per id");
     }
 
     function _supplyValueKey() private view returns (bytes32) {
@@ -2650,45 +2993,158 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     }
 
     function _expectedOperationRoot(
-        IStreamMintManager.MintRequest memory request,
+        IStreamMintManager.MintBatch memory request,
         bytes32 policyHash,
         uint256 operationNonce,
         uint256 quantity,
-        address executor
+        address executor,
+        uint64 supplyCap,
+        uint64 recipientCap
     ) private view returns (bytes32) {
+        ExpectedRootPreimage memory preimage;
+        preimage.chainId = block.chainid;
+        preimage.managerAddress = address(manager);
+        preimage.coreAddress = address(core);
+        preimage.ledgerAddress = address(ledger);
+        preimage.executionPath = manager.MINT_EXECUTION_PATH_PREPARED();
+        preimage.collectionId = request.collectionId;
+        preimage.phaseId = request.phaseId;
+        preimage.currentPolicyHash = policyHash;
+        preimage.boundPolicyHash = policyHash;
+        preimage.authorizationId = request.authorizationId;
+        preimage.requestCommitmentHash =
+            _expectedRequestCommitment(request, supplyCap, recipientCap);
+        preimage.contextHash = request.contextHash;
+        preimage.executor = executor;
+        preimage.firstOperationNonce = operationNonce;
+        preimage.quantity = quantity;
+        return keccak256(abi.encode(manager.MINT_OPERATION_ROOT_DOMAIN(), preimage));
+    }
+
+    function _expectedRequestCommitment(
+        IStreamMintManager.MintBatch memory request,
+        uint64 supplyCap,
+        uint64 recipientCap
+    ) private view returns (bytes32) {
+        bytes32 validatedResultHash = _expectedUngatedValidatedResultHash(
+            request, supplyCap, recipientCap
+        );
         return keccak256(
             abi.encode(
-                manager.OPERATION_DOMAIN(),
-                uint256(block.chainid),
-                address(manager),
-                address(core),
-                address(ledger),
-                request.collectionId,
-                request.phaseId,
-                policyHash,
-                request.authorizationId,
-                _expectedRequestCommitment(request),
-                request.contextHash,
-                executor,
-                operationNonce,
-                quantity
+                manager.MINT_REQUEST_COMMITMENT_DOMAIN(),
+                request.payer,
+                request.authorizer,
+                request.expectedPolicyHash,
+                keccak256(abi.encode(manager.BATCH_RECIPIENTS_DOMAIN(), request.initialRecipients)),
+                keccak256(abi.encode(manager.BATCH_BENEFICIARIES_DOMAIN(), request.beneficiaries)),
+                keccak256(abi.encode(manager.BATCH_TOKEN_DATA_DOMAIN(), request.tokenData)),
+                keccak256(abi.encode(manager.BATCH_COMMITMENTS_DOMAIN(), request.mintCommitments)),
+                validatedResultHash
             )
         );
     }
 
-    function _expectedRequestCommitment(IStreamMintManager.MintRequest memory request)
-        private
-        pure
-        returns (bytes32)
-    {
+    function _expectedUngatedValidatedResultHash(
+        IStreamMintManager.MintBatch memory request,
+        uint64 supplyCap,
+        uint64 recipientCap
+    ) private view returns (bytes32) {
+        IStreamMintLedger.CounterConsumption[] memory consumptions =
+            new IStreamMintLedger.CounterConsumption[](2);
+        consumptions[0] = _expectedConsumption(
+            request,
+            SUPPLY_COUNTER_ID,
+            IStreamMintManager.CounterKeyMode.CONSTANT,
+            supplyCap,
+            SUPPLY_CONFIG_HASH
+        );
+        consumptions[1] = _expectedConsumption(
+            request,
+            RECIPIENT_COUNTER_ID,
+            IStreamMintManager.CounterKeyMode.RECIPIENT,
+            recipientCap,
+            RECIPIENT_CONFIG_HASH
+        );
+        bytes32[] memory nullifiers = new bytes32[](0);
         return keccak256(
             abi.encode(
-                request.payer,
-                request.authorizer,
-                keccak256(abi.encode(request.initialRecipients)),
-                keccak256(abi.encode(request.beneficiaries)),
-                keccak256(abi.encode(request.tokenData)),
-                keccak256(abi.encode(request.salts))
+                manager.MINT_VALIDATED_RESULT_DOMAIN(),
+                address(0),
+                request.authorizationId,
+                keccak256(abi.encode(manager.MINT_NULLIFIERS_DOMAIN(), nullifiers)),
+                address(0),
+                uint8(IStreamMintManager.AuthorizerKind.NONE),
+                uint64(0),
+                bytes32(0),
+                keccak256(abi.encode(manager.MINT_COUNTER_CONSUMPTIONS_DOMAIN(), consumptions))
+            )
+        );
+    }
+
+    function _expectedConsumption(
+        IStreamMintManager.MintBatch memory request,
+        bytes32 counterId,
+        IStreamMintManager.CounterKeyMode keyMode,
+        uint64 cap,
+        bytes32 configHash
+    ) private view returns (IStreamMintLedger.CounterConsumption memory consumption) {
+        bytes32 subjectKey;
+        if (keyMode == IStreamMintManager.CounterKeyMode.CONSTANT) {
+            subjectKey = keccak256(
+                abi.encode(
+                    manager.SUBJECT_DOMAIN(),
+                    uint256(block.chainid),
+                    address(ledger),
+                    keyMode,
+                    request.collectionId,
+                    request.phaseId,
+                    counterId
+                )
+            );
+        } else {
+            subjectKey = keccak256(
+                abi.encode(
+                    manager.SUBJECT_DOMAIN(),
+                    uint256(block.chainid),
+                    address(ledger),
+                    keyMode,
+                    request.beneficiaries[0]
+                )
+            );
+        }
+        consumption.valueKey = keccak256(
+            abi.encode(
+                ledger.VALUE_KEY_DOMAIN(),
+                address(manager),
+                request.collectionId,
+                request.phaseId,
+                counterId,
+                subjectKey
+            )
+        );
+        consumption.collectionId = request.collectionId;
+        consumption.phaseId = request.phaseId;
+        consumption.counterId = counterId;
+        consumption.subjectKey = subjectKey;
+        consumption.payer = request.payer;
+        consumption.recipient = request.beneficiaries[0];
+        consumption.authorizer = address(0);
+        consumption.executor = EXECUTOR;
+        consumption.increment = 1;
+        consumption.cap = cap;
+        consumption.contextHash = request.contextHash;
+        consumption.resolutionHash = keccak256(
+            abi.encode(
+                manager.RESOLUTION_DOMAIN(),
+                uint256(block.chainid),
+                address(manager),
+                address(ledger),
+                request.collectionId,
+                request.phaseId,
+                counterId,
+                subjectKey,
+                uint256(0),
+                configHash
             )
         );
     }

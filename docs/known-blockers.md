@@ -159,8 +159,8 @@ contributors who start from the README.
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  current target-isolated `StreamCore` runtime measurement at 24,152 bytes with
-  424 bytes of EIP-170 headroom,
+  current target-isolated `StreamCore` runtime measurement at 24,128 bytes with
+  448 bytes of EIP-170 headroom,
   which passes deployability and the interim 384-byte development floor but
   sits below the 512-byte warning threshold and the normative 2,000-byte
   production deployment minimum. The accepted CON-012 development exception
@@ -171,20 +171,21 @@ contributors who start from the README.
   probe/lower/emergency/conditional/rebinding machinery, but that machinery was
   not present in the measured Core and the ADR does not reduce this baseline.
   Historical measurements show the prior refactor reached
-  21,792 bytes, then the manager/prepared-mint boundary added roughly 2,330 bytes
+  21,792 bytes, then the manager/prepared-mint boundary added exactly 2,360 bytes
   while the legacy Drops/Minter route remained live. The remediation is a
   pre-genesis ABI cutover and caller migration, not another additive parallel
   API: satellite-only slices must keep zero Core delta and Core-changing slices
   must measure net-negative until the complete linked production-profile
   `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement. Accepted ADR 0018 defines one ledger-owned root
-  plus `N` token operation IDs, but its atomic source cutover remains
-  unimplemented and current source still calls the rootless ledger
-  before deriving its prepared-only root and retains lifetime replay storage in
-  Core. The sequential #688 -> #672 -> #654 lane must implement and validate
-  that cutover, prove post-entropy completion gas, and include the real
-  restricted Core ERC-4906 single/batch refresh emitters required by #667
-  before the exact production margin can pass. Exact typed primary settlement
+  not a bytecode measurement. Accepted ADR 0018's atomic cutover now implements
+  one ledger-owned root plus `N` token operation IDs, derive/reserve-before-
+  ledger ordering, manager-scoped replay, whole-transaction rollback, and Core
+  current-pair equality without lifetime operation-ID storage. The measured
+  24-byte Core reduction is net-negative but does not satisfy the complete
+  target. The remaining #654 lane must implement and remeasure the actual
+  post-entropy admission boundary and the restricted Core ERC-4906
+  single/batch refresh emitters required by #667 before the exact production
+  margin can pass. Exact typed primary settlement
   and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /
   #694; operation-root uniqueness does not close them. The final Core recovery seam is
   the canonical `IStreamFinalityRecoveryCore` interface:
@@ -233,13 +234,13 @@ contributors who start from the README.
 - P0-INIT-001 explicitly initialized the then-known first-party production
   `uninitialized-local` defaults and added regressions for string counting,
   delegation status/gating, empty-script rendering, and minter return indexes.
-  Later-added production surfaces now contribute 9 Open `uninitialized-local`
+  Later-added production surfaces now contribute 7 Open `uninitialized-local`
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 30 open
-  findings: 3 High and 27 Medium. One row is a confirmed Core state gap, five
-  rows require design review, and 24 remain pending disposition. None is
+- The normalized first-party production Slither baseline contains 28 open
+  findings: 3 High and 25 Medium. One row is a confirmed Core state gap, five
+  rows require design review, and 22 remain pending disposition. None is
   accepted or classified as a false positive. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue

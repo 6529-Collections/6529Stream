@@ -1,22 +1,20 @@
 # Active Context
 
-## 2026-07-26 Shipping Resumption
+## 2026-07-27 Atomic Operation-Identity Cutover
 
-- Explicit protocol-owner shipping mandate releases this workstream to own
-  `#672`, `#671`, and `#654` through review-ready PRs and coordinator-managed
-  merge/closure.
-- Active issue: `#672`.
-- Active branch: `codex/issue-672-post-entropy-completion-gas`.
+- The explicit protocol-owner shipping mandate releases this workstream to
+  complete `#688`, `#671`, and `#654` through validated PRs and merge.
+- Active issue: reopened `#688`.
+- Active branch: `codex/issue-688-operation-root-cutover`.
 - Final publication base and current `origin/main`:
-  `513bd7e079eafe109df6ae1ae21bfbca6fec6786` after merged PR `#701`.
-  The reviewed #672 source/spec/test bytes were preserved through the complete
-  shared-tail sequence; only the exact combined release-tool binding and
-  deterministic generated release files changed during final reconciliation.
-- Current committed source head:
-  `274f3a67ed03fb946fd4e74e482506602c2f9ca1`. The final generated tail and
-  this terminal-state context remain to be committed together before
-  publication.
-- #672 is a zero-`StreamCore`-delta target-fixture/spec/measurement slice. It
+  `0bc295d845e556ebb98e4fe59d891434a11072c9` after merged PR `#685`.
+- Current committed corrective source checkpoint:
+  `7c17e7644ca39257602cc5667f547026d22e855a`. The gate-nullifier cap,
+  status/size/checker reconciliation, and refreshed evidence inputs are
+  committed; the refreshed canonical artifacts are included in the corrective
+  publication delta and have passed the authoritative Windows gate.
+- PR #704 merged #672 as a zero-`StreamCore`-delta
+  target-fixture/spec/measurement slice. It
   may pin the EIP-150 admission formula, worst-case post-coordinator EOA tail,
   pure policy-predicate boundaries, a separate high-parent-gas full-stipend
   path, rollback, and checksum-bound planning evidence. It does not prove an
@@ -29,9 +27,10 @@
 - #654 remains the final Core slice. Missing entropy-coordinator, metadata
   router, restricted ERC-4906 emitters, and interface-support seams are work to
   implement and measure there rather than reasons to idle now.
-- Size control is unchanged: current transitional Core is 24,152 bytes; every
-  pre-#654 slice is bytecode-neutral, and every Core-changing slice must prove
-  an exact net-negative runtime. The complete target must be at most 22,576
+- Size control is unchanged: the atomic operation-identity cutover measures
+  24,128 bytes, a 24-byte reduction from the 24,152-byte pre-cutover
+  transitional baseline. Every pre-#654 Core-changing slice must prove an exact
+  net-negative runtime. The complete target must be at most 22,576
   bytes for the exact 2,000-byte EIP-170 margin; the objective is at most
   22,184 bytes. The historical 21,792-byte low-water mark is non-additive.
 - The ten-minute serialization heartbeat was deleted when the shipping mandate
@@ -56,77 +55,76 @@
   128,886-gas snapshot, 113/113 checksum tests, 114/114 verifier tests,
   428/428 offline records, the canonical 53-target release build, direct
   24,152-byte Core size proof, and all deployment rehearsals.
-- After #672 merges, prioritize the reopened #688 atomic operation-root
-  Solidity/test/as-built cutover before #671 and #654. Proposed ADR 0018 did
-  not implement the source cutover, and #670 depends on the prepared-operation
-  identity and `isManagerOperationRootUsed` seam.
+- #672 merged in PR #704. The reopened #688 atomic operation-root
+  Solidity/test/as-built cutover is now implemented locally and measures
+  net-negative before #671 and #654. The prepared-operation identity and
+  `isManagerOperationRootUsed` seam are current; typed primary settlement and
+  repeat-sale correlation remain ADR 0019/#694 blockers, and #654 still owns
+  the complete Core finality/headroom seam.
 
 ## Current Slice
 
-- Issue: `#672`
-- Branch: `codex/issue-672-post-entropy-completion-gas`
-- Base: `513bd7e079eafe109df6ae1ae21bfbca6fec6786`
-- Result: a checksum-bound planning measurement and target fixture for the
-  post-entropy EOA completion tail, with zero StreamCore bytecode delta. It
-  does not claim that the current Core implements the admission boundary or
-  that #684 candidate measurement binding exists.
-- Publication state: final authoritative local validation is green. Record the
-  terminal milestone, run lightweight workstream-only checks, commit, push,
-  open the draft PR, and obtain CI and substantive CodeRabbit review.
-- Closure state: merge the #672 evidence PR first, but keep issue #672 open
-  until #654 implements and remeasures the actual entropy-coordinator cutover.
+- Issue: reopened `#688`.
+- Branch: `codex/issue-688-operation-root-cutover`.
+- Base: `0bc295d845e556ebb98e4fe59d891434a11072c9`.
+- Corrective source checkpoint: `7c17e7644ca39257602cc5667f547026d22e855a`.
+- Result: the atomic operation-root source cutover is implemented across the
+  manager, ledger, Core hooks, fixed libraries, Foundry tests, checker, and
+  as-built documentation. The current via-IR diagnostic measures `StreamCore`
+  at 24,128 bytes, 24 bytes smaller than the 24,152-byte pre-cutover baseline.
+- Publication state: focused validation, canonical regeneration, release
+  verification, and the authoritative Windows gate are complete. Publish the
+  exact corrective head, resolve the substantive CodeRabbit threads, and
+  require latest-head CI before merge.
+- Static-analysis state: the exact full Slither 0.11.5 replay against the
+  frozen Solidity checkpoint introduces no new first-party production
+  High/Medium finding. Explicit initialization and narrowly documented
+  fully-assigned paths remove two prior `uninitialized-local` rows, leaving 28
+  Open rows (3 High and 25 Medium): one confirmed gap, five design-review
+  rows, and 22 pending dispositions. No remaining row is accepted or marked
+  false positive.
+- Closure state: do not claim typed settlement/repeat-sale completion or
+  production readiness. ADR 0019/#694 remains the typed primary-settlement and
+  repeated-identical-sale blocker; #654 remains the final complete-Core
+  finality/headroom implementation and measurement slice.
 
 ## Next Slice
 
-- Issue: reopened `#688`.
-- Required result: implement the Proposed ADR 0018 atomic operation-root
-  source cutover in Solidity, Foundry tests, and as-built documentation,
-  including the prepared-operation identity and
-  `isManagerOperationRootUsed` seam needed by #670.
-- Keep #671 and #654 separate; #671 follows #688, and #654 remains the final
-  entropy-coordinator Core implementation and remeasurement slice.
+- Issue: `#671`.
+- Required result: implement the shared `ROYALTY_RETURN_GAS_BUFFER` Core-read
+  semantics and proof without editing #684 governance evidence or adding a 23rd
+  governed gas parameter.
+- Keep #654 separate; it remains the final entropy-coordinator Core
+  implementation and complete target remeasurement slice.
 
 ## Integration Gate
 
-The fixed shared integration train is
-`#692 -> #688 -> #690 -> #669 -> #694 -> #691 -> #693 -> #670 -> #656 -> #677 -> #658`.
-PR `#692` for issue `#689` merged at
-`1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`.
-The isolated #688 branch is rebased on that exact main commit without importing
-another worktree. The remaining publication work is to:
+The active Core/mint order is `#688 -> #671 -> #654`. The #688 publication
+must preserve the accepted ADR 0018 normative fields, current/bound policy-hash
+split, manager-scoped ledger replay, zero generic callback surface, exact
+selector/typehash/topic rows, and as-built preimage attribution. It must also:
 
-1. keep the #689 canonical risk-tracker provenance correction intact;
-2. bind ADR 0018 into the release-manifest and checksum source inventories;
-3. close the three verified post-publication-review P1 families: stale
-   current/bound policy-hash mirrors, global cross-document normative ownership,
-   and deterministic release-tool checksum trust closure;
-4. pass focused source/checker review before any further regeneration;
-5. after independent GO, regenerate the canonical dependent tail exactly once
-   in documented order and run a fresh authoritative Windows gate; and
-6. declare the exact shared paths and head before updating the draft PR.
-
-Issue `#690` follows this first `#688` ADR/spec/checker slice with its own
-fail-closed/schema work. Issues `#669`, `#694`, `#691`, `#693`, `#670`, `#656`,
-and `#677` remain serialized downstream before `#658` final generated-release
-evidence.
-The coordinator must not let `#658` finalize its release chain from a base that
-omits merged `#688`. Report the complete changed-path inventory, especially
-`CHANGELOG.md`, maturity/spec/tooling inputs, roadmap/backlog inputs, canonical
-generator/test inventory changes, and every regenerated release artifact.
+1. retain the #672 zero-Core-delta evidence and 128,886-gas planning snapshot;
+2. prove the #688 Core change is exactly net-negative on the final base;
+3. preserve ADR 0019/#694 settlement and repeated-sale blockers;
+4. regenerate canonical source artifacts before the six-step release tail;
+5. pass focused Foundry, exact Slither, offline release verification, and one
+   authoritative Windows gate; and
+6. report the complete changed-path inventory and exact final head before merge.
 
 ## Sequencing Guard
 
-Do not begin `#672` until the coordinator confirms the `#688` spec slice has
-merged. Do not begin `#654` until the required `#672` predecessor state has
-merged.
+PR #704 merged the #672 planning/measurement slice. Do not begin #654's final
+Core implementation until the atomic #688 cutover and #671 shared-buffer slice
+have merged.
 
 Prior extraction reached a measured 21,792-byte Core runtime. The later
-manager/prepared-mint slice produced the current 24,152-byte transitional build
-while legacy mint behavior remained live; 24,152 is later duplication, not the
-pre-manager extraction baseline. The #672 slice must be either
-spec/test/measurement-only with zero Core delta, or pair any
-admission/completion-gas Core addition with a measured removal and prove an
-exact before/after net-negative runtime. The complete target must be at most
+manager/prepared-mint slice produced the 24,152-byte pre-cutover transitional
+build while legacy mint behavior remained live; 24,152 is later duplication,
+not the pre-manager extraction baseline. The atomic operation-identity cutover
+retires the duplicate mint path and lifetime Core replay map and measures
+24,128 bytes, a 24-byte net reduction. The #672 slice was
+spec/test/measurement-only with zero Core delta. The complete target must be at most
 22,576 bytes to preserve the exact 2,000-byte production margin, with
 restoration to the approved at-most-22,184-byte baseline as the objective.
 Historical scratch deltas are not additive savings.
@@ -206,19 +204,23 @@ target or add evidence; it must not make a deployment or readiness claim.
 
 ## Open Decisions
 
-- ADR 0018 remains Proposed only. The current corrective diff and generated
-  tail are green but still await final exact-diff readback and explicit
-  publication authorization. The ADR cannot be described as accepted.
+- ADR 0018 is Accepted. The current corrective diff implements its atomic
+  manager/ledger/Core operation-identity cutover but remains unmerged until the
+  exact corrective head passes latest-head review and CI.
 - Exact typed primary settlement, hostile callback handling, and
   execution-ID-bound repeated-sale replay remain ADR 0019 / #694 production
   blockers; operation-root uniqueness does not close them.
-- Draft-PR update and publication remain gated on exact shared-path/head
-  handoff and explicit coordinator publication authorization.
+- Draft-PR publication is authorized for the exact validated corrective head.
+  Merge remains gated on latest-head CI and resolved actionable review threads.
 
 ## Current Shared-Path Inventory
 
-The exact 26-path diff against the post-`#692` base after canonical
-regeneration and the full Windows gate is:
+The exact corrective PR diff against base
+`0bc295d845e556ebb98e4fe59d891434a11072c9` contains 101 paths: the 32
+non-snapshot source/test/documentation paths reviewed by CodeRabbit plus 69
+deterministic snapshot, deployment-evidence, and release-artifact paths. The
+historical 26-path pre-implementation inventory below is retained only as the
+earlier ADR 0018 planning baseline:
 
 - `CHANGELOG.md`
 - `docs/adr/0018-batch-operation-root-and-token-identity.md`

@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:3dc9234b7f2d744b4c1d7265a00ab56bab2bc3f7a55c2313a4c3b2281bf71402",
-      "size_bytes": 10255
+      "sha256": "sha256:117b66bba9460d142f1133a22fa5742833f9470bf7ba8ed7ad8099dd0dfa8ea4",
+      "size_bytes": 10120
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:608058dfca86ac66adeeb4b5375fad25a327e6b861f0689c63d7128f92e98818",
-      "size_bytes": 12079
+      "sha256": "sha256:a4bfb960e379fc172f0ea9bec584585bb35211da7c421d4ea191b9899a272397",
+      "size_bytes": 11944
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -169,7 +169,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:00d36f0d092a59ae992b268930560c5d9cedb37743583edd56c3e7e28afacd29",
+        "sha256": "sha256:447affe4703c65a20ec4d651ab1279fc0a1fd34897df31bac04a68b74efc8054",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -191,7 +191,7 @@
       ],
       "template_only_can_complete": false,
       "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "The retained fork deployment rehearsal artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork deployment rehearsal artifact set now binds the ADR 0018 operation-identity deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "phase": "public_beta",
@@ -387,7 +387,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-        "sha256": "sha256:b737343d9802fa9355a9251d2ae4fee58f3b1c23aef0acfd6a835cecff5b7952",
+        "sha256": "sha256:5e89b6d1d6633bfa585c28014209172d00bc0e15c1b85dac1aee65ffc6c44649",
         "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
         "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
@@ -409,7 +409,7 @@
       ],
       "template_only_can_complete": false,
       "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-015 collection metadata/preservation deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the ADR 0018 operation-identity deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "phase": "public_beta",
@@ -442,7 +442,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:e4475aabfe6629d9f338575e9a414d297848f9a710e1206954644330b5b6ab10",
+        "sha256": "sha256:9dc2506fddbfbf07c639738ed174959f086ccf945d429f36692d4f2eaf328ab0",
         "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
         "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."
@@ -464,7 +464,7 @@
       ],
       "template_only_can_complete": false,
       "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "The retained fork randomizer operations artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork randomizer operations artifact set now binds the ADR 0018 operation-identity deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "phase": "public_beta",

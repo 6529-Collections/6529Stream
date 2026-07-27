@@ -7,12 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
-- Accepted ADR 0018's batch-operation-root and per-token operation-identity
-  model for a conforming pre-genesis atomic source cutover. Issue #688 remains
-  open until the ledger, manager, Core, resolver, settlement, tests, and
-  generated as-built surfaces land together. Normative status mirrors and
-  their checker now pin accepted-but-unimplemented semantics; acceptance
-  changes no contract, ABI, deployment, maturity, or readiness state.
+- Implemented accepted ADR 0018's pre-genesis atomic operation-identity
+  cutover: the manager derives and reserves one batch root plus one operation
+  ID per token before ledger consumption; the ledger owns manager-scoped root,
+  authorization, nullifier, phase, and current/bound-policy validation; and
+  Core retains only current prepared-pair operation-ID equality. The exact
+  typed primary-settlement callback and execution-ID-bound repeated-sale key
+  remain ADR 0019 / #694 blockers, and #654 still owns the complete Core
+  headroom/finality seam. The refreshed exact Slither inventory introduces no
+  new first-party High/Medium finding and removes two prior
+  `uninitialized-local` rows after explicit initialization and narrow analyzer
+  annotations, leaving 28 Open rows. Generated as-built and release surfaces
+  are refreshed without promoting protocol maturity or readiness.
 - Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
   probe-record model and every related authorization path, and the
   overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic
@@ -1893,7 +1899,7 @@ the release policy in `docs/release-policy.md`.
 - Recovered `StreamCore` runtime bytecode headroom by replacing selected legacy
   string reverts with typed custom errors and tightening repeated
   `setCollectionData` storage access, bringing the production IR-optimized
-  runtime to 24,135 bytes with 441 bytes of EIP-170 headroom.
+  runtime to 24,128 bytes with 448 bytes of EIP-170 headroom.
 - Rejected `setFinalSupply` for collections with missing collection data using
   `CollectionDataMissing(collectionId)` before final supply math can underflow.
 - Recovered enough `StreamCore` bytecode for Core UTF-8 production enforcement

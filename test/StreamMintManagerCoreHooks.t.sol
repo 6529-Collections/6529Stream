@@ -508,13 +508,22 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
             .assertEq(0, "legacy lookup should clear with the identity record");
         deployed.core.lastAllocatedTokenId().assertEq(0, "abort did not rewind allocator");
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintOperationReused.selector));
-        manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, tokenDataHash, OPERATION_ID);
+        (uint256 reusedPreparedTokenId,) =
+            manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, tokenDataHash, OPERATION_ID);
+        reusedPreparedTokenId.assertEq(tokenId, "active record may reuse ledger-owned identity");
+        manager.abort(reusedPreparedTokenId, OPERATION_ID);
 
         (uint256 remintedTokenId,) =
             manager.mint(COLLECTION_ID, RECIPIENT, TOKEN_DATA, SALT, tokenDataHash);
         remintedTokenId.assertEq(tokenId, "abort did not free token");
         deployed.core.ownerOf(remintedTokenId).assertEq(RECIPIENT, "reminted owner");
+    }
+
+    function testPreparedMintRejectsZeroOperationId() public {
+        (, MockMintManager manager) = _deployWithManager();
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintOperationRequired.selector));
+        manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), bytes32(0));
     }
 
     function testPreparedMintRejectsHashBeforeComplete() public {
