@@ -29,7 +29,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:8286aa97b3dd5362f2c153c158e8987a415df18e57ed7c91a92a3c9151f2e83c"
+          "sha256": "sha256:6e81516859a14273730955683a11ad2e709482ecda787ddab1b9b896e717e2c8"
         }
       ],
       "risk_acceptance": null,

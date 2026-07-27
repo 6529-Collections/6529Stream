@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:df7df80354ba4e0a98c6fe8380a21f19ca8aa0d7ca1c51458b6ecea3548b0e71",
-      "size_bytes": 137447
+      "sha256": "sha256:72e6147b1d9a820d1dd175a955715c2616b187f2bd69b286c4ee84cd2e84ce19",
+      "size_bytes": 137892
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:bf73fd309069a8b23c3c81c36e6e27a4cdc608e12b967b5fb1c916f3f7cb182a",
+      "sha256": "sha256:071001e713cc7fc4099017f0b1e4c03f1ee67fe5ef83355832e6b608e0369461",
       "size_bytes": 32912
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,7 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
-      "Accepted ADR 0018's batch-operation-root and per-token operation-identity model for a conforming pre-genesis atomic source cutover. Issue #688 remains open until the ledger, manager, Core, resolver, settlement, tests, and generated as-built surfaces land together. Normative status mirrors and their checker now pin accepted-but-unimplemented semantics; acceptance changes no contract, ABI, deployment, maturity, or readiness state.",
+      "Implemented accepted ADR 0018's pre-genesis atomic operation-identity cutover: the manager derives and reserves one batch root plus one operation ID per token before ledger consumption; the ledger owns manager-scoped root, authorization, nullifier, phase, and current/bound-policy validation; and Core retains only current prepared-pair operation-ID equality. The exact typed primary-settlement callback and execution-ID-bound repeated-sale key remain ADR 0019 / #694 blockers, and #654 still owns the complete Core headroom/finality seam. The refreshed exact Slither inventory introduces no new first-party High/Medium finding and removes two prior `uninitialized-local` rows after explicit initialization and narrow analyzer annotations, leaving 28 Open rows. Generated as-built and release surfaces are refreshed without promoting protocol maturity or readiness.",
       "Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty probe-record model and every related authorization path, and the overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises. Separate measurement references must describe the same candidate and complete proposed tuple; actual candidate-bound measurements remain blocked on issues #684 and #671, so maturity and release readiness are unchanged.",
       "Rebound the issue #690 record-family source catalog and checker to the merged #699 source commit so candidate-source replay verifies the complete interface, registry, metadata, preservation, and rehearsal binding set. Candidate-bound deployment evidence remains unavailable and both release modes remain fail-closed.",
       "Reserved the external-call gas inventory's `artist-authority` call lane for the exact future issue #670 `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a fail-closed field-policy matrix covering path, site, kind, operation, expression, count, path class, lane, issue, disposition, missing rows, and duplicate calls/rows. Literal declarations cannot use the reserved lane, while the exact Yul `gas()` exemption and generic unexpected-call rejection remain unchanged. This issue #669 checker-support slice adds neither the artist registry source nor its inventory row and does not claim GGP provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or release readiness.",

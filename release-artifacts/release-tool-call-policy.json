@@ -30373,7 +30373,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "8461786b2a8a345329fedd3273e7764a6db19303781311071b8f763c2ffaa580",
+      "source_sha256": "7cf41845d81dac1a9e5bb8d67a44e4e472f6526aa1a7f5800e2d5ceb61d1e713",
       "size_bytes": 177513,
       "imports": [
         {
@@ -50697,7 +50697,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "ba02f06d4433b45408a504fb670b87e7900067ec42c111e7c95035da2db68c85",
+      "source_sha256": "5e2946623f5e021d2ac9566561a67535628e54cf63bd0f2debeb9df8d8730bd8",
       "size_bytes": 169204,
       "imports": [
         {

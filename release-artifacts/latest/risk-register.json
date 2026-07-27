@@ -10,19 +10,19 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:b0078bb4b752021e91099bee5d411b679a4556c9c88d5e1396a014e04780d61f"
+      "sha256": "sha256:889c8820caf81c9a80be3e08f66cda3bf42a6f5e2e08d897231750d944f2d7a8"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:5029f29f05ea80e7756366480566dffb4c112af81aaa1fda109be5fbe4dda8d8"
+      "sha256": "sha256:cac836ffa869fcde95503105b1878cbb9ea03cb7607a55dbfb84d2761c47d5fc"
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:db705a45e614c5132280e51548a9e933b0a7471e2aaa9b366620c16d919db499"
+      "sha256": "sha256:109febefc6cb9087346105bf9f8a232b9a3a53b6e77f9ba93bac34a65c6274f4"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:d51cd151e31f8a7d7a829e729c8fa077fdd23c006d72c2062fa06479143277ef"
+      "sha256": "sha256:03e3eb0c25070baa480a64991b89bc1dc7e4144dfc94d5bbd610919ab6ba51da"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:95e152a51174cb86248265f0acb080a78aa1e4e108e49bc3270895576e3c562b"
+      "sha256": "sha256:8be90d6a4e7fd098499e4ce2a56bac8794b3fdb3ad3e7a8f66527dcfd9d6f297"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -46,15 +46,15 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:38e1dbb5811372e8d649bf09351911308913b713bca906564f0cdf4667bcda9a"
+      "sha256": "sha256:ef3900442e471ca0695859759e30ecf223a091db2c99754067d82500dc2301f2"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:868833483e69760f022c230bfc53e3fca3bada85ad5c603c84915e4c2dd570f6"
+      "sha256": "sha256:c9c23f7d596bbe394af1a02313371b4d2cffc9949db1ee55941570537a87afdb"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:3dc9234b7f2d744b4c1d7265a00ab56bab2bc3f7a55c2313a4c3b2281bf71402"
+      "sha256": "sha256:cef1c62c29190e73aad70a0ed999996562646605e2999621001b488ba5da633f"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -103,7 +103,7 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:db705a45e614c5132280e51548a9e933b0a7471e2aaa9b366620c16d919db499"
+          "sha256": "sha256:109febefc6cb9087346105bf9f8a232b9a3a53b6e77f9ba93bac34a65c6274f4"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -146,11 +146,11 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:db705a45e614c5132280e51548a9e933b0a7471e2aaa9b366620c16d919db499"
+          "sha256": "sha256:109febefc6cb9087346105bf9f8a232b9a3a53b6e77f9ba93bac34a65c6274f4"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:5029f29f05ea80e7756366480566dffb4c112af81aaa1fda109be5fbe4dda8d8"
+          "sha256": "sha256:cac836ffa869fcde95503105b1878cbb9ea03cb7607a55dbfb84d2761c47d5fc"
         }
       ],
       "risk_acceptance": null
@@ -183,11 +183,11 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:d51cd151e31f8a7d7a829e729c8fa077fdd23c006d72c2062fa06479143277ef"
+          "sha256": "sha256:03e3eb0c25070baa480a64991b89bc1dc7e4144dfc94d5bbd610919ab6ba51da"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:3dc9234b7f2d744b4c1d7265a00ab56bab2bc3f7a55c2313a4c3b2281bf71402"
+          "sha256": "sha256:cef1c62c29190e73aad70a0ed999996562646605e2999621001b488ba5da633f"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -313,7 +313,7 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:95e152a51174cb86248265f0acb080a78aa1e4e108e49bc3270895576e3c562b"
+          "sha256": "sha256:8be90d6a4e7fd098499e4ce2a56bac8794b3fdb3ad3e7a8f66527dcfd9d6f297"
         },
         {
           "path": "test/StreamGovernanceExecutor.t.sol",
@@ -355,11 +355,11 @@
         },
         {
           "path": "docs/launch-v1-target-architecture.md",
-          "sha256": "sha256:ecc57eadb973a43aefb55dc38ac7da4f09d44153959a3d0c1239685f64bb80bb"
+          "sha256": "sha256:fc45adf45cda092fe9310640cbcff5dd64afa57708fb3676788ca7d5ee45c4f8"
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:95e152a51174cb86248265f0acb080a78aa1e4e108e49bc3270895576e3c562b"
+          "sha256": "sha256:8be90d6a4e7fd098499e4ce2a56bac8794b3fdb3ad3e7a8f66527dcfd9d6f297"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
@@ -418,7 +418,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:d51cd151e31f8a7d7a829e729c8fa077fdd23c006d72c2062fa06479143277ef"
+          "sha256": "sha256:03e3eb0c25070baa480a64991b89bc1dc7e4144dfc94d5bbd610919ab6ba51da"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -461,11 +461,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:b0078bb4b752021e91099bee5d411b679a4556c9c88d5e1396a014e04780d61f"
+          "sha256": "sha256:889c8820caf81c9a80be3e08f66cda3bf42a6f5e2e08d897231750d944f2d7a8"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:5029f29f05ea80e7756366480566dffb4c112af81aaa1fda109be5fbe4dda8d8"
+          "sha256": "sha256:cac836ffa869fcde95503105b1878cbb9ea03cb7607a55dbfb84d2761c47d5fc"
         },
         {
           "path": "docs/metadata.md",
@@ -509,7 +509,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:f10aee786efaa7fefd68a8d88866cfc61fafa7086e4e11dabf5b5ed0321442f3"
+          "sha256": "sha256:31cb76b8f9fa66fedeaf9780871d44a905ee02f638f62fdddb0c54919afd900d"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -550,7 +550,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:e2e43ccaec8274f37a698e5832244379d889e124e87e6656af25ba5c1c66d53e"
+          "sha256": "sha256:25ae1bc912bc9617d3e4090530d144c87f6b8107f88bc018a4b2e2d7c63b632e"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -569,7 +569,7 @@
       "target_gate": "Gate G",
       "source": "launch conformance matrix, target architecture, and artifact-backed size proof",
       "mitigation": "Recover real Core headroom through measured compression, extraction, or authorized relocation while retaining every mandatory hook; keep non-critical product surfaces satellite-first.",
-      "residual_risk": "The current 24,152-byte runtime leaves 424 bytes of EIP-170 headroom, 1,576 bytes below the non-waivable 2,000-byte production deployment minimum.",
+      "residual_risk": "The current 24,135-byte runtime leaves 441 bytes of EIP-170 headroom, 1,559 bytes below the non-waivable 2,000-byte production deployment minimum.",
       "checks": [
         "python scripts/build_release_artifacts.py",
         "python scripts/check_contract_size_budget.py",
@@ -583,15 +583,15 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:95e152a51174cb86248265f0acb080a78aa1e4e108e49bc3270895576e3c562b"
+          "sha256": "sha256:8be90d6a4e7fd098499e4ce2a56bac8794b3fdb3ad3e7a8f66527dcfd9d6f297"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:b0078bb4b752021e91099bee5d411b679a4556c9c88d5e1396a014e04780d61f"
+          "sha256": "sha256:889c8820caf81c9a80be3e08f66cda3bf42a6f5e2e08d897231750d944f2d7a8"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:1776ac477622f56565bb75f548d2943c6cbe1d9065d6ef29a1255983797d10b4"
+          "sha256": "sha256:6ee97f8dbff0e8f64bae10207a9d410fe89d894dc59c92497d106bbb51e808e4"
         }
       ],
       "risk_acceptance": null
@@ -606,7 +606,7 @@
       "target_gate": "Gate F",
       "source": "Normalized first-party production Slither high/medium baseline",
       "mitigation": "Disposition and remediate every open first-party production high/medium finding, retain issue-linked proof for each resolution, and keep the exact normalized baseline drift gate green.",
-      "residual_risk": "The current normalized baseline contains 3 High and 27 Medium open first-party production findings; local normalization and drift detection do not establish that any finding is safe.",
+      "residual_risk": "The current normalized baseline contains 3 High and 25 Medium open first-party production findings; local normalization and drift detection do not establish that any finding is safe.",
       "checks": [
         "python scripts/test_slither_baseline.py",
         "python scripts/check_slither_baseline.py --baseline-only",
@@ -621,19 +621,19 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:38e1dbb5811372e8d649bf09351911308913b713bca906564f0cdf4667bcda9a"
+          "sha256": "sha256:ef3900442e471ca0695859759e30ecf223a091db2c99754067d82500dc2301f2"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:868833483e69760f022c230bfc53e3fca3bada85ad5c603c84915e4c2dd570f6"
+          "sha256": "sha256:c9c23f7d596bbe394af1a02313371b4d2cffc9949db1ee55941570537a87afdb"
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:c9d850e6cdd004e9bd2378e60c6d4fdc9b41f3ed792330e8aaa518e6240cc56a"
+          "sha256": "sha256:542c56b5588e8419c2840b835f871399a8912d3718782fd8a85ab30299a68804"
         },
         {
           "path": "scripts/check_slither_baseline.py",
-          "sha256": "sha256:052ccda0c60bcd597cd6c1d7901ade55bbf56c644dc0cf79bed06e30ce749096"
+          "sha256": "sha256:d8dfa6791e710018c19c1092703d938da42be6ce817b2a7851737c9808001b7b"
         }
       ],
       "risk_acceptance": null
@@ -662,15 +662,15 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:b0078bb4b752021e91099bee5d411b679a4556c9c88d5e1396a014e04780d61f"
+          "sha256": "sha256:889c8820caf81c9a80be3e08f66cda3bf42a6f5e2e08d897231750d944f2d7a8"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:5029f29f05ea80e7756366480566dffb4c112af81aaa1fda109be5fbe4dda8d8"
+          "sha256": "sha256:cac836ffa869fcde95503105b1878cbb9ea03cb7607a55dbfb84d2761c47d5fc"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:6863ab9cd27782420aadeb3e3c9c381ae0c38e9ea910b23288ded5a548ac593b"
+          "sha256": "sha256:6e0b116c589adf76e1117af652e1493931105de9728ccb52eec85dd6c980b816"
         },
         {
           "path": "docs/warning-dispositions.md",
