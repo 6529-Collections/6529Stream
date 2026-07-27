@@ -14,8 +14,11 @@ the release policy in `docs/release-policy.md`.
   Core retains only current prepared-pair operation-ID equality. The exact
   typed primary-settlement callback and execution-ID-bound repeated-sale key
   remain ADR 0019 / #694 blockers, and #654 still owns the complete Core
-  headroom/finality seam. Generated as-built and release surfaces are refreshed
-  without promoting protocol maturity or readiness.
+  headroom/finality seam. The refreshed exact Slither inventory introduces no
+  new first-party High/Medium finding and removes two prior
+  `uninitialized-local` rows after explicit initialization and narrow analyzer
+  annotations, leaving 28 Open rows. Generated as-built and release surfaces
+  are refreshed without promoting protocol maturity or readiness.
 - Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
   probe-record model and every related authorization path, and the
   overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic

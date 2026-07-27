@@ -2060,15 +2060,15 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 30 open findings: 3 High and 27 Medium. The
+The current checked baseline has 28 open findings: 3 High and 25 Medium. The
 compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `93527f72ec7911f2e473053bccb5cd07c8cb311e` on
-`2026-07-27T03:45:25Z` records 3,096 findings: 49 High, 761 Medium, 1,249 Low,
+at source commit `8b7ce86396fa943ef332b6831e79a998237285a9` on
+`2026-07-27T10:29:17Z` records 3,131 findings: 49 High, 794 Medium, 1,251 Low,
 997 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/27/30`, vendored `1/9/10`, test `45/718/763`, script
+first-party production `3/25/28`, vendored `1/9/10`, test `45/753/798`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

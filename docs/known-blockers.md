@@ -234,13 +234,13 @@ contributors who start from the README.
 - P0-INIT-001 explicitly initialized the then-known first-party production
   `uninitialized-local` defaults and added regressions for string counting,
   delegation status/gating, empty-script rendering, and minter return indexes.
-  Later-added production surfaces now contribute 9 Open `uninitialized-local`
+  Later-added production surfaces now contribute 7 Open `uninitialized-local`
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 30 open
-  findings: 3 High and 27 Medium. One row is a confirmed Core state gap, five
-  rows require design review, and 24 remain pending disposition. None is
+- The normalized first-party production Slither baseline contains 28 open
+  findings: 3 High and 25 Medium. One row is a confirmed Core state gap, five
+  rows require design review, and 22 remain pending disposition. None is
   accepted or classified as a false positive. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue

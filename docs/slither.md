@@ -1,8 +1,8 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-high/medium baseline. The current baseline contains 30 open findings: 3 High
-and 27 Medium. Those rows are a review and burn-down queue; they are not proof
+high/medium baseline. The current baseline contains 28 open findings: 3 High
+and 25 Medium. Those rows are a review and burn-down queue; they are not proof
 of exploitability, an audit completion claim, or evidence that the protocol is
 ready for public beta or production.
 
@@ -23,24 +23,25 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced at source commit
-`93527f72ec7911f2e473053bccb5cd07c8cb311e` on
-`2026-07-27T03:45:25Z`. It contains 3,096 findings across all impacts and
-scopes: 49 High, 761 Medium, 1,249 Low, 997 Informational, and 40
+`8b7ce86396fa943ef332b6831e79a998237285a9` on
+`2026-07-27T10:29:17Z`. It contains 3,131 findings across all impacts and
+scopes: 49 High, 794 Medium, 1,251 Low, 997 Informational, and 40
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| First-party production | 3 | 27 | 30 |
+| First-party production | 3 | 25 | 28 |
 | Vendored | 1 | 9 | 10 |
-| Test | 45 | 718 | 763 |
+| Test | 45 | 753 | 798 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
-All 30 retained first-party High/Medium fingerprints are unchanged from the
-prior canonical baseline, and the refresh added or removed no production row.
-The higher all-scope totals include the governance action-policy adversarial
-tests in the separately classified test scope; they do not reduce or accept
-any production finding.
+The operation-identity cutover introduced no new first-party production
+High/Medium finding. Two prior `uninitialized-local` rows disappeared after
+the affected locals were made explicit and the fully assigned struct path was
+documented narrowly for Slither; the focused operation-identity tests preserve
+the behavior. This reduces the open inventory from 30 to 28 without accepting
+any remaining row or changing public-beta or production readiness.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to

@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "93527f72ec7911f2e473053bccb5cd07c8cb311e",
-    "captured_at_utc": "2026-07-27T03:45:25Z",
+    "analyzed_commit": "8b7ce86396fa943ef332b6831e79a998237285a9",
+    "captured_at_utc": "2026-07-27T10:29:17Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 255,
     "capture_json_success": true,
-    "raw_json_size_bytes": 307456608,
-    "raw_json_sha256": "sha256:0d093d4f6d240b525953e1137c5dd9063e5145d22b26e53d8c169fa96f52b478",
-    "solidity_tree_sha256": "sha256:172327c8b881417417270febbf8cf93a2a4da51a31cb5563594f4201590192cf",
+    "raw_json_size_bytes": 335434961,
+    "raw_json_sha256": "sha256:7ca3be37e91491af759340151c65b1bcbac504e817b83e27a788096d587fbe24",
+    "solidity_tree_sha256": "sha256:b765a5422c66a2f9ccf310c0a353dfb5d4332a0b841e071e5143a6fc4eeed65d",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -37,17 +37,17 @@
   },
   "capture_counts": {
     "High": 49,
-    "Medium": 761,
-    "Low": 1249,
+    "Medium": 794,
+    "Low": 1251,
     "Informational": 997,
     "Optimization": 40,
-    "total": 3096
+    "total": 3131
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
       "High": 3,
-      "Medium": 27,
-      "total": 30
+      "Medium": 25,
+      "total": 28
     },
     "vendored": {
       "High": 1,
@@ -56,8 +56,8 @@
     },
     "test": {
       "High": 45,
-      "Medium": 718,
-      "total": 763
+      "Medium": 753,
+      "total": 798
     },
     "script": {
       "High": 0,
@@ -72,8 +72,8 @@
   },
   "counts": {
     "High": 3,
-    "Medium": 27,
-    "total": 30
+    "Medium": 25,
+    "total": 28
   },
   "findings": [
     {
@@ -199,14 +199,14 @@
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 624,
-          "end_line": 626,
+          "start_line": 620,
+          "end_line": 622,
           "element_type": "function",
           "name": "collectionBurnsBlockedAtBlock",
           "signature": "collectionBurnsBlockedAtBlock(uint256)"
         }
       ],
-      "fingerprint": "sha256:1728b8f1d12b639b534009b5dd9fe2d30e641675ef26974d4fc426e94dbe7a0b",
+      "fingerprint": "sha256:6ee25e333e0e15fc0b2e14a4c0e64c9c4b301bf8bedba0fbfcac96fa8772eae4",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "confirmed_gap",
@@ -321,8 +321,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 521,
-        "end_line": 543,
+        "start_line": 517,
+        "end_line": 539,
         "element_type": "function",
         "name": "completePreparedMintFromManager",
         "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)"
@@ -338,38 +338,38 @@
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 521,
-          "end_line": 543,
+          "start_line": 517,
+          "end_line": 539,
           "element_type": "function",
           "name": "completePreparedMintFromManager",
           "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 539,
-          "end_line": 539,
+          "start_line": 535,
+          "end_line": 535,
           "element_type": "node",
           "name": "_safeMint(initialRecipient,tokenId)",
           "signature": ""
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 540,
-          "end_line": 541,
+          "start_line": 536,
+          "end_line": 537,
           "element_type": "node",
           "name": "collectionAdditionalData[collectionId].randomizer.calculateTokenHash(collectionId,tokenId,_saltfun_o)",
           "signature": ""
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 542,
-          "end_line": 542,
+          "start_line": 538,
+          "end_line": 538,
           "element_type": "node",
           "name": "pendingPreparedMintTokenId = 0",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:9b9ad9788b8d83f271b0d0150b0c021d388aa4526b30856b229984ce54d3578c",
+      "fingerprint": "sha256:5abddcac429d8e5ce402ad1019a09b2ef700dd884be4cea1117758a30f7b8fd2",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
@@ -682,82 +682,6 @@
       "status": "Open",
       "triage_class": "pending_disposition",
       "rationale": "Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamArtworkFinalityRegistry.sol:545 ctx. All control-flow paths and downstream consumers still need review.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Trace assignment and use on every branch, including early return and revert paths.",
-        "Add focused tests for the default-valued path and every explicitly assigned path.",
-        "Record independent reviewer disposition or make initialization explicit under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "uninitialized-local",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamMintManager.sol",
-        "start_line": 501,
-        "end_line": 501,
-        "element_type": "variable",
-        "name": "cursor",
-        "signature": ""
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamMintManager.sol",
-          "start_line": 501,
-          "end_line": 501,
-          "element_type": "variable",
-          "name": "cursor",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:5ec694ad1fbfccbbab1010327f9cbe023523928afa3b78df766684a5f1494b0f",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports local cursor as relying on a Solidity default in smart-contracts/StreamMintManager.sol:501 cursor. All control-flow paths and downstream consumers still need review.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Trace assignment and use on every branch, including early return and revert paths.",
-        "Add focused tests for the default-valued path and every explicitly assigned path.",
-        "Record independent reviewer disposition or make initialization explicit under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "uninitialized-local",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamMintManager.sol",
-        "start_line": 617,
-        "end_line": 617,
-        "element_type": "variable",
-        "name": "gateCall",
-        "signature": ""
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamMintManager.sol",
-          "start_line": 617,
-          "end_line": 617,
-          "element_type": "variable",
-          "name": "gateCall",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:9d08be8f4d7eb2f6d1918efc8d9f8bcdc92bd360575aa1aac850f70e04e1c94a",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports local gateCall as relying on a Solidity default in smart-contracts/StreamMintManager.sol:617 gateCall. All control-flow paths and downstream consumers still need review.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],

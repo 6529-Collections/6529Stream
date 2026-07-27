@@ -329,7 +329,7 @@ Both release phases also validate the canonical normalized first-party
 production Slither baseline and its Markdown mirror. Open High/Medium findings
 are technical blockers outside the evidence-manifest requirement rows and
 cannot be waived by marking an external-evidence row `accepted_risk`. The
-current 3 High and 27 Medium rows remain Open under issue #658; an exact live
+current 3 High and 25 Medium rows remain Open under issue #658; an exact live
 baseline match proves inventory consistency, not acceptance. The separate High
 open blocker `RISK-GOV-003` preserves the Governance Executor's
 proposal-selected native-value authority after bounded assembly made that call

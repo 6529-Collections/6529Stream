@@ -8,10 +8,10 @@
 - Active branch: `codex/issue-688-operation-root-cutover`.
 - Final publication base and current `origin/main`:
   `0bc295d845e556ebb98e4fe59d891434a11072c9` after merged PR `#685`.
-- Current committed source checkpoint:
-  `d340780379baf30545b51f997ab2a93dae9fea62`. The as-built
-  status/size/checker reconciliation and canonical generated artifacts remain
-  to be committed before publication.
+- Current committed Solidity checkpoint:
+  `8b7ce86396fa943ef332b6831e79a998237285a9`. The as-built
+  status/size/checker reconciliation is committed; refreshed Slither evidence
+  and canonical generated artifacts remain to be committed before publication.
 - PR #704 merged #672 as a zero-`StreamCore`-delta
   target-fixture/spec/measurement slice. It
   may pin the EIP-150 admission formula, worst-case post-coordinator EOA tail,
@@ -66,7 +66,7 @@
 - Issue: reopened `#688`.
 - Branch: `codex/issue-688-operation-root-cutover`.
 - Base: `0bc295d845e556ebb98e4fe59d891434a11072c9`.
-- Source checkpoint: `d340780379baf30545b51f997ab2a93dae9fea62`.
+- Solidity checkpoint: `8b7ce86396fa943ef332b6831e79a998237285a9`.
 - Result: the atomic operation-root source cutover is implemented across the
   manager, ledger, Core hooks, fixed libraries, Foundry tests, checker, and
   as-built documentation. The current via-IR diagnostic measures `StreamCore`
@@ -75,6 +75,13 @@
   progress. Freeze the reviewed source, regenerate canonical artifacts and the
   release tail once, run one authoritative Windows gate, then publish and
   obtain CI plus substantive CodeRabbit review.
+- Static-analysis state: the exact full Slither 0.11.5 replay against the
+  frozen Solidity checkpoint introduces no new first-party production
+  High/Medium finding. Explicit initialization and narrowly documented
+  fully-assigned paths remove two prior `uninitialized-local` rows, leaving 28
+  Open rows (3 High and 25 Medium): one confirmed gap, five design-review
+  rows, and 22 pending dispositions. No remaining row is accepted or marked
+  false positive.
 - Closure state: do not claim typed settlement/repeat-sale completion or
   production readiness. ADR 0019/#694 remains the typed primary-settlement and
   repeated-identical-sale blocker; #654 remains the final complete-Core
