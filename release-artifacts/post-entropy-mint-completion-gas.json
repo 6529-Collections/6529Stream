@@ -30,13 +30,13 @@
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:a9868ccb5be585efc40b25e387b526fee82491a7ce5e353529a3a58bd18a25fc",
-      "size_bytes": 137995
+      "sha256": "sha256:fd1134e4200e50edf13dda3bd85f45cd19c122d9c7cb9d6c888676a72f0ebe2c",
+      "size_bytes": 137997
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:32964f2edef3dcc0140a41afed54823b9dc682181b2e746f0037db9a3cf6dc33",
-      "size_bytes": 160685
+      "sha256": "sha256:edaf83a77dbed619298f66d3fcc1961a0b0f133d9ee4ff08216611971f6058cc",
+      "size_bytes": 160726
     }
   ],
   "measurement": {
