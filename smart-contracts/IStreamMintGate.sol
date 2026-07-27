@@ -9,6 +9,7 @@ interface IStreamMintGate is IERC165 {
         bytes32 authorizationId;
         bytes32[] nullifiers;
         address authorizer;
+        uint8 authorizerKind;
         uint64 maxQuantity;
         bytes32 gateHash;
     }
@@ -24,7 +25,7 @@ interface IStreamMintGate is IERC165 {
         address[] calldata initialRecipients,
         address[] calldata beneficiaries,
         bytes32 contextHash,
-        bytes32 policyHash,
+        bytes32 expectedPolicyHash,
         bytes calldata gateData
     ) external view returns (GateResult memory);
 }

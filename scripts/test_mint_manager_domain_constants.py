@@ -203,6 +203,80 @@ class MintManagerDomainConstantTests(unittest.TestCase):
                 documents[checker.DOC_PATH],
             )
 
+    def test_rejects_target_operation_solidity_preimage_drift(self) -> None:
+        documents = committed_operation_documents()
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        stale_source = source.replace(preimage, f"{preimage}_DRIFT", 1)
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} Solidity implementation preimage/cardinality drifted",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                documents[checker.DOC_PATH],
+                source_text=stale_source,
+            )
+
+    def test_rejects_superseded_operation_domain_in_solidity(self) -> None:
+        documents = committed_operation_documents()
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.SOURCE_PATH).read_text(encoding="utf-8")
+        stale_source = source.replace(
+            "contract StreamMintManager",
+            "bytes32 public constant OPERATION_DOMAIN = "
+            'keccak256("6529STREAM_PREPARED_MINT_OPERATION_V1");\n'
+            "contract StreamMintManager",
+            1,
+        )
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "superseded OPERATION_DOMAIN remains co-live",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                documents[checker.DOC_PATH],
+                source_text=stale_source,
+            )
+
+    def test_rejects_linked_identity_library_preimage_drift(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.IDENTITY_SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.IDENTITY_LIBRARY_DOMAINS[0]
+        stale_source = source.replace(preimage, f"{preimage}_DRIFT", 1)
+        self.assertNotEqual(stale_source, source)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} linked identity-library preimage/cardinality drifted",
+        ):
+            checker.validate_identity_library_domains(stale_source)
+
+    def test_rejects_missing_linked_identity_library_domain(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        source = (repo_root / checker.IDENTITY_SOURCE_PATH).read_text(encoding="utf-8")
+        name, preimage = checker.IDENTITY_LIBRARY_DOMAINS[-1]
+        assignment = re.search(
+            rf'\bbytes32\s+private\s+constant\s+{re.escape(name)}\s*=\s*'
+            rf'keccak256\(\s*"{re.escape(preimage)}"\s*\)\s*;',
+            source,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment)
+        assert assignment is not None
+        stale_source = source[: assignment.start()] + source[assignment.end() :]
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            rf"{name} linked identity-library preimage/cardinality drifted",
+        ):
+            checker.validate_identity_library_domains(stale_source)
+
     def test_rejects_missing_operation_identity_contract_fragment(self) -> None:
         documents = {
             path: "\n".join(fragments)

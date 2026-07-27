@@ -102,8 +102,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     error PreparedMintNotFound();
     /// @notice Prepared token state does not match the supplied completion data.
     error PreparedMintMismatch();
-    /// @notice A prepared-mint operation ID has already been consumed.
-    error PreparedMintOperationReused();
+    /// @notice A prepared-mint operation ID must be nonzero.
+    error PreparedMintOperationRequired();
     /// @notice Renderer token data does not match the manager commitment.
     error TokenDataHashMismatch();
     error TokenNotMinted();
@@ -246,9 +246,6 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
 
     mapping(uint256 => PreparedMintRecord) private preparedMintRecords;
     address private pendingPreparedMintManager;
-    // Operation IDs are one-shot manager commitments, even if the prepared token is aborted.
-    mapping(bytes32 => bool) private usedPreparedOperationIds;
-
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
 
@@ -502,10 +499,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         _requireNoPreparedMint();
         _requireCollectionNotFrozen(collectionId);
         _requireTokenDataWithHash(_tokenData, tokenDataHash);
-        if (usedPreparedOperationIds[operationId]) {
-            revert PreparedMintOperationReused();
+        if (operationId == bytes32(0)) {
+            revert PreparedMintOperationRequired();
         }
-        usedPreparedOperationIds[operationId] = true;
         collectionAdditonalDataStructure storage collectionData =
             collectionAdditionalData[collectionId];
         (tokenId, collectionSerial) = _allocateTokenIdentity(collectionId, collectionData);

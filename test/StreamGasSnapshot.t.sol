@@ -198,11 +198,11 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         ledger.setLedgerWriter(address(manager), true);
         deployed.core.updateContracts(4, address(manager));
         _configureMaxLaunchBatchPhase(manager);
-        IStreamMintManager.MintRequest memory request = _maxLaunchBatchRequest(manager);
+        IStreamMintManager.MintBatch memory request = _maxLaunchBatchRequest(manager);
 
         vm.resumeGasMetering();
         vm.prank(MINT_MANAGER_EXECUTOR);
-        manager.mintPrepared(request);
+        manager.executePreparedMint(request, request.resolverData);
     }
 
     struct AuctionSetup {
@@ -349,20 +349,20 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
     function _maxLaunchBatchRequest(StreamMintManager manager)
         private
         view
-        returns (IStreamMintManager.MintRequest memory request)
+        returns (IStreamMintManager.MintBatch memory request)
     {
         uint256 quantity = manager.MAX_PHASE_BATCH_QUANTITY();
         address[] memory initialRecipients = new address[](quantity);
         address[] memory beneficiaries = new address[](quantity);
-        string[] memory tokenData = new string[](quantity);
-        uint256[] memory salts = new uint256[](quantity);
+        bytes[] memory tokenData = new bytes[](quantity);
+        bytes32[] memory mintCommitments = new bytes32[](quantity);
         for (uint256 i = 0; i < quantity; i++) {
             initialRecipients[i] = RECIPIENT;
             beneficiaries[i] = RECIPIENT;
             tokenData[i] = "gas-manager-token";
-            salts[i] = 10_000 + i;
+            mintCommitments[i] = bytes32(uint256(10_000 + i));
         }
-        request = IStreamMintManager.MintRequest({
+        request = IStreamMintManager.MintBatch({
             collectionId: COLLECTION_ID,
             phaseId: GAS_PHASE_ID,
             payer: address(this),
@@ -370,11 +370,11 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
             initialRecipients: initialRecipients,
             beneficiaries: beneficiaries,
             tokenData: tokenData,
-            salts: salts,
+            mintCommitments: mintCommitments,
             authorizationId: GAS_AUTHORIZATION_ID,
             contextHash: bytes32(0),
             expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, GAS_PHASE_ID),
-            gateData: ""
+            resolverData: ""
         });
     }
 

@@ -43,6 +43,13 @@ interface IStreamMintLedger {
         bytes32 resolutionHash;
     }
 
+    /// @notice Immediate predecessor policy retained for a bounded grace window.
+    struct LedgerPolicyGrace {
+        bytes32 previousPolicyHash;
+        uint64 previousPolicyRevision;
+        uint64 previousPolicyGraceUntil;
+    }
+
     /// @notice Reverts when a caller is not authorized to write ledger state.
     error UnauthorizedLedgerWriter(address writer);
     /// @notice Reverts when the owner tries to configure an invalid writer.
@@ -55,8 +62,6 @@ interface IStreamMintLedger {
     error DuplicateCounterPolicy(bytes32 counterId);
     /// @notice Reverts when counter ID and counter policy arrays differ in length.
     error CounterPolicyLengthMismatch(uint256 counterIds, uint256 counterPolicies);
-    /// @notice Reverts when callers try to consume no counters.
-    error EmptyCounterConsumption();
     /// @notice Reverts when a consumed counter has no registered policy.
     error CounterPolicyNotRegistered(
         address manager, uint256 collectionId, bytes32 phaseId, bytes32 counterId
@@ -71,8 +76,14 @@ interface IStreamMintLedger {
     error CounterValueOverflow(bytes32 valueKey);
     /// @notice Reverts when an authorization ID has already been consumed.
     error AuthorizationAlreadyConsumed(bytes32 authorizationId);
-    /// @notice Reverts when callers attempt to use unsupported nullifier writes.
-    error NullifiersUnsupported(bytes32 nullifier);
+    /// @notice Reverts when a nullifier has already been consumed.
+    error NullifierAlreadyConsumed(bytes32 nullifier);
+    /// @notice Reverts when a phase policy grace deadline is invalid.
+    error InvalidPolicyGrace(uint64 graceUntil);
+    /// @notice Reverts when a batch operation root is zero.
+    error OperationRootRequired();
+    /// @notice Reverts when a manager already consumed a batch operation root.
+    error OperationRootAlreadyConsumed(address manager, bytes32 operationRoot);
 
     /// @notice Emitted when the owner enables or disables a ledger writer.
     event MintLedgerWriterUpdated(address indexed writer, bool allowed);
@@ -98,6 +109,7 @@ interface IStreamMintLedger {
     );
     /// @notice Emitted when a registered counter value is incremented.
     event MintLedgerCounterConsumed(
+        uint16 schemaVersion,
         bytes32 indexed valueKey,
         uint256 indexed collectionId,
         bytes32 indexed phaseId,
@@ -107,10 +119,12 @@ interface IStreamMintLedger {
         uint64 increment,
         uint64 newValue,
         uint64 cap,
-        bytes32 policyHash
+        bytes32 boundPolicyHash,
+        bytes32 operationRoot
     );
     /// @notice Emitted with non-indexed context for reconstructing a counter increment.
     event MintLedgerCounterConsumptionContext(
+        uint16 schemaVersion,
         bytes32 indexed valueKey,
         bytes32 indexed counterId,
         bytes32 indexed subjectKey,
@@ -124,10 +138,39 @@ interface IStreamMintLedger {
     );
     /// @notice Emitted when an authorization ID is consumed.
     event MintLedgerAuthorizationConsumed(
-        bytes32 indexed authorizationId, bytes32 indexed policyHash, address indexed manager
+        uint16 schemaVersion,
+        bytes32 indexed authorizationId,
+        bytes32 indexed operationRoot,
+        address indexed manager,
+        bytes32 boundPolicyHash
     );
-    /// @notice Reserved for future nullifier-supporting ledger implementations.
-    event MintLedgerNullifierConsumed(bytes32 indexed nullifier, bytes32 indexed policyHash);
+    /// @notice Emitted when a manager consumes a nullifier.
+    event MintLedgerNullifierConsumed(
+        uint16 schemaVersion,
+        bytes32 indexed nullifier,
+        bytes32 indexed operationRoot,
+        address indexed manager,
+        bytes32 boundPolicyHash
+    );
+    /// @notice Emitted exactly once when a manager consumes a batch operation root.
+    event MintLedgerOperationRootConsumed(
+        uint16 schemaVersion,
+        bytes32 indexed operationRoot,
+        address indexed manager,
+        bytes32 currentPolicyHash,
+        bytes32 indexed boundPolicyHash,
+        bytes32 authorizationId
+    );
+    /// @notice Emitted when a policy rotation records or clears predecessor grace.
+    event MintLedgerPolicyGraceSet(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        address indexed manager,
+        bytes32 previousPolicyHash,
+        bytes32 newPolicyHash,
+        uint64 graceUntil
+    );
 
     /// @notice Returns true for deployment validation.
     function isStreamMintLedger() external pure returns (bool);
@@ -145,15 +188,19 @@ interface IStreamMintLedger {
         bytes32 phaseId,
         bytes32 policyHash,
         bytes32[] calldata counterIds,
-        LedgerCounterPolicy[] calldata counterPolicies
+        LedgerCounterPolicy[] calldata counterPolicies,
+        uint64 graceUntil
     ) external;
 
-    /// @notice Consumes static counter increments and an optional authorization ID.
+    /// @notice Consumes one manager-scoped operation root and its accounting facts.
     function consume(
+        uint256 collectionId,
+        bytes32 phaseId,
         CounterConsumption[] calldata consumptions,
         bytes32 authorizationId,
         bytes32[] calldata nullifiers,
-        bytes32 policyHash
+        bytes32 boundPolicyHash,
+        bytes32 operationRoot
     ) external;
 
     /// @notice Returns the registered policy hash for a manager phase.
@@ -183,15 +230,28 @@ interface IStreamMintLedger {
         bytes32 subjectKey
     ) external pure returns (bytes32);
 
-    /// @notice Returns whether the caller has already consumed an authorization ID.
-    function isAuthorizationUsed(bytes32 authorizationId) external view returns (bool);
-
     /// @notice Returns whether a manager has already consumed an authorization ID.
     function isManagerAuthorizationUsed(address manager, bytes32 authorizationId)
         external
         view
         returns (bool);
 
-    /// @notice Returns false until a future nullifier-supporting implementation is accepted.
-    function isNullifierUsed(bytes32 nullifier) external view returns (bool);
+    /// @notice Returns whether a manager has already consumed a nullifier.
+    function isManagerNullifierUsed(address manager, bytes32 nullifier) external view returns (bool);
+
+    /// @notice Returns whether a manager has already consumed an operation root.
+    function isManagerOperationRootUsed(address manager, bytes32 operationRoot)
+        external
+        view
+        returns (bool);
+
+    /// @notice Returns the immediate predecessor grace tuple for a manager phase.
+    function policyGrace(address manager, uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        returns (
+            bytes32 previousPolicyHash,
+            uint64 previousPolicyRevision,
+            uint64 previousPolicyGraceUntil
+        );
 }

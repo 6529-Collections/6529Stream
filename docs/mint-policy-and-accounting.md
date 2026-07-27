@@ -818,15 +818,18 @@ Requirements [MPA-OPERATION]:
    same rule (ADR 0012 decision T6); all operation domains are mirrored in the
    protocol v1 domain-constants table.
 
-   Implementation evidence (non-normative). The CON-014 slice computes
-   a prepared-only root after ledger consumption, computes the request
-   commitment without the target leading domain, and computes per-token
-   operation IDs without `MINT_TOKEN_OPERATION_ID_DOMAIN`. The
-   checker-pinned `OPERATION_DOMAIN` protocol mirror remains as-built
-   evidence until implementation alignment. Deployment requires the
-   target domains and ordering above; the as-built mirror, manager
-   constants, ABI/event catalogs, and release artifacts re-pin together
-   only in the atomic implementation cutover.
+   Implementation evidence (non-normative). The atomic issue #688 cutover
+   computes the request/result transcript and root before ledger consumption,
+   reserves one root plus `N` token operation IDs, and uses the exact leading
+   domains and ordering above. Fixed compiler-linked libraries own pure
+   identity/counter derivation, closed-world gate validation, and Core token
+   execution so the manager remains deployable; their addresses are immutable
+   link references, expose no caller-selected target/selector/value/callback
+   surface, and execute in the manager context. The checker binds the
+   normative home, protocol-v1 mirror, manager constants, and every hash
+   preimage duplicated in the identity library together and rejects the
+   superseded CON-014 `OPERATION_DOMAIN` as co-live legacy surface. ABI/event
+   catalogs and release artifacts re-pin in the same implementation change.
 2. Every state- or economics-affecting value inside the manager/ledger mint
    boundary is bound either directly in the normalized preimages above or
    transitively through a typed digest that is itself bound there. In a signed
@@ -3970,14 +3973,15 @@ Status: CON-013 and CON-014 implement the static v1 foundation:
    of `CounterKeyMode`. (An earlier revision of this note claimed an
    `authorizer` key mode; no such mode exists in `CounterKeyMode`, and
    the claim was a defect, ADR 0012 decision T6.)
-4. `mintPrepared` requires a nonzero `expectedPolicyHash` and nonzero
-   `authorizationId` so production execution cannot bypass stale-policy
-   detection or ledger replay protection. `authorizationId` is a replay key
-   supplied by the allowlisted executor; it is not, by itself, cryptographic
-   signature verification. A buggy or compromised allowlisted executor can
-   choose the request contents for any unused `authorizationId`, so untrusted
-   sale, drop, or gate flows must bind `authorizationId` to their own reviewed
-   signed commitment before they receive executor rights.
+4. `executeSingleStepMint` and `executePreparedMint` require a nonzero
+   `expectedPolicyHash` and nonzero `authorizationId`, derive one batch
+   `operationRoot` plus one distinct `operationId` per token, and consume the
+   root through the ledger before Core execution. `authorizationId` is a replay
+   key supplied by the allowlisted executor; it is not, by itself,
+   cryptographic signature verification. A buggy or compromised allowlisted
+   executor can choose the request contents for any unused `authorizationId`,
+   so untrusted sale, drop, or gate flows must bind `authorizationId` to their
+   own reviewed signed commitment before they receive executor rights.
 5. Gates, payment settlement, sale/auction routing, `GLOBAL` scope
    derivation, the `MERKLE_STATIC` cap mode, grace windows, revocation,
    succession import, and burn-gate nullifier consumption remain later

@@ -6,10 +6,9 @@ Also enforces the revenue-layer domain-string namespace rule
 string preimage in the revenue home table and its protocol v1 mirror must
 start with ``6529STREAM_``.
 
-The ADR 0018 target operation domains intentionally differ from the current
-CON-014 Solidity/as-built table until the atomic implementation cutover. This
-checker therefore validates them against their normative home and protocol-v1
-mirror without pretending the current source already implements the target.
+The ADR 0018 operation domains are validated against their normative home,
+protocol-v1 mirror, and the atomic StreamMintManager implementation. The
+superseded CON-014 ``OPERATION_DOMAIN`` is forbidden from remaining co-live.
 """
 
 from __future__ import annotations
@@ -25,6 +24,7 @@ from typing import Callable, Iterable
 
 DOC_PATH = Path("docs/launch-v1-target-architecture.md")
 SOURCE_PATH = Path("smart-contracts/StreamMintManager.sol")
+IDENTITY_SOURCE_PATH = Path("smart-contracts/StreamMintOperationIdentity.sol")
 TABLE_HEADING = "### StreamMintManager Domain Constants"
 SCHEMA_VERSION_CONSTANT = "SCHEMA_VERSION"
 SCHEMA_VERSION = "1"
@@ -115,19 +115,6 @@ EXPECTED_DOMAINS: tuple[DomainSpec, ...] = (
             "RESOLUTION_DOMAIN; uint256(block.chainid); address(this); "
             "address(mintLedger); collectionId; phaseId; counterId; subjectKey; "
             "tokenIndex; counterConfigHash"
-        ),
-    ),
-    DomainSpec(
-        name="OPERATION_DOMAIN",
-        preimage="6529STREAM_PREPARED_MINT_OPERATION_V1",
-        owner="StreamMintManager",
-        schema_version=SCHEMA_VERSION,
-        inputs=(
-            "OPERATION_DOMAIN; uint256(block.chainid); address(this); address(core); "
-            "address(mintLedger); collectionId; phaseId; policyHash; authorizationId; "
-            "requestCommitmentHash(payer, authorizer, initialRecipientsHash, "
-            "beneficiariesHash, tokenDataHash, saltsHash); contextHash; msg.sender; "
-            "operationNonce; quantity"
         ),
     ),
 )
@@ -309,6 +296,18 @@ TARGET_OPERATION_DOMAINS: tuple[tuple[str, str], ...] = (
         "6529STREAM_MINT_EXECUTION_PATH_SINGLE_STEP_V1",
     ),
     ("MINT_EXECUTION_PATH_PREPARED", "6529STREAM_MINT_EXECUTION_PATH_PREPARED_V1"),
+)
+IDENTITY_LIBRARY_AUX_DOMAINS: tuple[tuple[str, str], ...] = (
+    ("BATCH_RECIPIENTS_DOMAIN", "6529STREAM_MINT_BATCH_RECIPIENTS_V1"),
+    ("BATCH_BENEFICIARIES_DOMAIN", "6529STREAM_MINT_BATCH_BENEFICIARIES_V1"),
+    ("BATCH_TOKEN_DATA_DOMAIN", "6529STREAM_MINT_BATCH_TOKEN_DATA_V1"),
+    ("BATCH_COMMITMENTS_DOMAIN", "6529STREAM_MINT_BATCH_COMMITMENTS_V1"),
+    ("VALUE_KEY_DOMAIN", "6529STREAM_MINT_COUNTER_VALUE_KEY_V1"),
+)
+IDENTITY_LIBRARY_DOMAINS: tuple[tuple[str, str], ...] = (
+    *((spec.name, spec.preimage) for spec in EXPECTED_DOMAINS),
+    *TARGET_OPERATION_DOMAINS[:6],
+    *IDENTITY_LIBRARY_AUX_DOMAINS,
 )
 TARGET_OPERATION_DOMAIN_MIRROR_METADATA: dict[str, tuple[str, str, str]] = {
     "MINT_REQUEST_COMMITMENT_DOMAIN": (
@@ -952,6 +951,7 @@ def validate_operation_domains(
     mint_spec_text: str,
     architecture_text: str,
     *,
+    source_text: str | None = None,
     keccak_fn: Callable[[str], str] = cast_keccak256,
 ) -> None:
     rows = parse_operation_domain_table(mint_spec_text)
@@ -1032,6 +1032,55 @@ def validate_operation_domains(
                     f"{name} target protocol-v1 mirror {column} drifted: "
                     f"expected {expected_value!r}, got {actual_mirror[column]!r}"
                 )
+
+    if source_text is not None:
+        constants, _schema_version = parse_solidity_constants(source_text)
+        for name, preimage in TARGET_OPERATION_DOMAINS:
+            assignment_count = len(
+                re.findall(
+                    rf"\bbytes32\s+public\s+constant\s+{re.escape(name)}\s*=",
+                    source_text,
+                )
+            )
+            if assignment_count != 1 or constants.get(name) != preimage:
+                raise MintManagerDomainError(
+                    f"{name} Solidity implementation preimage/cardinality drifted: "
+                    f"expected count=1 preimage={preimage!r}, "
+                    f"got count={assignment_count} "
+                    f"preimage={constants.get(name) or '<missing>'!r}"
+                )
+        legacy_count = len(
+            re.findall(
+                r"\bbytes32\s+public\s+constant\s+OPERATION_DOMAIN\s*=",
+                source_text,
+            )
+        )
+        if legacy_count != 0:
+            raise MintManagerDomainError(
+                "superseded OPERATION_DOMAIN remains co-live in StreamMintManager"
+            )
+
+
+def validate_identity_library_domains(source_text: str) -> None:
+    """Bind every linked-library hash preimage to the reviewed manager domains."""
+    for name, preimage in IDENTITY_LIBRARY_DOMAINS:
+        pattern = (
+            rf'\bbytes32\s+private\s+constant\s+{re.escape(name)}\s*=\s*'
+            rf'keccak256\(\s*"(?P<preimage>[^"]+)"\s*\)\s*;'
+        )
+        matches = list(re.finditer(pattern, source_text, re.DOTALL))
+        actual = matches[0].group("preimage") if len(matches) == 1 else "<missing>"
+        if len(matches) != 1 or actual != preimage:
+            raise MintManagerDomainError(
+                f"{name} linked identity-library preimage/cardinality drifted: "
+                f"expected count=1 preimage={preimage!r}, "
+                f"got count={len(matches)} preimage={actual!r}"
+            )
+    legacy_count = len(re.findall(r"\bOPERATION_DOMAIN\b", source_text))
+    if legacy_count != 0:
+        raise MintManagerDomainError(
+            "superseded OPERATION_DOMAIN remains co-live in StreamMintOperationIdentity"
+        )
 
 
 def validate_operation_selectors(
@@ -2117,10 +2166,12 @@ def validate_operation_identity_fragments(documents: dict[Path, str]) -> None:
 def validate_repo(repo_root: Path) -> None:
     docs_text = (repo_root / DOC_PATH).read_text(encoding="utf-8")
     source_text = (repo_root / SOURCE_PATH).read_text(encoding="utf-8")
+    identity_source_text = (repo_root / IDENTITY_SOURCE_PATH).read_text(encoding="utf-8")
     validate_documents(docs_text, source_text)
     validate_revenue_domain_prefixes(repo_root)
     mint_spec_text = (repo_root / MINT_SPEC_PATH).read_text(encoding="utf-8")
-    validate_operation_domains(mint_spec_text, docs_text)
+    validate_operation_domains(mint_spec_text, docs_text, source_text=source_text)
+    validate_identity_library_domains(identity_source_text)
     validate_operation_selectors(mint_spec_text)
     validate_operation_preimages(mint_spec_text)
     validate_operation_structs(mint_spec_text)
