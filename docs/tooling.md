@@ -814,7 +814,7 @@ The mint-manager domain constants step validates the checked
 [`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
 `StreamMintManager` domain table against `StreamMintManager.sol` and recomputes
 each listed `keccak256` preimage with `cast`, failing on source, spec, or hash
-drift. It also checks the Proposed ADR 0018 target operation-domain mirrors;
+drift. It also checks the accepted ADR 0018 target operation-domain mirrors;
 the full normalized request/result/root/token `abi.encode` term order; exact
 `MintBatch`, `CounterConsumption`, and `GateResult` field layouts; selector,
 return, and replay-read ABI goldens; nonpayable manager ownership with no

@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:5ea32a27d37d8c825ad2b56bc0f6d36342646c91f65025e69f5ed8df12817097"
+      "sha256": "sha256:98e87c12821c86298c6aeaa0acfe48a0dd497a4025ebdcff2211dc163c469065"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -312,7 +312,7 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5ea32a27d37d8c825ad2b56bc0f6d36342646c91f65025e69f5ed8df12817097"
+          "sha256": "sha256:98e87c12821c86298c6aeaa0acfe48a0dd497a4025ebdcff2211dc163c469065"
         },
         {
           "path": "test/StreamGovernanceExecutor.t.sol",
@@ -354,11 +354,11 @@
         },
         {
           "path": "docs/launch-v1-target-architecture.md",
-          "sha256": "sha256:32964f2edef3dcc0140a41afed54823b9dc682181b2e746f0037db9a3cf6dc33"
+          "sha256": "sha256:edaf83a77dbed619298f66d3fcc1961a0b0f133d9ee4ff08216611971f6058cc"
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5ea32a27d37d8c825ad2b56bc0f6d36342646c91f65025e69f5ed8df12817097"
+          "sha256": "sha256:98e87c12821c86298c6aeaa0acfe48a0dd497a4025ebdcff2211dc163c469065"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
@@ -582,7 +582,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5ea32a27d37d8c825ad2b56bc0f6d36342646c91f65025e69f5ed8df12817097"
+          "sha256": "sha256:98e87c12821c86298c6aeaa0acfe48a0dd497a4025ebdcff2211dc163c469065"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -590,7 +590,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:9bb69557266951cb34dd5f2caa58d34febffeafb2612ccf50df6222ccaf3ce3a"
+          "sha256": "sha256:52e5f720f1d3cb66c688e32cc6f4c6dda998f50cb991547165c8c70e74e29dfd"
         }
       ],
       "risk_acceptance": null
@@ -669,7 +669,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:45e5c1d5fa37faa8810f7e15072cfef5494d561d12e7da8937c9a7ad24a84841"
+          "sha256": "sha256:8765a4378fc80a228faa7fc461aa0183772e836480dc2fd35d448945714be8d6"
         },
         {
           "path": "docs/warning-dispositions.md",

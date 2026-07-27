@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:723eacf79562dba19d125aa3e0a8c44f79c718b381dfb39f60d5cf6a1bac60f7",
-      "size_bytes": 135662
+      "sha256": "sha256:693d9cd5360aa508ed26db67901738409a71f86032300285f36c58c81b579ce2",
+      "size_bytes": 136107
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:4fae8a86fc4a50bc2c702e304a1449680e1db9741320e75654f33fba8d327e7f",
+      "sha256": "sha256:855c5d247df866ffd1bc0722bd2c93143d67e85c64f3d0cc5007430c593a1d11",
       "size_bytes": 32843
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Accepted ADR 0018's batch-operation-root and per-token operation-identity model for a conforming pre-genesis atomic source cutover. Issue #688 remains open until the ledger, manager, Core, resolver, settlement, tests, and generated as-built surfaces land together. Normative status mirrors and their checker now pin accepted-but-unimplemented semantics; acceptance changes no contract, ABI, deployment, maturity, or readiness state.",
       "Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty probe-record model and every related authorization path, and the overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises. Separate measurement references must describe the same candidate and complete proposed tuple; actual candidate-bound measurements remain blocked on issues #684 and #671, so maturity and release readiness are unchanged.",
       "Rebound the issue #690 record-family source catalog and checker to the merged #699 source commit so candidate-source replay verifies the complete interface, registry, metadata, preservation, and rehearsal binding set. Candidate-bound deployment evidence remains unavailable and both release modes remain fail-closed.",
       "Reserved the external-call gas inventory's `artist-authority` call lane for the exact future issue #670 `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a fail-closed field-policy matrix covering path, site, kind, operation, expression, count, path class, lane, issue, disposition, missing rows, and duplicate calls/rows. Literal declarations cannot use the reserved lane, while the exact Yul `gas()` exemption and generic unexpected-call rejection remain unchanged. This issue #669 checker-support slice adds neither the artist registry source nor its inventory row and does not claim GGP provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or release readiness.",

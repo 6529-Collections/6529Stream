@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Accepted ADR 0018's batch-operation-root and per-token operation-identity
+  model for a conforming pre-genesis atomic source cutover. Issue #688 remains
+  open until the ledger, manager, Core, resolver, settlement, tests, and
+  generated as-built surfaces land together. Normative status mirrors and
+  their checker now pin accepted-but-unimplemented semantics; acceptance
+  changes no contract, ABI, deployment, maturity, or readiness state.
 - Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
   probe-record model and every related authorization path, and the
   overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic

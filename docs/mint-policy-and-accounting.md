@@ -14,11 +14,12 @@ and U9 amend this document), and
 [ADR 0014](adr/0014-world-class-pass-round-5.md) (decisions V5 and V6
 amend this document). Those accepted decisions are superseded in part by
 [ADR 0017](adr/0017-raise-only-parameter-governance.md) for Governed Gas
-Parameter mutation and evidence surfaces. Proposed
-[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the
-candidate mint operation-identity and replay-ownership amendment; it remains
-unaccepted, and the target sections it introduces are blockers rather than
-acceptance or implementation evidence. The decisions are recorded in
+Parameter mutation and evidence surfaces. Accepted
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the
+pre-genesis target mint operation-identity and replay-ownership amendment. Its
+atomic source cutover remains unimplemented, and the target sections it
+introduces are deployment blockers rather than implementation or readiness
+evidence. The decisions are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
