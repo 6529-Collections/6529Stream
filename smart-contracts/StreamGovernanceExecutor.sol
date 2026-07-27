@@ -954,7 +954,13 @@ contract StreamGovernanceExecutor is
             privilegedProposer
         );
         StreamGovernanceActionPolicy.validateCalls(
-            _actionPolicy, ctx.actionClass, calls, canonicalCallDatas, true
+            _actionPolicy,
+            _manifest.actionPolicyCandidateProfileHash,
+            _manifest.actionPolicyCatalogHash,
+            _manifest.actionPolicyEntryCount,
+            ctx.actionClass,
+            calls,
+            canonicalCallDatas
         );
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
@@ -1231,7 +1237,13 @@ contract StreamGovernanceExecutor is
             actionId, action.proposer, action.actionClass, calls, !_manifest.isSealed, false, false
         );
         StreamGovernanceActionPolicy.validateCalls(
-            _actionPolicy, action.actionClass, calls, scheduledCallDatas, false
+            _actionPolicy,
+            _manifest.actionPolicyCandidateProfileHash,
+            _manifest.actionPolicyCatalogHash,
+            _manifest.actionPolicyEntryCount,
+            action.actionClass,
+            calls,
+            scheduledCallDatas
         );
         if (!_manifest.isSealed && action.proposer != genesisBootstrapAuthority) {
             revert GenesisBootstrapActorRequired(action.proposer);

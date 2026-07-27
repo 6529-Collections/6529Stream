@@ -20,6 +20,8 @@
     "schedule_validation": true,
     "execution_validation": true,
     "runtime_code_hash_validation": true,
+    "catalog_commitment_mirror_validation": true,
+    "selected_entry_hash_validation": true,
     "scheduled_catalog_snapshot_validation": true,
     "unknown_tuple_policy": "revert",
     "default_value_policy": "zero_only",

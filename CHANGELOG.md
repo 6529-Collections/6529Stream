@@ -117,9 +117,11 @@ the release policy in `docs/release-policy.md`.
 - Bound Governance V2 to an immutable, checksum-covered closed-world action
   catalog keyed by exact action class, target, and selector, with target runtime
   and reviewed profile hashes plus zero, exact, or bounded native-value
-  semantics. Scheduling now rehashes full catalog integrity; execution checks
-  the immutable scheduled catalog snapshot and revalidates exact target code,
-  call type, and value bounds;
+  semantics. Scheduling now compares the immutable catalog against its
+  separately stored manifest commitment and validates each selected entry's
+  bound hash without work proportional to the full catalog; execution checks
+  the scheduled catalog snapshot and revalidates each selected entry, exact
+  target code, call type, and value bounds;
   unknown tuples, unregistered modules, generic proxy/multicall/fallback/
   delegatecall routes, and unreviewed native transfers fail closed. Added
   hostile target, target-drift, typed-value, refund, reentrancy, and mixed-value

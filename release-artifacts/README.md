@@ -391,16 +391,19 @@ launch Executor, RoleRegistry, ModuleRegistry, governed gas/time host, and
 system-manifest-tail surfaces by exact action class, target profile, selector,
 call type, and value policy. The runtime bootstrap expands those reviewed
 profiles to exact addresses and runtime code hashes, commits the sorted catalog,
-caps it at 1,024 entries, fully rehashes it when scheduling, and checks the
-immutable snapshot plus each selected live entry again at execution. Unknown
-tuples fail closed. The launch source catalog authorizes no
+caps it at 1,024 entries, binds the policy and its exact schema in the release
+manifest, and stores a per-entry hash commitment. Scheduling compares the
+catalog against its separately stored manifest commitment and validates only
+the selected entry commitments, so validation remains bounded at the catalog
+cap. Execution checks the immutable scheduled snapshot plus each selected live
+entry again. Unknown tuples fail closed. The launch source catalog authorizes no
 native-value entry; any future
 nonzero row must explicitly select exact or bounded value semantics and inherit
 the caller-funded, exact-target, exact-batch-sum, atomic-revert, and
 surplus-rejection policy.
 
 The committed candidate binding is deliberately `not_available` because issue
-#656 has not produced exact launch addresses and runtime hashes. It is not
+`#656` has not produced exact launch addresses and runtime hashes. It is not
 readiness evidence and keeps `RISK-GOV-003` open pending candidate expansion,
 deployment/system-manifest reconciliation, fork and testnet rehearsal,
 monitoring, and independent review. Run

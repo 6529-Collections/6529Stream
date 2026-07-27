@@ -25,6 +25,8 @@ library StreamGovernanceManifest {
     bytes4 private constant MANIFEST_PUBLICATION_COUNT_SELECTOR = 0x5b1e1cba;
     bytes4 private constant REGISTER_ROLE_MANAGER_SELECTOR =
         IStreamRoleRegistry.registerRoleManager.selector;
+    uint256 private constant BOOTSTRAP_STATE_WORDS = 29;
+    uint256 private constant BOOTSTRAP_STATE_BYTES = BOOTSTRAP_STATE_WORDS * 32;
 
     struct LifecycleState {
         bool bound;
@@ -350,11 +352,17 @@ library StreamGovernanceManifest {
             inventoryStateRoot,
             inventoryLeafCount
         );
-        encoded = new bytes(0x3A0);
+        if (abi.encode(stateView).length != BOOTSTRAP_STATE_BYTES) {
+            revert IStreamGovernanceExecutor.InvalidSystemManifestBootstrap();
+        }
+        uint256 bootstrapStateBytes = BOOTSTRAP_STATE_BYTES;
+        encoded = new bytes(bootstrapStateBytes);
         assembly ("memory-safe") {
             let source := stateView
             let destination := add(encoded, 0x20)
-            for { let offset := 0 } lt(offset, 0x3A0) { offset := add(offset, 0x20) } {
+            for { let offset := 0 } lt(offset, bootstrapStateBytes) {
+                offset := add(offset, 0x20)
+            } {
                 mstore(add(destination, offset), mload(add(source, offset)))
             }
         }

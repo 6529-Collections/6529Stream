@@ -350,6 +350,9 @@ interface IStreamGovernanceExecutor {
     error InvalidGovernanceActionPolicyEntry(uint256 index);
     error GovernanceActionPolicyEntriesNotSorted(uint256 index);
     error GovernanceActionPolicyCatalogHashMismatch(bytes32 expected, bytes32 actual);
+    error GovernanceActionPolicyEntryHashMismatch(
+        uint256 callIndex, bytes32 expected, bytes32 actual
+    );
     error GovernanceActionPolicyUnknown(
         uint256 callIndex, uint8 actionClass, address target, bytes4 selector
     );

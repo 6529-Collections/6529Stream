@@ -5,11 +5,12 @@ import "./IStreamGovernanceExecutor.sol";
 
 /// @notice Closed-world Governance V2 action and native-value policy.
 /// @dev The catalog is materialized once during bootstrap, has no mutation
-///      entrypoint, and is fully rehashed at scheduling. Execution compares the
-///      immutable scheduled commitment and revalidates every selected entry's
-///      exact live target and value policy. Public functions execute by
-///      DELEGATECALL from `StreamGovernanceExecutor`, so the catalog commitment
-///      is domain-separated by the exact Executor.
+///      entrypoint, and stores a commitment for every selected-entry proof.
+///      Scheduling and execution both verify the bound catalog commitment plus
+///      every selected entry's immutable hash, exact live target, and value
+///      policy. Public functions execute by DELEGATECALL from
+///      `StreamGovernanceExecutor`, so the catalog commitment is
+///      domain-separated by the exact Executor.
 library StreamGovernanceActionPolicy {
     uint16 private constant SCHEMA_VERSION = 1;
     // The bootstrap trigger table can contain 128 selectors, each admitted for
@@ -38,6 +39,7 @@ library StreamGovernanceActionPolicy {
         bytes32 catalogHash;
         GovernanceActionPolicyEntry[] entries;
         mapping(bytes32 => uint256) entryIndexPlusOne;
+        mapping(bytes32 => bytes32) entryHashes;
     }
 
     event GovernanceActionPolicyBound(
@@ -75,7 +77,9 @@ library StreamGovernanceActionPolicy {
             priorKey = key;
             state.entries.push(entry);
             state.entryIndexPlusOne[key] = i + 1;
-            chainHash = _appendEntry(chainHash, entry, i);
+            bytes32 entryHash = _entryHash(entry, i);
+            state.entryHashes[key] = entryHash;
+            chainHash = _appendEntryHash(chainHash, entryHash, i);
         }
 
         bytes32 catalogHash =
@@ -95,12 +99,16 @@ library StreamGovernanceActionPolicy {
 
     function validateCalls(
         State storage state,
+        bytes32 expectedCandidateProfileHash,
+        bytes32 manifestCatalogHash,
+        uint256 expectedEntryCount,
         uint8 actionClass,
         GovernanceCall[] memory calls,
-        bytes[] memory callDatas,
-        bool verifyIntegrity
+        bytes[] memory callDatas
     ) public view {
-        if (verifyIntegrity) _requireIntegrity(state);
+        _requireBoundCatalog(
+            state, expectedCandidateProfileHash, manifestCatalogHash, expectedEntryCount
+        );
         for (uint256 i = 0; i < calls.length; i++) {
             _validateCall(state, actionClass, calls[i], callDatas[i], i);
         }
@@ -127,38 +135,33 @@ library StreamGovernanceActionPolicy {
                 revert IStreamGovernanceExecutor.GovernanceActionPolicyEntriesNotSorted(i);
             }
             priorKey = key;
-            chainHash = _appendEntry(chainHash, entry, i);
+            chainHash = _appendEntryHash(chainHash, _entryHash(entry, i), i);
         }
         return _catalogHash(executor, candidateProfileHash, entries.length, chainHash);
     }
 
-    function _requireIntegrity(State storage state) private view {
-        if (!state.bound) revert IStreamGovernanceExecutor.GovernanceActionPolicyNotBound();
-        bytes32 chainHash = bytes32(0);
-        bytes32 priorKey = bytes32(0);
+    function _requireBoundCatalog(
+        State storage state,
+        bytes32 expectedCandidateProfileHash,
+        bytes32 manifestCatalogHash,
+        uint256 expectedEntryCount
+    ) private view {
         uint256 count = state.entries.length;
-        if (count == 0 || count > MAX_ACTION_POLICY_ENTRIES) {
-            revert IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry(count);
+        if (
+            !state.bound || state.candidateProfileHash == bytes32(0)
+                || state.catalogHash == bytes32(0) || count == 0
+                || count > MAX_ACTION_POLICY_ENTRIES
+        ) revert IStreamGovernanceExecutor.GovernanceActionPolicyNotBound();
+        if (state.candidateProfileHash != expectedCandidateProfileHash) {
+            revert IStreamGovernanceExecutor.InvalidGovernanceActionPolicyCandidate(state.candidateProfileHash);
         }
-        for (uint256 i = 0; i < count; i++) {
-            GovernanceActionPolicyEntry storage entry = state.entries[i];
-            _validateStoredEntry(entry, i);
-            bytes32 key = policyKey(entry.actionClass, entry.target, entry.selector);
-            if (
-                (i != 0 && uint256(priorKey) >= uint256(key))
-                    || state.entryIndexPlusOne[key] != i + 1
-            ) {
-                revert IStreamGovernanceExecutor.GovernanceActionPolicyEntriesNotSorted(i);
-            }
-            priorKey = key;
-            chainHash = _appendStoredEntry(chainHash, entry, i);
-        }
-        bytes32 catalogHash =
-            _catalogHash(address(this), state.candidateProfileHash, count, chainHash);
-        if (catalogHash != state.catalogHash) {
+        if (state.catalogHash != manifestCatalogHash) {
             revert IStreamGovernanceExecutor.GovernanceActionPolicyCatalogHashMismatch(
-                state.catalogHash, catalogHash
+                manifestCatalogHash, state.catalogHash
             );
+        }
+        if (count != expectedEntryCount) {
+            revert IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry(count);
         }
     }
 
@@ -183,6 +186,14 @@ library StreamGovernanceActionPolicy {
         ) {
             revert IStreamGovernanceExecutor.GovernanceActionPolicyUnknown(
                 callIndex, actionClass, call_.target, call_.selector
+            );
+        }
+        GovernanceActionPolicyEntry memory entryCopy = entry;
+        bytes32 expectedEntryHash = state.entryHashes[key];
+        bytes32 actualEntryHash = _entryHash(entryCopy, indexPlusOne - 1);
+        if (expectedEntryHash == bytes32(0) || actualEntryHash != expectedEntryHash) {
+            revert IStreamGovernanceExecutor.GovernanceActionPolicyEntryHashMismatch(
+                callIndex, expectedEntryHash, actualEntryHash
             );
         }
 
@@ -260,14 +271,6 @@ library StreamGovernanceActionPolicy {
         _validateValueShape(entry, index);
     }
 
-    function _validateStoredEntry(GovernanceActionPolicyEntry storage entry, uint256 index)
-        private
-        view
-    {
-        GovernanceActionPolicyEntry memory copy = entry;
-        _validateEntry(copy, index, false);
-    }
-
     function _validateValueShape(GovernanceActionPolicyEntry memory entry, uint256 index)
         private
         pure
@@ -301,25 +304,23 @@ library StreamGovernanceActionPolicy {
         }
     }
 
-    function _appendEntry(
-        bytes32 chainHash,
-        GovernanceActionPolicyEntry memory entry,
-        uint256 index
-    ) private pure returns (bytes32) {
+    function _entryHash(GovernanceActionPolicyEntry memory entry, uint256 index)
+        private
+        pure
+        returns (bytes32)
+    {
         // The catalog is bounded to 1,024 entries, so its index fits uint64.
         // forge-lint: disable-next-line(unsafe-typecast)
-        bytes32 entryHash = keccak256(abi.encode(ACTION_POLICY_ENTRY_V1, uint64(index), entry));
-        // forge-lint: disable-next-line(unsafe-typecast)
-        return keccak256(abi.encode(ACTION_POLICY_CHAIN_V1, chainHash, entryHash, uint64(index)));
+        return keccak256(abi.encode(ACTION_POLICY_ENTRY_V1, uint64(index), entry));
     }
 
-    function _appendStoredEntry(
-        bytes32 chainHash,
-        GovernanceActionPolicyEntry storage entry,
-        uint256 index
-    ) private pure returns (bytes32) {
-        GovernanceActionPolicyEntry memory copy = entry;
-        return _appendEntry(chainHash, copy, index);
+    function _appendEntryHash(bytes32 chainHash, bytes32 entryHash, uint256 index)
+        private
+        pure
+        returns (bytes32)
+    {
+        // forge-lint: disable-next-line(unsafe-typecast)
+        return keccak256(abi.encode(ACTION_POLICY_CHAIN_V1, chainHash, entryHash, uint64(index)));
     }
 
     function _catalogHash(

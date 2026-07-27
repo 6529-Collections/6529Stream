@@ -1618,10 +1618,14 @@ The checker validates
 and its
 [`governance-action-policy.v1.schema.json`](../release-artifacts/schema/governance-action-policy.v1.schema.json)
 schema. It pins the exact source-level action-class, target-profile, and selector
-tuples, requires the zero-value default, rejects generic proxy, multicall,
-fallback-dispatch, delegatecall, and unregistered-module routes, and verifies
-that the Executor validates the immutable catalog at scheduling and execution
-with the same 1,024-entry ceiling recorded by the artifact.
+lookup key and all three ABI/Keccak domains, requires the exact zero-value
+limit/hash default, rejects generic proxy, multicall, fallback-dispatch,
+delegatecall, and unregistered-module routes, and verifies that the Executor
+compares the catalog against the separately stored manifest
+candidate/catalog/count commitment and validates every selected entry hash at
+scheduling and execution. Validation is proportional to selected calls rather
+than the catalog's recorded 1,024-entry ceiling. The release manifest binds both
+the policy and its exact schema identity, digest, and size.
 For a complete candidate it also requires policy-key ordering, rejects routes
 that do not expand from the reviewed source/native catalogs, and independently
 recomputes the ABI-encoded onchain catalog commitment from the chain ID, exact

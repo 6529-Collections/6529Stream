@@ -29,6 +29,9 @@ GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
     "6529stream.governed-parameter-inventory.v1"
 )
 GOVERNANCE_ACTION_POLICY_SCHEMA = "6529stream.governance-action-policy.v1"
+GOVERNANCE_ACTION_POLICY_SCHEMA_ID = (
+    "https://6529.io/schemas/governance-action-policy.v1.schema.json"
+)
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
 )
@@ -78,6 +81,9 @@ DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
 )
 DEFAULT_GOVERNANCE_ACTION_POLICY = Path(
     "release-artifacts/governance-action-policy.json"
+)
+DEFAULT_GOVERNANCE_ACTION_POLICY_SCHEMA = Path(
+    "release-artifacts/schema/governance-action-policy.v1.schema.json"
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
     record_family_authorization_checker.DEFAULT_INVENTORY
@@ -419,6 +425,58 @@ def release_tool_call_policy_records(
             "schema_version": JSON_SCHEMA_DRAFT,
             "schema_id": RELEASE_TOOL_CALL_POLICY_SCHEMA_ID,
             "document_schema_version": RELEASE_TOOL_CALL_POLICY_SCHEMA,
+        }
+    )
+    return {
+        "policy": policy_record,
+        "schema": schema_record,
+    }
+
+
+def governance_action_policy_records(
+    repo_root: Path,
+) -> dict[str, dict[str, Any]]:
+    """Validate and bind the governance action policy plus its exact schema."""
+    policy_path = repo_root / DEFAULT_GOVERNANCE_ACTION_POLICY
+    schema_path = repo_root / DEFAULT_GOVERNANCE_ACTION_POLICY_SCHEMA
+    policy, _, policy_record = json_snapshot_record(policy_path, repo_root)
+    schema, _, schema_record = json_snapshot_record(schema_path, repo_root)
+
+    if policy.get("schema_version") != GOVERNANCE_ACTION_POLICY_SCHEMA:
+        raise ReleaseManifestError(
+            "governance action policy must use schema "
+            f"{GOVERNANCE_ACTION_POLICY_SCHEMA}"
+        )
+    policy_record["schema_version"] = GOVERNANCE_ACTION_POLICY_SCHEMA
+
+    if schema.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseManifestError(
+            "governance action policy schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if schema.get("$id") != GOVERNANCE_ACTION_POLICY_SCHEMA_ID:
+        raise ReleaseManifestError(
+            "governance action policy schema must use schema ID "
+            f"{GOVERNANCE_ACTION_POLICY_SCHEMA_ID}"
+        )
+    schema_properties = require_dict(
+        schema.get("properties"),
+        f"{schema_path}.properties",
+    )
+    schema_version = require_dict(
+        schema_properties.get("schema_version"),
+        f"{schema_path}.properties.schema_version",
+    )
+    if schema_version.get("const") != GOVERNANCE_ACTION_POLICY_SCHEMA:
+        raise ReleaseManifestError(
+            "governance action policy schema must pin document version "
+            f"{GOVERNANCE_ACTION_POLICY_SCHEMA}"
+        )
+    schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": GOVERNANCE_ACTION_POLICY_SCHEMA_ID,
+            "document_schema_version": GOVERNANCE_ACTION_POLICY_SCHEMA,
         }
     )
     return {
@@ -1584,10 +1642,8 @@ def build_manifest(
                 repo_root / DEFAULT_GOVERNED_PARAMETER_INVENTORY,
                 repo_root,
             ),
-            "governance_action_policy": file_record(
-                repo_root / DEFAULT_GOVERNANCE_ACTION_POLICY,
-                repo_root,
-                schema_required=True,
+            "governance_action_policy": governance_action_policy_records(
+                repo_root
             ),
             "record_family_authorization": record_family_authorization_records(
                 repo_root

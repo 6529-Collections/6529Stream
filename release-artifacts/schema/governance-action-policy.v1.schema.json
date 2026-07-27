@@ -34,6 +34,8 @@
         "schedule_validation",
         "execution_validation",
         "runtime_code_hash_validation",
+        "catalog_commitment_mirror_validation",
+        "selected_entry_hash_validation",
         "scheduled_catalog_snapshot_validation",
         "unknown_tuple_policy",
         "default_value_policy",

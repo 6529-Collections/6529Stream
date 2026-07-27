@@ -2788,13 +2788,39 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
         _assertActionPolicyUnbound(setup.executor);
     }
 
+    function testBindRejectsEmptyActionPolicyCatalogAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        setup.binding.actionPolicies = new GovernanceActionPolicyEntry[](0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry.selector, 0
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
+    function testBindRejectsActionPolicyCatalogOverCapAndRollsBack() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        setup.binding.actionPolicies = new GovernanceActionPolicyEntry[](1_025);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry.selector, 1_025
+            )
+        );
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        _assertActionPolicyUnbound(setup.executor);
+    }
+
     function _assertActionPolicyUnbound(StreamGovernanceExecutor executor) private view {
-        (bool bound, bytes32 candidate, bytes32 catalogHash, uint256 entryCount) =
+        (bool bootstrapBound, bytes32 candidate, bytes32 catalogHash, uint256 entryCount) =
             _actionPolicyBootstrapState(executor);
-        require(!bound, "failed bind policy remains unbound");
+        require(!bootstrapBound, "failed bind bootstrap remains unbound");
         require(candidate == bytes32(0), "failed bind candidate rolled back");
-        require(catalogHash == bytes32(0), "failed bind catalog rolled back");
-        require(entryCount == 0, "failed bind entries rolled back");
+        require(
+            catalogHash == bytes32(0) && entryCount == 0,
+            "failed bind action policy remains unbound"
+        );
     }
 
     function testBindRejectsZeroCodelessWrongAndAllTrueRoleRegistries() public {

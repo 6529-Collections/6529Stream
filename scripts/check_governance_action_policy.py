@@ -81,6 +81,20 @@ VALUE_SEMANTICS = (
 ENTRY_DOMAIN = keccak(b"6529STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1")
 CHAIN_DOMAIN = keccak(b"6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1")
 CATALOG_DOMAIN = keccak(b"6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1")
+EXPECTED_DOMAINS = {
+    "entry": (
+        "6529STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1",
+        ENTRY_DOMAIN,
+    ),
+    "chain": (
+        "6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1",
+        CHAIN_DOMAIN,
+    ),
+    "catalog": (
+        "6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1",
+        CATALOG_DOMAIN,
+    ),
+}
 
 
 def fail(message: str) -> None:
@@ -279,10 +293,16 @@ def check(policy: dict) -> None:
 
     enforcement = policy.get("runtime_enforcement", {})
     require(enforcement.get("max_entries") == 1024, "runtime enforcement catalog cap")
+    require(
+        enforcement.get("lookup_key") == ["action_class", "target", "selector"],
+        "runtime enforcement lookup key",
+    )
     for flag in (
         "schedule_validation",
         "execution_validation",
         "runtime_code_hash_validation",
+        "catalog_commitment_mirror_validation",
+        "selected_entry_hash_validation",
         "scheduled_catalog_snapshot_validation",
     ):
         require(enforcement.get(flag) is True, f"runtime enforcement {flag}")
@@ -290,9 +310,21 @@ def check(policy: dict) -> None:
     require(enforcement.get("default_value_policy") == "zero_only", "default value policy")
     require(enforcement.get("batch_policy") == "atomic_exact_msg_value_sum", "batch policy")
     require(enforcement.get("surplus_policy") == "revert", "surplus policy")
+    domains = enforcement.get("domains", {})
+    require(set(domains) == set(EXPECTED_DOMAINS), "runtime enforcement domain set")
+    for name, (preimage, expected_hash) in EXPECTED_DOMAINS.items():
+        domain = domains.get(name, {})
+        require(domain.get("preimage") == preimage, f"{name} domain preimage")
+        require(
+            domain.get("keccak256") == "0x" + expected_hash.hex(),
+            f"{name} domain hash",
+        )
 
     value_semantics = policy.get("value_semantics", {})
-    require(value_semantics.get("zero_only", {}).get("id") == 0, "zero value id")
+    zero_only = value_semantics.get("zero_only", {})
+    require(zero_only.get("id") == 0, "zero value id")
+    require(zero_only.get("value_limit") == "0", "zero value limit")
+    require(zero_only.get("semantics_hash") == ZERO_WORD, "zero value semantics hash")
     for name, identifier in (("exact", 1), ("bounded", 2)):
         value = value_semantics.get(name, {})
         require(value.get("id") == identifier, f"{name} value id")
@@ -366,7 +398,17 @@ def check(policy: dict) -> None:
         "GovernanceActionPolicySnapshotMismatch" in executor_source,
         "scheduled catalog snapshot check",
     )
-    require("ACTION_POLICY_CATALOG_V1" in policy_source, "catalog hash domain")
+    for source_domain in (
+        "ACTION_POLICY_ENTRY_V1",
+        "ACTION_POLICY_CHAIN_V1",
+        "ACTION_POLICY_CATALOG_V1",
+    ):
+        require(source_domain in policy_source, f"{source_domain} source domain")
+    require("entryHashes" in policy_source, "selected entry commitment check")
+    require(
+        "actionPolicyCatalogHash" in executor_source,
+        "manifest catalog commitment mirror check",
+    )
     require("GovernanceActionPolicyUnknown" in policy_source, "unknown tuple rejection")
     require("GovernanceActionPolicyValueRejected" in policy_source, "value rejection")
     require("StreamGovernanceActionPolicy.bind(" in manifest_source, "manifest bootstrap bind")

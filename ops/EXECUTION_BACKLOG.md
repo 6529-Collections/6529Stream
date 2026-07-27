@@ -1935,7 +1935,7 @@ merged ADR 0017's raise-only parameter hosts. The current #684 slice adds the
 exact schema-validated planning inventory and strict production-completeness boundary
 without pretending unavailable candidate bindings are complete. The #685 slice
 adds the closed-world action-policy implementation and release catalog; #684,
-#656 candidate binding, non-local evidence, and independent review still own
+issue `#656` candidate binding, non-local evidence, and independent review still own
 the remaining cutover work. Measured net-negative Core cutover work remains
 required to complete issue `#654`.
 

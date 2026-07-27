@@ -1092,7 +1092,12 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
     function _actionPolicyBootstrapState(StreamGovernanceExecutor executor)
         internal
         view
-        returns (bool bound, bytes32 candidateProfileHash, bytes32 catalogHash, uint256 entryCount)
+        returns (
+            bool bootstrapBound,
+            bytes32 candidateProfileHash,
+            bytes32 catalogHash,
+            uint256 entryCount
+        )
     {
         (bool success, bytes memory encoded) = address(executor)
             .staticcall(
@@ -1102,7 +1107,7 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
             );
         require(success && encoded.length == 29 * 32, "bootstrap state read failed");
         assembly ("memory-safe") {
-            bound := iszero(iszero(mload(add(encoded, 0x20))))
+            bootstrapBound := iszero(iszero(mload(add(encoded, 0x20))))
             candidateProfileHash := mload(add(encoded, 0x360))
             catalogHash := mload(add(encoded, 0x380))
             entryCount := mload(add(encoded, 0x3a0))

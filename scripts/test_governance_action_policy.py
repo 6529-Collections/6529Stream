@@ -30,6 +30,41 @@ class GovernanceActionPolicyCheckerTest(unittest.TestCase):
         with self.assertRaisesRegex(checker.jsonschema.ValidationError, "1024"):
             checker.check(policy)
 
+    def test_runtime_lookup_key_is_exact(self) -> None:
+        policy = copy.deepcopy(self.policy)
+        policy["runtime_enforcement"]["lookup_key"] = [
+            "action_class",
+            "selector",
+            "target",
+        ]
+        with self.assertRaisesRegex(ValueError, "runtime enforcement lookup key"):
+            checker.check(policy)
+
+    def test_runtime_domain_hash_is_recomputed(self) -> None:
+        policy = copy.deepcopy(self.policy)
+        policy["runtime_enforcement"]["domains"]["entry"]["keccak256"] = (
+            "0x" + "11" * 32
+        )
+        with self.assertRaisesRegex(ValueError, "entry domain hash"):
+            checker.check(policy)
+
+    def test_runtime_domain_preimage_is_exact(self) -> None:
+        policy = copy.deepcopy(self.policy)
+        policy["runtime_enforcement"]["domains"]["catalog"]["preimage"] += "-drift"
+        with self.assertRaisesRegex(ValueError, "catalog domain preimage"):
+            checker.check(policy)
+
+    def test_zero_value_semantics_are_exact(self) -> None:
+        for field, value, expected_error in (
+            ("value_limit", "1", "zero value limit"),
+            ("semantics_hash", "0x" + "11" * 32, "zero value semantics hash"),
+        ):
+            with self.subTest(field=field):
+                policy = copy.deepcopy(self.policy)
+                policy["value_semantics"]["zero_only"][field] = value
+                with self.assertRaisesRegex(ValueError, expected_error):
+                    checker.check(policy)
+
     def test_complete_candidate_cannot_exceed_runtime_cap(self) -> None:
         policy = copy.deepcopy(self.policy)
         policy["runtime_enforcement"]["max_entries"] = 0
