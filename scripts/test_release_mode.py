@@ -344,7 +344,7 @@ class ReleaseModeTests(unittest.TestCase):
 
         self.assertEqual(len(blockers), 1)
         self.assertIn("RISK-GOV-003 remains open_blocker", blockers[0])
-        self.assertIn("issues #658 and #685", blockers[0])
+        self.assertIn("issues #656 and #658", blockers[0])
 
     def test_governance_native_value_blocker_reads_validated_snapshot_once(self) -> None:
         """The release decision consumes the exact snapshot that was validated."""

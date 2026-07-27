@@ -1453,14 +1453,16 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 260 configured roots,
-expanding to exactly 428 covered-file entries in each checksum index. The twelve
+The revised canonical projection contains exactly 263 configured roots,
+expanding to exactly 432 covered-file entries in each checksum index. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
 `smart-contracts/` or `script/`. The #672 planning package adds six exact roots
 for its artifact, generator/checker/tests, and two Solidity target-fixture
 sources; its dedicated via-IR snapshot is the seventh new record under the
-already covered baseline directory.
+already covered baseline directory. The Governance V2 policy artifact, checker,
+and tests add three exact roots; those files plus the policy schema under the
+already covered schema directory add four exact entries.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
@@ -1595,6 +1597,46 @@ tests are checksum-covered, and release-manifest generation/check depends on
 the ordinary inventory target so stale policy cannot enter the generated tail.
 The offline release verifier additionally requires the release manifest and
 candidate lockfile to carry matching canonical inventory records.
+
+## Governance V2 Action Policy
+
+Run the closed-world action/native-value gate with:
+
+```bash
+make governance-action-policy-check
+```
+
+The target runs:
+
+```bash
+python scripts/test_governance_action_policy.py
+python scripts/check_governance_action_policy.py
+```
+
+The checker validates
+[`release-artifacts/governance-action-policy.json`](../release-artifacts/governance-action-policy.json)
+and its
+[`governance-action-policy.v1.schema.json`](../release-artifacts/schema/governance-action-policy.v1.schema.json)
+schema. It pins the exact source-level action-class, target-profile, and selector
+lookup key and all three ABI/Keccak domains, requires the exact zero-value
+limit/hash default, rejects generic proxy, multicall, fallback-dispatch,
+delegatecall, and unregistered-module routes, and verifies that the Executor
+compares the catalog against the separately stored manifest
+candidate/catalog/count commitment and validates every selected entry hash at
+scheduling and execution. Validation is proportional to selected calls rather
+than the catalog's recorded 1,024-entry ceiling. The release manifest binds both
+the policy and its exact schema identity, digest, and size.
+For a complete candidate it also requires policy-key ordering, rejects routes
+that do not expand from the reviewed source/native catalogs, and independently
+recomputes the ABI-encoded onchain catalog commitment from the chain ID, exact
+Executor address, candidate profile, target addresses, runtime code hashes, and
+value-policy rows.
+Candidate binding remains honestly unavailable until issue #656 supplies exact
+addresses and runtime hashes. The ordinary gate accepts that explicit blocker
+but rejects a fabricated or commitment-inconsistent complete candidate;
+`RISK-GOV-003` cannot close until
+candidate deployment, rehearsal, monitoring, and independent-review evidence
+are linked.
 
 ## External-Call Gas Inventory
 
@@ -1766,7 +1808,7 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline.
 
 The release-tool call policy and its schema are reviewed inputs, not generated
-outputs. Any change to one of the 31 reviewed tool/test sources or to an allowed
+outputs. Any change to one of the 32 reviewed tool/test sources or to an allowed
 dangerous exception must update and review the policy before the generated
 tail. Preserve the canonical tail order: risk register, release notes, release
 manifest, bytecode proof, candidate lockfile, then checksum bundle. This keeps
@@ -2023,10 +2065,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `522ec69adc075b6514ca96b410926128cfdfe1b0` on
-`2026-07-26T11:35:26Z` records 3,035 findings: 47 High, 740 Medium, 1,216 Low,
-992 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/27/30`, vendored `1/9/10`, test `43/697/740`, script
+at source commit `93527f72ec7911f2e473053bccb5cd07c8cb311e` on
+`2026-07-27T03:45:25Z` records 3,096 findings: 49 High, 761 Medium, 1,249 Low,
+997 Informational, and 40 Optimization. Its High/Medium scope totals are
+first-party production `3/27/30`, vendored `1/9/10`, test `45/718/763`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

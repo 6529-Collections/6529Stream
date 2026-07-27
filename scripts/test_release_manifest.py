@@ -109,6 +109,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     governed_parameter_inventory = (
         root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
     )
+    governance_action_policy = root / generator.DEFAULT_GOVERNANCE_ACTION_POLICY
+    governance_action_policy_schema = (
+        root / generator.DEFAULT_GOVERNANCE_ACTION_POLICY_SCHEMA
+    )
     record_family_inventory = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
     )
@@ -259,6 +263,22 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         governed_parameter_inventory,
         {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
+    )
+    write_json(
+        governance_action_policy,
+        {"schema_version": generator.GOVERNANCE_ACTION_POLICY_SCHEMA},
+    )
+    write_json(
+        governance_action_policy_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": generator.GOVERNANCE_ACTION_POLICY_SCHEMA_ID,
+            "properties": {
+                "schema_version": {
+                    "const": generator.GOVERNANCE_ACTION_POLICY_SCHEMA
+                }
+            },
+        },
     )
     write_json(
         record_family_source_catalog,
@@ -1377,6 +1397,8 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "contract_config": contract_config,
         "genesis_deployment_profile": genesis_deployment_profile,
         "governed_parameter_inventory": governed_parameter_inventory,
+        "governance_action_policy": governance_action_policy,
+        "governance_action_policy_schema": governance_action_policy_schema,
         "record_family_inventory": record_family_inventory,
         "record_family_source_catalog": record_family_source_catalog,
         "record_family_source_catalog_schema": (
@@ -1432,6 +1454,14 @@ class ReleaseManifestTests(unittest.TestCase):
             },
         )
         self.inventory_validator = self.inventory_validation_patcher.start()
+        self.governance_action_policy_validation_patcher = mock.patch.object(
+            generator.governance_action_policy_checker,
+            "check",
+            return_value=None,
+        )
+        self.governance_action_policy_validator = (
+            self.governance_action_policy_validation_patcher.start()
+        )
         self.record_family_validation_patcher = mock.patch.object(
             generator.record_family_authorization_checker,
             "validate_package",
@@ -1450,6 +1480,7 @@ class ReleaseManifestTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.release_tool_policy_validation_patcher.stop()
         self.record_family_validation_patcher.stop()
+        self.governance_action_policy_validation_patcher.stop()
         self.inventory_validation_patcher.stop()
 
     def test_governed_parameter_inventory_record_runs_semantic_validation(
@@ -2040,6 +2071,76 @@ class ReleaseManifestTests(unittest.TestCase):
             },
         )
 
+    def test_committed_manifest_binds_governance_action_policy(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            manifest["release_artifacts"]["governance_action_policy"],
+            generator.governance_action_policy_records(repo_root),
+        )
+
+    def test_governance_action_policy_records_reject_identity_drift(self) -> None:
+        mutations = (
+            (
+                "policy schema",
+                "governance_action_policy",
+                lambda document: document.__setitem__(
+                    "schema_version",
+                    "6529stream.governance-action-policy.v2",
+                ),
+                "governance action policy must use schema",
+            ),
+            (
+                "schema ID",
+                "governance_action_policy_schema",
+                lambda document: document.__setitem__(
+                    "$id",
+                    "https://example.invalid/governance-action-policy.json",
+                ),
+                "governance action policy schema must use schema ID",
+            ),
+            (
+                "document version",
+                "governance_action_policy_schema",
+                lambda document: document["properties"]["schema_version"].__setitem__(
+                    "const",
+                    "6529stream.governance-action-policy.v2",
+                ),
+                "governance action policy schema must pin document version",
+            ),
+        )
+        for label, path_key, mutate, expected_error in mutations:
+            with self.subTest(label=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_release_tree(root)
+                    path = paths[path_key]
+                    document = json.loads(path.read_text(encoding="utf-8"))
+                    mutate(document)
+                    write_json(path, document)
+                    with self.assertRaisesRegex(
+                        generator.ReleaseManifestError,
+                        expected_error,
+                    ):
+                        generator.governance_action_policy_records(root)
+
+    def test_governance_action_policy_records_reject_semantic_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_tree(root)
+            self.governance_action_policy_validator.side_effect = ValueError(
+                "runtime enforcement catalog cap"
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "invalid governance action policy: runtime enforcement catalog cap",
+            ):
+                generator.governance_action_policy_records(root)
+
     def test_default_governance_docs_cover_raise_only_governance_adr(self) -> None:
         self.assertIn(
             Path("docs/adr/0017-raise-only-parameter-governance.md"),
@@ -2226,6 +2327,10 @@ class ReleaseManifestTests(unittest.TestCase):
                         "schema_version": schema_version,
                     },
                 )
+            self.assertEqual(
+                manifest["release_artifacts"]["governance_action_policy"],
+                generator.governance_action_policy_records(root),
+            )
             self.assertEqual(
                 manifest["release_artifacts"]["source_verification_inputs"]["schema_version"],
                 "6529stream.source-verification-inputs.v1",

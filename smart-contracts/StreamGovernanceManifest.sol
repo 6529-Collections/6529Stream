@@ -5,6 +5,7 @@ import "./IStreamGovernanceExecutor.sol";
 import "./IStreamModuleRegistry.sol";
 import "./IStreamRoleRegistry.sol";
 import "./StreamGovernanceBootstrap.sol";
+import "./StreamGovernanceActionPolicy.sol";
 import "./StreamGovernanceEvidence.sol";
 import "./StreamGovernancePolicy.sol";
 import "./StreamRoles.sol";
@@ -16,14 +17,16 @@ import "./StreamRoles.sol";
 library StreamGovernanceManifest {
     bytes32 private constant SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1 =
         0xace275f08856e822491961304b01cdc9423d7d16c05518327353df5cd02e33f8;
-    bytes32 private constant SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1 =
-        0x96decef116f307400b4d1826658d33976ec923ce136ead67b736b8becbe781ef;
+    bytes32 private constant SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2 =
+        keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2");
     bytes32 private constant SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1 =
         0x9927dc0a368efe3d99880bb180d83938664a29ad399291c4544e4cab70c84548;
     bytes4 private constant MANIFEST_PUBLISH_SELECTOR = 0x09b1b5c6;
     bytes4 private constant MANIFEST_PUBLICATION_COUNT_SELECTOR = 0x5b1e1cba;
     bytes4 private constant REGISTER_ROLE_MANAGER_SELECTOR =
         IStreamRoleRegistry.registerRoleManager.selector;
+    uint256 private constant BOOTSTRAP_STATE_WORDS = 29;
+    uint256 private constant BOOTSTRAP_STATE_BYTES = BOOTSTRAP_STATE_WORDS * 32;
 
     struct LifecycleState {
         bool bound;
@@ -48,6 +51,9 @@ library StreamGovernanceManifest {
         bytes32 expectedInventoryStateRoot;
         uint256 expectedInventoryLeafCount;
         address sealedPayloadPointer;
+        bytes32 actionPolicyCandidateProfileHash;
+        bytes32 actionPolicyCatalogHash;
+        uint256 actionPolicyEntryCount;
         bytes32[] pointerTypes;
         address[] registries;
         bytes32[] registryCodeHashes;
@@ -81,6 +87,9 @@ library StreamGovernanceManifest {
         uint256 inventoryLeafCount;
         address bootstrapAuthority;
         address sealedPayloadPointer;
+        bytes32 actionPolicyCandidateProfileHash;
+        bytes32 actionPolicyCatalogHash;
+        uint256 actionPolicyEntryCount;
     }
 
     struct BindContext {
@@ -128,6 +137,7 @@ library StreamGovernanceManifest {
     function bind(
         LifecycleState storage state,
         StreamGovernanceBootstrap.PolicyState storage policy,
+        StreamGovernanceActionPolicy.State storage actionPolicy,
         SystemManifestBootstrapBinding calldata binding,
         BindContext memory ctx
     ) public {
@@ -144,6 +154,15 @@ library StreamGovernanceManifest {
             revert IStreamGovernanceExecutor.InvalidSystemManifestBootstrap();
         }
         _validateBootstrapBinding(binding, ctx.genesisBootstrapAuthority);
+        StreamGovernanceActionPolicy.bind(
+            actionPolicy,
+            binding.actionPolicyCandidateProfileHash,
+            binding.expectedActionPolicyCatalogHash,
+            binding.actionPolicies
+        );
+        state.actionPolicyCandidateProfileHash = actionPolicy.candidateProfileHash;
+        state.actionPolicyCatalogHash = actionPolicy.catalogHash;
+        state.actionPolicyEntryCount = actionPolicy.entries.length;
 
         state.roleRegistry = IStreamRoleRegistry(binding.roleRegistry);
         state.roleRegistryCodeHash = binding.roleRegistry.codehash;
@@ -333,11 +352,17 @@ library StreamGovernanceManifest {
             inventoryStateRoot,
             inventoryLeafCount
         );
-        encoded = new bytes(0x340);
+        if (abi.encode(stateView).length != BOOTSTRAP_STATE_BYTES) {
+            revert IStreamGovernanceExecutor.InvalidSystemManifestBootstrap();
+        }
+        uint256 bootstrapStateBytes = BOOTSTRAP_STATE_BYTES;
+        encoded = new bytes(bootstrapStateBytes);
         assembly ("memory-safe") {
             let source := stateView
             let destination := add(encoded, 0x20)
-            for { let offset := 0 } lt(offset, 0x340) { offset := add(offset, 0x20) } {
+            for { let offset := 0 } lt(offset, bootstrapStateBytes) {
+                offset := add(offset, 0x20)
+            } {
                 mstore(add(destination, offset), mload(add(source, offset)))
             }
         }
@@ -714,7 +739,7 @@ library StreamGovernanceManifest {
         );
         return keccak256(
             bytes.concat(
-                abi.encode(SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1, _bootstrapScopeHash()),
+                abi.encode(SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2, _bootstrapScopeHash()),
                 abi.encode(stateView)
             )
         );
@@ -761,7 +786,10 @@ library StreamGovernanceManifest {
             inventoryStateRoot: currentInventoryRoot,
             inventoryLeafCount: currentInventoryCount,
             bootstrapAuthority: genesisBootstrapAuthority,
-            sealedPayloadPointer: sealedPayloadPointer
+            sealedPayloadPointer: sealedPayloadPointer,
+            actionPolicyCandidateProfileHash: state.actionPolicyCandidateProfileHash,
+            actionPolicyCatalogHash: state.actionPolicyCatalogHash,
+            actionPolicyEntryCount: state.actionPolicyEntryCount
         });
     }
 }

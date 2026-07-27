@@ -333,8 +333,9 @@ current 3 High and 27 Medium rows remain Open under issue #658; an exact live
 baseline match proves inventory consistency, not acceptance. The separate High
 open blocker `RISK-GOV-003` preserves the Governance Executor's
 proposal-selected native-value authority after bounded assembly made that call
-invisible to Slither; it remains non-waivable pending the closed-world policy
-and evidence work tracked by issues #658 and #685.
+invisible to Slither. The closed-world runtime and source catalog now exist,
+but the risk remains non-waivable pending #656-bound candidate deployment and
+rehearsal evidence plus independent review under issue #658.
 
 Production release mode also checks the checksum-covered current `StreamCore`
 measurement in `release-artifacts/latest/abi-checksums.json`. It requires at

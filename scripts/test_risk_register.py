@@ -454,6 +454,7 @@ class RiskRegisterTests(unittest.TestCase):
         self.assertEqual(
             risk["tracking"],
             [
+                "https://github.com/6529-Collections/6529Stream/issues/656",
                 "https://github.com/6529-Collections/6529Stream/issues/658",
                 "https://github.com/6529-Collections/6529Stream/issues/685",
             ],

@@ -274,6 +274,20 @@ Required monitors:
 - link collector-facing 1/1 provenance and permanence claims to reviewed
   artifacts before production display.
 
+## Governance Action Policy Monitoring
+
+Governance V2 monitoring must ingest `GovernanceActionPolicyBound` and
+`GovernanceActionPolicyValidated` alongside the existing action lifecycle
+events. Retain the candidate profile hash, catalog hash, entry count, action ID,
+and validation phase. Alert Critical when the bootstrap event disagrees with
+the checksum-covered candidate catalog, when a scheduled action lacks exactly
+one phase-1 validation for the bound catalog, when an executed action lacks the
+matching phase-2 validation, or when the schedule and execution catalog hashes
+differ. A catalog-bound target runtime-code-hash rejection is High and blocks
+execution until deployment drift is triaged; it must never be bypassed through
+a proxy, multicall, fallback dispatcher, delegatecall router, or unregistered
+module.
+
 ## Release Evidence Monitoring
 
 Release monitoring covers release manifest drift, checksum drift, ABI checksum

@@ -91,6 +91,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governance_action_policy.py"),
     Path("scripts/check_governed_parameter_identifiers.py"),
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
@@ -182,6 +183,7 @@ scripts/check_changelog.py|sys.stderr|local:print|keyword:file
 scripts/check_drop_authorization_signing_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/check_drop_authorization_signing_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_drop_authorization_signing_evidence.py|sys.stderr|local:print|keyword:file
+scripts/check_governance_action_policy.py|sys.stderr|local:print|keyword:file
 scripts/check_governed_parameter_identifiers.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/check_governed_parameter_identifiers.py|re.IGNORECASE|re.match|keyword:flags
 scripts/check_governed_parameter_identifiers.py|re.IGNORECASE|re.compile|keyword:flags
@@ -418,14 +420,14 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         100_553,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "223de8d925885bb55e7a6bc572dbefa5f50b0553fddb1a4e76331619ccebe530",
-        46_534,
+        "052ccda0c60bcd597cd6c1d7901ade55bbf56c644dc0cf79bed06e30ce749096",
+        46_536,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "3c4f55cca49507fb722759a9a5bc348277241b01052dc9ab5891cacaaaeb4c95",
-        169_071,
+        "ba02f06d4433b45408a504fb670b87e7900067ec42c111e7c95035da2db68c85",
+        169_204,
     ),
 }
 
@@ -483,6 +485,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/governed-parameter-inventory.json"),
+    Path("release-artifacts/governance-action-policy.json"),
     Path("release-artifacts/record-family-authorization-inventory.json"),
     Path("release-artifacts/record-family-authorization-source-catalog.json"),
     Path("release-artifacts/post-entropy-mint-completion-gas.json"),
@@ -514,6 +517,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_governed_parameter_identifiers.py"),
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/test_governed_parameter_inventory.py"),
+    Path("scripts/check_governance_action_policy.py"),
+    Path("scripts/test_governance_action_policy.py"),
     Path("scripts/generate_system_manifest_payload_vector.py"),
     Path("scripts/check_system_manifest_payload_vector.py"),
     Path("scripts/test_system_manifest_payload_vector.py"),
@@ -3029,7 +3034,7 @@ def build_release_tool_call_policy(
     *,
     source_snapshots: dict[str, CoveredFileSnapshot] | None = None,
 ) -> dict[str, Any]:
-    """Build the exact bounded static call policy for the reviewed 30 files."""
+    """Build the exact bounded static call policy for the reviewed 32 files."""
 
     runtime_paths = set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
     focused_paths = set(RELEASE_TOOL_FOCUSED_TESTS)
@@ -3039,9 +3044,9 @@ def build_release_tool_call_policy(
             "release-tool call policy role sets overlap: "
             f"{overlap}"
         )
-    if len(runtime_paths) != 22 or len(focused_paths) != 9:
+    if len(runtime_paths) != 23 or len(focused_paths) != 9:
         raise ChecksumError(
-            "release-tool call policy requires exactly 22 runtime and 9 "
+            "release-tool call policy requires exactly 23 runtime and 9 "
             f"focused-test paths, got {len(runtime_paths)} and "
             f"{len(focused_paths)}"
         )
@@ -3247,8 +3252,8 @@ def _validate_release_tool_call_policy_schema_document(
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 31,
-                "maxItems": 31,
+                "minItems": 32,
+                "maxItems": 32,
                 "uniqueItems": True,
                 "prefixItems": [
                     {

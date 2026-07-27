@@ -28,6 +28,7 @@ EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governance_action_policy.py"),
     Path("scripts/check_governed_parameter_identifiers.py"),
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
@@ -153,7 +154,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 260)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 263)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -240,14 +241,14 @@ class ReleaseChecksumTests(unittest.TestCase):
             sorted(generator.RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES),
         )
         self.assertEqual(len(policy["external_modules"]), 29)
-        self.assertEqual(len(rows), 31)
+        self.assertEqual(len(rows), 32)
         self.assertEqual(
             [row["path"] for row in rows],
             [path.as_posix() for path in generator.RELEASE_TOOL_CALL_POLICY_PATHS],
         )
         self.assertEqual(
             sum(row["role"] == "runtime" for row in rows),
-            22,
+            23,
         )
         self.assertEqual(
             sum(row["role"] == "focused-test" for row in rows),
@@ -255,7 +256,7 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST),
-            224,
+            225,
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_SHADOW_ALLOWLIST),
@@ -861,8 +862,8 @@ class ReleaseChecksumTests(unittest.TestCase):
                 },
                 "reviewed_paths": {
                     "type": "array",
-                    "minItems": 31,
-                    "maxItems": 31,
+                    "minItems": 32,
+                    "maxItems": 32,
                     "items": {},
                 },
             },
@@ -3148,11 +3149,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 260)
-        self.assertEqual(len(manifest["files"]), 428)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 263)
+        self.assertEqual(len(manifest["files"]), 432)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            428,
+            432,
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
@@ -3460,7 +3461,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 428)
+        self.assertEqual(len(classifications), 432)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

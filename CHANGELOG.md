@@ -114,6 +114,23 @@ the release policy in `docs/release-policy.md`.
   full root/operation-ID-vector comparison are pinned for later implementation.
   The ADR remains Proposed, freezes no ABI, changes no contract, and does not
   advance maturity or release readiness.
+- Bound Governance V2 to an immutable, checksum-covered closed-world action
+  catalog keyed by exact action class, target, and selector, with target runtime
+  and reviewed profile hashes plus zero, exact, or bounded native-value
+  semantics. Scheduling now compares the immutable catalog against its
+  separately stored manifest commitment and validates each selected entry's
+  bound hash without work proportional to the full catalog; execution checks
+  the scheduled catalog snapshot and revalidates each selected entry, exact
+  target code, call type, and value bounds;
+  unknown tuples, unregistered modules, generic proxy/multicall/fallback/
+  delegatecall routes, and unreviewed native transfers fail closed. Added
+  hostile target, target-drift, typed-value, refund, reentrancy, and mixed-value
+  atomic rollback tests; bootstrap/catalog monitoring events; machine schema,
+  policy checker, release-manifest/checksum integration, and monitoring/docs
+  updates for issue #685. The committed candidate binding remains explicitly
+  unavailable until issue #656 supplies exact addresses and code hashes, so
+  `RISK-GOV-003` remains High and open pending deployment, non-local rehearsal,
+  monitoring, and independent review; this is not a readiness claim.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
   `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
@@ -313,16 +330,17 @@ the release policy in `docs/release-policy.md`.
   target/selector/native-value boundary. This does not clear the static-analysis
   blocker in #658 and is not a production-readiness claim.
 - Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
-  `55a2e817876eac754355a14ae3907053e3d3deed` on
-  `2026-07-24T04:58:03Z`. The exact first-party production High/Medium
+  `93527f72ec7911f2e473053bccb5cd07c8cb311e` on
+  `2026-07-27T03:45:25Z`. The exact first-party production High/Medium
   inventory is now 30 Open rows (3 High, 27 Medium; one confirmed gap, five
   design-review rows, and 24 pending dispositions). All 30 retained semantic
-  fingerprints are unchanged and no new row appeared. The three retired rows
-  were `StreamCadenceProbe` equality findings; their removal records source
-  retirement under ADR 0017, not finding acceptance. Bounded assembly still
-  hides the Executor's proposal-selected native-value call from
+  fingerprints are unchanged and no new production row appeared. The seven
+  additional Medium rows are test-only governance action-policy findings. The
+  prior refresh's three retired `StreamCadenceProbe` equality rows record
+  source retirement under ADR 0017, not finding acceptance. Bounded assembly
+  still hides the Executor's proposal-selected native-value call from
   `arbitrary-send-eth`, so mandatory High open blocker `RISK-GOV-003` preserves
-  that authority under issues #658 and #685. The full 3,017-row capture,
+  that authority under issues #656 and #658. The full 3,096-row capture,
   normalized scope counts, provenance hashes, deterministic reviewer mirror,
   release-mode blocker, and generated risk/release evidence are checked
   together. This refresh is not an audit or readiness claim.

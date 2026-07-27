@@ -1737,16 +1737,49 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
     StreamGovernanceBootstrapManifestMock private systemManifest;
     address private systemManifestPayload;
 
+    function _additionalActionPolicies(BootstrapArtifacts memory artifacts)
+        internal
+        override
+        returns (GovernanceActionPolicyEntry[] memory entries)
+    {
+        executor = artifacts.executor;
+        registry = new StreamModuleRegistry(
+            executor, keccak256("registry-manifest"), "ipfs://registry-manifest"
+        );
+        module = new RegistryModuleMock(MODULE_INTERFACE_ID);
+        entries = new GovernanceActionPolicyEntry[](4);
+        entries[0] = _zeroPolicy(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            address(registry),
+            StreamModuleRegistry.registerModule.selector,
+            keccak256("TEST_MODULE_REGISTRY")
+        );
+        entries[1] = _zeroPolicy(
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
+            address(registry),
+            StreamModuleRegistry.setModuleStatus.selector,
+            keccak256("TEST_MODULE_REGISTRY")
+        );
+        entries[2] = _zeroPolicy(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            address(registry),
+            StreamModuleRegistry.setModuleStatus.selector,
+            keccak256("TEST_MODULE_REGISTRY")
+        );
+        entries[3] = _zeroPolicy(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            address(registry),
+            StreamModuleRegistry.setModuleRegistryManifest.selector,
+            keccak256("TEST_MODULE_REGISTRY")
+        );
+    }
+
     function setUp() public {
         vm.warp(BASE_TIME);
         BootstrapArtifacts memory bootstrap = _deploySealedExecutor(address(this));
         executor = bootstrap.executor;
         systemManifest = bootstrap.manifest;
         systemManifestPayload = bootstrap.payloadRoot;
-        registry = new StreamModuleRegistry(
-            executor, keccak256("registry-manifest"), "ipfs://registry-manifest"
-        );
-        module = new RegistryModuleMock(MODULE_INTERFACE_ID);
         _registerRegistryTailRules();
     }
 

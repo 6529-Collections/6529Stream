@@ -385,6 +385,34 @@ defaulting to this canonical artifact; the override must remain inside the
 repository's `release-artifacts/` tree, and only production release applies
 strict completeness.
 
+`governance-action-policy.json` is the checksum-covered Governance V2
+closed-world action and native-value policy. Its source catalog enumerates the
+launch Executor, RoleRegistry, ModuleRegistry, governed gas/time host, and
+system-manifest-tail surfaces by exact action class, target profile, selector,
+call type, and value policy. The runtime bootstrap expands those reviewed
+profiles to exact addresses and runtime code hashes, commits the sorted catalog,
+caps it at 1,024 entries, binds the policy and its exact schema in the release
+manifest, and stores a per-entry hash commitment. Scheduling compares the
+catalog against its separately stored manifest commitment and validates only
+the selected entry commitments, so validation remains bounded at the catalog
+cap. Execution checks the immutable scheduled snapshot plus each selected live
+entry again. Unknown tuples fail closed. The launch source catalog authorizes no
+native-value entry; any future
+nonzero row must explicitly select exact or bounded value semantics and inherit
+the caller-funded, exact-target, exact-batch-sum, atomic-revert, and
+surplus-rejection policy.
+
+The committed candidate binding is deliberately `not_available` because issue
+`#656` has not produced exact launch addresses and runtime hashes. It is not
+readiness evidence and keeps `RISK-GOV-003` open pending candidate expansion,
+deployment/system-manifest reconciliation, fork and testnet rehearsal,
+monitoring, and independent review. Run
+`python scripts/test_governance_action_policy.py` and
+`python scripts/check_governance_action_policy.py`, or
+`make governance-action-policy-check`, to enforce the source catalog,
+fail-closed candidate grammar, independent candidate-catalog commitment
+recomputation, forbidden generic routing classes, and honest release status.
+
 `system-manifest-payload-vector.json` is the deterministic, non-production
 `target_abi_lock_fixture` derived from all 37 profile entries under the
 probe-free `6529stream.genesis-deployment-profile.v2` grammar. Payload schema v1

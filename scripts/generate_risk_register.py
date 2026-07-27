@@ -281,6 +281,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_release_mode.py",
         ],
         "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/656",
             "https://github.com/6529-Collections/6529Stream/issues/658",
             "https://github.com/6529-Collections/6529Stream/issues/685",
         ],

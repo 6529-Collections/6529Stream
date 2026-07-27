@@ -41,9 +41,11 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: canonical-deployment-plan-check
 .PHONY: governed-parameter-identifiers-check
 .PHONY: governed-parameter-inventory-check
+.PHONY: governance-action-policy-check
 .PHONY: record-family-authorization-check
 check: governed-parameter-identifiers-check
 check: governed-parameter-inventory-check
+check: governance-action-policy-check
 check: record-family-authorization-check
 
 build:
@@ -585,6 +587,10 @@ governed-parameter-identifiers-check:
 governed-parameter-inventory-check:
 	$(PYTHON) scripts/test_governed_parameter_inventory.py
 	$(PYTHON) scripts/check_governed_parameter_inventory.py
+
+governance-action-policy-check:
+	$(PYTHON) scripts/test_governance_action_policy.py
+	$(PYTHON) scripts/check_governance_action_policy.py
 
 record-family-authorization-check:
 	$(PYTHON) scripts/test_record_family_authorization.py

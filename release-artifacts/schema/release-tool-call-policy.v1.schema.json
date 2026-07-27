@@ -74,13 +74,14 @@
     },
     "reviewed_paths": {
       "type": "array",
-      "minItems": 31,
-      "maxItems": 31,
+      "minItems": 32,
+      "maxItems": 32,
       "uniqueItems": true,
       "prefixItems": [
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_admin_ceremony_evidence.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_changelog.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_drop_authorization_signing_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governance_action_policy.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_identifiers.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_inventory.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_non_local_release_evidence.py"}, "role": {"const": "runtime"}}},

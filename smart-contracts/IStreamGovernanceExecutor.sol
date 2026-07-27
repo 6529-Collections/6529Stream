@@ -66,6 +66,26 @@ struct GovernanceActionRequest {
     bytes32 manifestHash;
 }
 
+/// @notice One closed-world governance call policy bound during the one-way
+///         system-manifest bootstrap.
+/// @dev Entries are keyed by the exact `(actionClass, target, selector)` tuple.
+///      `callType` is `1` for a direct selector-bearing contract call and `2`
+///      for an empty-calldata native transfer. `valuePolicy` is `0` for
+///      zero-only, `1` for an exact nonzero value, and `2` for a bounded
+///      nonzero value. Nonzero policies must carry the canonical value
+///      semantics hash defined by the implementation.
+struct GovernanceActionPolicyEntry {
+    uint8 actionClass;
+    address target;
+    bytes4 selector;
+    bytes32 targetCodeHash;
+    bytes32 targetProfileHash;
+    uint8 callType;
+    uint8 valuePolicy;
+    uint256 valueLimit;
+    bytes32 valueSemanticsHash;
+}
+
 /// @notice Launch-v1 governance action classes as rebaselined by ADR 0017.
 /// @dev Numeric IDs are append-only. ID 6 is retired pre-genesis, forbidden,
 ///      and must never be reassigned.
@@ -112,6 +132,9 @@ struct SystemManifestBootstrapBinding {
     SystemManifestBootstrapTriggerExpectation[] expectedTriggers;
     bytes32[] pointerTypes;
     address[] registries;
+    bytes32 actionPolicyCandidateProfileHash;
+    bytes32 expectedActionPolicyCatalogHash;
+    GovernanceActionPolicyEntry[] actionPolicies;
 }
 
 /// @notice Staged governance executor implementing the canonical action
@@ -322,6 +345,29 @@ interface IStreamGovernanceExecutor {
     );
     error GovernanceSchedulingDuringExecution();
     error GovernanceIdentityRoleOverlap(address account, bytes32 role);
+    error GovernanceActionPolicyNotBound();
+    error InvalidGovernanceActionPolicyCandidate(bytes32 candidateProfileHash);
+    error InvalidGovernanceActionPolicyEntry(uint256 index);
+    error GovernanceActionPolicyEntriesNotSorted(uint256 index);
+    error GovernanceActionPolicyCatalogHashMismatch(bytes32 expected, bytes32 actual);
+    error GovernanceActionPolicyEntryHashMismatch(
+        uint256 callIndex, bytes32 expected, bytes32 actual
+    );
+    error GovernanceActionPolicyUnknown(
+        uint256 callIndex, uint8 actionClass, address target, bytes4 selector
+    );
+    error GovernanceActionPolicyCallTypeMismatch(
+        uint256 callIndex, uint8 expectedCallType, uint8 actualCallType
+    );
+    error GovernanceActionPolicyTargetCodeHashMismatch(
+        uint256 callIndex, address target, bytes32 expected, bytes32 actual
+    );
+    error GovernanceActionPolicyValueRejected(
+        uint256 callIndex, uint8 valuePolicy, uint256 value, uint256 valueLimit
+    );
+    error GovernanceActionPolicySnapshotMismatch(
+        bytes32 actionId, bytes32 scheduledCatalogHash, bytes32 currentCatalogHash
+    );
 
     event GovernanceActionScheduled(
         uint16 schemaVersion,
@@ -501,6 +547,20 @@ interface IStreamGovernanceExecutor {
         bytes32 targetCodeHash,
         uint64 revision,
         bytes32 indexed actionId
+    );
+    event GovernanceActionPolicyBound(
+        uint16 schemaVersion,
+        bytes32 indexed candidateProfileHash,
+        bytes32 indexed catalogHash,
+        uint256 entryCount
+    );
+    /// @dev `phase` is `1` for scheduling and `2` for execution.
+    event GovernanceActionPolicyValidated(
+        uint16 schemaVersion,
+        bytes32 indexed actionId,
+        uint8 indexed phase,
+        bytes32 indexed candidateProfileHash,
+        bytes32 catalogHash
     );
 
     /// @notice Returns the stored action; while `SCHEDULED` and past
@@ -806,7 +866,10 @@ interface IStreamGovernanceExecutor {
             bytes32 inventoryStateRoot,
             uint256 inventoryLeafCount,
             address genesisBootstrapAuthority,
-            address sealedPayloadPointer
+            address sealedPayloadPointer,
+            bytes32 actionPolicyCandidateProfileHash,
+            bytes32 actionPolicyCatalogHash,
+            uint256 actionPolicyEntryCount
         );
 
     function sealSystemManifestBootstrap() external;

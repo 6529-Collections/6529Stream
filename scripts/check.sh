@@ -53,6 +53,8 @@ forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -
 "$python_bin" scripts/check_governed_parameter_identifiers.py
 "$python_bin" scripts/test_governed_parameter_inventory.py
 "$python_bin" scripts/check_governed_parameter_inventory.py
+"$python_bin" scripts/test_governance_action_policy.py
+"$python_bin" scripts/check_governance_action_policy.py
 "$python_bin" scripts/test_record_family_authorization.py
 "$python_bin" scripts/check_record_family_authorization.py
 "$python_bin" scripts/test_system_manifest_payload_vector.py

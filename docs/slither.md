@@ -23,32 +23,32 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced at source commit
-`522ec69adc075b6514ca96b410926128cfdfe1b0` on
-`2026-07-26T11:35:26Z`. It contains 3,035 findings across all impacts and
-scopes: 47 High, 740 Medium, 1,216 Low, 992 Informational, and 40
+`93527f72ec7911f2e473053bccb5cd07c8cb311e` on
+`2026-07-27T03:45:25Z`. It contains 3,096 findings across all impacts and
+scopes: 49 High, 761 Medium, 1,249 Low, 997 Informational, and 40
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | First-party production | 3 | 27 | 30 |
 | Vendored | 1 | 9 | 10 |
-| Test | 43 | 697 | 740 |
+| Test | 45 | 718 | 763 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
 All 30 retained first-party High/Medium fingerprints are unchanged from the
 prior canonical baseline, and the refresh added or removed no production row.
-The higher all-scope totals come from the new record-family source and
-adversarial-test surfaces in separately classified diagnostic scopes; they do
-not reduce or accept any production finding.
+The higher all-scope totals include the governance action-policy adversarial
+tests in the separately classified test scope; they do not reduce or accept
+any production finding.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to
 Slither's `arbitrary-send-eth` detector. The row's disappearance is not a
-remediation or acceptance: High open blocker `RISK-GOV-003` preserves the
-semantic risk until closed-world target/selector/value policy, deployment
-binding, adversarial value-flow tests, and independent review are complete
-under issues #658 and #685.
+remediation or acceptance. The closed-world target/selector/value runtime,
+machine catalog, and adversarial value-flow tests now exist, but High open
+blocker `RISK-GOV-003` preserves the semantic risk until #656-bound candidate
+deployment/rehearsal evidence and independent review under #658 are complete.
 
 The reproducible Linux CI/release path installs the hashed lock before selecting
 the compiler:

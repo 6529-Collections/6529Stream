@@ -251,13 +251,16 @@ contributors who start from the README.
 - Bounded assembly in `StreamGovernanceExecutor` prevents governed-call
   returndata bombs but makes the proposal-selected native-value call invisible
   to Slither's `arbitrary-send-eth` detector. That analyzer disappearance is not
-  remediation: `RISK-GOV-003` preserves the authority as a High open blocker
-  until a closed-world target/selector/value policy, balance-source and
-  destination review, hostile-target and value-exhaustion regressions,
-  deployment binding, and independent review are complete. Issues
-  [#658](https://github.com/6529-Collections/6529Stream/issues/658) and
-  [#685](https://github.com/6529-Collections/6529Stream/issues/685) remain open;
-  the Governance V2 foundation is pre-audit and not production-ready.
+  remediation. The Executor now binds and revalidates a checksum-covered
+  closed-world action/target/selector/value catalog, and hostile target,
+  reentrancy, refund, typed-value, and atomic rollback regressions exist.
+  `RISK-GOV-003` nevertheless remains High and open because the exact production
+  candidate addresses/code hashes, deployment and system-manifest binding,
+  non-local rehearsals, monitoring proof, and independent review do not exist.
+  Issues [#656](https://github.com/6529-Collections/6529Stream/issues/656) and
+  [#658](https://github.com/6529-Collections/6529Stream/issues/658) own those
+  remaining gates; the Governance V2 foundation is pre-audit and not
+  production-ready.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback

@@ -152,13 +152,12 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     StreamGasParameterStore private _store;
     StreamTimeParameterStore private _timeStore;
 
-    function setUp() public {
-        vm.roll(_START_BLOCK);
-        vm.warp(_START_TIME);
-
-        _bootstrap = _deploySealedExecutor(address(this));
-        _executor = _bootstrap.executor;
-        _roleRegistry = _bootstrap.roleRegistry;
+    function _additionalActionPolicies(BootstrapArtifacts memory artifacts)
+        internal
+        override
+        returns (GovernanceActionPolicyEntry[] memory entries)
+    {
+        _executor = artifacts.executor;
 
         address[] memory safeOwners = new address[](3);
         safeOwners[0] = _SAFE_OWNER_ONE;
@@ -204,6 +203,51 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
             wallClockFloorSeconds: _TIME_WALL_CLOCK_FLOOR_SECONDS
         });
         _timeStore = new StreamTimeParameterStore(address(_executor), timeConfigs);
+
+        entries = new GovernanceActionPolicyEntry[](5);
+        entries[0] = _zeroPolicy(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            address(_terminalTarget),
+            StreamGovernanceV2TerminalFreezeRehearsalTarget.terminalFreeze.selector,
+            keccak256("TEST_HOLDER_REHEARSAL_TERMINAL_TARGET")
+        );
+        entries[1] = _zeroPolicy(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            address(_store),
+            IStreamGasParameterHost.raiseGasParameter.selector,
+            keccak256("TEST_HOLDER_REHEARSAL_GAS_STORE")
+        );
+        entries[2] = _zeroPolicy(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            address(_timeStore),
+            IStreamTimeParameterHost.raiseTimeParameter.selector,
+            keccak256("TEST_HOLDER_REHEARSAL_TIME_STORE")
+        );
+        entries[3] = _valuePolicy(
+            StreamGovernanceActionClasses.FUNDS_RECOVERY,
+            address(_schedulingSafe),
+            bytes4(0),
+            keccak256("TEST_HOLDER_REHEARSAL_SAFE_RECEIVER"),
+            1,
+            _NATIVE_REHEARSAL_VALUE
+        );
+        entries[4] = _valuePolicy(
+            StreamGovernanceActionClasses.FUNDS_RECOVERY,
+            address(_governor),
+            bytes4(0),
+            keccak256("TEST_HOLDER_REHEARSAL_GOVERNOR_RECEIVER"),
+            1,
+            _NATIVE_REHEARSAL_VALUE
+        );
+    }
+
+    function setUp() public {
+        vm.roll(_START_BLOCK);
+        vm.warp(_START_TIME);
+
+        _bootstrap = _deploySealedExecutor(address(this));
+        _executor = _bootstrap.executor;
+        _roleRegistry = _bootstrap.roleRegistry;
 
         _grantTerminalVetoRoleThroughRoot(address(_vetoSafe));
         _registerProposerThroughRoot(address(_schedulingSafe));

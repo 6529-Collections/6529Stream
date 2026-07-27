@@ -83,6 +83,34 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(PINNED_GOVERNANCE_CALLS_V2, "calls preimage recompute");
     }
 
+    function testGovernanceActionPolicyDomains() public {
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_ENTRY_V1")
+            .assertEq(
+                0x17497217a4a2920f9d71e4eb21f2e6c4e1807ebc94efc840b803a082c1923b7e,
+                "action policy entry domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1")
+            .assertEq(
+                0x10d1e55c75d9ea0c727e0d8b25139c0a44b8960214ae155228429067e7c49620,
+                "action policy chain domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1")
+            .assertEq(
+                0xba5f75b790daceafedd59e5aa5b3e7e55d939e3909f4ac95b32a8611997bc31a,
+                "action policy catalog domain"
+            );
+        keccak256("6529STREAM_NATIVE_VALUE_CALLER_EXACT_TARGET_ATOMIC_REVERT_SURPLUS_V1")
+            .assertEq(
+                0x9734d6cd59791593409e4cc12cae8ad5c2c0fa8cd606deffc0814fbf58109aea,
+                "native value semantics domain"
+            );
+        keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V2")
+            .assertEq(
+                0x9217c521443c5f03514316d2b2ad0dea3b73d13654494d9c0cf467a347776878,
+                "bootstrap state V2 domain"
+            );
+    }
+
     function testGovernanceV2DomainsAreNotContractGetters() public {
         bytes4[5] memory retiredGetters = [
             bytes4(0x5a7922a5),
@@ -173,6 +201,26 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(bytes32(bytes4(0x204cb92b)), "terminal cursor error");
         bytes32(IStreamGovernanceExecutor.TerminalFreezePageLimitExceeded.selector)
             .assertEq(bytes32(bytes4(0x83beaacb)), "terminal page-limit error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyNotBound.selector)
+            .assertEq(bytes32(bytes4(0xa5b742e2)), "action policy unbound error");
+        bytes32(IStreamGovernanceExecutor.InvalidGovernanceActionPolicyCandidate.selector)
+            .assertEq(bytes32(bytes4(0xe520f60d)), "action policy candidate error");
+        bytes32(IStreamGovernanceExecutor.InvalidGovernanceActionPolicyEntry.selector)
+            .assertEq(bytes32(bytes4(0xd6b8cb68)), "action policy entry error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyEntriesNotSorted.selector)
+            .assertEq(bytes32(bytes4(0x6acf28fc)), "action policy ordering error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyCatalogHashMismatch.selector)
+            .assertEq(bytes32(bytes4(0xf107e7a1)), "action policy catalog error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyUnknown.selector)
+            .assertEq(bytes32(bytes4(0x67318682)), "unknown action policy error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyCallTypeMismatch.selector)
+            .assertEq(bytes32(bytes4(0x0ffdba41)), "action policy call-type error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyTargetCodeHashMismatch.selector)
+            .assertEq(bytes32(bytes4(0x25ccae3e)), "action policy codehash error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicyValueRejected.selector)
+            .assertEq(bytes32(bytes4(0xdd09ff18)), "action policy value error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch.selector)
+            .assertEq(bytes32(bytes4(0xc9c602c5)), "action policy snapshot error");
     }
 
     function testManifestSelectorGoldens() public {
@@ -187,7 +235,7 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         bytes32(IStreamGovernanceExecutor.systemManifestTailTriggerChainHash.selector)
             .assertEq(bytes32(bytes4(0xa05cac72)), "tail chain selector");
         bytes32(IStreamGovernanceExecutor.bindSystemManifestBootstrap.selector)
-            .assertEq(bytes32(bytes4(0x32212927)), "bootstrap bind selector");
+            .assertEq(bytes32(bytes4(0x67e9ec44)), "bootstrap bind selector");
         bytes32(IStreamGovernanceExecutor.pendingScheduledActionCount.selector)
             .assertEq(bytes32(bytes4(0x20662991)), "pending count selector");
         bytes32(IStreamGovernanceExecutor.systemManifestBootstrapState.selector)

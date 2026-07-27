@@ -521,10 +521,14 @@ The current Gate A smoke baseline proves:
   (3 High, 27 Medium): one confirmed gap, five design-review rows, and 24
   pending dispositions. This is a release blocker and not a risk acceptance.
   Bounded assembly made the Governance Executor's proposal-selected
-  native-value authority invisible to Slither without removing it, so
-  `RISK-GOV-003` preserves that authority as a separate High open blocker under
-  issues #658 and #685. The Governance V2 foundation remains pre-audit and not
-  production-ready.
+  native-value authority invisible to Slither without removing it. That
+  analyzer disappearance is not remediation. The checksum-covered closed-world
+  Governance V2 catalog now makes unknown
+  action-class/target/selector tuples and unreviewed native value fail closed at
+  scheduling and execution. `RISK-GOV-003` remains a separate High open blocker
+  under issue #658 until issue #656 supplies exact candidate bindings and the
+  required deployment, rehearsal, monitoring, and independent-review evidence.
+  The Governance V2 foundation remains pre-audit and not production-ready.
 - `scripts/test_release_readiness.py` and
   `scripts/check_release_readiness.py` prove
   `docs/release-readiness.md` remains a Gate G dashboard that separates

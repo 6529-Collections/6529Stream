@@ -8,6 +8,7 @@ import "./Ownable.sol";
 import "./ReentrancyGuard.sol";
 import "./StreamRoles.sol";
 import "./StreamGovernanceBootstrap.sol";
+import "./StreamGovernanceActionPolicy.sol";
 import "./StreamGovernanceManifest.sol";
 import "./StreamGovernancePolicy.sol";
 
@@ -66,8 +67,10 @@ contract StreamGovernanceExecutor is
     StreamGovernancePolicy.AdminState private _admin;
     mapping(bytes32 => bytes32[3]) private _firstCallTransitionHashes;
     mapping(bytes32 => bytes32) private _terminalFreezeGuardianConfigCommitments;
+    mapping(bytes32 => bytes32) private _actionPolicyCatalogHashes;
 
     StreamGovernanceBootstrap.PolicyState private _policy;
+    StreamGovernanceActionPolicy.State private _actionPolicy;
     StreamGovernanceManifest.LifecycleState private _manifest;
     address private immutable genesisBootstrapAuthority;
     uint256 private _pendingScheduledActionCount;
@@ -812,6 +815,7 @@ contract StreamGovernanceExecutor is
         StreamGovernanceManifest.bind(
             _manifest,
             _policy,
+            _actionPolicy,
             binding,
             StreamGovernanceManifest.BindContext({
                 genesisBootstrapAuthority: genesisBootstrapAuthority,
@@ -857,7 +861,10 @@ contract StreamGovernanceExecutor is
             bytes32,
             uint256,
             address,
-            address
+            address,
+            bytes32,
+            bytes32,
+            uint256
         )
     {
         bytes memory encoded = StreamGovernanceManifest.encodeBootstrapState(
@@ -920,8 +927,8 @@ contract StreamGovernanceExecutor is
         // published onchain; the action record stores the pointer for the
         // full open-to-execute window.
         address callDataPointer = _requirePublishedCallData(calls);
-        uint256 totalValue =
-            _validateCalls(ctx.actionClass, calls, _readCanonicalCallDatas(callDataPointer));
+        bytes[] memory canonicalCallDatas = _readCanonicalCallDatas(callDataPointer);
+        uint256 totalValue = _validateCalls(ctx.actionClass, calls, canonicalCallDatas);
         bytes32 callsHash = _callsHash(calls);
         (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
             _deriveBatchTransitionHashes(calls, callsHash);
@@ -945,6 +952,15 @@ contract StreamGovernanceExecutor is
             !_manifest.isSealed,
             true,
             privilegedProposer
+        );
+        StreamGovernanceActionPolicy.validateCalls(
+            _actionPolicy,
+            _manifest.actionPolicyCandidateProfileHash,
+            _manifest.actionPolicyCatalogHash,
+            _manifest.actionPolicyEntryCount,
+            ctx.actionClass,
+            calls,
+            canonicalCallDatas
         );
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
@@ -975,6 +991,7 @@ contract StreamGovernanceExecutor is
         action.manifestHash = ctx.manifestHash;
 
         _actionNonces[actionId] = nonceUsed;
+        _actionPolicyCatalogHashes[actionId] = _actionPolicy.catalogHash;
         _callDataPointers[actionId] = callDataPointer;
         _firstCallTransitionHashes[actionId] =
             [calls[0].scopeHash, calls[0].oldValueHash, calls[0].newValueHash];
@@ -996,6 +1013,13 @@ contract StreamGovernanceExecutor is
 
         StreamGovernanceBootstrap.emitActionScheduled(
             actionId, ctx, calls[0].target, calls[0].selector, totalValue, callsHash, nonceUsed
+        );
+        emit GovernanceActionPolicyValidated(
+            SCHEMA_VERSION,
+            actionId,
+            1,
+            _actionPolicy.candidateProfileHash,
+            _actionPolicy.catalogHash
         );
     }
 
@@ -1192,6 +1216,14 @@ contract StreamGovernanceExecutor is
         if (callDatas.length != calls.length || scheduledCallDatas.length != calls.length) {
             revert CallDataCountMismatch(calls.length, callDatas.length);
         }
+        if (!_actionPolicy.bound) revert GovernanceActionPolicyNotBound();
+        bytes32 currentCatalogHash = _actionPolicy.catalogHash;
+        bytes32 scheduledCatalogHash = _actionPolicyCatalogHashes[actionId];
+        if (scheduledCatalogHash != currentCatalogHash) {
+            revert GovernanceActionPolicySnapshotMismatch(
+                actionId, scheduledCatalogHash, currentCatalogHash
+            );
+        }
         uint256 totalValue = _validateCalls(action.actionClass, calls, scheduledCallDatas);
         for (uint256 i = 0; i < calls.length; i++) {
             if (!_bytesEqual(callDatas[i], scheduledCallDatas[i])) {
@@ -1203,6 +1235,15 @@ contract StreamGovernanceExecutor is
             && calls[0].selector == this.sealSystemManifestBootstrap.selector;
         _validateManifestTailComposition(
             actionId, action.proposer, action.actionClass, calls, !_manifest.isSealed, false, false
+        );
+        StreamGovernanceActionPolicy.validateCalls(
+            _actionPolicy,
+            _manifest.actionPolicyCandidateProfileHash,
+            _manifest.actionPolicyCatalogHash,
+            _manifest.actionPolicyEntryCount,
+            action.actionClass,
+            calls,
+            scheduledCallDatas
         );
         if (!_manifest.isSealed && action.proposer != genesisBootstrapAuthority) {
             revert GenesisBootstrapActorRequired(action.proposer);
@@ -1292,6 +1333,9 @@ contract StreamGovernanceExecutor is
             action.newValueHash,
             msg.sender,
             action.manifestHash
+        );
+        emit GovernanceActionPolicyValidated(
+            SCHEMA_VERSION, actionId, 2, _actionPolicy.candidateProfileHash, currentCatalogHash
         );
     }
 
