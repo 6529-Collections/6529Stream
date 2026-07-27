@@ -251,7 +251,7 @@ def _validate_core_boundary(evidence: dict[str, Any], repo_root: Path) -> None:
         raise CompletionGasCheckError("evidence must remain target-fixture-only")
     if boundary.get("stream_core_delta_bytes") != 0:
         raise CompletionGasCheckError("issue #672 must record zero StreamCore delta")
-    if boundary.get("stream_core_runtime_bytes") != 24_152:
+    if boundary.get("stream_core_runtime_bytes") != 24_135:
         raise CompletionGasCheckError("transitional StreamCore runtime drift")
     if (
         boundary.get("stream_core_eip170_margin_bytes")

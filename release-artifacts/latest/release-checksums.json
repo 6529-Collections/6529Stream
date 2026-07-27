@@ -274,7 +274,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:ebafcca845b9167d45046aa16eb5526df438f05143e94012862303ee2dc2fad5"
+    "sha256": "sha256:9d0de29e09cd824f82541516b59369132274143d99e63e2c7f41e5efa20aa17e"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1578,7 +1578,7 @@
     },
     {
       "path": "release-artifacts/post-entropy-mint-completion-gas.json",
-      "sha256": "sha256:61c67536a88639d58b9a2d5191009a66c10a3f2ea569b48b36a85bc6175a0011",
+      "sha256": "sha256:e55995c4e28ffcced568c64570901722f33397ef06ed508ae64f37ab0b9ebf20",
       "size_bytes": 5090
     },
     {
@@ -1858,7 +1858,7 @@
     },
     {
       "path": "scripts/check_post_entropy_completion_gas.py",
-      "sha256": "sha256:1af2910a3d6249fccd975e6139d57cb2c4f9b4c4039b702a7a2b7954d3e33a4b",
+      "sha256": "sha256:1a936e3209476177a70fe45624dde2e3ebf6a06c602b539769c0b3e5423d4617",
       "size_bytes": 17002
     },
     {
