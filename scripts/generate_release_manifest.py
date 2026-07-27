@@ -14,6 +14,7 @@ from typing import Any
 
 import check_drop_authorization_signing_evidence as drop_signing_evidence_checker
 import check_admin_ceremony_evidence as admin_ceremony_checker
+import check_governance_action_policy as governance_action_policy_checker
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
 import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
@@ -441,6 +442,20 @@ def governance_action_policy_records(
     schema_path = repo_root / DEFAULT_GOVERNANCE_ACTION_POLICY_SCHEMA
     policy, _, policy_record = json_snapshot_record(policy_path, repo_root)
     schema, _, schema_record = json_snapshot_record(schema_path, repo_root)
+
+    try:
+        governance_action_policy_checker.check(policy)
+    except (
+        OSError,
+        KeyError,
+        TypeError,
+        ValueError,
+        governance_action_policy_checker.jsonschema.SchemaError,
+        governance_action_policy_checker.jsonschema.ValidationError,
+    ) as exc:
+        raise ReleaseManifestError(
+            f"invalid governance action policy: {exc}"
+        ) from exc
 
     if policy.get("schema_version") != GOVERNANCE_ACTION_POLICY_SCHEMA:
         raise ReleaseManifestError(

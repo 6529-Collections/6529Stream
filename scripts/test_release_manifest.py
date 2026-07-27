@@ -1454,6 +1454,14 @@ class ReleaseManifestTests(unittest.TestCase):
             },
         )
         self.inventory_validator = self.inventory_validation_patcher.start()
+        self.governance_action_policy_validation_patcher = mock.patch.object(
+            generator.governance_action_policy_checker,
+            "check",
+            return_value=None,
+        )
+        self.governance_action_policy_validator = (
+            self.governance_action_policy_validation_patcher.start()
+        )
         self.record_family_validation_patcher = mock.patch.object(
             generator.record_family_authorization_checker,
             "validate_package",
@@ -1472,6 +1480,7 @@ class ReleaseManifestTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.release_tool_policy_validation_patcher.stop()
         self.record_family_validation_patcher.stop()
+        self.governance_action_policy_validation_patcher.stop()
         self.inventory_validation_patcher.stop()
 
     def test_governed_parameter_inventory_record_runs_semantic_validation(
@@ -2117,6 +2126,20 @@ class ReleaseManifestTests(unittest.TestCase):
                         expected_error,
                     ):
                         generator.governance_action_policy_records(root)
+
+    def test_governance_action_policy_records_reject_semantic_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_tree(root)
+            self.governance_action_policy_validator.side_effect = ValueError(
+                "runtime enforcement catalog cap"
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "invalid governance action policy: runtime enforcement catalog cap",
+            ):
+                generator.governance_action_policy_records(root)
 
     def test_default_governance_docs_cover_raise_only_governance_adr(self) -> None:
         self.assertIn(

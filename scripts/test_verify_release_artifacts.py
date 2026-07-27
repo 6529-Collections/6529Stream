@@ -689,7 +689,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_verifier_reviewed_trust_literals_are_exact(
         self,
     ) -> None:
-        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE), 22)
+        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE), 23)
         self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS), 9)
         self.assertFalse(
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
@@ -1213,8 +1213,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 },
                 "reviewed_paths": {
                     "type": "array",
-                    "minItems": 31,
-                    "maxItems": 31,
+                    "minItems": 32,
+                    "maxItems": 32,
                 },
             },
         }

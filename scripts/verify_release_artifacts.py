@@ -138,6 +138,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governance_action_policy.py"),
     Path("scripts/check_governed_parameter_identifiers.py"),
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
@@ -248,6 +249,7 @@ scripts/check_changelog.py|sys.stderr|local:print|keyword:file
 scripts/check_drop_authorization_signing_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/check_drop_authorization_signing_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_drop_authorization_signing_evidence.py|sys.stderr|local:print|keyword:file
+scripts/check_governance_action_policy.py|sys.stderr|local:print|keyword:file
 scripts/check_governed_parameter_identifiers.py|pathlib.Path|local:parser.add_argument|keyword:type
 scripts/check_governed_parameter_identifiers.py|re.IGNORECASE|re.match|keyword:flags
 scripts/check_governed_parameter_identifiers.py|re.IGNORECASE|re.compile|keyword:flags
@@ -2463,8 +2465,8 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 31,
-                "maxItems": 31,
+                "minItems": 32,
+                "maxItems": 32,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
@@ -2780,9 +2782,9 @@ def verify_release_tool_call_policy(
             for path in REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
         },
     }
-    if len(roles) != 31:
+    if len(roles) != 32:
         raise ReleaseArtifactVerificationError(
-            "release-tool call policy requires exactly 22 runtime and 9 "
+            "release-tool call policy requires exactly 23 runtime and 9 "
             "focused-test paths"
         )
     if (

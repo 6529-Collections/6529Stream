@@ -28,6 +28,7 @@ EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governance_action_policy.py"),
     Path("scripts/check_governed_parameter_identifiers.py"),
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
@@ -240,14 +241,14 @@ class ReleaseChecksumTests(unittest.TestCase):
             sorted(generator.RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES),
         )
         self.assertEqual(len(policy["external_modules"]), 29)
-        self.assertEqual(len(rows), 31)
+        self.assertEqual(len(rows), 32)
         self.assertEqual(
             [row["path"] for row in rows],
             [path.as_posix() for path in generator.RELEASE_TOOL_CALL_POLICY_PATHS],
         )
         self.assertEqual(
             sum(row["role"] == "runtime" for row in rows),
-            22,
+            23,
         )
         self.assertEqual(
             sum(row["role"] == "focused-test" for row in rows),
@@ -255,7 +256,7 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST),
-            224,
+            225,
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_SHADOW_ALLOWLIST),
@@ -861,8 +862,8 @@ class ReleaseChecksumTests(unittest.TestCase):
                 },
                 "reviewed_paths": {
                     "type": "array",
-                    "minItems": 31,
-                    "maxItems": 31,
+                    "minItems": 32,
+                    "maxItems": 32,
                     "items": {},
                 },
             },

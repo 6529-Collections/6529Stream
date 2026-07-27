@@ -1808,7 +1808,7 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline.
 
 The release-tool call policy and its schema are reviewed inputs, not generated
-outputs. Any change to one of the 31 reviewed tool/test sources or to an allowed
+outputs. Any change to one of the 32 reviewed tool/test sources or to an allowed
 dangerous exception must update and review the policy before the generated
 tail. Preserve the canonical tail order: risk register, release notes, release
 manifest, bytecode proof, candidate lockfile, then checksum bundle. This keeps
