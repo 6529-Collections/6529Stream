@@ -274,7 +274,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:05e67b6198436a92744e72828a819e517efaa503d1478f017ec49403164af048"
+    "sha256": "sha256:546ac61d32d64e5bf8cc9588bc0b2d1f4ed30591a4cf1298362d9070fa0efdad"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1428,7 +1428,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a12bd30e4410baeb51d94fbbc5b7a778c4177c3613f8e7da3b988c5b471181bb",
+      "sha256": "sha256:cbf17dc821fc11a8a76b0f7f5499a53893e733144ada32d21351a06c7d9bf67d",
       "size_bytes": 150687
     },
     {
@@ -1458,7 +1458,7 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:01f04226d4821735bac2657341a8e07d863ef246cdb293a4054f4165c668a475",
+      "sha256": "sha256:8b69c2d198ee4b0a5a7068f60ee1837845a12223f605722449b0c7083f238ab6",
       "size_bytes": 2913
     },
     {
@@ -1493,7 +1493,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:f82df8907ca3d95c3cecb38ab64ab6ea58f7dfd9a826a1b8a9cbbff968d71261",
+      "sha256": "sha256:0cd7c8c2ba41b6b8e1626729d2f564762f184d2b498b163cbe21196732f3e891",
       "size_bytes": 13603
     },
     {
@@ -1543,7 +1543,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:84d648b132ae9febf1466ac9270293615399a5672c6cde5c002f6570b982de3e",
+      "sha256": "sha256:940e7a00f43adacccf53c581b5701e6752f006af4d251d457c6fcbd8127a1640",
       "size_bytes": 147044
     },
     {
@@ -1573,7 +1573,7 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:49db234e7f6dedff67ce977ea4cf13d2c57e7b76fd8cc089db785b32fb33b199",
+      "sha256": "sha256:34cac63501a0ae7fc8a1e1366714b7860493cb482d21cb1fe8c7c70a2e968387",
       "size_bytes": 8272
     },
     {

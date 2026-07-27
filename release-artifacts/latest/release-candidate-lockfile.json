@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:84d648b132ae9febf1466ac9270293615399a5672c6cde5c002f6570b982de3e",
+      "sha256": "sha256:940e7a00f43adacccf53c581b5701e6752f006af4d251d457c6fcbd8127a1640",
       "size_bytes": 147044,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a12bd30e4410baeb51d94fbbc5b7a778c4177c3613f8e7da3b988c5b471181bb",
+      "sha256": "sha256:cbf17dc821fc11a8a76b0f7f5499a53893e733144ada32d21351a06c7d9bf67d",
       "size_bytes": 150687,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
