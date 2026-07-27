@@ -382,7 +382,7 @@ The current local baseline includes:
   size, and schema identity/version; both checksum indexes cover them, the
   offline verifier consumes immutable covered-file snapshots, and public-beta
   plus production release mode fail closed when validation fails. The revised
-  canonical projection is exactly 256 configured roots and 423 covered-file
+  canonical projection is exactly 263 configured roots and 432 covered-file
   entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),

@@ -7,6 +7,19 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Accepted ADR 0018's batch-operation-root and per-token operation-identity
+  model for a conforming pre-genesis atomic source cutover. Issue #688 remains
+  open until the ledger, manager, Core, resolver, settlement, tests, and
+  generated as-built surfaces land together. Normative status mirrors and
+  their checker now pin accepted-but-unimplemented semantics; acceptance
+  changes no contract, ABI, deployment, maturity, or readiness state.
+- Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
+  probe-record model and every related authorization path, and the
+  overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic
+  `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises.
+  Separate measurement references must describe the same candidate and
+  complete proposed tuple; actual candidate-bound measurements remain blocked
+  on issues #684 and #671, so maturity and release readiness are unchanged.
 - Rebound the issue #690 record-family source catalog and checker to the
   merged #699 source commit so candidate-source replay verifies the complete
   interface, registry, metadata, preservation, and rehearsal binding set.
@@ -58,6 +71,16 @@ the release policy in `docs/release-policy.md`.
   until the complete normative interface appendix and freeze commit are
   independently approved; acceptance changes no contract, ABI, profile,
   deployment, maturity, or readiness state.
+- Added proposed ADR 0022 for issue #670's size-feasible artist-registry
+  architecture: one registered, state-owning `StreamArtistRegistry` plus one
+  immutable, stateless, implementation-private validation adapter. The
+  proposal preserves the Permanent artist interfaces and Core ABI, forbids
+  advertised zero stubs and multiple state owners, and pins exact-code,
+  canonical-transcript, bounded-dynamic-input, gas-governance, deployment, and
+  dual-size requirements. Release-manifest and checksum source policies now
+  bind the ADR directly, expanding the canonical projection to 254 roots and
+  421 files. The ADR remains Proposed, authorizes no implementation, and
+  changes no contract, profile, maturity, or readiness state.
 - Added proposed ADR 0021 for issue #670's size-feasible royalty-resolver
   architecture: one registered, state-owning `StreamRevenueResolver` plus one
   immutable, stateless, implementation-private validation adapter. The
@@ -126,6 +149,22 @@ the release policy in `docs/release-policy.md`.
   checksums now bind the shared policy. This tooling-only change does not add
   retained non-local evidence or change public-beta or production readiness;
   issue #609 tracks the work.
+- Added the zero-`StreamCore`-delta planning and measurement slice for issue
+  #672. A dedicated production-profile via-IR target fixture measures the
+  first-mint, all-zero-to-nonzero EOA-recipient post-entropy completion tail at
+  128,886 gas and derives a 162,000-gas parent reserve using a 25% margin
+  rounded up to the next 1,000 gas. Pure below/at/above planning-predicate
+  boundaries, a separate high-parent-gas full-stipend path, coordinator and
+  receiver rollback, and the unbounded contract-receiver callback budget are
+  covered by focused Solidity and hostile evidence tests. The predicate is not
+  an exact as-built threshold: #654 must account for ABI setup, memory
+  expansion, low-level `CALL` costs, and intervening source work and prove
+  exact stipend forwarding at the candidate-instance boundary. The checksum-bound
+  artifact, snapshot, generator/checker/tests, aggregate gates, and offline
+  verifier remain planning-only: current `StreamCore` stays at the transitional
+  24,152-byte runtime, and #654 must implement and remeasure the actual seam
+  while delivering the complete target at or below 22,576 bytes (objective
+  22,184). No production-readiness or #684 measurement claim is made.
 - Added the first fail-closed planning slice for record-family authorization
   under issue #690. A schema-validated inventory now pins the five as-built
   collection-metadata and preservation mutation selectors, eight authorization

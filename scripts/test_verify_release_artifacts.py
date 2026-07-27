@@ -50,11 +50,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 256
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 256
+    len(TEST_CANONICAL_COVERED_PATHS) != 263
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 263
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 256 unique coverage roots"
+        "canonical verifier fixtures require exactly 263 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("scripts/generate_risk_register.py"),
@@ -695,8 +695,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 256)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 256)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 263)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 263)
         self.assertTrue(
             set(REQUIRED_CANONICAL_FIXTURE_PATHS).issubset(
                 TEST_CANONICAL_COVERED_PATHS
@@ -2309,8 +2309,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 423)
-        self.assertEqual(summary.checksum_manifest_records, 423)
+        self.assertEqual(summary.checksum_entries, 432)
+        self.assertEqual(summary.checksum_manifest_records, 432)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2322,8 +2322,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 423)
-        self.assertEqual(data["checksum_manifest_records"], 423)
+        self.assertEqual(data["checksum_entries"], 432)
+        self.assertEqual(data["checksum_manifest_records"], 432)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

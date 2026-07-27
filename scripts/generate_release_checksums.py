@@ -424,7 +424,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "2537c4ee358a7206a9c48cda91a5dbdeecf10f173806de544eb4d14b762b484c",
+        "f6ea867e58850a62f4e88ceaea42e4def5fbc347944a6a3f17c3c11c6ef072fe",
         169_071,
     ),
 }
@@ -472,6 +472,9 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_risk_register.py"),
     Path("scripts/check_record_family_authorization.py"),
     Path("scripts/test_record_family_authorization.py"),
+    Path("scripts/generate_post_entropy_completion_gas.py"),
+    Path("scripts/check_post_entropy_completion_gas.py"),
+    Path("scripts/test_post_entropy_completion_gas.py"),
     *RELEASE_TOOL_SEMANTIC_SOURCE_PATHS,
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/test_release_evidence_issue_links.py"),
@@ -483,6 +486,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/governance-action-policy.json"),
     Path("release-artifacts/record-family-authorization-inventory.json"),
     Path("release-artifacts/record-family-authorization-source-catalog.json"),
+    Path("release-artifacts/post-entropy-mint-completion-gas.json"),
     RELEASE_TOOL_CALL_POLICY_PATH,
     Path("release-artifacts/stream-core-permanent-interface.json"),
     Path("release-artifacts/system-manifest-payload-vector.json"),
@@ -603,6 +607,8 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/randomizer-operations"),
     Path("test/fixtures/drop-authorization"),
     Path("test/fixtures/warning-dispositions"),
+    Path("test/StreamPostEntropyCompletionGas.t.sol"),
+    Path("test/helpers/StreamPostEntropyCompletionGasHarness.sol"),
     Path("CHANGELOG.md"),
     Path("README.md"),
     Path("slither.config.json"),
@@ -623,6 +629,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/adr/0016-core-native-only-erc721.md"),
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
+    Path("docs/adr/0022-immutable-artist-registry-validation-adapter.md"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),

@@ -151,6 +151,47 @@ class and avoids adding the superseded permanent machinery to `StreamCore`.
 11. A parameter that must be tightened after launch requires a reviewed
     successor host or deployment line. The release manifest and operator
     procedures must make this one-way posture explicit before genesis.
+12. Issue #673's royalty-pair probe-record model and every related
+    authorization path are removed from launch v1 rather than repaired.
+    `ROYALTY_RESOLVER_GAS_LIMIT` and
+    `ROYALTY_RETURN_GAS_BUFFER` remain independently committed GGP rows, but
+    no run record authorizes either mutation. Reproducible measurements are
+    review and release evidence for the complete proposed Core tuple under
+    [RSR-2981-GAS].6; separate per-row evidence references are conformant only
+    when they identify the same candidate and measure the affected reads at
+    that tuple.
+
+    Let `L` be the current resolver limit, `B` the current return buffer, and
+    `G` the gas available at the precheck. Solidity integer division rounds
+    down, so the EIP-150 forwarding term is
+    `floor(64 * L / 63) = L + floor(L / 63)`. This rounding is sufficient:
+    for `L = 63k + r`, `0 <= r < 63`, the term is `64k` when `r = 0`
+    and `64k + r` otherwise; after EIP-150's one-64th retention, at least
+    `63k + r = L` remains forwardable.
+
+    A conforming Core must not evaluate `L * 64` or construct the possibly
+    overflowing sum `L + floor(L / 63) + B`. It implements the equivalent
+    fail-closed comparison by checking, in order, `G >= L`, then
+    `G - L >= floor(L / 63)`, then
+    `G - L - floor(L / 63) >= B`; failure at any step returns the bounded
+    fallback. Each subtraction is reached only after its minuend is proven
+    large enough. Consequently even values reached by repeated 2x raises near
+    `type(uint256).max` cannot overflow the precheck and instead fail closed
+    once the live limit or buffer exceeds available gas; no separate lifetime
+    upper bound is needed for arithmetic safety.
+
+    This overflow-safe 64/63 precheck makes every reachable ordering explicit:
+    raising only the buffer increases parent completion reserve; raising only
+    the resolver limit raises the live threshold so every call that passes
+    still delivers the full new limit while retaining the unchanged buffer;
+    raising both in either order is the composition of those two safe
+    intermediate cases; and the final tuple is independent of the order.
+    Same-value revision changes, lowering, and conditional re-lowering do not
+    exist, so there is no stale proof to reuse after the paired row changes.
+    Fixed-stipend compatibility and measured buffer sufficiency remain
+    release gates for every proposed tuple; this ordering proof does not turn
+    measurement evidence into mutation authority or claim that candidate
+    evidence already exists.
 
 ## Security And Bytecode Impact
 
@@ -200,6 +241,13 @@ target and readiness language must cite this ADR.
 - Genesis-profile and system-manifest tests prove there are no probe rows or
   bindings and preserve the reserved empty payload field only where payload-v1
   compatibility requires it.
+- The Core implementation tests required by issue #671 exercise 64/63
+  precheck residues `L mod 63 = 0`, `1`, and `62`; gas just below, at, and
+  above each computed threshold; maximum-value limit and buffer inputs;
+  repeated 2x raise chains; and each ordering of independent resolver-limit
+  and buffer raises. They prove the subtraction-form precheck never overflows
+  or reverts and fails closed whenever the threshold is not representable by
+  the available gas.
 - Governance tests prove class `6` is rejected at schedule and execution
   boundaries and can never be registered or reused.
 - Full Foundry, static-analysis, deterministic release-artifact, Markdown,

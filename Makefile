@@ -31,11 +31,13 @@ check: build test gas-snapshot-check gas-envelopes-check size release-build-chec
 check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 check: python-toolchain-check
 check: external-call-gas-inventory-check
+check: post-entropy-completion-gas-check
 release-manifest: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 .PHONY: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 .PHONY: python-toolchain-check
 .PHONY: external-call-gas-inventory-check
+.PHONY: post-entropy-completion-gas-check
 .PHONY: canonical-deployment-plan-check
 .PHONY: governed-parameter-identifiers-check
 .PHONY: governed-parameter-inventory-check
@@ -65,6 +67,13 @@ gas-envelopes-check:
 external-call-gas-inventory-check:
 	$(PYTHON) scripts/test_external_call_gas_inventory.py
 	$(PYTHON) scripts/check_external_call_gas_inventory.py
+
+post-entropy-completion-gas-check:
+	$(PYTHON) scripts/test_post_entropy_completion_gas.py
+	$(PYTHON) scripts/generate_post_entropy_completion_gas.py --check
+	$(PYTHON) scripts/check_post_entropy_completion_gas.py
+	forge test --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -vvv
+	forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --check release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap
 
 # Aggregate diagnostic only; canonical release bytecode is built by release-build.
 size:

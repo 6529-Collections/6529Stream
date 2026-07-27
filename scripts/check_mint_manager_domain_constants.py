@@ -315,50 +315,50 @@ TARGET_OPERATION_DOMAIN_MIRROR_METADATA: dict[str, tuple[str, str, str]] = {
         "StreamMintManager",
         "1",
         "interior composite; mint spec `[MPA-OPERATION]` "
-        "(ADR 0011 decision R12; ADR 0018 proposal)",
+        "(ADR 0011 decision R12; ADR 0018 decision)",
     ),
     "MINT_VALIDATED_RESULT_DOMAIN": (
         "StreamMintManager",
         "1",
         "canonical gate/counter result composite; raw proof encodings excluded; "
-        "mint spec `[MPA-OPERATION]` (ADR 0018 proposal)",
+        "mint spec `[MPA-OPERATION]` (ADR 0018 decision)",
     ),
     "MINT_COUNTER_CONSUMPTIONS_DOMAIN": (
         "StreamMintManager",
         "1",
         "exact counter-order/token-index-order `CounterConsumption[]` composite; "
         "projected cap aggregation is separate; mint spec `[MPA-OPERATION]` "
-        "(ADR 0018 proposal)",
+        "(ADR 0018 decision)",
     ),
     "MINT_NULLIFIERS_DOMAIN": (
         "StreamMintManager",
         "1",
         "ascending duplicate-free validated nullifier composite; mint spec "
-        "`[MPA-OPERATION]` (ADR 0018 proposal)",
+        "`[MPA-OPERATION]` (ADR 0018 decision)",
     ),
     "MINT_OPERATION_ROOT_DOMAIN": (
         "StreamMintManager",
         "1",
         "one root per manager batch; mint spec `[MPA-OPERATION]` "
-        "(ADR 0018 proposal)",
+        "(ADR 0018 decision)",
     ),
     "MINT_TOKEN_OPERATION_ID_DOMAIN": (
         "StreamMintManager",
         "1",
         "per-token interior composite; mint spec `[MPA-OPERATION]` rule 1 "
-        "(ADR 0012 decision T6; ADR 0018 proposal)",
+        "(ADR 0012 decision T6; ADR 0018 decision)",
     ),
     "MINT_EXECUTION_PATH_SINGLE_STEP": (
         "StreamMintManager",
         "1",
         "single-step execution-path identity; mint spec `[MPA-OPERATION]` "
-        "(ADR 0018 proposal)",
+        "(ADR 0018 decision)",
     ),
     "MINT_EXECUTION_PATH_PREPARED": (
         "StreamMintManager",
         "1",
         "prepared execution-path identity; mint spec `[MPA-OPERATION]` "
-        "(ADR 0018 proposal)",
+        "(ADR 0018 decision)",
     ),
 }
 TARGET_OPERATION_SELECTORS: tuple[tuple[str, str], ...] = (
@@ -565,7 +565,7 @@ SALE_AUTHORIZATION_HOME_ROW = {
     "Inputs": (
         "EIP-712 struct fields per [SSA-AUTH] (`bytes32 revenueClass`, "
         "`tokenDataArrayHash`, `mintCommitmentsHash`, and trailing "
-        "`uint64 finalizeBy`; ADR 0011 decisions R6 and R10; ADR 0018 proposal)"
+        "`uint64 finalizeBy`; ADR 0011 decisions R6 and R10; ADR 0018 decision)"
     ),
 }
 SALE_AUTHORIZATION_ARCHITECTURE_ROW = {
@@ -578,7 +578,7 @@ SALE_AUTHORIZATION_ARCHITECTURE_ROW = {
         "EIP-712 struct fields as listed; sales spec `[SSA-AUTH]` "
         "(`bytes32 revenueClass`, `tokenDataArrayHash`, `mintCommitmentsHash`, "
         "and trailing `uint64 finalizeBy`; ADR 0011 decisions R6 and R10; "
-        "ADR 0018 proposal)"
+        "ADR 0018 decision)"
     ),
 }
 TARGET_OPERATION_EVENTS: tuple[
@@ -1722,10 +1722,10 @@ def validate_operation_events(
 
 OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
-        "Proposed\n"
-        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
-        "candidate mint operation-identity and replay-ownership amendment; it remains\n"
-        "unaccepted",
+        "Accepted\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
+        "pre-genesis target mint operation-identity and replay-ownership amendment. Its\n"
+        "atomic source cutover remains unimplemented",
         "Every batch of quantity `N` has one batch",
         "`operationRoot` and exactly `N` per-token `operationId` values.",
         "Both manager entries are nonpayable and asset-agnostic.",
@@ -1826,9 +1826,10 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "Entropy registration  owns tokenId plus mintCommitment; receives no root or operationId",
     ),
     REVENUE_DOC_PATH: (
-        "Proposed\n"
-        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
-        "candidate operation-identity amendment and remains unaccepted.",
+        "Accepted\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
+        "pre-genesis target operation-identity amendment. Its atomic source cutover\n"
+        "remains unimplemented",
         "bytes32 operationRoot,\n    bytes32 operationId,\n    bytes32 revenueClass,",
         "event TokenRoyaltySnapshotted(",
         "Completion-time entropy registration correlates",
@@ -1857,13 +1858,14 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     ),
     ADR_0018_PATH: (
         "# ADR 0018: Batch Operation Root And Token Identity",
-        "Proposed only for the pre-genesis production target",
-        "This draft is not accepted, does not close issue #688",
+        "Accepted for pre-genesis implementation on 2026-07-26",
+        "Acceptance authorizes only the conforming atomic source cutover",
+        "It does not close issue #688",
         "Every successful manager batch of quantity `N > 0`",
         "The manager entrypoints are nonpayable and asset-agnostic.",
         "`MintBatch.authorizationId` is a required nonzero typed request field.",
         "Root derivation, nonce-range reservation, all token operation IDs",
-        "The proposed `SALE_AUTHORIZATION_TYPEHASH` additionally binds "
+        "The accepted `SALE_AUTHORIZATION_TYPEHASH` additionally binds "
         "`tokenDataArrayHash` and\n`mintCommitmentsHash`",
         "The preview is manager-owned, is safe for a `STATICCALL`",
         "returns exactly `batch.beneficiaries.length`\n"
@@ -1899,7 +1901,7 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "The generated event catalog remains an as-built artifact",
     ),
     ADR_0008_PATH: (
-        "`operationRoot` plus per-token `operationId` binding, as proposed by ADR 0018,",
+        "`operationRoot` plus per-token `operationId` binding, as accepted in ADR 0018,",
     ),
     SALES_SPEC_PATH: (
         "-> StreamMintManager.executeSingleStepMint(...) or executePreparedMint(...)",
@@ -1919,9 +1921,9 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "scope, independently loads the current registered phase policy",
     ),
     CONFORMANCE_PATH: (
-        "Proposed\n"
-        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies draft\n"
-        "target mint-operation identity and replay gates. They remain unaccepted",
+        "Accepted\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies the\n"
+        "target mint-operation identity and replay gates. They remain unimplemented",
         "exactly one root plus `N` token operation IDs",
         "full normalized request/result/root/token preimage mutation coverage",
         "adapter preview uses its own `address(this)` as manager executor",
@@ -1932,15 +1934,16 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "one root plus `N` token\n   operation IDs",
     ),
     DOC_PATH: (
-        "Proposed\n"
-        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
-        "candidate operation-identity amendment and remains unaccepted",
+        "Accepted\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) defines the\n"
+        "pre-genesis target operation-identity amendment; its atomic source cutover\n"
+        "remains unimplemented",
     ),
     ADR_INDEX_PATH: (
         "| [`0018-batch-operation-root-and-token-identity.md`]"
-        "(0018-batch-operation-root-and-token-identity.md) | Proposed | "
+        "(0018-batch-operation-root-and-token-identity.md) | Accepted | "
         "[#688](https://github.com/6529-Collections/6529Stream/issues/688): "
-        "proposed one manager batch root, `N` token operation IDs",
+        "accepted one manager batch root, `N` token operation IDs",
     ),
 }
 OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
@@ -1959,7 +1962,7 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "function consume(\n    CounterConsumption[] calldata consumptions,",
     ),
     ADR_0018_PATH: (
-        "Accepted for the pre-genesis production target",
+        "Proposed only for the pre-genesis production target",
         "## Accepted Risks",
         "exact request contents",
         "token-ID model",
@@ -1983,7 +1986,7 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     ),
     ADR_INDEX_PATH: (
         "| [`0018-batch-operation-root-and-token-identity.md`]"
-        "(0018-batch-operation-root-and-token-identity.md) | Accepted |",
+        "(0018-batch-operation-root-and-token-identity.md) | Proposed |",
     ),
 }
 OPERATION_IDENTITY_EXACT_COUNTS: dict[

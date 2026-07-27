@@ -187,6 +187,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/launch-conformance-matrix.md"),
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
+    Path("docs/adr/0022-immutable-artist-registry-validation-adapter.md"),
     Path("docs/revenue-splits-and-royalties.md"),
     Path("docs/mint-policy-and-accounting.md"),
     Path("docs/stream-sales-and-auctions.md"),

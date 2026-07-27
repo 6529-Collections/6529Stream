@@ -2,10 +2,11 @@
 
 ## Status
 
-Proposed only for the pre-genesis production target under
+Accepted for pre-genesis implementation on 2026-07-26 under
 [issue #688](https://github.com/6529-Collections/6529Stream/issues/688).
-This draft is not accepted, does not close issue #688, and is neither
-implementation nor production-readiness evidence.
+Acceptance authorizes only the conforming atomic source cutover described
+below. It does not close issue #688, change current Solidity or generated
+as-built surfaces, or provide production-readiness evidence.
 
 This ADR amends the legacy paid-mint operation binding delegated by ADR 0008,
 the prepared-mint identity decisions recorded by ADR 0012 decision T6, and the
@@ -30,9 +31,9 @@ The current implementation exposes the same structural gap:
 
 That arrangement leaves no durable batch replay owner outside byte-constrained
 Core, gives indexers no exact join from ledger accounting to prepared-token
-events, and makes the proposed Core replay-state removal unsafe.
+events, and makes the target Core replay-state removal unsafe.
 
-## Proposed Decision
+## Decision
 
 ### Cardinality And Domains
 
@@ -42,7 +43,7 @@ Every successful manager batch of quantity `N > 0`, whether it uses
 - one nonzero `operationRoot`; and
 - `N` nonzero, pairwise-distinct per-token `operationId` values.
 
-The proposed normative derivation lives in
+The normative derivation lives in
 [`docs/mint-policy-and-accounting.md`](../mint-policy-and-accounting.md)
 `[MPA-OPERATION]`. It uses the final generic mint domains
 `MINT_REQUEST_COMMITMENT_DOMAIN`, `MINT_OPERATION_ROOT_DOMAIN`, and
@@ -92,11 +93,11 @@ root only because their canonical validated values/results are bound. Two
 equivalent presentations that produce the same canonical result derive the
 same operation identity; changing any state- or economics-affecting typed value
 or validated result inside the manager/ledger mint boundary changes it. The
-proposal deliberately does not synthesize a primary-settlement result field;
+decision deliberately does not synthesize a primary-settlement result field;
 ADR 0019 / issue #694 must bind that component's exact typed result and
 execution key under its accepted ABI.
 
-Signed sale authority is separate from root uniqueness. The proposed
+Signed sale authority is separate from root uniqueness. The accepted
 `SALE_AUTHORIZATION_TYPEHASH` additionally binds `tokenDataArrayHash` and
 `mintCommitmentsHash`; a unique root cannot authorize content the signer did
 not commit.
@@ -244,7 +245,7 @@ single-step mints.
 
 ### Settlement Invariant And Open Blocker
 
-This proposal does not invent or freeze ADR 0019 / issue #694's typed
+This decision does not invent or freeze ADR 0019 / issue #694's typed
 primary-settlement callback. It pins only the invariant required by operation
 identity:
 
@@ -368,7 +369,7 @@ bytes).
 
 ## Release Impact
 
-This is a proposed pre-genesis MAJOR target correction. No production
+This is an accepted pre-genesis MAJOR target correction. No production
 deployment used the superseded prepared-only domains, rootless ledger ABI, or
 ambiguous shared-operation language.
 
@@ -454,11 +455,10 @@ artifacts from canonical generators.
 
 ## Rollout
 
-Merge this ADR/spec slice before implementation. After merge, implement the
-atomic cutover from a fresh `origin/main` branch, run focused behavioral tests,
-then the full Foundry/check/release validation ladder. Independent review must
-verify the final diff and generated-artifact scope before a review-ready PR is
-handed to the merge coordinator.
+Implement the atomic cutover from a fresh `origin/main` branch, run focused
+behavioral tests, then the full Foundry/check/release validation ladder.
+Independent review must verify the final diff and generated-artifact scope
+before a review-ready PR is handed to the merge coordinator.
 
 This rollout authorizes no merge, deployment, release, live-chain action, or
 readiness claim.

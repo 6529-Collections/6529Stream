@@ -2,7 +2,8 @@
 
 ## Charter
 
-Own the sequential `#688 -> #672 -> #654` Core/mint launch-conformance lane.
+Own the sequential `#688 -> #672 -> #671 -> #654` Core/mint
+launch-conformance lane.
 Each issue remains one review-ready draft PR, based on the then-current
 `origin/main`, with no dependent implementation stacked on an unmerged PR.
 The current shared release-input train is
@@ -25,8 +26,11 @@ the implementation lane remains separately serialized as `#688 -> #672 -> #654`.
 
 - `#688`: pin batch operation-root and per-token operation-ID semantics before
   Core lifetime replay storage can be removed.
-- `#672`: prove and enforce post-entropy mint-completion gas after the required
-  predecessor state merges.
+- `#672`: bind the post-entropy EOA completion-tail measurement and planning
+  admission terms after the required predecessor state merges; `#654` owns the
+  complete executable call-boundary proof and enforcement.
+- `#671`: prove the shared Core bounded-read parent-completion buffer across
+  royalty and metadata paths without adding a 23rd governed gas parameter.
 - `#654`: recover measured `StreamCore` launch-conformance headroom while
   preserving the exact 2,000-byte production margin gate, including the real
   restricted single/batch metadata-refresh emitters required by `#667`.
@@ -42,8 +46,10 @@ issue requires them and are reported to the coordinator.
 ## Boundaries
 
 - Do not merge, deploy, release, perform live-chain actions, or claim readiness.
-- Do not take ownership of governance/gas issues `#684`, `#685`, `#669`,
-  `#671`, or `#673`.
+- Do not take ownership of governance/gas issues `#684`, `#685`, `#669`, or
+  `#673`. This workstream owns only the newly assigned `#671` shared Core
+  buffer slice and must leave `#684` candidate/evidence binding honestly
+  incomplete until that lane supplies it.
 - Do not absorb the finality-registry or artist/royalty satellite
   implementations owned by `#667` and `#670`; this lane owns only their
   required Core seams.
@@ -76,5 +82,6 @@ and readiness claims always require authority outside this workstream.
 
 ## Integration Coordinator
 
-Codex task `019f86dc-11c7-7ad2-8f6a-5125e1fb8de1` owns merge ordering and
-confirms when a predecessor has landed.
+The integration coordinator owns merge ordering and confirms when a predecessor
+has landed. Current coordinator identity is recorded in `active-context.md`
+because earlier coordinator tasks have been superseded.

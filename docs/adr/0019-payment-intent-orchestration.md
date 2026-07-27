@@ -1335,8 +1335,10 @@ satisfies `[RSR-ORCHESTRATION].1` and
 
 ### 10. Freeze Requires Complete Identity And ABI Constants
 
-ADR 0019 remains Proposed and partial until ADR 0018 / issue #688 is accepted.
-Before this ADR can be frozen, the final revision must replace the provisional
+ADR 0019 remains Proposed and partial. ADR 0018 is accepted for an atomic
+pre-genesis source cutover, but issue #688 remains open until that cutover is
+implemented and independently reviewed. Before this ADR can be frozen, the
+final revision must replace the provisional
 operation-identity placeholder with the exact typed orchestration kind and
 complete #688 operation identity in:
 

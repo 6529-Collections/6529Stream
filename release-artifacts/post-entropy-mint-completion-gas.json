@@ -1,0 +1,110 @@
+{
+  "schema_version": "6529stream.post-entropy-mint-completion-gas.v1",
+  "generated_by": "scripts/generate_post_entropy_completion_gas.py:1",
+  "status": "planning_target_fixture",
+  "issue": 672,
+  "compiler_profile": {
+    "solc_version": "0.8.19",
+    "evm_version": "paris",
+    "optimizer_enabled": true,
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "bytecode_hash": "none",
+    "snapshot_command": "forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --snap release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap"
+  },
+  "sources": [
+    {
+      "path": "test/StreamPostEntropyCompletionGas.t.sol",
+      "sha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8",
+      "size_bytes": 7927
+    },
+    {
+      "path": "test/helpers/StreamPostEntropyCompletionGasHarness.sol",
+      "sha256": "sha256:39b0a84e5df0a82c720b6f0a76cdd86e6b1f8b976bf25d828e37370394bb1112",
+      "size_bytes": 9118
+    },
+    {
+      "path": "docs/stream-entropy-coordinator.md",
+      "sha256": "sha256:3c867a5ea1a17373c6054bdde81802bf7cbad0dd2f059acbe5b3ea2756e5e00b",
+      "size_bytes": 168338
+    },
+    {
+      "path": "docs/launch-conformance-matrix.md",
+      "sha256": "sha256:fd1134e4200e50edf13dda3bd85f45cd19c122d9c7cb9d6c888676a72f0ebe2c",
+      "size_bytes": 137997
+    },
+    {
+      "path": "docs/launch-v1-target-architecture.md",
+      "sha256": "sha256:edaf83a77dbed619298f66d3fcc1961a0b0f133d9ee4ff08216611971f6058cc",
+      "size_bytes": 160726
+    }
+  ],
+  "measurement": {
+    "snapshot_path": "release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap",
+    "snapshot_sha256": "sha256:3ead043138bb24c4de8900fa890c3a7f439cfb174ddcdf9b04b22aa53f632f7b",
+    "snapshot_test": "StreamPostEntropyCompletionGasTest:testMeasureWorstCaseEoaPostCoordinatorTail()",
+    "measured_upper_bound_gas": 128886,
+    "scenario": {
+      "recipient_class": "EOA",
+      "storage_state": "first_mint_all_zero_to_nonzero",
+      "starts_after": "successful_entropy_coordinator_return",
+      "ends_after": "erc721_safe_mint_and_transfer_event",
+      "includes": [
+        "prepared-state cleanup",
+        "collection live-supply write",
+        "global live-supply write",
+        "token metadata-record write",
+        "collection metadata-accumulator write",
+        "pending-metadata count write",
+        "ERC-721 balance write",
+        "ERC-721 owner write",
+        "Transfer event"
+      ]
+    }
+  },
+  "admission_model": {
+    "formula": "ceil(registrationGasLimit * 64 / 63) + POST_ENTROPY_PARENT_RESERVE",
+    "eip150_numerator": 64,
+    "eip150_denominator": 63,
+    "measurement_margin_bps": 2500,
+    "rounding_quantum_gas": 1000,
+    "post_entropy_parent_reserve_gas": 162000,
+    "reference_registration_gas_limit": 120000,
+    "reference_planning_parent_gas_lower_bound": 283905,
+    "registration_gas_limit_source": "live ENTROPY_REGISTRATION_GAS_LIMIT governed parameter",
+    "proof_scope": "planning_eip150_and_eoa_tail_terms_only",
+    "excluded_call_boundary_costs": [
+      "ABI argument encoding and memory expansion",
+      "low-level CALL upfront and dynamic costs",
+      "source-level work between the admission check and CALL opcode"
+    ],
+    "legacy_unmeasured_parent_allowance_gas": 30000
+  },
+  "receiver_callback_scope": {
+    "fixed_reserve_guarantee": "EOA_recipient_only",
+    "contract_receiver_callback": "caller_supplied_and_unbounded",
+    "failure_behavior": "whole_transaction_revert"
+  },
+  "core_boundary": {
+    "implementation_status": "target_fixture_only",
+    "stream_core_source": {
+      "path": "smart-contracts/StreamCore.sol",
+      "sha256": "sha256:7a41520f3792ebe398d0c0ad60835e0410dcd8eee29a645d2f9ccd8b308d3918",
+      "size_bytes": 70651
+    },
+    "stream_core_runtime_bytes": 24152,
+    "stream_core_eip170_margin_bytes": 424,
+    "stream_core_delta_bytes": 0,
+    "production_complete_runtime_ceiling_bytes": 22576,
+    "approved_runtime_objective_bytes": 22184,
+    "implementation_owner": "#654"
+  },
+  "limitations": [
+    "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
+    "The admission formula is a planning lower bound over EIP-150 forwarding and the measured EOA tail; this fixture does not prove an exact as-built gasleft threshold at the low-level CALL boundary.",
+    "The target fixture checks the pure below/at/above policy predicate and a high-parent-gas full-stipend path separately; it does not prove full-stipend forwarding from an exact supplied threshold.",
+    "Issue #654 must measure and enforce the complete low-level-call admission boundary, including ABI encoding, memory expansion, CALL upfront and dynamic costs, and source-level pre-call work, then prove the exact forwarded stipend and post-return reserve against the linked Core.",
+    "The committed governed-parameter inventory remains incomplete and is not updated by this artifact.",
+    "This artifact makes no production-readiness or deployment claim."
+  ]
+}

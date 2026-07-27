@@ -31,6 +31,11 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_gas_envelopes.py
 "$python_bin" scripts/test_external_call_gas_inventory.py
 "$python_bin" scripts/check_external_call_gas_inventory.py
+"$python_bin" scripts/test_post_entropy_completion_gas.py
+"$python_bin" scripts/generate_post_entropy_completion_gas.py --check
+"$python_bin" scripts/check_post_entropy_completion_gas.py
+forge test --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -vvv
+forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --check release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap
 "$python_bin" scripts/run_forge_size_log.py --log cache/forge-size.log
 "$python_bin" scripts/test_release_build_artifacts.py
 "$python_bin" scripts/build_release_artifacts.py
