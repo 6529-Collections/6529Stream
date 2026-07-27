@@ -287,7 +287,7 @@ class ReleaseModeTests(unittest.TestCase):
         self.slither_patcher.stop()
 
     def test_committed_slither_baseline_is_a_release_blocker(self) -> None:
-        """A matching 30-row baseline remains blocked rather than accepted."""
+        """A matching 28-row baseline remains blocked rather than accepted."""
         repo_root = Path(__file__).resolve().parents[1]
 
         blockers = REAL_SLITHER_BASELINE_BLOCKERS(
@@ -297,8 +297,8 @@ class ReleaseModeTests(unittest.TestCase):
         )
 
         self.assertEqual(len(blockers), 1)
-        self.assertIn("30 Open High/Medium", blockers[0])
-        self.assertIn("High=3, Medium=27", blockers[0])
+        self.assertIn("28 Open High/Medium", blockers[0])
+        self.assertIn("High=3, Medium=25", blockers[0])
         self.assertIn("issue #658", blockers[0])
 
     def test_slither_blocker_prevents_otherwise_complete_public_beta(self) -> None:
