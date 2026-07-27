@@ -242,7 +242,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:952ce15d431b423613dac662e0bab8b266d7c8fbd11fbcf14daa5ed1f990c2d1",
+      "sha256": "sha256:2ca506442d7af2c38fddbea369aaa15d0c531771160d9e871169b52c67625a24",
       "size_bytes": 2177,
       "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1"
     },
