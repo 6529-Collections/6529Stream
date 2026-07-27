@@ -22237,8 +22237,8 @@
     {
       "path": "scripts/check_slither_baseline.py",
       "role": "runtime",
-      "source_sha256": "ddc10bcef157fe71ef6c6cf366746cb0a05fe8de5a8b67485ee2f995cabc8e72",
-      "size_bytes": 46534,
+      "source_sha256": "052ccda0c60bcd597cd6c1d7901ade55bbf56c644dc0cf79bed06e30ce749096",
+      "size_bytes": 46536,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
@@ -28953,7 +28953,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "216afcf34dcf1a8676ab3efa971041cbe0e0ff10200b71bbf13bf24e263e48b8",
+      "source_sha256": "861ad05c4f1c9be698a212ad9fe08b5bfa89c40276455ca51f1bf3f2e1bff2c6",
       "size_bytes": 177380,
       "imports": [
         {
@@ -35635,8 +35635,8 @@
     {
       "path": "scripts/generate_release_manifest.py",
       "role": "runtime",
-      "source_sha256": "ed6f38a63d0984bfb010fb04546b2ac5ed03a7776d3c0ebdc001f4c7c26fd155",
-      "size_bytes": 85174,
+      "source_sha256": "41199c48d42537fef3a38b40e6e81e41668b8ac4f8120e371270e136f2e35f94",
+      "size_bytes": 87322,
       "imports": [
         {
           "record": "{\"alias\":\"admin_ceremony_checker\",\"binding\":\"admin_ceremony_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_admin_ceremony_evidence\"}",
@@ -35882,11 +35882,11 @@
         },
         {
           "record": "{\"context\":\"Tuple.elts\",\"target\":\"typing.Any\"}",
-          "count": 24
+          "count": 25
         },
         {
           "record": "{\"context\":\"arg.annotation\",\"target\":\"pathlib.Path\"}",
-          "count": 102
+          "count": 103
         },
         {
           "record": "{\"context\":\"arg.annotation\",\"target\":\"typing.Any\"}",
@@ -36034,7 +36034,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 106
+          "count": 107
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -36211,6 +36211,12 @@
         {
           "target": "local:ReleaseManifestError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "0782d3bbec9fbcc46e3b4371405732b6f547556be9fd624f3223ba5cc5e1efaa",
+          "count": 1
+        },
+        {
+          "target": "local:ReleaseManifestError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "0849dfec1d3e1248f5b035921e07440ac6d66407a397e0c9cc29fe744379828a",
           "count": 1
         },
@@ -36296,6 +36302,12 @@
           "target": "local:ReleaseManifestError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "4f78b321920886c1a4988ca472b2d1d9204b2f9f09ce351620054e95c1fb99fb",
+          "count": 1
+        },
+        {
+          "target": "local:ReleaseManifestError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "50dc90059785ce927b36150654c23ce63900de6f3ae1a7e4f4bb3c64315350dc",
           "count": 1
         },
         {
@@ -36409,6 +36421,12 @@
         {
           "target": "local:ReleaseManifestError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "c4c9fcdba3419adf7c281a0ce9e4d6e65ffd9d8994cd1cbcf21b635a6e2e7127",
+          "count": 1
+        },
+        {
+          "target": "local:ReleaseManifestError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "c94e06bbbc23c28aebecc29bd0b3c4392566838de09010923fb93485cb357899",
           "count": 1
         },
@@ -36470,6 +36488,12 @@
           "target": "local:ReleaseManifestError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "f61378d07e03f72241b7b0ce19225551d70a7ac491cdf1781ebbffd403aae676",
+          "count": 1
+        },
+        {
+          "target": "local:ReleaseManifestError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "fb3e6051a4a8e05b93547a9539c0fca66e63e80f959aaffc4d3eba0b2d287ff9",
           "count": 1
         },
         {
@@ -37153,12 +37177,6 @@
         {
           "target": "local:file_record",
           "shape": "positional=2;starred=0;keywords=schema_required",
-          "ast_sha256": "a79afed4606628820145db2054630d8608325d332e7987595c88d9b3bf9d3408",
-          "count": 1
-        },
-        {
-          "target": "local:file_record",
-          "shape": "positional=2;starred=0;keywords=schema_required",
           "ast_sha256": "aa5fe1eb6ef8e4ddb5f96cb15960ec3c748be622bcf1054406e186ac2707cd18",
           "count": 1
         },
@@ -37244,6 +37262,12 @@
           "target": "local:gas_snapshot_path.is_absolute",
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "6d462a8593c8de47e757ea7bc2439a77ed832018bb592d8684b42f9437ed2d3f",
+          "count": 1
+        },
+        {
+          "target": "local:governance_action_policy_records",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "592ca511f114cfbfe0e5efc032e02a56e60b927270e970c1bfb660327633fa21",
           "count": 1
         },
         {
@@ -37472,13 +37496,13 @@
           "target": "local:json_snapshot_record",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "036ab229cc960fd64417083ac224acbb5db1d50698b385e97ab144e9a4219f32",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:json_snapshot_record",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "8b453efb24a93d79fe640611f8651436ca30bdf7444d833fcb557d6f84aa2a61",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:len",
@@ -38018,7 +38042,7 @@
           "target": "local:policy.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "77c31dfd97c9d2170c3d2232f6083211edbd1afcff5d40987450376751a96154",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:print",
@@ -38354,7 +38378,7 @@
           "target": "local:require_dict",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "6d157b19fe6fa9a5a9d3cb4315c7eba2396cef9881cf10ffca9935ed3e505b0b",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:require_dict",
@@ -38432,7 +38456,7 @@
           "target": "local:require_dict",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "b0881c97d5febeab86a29b5c57e786ab1b3404c2130221e603fe7338fd2d9d9c",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:require_dict",
@@ -39038,24 +39062,30 @@
           "target": "local:schema.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "3ee88b4c36cab960f9c51c85f9e0c8390c3e01ea3c01b82e1f3ece6031f8e050",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:schema.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "d5327e6933b309173a8fb2ff569ea74ce8bd03a91c1b31847814f2effc2acf41",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:schema.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e5e463eac1ba19e8300ab2f77c9dc94d9c7356266a58150b117ab2cb8a67bfda",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:schema_properties.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "468cb298e2f24fec45537067c899f47234225cbec4aaec5fe24b8c09ec407de7",
+          "count": 2
+        },
+        {
+          "target": "local:schema_record.update",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "0366dcb9e1cbac115a90a8073f4efb6af256365eda9bd448537d59c98629de33",
           "count": 1
         },
         {
@@ -39068,7 +39098,7 @@
           "target": "local:schema_version.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "1cb99444a4931fbee22c1e696e40e3cf46e6eab954ef5b8667c4f524a82591ac",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:schema_version_property.get",
@@ -40058,6 +40088,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e9093159e0870eb0e728b835d1813c760cb7c8c5c6b8dca77ee55455ebfcfcf9",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "e9dcec59d486221673293f27c421cd6f37fe925d2a5f82ccb4ad36db365b09da",
           "count": 1
         },
         {
@@ -49205,7 +49241,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "f6ea867e58850a62f4e88ceaea42e4def5fbc347944a6a3f17c3c11c6ef072fe",
+      "source_sha256": "cc13dcf67637eba993d7f6f6638227b28340111bf86576146ad2d98132a51214",
       "size_bytes": 169071,
       "imports": [
         {

@@ -999,7 +999,7 @@
     "IStreamGovernanceExecutor": {
       "source": "smart-contracts/IStreamGovernanceExecutor.sol",
       "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
-      "abi_sha256": "sha256:4bafda7790c33152e5d6ef0a1d975f664878cef3eae682bbc2f1c56c0c01608c",
+      "abi_sha256": "sha256:af81e2de8cc4012bd74654a873b9b9e3353e282b82da831bee38b4de5c490cea",
       "interface_id": "0x4bc45fd4",
       "interface_id_source": "selector_xor",
       "computed_selector_xor": "0x4bc45fd4",

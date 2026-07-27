@@ -329,7 +329,7 @@ class SlitherBaselineTests(unittest.TestCase):
             ("captured_at_utc", "2026-07-22T10:02:34Z", "captured_at_utc must be"),
             ("capture_command", "slither arbitrary", "capture_command must be"),
             ("gate_command", "slither arbitrary --fail-none", "gate_command must be"),
-            ("capture_native_exit_code", 123, "must retain the audited 1 exit"),
+            ("capture_native_exit_code", 123, "must retain the audited 255 exit"),
             ("raw_json_size_bytes", 1, "raw_json_size_bytes must be"),
             ("raw_json_sha256", "sha256:" + "0" * 64, "raw_json_sha256 must be"),
         )

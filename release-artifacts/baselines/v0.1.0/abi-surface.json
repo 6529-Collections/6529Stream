@@ -32626,13 +32626,13 @@
     "IStreamGovernanceExecutor": {
       "source": "smart-contracts/IStreamGovernanceExecutor.sol",
       "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
-      "abi_sha256": "sha256:4bafda7790c33152e5d6ef0a1d975f664878cef3eae682bbc2f1c56c0c01608c",
-      "abi_entries": 174,
+      "abi_sha256": "sha256:af81e2de8cc4012bd74654a873b9b9e3353e282b82da831bee38b4de5c490cea",
+      "abi_entries": 175,
       "entry_counts": {
         "constructors": 0,
         "functions": 51,
         "events": 19,
-        "errors": 104,
+        "errors": 105,
         "fallbacks": 0,
         "receives": 0
       },
@@ -35918,6 +35918,29 @@
                 "name": "index",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionPolicyEntryHashMismatch(uint256,bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionPolicyEntryHashMismatch",
+            "signature": "GovernanceActionPolicyEntryHashMismatch(uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ]
           },
