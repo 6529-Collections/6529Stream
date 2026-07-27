@@ -371,6 +371,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         override
         returns (bytes32 previousPolicyHash, uint64 graceUntil)
     {
+        // Revision adjacency is enforced by the ledger; this view exposes only hash and expiry.
+        // slither-disable-next-line unused-return
         (previousPolicyHash,, graceUntil) =
             mintLedger.policyGrace(address(this), collectionId, phaseId);
     }
@@ -563,6 +565,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         if (boundPolicyHash == currentPolicyHash) {
             return boundPolicyHash;
         }
+        // The ledger independently enforces predecessor revision adjacency during consume.
+        // slither-disable-next-line unused-return
         (bytes32 previousPolicyHash,, uint64 graceUntil) =
             mintLedger.policyGrace(address(this), batch.collectionId, batch.phaseId);
         if (boundPolicyHash != previousPolicyHash || block.timestamp > graceUntil) {

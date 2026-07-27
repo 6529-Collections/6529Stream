@@ -145,6 +145,8 @@ library StreamMintGateValidator {
         IStreamMintManager.MintGateConfig memory gateConfig,
         address executor
     ) private view returns (IStreamMintGate.GateResult memory) {
+        // Every GateCall field is assigned below before any field is read or encoded.
+        // slither-disable-next-line uninitialized-local
         GateCall memory gateCall;
         gateCall.gate = gateConfig.gate;
         gateCall.gasLimit = gateConfig.gateGasLimit;

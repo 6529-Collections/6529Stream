@@ -151,7 +151,7 @@ library StreamMintOperationIdentity {
         IStreamMintManager.MintCounterConfig[] memory counterConfigs,
         CounterContext memory context
     ) external pure returns (IStreamMintLedger.CounterConsumption[] memory consumptions) {
-        uint256 consumptionCount;
+        uint256 consumptionCount = 0;
         for (uint256 i = 0; i < counterConfigs.length; i++) {
             consumptionCount += counterConfigs[i].keyMode
                 == IStreamMintManager.CounterKeyMode.CONTEXT
@@ -159,7 +159,7 @@ library StreamMintOperationIdentity {
                 : quantity;
         }
         consumptions = new IStreamMintLedger.CounterConsumption[](consumptionCount);
-        uint256 cursor;
+        uint256 cursor = 0;
         for (uint256 i = 0; i < counterIds.length; i++) {
             cursor = _appendCounterConsumptions(
                 batch, consumptions, cursor, quantity, counterIds[i], counterConfigs[i], context
@@ -201,6 +201,8 @@ library StreamMintOperationIdentity {
             );
         }
         _sortAddresses(executors);
+        // Every canonical field is assigned below before the struct is encoded.
+        // slither-disable-next-line uninitialized-local
         PolicyPreimage memory preimage;
         preimage.chainId = context.chainId;
         preimage.manager = context.manager;
@@ -285,6 +287,8 @@ library StreamMintOperationIdentity {
         TranscriptContext memory context,
         bytes32 requestCommitmentHash
     ) private pure returns (bytes32) {
+        // Every canonical field is assigned below before the struct is encoded.
+        // slither-disable-next-line uninitialized-local
         OperationRootPreimage memory preimage;
         preimage.chainId = context.chainId;
         preimage.manager = context.manager;

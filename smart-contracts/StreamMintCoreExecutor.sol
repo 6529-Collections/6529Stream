@@ -63,6 +63,8 @@ library StreamMintCoreExecutor {
         uint16 schemaVersion
     ) external returns (uint256 tokenId) {
         bytes32 tokenDataHash = keccak256(batch.tokenData[tokenIndex]);
+        // Single-step identity is emitted by Core's TokenIdentityAllocated event.
+        // slither-disable-next-line unused-return
         (tokenId,) = core.mintFromManager(
             batch.collectionId,
             batch.initialRecipients[tokenIndex],
