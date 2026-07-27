@@ -77,7 +77,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintManager.sol",
+      "path": "smart-contracts/StreamMintGateValidator.sol",
       "site": "_gateAdvertisesInterface",
       "kind": "call-option",
       "operation": "external-call",
@@ -89,8 +89,8 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintManager.sol",
-      "site": "_executeGateCall",
+      "path": "smart-contracts/StreamMintGateValidator.sol",
+      "site": "_callGate",
       "kind": "call-option",
       "operation": "external-call",
       "expression": "gateCall.gasLimit",
@@ -190,7 +190,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintManager.sol",
+      "path": "smart-contracts/StreamMintGateValidator.sol",
       "identifier": "GATE_ERC165_PROBE_GAS",
       "value": 30000,
       "expected_count": 1,
