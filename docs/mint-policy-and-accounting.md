@@ -881,7 +881,9 @@ Requirements [MPA-OPERATION]:
    with execution, and reads the current `nextOperationNonce`. It emits no
    event, writes or consumes no state, and exposes no callback, settlement,
    value, or delegatecall surface; it is safe for `STATICCALL` and returns
-   exactly `batch.beneficiaries.length` operation IDs. Because the adapter calls
+   exactly `batch.beneficiaries.length` operation IDs. The returned identity
+   matches a later execution only while the nonce, phase policy/grace state,
+   and gate/resolver result remain unchanged. Because the adapter calls
    the preview, the
    executor term is exactly the adapter's `address(this)`; it is never the
    adapter's external caller, payer, relayer, or `tx.origin`. A direct payer
@@ -3513,6 +3515,7 @@ error MintOperationIdDuplicate(uint256 firstIndex, uint256 secondIndex);
 error MintAuthorizationAlreadyUsed(bytes32 authorizationId);
 error MintNullifierAlreadyUsed(bytes32 nullifier);
 error MintGateQuantityExceeded(uint256 requested, uint256 maxAllowed);
+error MintGateNullifierCountExceeded(uint256 count, uint256 maximum);
 error MintSignatureExpired(uint256 deadline);
 error MintInvalidSignature();
 error MintInvalidAuthorizerKind(uint8 kind, address authorizer);

@@ -159,8 +159,8 @@ contributors who start from the README.
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  current target-isolated `StreamCore` runtime measurement at 24,135 bytes with
-  441 bytes of EIP-170 headroom,
+  current target-isolated `StreamCore` runtime measurement at 24,128 bytes with
+  448 bytes of EIP-170 headroom,
   which passes deployability and the interim 384-byte development floor but
   sits below the 512-byte warning threshold and the normative 2,000-byte
   production deployment minimum. The accepted CON-012 development exception
@@ -171,7 +171,7 @@ contributors who start from the README.
   probe/lower/emergency/conditional/rebinding machinery, but that machinery was
   not present in the measured Core and the ADR does not reduce this baseline.
   Historical measurements show the prior refactor reached
-  21,792 bytes, then the manager/prepared-mint boundary added roughly 2,330 bytes
+  21,792 bytes, then the manager/prepared-mint boundary added exactly 2,360 bytes
   while the legacy Drops/Minter route remained live. The remediation is a
   pre-genesis ABI cutover and caller migration, not another additive parallel
   API: satellite-only slices must keep zero Core delta and Core-changing slices
@@ -181,7 +181,7 @@ contributors who start from the README.
   one ledger-owned root plus `N` token operation IDs, derive/reserve-before-
   ledger ordering, manager-scoped replay, whole-transaction rollback, and Core
   current-pair equality without lifetime operation-ID storage. The measured
-  17-byte Core reduction is net-negative but does not satisfy the complete
+  24-byte Core reduction is net-negative but does not satisfy the complete
   target. The remaining #654 lane must implement and remeasure the actual
   post-entropy admission boundary and the restricted Core ERC-4906
   single/batch refresh emitters required by #667 before the exact production

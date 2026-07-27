@@ -1311,7 +1311,7 @@
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
       "artifact_path": "out-release/IStreamMintManager.sol/IStreamMintManager.json",
-      "abi_sha256": "sha256:95e5d9b021dff1cf68b6f1e8d7c7bdf8b218646265184bfdf208deae5e395d19",
+      "abi_sha256": "sha256:7fa01d81a22280a768c79ae560902412bb5cfb0d8bd796118d6951365da68db4",
       "interface_id": "0xb4074ed7",
       "interface_id_source": "selector_xor",
       "computed_selector_xor": "0xb4074ed7",

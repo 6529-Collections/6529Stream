@@ -479,8 +479,8 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "product surfaces satellite-first."
         ),
         "residual_risk": (
-            "The current 24,135-byte runtime leaves 441 bytes of EIP-170 headroom, "
-            "1,559 bytes below the non-waivable 2,000-byte production deployment minimum."
+            "The current 24,128-byte runtime leaves 448 bytes of EIP-170 headroom, "
+            "1,552 bytes below the non-waivable 2,000-byte production deployment minimum."
         ),
         "evidence_paths": [
             "docs/known-blockers.md",

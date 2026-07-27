@@ -300,6 +300,23 @@ class MintManagerDomainConstantTests(unittest.TestCase):
         ):
             checker.validate_operation_identity_fragments(documents)
 
+    def test_rejects_gate_nullifier_launch_cap_drift(self) -> None:
+        documents = committed_operation_documents()
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        stale_spec = mint_spec.replace(
+            "`MAX_GATE_NULLIFIERS = 16`",
+            "`MAX_GATE_NULLIFIERS = 17`",
+            1,
+        )
+        self.assertNotEqual(stale_spec, mint_spec)
+        documents[checker.MINT_SPEC_PATH] = stale_spec
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity contract drifted",
+        ):
+            checker.validate_operation_identity_fragments(documents)
+
     def test_rejects_stale_operation_identity_implementation_status(self) -> None:
         documents = committed_implementation_status_documents()
         mutations = (

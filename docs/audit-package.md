@@ -297,7 +297,7 @@ unresolved production blockers:
 
 - The normalized first-party production Slither rows are all Open. Test,
   vendored, and script findings are reported outside that release-blocking set;
-  they are not used to accept or suppress any of the 30 analyzer-visible rows
+  they are not used to accept or suppress any of the 28 analyzer-visible rows
   or the separately tracked `RISK-GOV-003` authority.
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.

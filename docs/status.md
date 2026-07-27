@@ -49,8 +49,8 @@ The current Gate A smoke baseline proves:
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
   the pre-audit, not-production-ready posture is unchanged. The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the current
-  target-isolated `StreamCore` production runtime size as 24,135 bytes, leaving
-  441 bytes of EIP-170
+  target-isolated `StreamCore` production runtime size as 24,128 bytes, leaving
+  448 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes EIP-170 and
   the interim 384-byte development floor, but it is below the 512-byte warning
   threshold and fails the normative 2,000-byte production deployment minimum.
@@ -60,11 +60,11 @@ The current Gate A smoke baseline proves:
   adding the superseded probe/lower/emergency/conditional/rebinding machinery
   to the target; that machinery was not present in the measured Core, so the
   decision did not reduce the 24,152-byte pre-cutover baseline. The ADR 0018
-  atomic cutover removes 17 bytes by deleting lifetime prepared-operation
+  atomic cutover removes 24 bytes by deleting lifetime prepared-operation
   replay storage while retaining current-pair equality; a larger measured Core
   refactor is still required. Historical
   artifacts show the extraction work did reduce Core to 21,792 bytes; the later
-  manager/prepared-mint slice added roughly 2,330 bytes before the legacy mint
+  manager/prepared-mint slice added exactly 2,360 bytes before the legacy mint
   path was retired. The 24,152-byte baseline was therefore a duplicated,
   incomplete transition rather than the promised post-extraction target. The
   remaining train still requires zero-Core-delta or measured net-negative

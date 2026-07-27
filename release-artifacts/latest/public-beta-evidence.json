@@ -29,11 +29,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:6e81516859a14273730955683a11ad2e709482ecda787ddab1b9b896e717e2c8"
+          "sha256": "sha256:0e76c178d7d5160de59d4de0d5780c72083321a30fa368c10fd9f6806c349c34"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork deployment rehearsal artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork deployment rehearsal artifact set now binds the ADR 0018 operation-identity deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "testnet_deployment_rehearsal",
@@ -80,11 +80,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-          "sha256": "sha256:62bb4eeb7e981b06b262e8ab60f8fba8ce0d51e252c1974c2345f3212b0788ef"
+          "sha256": "sha256:db46b9feb4e864ad0c28d20be198a6aec636a9eacfd20e585e553a499c4d0867"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-015 collection metadata/preservation deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the ADR 0018 operation-identity deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "fork_testnet_randomizer_operations_evidence",
@@ -94,11 +94,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:d0192095b407a35f5dbf262d67a684481e9b948c256dd9abb9a1670bb33f0fe0"
+          "sha256": "sha256:c5636894b9cdde586028be7106e371bb56c134c8ff1d1eca9a3d52bc2b0b5c81"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork randomizer operations artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork randomizer operations artifact set now binds the ADR 0018 operation-identity deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in PR #707 before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "verified_deployed_addresses",

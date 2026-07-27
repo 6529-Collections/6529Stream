@@ -1806,6 +1806,8 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "   `batch.authorizer == address(0)` and an empty `canonicalNullifiers` array.",
         "No ungated path infers an authorizer kind from the caller, payer, account\n"
         "   code, or any phase field.",
+        "`MAX_GATE_NULLIFIERS = 16` nullifiers, with typed errors.",
+        "error MintGateNullifierCountExceeded(uint256 count, uint256 maximum);",
         "This operation preimage does not invent a primary-settlement result field",
         "exact typed primary-settlement invocation, hostile callback\n"
         "cases, and execution-specific settlement replay key remain an explicit ADR\n"
@@ -2080,14 +2082,14 @@ IMPLEMENTATION_STATUS_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "  reservation precede ledger consumption",
         "Exact typed primary settlement and repeated-sale\n"
         "  replay remain ADR 0019 / #694 blockers",
-        "24,135 bytes, leaving\n"
-        "  441 bytes of EIP-170",
+        "24,128 bytes, leaving\n"
+        "  448 bytes of EIP-170",
     ),
     KNOWN_BLOCKERS_PATH: (
         "Accepted ADR 0018's atomic cutover now implements\n"
         "  one ledger-owned root plus `N` token operation IDs",
         "The measured\n"
-        "  17-byte Core reduction is net-negative but does not satisfy the complete\n"
+        "  24-byte Core reduction is net-negative but does not satisfy the complete\n"
         "  target.",
         "Exact typed primary settlement\n"
         "  and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /\n"

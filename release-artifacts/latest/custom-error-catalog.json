@@ -6,7 +6,7 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 237,
+    "custom_error_count": 238,
     "contract_count": 18,
     "category_counts": {
       "access_control": 16,
@@ -15,7 +15,7 @@
       "configuration": 27,
       "metadata_integrity": 36,
       "mint_ledger_accounting": 16,
-      "mint_manager_policy": 41,
+      "mint_manager_policy": 42,
       "pause_emergency": 4,
       "primary_settlement_safety": 16,
       "randomness_lifecycle": 26,
@@ -25,7 +25,7 @@
     },
     "severity_counts": {
       "critical": 16,
-      "high": 180,
+      "high": 181,
       "medium": 41
     },
     "duplicate_selectors": {
@@ -4599,6 +4599,39 @@
           "internal_type": "address",
           "name": "gate",
           "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol",
+          "test/StreamMintModuleRegistry.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintGateNullifierCountExceeded(uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintGateNullifierCountExceeded",
+      "signature": "MintGateNullifierCountExceeded(uint256,uint256)",
+      "selector": "0x2ca5a6ef",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "count",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
         }
       ],
       "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",

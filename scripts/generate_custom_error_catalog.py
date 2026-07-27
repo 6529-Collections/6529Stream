@@ -152,6 +152,7 @@ CATEGORY_BY_ERROR_NAME = {
     "MintGateCodehashChanged": "mint_manager_policy",
     "MintGateHashRequired": "mint_manager_policy",
     "MintGateNotActive": "mint_manager_policy",
+    "MintGateNullifierCountExceeded": "mint_manager_policy",
     "MintGateNullifiersUnsupported": "mint_manager_policy",
     "MintGateQuantityExceeded": "mint_manager_policy",
     "MintGateValidationFailed": "mint_manager_policy",

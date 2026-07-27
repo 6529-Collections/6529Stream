@@ -1899,7 +1899,7 @@ the release policy in `docs/release-policy.md`.
 - Recovered `StreamCore` runtime bytecode headroom by replacing selected legacy
   string reverts with typed custom errors and tightening repeated
   `setCollectionData` storage access, bringing the production IR-optimized
-  runtime to 24,135 bytes with 441 bytes of EIP-170 headroom.
+  runtime to 24,128 bytes with 448 bytes of EIP-170 headroom.
 - Rejected `setFinalSupply` for collections with missing collection data using
   `CollectionDataMissing(collectionId)` before final supply math can underflow.
 - Recovered enough `StreamCore` bytecode for Core UTF-8 production enforcement

@@ -515,8 +515,8 @@ Implementation evidence (non-normative). Current artifact-backed
 CON-012-lineage Core hook proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. Current measured `StreamCore` runtime: 24,135 bytes.
-3. EIP-170 margin: 441 bytes.
+2. Current measured `StreamCore` runtime: 24,128 bytes.
+3. EIP-170 margin: 448 bytes.
 4. The margin remains above the interim 384-byte development floor but below
    the 512-byte warning threshold and the normative 2,000-byte production
    deployment requirement.
@@ -527,7 +527,7 @@ CON-012-lineage Core hook proof:
 6. This build inherits plain, non-enumerable `ERC721` and contains no
    `ERC721Enumerable` index storage. ADR 0012 decision T10 is already reflected
    and offers no remaining implementation savings.
-7. The current build is 1,559 bytes above the 22,576-byte deployment ceiling
+7. The current build is 1,552 bytes above the 22,576-byte deployment ceiling
    and 3,135 bytes above the 21,000-byte planning allocation. The Core size
    reconciliation workstream in
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
@@ -551,8 +551,8 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    and produce a net-negative measured Core delta. The final implementation PR
    must compile every mandatory hook in [PV1-HOOKS] together; a partial build
    below the ceiling is not the passing proof.
-3. From the current 24,135-byte evidence, the minimum full-stack recovery is
-   `1,559 + A` bytes, where `A` is the measured net runtime cost of all
+3. From the current 24,128-byte evidence, the minimum full-stack recovery is
+   `1,552 + A` bytes, where `A` is the measured net runtime cost of all
    mandatory Core hooks absent from that evidence after any same-PR removals.
    Scratch deletions and individually measured experiments are non-additive
    under via-IR and never satisfy this equation. Only the final linked runtime

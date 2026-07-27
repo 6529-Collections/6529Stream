@@ -133,6 +133,8 @@ interface IStreamMintManager {
     error MintGateValidationFailed(address gate);
     /// @notice Reverts when a gate returns unsupported nullifiers.
     error MintGateNullifiersUnsupported(bytes32 nullifier);
+    /// @notice Reverts when a gate returns more nullifiers than the launch hard cap.
+    error MintGateNullifierCountExceeded(uint256 count, uint256 maximum);
     /// @notice Reverts when a gate returns too small a quantity limit.
     error MintGateQuantityExceeded(uint256 quantity, uint256 maxQuantity);
     /// @notice Reverts when request and gate authorization IDs conflict.
@@ -305,7 +307,8 @@ interface IStreamMintManager {
     function executePreparedMint(MintBatch calldata batch, bytes calldata gateData)
         external
         returns (uint256[] memory tokenIds, bytes32 operationRoot, bytes32[] memory operationIds);
-    /// @notice Previews the exact single-step identity transcript without writes or events.
+    /// @notice Previews the single-step identity transcript for the current manager state.
+    /// @dev Matches execution only while the nonce, phase policy/grace, and gate result stay unchanged.
     function previewSingleStepMintOperation(MintBatch calldata batch, bytes calldata gateData)
         external
         view

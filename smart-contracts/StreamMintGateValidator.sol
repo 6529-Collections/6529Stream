@@ -11,6 +11,7 @@ import "./StreamMintOperationIdentity.sol";
 /// @dev Linked so complete gate validation does not make the manager undeployable.
 library StreamMintGateValidator {
     uint256 private constant GATE_ERC165_PROBE_GAS = 30_000;
+    uint256 private constant MAX_GATE_NULLIFIERS = 16;
 
     struct GateCall {
         address gate;
@@ -110,6 +111,11 @@ library StreamMintGateValidator {
         _requireGateStillActive(moduleRegistry, gateConfig);
         IStreamMintGate.GateResult memory result =
             _callGate(batch, gateData, boundPolicyHash, gateConfig, executor);
+        if (result.nullifiers.length > MAX_GATE_NULLIFIERS) {
+            revert IStreamMintManager.MintGateNullifierCountExceeded(
+                result.nullifiers.length, MAX_GATE_NULLIFIERS
+            );
+        }
         _canonicalizeNullifiers(result.nullifiers);
         if (result.maxQuantity != 0 && quantity > result.maxQuantity) {
             revert IStreamMintManager.MintGateQuantityExceeded(quantity, result.maxQuantity);

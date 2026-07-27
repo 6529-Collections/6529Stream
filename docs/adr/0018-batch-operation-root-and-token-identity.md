@@ -232,7 +232,9 @@ and exposes no callback, settlement, value, or delegatecall surface. Because
 the adapter calls it, the executor term is exactly the adapter's
 `address(this)`; it is never an external caller, payer, relayer, or `tx.origin`.
 Direct and relayed adapter calls carrying the same valid signed request
-therefore preview the same identity. The adapter records that root with the
+therefore preview the same identity for the same live manager state. The
+preview matches execution only while the nonce, phase policy/grace state, and
+gate/resolver result remain unchanged. The adapter records that root with the
 settlement, calls the manager in the same top-level transaction, and compares
 the returned root and token operation ID vector with the preview. A caller
 substitution, nonce race, changed policy/gate/resolver result, any request

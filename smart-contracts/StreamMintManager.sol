@@ -296,7 +296,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         return (tokenIds, transcript.operationRoot, transcript.operationIds);
     }
 
-    /// @notice Previews the byte-identical single-step identity transcript without writes.
+    /// @notice Previews the single-step identity transcript for the current manager state.
+    /// @dev Matches execution only while the nonce, phase policy/grace, and gate result stay unchanged.
     function previewSingleStepMintOperation(MintBatch calldata batch, bytes calldata gateData)
         external
         view

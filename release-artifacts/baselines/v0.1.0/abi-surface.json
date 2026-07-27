@@ -16213,13 +16213,13 @@
     "StreamMintManager": {
       "source": "smart-contracts/StreamMintManager.sol",
       "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
-      "abi_sha256": "sha256:814f7ca066419d887e9c25027cc78a28cba98ad79ee09f2f483b37ab20c66bbd",
-      "abi_entries": 102,
+      "abi_sha256": "sha256:7b3399fede76194f9b11b330dc7127faf34ff591634861a8062416e57d132784",
+      "abi_entries": 103,
       "entry_counts": {
         "constructors": 1,
         "functions": 49,
         "events": 12,
-        "errors": 40,
+        "errors": 41,
         "fallbacks": 0,
         "receives": 0
       },
@@ -18697,6 +18697,24 @@
                 "name": "gate",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNullifierCountExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintGateNullifierCountExceeded",
+            "signature": "MintGateNullifierCountExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ]
           },
@@ -39653,13 +39671,13 @@
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
       "artifact_path": "out-release/IStreamMintManager.sol/IStreamMintManager.json",
-      "abi_sha256": "sha256:95e5d9b021dff1cf68b6f1e8d7c7bdf8b218646265184bfdf208deae5e395d19",
-      "abi_entries": 70,
+      "abi_sha256": "sha256:7fa01d81a22280a768c79ae560902412bb5cfb0d8bd796118d6951365da68db4",
+      "abi_entries": 71,
       "entry_counts": {
         "constructors": 0,
         "functions": 20,
         "events": 11,
-        "errors": 39,
+        "errors": 40,
         "fallbacks": 0,
         "receives": 0
       },
@@ -41663,6 +41681,24 @@
                 "name": "gate",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNullifierCountExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintGateNullifierCountExceeded",
+            "signature": "MintGateNullifierCountExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
               }
             ]
           },

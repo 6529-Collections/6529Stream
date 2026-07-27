@@ -113,8 +113,8 @@ The current production profile is:
 
 - canonical command: `python scripts/build_release_artifacts.py`;
 - aggregate diagnostic: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 24,135 bytes;
-- current EIP-170 margin: 441 bytes;
+- current `StreamCore` runtime: 24,128 bytes;
+- current EIP-170 margin: 448 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
 - interim development floor: 384-byte minimum runtime margin;
@@ -159,7 +159,7 @@ The default classification for future feature work is:
 This policy is intentionally conservative even when an accepted exception keeps
 the current runtime above the approved baseline. CON-012 spent Core bytecode on
 the mint-manager boundary and explicit token identity reads; the atomic
-operation-identity cutover later removed 17 net runtime bytes, leaving 441 bytes
+operation-identity cutover later removed 24 net runtime bytes, leaving 448 bytes
 of current EIP-170 margin. That passes the interim development floor but fails
 the non-waivable 2,000-byte production deployment minimum; interim exception
 records cannot survive the deployment gate. The approved bytecode-spend

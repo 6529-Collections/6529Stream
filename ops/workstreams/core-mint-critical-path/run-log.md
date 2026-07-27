@@ -8,8 +8,8 @@
 - Committed the typed manager/ledger/Core cutover, manager-scoped replay,
   fixed libraries, rollback and preimage tests, and as-built status/checker
   reconciliation as `d3407803`, `f555cbfc`, and `8b7ce863`. The frozen
-  via-IR Core runtime is 24,135 bytes, 17 bytes smaller than the 24,152-byte
-  pre-cutover transitional build, with 441 bytes of EIP-170 headroom.
+  via-IR Core runtime is 24,128 bytes, 24 bytes smaller than the 24,152-byte
+  pre-cutover transitional build, with 448 bytes of EIP-170 headroom.
 - Focused operation tests pass 126/126, the semantic checker passes 62/62, and
   the full retained Slither 0.11.5 replay introduces no new first-party
   production High/Medium finding. Two explicit/fully-assigned local fixes

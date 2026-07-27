@@ -7186,6 +7186,17 @@
     {
       "contract": "StreamMintManager",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateNullifierCountExceeded(uint256,uint256)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateNullifierCountExceeded(uint256,uint256)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamMintManager:custom_error:MintGateNullifiersUnsupported(bytes32)",
       "kind": "custom_error",
       "line": null,

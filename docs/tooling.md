@@ -324,8 +324,8 @@ negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
 under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,135 bytes
-with 441 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 24,128 bytes
+with 448 bytes of EIP-170 margin.
 This CON-014 branch also refreshes via-IR bytecode hashes for contracts whose
 source files are otherwise unchanged in the diff. `StreamCore` changes because
 its imported `IStreamMintManager` source expands from the prior marker-only
@@ -1008,7 +1008,7 @@ The non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
-The current 441-byte margin intentionally leaves production release mode red
+The current 448-byte margin intentionally leaves production release mode red
 until the tracked slimming work lands; ordinary `make check` remains usable for
 development.
 

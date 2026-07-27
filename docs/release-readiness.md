@@ -221,8 +221,8 @@ normative 2,000-byte EIP-170 deployment headroom rule from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
 Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
-The current measurement is a 24,135-byte runtime with only 441 bytes of
-headroom, a 17-byte reduction from the pre-cutover 24,152-byte transitional
+The current measurement is a 24,128-byte runtime with only 448 bytes of
+headroom, a 24-byte reduction from the pre-cutover 24,152-byte transitional
 baseline. ADR 0017 avoids adding superseded machinery to the planned target;
 that machinery was not present in this measured Core. A separate Core refactor
 and regenerated canonical proof
@@ -287,7 +287,7 @@ that stricter decision, so #684 and `RISK-GOV-004` remain open.
 | Area | Current state | Blocks public beta | Blocks production release |
 | --- | --- | --- | --- |
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
-| StreamCore deployment headroom | The current measurement passes the ordinary development floor at 24,135 runtime bytes and 441 bytes of EIP-170 margin, 17 bytes smaller than the pre-cutover transitional baseline. The normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
+| StreamCore deployment headroom | The current measurement passes the ordinary development floor at 24,128 runtime bytes and 448 bytes of EIP-170 margin, 24 bytes smaller than the pre-cutover transitional baseline. The normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
 | Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory now pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, sale-adapter/delegate-gate coverage, callback-provider coverage, and the shared Core completion buffer. Its candidate bindings remain honestly `not_available` and its guarded-consumer lists remain `planning`; production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are not yet complete. Self-reported complete candidates remain categorically rejected until #656 supplies the structured candidate reconciliation model, and self-reported complete evidence is rejected until #684 adds candidate-instance-bound measurement/cadence, reproduction, and reachable-raise-chain semantics. Issue #684 stays open; the shared-buffer code/tests/evidence remain open under #671; and `RISK-GOV-004` plus `--require-complete` make this a non-waivable production gate | No | Yes |
 | Record-family authorization | The checked planning inventory pins five selector/global-admin mutation surfaces, eight authorization classes, fourteen family groups, and eight fail-open behaviors. The retained-evidence and strict grant-map schemas plus the template require candidate, classifier, grant-map, snapshot-intersection, lifecycle, phase, runtime, and independent-review bindings, but current contracts enforce none of that family-scoped policy; issue #690 and `RISK-GOV-002` remain open | Yes | Yes |

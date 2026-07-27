@@ -159,6 +159,7 @@ contract MockMintGate is ERC165 {
     bytes32 public expectedCallDataHash;
 
     bytes32 private _nullifier;
+    uint256 private _nullifierCount;
 
     function setResult(
         bytes32 authorizationId_,
@@ -178,6 +179,12 @@ contract MockMintGate is ERC165 {
 
     function setNullifier(bytes32 nullifier) external {
         _nullifier = nullifier;
+        _nullifierCount = nullifier == bytes32(0) ? 0 : 1;
+    }
+
+    function setNullifierCount(uint256 count) external {
+        _nullifier = bytes32(0);
+        _nullifierCount = count;
     }
 
     function setAdvertisesInterface(bool advertisesInterface_) external {
@@ -198,9 +205,9 @@ contract MockMintGate is ERC165 {
         if (expectedCallDataHash != bytes32(0) && keccak256(msg.data) != expectedCallDataHash) {
             revert("unexpected gate calldata");
         }
-        bytes32[] memory nullifiers = new bytes32[](_nullifier == bytes32(0) ? 0 : 1);
-        if (_nullifier != bytes32(0)) {
-            nullifiers[0] = _nullifier;
+        bytes32[] memory nullifiers = new bytes32[](_nullifierCount);
+        for (uint256 i = 0; i < _nullifierCount; i++) {
+            nullifiers[i] = _nullifier == bytes32(0) ? bytes32(i + 1) : _nullifier;
         }
         IStreamMintGate.GateResult memory result = IStreamMintGate.GateResult({
             authorizationId: authorizationId,
@@ -940,6 +947,30 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             .assertEq(0, "replay recipient not consumed");
         core.viewCirSupply(COLLECTION_ID).assertEq(1, "no replay mint");
         manager.nextOperationNonce().assertEq(1, "replay nonce rolled back");
+    }
+
+    function testGatedMintRejectsNullifierCountAboveLaunchCapBeforeMutation() public {
+        MockMintGate gate = new MockMintGate();
+        _configureGatedPhase(gate, 5, 2, 1);
+        gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
+        gate.setNullifierCount(17);
+
+        IStreamMintManager.MintBatch memory request =
+            _singleRequest(RECIPIENT, GATE_AUTHORIZATION_ID, bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintManager.MintGateNullifierCountExceeded.selector,
+                uint256(17),
+                uint256(16)
+            )
+        );
+        vm.prank(EXECUTOR);
+        manager.executePreparedMint(request, request.resolverData);
+
+        ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
+            .assertFalse("authorization not consumed");
+        manager.nextOperationNonce().assertEq(0, "nonce not reserved");
+        core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
     }
 
     function testGatedMintRejectsMaxQuantityBeforeMutation() public {

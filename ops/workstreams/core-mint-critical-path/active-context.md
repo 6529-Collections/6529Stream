@@ -27,7 +27,7 @@
   router, restricted ERC-4906 emitters, and interface-support seams are work to
   implement and measure there rather than reasons to idle now.
 - Size control is unchanged: the atomic operation-identity cutover measures
-  24,135 bytes, a 17-byte reduction from the 24,152-byte pre-cutover
+  24,128 bytes, a 24-byte reduction from the 24,152-byte pre-cutover
   transitional baseline. Every pre-#654 Core-changing slice must prove an exact
   net-negative runtime. The complete target must be at most 22,576
   bytes for the exact 2,000-byte EIP-170 margin; the objective is at most
@@ -70,7 +70,7 @@
 - Result: the atomic operation-root source cutover is implemented across the
   manager, ledger, Core hooks, fixed libraries, Foundry tests, checker, and
   as-built documentation. The current via-IR diagnostic measures `StreamCore`
-  at 24,135 bytes, 17 bytes smaller than the 24,152-byte pre-cutover baseline.
+  at 24,128 bytes, 24 bytes smaller than the 24,152-byte pre-cutover baseline.
 - Publication state: focused source reconciliation and validation are in
   progress. Freeze the reviewed source, regenerate canonical artifacts and the
   release tail once, run one authoritative Windows gate, then publish and
@@ -122,7 +122,7 @@ manager/prepared-mint slice produced the 24,152-byte pre-cutover transitional
 build while legacy mint behavior remained live; 24,152 is later duplication,
 not the pre-manager extraction baseline. The atomic operation-identity cutover
 retires the duplicate mint path and lifetime Core replay map and measures
-24,135 bytes, a 17-byte net reduction. The #672 slice was
+24,128 bytes, a 24-byte net reduction. The #672 slice was
 spec/test/measurement-only with zero Core delta. The complete target must be at most
 22,576 bytes to preserve the exact 2,000-byte production margin, with
 restoration to the approved at-most-22,184-byte baseline as the objective.

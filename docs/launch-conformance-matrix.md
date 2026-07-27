@@ -700,16 +700,16 @@ interface, two binding getters, ERC-165 surface, and publication event consume
 no Core target entry or Core budget group.
 
 Non-normative reconciliation note: the current artifact-backed transitional
-build is 24,135 runtime bytes with 441 bytes of EIP-170 headroom. It
-exceeds the 22,576-byte deployment ceiling by 1,559 bytes before the net cost of
+build is 24,128 runtime bytes with 448 bytes of EIP-170 headroom. It
+exceeds the 22,576-byte deployment ceiling by 1,552 bytes before the net cost of
 any missing mandatory target work. Closing that measured gap is the engineering
 workstream tracked by
 [#654](https://github.com/6529-Collections/6529Stream/issues/654); target-surface
 deletions are not counted as savings until a complete linked build realizes
 them. The first passing complete build is published as release evidence.
 
-The complete-stack size equation is fail-closed: starting from this 24,135-byte
-evidence, gross recovery must cover at least `1,559 + A`, where `A` is the
+The complete-stack size equation is fail-closed: starting from this 24,128-byte
+evidence, gross recovery must cover at least `1,552 + A`, where `A` is the
 measured net runtime cost of every mandatory Core hook absent from that
 evidence after same-build removals. Via-IR optimization makes isolated scratch
 deltas non-additive, so no spreadsheet sum, partial-hook build, compiler-only
@@ -1462,8 +1462,11 @@ indexed field families:
 
 ADR 0018 target operation-event topic mirror [LCM-OPERATION-EVENTS]. The owning
 mint, revenue, and entropy specs define field names and indexed masks; this
-checked table pins canonical type signatures and `topic0` values published by
-the atomic source cutover into the generated current-as-built event catalog:
+checked table pins canonical type signatures and `topic0` values. The mint
+manager and mint ledger rows are published by the atomic source cutover in the
+generated current-as-built event catalog. `TokenRoyaltySnapshotted`,
+`PrimaryRevenueSettlementContext`, and `EntropyRegistered` remain target-only
+goldens until their owning source cutovers and are not current catalog entries:
 
 | Canonical event signature | `topic0` | Indexed fields | Owner |
 | --- | --- | --- | --- |

@@ -95,17 +95,17 @@ before either PR is published, and neither lane may modify Core for this edge.
   or fallback distinctness, so issue #656 remains a production blocker. ADR
   0017 removes parameter-probe bindings from the canonical 37-entry target.
 - PR #662 merged the canonical normalized Slither gate. The fresh unfiltered
-  capture at source commit `522ec69adc075b6514ca96b410926128cfdfe1b0` on
-  `2026-07-26T11:35:26Z` records 3,035 findings across all impacts/scopes and
-  normalizes to 30 Open first-party production High/Medium rows under issue
-  #658: 3 High, 27 Medium, one confirmed gap, five design-review rows, and 24
-  pending dispositions. All 30 retained fingerprints are unchanged, with no
-  new or removed first-party production row.
+  capture at source commit `8b7ce86396fa943ef332b6831e79a998237285a9` on
+  `2026-07-27T10:29:17Z` records 3,131 findings across all impacts/scopes and
+  normalizes to 28 Open first-party production High/Medium rows under issue
+  #658: 3 High, 25 Medium, one confirmed gap, five design-review rows, and 22
+  pending dispositions. All 28 retained fingerprints remain Open.
 - The Governance Executor's proposal-selected native-value row disappeared
   only because bounded assembly makes the call invisible to Slither; the
   authority remains independently tracked as High open blocker `RISK-GOV-003`.
-  Issues #658 and #685 remain open, and the Governance V2 foundation remains
-  pre-audit and not production-ready.
+  Issue #685's closed-world runtime/catalog slice is merged, while #658 and its
+  #656 candidate-evidence dependency remain open; the Governance V2 foundation
+  remains pre-audit and not production-ready.
 - PR #660 subsequently merged the locked CPython audit/release toolchain and
   checksum provenance. The permanent pre-genesis target lock merged in PR #663,
   and PR #666 completed the zero-Core-delta finality-adapter cutover.
@@ -161,11 +161,11 @@ before either PR is published, and neither lane may modify Core for this edge.
   and fail-closed completeness boundary; later #684 work must replace every
   unavailable candidate binding with reviewed production facts.
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
-  runtime bytes; CON-012 then added roughly 2,360 bytes of manager/prepared-mint
+  runtime bytes; CON-012 then added exactly 2,360 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the
   24,152-byte pre-cutover transitional Core. The atomic operation-identity
   cutover retires that duplicate path and the Core lifetime root replay map,
-  producing the current 24,135-byte runtime and 441-byte margin. The current
+  producing the current 24,128-byte runtime and 448-byte margin. The current
   build is already non-enumerable and is not a complete mandatory-hook proof.
 - PR #663's authoritative final-follow-up local gate passed in 1,021.7 seconds,
   and latest-head Windows, Slither, Foundry, CodeRabbit, and independent review

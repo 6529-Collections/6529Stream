@@ -1239,7 +1239,8 @@ Requirements [RSR-ORCHESTRATION]:
    execution. It returns the `MINT_EXECUTION_PATH_SINGLE_STEP` root and exactly
    `N` token operation IDs, commits both `currentPolicyHash` and the signed
    `batch.expectedPolicyHash` accepted as `boundPolicyHash`, and emits, writes,
-   and consumes nothing.
+   and consumes nothing. The preview matches execution only while the nonce,
+   phase policy/grace state, and gate/resolver result remain unchanged.
 4. Sale adapter materializes the split profile if needed and deposits the
    accepted settlement asset — native ETH, or an approved standard
    ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —
