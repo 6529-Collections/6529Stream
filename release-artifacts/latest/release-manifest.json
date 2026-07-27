@@ -185,7 +185,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:f7bc1bf4275d5d6b06b58b5b437072ac2304b9b3e2e6e83ff415af2c96b4c7bd",
+        "sha256": "sha256:84fcc7811b0582c3351fbec20a54d07460db7cd4178bb28528a18225a87eba03",
         "size_bytes": 139038,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -254,7 +254,7 @@
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:cef1c62c29190e73aad70a0ed999996562646605e2999621001b488ba5da633f",
+      "sha256": "sha256:baddc1a40eb19b6640a88eec487955d0f9c3b3a376d5a24ba10e1210871ce6af",
       "size_bytes": 10255,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
@@ -269,7 +269,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:071001e713cc7fc4099017f0b1e4c03f1ee67fe5ef83355832e6b608e0369461",
+      "sha256": "sha256:d216bc6b07b656e4dcc8b0959264a2498f6783e4af9291dd73d68eda894cfffb",
       "size_bytes": 32912,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -304,7 +304,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:52c8346600d479b383d4e3852cb90b0814579609915e085c6eb3a40cec46bce7",
+        "sha256": "sha256:83c363621c873bc5c1d4edd4ea5d35b3927ce84814467bc4bd062b0258d04c4b",
         "size_bytes": 74299,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -330,7 +330,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:23ca29089a11910d266a7c79ac465eadef1a6efa1e10d206d11ee65c2920f993",
+        "sha256": "sha256:f9b9b054224b782a8f21adeab25d048bfc9ccfe59ee6dc97cb1f479c100c7709",
         "size_bytes": 124588,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -349,13 +349,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:5eb712315c2686bfa568398c72249acc3254861f926d82d8d7b2db73ad2ef7f3",
+        "sha256": "sha256:84dc56a5de4ff1aac8e792ea315a28b42fdb9ef4369bc84b22e341ad42a74d3c",
         "size_bytes": 84653,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:0f2ed9285b605235cd9cf79eb5c8bbd5d7f6a0e530b507d68853d6ccb300d94c",
+        "sha256": "sha256:9f177aef80ce58a5d0dc77c023aa9a0db7f702aafea52d0e6c38c0228d110688",
         "size_bytes": 75155
       }
     },
@@ -600,7 +600,7 @@
       },
       {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-        "sha256": "sha256:a4a228b28348ab0ff17ec844b17dfde81db3f27e482ad837e5aa7d7abf47eb91",
+        "sha256": "sha256:d0192095b407a35f5dbf262d67a684481e9b948c256dd9abb9a1670bb33f0fe0",
         "size_bytes": 2554,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-randomizer-operations-evidence-fork-evidence",
@@ -619,7 +619,7 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:e4475aabfe6629d9f338575e9a414d297848f9a710e1206954644330b5b6ab10",
+          "sha256": "sha256:134e837ec803b0fa4ab77c8ed4255af78d7375a0bbcab959523007eaf2b2509a",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous implementer",
           "reviewer": "pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220",
@@ -1540,7 +1540,7 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
-        "sha256": "sha256:6b6c3feb8eb7b25e4877162b1fa357b98f1f60b3bb029d84452bbd40773bdb38",
+        "sha256": "sha256:a7020af901ca818745dd0920f3086a1003eac145e44d77986ad7eceec8207423",
         "size_bytes": 1796,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
@@ -1559,7 +1559,7 @@
           "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
           "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:e4475aabfe6629d9f338575e9a414d297848f9a710e1206954644330b5b6ab10",
+          "sha256": "sha256:134e837ec803b0fa4ab77c8ed4255af78d7375a0bbcab959523007eaf2b2509a",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",

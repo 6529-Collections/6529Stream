@@ -54,7 +54,7 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:cef1c62c29190e73aad70a0ed999996562646605e2999621001b488ba5da633f"
+      "sha256": "sha256:baddc1a40eb19b6640a88eec487955d0f9c3b3a376d5a24ba10e1210871ce6af"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -187,7 +187,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:cef1c62c29190e73aad70a0ed999996562646605e2999621001b488ba5da633f"
+          "sha256": "sha256:baddc1a40eb19b6640a88eec487955d0f9c3b3a376d5a24ba10e1210871ce6af"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
