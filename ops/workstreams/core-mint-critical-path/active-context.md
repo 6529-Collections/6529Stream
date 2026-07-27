@@ -8,10 +8,11 @@
 - Active branch: `codex/issue-688-operation-root-cutover`.
 - Final publication base and current `origin/main`:
   `0bc295d845e556ebb98e4fe59d891434a11072c9` after merged PR `#685`.
-- Current committed Solidity checkpoint:
-  `8b7ce86396fa943ef332b6831e79a998237285a9`. The as-built
-  status/size/checker reconciliation is committed; refreshed Slither evidence
-  and canonical generated artifacts remain to be committed before publication.
+- Current committed corrective source checkpoint:
+  `7c17e7644ca39257602cc5667f547026d22e855a`. The gate-nullifier cap,
+  status/size/checker reconciliation, and refreshed evidence inputs are
+  committed; the refreshed canonical artifacts are included in the corrective
+  publication delta and have passed the authoritative Windows gate.
 - PR #704 merged #672 as a zero-`StreamCore`-delta
   target-fixture/spec/measurement slice. It
   may pin the EIP-150 admission formula, worst-case post-coordinator EOA tail,
@@ -66,15 +67,15 @@
 - Issue: reopened `#688`.
 - Branch: `codex/issue-688-operation-root-cutover`.
 - Base: `0bc295d845e556ebb98e4fe59d891434a11072c9`.
-- Solidity checkpoint: `8b7ce86396fa943ef332b6831e79a998237285a9`.
+- Corrective source checkpoint: `7c17e7644ca39257602cc5667f547026d22e855a`.
 - Result: the atomic operation-root source cutover is implemented across the
   manager, ledger, Core hooks, fixed libraries, Foundry tests, checker, and
   as-built documentation. The current via-IR diagnostic measures `StreamCore`
   at 24,128 bytes, 24 bytes smaller than the 24,152-byte pre-cutover baseline.
-- Publication state: focused source reconciliation and validation are in
-  progress. Freeze the reviewed source, regenerate canonical artifacts and the
-  release tail once, run one authoritative Windows gate, then publish and
-  obtain CI plus substantive CodeRabbit review.
+- Publication state: focused validation, canonical regeneration, release
+  verification, and the authoritative Windows gate are complete. Publish the
+  exact corrective head, resolve the substantive CodeRabbit threads, and
+  require latest-head CI before merge.
 - Static-analysis state: the exact full Slither 0.11.5 replay against the
   frozen Solidity checkpoint introduces no new first-party production
   High/Medium finding. Explicit initialization and narrowly documented
@@ -203,19 +204,23 @@ target or add evidence; it must not make a deployment or readiness claim.
 
 ## Open Decisions
 
-- ADR 0018 remains Proposed only. The current corrective diff and generated
-  tail are green but still await final exact-diff readback and explicit
-  publication authorization. The ADR cannot be described as accepted.
+- ADR 0018 is Accepted. The current corrective diff implements its atomic
+  manager/ledger/Core operation-identity cutover but remains unmerged until the
+  exact corrective head passes latest-head review and CI.
 - Exact typed primary settlement, hostile callback handling, and
   execution-ID-bound repeated-sale replay remain ADR 0019 / #694 production
   blockers; operation-root uniqueness does not close them.
-- Draft-PR update and publication remain gated on exact shared-path/head
-  handoff and explicit coordinator publication authorization.
+- Draft-PR publication is authorized for the exact validated corrective head.
+  Merge remains gated on latest-head CI and resolved actionable review threads.
 
 ## Current Shared-Path Inventory
 
-The exact 26-path diff against the post-`#692` base after canonical
-regeneration and the full Windows gate is:
+The exact corrective PR diff against base
+`0bc295d845e556ebb98e4fe59d891434a11072c9` contains 101 paths: the 32
+non-snapshot source/test/documentation paths reviewed by CodeRabbit plus 69
+deterministic snapshot, deployment-evidence, and release-artifact paths. The
+historical 26-path pre-implementation inventory below is retained only as the
+earlier ADR 0018 planning baseline:
 
 - `CHANGELOG.md`
 - `docs/adr/0018-batch-operation-root-and-token-identity.md`

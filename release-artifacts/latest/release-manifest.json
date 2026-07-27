@@ -121,7 +121,7 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:1c00562783723d0759c48b28f8fcc04b65cec510d81b5a0737ed62c5fe8bca6b",
+        "sha256": "sha256:4fe5b4627edc43b22721938f2c1baab2934cd73f958f8f311a5cfc79b150b253",
         "size_bytes": 2219482,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
@@ -154,7 +154,7 @@
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:ecd9488d74083dffc2a298badf351fbb83b393f4d0dc14c56349c3239773fbdf",
+      "sha256": "sha256:4cf9c29b4b33d67be3d30c8f173a03ef85c64a42e253f0c6edffce60ae8f4a3f",
       "size_bytes": 30621,
       "schema_version": "6529stream.abi-checksums.v1"
     },
@@ -166,32 +166,32 @@
     },
     "interface_ids": {
       "path": "release-artifacts/latest/interface-ids.json",
-      "sha256": "sha256:13e0cd62e36737664966e86fe6c251265e90818fbfdaac476a0b183a7f9a1e27",
+      "sha256": "sha256:eac25ea06c054a3e66983f089444a9f3cc57e55d22dc0ef82e5ac1775701c1b6",
       "size_bytes": 62696,
       "schema_version": "6529stream.interface-ids.v1"
     },
     "protocol_surface_report": {
       "path": "release-artifacts/latest/protocol-surface-report.json",
-      "sha256": "sha256:b81a5dac5a1f55e80bdd0a463b71e9ebbdf4844d264dfe1b8e8b9271febc524c",
-      "size_bytes": 378376,
+      "sha256": "sha256:c60e3431b854fe3971ac0980e6284d961db451a77cc33c26ea059b18983765f8",
+      "size_bytes": 378657,
       "schema_version": "6529stream.protocol-surface-report.v1"
     },
     "custom_error_catalog": {
       "path": "release-artifacts/latest/custom-error-catalog.json",
-      "sha256": "sha256:a090d440e6963173d351e48d7f045c2e4842fa85b9fe531962d3334f35c1ad5f",
-      "size_bytes": 271237,
+      "sha256": "sha256:484558e5ae79e2e282a3775a143289fdd37ca8ffd7e97507c3d7d7ee7818ea51",
+      "size_bytes": 272464,
       "schema_version": "6529stream.custom-error-catalog.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:84fcc7811b0582c3351fbec20a54d07460db7cd4178bb28528a18225a87eba03",
+        "sha256": "sha256:fb78d974485e3e2564b690f28a99c64435c6cafbe3127017d10f4042602104c1",
         "size_bytes": 139038,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:98ffb403a72a7f2d59d90b8b42f8f2f87b39e668cbb938a12d11048947f70513",
+        "sha256": "sha256:347c4f13111e5c2ffc1f1c6aade1d2c9d57cd3bc5909180f100b954a02ff5428",
         "size_bytes": 135586
       }
     },
@@ -204,13 +204,13 @@
     },
     "artifact_manifest": {
       "path": "release-artifacts/latest/release-artifact-manifest.json",
-      "sha256": "sha256:7ec9914304479012f122055559f49187a72b80cdd4e43244ea027125fb758a2c",
+      "sha256": "sha256:5c7ac9c9a256dafceb36cf15a82519cecc19800853ad45f8bb59ea4bfd33259f",
       "size_bytes": 745,
       "schema_version": "6529stream.release-artifact-manifest.v1",
       "artifacts": {
         "abi-checksums.json": {
           "path": "release-artifacts/latest/abi-checksums.json",
-          "sha256": "sha256:ecd9488d74083dffc2a298badf351fbb83b393f4d0dc14c56349c3239773fbdf"
+          "sha256": "sha256:4cf9c29b4b33d67be3d30c8f173a03ef85c64a42e253f0c6edffce60ae8f4a3f"
         },
         "event-topic-catalog.json": {
           "path": "release-artifacts/latest/event-topic-catalog.json",
@@ -218,7 +218,7 @@
         },
         "interface-ids.json": {
           "path": "release-artifacts/latest/interface-ids.json",
-          "sha256": "sha256:13e0cd62e36737664966e86fe6c251265e90818fbfdaac476a0b183a7f9a1e27"
+          "sha256": "sha256:eac25ea06c054a3e66983f089444a9f3cc57e55d22dc0ef82e5ac1775701c1b6"
         }
       }
     },
@@ -236,26 +236,26 @@
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:25ae1bc912bc9617d3e4090530d144c87f6b8107f88bc018a4b2e2d7c63b632e",
+      "sha256": "sha256:df95117c694156e4e2d446d63c22fb7113338a9e6c69eea9b31681d14fd09e75",
       "size_bytes": 102175,
       "schema_version": "6529stream.source-verification-inputs.v1"
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:2ca506442d7af2c38fddbea369aaa15d0c531771160d9e871169b52c67625a24",
+      "sha256": "sha256:e27616742696114474231976e91afa77089b183b4016913bf8d4df82f9c9f9b8",
       "size_bytes": 2177,
       "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1"
     },
     "one_of_one_permanence_manifest": {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:8b69c2d198ee4b0a5a7068f60ee1837845a12223f605722449b0c7083f238ab6",
+      "sha256": "sha256:7daee1e22fe527c0e60f6272f0119fa5b22302a81599db7c274e0b8146eb0e41",
       "size_bytes": 2913,
       "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:baddc1a40eb19b6640a88eec487955d0f9c3b3a376d5a24ba10e1210871ce6af",
-      "size_bytes": 10255,
+      "sha256": "sha256:117b66bba9460d142f1133a22fa5742833f9470bf7ba8ed7ad8099dd0dfa8ea4",
+      "size_bytes": 10120,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
       "status": {
@@ -269,7 +269,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d216bc6b07b656e4dcc8b0959264a2498f6783e4af9291dd73d68eda894cfffb",
+      "sha256": "sha256:c86e91feb931b00ae5a98be8b75c8c711710794f179acef7280954bc2d3f239d",
       "size_bytes": 32912,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -293,8 +293,8 @@
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:608058dfca86ac66adeeb4b5375fad25a327e6b861f0689c63d7128f92e98818",
-      "size_bytes": 12079
+      "sha256": "sha256:a4bfb960e379fc172f0ea9bec584585bb35211da7c421d4ea191b9899a272397",
+      "size_bytes": 11944
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -304,8 +304,8 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:83c363621c873bc5c1d4edd4ea5d35b3927ce84814467bc4bd062b0258d04c4b",
-        "size_bytes": 74299,
+        "sha256": "sha256:f5a9b76c746e07bd2c877d3a3b8fad1b94675ebfb0af435597cb557c5983a122",
+        "size_bytes": 74164,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
       "markdown": {
@@ -330,7 +330,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:f9b9b054224b782a8f21adeab25d048bfc9ccfe59ee6dc97cb1f479c100c7709",
+        "sha256": "sha256:0af966e0f6cda3b57984bb7525a5748b17def819a53bab09088a02b3f9b62849",
         "size_bytes": 124588,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -349,13 +349,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:84dc56a5de4ff1aac8e792ea315a28b42fdb9ef4369bc84b22e341ad42a74d3c",
+        "sha256": "sha256:baff2434161890f1cbec120d2434a94c7ade4724a95512544357ab764bebebce",
         "size_bytes": 84653,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:9f177aef80ce58a5d0dc77c023aa9a0db7f702aafea52d0e6c38c0228d110688",
+        "sha256": "sha256:6cd3b825fc128a3e9e163ba29bcd9a077458ebc5d6326f0475131b7cde5f1235",
         "size_bytes": 75155
       }
     },
@@ -459,8 +459,8 @@
     "non_local_release_evidence": [
       {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-        "sha256": "sha256:62bb4eeb7e981b06b262e8ab60f8fba8ce0d51e252c1974c2345f3212b0788ef",
-        "size_bytes": 2463,
+        "sha256": "sha256:db46b9feb4e864ad0c28d20be198a6aec636a9eacfd20e585e553a499c4d0867",
+        "size_bytes": 2406,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-ceremony-evidence-fork-evidence",
         "record_type": "evidence",
@@ -478,16 +478,16 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
           "retained_path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-          "sha256": "sha256:b737343d9802fa9355a9251d2ae4fee58f3b1c23aef0acfd6a835cecff5b7952",
+          "sha256": "sha256:5e89b6d1d6633bfa585c28014209172d00bc0e15c1b85dac1aee65ffc6c44649",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous implementer",
-          "reviewer": "pending collection metadata/preservation PR review; historical Codex autonomous maintainer second-pass review for PR #552",
+          "reviewer": "pending operation-identity PR #707 review; historical Codex autonomous maintainer second-pass review for PR #552",
           "public_beta_requirement_id": "fork_testnet_ceremony_evidence",
           "source": {
             "repository": "https://github.com/6529-Collections/6529Stream",
             "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
             "source_dirty": false,
-            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge; collection metadata/preservation PR review pending"
+            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed; operation-identity PR #707 review pending"
           },
           "redaction_policy": {
             "no_secrets": true,
@@ -501,13 +501,13 @@
             ]
           },
           "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-          "operator_notes": "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+          "operator_notes": "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
         }
       },
       {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-        "sha256": "sha256:6e81516859a14273730955683a11ad2e709482ecda787ddab1b9b896e717e2c8",
-        "size_bytes": 2354,
+        "sha256": "sha256:0e76c178d7d5160de59d4de0d5780c72083321a30fa368c10fd9f6806c349c34",
+        "size_bytes": 2324,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-deployment-rehearsal-fork-evidence",
         "record_type": "evidence",
@@ -525,16 +525,16 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
           "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-          "sha256": "sha256:7c86b8f082c16c284c5354a98e833f0ba99ccc54094dfdbfc17d7a8efa9c9919",
+          "sha256": "sha256:447affe4703c65a20ec4d651ab1279fc0a1fd34897df31bac04a68b74efc8054",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous operator",
-          "reviewer": "pending collection metadata/preservation PR review; historical CodeRabbit status success on PR #347 and PR #349",
+          "reviewer": "pending operation-identity PR #707 review; historical CodeRabbit status success on PR #347 and PR #349",
           "public_beta_requirement_id": "fork_deployment_rehearsal",
           "source": {
             "repository": "https://github.com/6529-Collections/6529Stream",
             "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
             "source_dirty": false,
-            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; collection metadata/preservation PR review pending"
+            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; operation-identity PR #707 review pending"
           },
           "redaction_policy": {
             "no_secrets": true,
@@ -548,7 +548,7 @@
             ]
           },
           "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-          "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+          "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
         }
       },
       {
@@ -600,8 +600,8 @@
       },
       {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-        "sha256": "sha256:d0192095b407a35f5dbf262d67a684481e9b948c256dd9abb9a1670bb33f0fe0",
-        "size_bytes": 2554,
+        "sha256": "sha256:c5636894b9cdde586028be7106e371bb56c134c8ff1d1eca9a3d52bc2b0b5c81",
+        "size_bytes": 2524,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-randomizer-operations-evidence-fork-evidence",
         "record_type": "evidence",
@@ -619,16 +619,16 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:134e837ec803b0fa4ab77c8ed4255af78d7375a0bbcab959523007eaf2b2509a",
+          "sha256": "sha256:9dc2506fddbfbf07c639738ed174959f086ccf945d429f36692d4f2eaf328ab0",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous implementer",
-          "reviewer": "pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220",
+          "reviewer": "pending operation-identity PR #707 review; historical Codex autonomous maintainer evidence review for issue #220",
           "public_beta_requirement_id": "fork_testnet_randomizer_operations_evidence",
           "source": {
             "repository": "https://github.com/6529-Collections/6529Stream",
             "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
             "source_dirty": false,
-            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; collection metadata/preservation PR review pending"
+            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; operation-identity PR #707 review pending"
           },
           "redaction_policy": {
             "no_secrets": true,
@@ -642,7 +642,7 @@
             ]
           },
           "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-          "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+          "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
         }
       },
       {
@@ -1352,7 +1352,7 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json",
-        "sha256": "sha256:c7f976b86f095a6251506e113acf4ccefb141d8bdd2051eb51dd8e58a5e452e0",
+        "sha256": "sha256:c81f63c5f8be7ab362d53d34f7bf31004ef1e566b31f2e4ce140f17e1b7a3411",
         "size_bytes": 1690,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-deployment-rehearsal",
@@ -1371,7 +1371,7 @@
           "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
           "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-          "sha256": "sha256:7c86b8f082c16c284c5354a98e833f0ba99ccc54094dfdbfc17d7a8efa9c9919",
+          "sha256": "sha256:447affe4703c65a20ec4d651ab1279fc0a1fd34897df31bac04a68b74efc8054",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -1399,7 +1399,7 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json",
-        "sha256": "sha256:fe3c6367d257fe2f34729f439ae29c1b8d6aac6a5fcffe9bda079b30f6f24d64",
+        "sha256": "sha256:76200e771b75682d7188049ab4ff76887e42ca609b9a9cc2c819eeff1e7b6759",
         "size_bytes": 1728,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-testnet-ceremony-evidence",
@@ -1418,7 +1418,7 @@
           "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
           "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-          "sha256": "sha256:b737343d9802fa9355a9251d2ae4fee58f3b1c23aef0acfd6a835cecff5b7952",
+          "sha256": "sha256:5e89b6d1d6633bfa585c28014209172d00bc0e15c1b85dac1aee65ffc6c44649",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -1540,7 +1540,7 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
-        "sha256": "sha256:a7020af901ca818745dd0920f3086a1003eac145e44d77986ad7eceec8207423",
+        "sha256": "sha256:0116c2a9d3dd79b1f14acacfc68f6c92d34ce262f182f1a11cbe8a61cde55d06",
         "size_bytes": 1796,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
@@ -1559,7 +1559,7 @@
           "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
           "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:134e837ec803b0fa4ab77c8ed4255af78d7375a0bbcab959523007eaf2b2509a",
+          "sha256": "sha256:9dc2506fddbfbf07c639738ed174959f086ccf945d429f36692d4f2eaf328ab0",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -1977,8 +1977,8 @@
     ],
     "abi_compatibility_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
-      "sha256": "sha256:4cd1babff673d5a5c3305a619ae6162cf6faa8bb1b4519b5670f8470d6664c7b",
-      "size_bytes": 1504945,
+      "sha256": "sha256:83f5c9058d5d43c06c0d103acfda685a4f4ba1601a2e2abfa238fb7f1c91a30e",
+      "size_bytes": 1506107,
       "schema_version": "6529stream.abi-surface-baseline.v2"
     },
     "gas_snapshot_baseline": {
@@ -1994,8 +1994,8 @@
     },
     "natspec_coverage_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
-      "sha256": "sha256:532d9f40ec8935ff0cd0d5156fdf9eb8715a658a64d7b1c2556cafa708265d65",
-      "size_bytes": 525441,
+      "sha256": "sha256:9c4995a6e48c6bb9148a8aa989b83f9c31604de96760c3f686d4514e33a8ad17",
+      "size_bytes": 526091,
       "schema_version": "6529stream.natspec-coverage-baseline.v1"
     }
   },
@@ -2015,7 +2015,7 @@
       },
       {
         "path": "deployments/config/canonical-deployment-candidate-non-production.json",
-        "sha256": "sha256:868603e800956d32525e15a66c125e71746cf24dab864b96c119b0ec12b38710",
+        "sha256": "sha256:caf7dadc0850889b1ab6d8553cabf53f4473d52762df5fe1d760fa488a58da68",
         "size_bytes": 2170,
         "schema_version": "6529stream.canonical-deployment-candidate.v1"
       },
@@ -2053,7 +2053,7 @@
     "manifests": [
       {
         "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:3e0e0091b76286528af5fcd7f2d26d2a311d7d27fa448979069b49e2038a859f",
+        "sha256": "sha256:166c6292d6c2f3d1735551e2b36af10b568a1755f4a800256d7af040953df16b",
         "size_bytes": 14743,
         "schema_version": "6529stream.deployment-manifest.v1",
         "protocol_version": "0.1.0",
@@ -2063,7 +2063,7 @@
           "name": "anvil",
           "chain_id": 31337
         },
-        "manifest_sha256": "sha256:15a98bcce37af83c0678ce7f7aeb29b13af01c3e627887f68b3de8cadf5bef79",
+        "manifest_sha256": "sha256:e854763425899bee730555fca604b2dc42813533862e0a1e17ca800a6e393d9c",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2088,7 +2088,7 @@
       },
       {
         "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:313423e4ab2853f1c104cc3b57157dc04c5103fdf7eb33bf4370330772f2b02f",
+        "sha256": "sha256:97a50fa935f70759c46f8ca0e34e7860182d71e32ec36bc8d3e1a18162371b00",
         "size_bytes": 14706,
         "schema_version": "6529stream.deployment-manifest.v1",
         "protocol_version": "0.1.0",
@@ -2098,7 +2098,7 @@
           "name": "anvil",
           "chain_id": 31337
         },
-        "manifest_sha256": "sha256:712d8f678577585c0bbd563b5d03f55d8ededa810fc5dfd9e1e49583b19bd229",
+        "manifest_sha256": "sha256:6434b17f3c6a6fec2be3f5ce7822288b5c68eebffc6079aa06033d994151f674",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2123,7 +2123,7 @@
       },
       {
         "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8",
+        "sha256": "sha256:9df336b00d0217f73cd159394e6d308c25faae8952a787b147e50b9d4818b838",
         "size_bytes": 14889,
         "schema_version": "6529stream.deployment-manifest.v1",
         "protocol_version": "0.1.0",
@@ -2133,7 +2133,7 @@
           "name": "fork-mainnet",
           "chain_id": 1
         },
-        "manifest_sha256": "sha256:ade1cb4e342d96250471a2e9837610a84c0dcf7d84d862a6446b7755555aa1e0",
+        "manifest_sha256": "sha256:c6e569c520348441d01abd1210aa00fe46b9c3cfc1942d00725e8d7cc17577f7",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2158,7 +2158,7 @@
       },
       {
         "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:678ae9b262ae8a6425d960a29ed25bcaa024bbccb8a4d38661498f24ec3a5bd6",
+        "sha256": "sha256:7802e27b7eccc0408a49715d5ba291b6d6c6594aa95bb94891b9c4c9632edccd",
         "size_bytes": 14959,
         "schema_version": "6529stream.deployment-manifest.v1",
         "protocol_version": "0.1.0",
@@ -2168,7 +2168,7 @@
           "name": "fork-mainnet",
           "chain_id": 1
         },
-        "manifest_sha256": "sha256:d7875f28bcbb48a80761cc40c41b86dc1dc5b207512b06b5200ef7f4737fcea1",
+        "manifest_sha256": "sha256:4873e4c7eed1eeb036ae7ffe8e53706c39e4a55f85fdeb9512c7a9b0b919313e",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2195,7 +2195,7 @@
     "address_books": [
       {
         "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:bba89336893fdfe8535e32d4c53896f2a85c00bc18f95c11b01de5a37bbfdc40",
+        "sha256": "sha256:640440035660ba57d082b29ec88c77e884f59873451551467d37254375305215",
         "size_bytes": 10170,
         "schema_version": "6529stream.address-book.v1",
         "protocol_version": "0.1.0",
@@ -2206,7 +2206,7 @@
           "chain_id": 31337
         },
         "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-        "deployment_manifest_sha256": "sha256:3e0e0091b76286528af5fcd7f2d26d2a311d7d27fa448979069b49e2038a859f",
+        "deployment_manifest_sha256": "sha256:166c6292d6c2f3d1735551e2b36af10b568a1755f4a800256d7af040953df16b",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2231,7 +2231,7 @@
       },
       {
         "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:f03f55bf4602eace2dc37010f8c014881cb2ec283a0be53dd9e931fc120579ea",
+        "sha256": "sha256:2aec2042e6825f120abc15b7df22ad52269f67ff2fde29bacd28d226545c6713",
         "size_bytes": 10150,
         "schema_version": "6529stream.address-book.v1",
         "protocol_version": "0.1.0",
@@ -2242,7 +2242,7 @@
           "chain_id": 31337
         },
         "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-        "deployment_manifest_sha256": "sha256:313423e4ab2853f1c104cc3b57157dc04c5103fdf7eb33bf4370330772f2b02f",
+        "deployment_manifest_sha256": "sha256:97a50fa935f70759c46f8ca0e34e7860182d71e32ec36bc8d3e1a18162371b00",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2267,7 +2267,7 @@
       },
       {
         "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-        "sha256": "sha256:a0dda5a0d342fbe5d3abf95bdc883020aa5f06696f18ddb48243fb8103b9301a",
+        "sha256": "sha256:954f30e30c63e10b4012f5adb1f370b742b71be0e91497e24a93de38b6668575",
         "size_bytes": 10187,
         "schema_version": "6529stream.address-book.v1",
         "protocol_version": "0.1.0",
@@ -2278,7 +2278,7 @@
           "chain_id": 1
         },
         "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-        "deployment_manifest_sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8",
+        "deployment_manifest_sha256": "sha256:9df336b00d0217f73cd159394e6d308c25faae8952a787b147e50b9d4818b838",
         "contracts": [
           "DependencyRegistry",
           "NextGenRandomizerRNG",
@@ -2361,7 +2361,7 @@
     "ceremony_evidence": [
       {
         "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:9c3b63002763707078757273821efcce7329bfbd8cb7d768fe72f8c3953ec015",
+        "sha256": "sha256:f207988807dfbfbe524086a87effd25bbf0eeecaa766f9ff0dc719af62837e00",
         "size_bytes": 5668,
         "schema_version": "6529stream.deployment-ceremony-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-local",
@@ -2400,7 +2400,7 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:31cb76b8f9fa66fedeaf9780871d44a905ee02f638f62fdddb0c54919afd900d",
+        "sha256": "sha256:92bb1362e3d36e4e01beca52bea346b90a34cb18d68d3a9a2003684709caaea6",
         "size_bytes": 10245,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
@@ -2467,7 +2467,7 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:72e6147b1d9a820d1dd175a955715c2616b187f2bd69b286c4ee84cd2e84ce19",
+      "sha256": "sha256:02e3e4dc0271e8b7ff94efeeba3a187ba29794f8a636e5603242bf3bd4533f98",
       "size_bytes": 137892
     },
     "governance_docs": [
@@ -2523,7 +2523,7 @@
       },
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:2c73ea7bb3c00a076be9f7b319a241b952ee527f06a42554980502ef4c7c9455",
+        "sha256": "sha256:cebe114e06c6487b1be9d80c6ab6be18e73f4984621c0fc159b3c6ed510f99eb",
         "size_bytes": 15638
       },
       {
@@ -2548,7 +2548,7 @@
       },
       {
         "path": "docs/public-beta-evidence.md",
-        "sha256": "sha256:b1ccd4aa34a83aa6705da38fc35a99747758060d94d87bb27200379c52d35140",
+        "sha256": "sha256:9f24b04ad3719344a643baf682a26bc61751c3836e7d8bc31a1b86dcf17291e1",
         "size_bytes": 20142
       },
       {
@@ -2558,7 +2558,7 @@
       },
       {
         "path": "docs/architecture.md",
-        "sha256": "sha256:0ed6a4bf3b4e2fe1639e950e0ff3670dc46d8da1f81e8f6b067553efe8223845",
+        "sha256": "sha256:dff07c2db7eed3c3ace3746306a6f2a167ebc979a7d2a92f4f2c996be5613c21",
         "size_bytes": 19746
       },
       {
@@ -2608,13 +2608,13 @@
       },
       {
         "path": "docs/launch-v1-target-architecture.md",
-        "sha256": "sha256:fc45adf45cda092fe9310640cbcff5dd64afa57708fb3676788ca7d5ee45c4f8",
+        "sha256": "sha256:4f1269651e84ae155d67e38e807deddda4e9e2d180463803c405f1469bcf9e2d",
         "size_bytes": 161695
       },
       {
         "path": "docs/launch-conformance-matrix.md",
-        "sha256": "sha256:e0dedad9ebdaeded96bcd675b3c143d2548b306f71e96bb1c35c7b7b4cf46243",
-        "size_bytes": 138107
+        "sha256": "sha256:3e386a592412a29616a725ae4c92c4812467d2935d86ecfef740cab938714f82",
+        "size_bytes": 138333
       },
       {
         "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -2623,8 +2623,8 @@
       },
       {
         "path": "docs/adr/0018-batch-operation-root-and-token-identity.md",
-        "sha256": "sha256:b9bea4c50fb5eb99243577d0903a97ae1465e778a3bbc6bd09210d81f914aa93",
-        "size_bytes": 24519
+        "sha256": "sha256:746366d2c361883777aef5fdcc2db8e656690dc0a8e054a5bc32b48ce4c9ba18",
+        "size_bytes": 24672
       },
       {
         "path": "docs/adr/0022-immutable-artist-registry-validation-adapter.md",
@@ -2633,13 +2633,13 @@
       },
       {
         "path": "docs/revenue-splits-and-royalties.md",
-        "sha256": "sha256:b77dbf6d3eebfbd87d9fae1ea1994840ccb96d44a01e4faa9d032f70d251524a",
-        "size_bytes": 240563
+        "sha256": "sha256:f83b34ebbb8f3def3b10b7694e8c61700c8e0ab01ee57ae1baf38c7c6fc9b957",
+        "size_bytes": 240687
       },
       {
         "path": "docs/mint-policy-and-accounting.md",
-        "sha256": "sha256:74050074dca300ecf9fc15582cdbcd2e79b84cb876404077a10a32499abdff10",
-        "size_bytes": 208542
+        "sha256": "sha256:08c31bbe5d12c19005603bf51f27ac3411b7dc8e3a094324e5adf28333d340ef",
+        "size_bytes": 208757
       },
       {
         "path": "docs/stream-sales-and-auctions.md",
@@ -2683,7 +2683,7 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:109febefc6cb9087346105bf9f8a232b9a3a53b6e77f9ba93bac34a65c6274f4",
+        "sha256": "sha256:965ba066d90e745cf354af13cbb7654890cadd207fa01f4d433259bdaa58db66",
         "size_bytes": 29908
       },
       {
@@ -2698,7 +2698,7 @@
       },
       {
         "path": "docs/known-blockers.md",
-        "sha256": "sha256:8be90d6a4e7fd098499e4ce2a56bac8794b3fdb3ad3e7a8f66527dcfd9d6f297",
+        "sha256": "sha256:5b17ce6ffb070241c04a2d21de169b99682d815c73f5ff9e46b1f8b060a1b6a7",
         "size_bytes": 20903
       },
       {
@@ -2733,7 +2733,7 @@
       },
       {
         "path": "docs/natspec-coverage.md",
-        "sha256": "sha256:3e8879c450bea2b87e231662bedb06fab859cd690eb51418fece8d440994a115",
+        "sha256": "sha256:3f7fcd88d2b3e9df9067da5c8047cff5ffb3985880d3bdaedec8262020848ad3",
         "size_bytes": 3825
       },
       {
@@ -2748,12 +2748,12 @@
       },
       {
         "path": "docs/production-readiness-execution.md",
-        "sha256": "sha256:71ee1f11eb240a7f97e1e45c6dc7afbb1a1e86705756a4cfd88ba4cd4bddd8a4",
-        "size_bytes": 9381
+        "sha256": "sha256:0e500e2070ec28206ad2d2362a8b42dce8f2882cb1e272987069a960f2052daa",
+        "size_bytes": 9378
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:03e3eb0c25070baa480a64991b89bc1dc7e4144dfc94d5bbd610919ab6ba51da",
+        "sha256": "sha256:a117e289c2e67c33a76fe87ec98c3ab6f7d15764416c6291cfbb72d05b551efe",
         "size_bytes": 78534
       },
       {
@@ -2869,12 +2869,12 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:6e0b116c589adf76e1117af652e1493931105de9728ccb52eec85dd6c980b816",
+        "sha256": "sha256:6b184e0aee180b428f269441fceb6752fbcbb5eaf1fdee38910c2fd529136659",
         "size_bytes": 122770
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:6ee97f8dbff0e8f64bae10207a9d410fe89d894dc59c92497d106bbb51e808e4",
+        "sha256": "sha256:6d8980912d23b9600ab68cc4c0a6d2a07d55d10c3d04b2a2cd5d94bd75050a1f",
         "size_bytes": 38799
       }
     ]

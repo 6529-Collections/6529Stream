@@ -12,7 +12,7 @@ not replace the generated release evidence status manifest in
 | --- | --- |
 | Candidate source | `https://github.com/6529-Collections/6529Stream` |
 | Candidate branch | `codex/issue-688-operation-root-cutover` |
-| Candidate source commit | `8b7ce86396fa943ef332b6831e79a998237285a9` |
+| Candidate source commit | `7c17e7644ca39257602cc5667f547026d22e855a` |
 | Candidate summary | Accepted ADR 0018 atomic manager/ledger/Core operation-identity cutover, including the final Slither-hardened Solidity and Foundry source snapshot |
 | Execution date | 2026-07-27 |
 | Readiness posture | Public beta blocked; production release blocked |

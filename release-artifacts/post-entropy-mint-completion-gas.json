@@ -30,12 +30,12 @@
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:e0dedad9ebdaeded96bcd675b3c143d2548b306f71e96bb1c35c7b7b4cf46243",
-      "size_bytes": 138107
+      "sha256": "sha256:3e386a592412a29616a725ae4c92c4812467d2935d86ecfef740cab938714f82",
+      "size_bytes": 138333
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:fc45adf45cda092fe9310640cbcff5dd64afa57708fb3676788ca7d5ee45c4f8",
+      "sha256": "sha256:4f1269651e84ae155d67e38e807deddda4e9e2d180463803c405f1469bcf9e2d",
       "size_bytes": 161695
     }
   ],
@@ -92,8 +92,8 @@
       "sha256": "sha256:4e90f9ae1bb3b4979f055b8cf92362ffb7033e73be89df84cad1c1c3315f525f",
       "size_bytes": 70421
     },
-    "stream_core_runtime_bytes": 24135,
-    "stream_core_eip170_margin_bytes": 441,
+    "stream_core_runtime_bytes": 24128,
+    "stream_core_eip170_margin_bytes": 448,
     "stream_core_delta_bytes": 0,
     "production_complete_runtime_ceiling_bytes": 22576,
     "approved_runtime_objective_bytes": 22184,
