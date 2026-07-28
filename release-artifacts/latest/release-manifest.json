@@ -2015,7 +2015,7 @@
       },
       {
         "path": "deployments/config/canonical-deployment-candidate-non-production.json",
-        "sha256": "sha256:c7d282d209ab410669b10a533b1d983bf39872b4489abcb2c48b3d3e2f7e921a",
+        "sha256": "sha256:dc87ad7b2bfa92866a14e1ecaa96f8d95189c7148ea092ccce33d5225dfa3ecc",
         "size_bytes": 2170,
         "schema_version": "6529stream.canonical-deployment-candidate.v1"
       },
