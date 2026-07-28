@@ -46,7 +46,7 @@
     },
     "governed_parameter_inventory": {
       "path": "release-artifacts/governed-parameter-inventory.json",
-      "sha256": "sha256:47e7f88c49e993251ce51574ee15710e9ede59fc2d6895601346630a4c9efe06",
+      "sha256": "sha256:f8343ed7f36ab129076eda3cc705ac4d7c8df1174d3c81a949391845dda05011",
       "size_bytes": 42300,
       "schema_version": "6529stream.governed-parameter-inventory.v1"
     },
@@ -121,8 +121,8 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:0adbd32e618e12a4d56415cfa04c2e1c4b8670eb63ec42829a839e4b00a52b04",
-        "size_bytes": 2230295,
+        "sha256": "sha256:47afb7fb88520d23555e43ffb932552c81f01622c76805703f0cb314b151e35a",
+        "size_bytes": 2230759,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
       "schema": {
@@ -185,7 +185,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:0efeb90882721dc92132604c5398d9c3567ef212f29c3e6cafb97a0c0a93f92c",
+        "sha256": "sha256:aab48e295843ad11bf59b383de057e0473f9be782d4686257b00149b3734c105",
         "size_bytes": 139730,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -269,7 +269,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f2e75a74bc3a94275383af1954f9e38a467c01f7b9482a4aa938d61ac9f24b53",
+      "sha256": "sha256:f01c08ae163eb7cc5d3f26660eded1a88b23408a80b611739885b4cf54170e18",
       "size_bytes": 32912,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2633,8 +2633,8 @@
       },
       {
         "path": "docs/revenue-splits-and-royalties.md",
-        "sha256": "sha256:75ae020f73b6cfd073112c2a1721c030ffcc6c33f75940867405d82de0e2c34b",
-        "size_bytes": 241435
+        "sha256": "sha256:9370fb3f5a663abdf30821cf0fbe1d3a226f69dc5e701f87155ac0ef053bf70e",
+        "size_bytes": 241455
       },
       {
         "path": "docs/mint-policy-and-accounting.md",
@@ -2653,8 +2653,8 @@
       },
       {
         "path": "docs/metadata-router-and-renderer.md",
-        "sha256": "sha256:bed49f01d0d1475d907960d76ea183f4b7c8765efe26e36f4703101359b0d638",
-        "size_bytes": 155072
+        "sha256": "sha256:08d4a06d7d4fb0d280df79790038761f938f114e0e3c29a3dec3008955705888",
+        "size_bytes": 155078
       },
       {
         "path": "docs/collection-metadata-contract.md",
@@ -2869,8 +2869,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:2e5964bc929b28431ae44dc668b167142978d3bdafea194eeb6ced9b2687961b",
-        "size_bytes": 124386
+        "sha256": "sha256:4e761742a3872d743f98186608fdc74bd09cc970c94e53fbb143657852847b98",
+        "size_bytes": 124393
       },
       {
         "path": "docs/status.md",

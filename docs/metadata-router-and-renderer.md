@@ -391,7 +391,7 @@ canonical `tokenURI()` and `contractURI()` returns, malformed and oversized
 fail-safe paths, shared-row threshold residues, full-stipend calls, independent
 2x raise orderings, and the uint256 terminal raise chain are checked. The
 derived 1,460,000 floor and 2,910,000 genesis value remain planning values until
-#654 integrates and remeasures the complete Core, and #656/#684 bind and review
+issue #654 integrates and remeasures the complete Core, and #656/#684 bind and review
 the exact candidate and upstream fixed-stipend budgets.
 
 The fallback JSON schema must be canonicalized and hash-committed in the

@@ -339,9 +339,9 @@ measure canonical success and fail-safe completion for `royaltyInfo()`,
 cap. The worst conservative completion measurement is 725,735 gas; applying
 rule 9 and rounding upward to 10,000 gas yields the planning immutable floor
 1,460,000 and planning genesis value 2,910,000. These are target-fixture planning
-facts, not candidate host facts or mutation authority. Issues #654, #656, and
-#684 still own as-built Core integration, exact candidate binding, reproduction,
-cadence, fixed-stipend, and independent review evidence.
+facts, not candidate host facts or mutation authority. Issues #654 and #656,
+together with issue #684, still own as-built Core integration, exact candidate
+binding, reproduction, cadence, fixed-stipend, and independent review evidence.
 
 ## Split Profile Model
 

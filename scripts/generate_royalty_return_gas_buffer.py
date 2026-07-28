@@ -8,9 +8,13 @@ import hashlib
 import json
 import re
 import sys
-import tomllib
 from pathlib import Path
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised by the fallback test.
+    tomllib = None  # type: ignore[assignment]
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -132,8 +136,54 @@ def _harness_constants() -> dict[str, int]:
     return constants
 
 
+def _parse_toml_scalar(value: str) -> Any:
+    value = value.strip()
+    if value in {"true", "false"}:
+        return value == "true"
+    if value.startswith('"') and value.endswith('"'):
+        return value[1:-1]
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
+
+def _load_foundry_config() -> dict[str, Any]:
+    text = FOUNDRY_CONFIG_PATH.read_text(encoding="utf-8")
+    if tomllib is not None:
+        try:
+            return tomllib.loads(text)
+        except tomllib.TOMLDecodeError as exc:
+            raise SharedBufferGenerationError(f"invalid foundry.toml: {exc}") from exc
+
+    # Python 3.8-3.10 has no stdlib TOML parser. The evidence only consumes
+    # scalar keys in [profile.default], so parse that bounded surface without
+    # adding a release-tool dependency.
+    default: dict[str, Any] = {}
+    in_default = False
+    in_multiline_array = False
+    for raw_line in text.splitlines():
+        line = raw_line.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if in_multiline_array:
+            in_multiline_array = not line.endswith("]")
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            in_default = line == "[profile.default]"
+            continue
+        if in_default and "=" in line:
+            key, value = line.split("=", 1)
+            scalar = value.strip()
+            if scalar.startswith("["):
+                in_multiline_array = not scalar.endswith("]")
+                continue
+            default[key.strip()] = _parse_toml_scalar(scalar)
+    return {"profile": {"default": default}}
+
+
 def _compiler_profile() -> dict[str, Any]:
-    config = tomllib.loads(FOUNDRY_CONFIG_PATH.read_text(encoding="utf-8"))
+    config = _load_foundry_config()
     default = config.get("profile", {}).get("default", {})
     expected = {
         "solc_version": "0.8.19",

@@ -794,8 +794,8 @@ target fixture, maximum bounded metadata ABI return, six completion
 measurements, measurement-derived planning floor/genesis values, independent
 raise-chain tests, and unchanged 24,128-byte transitional Core proof. It has no
 onchain authority and adds no 23rd GGP. The governed inventory deliberately
-keeps generic candidate measurement and fixed-stipend facts incomplete; #654,
-#656, and #684 remain production gates.
+keeps generic candidate measurement and fixed-stipend facts incomplete;
+issues #654, #656, and #684 remain production gates.
 
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at

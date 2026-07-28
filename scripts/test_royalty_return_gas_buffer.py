@@ -9,6 +9,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -70,6 +71,16 @@ class SharedBufferEvidenceTests(unittest.TestCase):
                 generator.main(["--output", str(output), "--check"]),
                 1,
             )
+
+    def test_python_38_toml_fallback_preserves_compiler_profile(self) -> None:
+        with mock.patch.object(generator, "tomllib", None):
+            profile = generator._compiler_profile()
+        self.assertEqual(profile["solc_version"], "0.8.19")
+        self.assertEqual(profile["evm_version"], "paris")
+        self.assertEqual(profile["optimizer_runs"], 200)
+        self.assertTrue(profile["optimizer_enabled"])
+        self.assertTrue(profile["via_ir"])
+        self.assertEqual(profile["bytecode_hash"], "none")
 
     def test_rejects_completion_overclaim(self) -> None:
         self._check_mutation(

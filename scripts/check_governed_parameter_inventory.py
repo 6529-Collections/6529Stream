@@ -426,6 +426,11 @@ def _row(
     }
 
 
+def _parameter_id(family: str, name: str) -> str:
+    preimage = f"6529STREAM_{family}_{name}"
+    return "0x" + identifier_checker._keccak256(preimage.encode("ascii")).hex()
+
+
 # This table is the reviewed structural policy for issue #684. Numeric values
 # marked planning are copied from their normative homes; they are not candidate
 # facts and cannot satisfy --require-complete.
@@ -1280,9 +1285,7 @@ def _validate_parameters(
         _expect(row["name"] == name, f"{label}.name must be {name}")
         constant_name = f"{family}_{name}"
         preimage = f"6529STREAM_{constant_name}"
-        parameter_id = "0x" + identifier_checker._keccak256(
-            preimage.encode("ascii")
-        ).hex()
+        parameter_id = _parameter_id(family, name)
         _expect(
             row["constant_name"] == constant_name,
             f"{label}.constant_name must be {constant_name}",
@@ -1823,9 +1826,8 @@ def _validate_shared_buffer_planning(
         planning["parameter"], {"family", "name", "parameter_id"}, f"{label}.parameter"
     )
     expected_parameter = EXPECTED_ROWS[1]
-    expected_parameter_id = (
-        "0x0af6f5a1a5059e398191fa0af185be12"
-        "fee6d609933826603244c7f247793be7"
+    expected_parameter_id = _parameter_id(
+        expected_parameter["family"], expected_parameter["name"]
     )
     _expect(parameter["family"] == "GGP", f"{label}.parameter.family drifted")
     _expect(
@@ -1850,8 +1852,8 @@ def _validate_shared_buffer_planning(
         planning["failure_class"] == {"id": 1, "name": "FORWARDING_CAP"},
         f"{label}.failure_class drifted",
     )
-    expected_genesis = {"status": "planning", "value": 2_910_000}
-    expected_floor = {"status": "planning", "value": 1_460_000}
+    expected_genesis = expected_parameter["genesis"]
+    expected_floor = expected_parameter["floor"]
     _expect(
         planning["genesis_value"] == expected_genesis,
         f"{label}.genesis_value drifted",

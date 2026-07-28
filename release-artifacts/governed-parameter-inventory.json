@@ -117,7 +117,7 @@
     "planning_evidence": {
       "status": "planning_target_fixture",
       "path": "release-artifacts/evidence/royalty-return-gas-buffer.json",
-      "sha256": "406feffa44efeb79e5bb488e99e3093e6696e63e06009d5e5bbe8ed52bb93eb2",
+      "sha256": "cb791388000ba8ea7956be67f989d87c4972495617e4d12f8c709ef0ca2be36c",
       "onchain_authority": false
     },
     "independent_raise_chain": {

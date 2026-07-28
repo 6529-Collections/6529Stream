@@ -7603,8 +7603,8 @@
     {
       "path": "scripts/check_governed_parameter_inventory.py",
       "role": "runtime",
-      "source_sha256": "25f93c2e825bb724ec60847787f1569d7b54f2501244198c1c34ba924f023dd6",
-      "size_bytes": 71072,
+      "source_sha256": "ed78406055dd15b3306f46e4ccff9689c2ec3adf31f074a1a9164cd17947c6b3",
+      "size_bytes": 71148,
       "imports": [
         {
           "record": "{\"alias\":\"identifier_checker\",\"binding\":\"identifier_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_identifiers\"}",
@@ -9440,6 +9440,18 @@
           "target": "local:_markdown_anchor_declared",
           "shape": "positional=2;starred=0;keywords=allow_bare_heading",
           "ast_sha256": "0f07ca111f7d8f09594d8cfb0de2a9ffcd549fbaff90f36d5ee7015595694cf0",
+          "count": 1
+        },
+        {
+          "target": "local:_parameter_id",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "3e87ae40d9219ddcac70d1efbb3ff72cded2ac41b1375d8d90d36da760d1a40c",
+          "count": 1
+        },
+        {
+          "target": "local:_parameter_id",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "bec5c56942963ea343b6e4c51d52198e569e0d484d109eafafb7db51f6b02bcd",
           "count": 1
         },
         {

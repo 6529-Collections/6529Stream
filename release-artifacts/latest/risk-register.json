@@ -363,7 +363,7 @@
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
-          "sha256": "sha256:47e7f88c49e993251ce51574ee15710e9ede59fc2d6895601346630a4c9efe06"
+          "sha256": "sha256:f8343ed7f36ab129076eda3cc705ac4d7c8df1174d3c81a949391845dda05011"
         },
         {
           "path": "release-artifacts/schema/governed-parameter-inventory.v1.schema.json",
@@ -375,7 +375,7 @@
         },
         {
           "path": "scripts/check_governed_parameter_inventory.py",
-          "sha256": "sha256:25f93c2e825bb724ec60847787f1569d7b54f2501244198c1c34ba924f023dd6"
+          "sha256": "sha256:ed78406055dd15b3306f46e4ccff9689c2ec3adf31f074a1a9164cd17947c6b3"
         },
         {
           "path": "scripts/check_governed_parameter_identifiers.py",
@@ -670,7 +670,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:2e5964bc929b28431ae44dc668b167142978d3bdafea194eeb6ced9b2687961b"
+          "sha256": "sha256:4e761742a3872d743f98186608fdc74bd09cc970c94e53fbb143657852847b98"
         },
         {
           "path": "docs/warning-dispositions.md",

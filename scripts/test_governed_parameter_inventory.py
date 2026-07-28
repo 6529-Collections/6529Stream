@@ -460,6 +460,41 @@ class GovernedParameterInventoryTests(unittest.TestCase):
             "does not satisfy.*schema",
         )
 
+        temporary, root, inventory_path, inventory = self._fixture_root()
+        self.addCleanup(temporary.cleanup)
+        evidence_path = root / SHARED_BUFFER_EVIDENCE_PATH
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        evidence["core_boundary"]["stream_core_delta_bytes"] = 1
+        write_json(evidence_path, evidence)
+        inventory["shared_buffer_planning"]["planning_evidence"]["sha256"] = sha256(
+            evidence_path
+        )
+        write_json(inventory_path, inventory)
+        with self.assertRaisesRegex(
+            checker.GovernedParameterInventoryError,
+            "must record zero StreamCore delta",
+        ):
+            checker._validate_shared_buffer_planning(
+                inventory["shared_buffer_planning"],
+                inventory["parameters"],
+                root.resolve(),
+                [],
+            )
+
+        temporary, root, _, inventory = self._fixture_root()
+        self.addCleanup(temporary.cleanup)
+        inventory["parameters"][1]["gas"]["genesis_value"]["value"] += 1
+        with self.assertRaisesRegex(
+            checker.GovernedParameterInventoryError,
+            "genesis does not match parameter row",
+        ):
+            checker._validate_shared_buffer_planning(
+                inventory["shared_buffer_planning"],
+                inventory["parameters"],
+                root.resolve(),
+                [],
+            )
+
     def test_shared_buffer_cannot_overclaim_fixed_stipend_completion(self) -> None:
         self._validate_mutation(
             lambda value: value["shared_buffer_planning"][

@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a609be0c7ea4faa83195d01390adba22e7c07bd870aa2072f437e84b55daf6ff",
+      "sha256": "sha256:1a2888664cfe7eb6e0dc1a9f995ab631da3a709d9997daf99b8d8ec1374d655e",
       "size_bytes": 146927,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:8325dac46a0ed2ce011b931c8a8d996df4fbaaa9208ddeda419cda04f99e1628",
+      "sha256": "sha256:cfed4f29d0dfccd0fa54a5b85342eeba320284f4088c0286af8bc4739d7b1610",
       "size_bytes": 150687,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,13 +73,13 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f2e75a74bc3a94275383af1954f9e38a467c01f7b9482a4aa938d61ac9f24b53",
+      "sha256": "sha256:f01c08ae163eb7cc5d3f26660eded1a88b23408a80b611739885b4cf54170e18",
       "size_bytes": 32912,
       "schema_version": "6529stream.risk-register.v1"
     },
     "governed_parameter_inventory": {
       "path": "release-artifacts/governed-parameter-inventory.json",
-      "sha256": "sha256:47e7f88c49e993251ce51574ee15710e9ede59fc2d6895601346630a4c9efe06",
+      "sha256": "sha256:f8343ed7f36ab129076eda3cc705ac4d7c8df1174d3c81a949391845dda05011",
       "size_bytes": 42300,
       "schema_version": "6529stream.governed-parameter-inventory.v1"
     },
@@ -135,8 +135,8 @@
     },
     "release_tool_call_policy": {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:0adbd32e618e12a4d56415cfa04c2e1c4b8670eb63ec42829a839e4b00a52b04",
-      "size_bytes": 2230295,
+      "sha256": "sha256:47afb7fb88520d23555e43ffb932552c81f01622c76805703f0cb314b151e35a",
+      "size_bytes": 2230759,
       "schema_version": "6529stream.release-tool-call-policy.v1"
     },
     "release_tool_call_policy_schema": {
@@ -150,7 +150,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:0efeb90882721dc92132604c5398d9c3567ef212f29c3e6cafb97a0c0a93f92c",
+        "sha256": "sha256:aab48e295843ad11bf59b383de057e0473f9be782d4686257b00149b3734c105",
         "size_bytes": 139730,
         "schema_version": "6529stream.release-notes.v1"
       },
