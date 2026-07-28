@@ -19,4 +19,3 @@ interface IStreamMetadataRouter is IERC165 {
         view
         returns (string memory);
 }
-

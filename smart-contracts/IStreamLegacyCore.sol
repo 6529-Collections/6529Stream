@@ -237,4 +237,3 @@ interface IStreamLegacyCore {
             uint256 globalBurnCount
         );
 }
-

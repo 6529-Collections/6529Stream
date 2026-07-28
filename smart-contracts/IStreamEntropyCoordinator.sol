@@ -35,4 +35,3 @@ interface IStreamEntropyCoordinator is IERC165 {
         external
         returns (uint8 outcome);
 }
-

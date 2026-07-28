@@ -71,4 +71,3 @@ interface IStreamSystemManifest is IERC165 {
         StreamSystemManifestUpdate calldata update
     ) external;
 }
-
