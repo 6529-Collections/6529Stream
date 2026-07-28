@@ -28,6 +28,10 @@ the release policy in `docs/release-policy.md`.
   warning surface without treating its 11-byte EIP-170 overage as production;
   any other overage or compiler error remains fail-closed, while isolated
   release artifacts remain the production size authority.
+- Raised the aggregate Foundry CI timeout from 60 to 90 minutes after the
+  exact permanent-Core lane reached its final deployment rehearsal at the old
+  limit. The rehearsal parity checker now rejects insufficient timeout
+  headroom instead of relying on a presence-only workflow assertion.
 - Completed issue #671's shared
   `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150
   admission helper, authenticated permanent-Core three-row implementation,
