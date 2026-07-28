@@ -345,10 +345,8 @@ and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget),
 tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
 The requirement is a non-waivable deployment rule, not an evidence-manifest
 row. Missing, malformed, inconsistent, or sub-threshold artifact fields fail
-closed. The current measured runtime is 24,128 bytes with 448 bytes of margin;
-the atomic operation-identity cutover removed 24 net bytes from the prior
-24,152-byte transitional baseline. ADR 0017 avoids adding superseded target
-machinery, but that machinery was not in the measured Core. A
-separate refactor and regenerated canonical checksum-covered proof must
-demonstrate at least 2,000 bytes of headroom before production release mode can
-pass.
+closed. The permanent target measures 18,997 runtime bytes with 5,579 bytes of
+margin, 5,131 bytes smaller than the 24,128-byte transitional build and 3,187
+bytes below the approved 22,184-byte objective. The size rule is satisfied;
+candidate-instance, governed-parameter, audit, and live evidence gates remain
+independent.

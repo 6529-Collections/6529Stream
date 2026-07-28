@@ -55,9 +55,7 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
     constructor(address core, address admins, address supersedes)
         StreamRecordFamilyRegistry(admins)
     {
-        StreamMetadataRenderer.requireContractMarker(
-            core, IStreamCore.isCoreContract.selector, InvalidCoreContract.selector
-        );
+        if (core.code.length == 0) revert InvalidCoreContract();
         streamCore = core;
         recordFamilyRegistry = address(this);
         _recordFamilyRegistry = IStreamRecordFamilyRegistry(address(this));
@@ -397,7 +395,10 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
     }
 
     function _requireKnownCollection(uint256 collectionId) private view {
-        if (collectionId == 0 || collectionId >= IStreamCore(streamCore).newCollectionIndex()) {
+        if (
+            collectionId == 0
+                || collectionId > IStreamCore(streamCore).lastAllocatedCollectionId()
+        ) {
             revert CollectionDoesNotExist(collectionId);
         }
     }

@@ -2654,9 +2654,11 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
     // pre-call reads and post-call decode and is coupled to the limit
     // by [RSR-2981-GAS].6. Both values are read as current GGP values.
     if (
-        gasleft()
-            < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63
-                + ROYALTY_RETURN_GAS_BUFFER
+        !StreamCoreReadBuffer.hasSufficientParentGas(
+            gasleft(),
+            ROYALTY_RESOLVER_GAS_LIMIT,
+            ROYALTY_RETURN_GAS_BUFFER
+        )
     ) {
         return (address(0), 0);
     }
@@ -2756,24 +2758,19 @@ Requirements [RSR-2981-GAS]:
 2. The parent gas precheck must account for EIP-150's 63/64 gas forwarding
    rule so a caller cannot pass the precheck while the resolver receives
    less than the current `ROYALTY_RESOLVER_GAS_LIMIT`, and the precheck
-   must read the current GGP values, not compiled-in constants. The
-   normative reference realization is the multiplicative form of the
-   reference shape above (ADR 0013 decision U7):
-   `gasleft() < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63 +
-   ROYALTY_RETURN_GAS_BUFFER` falls back to `(address(0), 0)` — the
-   64/63 term guarantees full-limit delivery through the caller's
-   one-64th retention at every reachable limit value, and the buffer
-   covers Core's parent-side work. The same buffer also covers the bounded
+   must read the current GGP values, not compiled-in constants. The exact
+   reference model is
+   `gasLimit + ceil(gasLimit / 63) + sharedBuffer`; the production
+   implementation uses ADR 0017's overflow-safe subtraction comparisons
+   rather than evaluating that sum. The ceiling term guarantees full-limit
+   delivery through the caller's one-64th retention at every reachable limit
+   value, and the buffer covers Core's parent-side work. The same buffer also
+   covers the bounded
    `tokenURI()` and `contractURI()` parent-completion paths under
    [MRR-ROUTER-GGP]; its floor is therefore sized from the worst measured
-   parent-side completion work across all three Core reads. An additive
-   `LIMIT + BUFFER`
-   comparison guarantees full forwarding only while the buffer
-   separately covers the one-64th retention, so an additive realization
-   is conformant only with the rule 6 coupling floor enforced by the
-   host at every value change; the earlier uncoupled sum form is
-   superseded and nonconformant. CI must
-   test calls just below, at, and above the precheck threshold and prove
+   parent-side completion work across all three Core reads. The earlier
+   uncoupled `LIMIT + BUFFER` comparison is superseded and nonconformant.
+   CI tests calls just below, at, and above the precheck threshold and proves
    ordinary all-cold resolver reads do not fallback-to-zero because of
    under-forwarded gas.
 3. `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
@@ -2831,10 +2828,18 @@ Requirements [RSR-2981-GAS]:
    - CI must include a golden test replaying the rule 2 threshold suite
      across simulated multi-step raise chains — repeated 2x raises of
      the limit with unchanged and with re-verified buffers — proving
-     that whenever the precheck passes, the resolver receives the full
-     current limit and the parent completes decode, at every step; the
-     threshold tests pinned only at deployed genesis values are not
-     sufficient.
+      that whenever the precheck passes, the resolver receives the full
+      current limit and the parent completes decode, at every step; the
+      threshold tests pinned only at deployed genesis values are not
+      sufficient.
+
+   The checksum-bound evidence binds the as-built permanent `StreamCore`, the
+   exact linked runtime, and the worst measured parent-side completion work
+   across `royaltyInfo()`, `tokenURI()`, and `contractURI()`, including maximum
+   permitted returndata, canonical decoding, fallback construction, and return
+   handling. The raise chain is strictly monotonic, and bounded to at most 2x
+   the current value per action. Candidate-instance and fixed-stipend facts
+   remain separate release blockers.
 
 The resolver read must be O(1). Wallet deployment, `walletFor(profileId)`,
 `wallet.profileId()`, and runtime-code-hash checks happen when assignments are

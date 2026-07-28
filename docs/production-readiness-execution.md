@@ -29,10 +29,10 @@ artifact generators in canonical order.
 | Gate | Result | Evidence |
 | --- | --- | --- |
 | Full ordinary repository gate | Passed | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed end to end in 3,948.2 seconds after the final operation-identity release-tail refresh; focused operation, gas, profile, vector, release-build, size, exact Slither, and standalone release-artifact gates also pass |
-| Production size build | Measured, release-blocking | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical `StreamCore` at 24,128 runtime bytes; the aggregate all-source size build is diagnostic only |
-| `StreamCore` production headroom | Blocked | 448 bytes of EIP-170 margin, 1,552 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
+| Production size build | Measured | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical permanent `StreamCore` at 18,997 runtime bytes; the aggregate all-source size build is diagnostic only |
+| `StreamCore` production headroom | Passes size requirement | 5,579 bytes of EIP-170 margin, 3,579 bytes above the non-waivable 2,000-byte production minimum and 3,187 bytes below the approved 22,184-byte objective |
 | Genesis deployment profile | Blocked | The canonical profile has 37 entries and rejects probes, but the implementation catalog still must prove deployment-instance identity and fallback distinctness; issue #656 owns reconciliation |
-| Governed parameter inventory | Checked planning artifact; production blocked | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding policy and host-profile coverage, but its concrete candidate bindings are honestly unavailable and its guarded-consumer lists remain planning. Production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and addresses remain open under issue #684; any self-reported complete candidate is rejected until #656 supplies structured candidate reconciliation, complete evidence is rejected until #684 supplies candidate-instance-bound measurement/reproduction/raise-chain semantics, the shared Core buffer implementation/tests/evidence remain open under #671, and `RISK-GOV-004` plus `python scripts/check_governed_parameter_inventory.py --require-complete` fail closed |
+| Governed parameter inventory | Checked as-built source plus incomplete candidate facts; production blocked | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding policy, the permanent Core shared-buffer implementation, and its measured source/runtime evidence. Concrete #670 artist/revenue rows, candidate bindings, exhaustive consumer review, fixed-stipend compatibility, and instance-aware deployment facts remain open under #656/#684; `RISK-GOV-004` plus `python scripts/check_governed_parameter_inventory.py --require-complete` fail closed |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 28 Open production rows (3 High, 25 Medium): one confirmed gap, five design-review rows, and 22 pending dispositions; issue #658 owns remediation and reviewed disposition |
 | Governance Executor native-value authority | Blocked | The issue #685 slice binds and revalidates a closed-world target/selector/value catalog and adds adversarial tests, but bounded assembly still makes the value-bearing call invisible to Slither. High open blocker `RISK-GOV-003` now requires exact #656-bound candidate deployment/rehearsal evidence and independent review under #658 |
 | Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
@@ -100,8 +100,9 @@ Before any public beta or production-release claim:
 3. Run `python scripts/check_slither_baseline.py --run-slither`; remediate or
    produce issue-linked reviewed proof for every first-party production
    High/Medium row. Baseline equality alone is not acceptance.
-4. Restore at least 2,000 bytes of `StreamCore` EIP-170 margin under issue #654,
-   complete instance-aware genesis reconciliation under issue #656, replace
+4. Preserve the measured 5,579-byte `StreamCore` EIP-170 margin, land the two
+   concrete #670 artist/revenue pointer rows, complete instance-aware genesis
+   reconciliation under issue #656, replace
    every `not_available` governed-parameter candidate binding with exact
    production hosts, values, floors, exhaustive guarded-consumer review,
    evidence, and fixed-stipend compatibility under issue #684 and pass the

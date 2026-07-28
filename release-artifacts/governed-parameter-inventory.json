@@ -82,7 +82,7 @@
     "host_bindings": []
   },
   "shared_buffer_planning": {
-    "status": "planning_target_fixture",
+    "status": "as_built_permanent_core_source",
     "parameter": {
       "family": "GGP",
       "name": "ROYALTY_RETURN_GAS_BUFFER",
@@ -115,13 +115,13 @@
       "metadata_max_abi_bytes": 65536
     },
     "planning_evidence": {
-      "status": "planning_target_fixture",
+      "status": "as_built_permanent_core_source",
       "path": "release-artifacts/evidence/royalty-return-gas-buffer.json",
-      "sha256": "cb791388000ba8ea7956be67f989d87c4972495617e4d12f8c709ef0ca2be36c",
+      "sha256": "1070ac92e1940a179eab9165945fd0300b4d0efa5dd6e633fa48fcd6ac7223e5",
       "onchain_authority": false
     },
     "independent_raise_chain": {
-      "status": "planning_target_fixture",
+      "status": "as_built_source_and_target_fixture",
       "action_class_id": 1,
       "minimum_delay_seconds": 172800,
       "maximum_raise_multiplier": {

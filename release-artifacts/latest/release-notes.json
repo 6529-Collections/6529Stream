@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0209927f14f7ca8e77c7aba93b5eb61ef33b7a4f307900f28bc9a29ad86abbf4",
-      "size_bytes": 138595
+      "sha256": "sha256:2e8dbd48e23d6e09e472117d283d755fd32ecd976dc48893b776def9990d86d1",
+      "size_bytes": 139963
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f01c08ae163eb7cc5d3f26660eded1a88b23408a80b611739885b4cf54170e18",
+      "sha256": "sha256:150c760f3a1426fe714e64df77284c1364ad01b6556dd77443bec64f80b9985a",
       "size_bytes": 32912
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,7 +45,9 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
-      "Added the issue #671 zero-Core-delta shared `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150 admission helper, authenticated three-row target fixture, bounded 65,536-byte metadata ABI return, hostile full-budget/malformed/oversized and independent raise-chain tests, and six-scenario checksum-bound via-IR evidence. The governed inventory records the measurement-derived 1,460,000 planning floor and 2,910,000 planning genesis value without adding a 23rd GGP. Transitional `StreamCore` stays 24,128 bytes; #654 owns final integration and as-built measurement, while #656/#684 keep candidate, fixed-stipend, cadence, rehearsal, and review readiness fail-closed.",
+      "Implemented the locked permanent `StreamCore` target with authenticated metadata-router, system-manifest, entropy-coordinator, artist-registry, and revenue-resolver pointer rows; linked bounded external reads; manager-only prepared mint completion; exact EIP-150/full-stipend entropy admission; shared royalty/metadata parent-gas protection; and restricted ERC-4906 emitters. The production-profile via-IR target measures 18,997 runtime bytes, 5,579 bytes below EIP-170 and 3,579 bytes inside the non-waivable 2,000-byte deployment margin. That is a 5,131-byte reduction from the 24,128-byte transitional Core and restores the stricter 22,184-byte objective. The two #670 concrete artist/revenue interface rows and exact candidate-instance bindings under #656/#684 remain unresolved, so this is pre-audit source completion rather than a deployment or readiness claim.",
+      "Completed issue #671's shared `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150 admission helper, authenticated permanent-Core three-row implementation, bounded 65,536-byte metadata ABI return, actual `tokenURI()` and `contractURI()` threshold tests, hostile full-budget/malformed/oversized and independent raise-chain tests, and six-scenario checksum-bound via-IR evidence. The governed inventory records the measurement-derived 1,460,000 planning floor and 2,910,000 planning genesis value without adding a 23rd GGP. The artifact binds the 18,997-byte permanent Core while #656/#670/#684 keep candidate, fixed-stipend, cadence, rehearsal, and review readiness fail-closed.",
+      "Completed issue #672's as-built permanent-Core post-entropy boundary: Core encodes coordinator calldata before admission, reserves the EIP-150 ceiling, 3,300-gas cold-call cost, and measured 162,000-gas EOA completion tail, forwards the exact governed stipend, rejects nonempty returndata, and rolls back all mint state and events on failure. Contract-receiver callback gas remains caller supplied and candidate-instance binding remains incomplete.",
       "Implemented accepted ADR 0018's pre-genesis atomic operation-identity cutover: the manager derives and reserves one batch root plus one operation ID per token before ledger consumption; the ledger owns manager-scoped root, authorization, nullifier, phase, and current/bound-policy validation; and Core retains only current prepared-pair operation-ID equality. The exact typed primary-settlement callback and execution-ID-bound repeated-sale key remain ADR 0019 / #694 blockers, and #654 still owns the complete Core headroom/finality seam. The refreshed exact Slither inventory introduces no new first-party High/Medium finding and removes two prior `uninitialized-local` rows after explicit initialization and narrow analyzer annotations, leaving 28 Open rows. Generated as-built and release surfaces are refreshed without promoting protocol maturity or readiness.",
       "Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty probe-record model and every related authorization path, and the overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises. Separate measurement references must describe the same candidate and complete proposed tuple; actual candidate-bound measurements remain blocked on issues #684 and #656, so maturity and release readiness are unchanged.",
       "Rebound the issue #690 record-family source catalog and checker to the merged #699 source commit so candidate-source replay verifies the complete interface, registry, metadata, preservation, and rehearsal binding set. Candidate-bound deployment evidence remains unavailable and both release modes remain fail-closed.",

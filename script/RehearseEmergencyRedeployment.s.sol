@@ -2,9 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IStreamCore.sol";
+import "../smart-contracts/IStreamLegacyCore.sol";
 import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "../test/helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "./RehearseDeployment.s.sol";
 
@@ -18,10 +18,10 @@ interface EmergencyRedeploymentVm {
 }
 
 contract EmergencyRedeploymentRandomizer is IRandomizer {
-    IStreamCore private immutable core;
+    IStreamLegacyCore private immutable core;
 
     constructor(address core_) {
-        core = IStreamCore(core_);
+        core = IStreamLegacyCore(core_);
     }
 
     function calculateTokenHash(uint256 collectionId, uint256 mintIndex, uint256 saltfunO)

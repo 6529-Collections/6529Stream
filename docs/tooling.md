@@ -743,7 +743,7 @@ candidate-bound admission/provider/grant/runtime/lifecycle evidence and
 independent review are merged. This tooling proves the source slice, not
 deployment completeness or readiness.
 
-The post-entropy completion-gas planning gate runs:
+The post-entropy completion-gas as-built source gate runs:
 
 ```sh
 make post-entropy-completion-gas-check
@@ -761,16 +761,15 @@ forge test --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -vvv
 forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --check release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap
 ```
 
-The artifact records the measured EOA-recipient post-coordinator tail and the
-measurement-derived parent reserve, but its admission formula is only the
-EIP-150-plus-tail planning lower bound. The predicate excludes ABI setup,
-memory expansion, low-level `CALL` costs, and intervening source work; its
-separate high-parent-gas test does not prove exact-threshold forwarding. The
-artifact remains target-fixture planning evidence, changes no production Core
-bytecode, and cannot substitute for #654's complete call-boundary enforcement
-and as-built remeasurement of the actual Core seam.
+The artifact records the measured EOA-recipient post-coordinator tail, the
+measurement-derived parent reserve, the permanent-Core source and linked
+via-IR runtime, and the executable exact-threshold/full-stipend regression.
+Calldata encoding occurs before admission and the threshold includes the
+cold-call upfront reserve. It is source evidence, not a candidate-instance
+measurement; #656/#670 candidate binding and #684 governed-parameter
+completeness remain separate blockers.
 
-The shared royalty/metadata completion-buffer planning gate runs:
+The shared royalty/metadata completion-buffer as-built source gate runs:
 
 ```sh
 make royalty-return-gas-buffer-check
@@ -789,13 +788,14 @@ forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --m
 
 The generated
 [`royalty-return-gas-buffer.json`](../release-artifacts/evidence/royalty-return-gas-buffer.json)
-binds the reusable overflow-safe admission source, authenticated three-row
-target fixture, maximum bounded metadata ABI return, six completion
+binds the reusable overflow-safe admission source, the authenticated
+permanent-Core three-row implementation, maximum bounded metadata ABI return,
+actual `tokenURI()` and `contractURI()` boundary tests, six completion
 measurements, measurement-derived planning floor/genesis values, independent
-raise-chain tests, and unchanged 24,128-byte transitional Core proof. It has no
+raise-chain tests, and the exact linked permanent-Core runtime. It has no
 onchain authority and adds no 23rd GGP. The governed inventory deliberately
-keeps generic candidate measurement and fixed-stipend facts incomplete;
-issues #654, #656, and #684 remain production gates.
+keeps candidate and fixed-stipend facts incomplete; issues #656, #670, and
+#684 remain production gates.
 
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at
@@ -2091,15 +2091,15 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 28 open findings: 3 High and 25 Medium. The
+The current checked baseline has 32 open findings: 2 High and 30 Medium. The
 compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `baa99be668689d7b3357cc54f8d2f112c4444fdc` on
-`2026-07-28T02:40:06Z` records 3,156 findings: 49 High, 802 Medium, 1,259 Low,
-1,006 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/25/28`, vendored `1/9/10`, test `45/761/806`, script
+at source commit `408c1b894f947fc0f8db34259f1c82ecd7e91439` on
+`2026-07-28T09:41:42Z` records 3,213 findings: 49 High, 825 Medium, 1,265 Low,
+1,032 Informational, and 42 Optimization. Its High/Medium scope totals are
+first-party production `2/30/32`, vendored `1/9/10`, test `46/779/825`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

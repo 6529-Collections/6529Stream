@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/DependencyRegistry.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";

@@ -162,23 +162,23 @@ class and avoids adding the superseded permanent machinery to `StreamCore`.
     that tuple.
 
     Let `L` be the current resolver limit, `B` the current return buffer, and
-    `G` the gas available at the precheck. Solidity integer division rounds
-    down, so the EIP-150 forwarding term is
-    `floor(64 * L / 63) = L + floor(L / 63)`. This rounding is sufficient:
-    for `L = 63k + r`, `0 <= r < 63`, the term is `64k` when `r = 0`
-    and `64k + r` otherwise; after EIP-150's one-64th retention, at least
+    `G` the gas available at the precheck. The exact EIP-150 forwarding term is
+    `ceil(64 * L / 63) = L + ceil(L / 63)`. For
+    `L = 63k + r`, `0 <= r < 63`, the term is `64k` when `r = 0`
+    and `64k + r + 1` otherwise; after EIP-150's one-64th retention, at least
     `63k + r = L` remains forwardable.
 
     A conforming Core must not evaluate `L * 64` or construct the possibly
-    overflowing sum `L + floor(L / 63) + B`. It implements the equivalent
+    overflowing sum `L + ceil(L / 63) + B`. It implements the equivalent
     fail-closed comparison by checking, in order, `G >= L`, then
-    `G - L >= floor(L / 63)`, then
-    `G - L - floor(L / 63) >= B`; failure at any step returns the bounded
+    `G - L >= ceil(L / 63)`, then
+    `G - L - ceil(L / 63) >= B`; failure at any step returns the bounded
     fallback. Each subtraction is reached only after its minuend is proven
     large enough. Consequently even values reached by repeated 2x raises near
     `type(uint256).max` cannot overflow the precheck and instead fail closed
     once the live limit or buffer exceeds available gas; no separate lifetime
     upper bound is needed for arithmetic safety.
+    Boundary tests pin precheck residues `L mod 63 = 0`, `1`, and `62`.
 
     This overflow-safe 64/63 precheck makes every reachable ordering explicit:
     raising only the buffer increases parent completion reserve; raising only

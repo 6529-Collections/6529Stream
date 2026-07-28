@@ -11,7 +11,7 @@
 pragma solidity ^0.8.19;
 
 import "./ArrngConsumer.sol";
-import "./IStreamCore.sol";
+import "./IStreamLegacyCore.sol";
 import "./IStreamAdmins.sol";
 import "./StreamPauseDomains.sol";
 import "./StreamRandomizerLifecycle.sol";
@@ -20,7 +20,7 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
     address gencore;
-    IStreamCore public gencoreContract;
+    IStreamLegacyCore public gencoreContract;
     IStreamAdmins private adminsContract;
     event Withdraw(address indexed _add, bool status, uint256 indexed funds);
     uint256 ethRequired;
@@ -30,7 +30,7 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
 
     constructor(address _gencore, address _adminsContract, address _arRNG) ArrngConsumer(_arRNG) {
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
         adminsContract = IStreamAdmins(_adminsContract);
     }
 
@@ -151,7 +151,7 @@ contract NextGenRandomizerRNG is ArrngConsumer, StreamRandomizerLifecycle {
         FunctionAdminRequired(this.updateCoreContract.selector)
     {
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
     }
 
     // function to update cost

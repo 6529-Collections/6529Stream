@@ -48,46 +48,31 @@ The current Gate A smoke baseline proves:
   initcode. That deployment binding remains a production blocker under
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
   the pre-audit, not-production-ready posture is unchanged. The committed
-  `release-artifacts/latest/bytecode-release-proof.json` records the current
-  target-isolated `StreamCore` production runtime size as 24,128 bytes, leaving
-  448 bytes of EIP-170
-  headroom under the IR-optimized deployment profile. This passes EIP-170 and
-  the interim 384-byte development floor, but it is below the 512-byte warning
-  threshold and fails the normative 2,000-byte production deployment minimum.
-  The accepted CON-012 development exception cannot survive the deployment
-  gate; [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-  blocks production release until real headroom is recovered. ADR 0017 avoids
-  adding the superseded probe/lower/emergency/conditional/rebinding machinery
-  to the target; that machinery was not present in the measured Core, so the
-  decision did not reduce the 24,152-byte pre-cutover baseline. The ADR 0018
-  atomic cutover removes 24 bytes by deleting lifetime prepared-operation
-  replay storage while retaining current-pair equality; a larger measured Core
-  refactor is still required. Historical
-  artifacts show the extraction work did reduce Core to 21,792 bytes; the later
-  manager/prepared-mint slice added exactly 2,360 bytes before the legacy mint
-  path was retired. The 24,152-byte baseline was therefore a duplicated,
-  incomplete transition rather than the promised post-extraction target. The
-  remaining train still requires zero-Core-delta or measured net-negative
-  slices until the complete hook build is at or below 22,576 bytes, with
-  restoration to the approved 22,184-byte baseline as the objective.
+  `release-artifacts/latest/bytecode-release-proof.json` records the permanent,
+  target-isolated `StreamCore` production runtime as 18,997 bytes, leaving
+  5,579 bytes of EIP-170 headroom under the IR-optimized deployment profile.
+  This is 3,579 bytes inside the non-waivable 2,000-byte deployment margin,
+  3,187 bytes below the approved 22,184-byte objective, and 5,131 bytes smaller
+  than the 24,128-byte transitional operation-identity build. Historical
+  21,792-byte scratch and merged measurements remain non-additive; only this
+  complete linked build is the current size proof. The permanent Core now
+  includes the locked mint, metadata, entropy, governed-parameter, pointer, and
+  restricted ERC-4906 seams rather than relying on a temporary size exception.
   Accepted ADR 0018 is now implemented in the current pre-genesis source:
   one manager batch root is replay-protected in the ledger, exactly one unique
   operation ID identifies each token transition, derivation and nonce
   reservation precede ledger consumption, and Core retains only its current
   prepared-pair equality lock. Exact typed primary settlement and repeated-sale
   replay remain ADR 0019 / #694 blockers; operation-root uniqueness does not
-  close them. The subsequent Core measurement must also
-  include the target restricted ERC-4906 single/batch refresh emitters required
-  by #667. Their selectors exist in the permanent target artifact, but current
-  Core source does not yet implement the restricted external helpers.
-  The final recovery boundary is
+  close them. The target restricted ERC-4906 single/batch refresh emitters
+  required by #667 are implemented and included in the measured Core. The
+  final recovery boundary is
   `IStreamFinalityRecoveryCore`: `lastAllocatedTokenId()` (`0x254b22bc`) XOR
   `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) produces
-  ERC-165 ID `0xb5c73a01`. The #654 target must advertise IERC165 and that
-  exact ID, reject `0xffffffff`, and implement the real batch emitter; a
-  fallback-only target is not conformance evidence. Issue #667 owns only the
-  fail-closed interface probe and registry consumer and remains blocked from a
-  production-completeness claim until the #654 Core seam lands.
+  ERC-165 ID `0xb5c73a01`. Core advertises IERC165 and that exact ID, rejects
+  `0xffffffff`, and implements the real batch emitter; fallback-only handling
+  remains nonconformant. Issue #667 owns the separate fail-closed interface
+  probe and registry consumer.
   The stricter bytecode-spend ceiling remains the reviewed 22,184-byte approved
   baseline with 2,392 bytes of baseline margin.
   The architecture policy in
@@ -124,12 +109,12 @@ The current Gate A smoke baseline proves:
   retained as `RISK-GOV-004` and tracked by
   [issue #684](https://github.com/6529-Collections/6529Stream/issues/684).
   [Issue #671](https://github.com/6529-Collections/6529Stream/issues/671)
-  now binds a zero-Core-delta reusable admission source, hostile
-  threshold/returndata/full-budget tests, six via-IR completion measurements,
-  and the target-fixture planning floor/genesis tuple into the governed
-  inventory. Transitional `StreamCore` remains exactly 24,128 bytes; #654 owns
-  final integration and as-built remeasurement, and #656/#684 still block exact
-  candidate, fixed-stipend, cadence, rehearsal, and independent-review evidence.
+  now binds the reusable admission source to the permanent Core's three actual
+  read paths, hostile threshold/returndata/full-budget tests, six via-IR
+  completion measurements, actual Core below/at/above regressions, and the
+  planning floor/genesis tuple in the governed inventory. The linked Core
+  measures 18,997 bytes. Issues #656/#670/#684 still block exact candidate,
+  fixed-stipend, cadence, rehearsal, and independent-review evidence.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

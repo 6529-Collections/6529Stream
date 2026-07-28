@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate checksum-bound planning evidence for post-entropy mint completion gas."""
+"""Generate checksum-bound as-built evidence for post-entropy mint completion gas."""
 
 from __future__ import annotations
 
@@ -21,10 +21,13 @@ SNAPSHOT_PATH = (
     REPO_ROOT
     / "release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap"
 )
-BYTECODE_PROOF_PATH = REPO_ROOT / "release-artifacts/latest/bytecode-release-proof.json"
+RELEASE_BUILD_MANIFEST_PATH = REPO_ROOT / "out-release/release-build-manifest.json"
 FOUNDRY_CONFIG_PATH = REPO_ROOT / "foundry.toml"
 HARNESS_PATH = REPO_ROOT / "test/helpers/StreamPostEntropyCompletionGasHarness.sol"
 MEASUREMENT_TEST_PATH = REPO_ROOT / "test/StreamPostEntropyCompletionGas.t.sol"
+CORE_PATH = REPO_ROOT / "smart-contracts/StreamCore.sol"
+CORE_BUFFER_PATH = REPO_ROOT / "smart-contracts/StreamCoreReadBuffer.sol"
+CORE_TEST_PATH = REPO_ROOT / "test/StreamCorePermanentTarget.t.sol"
 NORMATIVE_PATHS = (
     REPO_ROOT / "docs/stream-entropy-coordinator.md",
     REPO_ROOT / "docs/launch-conformance-matrix.md",
@@ -34,10 +37,12 @@ SNAPSHOT_TEST = (
     "StreamPostEntropyCompletionGasTest:"
     "testMeasureWorstCaseEoaPostCoordinatorTail()"
 )
-SCHEMA_VERSION = "6529stream.post-entropy-mint-completion-gas.v1"
+SCHEMA_VERSION = "6529stream.post-entropy-mint-completion-gas.v2"
 MARGIN_BPS = 2_500
 ROUNDING_QUANTUM_GAS = 1_000
 REFERENCE_REGISTRATION_GAS_LIMIT = 120_000
+ENTROPY_CALL_UPFRONT_GAS = 3_300
+TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES = 24_128
 SNAPSHOT_LINE_RE = re.compile(
     r"^(?P<test>[^ ]+) \(gas: (?P<gas>[0-9]+)\)$"
 )
@@ -47,7 +52,7 @@ RESERVE_CONSTANT_RE = re.compile(
 
 
 class CompletionGasGenerationError(ValueError):
-    """Raised when the planning evidence cannot be generated deterministically."""
+    """Raised when the as-built evidence cannot be generated deterministically."""
 
 
 def file_sha256(path: Path) -> str:
@@ -139,41 +144,67 @@ def _compiler_profile() -> dict[str, Any]:
 
 
 def _stream_core_boundary() -> dict[str, Any]:
-    proof = json.loads(BYTECODE_PROOF_PATH.read_text(encoding="utf-8"))
+    manifest = json.loads(RELEASE_BUILD_MANIFEST_PATH.read_text(encoding="utf-8"))
     rows = [
         row
-        for row in proof.get("contract_proofs", [])
-        if row.get("contract", {}).get("name") == "StreamCore"
+        for row in manifest.get("targets", [])
+        if row.get("kind") == "production_contract"
+        and row.get("name") == "StreamCore"
+        and row.get("source") == "smart-contracts/StreamCore.sol"
     ]
-    if not rows:
-        raise CompletionGasGenerationError("bytecode proof has no StreamCore rows")
-    sizes = {
-        (
-            row["sizes"]["runtime_bytecode_bytes"],
-            row["sizes"]["runtime_margin_bytes"],
-            row["source_verification"]["source_sha256"],
-        )
-        for row in rows
-    }
-    if len(sizes) != 1:
+    if len(rows) != 1:
         raise CompletionGasGenerationError(
-            "bytecode proof StreamCore rows disagree on source or runtime size"
+            "release build manifest must contain exactly one StreamCore target"
         )
-    runtime_bytes, margin_bytes, source_sha256 = next(iter(sizes))
-    core_path = REPO_ROOT / "smart-contracts/StreamCore.sol"
-    if source_sha256 != f"sha256:{file_sha256(core_path)}":
+    row = rows[0]
+    source_rows = [
+        source
+        for source in row.get("metadata_sources", [])
+        if source.get("path") == "smart-contracts/StreamCore.sol"
+    ]
+    if len(source_rows) != 1:
         raise CompletionGasGenerationError(
-            "bytecode proof StreamCore source hash is stale"
+            "release build manifest must bind exactly one StreamCore source"
         )
+    source_sha256 = source_rows[0].get("sha256")
+    if source_sha256 != f"sha256:{file_sha256(CORE_PATH)}":
+        raise CompletionGasGenerationError(
+            "release build manifest StreamCore source hash is stale"
+        )
+    artifact_path = (REPO_ROOT / row["artifact_path"]).resolve()
+    if not artifact_path.is_relative_to((REPO_ROOT / "out-release").resolve()):
+        raise CompletionGasGenerationError("StreamCore artifact escaped out-release")
+    if f"sha256:{file_sha256(artifact_path)}" != row.get("artifact_sha256"):
+        raise CompletionGasGenerationError("StreamCore artifact hash is stale")
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    runtime_object = artifact.get("deployedBytecode", {}).get("object")
+    if (
+        not isinstance(runtime_object, str)
+        or not runtime_object.startswith("0x")
+        or len(runtime_object) <= 2
+        or len(runtime_object[2:]) % 2 != 0
+    ):
+        raise CompletionGasGenerationError("StreamCore runtime bytecode is malformed")
+    runtime_bytes = len(runtime_object[2:]) // 2
+    margin_bytes = 24_576 - runtime_bytes
+    if runtime_bytes > 22_576:
+        raise CompletionGasGenerationError(
+            f"as-built StreamCore runtime exceeds the production ceiling: {runtime_bytes}"
+        )
+    if margin_bytes != 24_576 - runtime_bytes:
+        raise CompletionGasGenerationError("bytecode proof StreamCore margin is inconsistent")
     return {
-        "implementation_status": "target_fixture_only",
-        "stream_core_source": _source_binding(core_path),
+        "implementation_status": "as_built_permanent_core_source",
+        "stream_core_source": _source_binding(CORE_PATH),
         "stream_core_runtime_bytes": runtime_bytes,
         "stream_core_eip170_margin_bytes": margin_bytes,
-        "stream_core_delta_bytes": 0,
+        "transitional_stream_core_runtime_bytes": TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES,
+        "stream_core_delta_bytes": runtime_bytes - TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES,
         "production_complete_runtime_ceiling_bytes": 22_576,
         "approved_runtime_objective_bytes": 22_184,
-        "implementation_owner": "#654",
+        "implementation_owner": "#654 permanent-Core slice",
+        "candidate_instance_binding": "missing",
+        "candidate_instance_blocked_by": ["#656", "#670"],
     }
 
 
@@ -194,12 +225,15 @@ def build_evidence() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_by": "scripts/generate_post_entropy_completion_gas.py:1",
-        "status": "planning_target_fixture",
+        "status": "as_built_permanent_core_source",
         "issue": 672,
         "compiler_profile": _compiler_profile(),
         "sources": [
             _source_binding(MEASUREMENT_TEST_PATH),
             _source_binding(HARNESS_PATH),
+            _source_binding(CORE_PATH),
+            _source_binding(CORE_BUFFER_PATH),
+            _source_binding(CORE_TEST_PATH),
             *[_source_binding(path) for path in NORMATIVE_PATHS],
         ],
         "measurement": {
@@ -227,8 +261,8 @@ def build_evidence() -> dict[str, Any]:
         },
         "admission_model": {
             "formula": (
-                "ceil(registrationGasLimit * 64 / 63) "
-                "+ POST_ENTROPY_PARENT_RESERVE"
+                "registrationGasLimit + ceil(registrationGasLimit / 63) "
+                "+ POST_ENTROPY_PARENT_RESERVE + ENTROPY_CALL_UPFRONT_GAS"
             ),
             "eip150_numerator": 64,
             "eip150_denominator": 63,
@@ -236,17 +270,27 @@ def build_evidence() -> dict[str, Any]:
             "rounding_quantum_gas": ROUNDING_QUANTUM_GAS,
             "post_entropy_parent_reserve_gas": reserve_gas,
             "reference_registration_gas_limit": REFERENCE_REGISTRATION_GAS_LIMIT,
-            "reference_planning_parent_gas_lower_bound": (
-                eip150_forwarding_requirement + reserve_gas
+            "reference_as_built_parent_gas_requirement": (
+                eip150_forwarding_requirement + reserve_gas + ENTROPY_CALL_UPFRONT_GAS
             ),
             "registration_gas_limit_source": (
                 "live ENTROPY_REGISTRATION_GAS_LIMIT governed parameter"
             ),
-            "proof_scope": "planning_eip150_and_eoa_tail_terms_only",
-            "excluded_call_boundary_costs": [
+            "proof_scope": "as_built_complete_low_level_call_boundary",
+            "included_call_boundary_costs": [
                 "ABI argument encoding and memory expansion",
-                "low-level CALL upfront and dynamic costs",
+                "cold low-level CALL upfront and account-access costs",
                 "source-level work between the admission check and CALL opcode",
+            ],
+            "call_upfront_reserve_gas": ENTROPY_CALL_UPFRONT_GAS,
+            "actual_boundary_test": (
+                "StreamCorePermanentTargetTest:"
+                "testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold()"
+            ),
+            "rollback_tests": [
+                "StreamCorePermanentTargetTest:testEntropyFailureRollsBackAllCoreState()",
+                "StreamCorePermanentTargetTest:"
+                "testEntropyReturnDataFailsClosedAndRollsBack()",
             ],
             "legacy_unmeasured_parent_allowance_gas": 30_000,
         },
@@ -257,11 +301,10 @@ def build_evidence() -> dict[str, Any]:
         },
         "core_boundary": _stream_core_boundary(),
         "limitations": [
-            "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
-            "The admission formula is a planning lower bound over EIP-150 forwarding and the measured EOA tail; this fixture does not prove an exact as-built gasleft threshold at the low-level CALL boundary.",
-            "The target fixture checks the pure below/at/above policy predicate and a high-parent-gas full-stipend path separately; it does not prove full-stipend forwarding from an exact supplied threshold.",
-            "Issue #654 must measure and enforce the complete low-level-call admission boundary, including ABI encoding, memory expansion, CALL upfront and dynamic costs, and source-level pre-call work, then prove the exact forwarded stipend and post-return reserve against the linked Core.",
-            "The committed governed-parameter inventory remains incomplete and is not updated by this artifact.",
+            "This artifact binds the measured EOA tail to the as-built permanent StreamCore source, its linked via-IR runtime receipt, and an executable exact-boundary/full-stipend regression test.",
+            "The fixed reserve covers the measured EOA-recipient completion tail; contract-recipient callback gas remains caller-supplied and unbounded.",
+            "The exact deployment instance and the two unresolved artist/revenue pointer rows remain blocked by issues #656 and #670.",
+            "The governed-parameter candidate binding remains incomplete under issue #684.",
             "This artifact makes no production-readiness or deployment claim.",
         ],
     }

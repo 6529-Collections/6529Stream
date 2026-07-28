@@ -7,16 +7,35 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
-- Added the issue #671 zero-Core-delta shared
+- Implemented the locked permanent `StreamCore` target with authenticated
+  metadata-router, system-manifest, entropy-coordinator, artist-registry, and
+  revenue-resolver pointer rows; linked bounded external reads; manager-only
+  prepared mint completion; exact EIP-150/full-stipend entropy admission;
+  shared royalty/metadata parent-gas protection; and restricted ERC-4906
+  emitters. The production-profile via-IR target measures 18,997 runtime bytes,
+  5,579 bytes below EIP-170 and 3,579 bytes inside the non-waivable 2,000-byte
+  deployment margin. That is a 5,131-byte reduction from the 24,128-byte
+  transitional Core and restores the stricter 22,184-byte objective. The two
+  #670 concrete artist/revenue interface rows and exact candidate-instance
+  bindings under #656/#684 remain unresolved, so this is pre-audit source
+  completion rather than a deployment or readiness claim.
+- Completed issue #671's shared
   `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150
-  admission helper, authenticated three-row target fixture, bounded 65,536-byte
-  metadata ABI return, hostile full-budget/malformed/oversized and independent
-  raise-chain tests, and six-scenario checksum-bound via-IR evidence. The
+  admission helper, authenticated permanent-Core three-row implementation,
+  bounded 65,536-byte metadata ABI return, actual `tokenURI()` and
+  `contractURI()` threshold tests, hostile full-budget/malformed/oversized and
+  independent raise-chain tests, and six-scenario checksum-bound via-IR
+  evidence. The
   governed inventory records the measurement-derived 1,460,000 planning floor
-  and 2,910,000 planning genesis value without adding a 23rd GGP. Transitional
-  `StreamCore` stays 24,128 bytes; #654 owns final integration and as-built
-  measurement, while #656/#684 keep candidate, fixed-stipend, cadence,
-  rehearsal, and review readiness fail-closed.
+  and 2,910,000 planning genesis value without adding a 23rd GGP. The artifact
+  binds the 18,997-byte permanent Core while #656/#670/#684 keep candidate,
+  fixed-stipend, cadence, rehearsal, and review readiness fail-closed.
+- Completed issue #672's as-built permanent-Core post-entropy boundary: Core
+  encodes coordinator calldata before admission, reserves the EIP-150 ceiling,
+  3,300-gas cold-call cost, and measured 162,000-gas EOA completion tail,
+  forwards the exact governed stipend, rejects nonempty returndata, and rolls
+  back all mint state and events on failure. Contract-receiver callback gas
+  remains caller supplied and candidate-instance binding remains incomplete.
 - Implemented accepted ADR 0018's pre-genesis atomic operation-identity
   cutover: the manager derives and reserves one batch root plus one operation
   ID per token before ledger consumption; the ledger owns manager-scoped root,

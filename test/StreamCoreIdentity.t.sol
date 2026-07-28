@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamPauseDomains.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -33,7 +33,9 @@ contract IdentityMintManager {
     }
 
     function complete(uint256 tokenId, address initialRecipient, bytes32 operationId) external {
-        core.completePreparedMintFromManager(tokenId, initialRecipient, operationId, 0);
+        core.completePreparedMintFromManager(
+            tokenId, initialRecipient, operationId, uint256(0)
+        );
     }
 
     function abort(uint256 tokenId, bytes32 operationId) external {

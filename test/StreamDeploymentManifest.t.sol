@@ -12,7 +12,7 @@ import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamAssetPolicyRegistry.sol";
 import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "../smart-contracts/StreamMintManager.sol";
@@ -38,7 +38,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertTrue(result.manifestHash != bytes32(0), "manifest hash missing");
 
         StreamAdmins admins = StreamAdmins(result.admins);
-        StreamCore core = StreamCore(result.core);
+        LegacyStreamCore core = LegacyStreamCore(result.core);
         StreamContractMetadata metadata = StreamContractMetadata(result.contractMetadata);
         StreamDrops drops = StreamDrops(result.drops);
         StreamMinter minter = StreamMinter(result.minter);

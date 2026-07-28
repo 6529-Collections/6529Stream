@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Focused hostile tests for issue #671 shared-buffer planning evidence."""
+"""Focused hostile tests for issue #671 shared-buffer as-built evidence."""
 
 from __future__ import annotations
 
@@ -82,7 +82,7 @@ class SharedBufferEvidenceTests(unittest.TestCase):
         self.assertTrue(profile["via_ir"])
         self.assertEqual(profile["bytecode_hash"], "none")
 
-    def test_rejects_completion_overclaim(self) -> None:
+    def test_rejects_status_drift(self) -> None:
         self._check_mutation(
             lambda value: value.__setitem__("status", "complete"),
             r"evidence drift at \$\.status",
@@ -122,6 +122,14 @@ class SharedBufferEvidenceTests(unittest.TestCase):
             "planning_immutable_floor",
         )
 
+    def test_rejects_eip150_rounding_drift(self) -> None:
+        self._check_mutation(
+            lambda value: value["admission_model"].__setitem__(
+                "formula", "gasLimit + floor(gasLimit / 63) + sharedBuffer"
+            ),
+            "admission_model.formula",
+        )
+
     def test_rejects_missing_raise_ordering(self) -> None:
         self._check_mutation(
             lambda value: value["governance_and_raise_chain"][
@@ -149,10 +157,22 @@ class SharedBufferEvidenceTests(unittest.TestCase):
     def test_rejects_stream_core_delta_claim(self) -> None:
         self._check_mutation(
             lambda value: value["core_boundary"].__setitem__(
-                "stream_core_delta_bytes", -1
+                "stream_core_delta_bytes",
+                value["core_boundary"]["stream_core_delta_bytes"] + 1,
             ),
             "stream_core_delta_bytes",
         )
+
+    def test_generator_rejects_missing_actual_core_boundary_test(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "StreamCorePermanentTarget.t.sol"
+            path.write_text("contract MissingProof {}\n", encoding="utf-8")
+            with mock.patch.object(generator, "CORE_TEST_PATH", path):
+                with self.assertRaisesRegex(
+                    generator.SharedBufferGenerationError,
+                    "missing as-built shared-buffer regression test",
+                ):
+                    generator._validate_as_built_source()
 
     def test_rejects_removed_limitations(self) -> None:
         self._check_mutation(

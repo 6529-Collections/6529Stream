@@ -179,7 +179,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has 448 bytes of EIP-170 headroom at the current 24,128-byte runtime: the atomic operation-identity cutover is 24 bytes net-negative relative to the duplicated 24,152-byte pre-cutover baseline, so the interim development floor passes under an accepted exception but the normative 2,000-byte production deployment rule still fails; historical evidence shows the refactor reached 21,792 bytes before the manager/prepared-mint addition landed alongside the then-live legacy path | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; compile every remaining mandatory hook together, retire remaining duplicated legacy responsibilities, and allow only zero-Core-delta satellite slices or measured net-negative Core slices until the complete build is at or below 22,576 bytes |
+| Permanent `StreamCore` measures 18,997 runtime bytes with 5,579 bytes of EIP-170 headroom, 5,131 bytes smaller than the 24,128-byte transitional operation-identity build and 3,187 bytes below the approved 22,184-byte objective | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Size requirement passes; preserve the margin while #670 concrete pointer rows and #656/#684 candidate evidence remain open |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -1837,20 +1837,21 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Remaining work is sequentially gated by issue #654 after #688 and #672
-merged and #671 supplied the zero-Core-delta shared-buffer planning component;
-the target lock merged in PR #663 and the zero-Core-delta adapter/caller cutover
-merged in PR #666. Measured net-negative Core retirement work remains.
+Status: Permanent-Core implementation and headroom recovery are complete in
+source and target-fixture evidence. The target lock and prerequisite caller
+cutovers are consumed; issue #654 remains open only for the two concrete #670
+artist/revenue pointer rows and final candidate-bound remeasurement.
 
 Gate: C/E/G.
 
-Problem: the current 24,128-byte `StreamCore` is a transitional build. The
+Resolved size problem: the prior 24,128-byte `StreamCore` was a transitional build. The
 pre-cutover 24,152-byte baseline spent exactly 2,360 bytes on the
 manager/prepared-mint boundary while the legacy mint and product path remained
 live. The atomic operation-identity cutover removed that duplication for a
 24-byte net reduction, but the current build still omits mandatory launch hooks. The
-production ceiling is 22,576 bytes, so neither the temporary size exception nor
-a partial deletion experiment is release evidence.
+production ceiling is 22,576 bytes. The permanent linked target now measures
+18,997 bytes, leaving 5,579 bytes of EIP-170 margin and restoring the approved
+22,184-byte objective without an exception.
 
 Acceptance criteria:
 
@@ -1871,14 +1872,9 @@ Acceptance criteria:
    replay, derive/reserve-before-ledger ordering, one root plus `N` token
    operation IDs, exact event joins, and whole-transaction rollback proof
    (#688).
-7. After #688 merges, prove and enforce the post-entropy completion tail gas
-   required by #672. The zero-Core-delta planning slice must bind the via-IR
-   first-mint EOA target fixture, pure EIP-150-plus-tail below/at/above policy
-   predicates, a separate high-parent-gas full-stipend path, callback
-   separation, and atomic rollback. Only that merged evidence may be consumed
-   by #654, which owns the complete low-level-call admission measurement and
-   enforcement, actual Core seam, exact-forwarding proof, and as-built
-   remeasurement.
+7. The permanent Core consumes #672 and enforces the complete post-entropy
+   threshold after calldata encoding, including the EIP-150 ceiling, cold-call
+   cost, measured EOA tail, exact stipend, callback separation, and rollback.
 8. Implement the already-targeted restricted
    `emitMetadataUpdate(uint256,bytes32)` and
    `emitBatchMetadataUpdate(uint256,uint256,bytes32)` Core helpers needed by
@@ -1889,10 +1885,10 @@ Acceptance criteria:
    `0xb5c73a01`, rejects `0xffffffff`, implements the real batch emitter, and
    fails fallback-only conformance negatives. Report the interface/event ABI
    and measured runtime delta before finalizing the 2,000-byte margin.
-9. Consume #671's checked shared-buffer source and measurement without adding a
-   23rd GGP: integrate one live authenticated `ROYALTY_RETURN_GAS_BUFFER` row
-   across royalty and metadata reads, remeasure the complete as-built Core
-   boundary, and retain #656/#684 candidate and fixed-stipend production gates.
+9. #671's checked shared-buffer source is integrated without adding a 23rd
+   GGP: one live authenticated `ROYALTY_RETURN_GAS_BUFFER` row protects
+   royalty and metadata reads, and actual Core boundary tests bind the as-built
+   runtime. #656/#670/#684 candidate and fixed-stipend gates remain.
 
 Current target-lock evidence additionally requires an independently reviewed
 exact active-surface digest rather than count-only ABI checks plus a separate
@@ -1914,9 +1910,8 @@ whose Core seam is owned by the Core/mint lane: execution snapshots the
 monotonic token high-water mark and permissionless collection/scoped
 continuations advance exactly one bounded target-Core batch call per
 transaction using only the stored recovery-manifest content hash. The
-permanent target artifact already pins that selector, but current Core source
-does not implement the restricted external helper; #654 must include and
-measure it. A
+permanent target artifact and Core source implement that selector, and the
+runtime measurement includes it. A
 new route atomically carries forward an incomplete predecessor invalidation,
 and a global active-incomplete count plus exact same-batch zero-count assertion
 blocks finality-registry pointer cutover from stranding old-registry plans.
@@ -3853,15 +3848,10 @@ Status: Merged in PR #427; issue #426 closed completed.
 
 Gate: G.
 
-Problem: `StreamCore` currently has finite EIP-170 bytecode headroom; the
-current runtime is 24,128 bytes with 448 bytes of margin under accepted
-development exception `CORE-SPEND-2026-06-24-001`, while the approved spend
-ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. The
-normative production deployment gate requires 2,000 bytes and does not admit
-the interim exception, so
-[#654](https://github.com/6529-Collections/6529Stream/issues/654) blocks release
-until real headroom is recovered. Adding world-class 1/1 product surfaces
-directly to Core would deepen that deficit.
+Problem resolved for the permanent target: `StreamCore` measures 18,997 bytes
+with 5,579 bytes of EIP-170 margin, 3,187 bytes below the reviewed 22,184-byte
+objective. The satellite-first policy remains binding because future product
+surfaces must preserve that sustainable margin.
 
 Outcome: The repo has a documented architecture policy for future product
 features: prefer satellite contracts, read adapters, libraries, release
@@ -4109,7 +4099,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
-| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | In progress under issue #654; target lock merged in PR #663 and zero-Core-delta adapter/caller cutover merged in PR #666; measured net-negative Core retirement remains after the Governance V2 foundation |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Permanent target implemented at 18,997 bytes with 5,579 bytes of margin; #654 remains open for #670 concrete pointer rows and final candidate-bound remeasurement |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

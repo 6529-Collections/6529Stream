@@ -30,8 +30,8 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = "baa99be668689d7b3357cc54f8d2f112c4444fdc"
-EXPECTED_CAPTURED_AT_UTC = "2026-07-28T02:40:06Z"
+EXPECTED_ANALYZED_COMMIT = "408c1b894f947fc0f8db34259f1c82ecd7e91439"
+EXPECTED_CAPTURED_AT_UTC = "2026-07-28T09:41:42Z"
 EXPECTED_CAPTURE_COMMAND = (
     "python -m slither . --config-file slither.config.json --foundry-compile-all "
     "--json <temp-file>"
@@ -42,40 +42,41 @@ EXPECTED_GATE_COMMAND = (
     "--json-types detectors --json <temp-file> --fail-none"
 )
 EXPECTED_CAPTURE_NATIVE_EXIT_CODE = 255
-EXPECTED_RAW_JSON_SIZE_BYTES = 335_515_806
+EXPECTED_RAW_JSON_SIZE_BYTES = 338_353_144
 EXPECTED_RAW_JSON_SHA256 = (
-    "sha256:a650007b9e3777e4a9cfea19aec687973083bbbf37da7c4471350c70c7c44ac8"
+    "sha256:9071bf46d27eca1b46a911f8deda157803a40fa91286356b2500b8839883fa65"
 )
 
 IMPACTS = ("High", "Medium")
-EXPECTED_COUNTS = {"High": 3, "Medium": 25, "total": 28}
+EXPECTED_COUNTS = {"High": 2, "Medium": 30, "total": 32}
 EXPECTED_CAPTURE_COUNTS = {
     "High": 49,
-    "Medium": 802,
-    "Low": 1259,
-    "Informational": 1006,
-    "Optimization": 40,
-    "total": 3156,
+    "Medium": 825,
+    "Low": 1265,
+    "Informational": 1032,
+    "Optimization": 42,
+    "total": 3213,
 }
 EXPECTED_SCOPE_COUNTS = {
-    "first_party_production": {"High": 3, "Medium": 25, "total": 28},
+    "first_party_production": {"High": 2, "Medium": 30, "total": 32},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
-    "test": {"High": 45, "Medium": 761, "total": 806},
+    "test": {"High": 46, "Medium": 779, "total": 825},
     "script": {"High": 0, "Medium": 7, "total": 7},
     "other": {"High": 0, "Medium": 0, "total": 0},
 }
 EXPECTED_TRIAGE_COUNTS = {
-    "confirmed_gap": 1,
-    "design_review": 5,
-    "pending_disposition": 22,
+    "confirmed_gap": 0,
+    "design_review": 6,
+    "pending_disposition": 26,
 }
 EXPECTED_DETECTOR_COUNTS = {
     ("High", "arbitrary-send-eth"): 1,
-    ("High", "uninitialized-state"): 2,
-    ("Medium", "incorrect-equality"): 2,
-    ("Medium", "reentrancy-no-eth"): 4,
+    ("High", "uninitialized-state"): 1,
+    ("Medium", "divide-before-multiply"): 1,
+    ("Medium", "incorrect-equality"): 3,
+    ("Medium", "reentrancy-no-eth"): 5,
     ("Medium", "uninitialized-local"): 7,
-    ("Medium", "unused-return"): 12,
+    ("Medium", "unused-return"): 14,
 }
 VENDORED_PATHS = (
     "smart-contracts/Base64.sol",
@@ -642,9 +643,12 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
         detector_counts[(impact, detector)] += 1
         impact_counts[impact] += 1
         validated_rows.append(row)
-    if dict(triage_counts) != EXPECTED_TRIAGE_COUNTS:
+    normalized_triage_counts = {
+        key: triage_counts[key] for key in EXPECTED_TRIAGE_COUNTS
+    }
+    if normalized_triage_counts != EXPECTED_TRIAGE_COUNTS:
         raise SlitherBaselineError(
-            f"triage counts must be {EXPECTED_TRIAGE_COUNTS}, got {dict(triage_counts)}"
+            f"triage counts must be {EXPECTED_TRIAGE_COUNTS}, got {normalized_triage_counts}"
         )
     if dict(detector_counts) != EXPECTED_DETECTOR_COUNTS:
         raise SlitherBaselineError(
@@ -784,14 +788,18 @@ def render_markdown(data: Mapping[str, Any]) -> str:
             "",
             "## Triage Boundary",
             "",
-            "- `confirmed_gap` is the unwritten Core burn-block activation-height mapping;",
-            "  it remains owned by #654 and cannot be accepted or marked fixed here.",
+            "- `confirmed_gap` has no current rows. The former Core burn-block",
+            "  activation-height gap was removed when the permanent Core began writing",
+            "  the initial blocked revision during collection initialization; this",
+            "  historical removal does not accept or suppress any current finding.",
             "- `design_review` covers one analyzer-visible native-value transfer row and",
-            "  four callback/order rows. The Executor's analyzer-blind proposal-selected",
+            "  five callback/order rows, including the two permanent-Core mint completion",
+            "  paths. The Executor's analyzer-blind proposal-selected",
             "  native-value authority is tracked separately as required open risk",
             "  `RISK-GOV-003`. Existing guards do not replace threat-model and",
             "  adversarial-test evidence.",
-            "- `pending_disposition` covers default/sentinel/ignored-field candidates. Each",
+            "- `pending_disposition` covers default/sentinel/ignored-field, arithmetic,",
+            "  equality, and unused-return candidates. Each",
             "  row needs its own executable proof before `Accepted` or `False Positive`.",
             "- No broad detector suppression is part of this baseline.",
             "- A removed row also fails drift until this inventory and its disposition",
