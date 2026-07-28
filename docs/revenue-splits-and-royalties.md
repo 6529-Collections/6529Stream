@@ -255,7 +255,7 @@ Revenue-layer GGPs and their hosts:
 | Parameter | Host | Guards | Genesis planning value |
 | --- | --- | --- | --- |
 | `ROYALTY_RESOLVER_GAS_LIMIT` | `StreamCore` storage | resolver `staticcall` in `royaltyInfo()` | 50,000 |
-| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` storage | shared parent-side completion reserve for bounded `royaltyInfo()`, `tokenURI()`, and `contractURI()` reads | 15,000 |
+| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` storage | shared parent-side completion reserve for bounded `royaltyInfo()`, `tokenURI()`, and `contractURI()` reads | 2,910,000 |
 | `ERC_1271_GAS_LIMIT` | split factory parameter store | `isValidSignature` staticcalls for release authorizations, sale authorizations, and `PaymentIntent`s | 400,000 |
 | `ASSET_POLICY_GAS_LIMIT` | split factory parameter store | asset-policy registry staticcalls from wallets, adapters, and escrow | 30,000 |
 | `WALLET_DEPOSIT_GAS_LIMIT` | split factory parameter store | gas-bounded split-wallet deposits from settlement and escrow flush | 50,000 |
@@ -331,6 +331,17 @@ Requirements [RSR-GGP]:
     every class uses the same authority-only class-`1` raise path. No class has
     a probe, lower, emergency, or permissionless mutation exception
     (ADR 0017).
+
+The issue #671 target-fixture sweep is retained at
+`release-artifacts/evidence/royalty-return-gas-buffer.json`. Its six via-IR scenarios
+measure canonical success and fail-safe completion for `royaltyInfo()`,
+`tokenURI()`, and `contractURI()`, including the 65,536-byte metadata ABI-return
+cap. The worst conservative completion measurement is 725,735 gas; applying
+rule 9 and rounding upward to 10,000 gas yields the planning immutable floor
+1,460,000 and planning genesis value 2,910,000. These are target-fixture planning
+facts, not candidate host facts or mutation authority. Issues #654 and #656,
+together with issue #684, still own as-built Core integration, exact candidate
+binding, reproduction, cadence, fixed-stipend, and independent review evidence.
 
 ## Split Profile Model
 
@@ -2736,7 +2747,7 @@ Requirements [RSR-2981-GAS]:
    ```text
    ROYALTY_RESOLVER_GAS_LIMIT   Governed Gas Parameter, genesis planning 50,000
    ROYALTY_RETURN_GAS_BUFFER    shared Core parent-completion Governed Gas
-                                Parameter, genesis planning 15,000
+                                Parameter, genesis planning 2,910,000
    resolver.staticcall{gas: current ROYALTY_RESOLVER_GAS_LIMIT}
    expected return length = 64 bytes
    failure fallback = (address(0), 0)

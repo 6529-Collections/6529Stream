@@ -1,0 +1,226 @@
+{
+  "schema_version": "6529stream.royalty-return-gas-buffer.v1",
+  "generated_by": "scripts/generate_royalty_return_gas_buffer.py:1",
+  "status": "planning_target_fixture",
+  "issue": 671,
+  "compiler_profile": {
+    "solc_version": "0.8.19",
+    "evm_version": "paris",
+    "optimizer_enabled": true,
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "bytecode_hash": "none",
+    "snapshot_command": "forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --match-test testMeasure --snap release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap"
+  },
+  "sources": [
+    {
+      "path": "smart-contracts/StreamCoreReadBuffer.sol",
+      "sha256": "sha256:593fa4f0f47b916f75e4eb34c82a17c863a60c9a1ff4199ec680c047961a1c07",
+      "size_bytes": 2684
+    },
+    {
+      "path": "smart-contracts/StreamGasParameterHost.sol",
+      "sha256": "sha256:06d174cbb5c5912310cbaeddbf020ec63e4bad75273eb5436cfb2d3953df1435",
+      "size_bytes": 11903
+    },
+    {
+      "path": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol",
+      "sha256": "sha256:5eb83f22bee83a8940d67c0ffdfffd94c3f14c0858485cfb188801adbd2c42ae",
+      "size_bytes": 11211
+    },
+    {
+      "path": "test/StreamRoyaltyReturnGasBuffer.t.sol",
+      "sha256": "sha256:9e976a23f7e0354f429d7d210a3a93497b3bb632c76ccfb57a01a9b8fa55a7ac",
+      "size_bytes": 16131
+    },
+    {
+      "path": "docs/adr/0017-raise-only-parameter-governance.md",
+      "sha256": "sha256:3270cf84f2132af6c677108d181006dac7a91cde8696701b06953c50fc72a3b8",
+      "size_bytes": 15463
+    },
+    {
+      "path": "docs/revenue-splits-and-royalties.md",
+      "sha256": "sha256:9370fb3f5a663abdf30821cf0fbe1d3a226f69dc5e701f87155ac0ef053bf70e",
+      "size_bytes": 241455
+    },
+    {
+      "path": "docs/metadata-router-and-renderer.md",
+      "sha256": "sha256:08d4a06d7d4fb0d280df79790038761f938f114e0e3c29a3dec3008955705888",
+      "size_bytes": 155078
+    }
+  ],
+  "shared_parameter": {
+    "family": "GGP",
+    "name": "ROYALTY_RETURN_GAS_BUFFER",
+    "parameter_id": "0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7",
+    "host_profile": {
+      "id": 1,
+      "key": "STREAM_CORE"
+    },
+    "failure_class": {
+      "id": 1,
+      "name": "FORWARDING_CAP"
+    },
+    "guarded_consumers": [
+      "StreamCore.royaltyInfo(uint256,uint256)",
+      "StreamCore.tokenURI(uint256)",
+      "StreamCore.contractURI()"
+    ],
+    "launch_ggp_count": 22,
+    "metadata_specific_buffer_added": false
+  },
+  "returndata_policy": {
+    "royalty_exact_bytes": 64,
+    "metadata_max_abi_bytes": 65536,
+    "metadata_max_string_bytes": 65472,
+    "oversized_copy_bytes": 0,
+    "required_string_encoding": "canonical_nonempty_abi_string",
+    "failure_behavior": "event_free_fallback_return"
+  },
+  "measurements": {
+    "snapshot_path": "release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap",
+    "snapshot_sha256": "sha256:98df3a78da1f7a2822061af4e5332cb28743cdb54f02f3ec6f63fccf34cf3442",
+    "boundary": {
+      "starts_at": "target_fixture_parent_completion_entry",
+      "ends_after": "external_return_copy_and_decode",
+      "setup_gas_metering": "paused",
+      "scope": "conservative_target_fixture_parent_completion_upper_bound"
+    },
+    "scenarios": [
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureContractUriFallbackCompletion()",
+        "scenario": "contractURI_fallback",
+        "measured_gas": 26689
+      },
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureContractUriMaximumCompletion()",
+        "scenario": "contractURI_maximum_canonical_returndata",
+        "measured_gas": 725735
+      },
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureRoyaltyFallbackCompletion()",
+        "scenario": "royaltyInfo_malformed_fallback",
+        "measured_gas": 9581
+      },
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureRoyaltySuccessCompletion()",
+        "scenario": "royaltyInfo_canonical_success_and_mulDiv",
+        "measured_gas": 9947
+      },
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureTokenUriFallbackCompletion()",
+        "scenario": "tokenURI_malformed_fallback",
+        "measured_gas": 27648
+      },
+      {
+        "test": "StreamRoyaltyReturnGasBufferTest:testMeasureTokenUriMaximumCompletion()",
+        "scenario": "tokenURI_maximum_canonical_returndata",
+        "measured_gas": 725682
+      }
+    ],
+    "worst_test": "StreamRoyaltyReturnGasBufferTest:testMeasureContractUriMaximumCompletion()",
+    "worst_scenario": "contractURI_maximum_canonical_returndata",
+    "worst_measured_gas": 725735
+  },
+  "sizing": {
+    "rounding_quantum_gas": 10000,
+    "immutable_floor_multiplier": 2,
+    "genesis_multiplier": 4,
+    "planning_immutable_floor": 1460000,
+    "planning_genesis_value": 2910000,
+    "floor_margin_gas": 734265,
+    "genesis_margin_gas": 2184265
+  },
+  "admission_model": {
+    "formula": "gasLimit + floor(gasLimit / 63) + sharedBuffer",
+    "implementation": "overflow_safe_subtraction_comparisons",
+    "residues_tested_mod_63": [
+      0,
+      1,
+      62
+    ],
+    "boundary_points_tested": [
+      "below",
+      "at",
+      "above"
+    ],
+    "near_uint256_behavior": "no_revert_fail_closed",
+    "genesis_examples": [
+      {
+        "consumer": "royaltyInfo(uint256,uint256)",
+        "gas_limit": 50000,
+        "minimum_parent_gas": 2960793
+      },
+      {
+        "consumer": "tokenURI(uint256)",
+        "gas_limit": 500000,
+        "minimum_parent_gas": 3417936
+      },
+      {
+        "consumer": "contractURI()",
+        "gas_limit": 500000,
+        "minimum_parent_gas": 3417936
+      }
+    ]
+  },
+  "governance_and_raise_chain": {
+    "action_class": {
+      "id": 1,
+      "name": "DELAYED_LOOSENING"
+    },
+    "minimum_delay_seconds": 172800,
+    "strict_raise_only": true,
+    "maximum_raise_multiplier": {
+      "numerator": 2,
+      "denominator": 1
+    },
+    "one_write_per_action_per_parameter": true,
+    "independent_parameters": [
+      "ROYALTY_RESOLVER_GAS_LIMIT",
+      "ROYALTY_RETURN_GAS_BUFFER",
+      "METADATA_ROUTER_GAS_LIMIT"
+    ],
+    "tested_orderings": [
+      "resolver_twice_then_buffer_then_metadata_twice",
+      "buffer_then_metadata_then_resolver",
+      "each_limit_and_buffer_repeated_2x_to_uint256_terminal"
+    ],
+    "maximum_chain_behavior": "no_overflow_and_fail_closed",
+    "mutation_authority_from_measurement": false,
+    "probe": null
+  },
+  "fixed_stipend_compatibility": {
+    "status": "missing_candidate_bound_evidence",
+    "disposition": "production_gate_conflict_until_all_upstream_budgets_cover_tuple",
+    "consumers": [
+      "royaltyInfo(uint256,uint256)",
+      "tokenURI(uint256)",
+      "contractURI()"
+    ],
+    "raise_review_rule": "replay all three full-call budgets for every proposed resolver, metadata, or shared-buffer tuple",
+    "blocked_by_issue": "#684"
+  },
+  "core_boundary": {
+    "implementation_status": "reusable_source_and_target_fixture_only",
+    "stream_core_source": {
+      "path": "smart-contracts/StreamCore.sol",
+      "sha256": "sha256:4e90f9ae1bb3b4979f055b8cf92362ffb7033e73be89df84cad1c1c3315f525f",
+      "size_bytes": 70421
+    },
+    "stream_core_runtime_bytes": 24128,
+    "stream_core_eip170_margin_bytes": 448,
+    "stream_core_delta_bytes": 0,
+    "production_complete_runtime_ceiling_bytes": 22576,
+    "implementation_owner": "#654"
+  },
+  "limitations": [
+    "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
+    "The reusable library owns no storage or mutation surface; the target fixture proves one authenticated shared host row feeds all three consumers.",
+    "The below/at/above threshold suite exercises the pure admission predicate; separate high-parent-gas paths prove full-stipend consumption and fail-safe completion, while #654 must prove the exact as-built external call boundary.",
+    "Issue #654 must integrate and remeasure the complete candidate StreamCore call boundary without increasing transitional Core bytecode in this slice.",
+    "Issue #656 must bind the exact production candidate, host instance, source verification, and deployed tuple.",
+    "Issue #684 must add candidate-instance-bound cadence, fixed-stipend, reproduction, and reachable raise-chain evidence before production.",
+    "The committed generic governed-parameter measurement and fixed-stipend fields remain incomplete and fail closed in production mode.",
+    "This artifact has no onchain authority, adds no probe or 23rd GGP, and makes no production-readiness claim."
+  ]
+}

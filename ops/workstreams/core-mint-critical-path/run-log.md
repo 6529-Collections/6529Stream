@@ -1,5 +1,19 @@
 # Run Log
 
+## 2026-07-28
+
+- Created `codex/issue-671-royalty-buffer-safety` from exact merged-main
+  `6f74978fc2db3332fb77f39f6a604ea200f29bb1`.
+- Added the zero-Core-delta shared-buffer admission source, authenticated
+  three-row target fixture, maximum-returndata and fail-safe read paths, full
+  forwarded-stipend assertions, independent 2x/max raise-chain tests, and
+  deterministic six-scenario gas evidence.
+- The 725,735-gas worst planning measurement derives a 1,460,000 immutable
+  floor and 2,910,000 genesis value. The governed inventory binds those
+  planning facts while leaving #656/#684 candidate, cadence, fixed-stipend,
+  rehearsal, and review facts fail-closed. #654 remains serialized behind this
+  merge and owns actual Core integration and as-built remeasurement.
+
 ## 2026-07-27
 
 - Rebased the reopened issue `#688` atomic operation-root cutover onto exact

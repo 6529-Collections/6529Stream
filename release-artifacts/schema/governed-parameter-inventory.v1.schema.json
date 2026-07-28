@@ -12,6 +12,7 @@
     "governance_policy",
     "inventory_summary",
     "candidate_binding",
+    "shared_buffer_planning",
     "parameters"
   ],
   "properties": {
@@ -53,6 +54,9 @@
     },
     "candidate_binding": {
       "$ref": "#/$defs/candidateBinding"
+    },
+    "shared_buffer_planning": {
+      "$ref": "#/$defs/sharedBufferPlanning"
     },
     "parameters": {
       "type": "array",
@@ -177,6 +181,160 @@
         "keccak256": {
           "type": "string",
           "pattern": "^0x[0-9a-f]{64}$"
+        }
+      }
+    },
+    "sharedBufferPlanning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "parameter",
+        "host_profile",
+        "guarded_consumers",
+        "failure_class",
+        "genesis_value",
+        "immutable_floor",
+        "returndata_limits",
+        "planning_evidence",
+        "independent_raise_chain",
+        "fixed_stipend_compatibility"
+      ],
+      "properties": {
+        "status": { "const": "planning_target_fixture" },
+        "parameter": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["family", "name", "parameter_id"],
+          "properties": {
+            "family": { "const": "GGP" },
+            "name": { "const": "ROYALTY_RETURN_GAS_BUFFER" },
+            "parameter_id": {
+              "const": "0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7"
+            }
+          }
+        },
+        "host_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "key", "candidate_instance"],
+          "properties": {
+            "id": { "const": 1 },
+            "key": { "const": "STREAM_CORE" },
+            "candidate_instance": { "const": "not_available" }
+          }
+        },
+        "guarded_consumers": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "StreamCore.royaltyInfo(uint256,uint256)" },
+            { "const": "StreamCore.tokenURI(uint256)" },
+            { "const": "StreamCore.contractURI()" }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "failure_class": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name"],
+          "properties": {
+            "id": { "const": 1 },
+            "name": { "const": "FORWARDING_CAP" }
+          }
+        },
+        "genesis_value": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value"],
+          "properties": {
+            "status": { "const": "planning" },
+            "value": { "const": 2910000 }
+          }
+        },
+        "immutable_floor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "value"],
+          "properties": {
+            "status": { "const": "planning" },
+            "value": { "const": 1460000 }
+          }
+        },
+        "returndata_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["royalty_exact_bytes", "metadata_max_abi_bytes"],
+          "properties": {
+            "royalty_exact_bytes": { "const": 64 },
+            "metadata_max_abi_bytes": { "const": 65536 }
+          }
+        },
+        "planning_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "path", "sha256", "onchain_authority"],
+          "properties": {
+            "status": { "const": "planning_target_fixture" },
+            "path": { "const": "release-artifacts/evidence/royalty-return-gas-buffer.json" },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "onchain_authority": { "const": false }
+          }
+        },
+        "independent_raise_chain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "action_class_id",
+            "minimum_delay_seconds",
+            "maximum_raise_multiplier",
+            "one_write_per_action_per_parameter",
+            "limit_parameters",
+            "near_uint256_behavior"
+          ],
+          "properties": {
+            "status": { "const": "planning_target_fixture" },
+            "action_class_id": { "const": 1 },
+            "minimum_delay_seconds": { "const": 172800 },
+            "maximum_raise_multiplier": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["numerator", "denominator"],
+              "properties": {
+                "numerator": { "const": 2 },
+                "denominator": { "const": 1 }
+              }
+            },
+            "one_write_per_action_per_parameter": { "const": true },
+            "limit_parameters": {
+              "type": "array",
+              "prefixItems": [
+                { "const": "ROYALTY_RESOLVER_GAS_LIMIT" },
+                { "const": "METADATA_ROUTER_GAS_LIMIT" }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "near_uint256_behavior": { "const": "no_overflow_and_fail_closed" }
+          }
+        },
+        "fixed_stipend_compatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "disposition", "blocked_by_issue"],
+          "properties": {
+            "status": { "const": "missing" },
+            "disposition": {
+              "const": "production_gate_conflict_until_candidate_upstream_budgets_cover_tuple"
+            },
+            "blocked_by_issue": { "const": "#684" }
+          }
         }
       }
     },

@@ -437,6 +437,9 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
     dependency_paths.add(
         Path(verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA_PATH)
     )
+    dependency_paths.add(
+        Path(inventory["shared_buffer_planning"]["planning_evidence"]["path"])
+    )
     for relative_path in dependency_paths:
         write_text(
             root / relative_path,
@@ -642,6 +645,7 @@ def seed_release_bundle(root: Path) -> None:
         [
             "deployments/examples/anvil.json",
             verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
+            "release-artifacts/evidence/royalty-return-gas-buffer.json",
             verifier.GENESIS_DEPLOYMENT_PROFILE_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
@@ -1409,8 +1413,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 100_553,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "80b8bfa57f552520e7fbc345259b0a9fa8d940233aae986bab9ba6b5f7c7f926",
-                46_536,
+                "16e710846ab118b976a2401e845292d3ab5217a2848081d06d753f1415130576",
+                46_537,
             ),
         }
         self.assertEqual(
@@ -2309,8 +2313,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 432)
-        self.assertEqual(summary.checksum_manifest_records, 432)
+        self.assertEqual(summary.checksum_entries, 434)
+        self.assertEqual(summary.checksum_manifest_records, 434)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2322,8 +2326,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 432)
-        self.assertEqual(data["checksum_manifest_records"], 432)
+        self.assertEqual(data["checksum_entries"], 434)
+        self.assertEqual(data["checksum_manifest_records"], 434)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

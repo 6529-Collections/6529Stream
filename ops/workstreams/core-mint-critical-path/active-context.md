@@ -64,50 +64,44 @@
 
 ## Current Slice
 
-- Issue: reopened `#688`.
-- Branch: `codex/issue-688-operation-root-cutover`.
-- Base: `0bc295d845e556ebb98e4fe59d891434a11072c9`.
-- Corrective source checkpoint: `7c17e7644ca39257602cc5667f547026d22e855a`.
-- Result: the atomic operation-root source cutover is implemented across the
-  manager, ledger, Core hooks, fixed libraries, Foundry tests, checker, and
-  as-built documentation. The current via-IR diagnostic measures `StreamCore`
-  at 24,128 bytes, 24 bytes smaller than the 24,152-byte pre-cutover baseline.
-- Publication state: focused validation, canonical regeneration, release
-  verification, and the authoritative Windows gate are complete. Publish the
-  exact corrective head, resolve the substantive CodeRabbit threads, and
-  require latest-head CI before merge.
-- Static-analysis state: the exact full Slither 0.11.5 replay against the
-  frozen Solidity checkpoint introduces no new first-party production
-  High/Medium finding. Explicit initialization and narrowly documented
-  fully-assigned paths remove two prior `uninitialized-local` rows, leaving 28
-  Open rows (3 High and 25 Medium): one confirmed gap, five design-review
-  rows, and 22 pending dispositions. No remaining row is accepted or marked
-  false positive.
-- Closure state: do not claim typed settlement/repeat-sale completion or
-  production readiness. ADR 0019/#694 remains the typed primary-settlement and
-  repeated-identical-sale blocker; #654 remains the final complete-Core
-  finality/headroom implementation and measurement slice.
+- Issue: `#671`.
+- Branch: `codex/issue-671-royalty-buffer-safety`.
+- Base: merged `#688` / `origin/main`
+  `6f74978fc2db3332fb77f39f6a604ea200f29bb1`.
+- Result: one storage-free overflow-safe admission source and an authenticated
+  three-row target fixture feed `ROYALTY_RETURN_GAS_BUFFER` into
+  `royaltyInfo()`, `tokenURI()`, and `contractURI()` without adding a 23rd GGP
+  or changing transitional Core bytecode. Hostile tests cover maximum bounded
+  returndata, malformed/oversized/reverting calls, full forwarded stipends,
+  below/at/above thresholds, residues, independent 2x orderings, and the
+  uint256 terminal raise chain.
+- Measurement state: the six-scenario via-IR snapshot records a conservative
+  725,735-gas worst completion path, deriving a 1,460,000 planning floor and
+  2,910,000 planning genesis value. The checksum-bound artifact has no onchain
+  authority, and candidate measurement/fixed-stipend facts remain incomplete.
+- Size and closure state: `StreamCore` remains exactly 24,128 bytes with zero
+  #671 delta. Do not claim candidate or production completion; #654 owns final
+  Core integration and as-built remeasurement, while #656/#684 own candidate,
+  fixed-stipend, cadence, rehearsal, and independent-review evidence.
 
 ## Next Slice
 
-- Issue: `#671`.
-- Required result: implement the shared `ROYALTY_RETURN_GAS_BUFFER` Core-read
-  semantics and proof without editing #684 governance evidence or adding a 23rd
-  governed gas parameter.
-- Keep #654 separate; it remains the final entropy-coordinator Core
-  implementation and complete target remeasurement slice.
+- Issue: `#654`, only after #671 merges.
+- Required result: consume the checked #671 source/evidence while implementing
+  the complete final Core surface below the 22,576-byte production ceiling.
+- Preserve #656/#684 fail-closed candidate and reviewed-evidence boundaries.
 
 ## Integration Gate
 
-The active Core/mint order is `#688 -> #671 -> #654`. The #688 publication
-must preserve the accepted ADR 0018 normative fields, current/bound policy-hash
-split, manager-scoped ledger replay, zero generic callback surface, exact
-selector/typehash/topic rows, and as-built preimage attribution. It must also:
+The active Core/mint order is `#688 -> #671 -> #654`. The #671 publication
+must preserve the accepted ADR 0017 arithmetic and raise ordering, exact 22-GGP
+catalog, zero transitional-Core delta, and honest candidate incompleteness. It
+must also:
 
 1. retain the #672 zero-Core-delta evidence and 128,886-gas planning snapshot;
-2. prove the #688 Core change is exactly net-negative on the final base;
+2. prove the #671 Core delta is exactly zero on the final base;
 3. preserve ADR 0019/#694 settlement and repeated-sale blockers;
-4. regenerate canonical source artifacts before the six-step release tail;
+4. regenerate canonical source artifacts and the six-step release tail;
 5. pass focused Foundry, exact Slither, offline release verification, and one
    authoritative Windows gate; and
 6. report the complete changed-path inventory and exact final head before merge.

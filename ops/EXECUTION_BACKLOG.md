@@ -1837,7 +1837,8 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Remaining work is sequentially gated by issues #688, #672, and #654;
+Status: Remaining work is sequentially gated by issue #654 after #688 and #672
+merged and #671 supplied the zero-Core-delta shared-buffer planning component;
 the target lock merged in PR #663 and the zero-Core-delta adapter/caller cutover
 merged in PR #666. Measured net-negative Core retirement work remains.
 
@@ -1888,6 +1889,10 @@ Acceptance criteria:
    `0xb5c73a01`, rejects `0xffffffff`, implements the real batch emitter, and
    fails fallback-only conformance negatives. Report the interface/event ABI
    and measured runtime delta before finalizing the 2,000-byte margin.
+9. Consume #671's checked shared-buffer source and measurement without adding a
+   23rd GGP: integrate one live authenticated `ROYALTY_RETURN_GAS_BUFFER` row
+   across royalty and metadata reads, remeasure the complete as-built Core
+   boundary, and retain #656/#684 candidate and fixed-stipend production gates.
 
 Current target-lock evidence additionally requires an independently reviewed
 exact active-surface digest rather than count-only ABI checks plus a separate

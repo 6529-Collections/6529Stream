@@ -81,6 +81,11 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_post_entropy_completion_gas.py"
 forge test --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -vvv
 forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --check release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap
+& $pythonPath @pythonArgs "scripts\test_royalty_return_gas_buffer.py"
+& $pythonPath @pythonArgs "scripts\generate_royalty_return_gas_buffer.py" "--check"
+& $pythonPath @pythonArgs "scripts\check_royalty_return_gas_buffer.py"
+forge test --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol -vvv
+forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --match-test testMeasure --check release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap
 & $pythonPath @pythonArgs "scripts\run_forge_size_log.py" "--log" "cache\forge-size.log"
 & $pythonPath @pythonArgs "scripts\test_release_build_artifacts.py"
 & $pythonPath @pythonArgs "scripts\build_release_artifacts.py"
