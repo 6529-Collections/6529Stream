@@ -128,6 +128,10 @@ entrypoint is [scripts/check.ps1](../scripts/check.ps1).
 
 ## Choose A Contribution Path
 
+Use the [`docs/` index](README.md) to find the canonical specification,
+security, integration, operations, or release surface for the area you plan to
+change.
+
 For docs-only changes, run the checker for the document you touched, then run
 the shared documentation and release-impact checks:
 
