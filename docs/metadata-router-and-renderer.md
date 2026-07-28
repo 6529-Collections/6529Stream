@@ -385,7 +385,7 @@ home,
    mutation exists (ADR 0017).
 
 The checksum-bound issue #671 target fixture and six-scenario via-IR snapshot
-live in `release-artifacts/royalty-return-gas-buffer.json` and
+live in `release-artifacts/evidence/royalty-return-gas-buffer.json` and
 `release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap`. The maximum
 canonical `tokenURI()` and `contractURI()` returns, malformed and oversized
 fail-safe paths, shared-row threshold residues, full-stipend calls, independent

@@ -333,7 +333,7 @@ Requirements [RSR-GGP]:
     (ADR 0017).
 
 The issue #671 target-fixture sweep is retained at
-`release-artifacts/royalty-return-gas-buffer.json`. Its six via-IR scenarios
+`release-artifacts/evidence/royalty-return-gas-buffer.json`. Its six via-IR scenarios
 measure canonical success and fail-safe completion for `royaltyInfo()`,
 `tokenURI()`, and `contractURI()`, including the 65,536-byte metadata ABI-return
 cap. The worst conservative completion measurement is 725,735 gas; applying

@@ -13,7 +13,7 @@ import generate_royalty_return_gas_buffer as generator
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_EVIDENCE = REPO_ROOT / "release-artifacts/royalty-return-gas-buffer.json"
+DEFAULT_EVIDENCE = REPO_ROOT / "release-artifacts/evidence/royalty-return-gas-buffer.json"
 REQUIRED_SPEC_FRAGMENTS = {
     "docs/revenue-splits-and-royalties.md": (
         "worst measured parent-side completion work across `royaltyInfo()`, "

@@ -1887,7 +1887,7 @@ def _validate_shared_buffer_planning(
     )
     _expect(
         path.relative_to(repo_root).as_posix()
-        == "release-artifacts/royalty-return-gas-buffer.json",
+        == "release-artifacts/evidence/royalty-return-gas-buffer.json",
         f"{label}.planning_evidence.path drifted",
     )
     recorded_sha = _expect_string(

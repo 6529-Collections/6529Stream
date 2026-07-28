@@ -788,7 +788,7 @@ forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --m
 ```
 
 The generated
-[`royalty-return-gas-buffer.json`](../release-artifacts/royalty-return-gas-buffer.json)
+[`royalty-return-gas-buffer.json`](../release-artifacts/evidence/royalty-return-gas-buffer.json)
 binds the reusable overflow-safe admission source, authenticated three-row
 target fixture, maximum bounded metadata ABI return, six completion
 measurements, measurement-derived planning floor/genesis values, independent
@@ -2096,10 +2096,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `7c17e7644ca39257602cc5667f547026d22e855a` on
-`2026-07-27T19:21:24Z` records 3,132 findings: 49 High, 795 Medium, 1,251 Low,
-997 Informational, and 40 Optimization. Its High/Medium scope totals are
-first-party production `3/25/28`, vendored `1/9/10`, test `45/754/799`, script
+at source commit `baa99be668689d7b3357cc54f8d2f112c4444fdc` on
+`2026-07-28T02:40:06Z` records 3,156 findings: 49 High, 802 Medium, 1,259 Low,
+1,006 Informational, and 40 Optimization. Its High/Medium scope totals are
+first-party production `3/25/28`, vendored `1/9/10`, test `45/761/806`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

@@ -40,13 +40,13 @@
     },
     {
       "path": "docs/revenue-splits-and-royalties.md",
-      "sha256": "sha256:991906b86e5c365ed89d6aeaf4846fb7625b9c12c59dc7c1a017321a369eb8cd",
-      "size_bytes": 241426
+      "sha256": "sha256:75ae020f73b6cfd073112c2a1721c030ffcc6c33f75940867405d82de0e2c34b",
+      "size_bytes": 241435
     },
     {
       "path": "docs/metadata-router-and-renderer.md",
-      "sha256": "sha256:55cc337349c36a5e61bf5d203f8a1c8df366257d1efa6a3169857ecdcd62ad4b",
-      "size_bytes": 155063
+      "sha256": "sha256:bed49f01d0d1475d907960d76ea183f4b7c8765efe26e36f4703101359b0d638",
+      "size_bytes": 155072
     }
   ],
   "shared_parameter": {

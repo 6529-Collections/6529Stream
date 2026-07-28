@@ -23,21 +23,22 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced at source commit
-`7c17e7644ca39257602cc5667f547026d22e855a` on
-`2026-07-27T19:21:24Z`. It contains 3,132 findings across all impacts and
-scopes: 49 High, 795 Medium, 1,251 Low, 997 Informational, and 40
+`baa99be668689d7b3357cc54f8d2f112c4444fdc` on
+`2026-07-28T02:40:06Z`. It contains 3,156 findings across all impacts and
+scopes: 49 High, 802 Medium, 1,259 Low, 1,006 Informational, and 40
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | First-party production | 3 | 25 | 28 |
 | Vendored | 1 | 9 | 10 |
-| Test | 45 | 754 | 799 |
+| Test | 45 | 761 | 806 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
-The operation-identity cutover introduced no new first-party production
-High/Medium finding. Two prior `uninitialized-local` rows disappeared after
+The shared return-gas-buffer planning source and target fixture introduced no
+new first-party production High/Medium finding. The prior operation-identity
+cutover removed two `uninitialized-local` rows after
 the affected locals were made explicit and the fully assigned struct path was
 documented narrowly for Slither; the focused operation-identity tests preserve
 the behavior. This reduces the open inventory from 30 to 28 without accepting

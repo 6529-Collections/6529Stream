@@ -277,7 +277,7 @@
           "required": ["status", "path", "sha256", "onchain_authority"],
           "properties": {
             "status": { "const": "planning_target_fixture" },
-            "path": { "const": "release-artifacts/royalty-return-gas-buffer.json" },
+            "path": { "const": "release-artifacts/evidence/royalty-return-gas-buffer.json" },
             "sha256": {
               "type": "string",
               "pattern": "^[0-9a-f]{64}$"

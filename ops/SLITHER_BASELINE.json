@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "7c17e7644ca39257602cc5667f547026d22e855a",
-    "captured_at_utc": "2026-07-27T19:21:24Z",
+    "analyzed_commit": "baa99be668689d7b3357cc54f8d2f112c4444fdc",
+    "captured_at_utc": "2026-07-28T02:40:06Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 255,
     "capture_json_success": true,
-    "raw_json_size_bytes": 335769562,
-    "raw_json_sha256": "sha256:488ceb9a38707c33b2255fe67fb28c63c52788fda56df0d72ca2163f9effacdf",
-    "solidity_tree_sha256": "sha256:473858cb841dd07fcd50aa150de749f1a8691d8c946f9c59ad89120d4e4b3f0e",
+    "raw_json_size_bytes": 335515806,
+    "raw_json_sha256": "sha256:a650007b9e3777e4a9cfea19aec687973083bbbf37da7c4471350c70c7c44ac8",
+    "solidity_tree_sha256": "sha256:936478b9f7ebcc92272d367d817dcad096db01d917f99a1ffe5edcc0aaa0d947",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -37,11 +37,11 @@
   },
   "capture_counts": {
     "High": 49,
-    "Medium": 795,
-    "Low": 1251,
-    "Informational": 997,
+    "Medium": 802,
+    "Low": 1259,
+    "Informational": 1006,
     "Optimization": 40,
-    "total": 3132
+    "total": 3156
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
@@ -56,8 +56,8 @@
     },
     "test": {
       "High": 45,
-      "Medium": 754,
-      "total": 799
+      "Medium": 761,
+      "total": 806
     },
     "script": {
       "High": 0,

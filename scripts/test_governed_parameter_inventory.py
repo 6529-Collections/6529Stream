@@ -24,7 +24,7 @@ SOURCE_VERIFICATION_PATH = Path(
 )
 FIXTURE_SOURCE_PATH = Path("smart-contracts/StreamCore.sol")
 SHARED_BUFFER_EVIDENCE_PATH = Path(
-    "release-artifacts/royalty-return-gas-buffer.json"
+    "release-artifacts/evidence/royalty-return-gas-buffer.json"
 )
 NORMATIVE_PATHS = tuple(
     sorted(

@@ -14,7 +14,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = REPO_ROOT / "release-artifacts/royalty-return-gas-buffer.json"
+DEFAULT_OUTPUT = REPO_ROOT / "release-artifacts/evidence/royalty-return-gas-buffer.json"
 SNAPSHOT_PATH = (
     REPO_ROOT
     / "release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap"

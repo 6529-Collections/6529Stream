@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:02e3e4dc0271e8b7ff94efeeba3a187ba29794f8a636e5603242bf3bd4533f98",
-      "size_bytes": 137892
+      "sha256": "sha256:0209927f14f7ca8e77c7aba93b5eb61ef33b7a4f307900f28bc9a29ad86abbf4",
+      "size_bytes": 138595
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c86e91feb931b00ae5a98be8b75c8c711710794f179acef7280954bc2d3f239d",
+      "sha256": "sha256:f2e75a74bc3a94275383af1954f9e38a467c01f7b9482a4aa938d61ac9f24b53",
       "size_bytes": 32912
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,8 +45,9 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added the issue #671 zero-Core-delta shared `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150 admission helper, authenticated three-row target fixture, bounded 65,536-byte metadata ABI return, hostile full-budget/malformed/oversized and independent raise-chain tests, and six-scenario checksum-bound via-IR evidence. The governed inventory records the measurement-derived 1,460,000 planning floor and 2,910,000 planning genesis value without adding a 23rd GGP. Transitional `StreamCore` stays 24,128 bytes; #654 owns final integration and as-built measurement, while #656/#684 keep candidate, fixed-stipend, cadence, rehearsal, and review readiness fail-closed.",
       "Implemented accepted ADR 0018's pre-genesis atomic operation-identity cutover: the manager derives and reserves one batch root plus one operation ID per token before ledger consumption; the ledger owns manager-scoped root, authorization, nullifier, phase, and current/bound-policy validation; and Core retains only current prepared-pair operation-ID equality. The exact typed primary-settlement callback and execution-ID-bound repeated-sale key remain ADR 0019 / #694 blockers, and #654 still owns the complete Core headroom/finality seam. The refreshed exact Slither inventory introduces no new first-party High/Medium finding and removes two prior `uninitialized-local` rows after explicit initialization and narrow analyzer annotations, leaving 28 Open rows. Generated as-built and release surfaces are refreshed without promoting protocol maturity or readiness.",
-      "Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty probe-record model and every related authorization path, and the overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises. Separate measurement references must describe the same candidate and complete proposed tuple; actual candidate-bound measurements remain blocked on issues #684 and #671, so maturity and release readiness are unchanged.",
+      "Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty probe-record model and every related authorization path, and the overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises. Separate measurement references must describe the same candidate and complete proposed tuple; actual candidate-bound measurements remain blocked on issues #684 and #656, so maturity and release readiness are unchanged.",
       "Rebound the issue #690 record-family source catalog and checker to the merged #699 source commit so candidate-source replay verifies the complete interface, registry, metadata, preservation, and rehearsal binding set. Candidate-bound deployment evidence remains unavailable and both release modes remain fail-closed.",
       "Reserved the external-call gas inventory's `artist-authority` call lane for the exact future issue #670 `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a fail-closed field-policy matrix covering path, site, kind, operation, expression, count, path class, lane, issue, disposition, missing rows, and duplicate calls/rows. Literal declarations cannot use the reserved lane, while the exact Yul `gas()` exemption and generic unexpected-call rejection remain unchanged. This issue #669 checker-support slice adds neither the artist registry source nor its inventory row and does not claim GGP provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or release readiness.",
       "Centralized recursive JSON no-secret scanning for public-beta evidence, non-local release evidence, drop-authorization signing evidence, and signer custody readiness. The shared scanner preserves checker-specific exception types, reports nested JSON paths, and applies the strict union of the migrated secret-key and assignment-looking value patterns. Direct helper tests, release-tool call-policy coverage, the offline verifier, and canonical checksums now bind the shared policy. This tooling-only change does not add retained non-local evidence or change public-beta or production readiness; issue #609 tracks the work.",

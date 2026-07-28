@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:26ff47ff6365a93c4ef867599a52f00e7ce16fe36c5ff03539bfc5a56096de2e"
+      "sha256": "sha256:55d7b374ce106914ba935311d49adddffbd79821f0d44131887cbf1bf1e59d7c"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:0fa166fc4032edf19f8a9c53c50b6da2828416ec705f1a0e4ae6ac31d2da24d0"
+      "sha256": "sha256:46f0e8b5f4c26b4e5ce6888db8eddaa8dca6d5daa346368b682898099ca84625"
     },
     {
       "path": "docs/audit-package.md",
@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:a117e289c2e67c33a76fe87ec98c3ab6f7d15764416c6291cfbb72d05b551efe"
+      "sha256": "sha256:136318fa5a2a75de4fdd17e67314da3494db170bc1f48431eceb09d5529dde21"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:5b17ce6ffb070241c04a2d21de169b99682d815c73f5ff9e46b1f8b060a1b6a7"
+      "sha256": "sha256:5eed538b2f2843f3d232c46e60cebe3b92a86f3a88eef118008466d5d4b43f4a"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -46,11 +46,11 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:e50f4ddeeac07bfeb081e22a3adcab81ff1199424ee10dfe060265a0331bb97d"
+      "sha256": "sha256:24599b40a0692db08283cc94590036926bd1371f2533afbdb4ce864dee8b8a85"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:e1c35b9696c43b497b29dd80ee852e6eb17a8be66a72358f41ca5ee70c2c3a4e"
+      "sha256": "sha256:223f1332cffe7618f74e6ad05c4d5bb0ff6bb08e3c8d91d16c62cdbf38a159ee"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -150,7 +150,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:0fa166fc4032edf19f8a9c53c50b6da2828416ec705f1a0e4ae6ac31d2da24d0"
+          "sha256": "sha256:46f0e8b5f4c26b4e5ce6888db8eddaa8dca6d5daa346368b682898099ca84625"
         }
       ],
       "risk_acceptance": null
@@ -183,7 +183,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:a117e289c2e67c33a76fe87ec98c3ab6f7d15764416c6291cfbb72d05b551efe"
+          "sha256": "sha256:136318fa5a2a75de4fdd17e67314da3494db170bc1f48431eceb09d5529dde21"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -313,7 +313,7 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5b17ce6ffb070241c04a2d21de169b99682d815c73f5ff9e46b1f8b060a1b6a7"
+          "sha256": "sha256:5eed538b2f2843f3d232c46e60cebe3b92a86f3a88eef118008466d5d4b43f4a"
         },
         {
           "path": "test/StreamGovernanceExecutor.t.sol",
@@ -359,15 +359,15 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5b17ce6ffb070241c04a2d21de169b99682d815c73f5ff9e46b1f8b060a1b6a7"
+          "sha256": "sha256:5eed538b2f2843f3d232c46e60cebe3b92a86f3a88eef118008466d5d4b43f4a"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
-          "sha256": "sha256:40cabe05ba3d4522f5512a51ecb6b3b7d3119374043cb5cf6ec99be09667b2f8"
+          "sha256": "sha256:47e7f88c49e993251ce51574ee15710e9ede59fc2d6895601346630a4c9efe06"
         },
         {
           "path": "release-artifacts/schema/governed-parameter-inventory.v1.schema.json",
-          "sha256": "sha256:b57505bb4c0d7804a1ff0f8a8eeb4c0a40fb9882bb711ee96321feb0faf5ffc3"
+          "sha256": "sha256:9b8b6a07b3e18b0686db8a652d1450f66eceeed5db410c1dd350b818b11445c9"
         },
         {
           "path": "release-artifacts/genesis-deployment-profile.json",
@@ -375,7 +375,7 @@
         },
         {
           "path": "scripts/check_governed_parameter_inventory.py",
-          "sha256": "sha256:25beee10413550b2377e92c176bc28d7d59c4ed243252160c142156191e8d976"
+          "sha256": "sha256:25f93c2e825bb724ec60847787f1569d7b54f2501244198c1c34ba924f023dd6"
         },
         {
           "path": "scripts/check_governed_parameter_identifiers.py",
@@ -418,7 +418,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:a117e289c2e67c33a76fe87ec98c3ab6f7d15764416c6291cfbb72d05b551efe"
+          "sha256": "sha256:136318fa5a2a75de4fdd17e67314da3494db170bc1f48431eceb09d5529dde21"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -461,11 +461,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:26ff47ff6365a93c4ef867599a52f00e7ce16fe36c5ff03539bfc5a56096de2e"
+          "sha256": "sha256:55d7b374ce106914ba935311d49adddffbd79821f0d44131887cbf1bf1e59d7c"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:0fa166fc4032edf19f8a9c53c50b6da2828416ec705f1a0e4ae6ac31d2da24d0"
+          "sha256": "sha256:46f0e8b5f4c26b4e5ce6888db8eddaa8dca6d5daa346368b682898099ca84625"
         },
         {
           "path": "docs/metadata.md",
@@ -583,15 +583,15 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:5b17ce6ffb070241c04a2d21de169b99682d815c73f5ff9e46b1f8b060a1b6a7"
+          "sha256": "sha256:5eed538b2f2843f3d232c46e60cebe3b92a86f3a88eef118008466d5d4b43f4a"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:26ff47ff6365a93c4ef867599a52f00e7ce16fe36c5ff03539bfc5a56096de2e"
+          "sha256": "sha256:55d7b374ce106914ba935311d49adddffbd79821f0d44131887cbf1bf1e59d7c"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:6d8980912d23b9600ab68cc4c0a6d2a07d55d10c3d04b2a2cd5d94bd75050a1f"
+          "sha256": "sha256:377560428bf4e33bd2c85e9951c6da5bbc516c385a47ed6fc579ad1293880be4"
         }
       ],
       "risk_acceptance": null
@@ -621,19 +621,19 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:e50f4ddeeac07bfeb081e22a3adcab81ff1199424ee10dfe060265a0331bb97d"
+          "sha256": "sha256:24599b40a0692db08283cc94590036926bd1371f2533afbdb4ce864dee8b8a85"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:e1c35b9696c43b497b29dd80ee852e6eb17a8be66a72358f41ca5ee70c2c3a4e"
+          "sha256": "sha256:223f1332cffe7618f74e6ad05c4d5bb0ff6bb08e3c8d91d16c62cdbf38a159ee"
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:ad4d56f033fc65d0b351b525e36a5e3ebf3e08fbdff25f1b35154af21564950d"
+          "sha256": "sha256:e7205286c112656a9096a2cc6ef30fe7e200d1ed76cabc5dede4a575f708f63a"
         },
         {
           "path": "scripts/check_slither_baseline.py",
-          "sha256": "sha256:80b8bfa57f552520e7fbc345259b0a9fa8d940233aae986bab9ba6b5f7c7f926"
+          "sha256": "sha256:16e710846ab118b976a2401e845292d3ab5217a2848081d06d753f1415130576"
         }
       ],
       "risk_acceptance": null
@@ -662,15 +662,15 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:26ff47ff6365a93c4ef867599a52f00e7ce16fe36c5ff03539bfc5a56096de2e"
+          "sha256": "sha256:55d7b374ce106914ba935311d49adddffbd79821f0d44131887cbf1bf1e59d7c"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:0fa166fc4032edf19f8a9c53c50b6da2828416ec705f1a0e4ae6ac31d2da24d0"
+          "sha256": "sha256:46f0e8b5f4c26b4e5ce6888db8eddaa8dca6d5daa346368b682898099ca84625"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:6b184e0aee180b428f269441fceb6752fbcbb5eaf1fdee38910c2fd529136659"
+          "sha256": "sha256:2e5964bc929b28431ae44dc668b167142978d3bdafea194eeb6ced9b2687961b"
         },
         {
           "path": "docs/warning-dispositions.md",
