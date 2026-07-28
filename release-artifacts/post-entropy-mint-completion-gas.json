@@ -25,18 +25,18 @@
     },
     {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:38b568e9fad174d896d615a77c637d14fec83ebf091872781d6a48c078f93719",
-      "size_bytes": 49462
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
     },
     {
       "path": "smart-contracts/StreamCoreReadBuffer.sol",
-      "sha256": "sha256:bbd76db15ef510870ecc62e2d85534b63e05754ea0e4bbc72e5100f6811f7356",
-      "size_bytes": 2726
+      "sha256": "sha256:8efd67d74274d1dcce42045d2f7ed694733b6edda141241c4279e6b0159833e6",
+      "size_bytes": 2714
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:2a86ea43bbdcfe9af4372a535c6ea454bbc765e98baf68e772ba01a08d7e40c6",
-      "size_bytes": 33661
+      "sha256": "sha256:0b1a12b22f9b0ccd69de9cb5e8157d4ac929503daf2731defecf5c357ed217d6",
+      "size_bytes": 34182
     },
     {
       "path": "docs/stream-entropy-coordinator.md",
@@ -110,8 +110,8 @@
     "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:38b568e9fad174d896d615a77c637d14fec83ebf091872781d6a48c078f93719",
-      "size_bytes": 49462
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
     },
     "stream_core_runtime_bytes": 18997,
     "stream_core_eip170_margin_bytes": 5579,

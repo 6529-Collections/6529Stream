@@ -182,7 +182,10 @@ class WarningDispositionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            text = minimal_warning_doc().replace("SOLC-PURE-ROYALTY", "SOLC-ROYALTY")
+            text = minimal_warning_doc().replace(
+                "SOLC-TEST-PURE-LEGACY-ROYALTY",
+                "SOLC-LEGACY-ROYALTY",
+            )
             write_text(root / checker.DEFAULT_WARNING_DISPOSITIONS, text)
 
             with self.assertRaisesRegex(

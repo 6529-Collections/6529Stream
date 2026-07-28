@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "408c1b894f947fc0f8db34259f1c82ecd7e91439",
-    "captured_at_utc": "2026-07-28T09:41:42Z",
+    "analyzed_commit": "6931aaa6db64e288ee2d67b6b0566ad986d2c856",
+    "captured_at_utc": "2026-07-28T13:20:58Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 255,
     "capture_json_success": true,
-    "raw_json_size_bytes": 338353144,
-    "raw_json_sha256": "sha256:9071bf46d27eca1b46a911f8deda157803a40fa91286356b2500b8839883fa65",
-    "solidity_tree_sha256": "sha256:f0da5133f437ccb21be96f1779b514a0c15761b4d199f5c7678c63a2c3c0ecb1",
+    "raw_json_size_bytes": 338343451,
+    "raw_json_sha256": "sha256:1936959b42f69eb4942819dac948c55aa4d2457a42b5f9e24933c730f3842654",
+    "solidity_tree_sha256": "sha256:ef36965c441d972b02b839dd235bba3381132fae0661355fb13f6eac2584ef99",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -177,14 +177,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:faba0a3becae3790f356f84a2e9b28ec325a0276b07f85d5c439f2d35a382364",
+      "fingerprint": "sha256:3d09984af13111e85ffc3bb4d781a1f598ccf37bdba1a8ea57a2d12a3b010730",
       "detector": "divide-before-multiply",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCoreExternalReads.sol",
-        "start_line": 456,
-        "end_line": 498,
+        "start_line": 449,
+        "end_line": 487,
         "element_type": "function",
         "name": "resolveRoyalty",
         "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
@@ -192,16 +192,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamCoreExternalReads.sol",
-          "start_line": 456,
-          "end_line": 498,
+          "start_line": 449,
+          "end_line": 487,
           "element_type": "function",
           "name": "resolveRoyalty",
           "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
         },
         {
           "path": "smart-contracts/StreamCoreExternalReads.sol",
-          "start_line": 495,
-          "end_line": 496,
+          "start_line": 484,
+          "end_line": 485,
           "element_type": "node",
           "name": "royaltyAmount = (salePrice / _ROYALTY_DENOMINATOR) * bps + ((salePrice % _ROYALTY_DENOMINATOR) * bps) / _ROYALTY_DENOMINATOR",
           "signature": ""
@@ -225,14 +225,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:1f3d84dea275d70aa77e13ec7faaf036f9e764e2306fb1736885183c59d9098b",
+      "fingerprint": "sha256:4fb9bd5e82acd402b9d1fc1a0f77a982799e716ce99fd40c44a10c77594c0bae",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 1050,
-        "end_line": 1053,
+        "start_line": 1041,
+        "end_line": 1044,
         "element_type": "function",
         "name": "_blockNumber64",
         "signature": "_blockNumber64()"
@@ -240,16 +240,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 1050,
-          "end_line": 1053,
+          "start_line": 1041,
+          "end_line": 1044,
           "element_type": "function",
           "name": "_blockNumber64",
           "signature": "_blockNumber64()"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 1051,
-          "end_line": 1051,
+          "start_line": 1042,
+          "end_line": 1042,
           "element_type": "node",
           "name": "block.number == 0 || block.number > type()(uint64).max",
           "signature": ""
@@ -364,14 +364,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:c0bf1c3c865621b71f005599639ba64374a6e46be87173a7f82f06fde31f1896",
+      "fingerprint": "sha256:90b373dcccf3c48614d86ea6322ce40a9d59e18a550db4d6c24bf0b439fe5b2e",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 522,
-        "end_line": 537,
+        "start_line": 521,
+        "end_line": 536,
         "element_type": "function",
         "name": "mintFromManager",
         "signature": "mintFromManager(uint256,address,bytes,bytes32,bytes32)"
@@ -387,24 +387,24 @@
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 522,
-          "end_line": 537,
+          "start_line": 521,
+          "end_line": 536,
           "element_type": "function",
           "name": "mintFromManager",
           "signature": "mintFromManager(uint256,address,bytes,bytes32,bytes32)"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 535,
-          "end_line": 535,
+          "start_line": 534,
+          "end_line": 534,
           "element_type": "node",
           "name": "_completeMint(collectionId,tokenId,initialRecipient,mintCommitment)",
           "signature": ""
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 536,
-          "end_line": 536,
+          "start_line": 535,
+          "end_line": 535,
           "element_type": "node",
           "name": "_completionTokenId = 0",
           "signature": ""
@@ -427,14 +427,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:d7a6694802b6dfc45de27e5424687186f773b5e41497dc6fc7bb9df0800cff74",
+      "fingerprint": "sha256:678e3d8465a078d6f69fd1592452717c7e2624f1ff0d4942f4529bbc5b67d9fc",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 556,
-        "end_line": 580,
+        "start_line": 555,
+        "end_line": 579,
         "element_type": "function",
         "name": "completePreparedMintFromManager",
         "signature": "completePreparedMintFromManager(uint256,address,bytes32,bytes32)"
@@ -450,24 +450,24 @@
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 556,
-          "end_line": 580,
+          "start_line": 555,
+          "end_line": 579,
           "element_type": "function",
           "name": "completePreparedMintFromManager",
           "signature": "completePreparedMintFromManager(uint256,address,bytes32,bytes32)"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 578,
-          "end_line": 578,
+          "start_line": 577,
+          "end_line": 577,
           "element_type": "node",
           "name": "_completeMint(collectionId,tokenId,initialRecipient,mintCommitment)",
           "signature": ""
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 579,
-          "end_line": 579,
+          "start_line": 578,
+          "end_line": 578,
           "element_type": "node",
           "name": "_completionTokenId = 0",
           "signature": ""
@@ -1410,14 +1410,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:88989c3a49a0faa2bb13536910363467cc89b15428ad0508fe5ed0e28b07ac92",
+      "fingerprint": "sha256:57e768ce4a554b85bf8fa3b73ae4d6971a3eafc44f99d69457095d49a327513d",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 804,
-        "end_line": 831,
+        "start_line": 803,
+        "end_line": 826,
         "element_type": "function",
         "name": "royaltyInfo",
         "signature": "royaltyInfo(uint256,uint256)"
@@ -1425,16 +1425,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 804,
-          "end_line": 831,
+          "start_line": 803,
+          "end_line": 826,
           "element_type": "function",
           "name": "royaltyInfo",
           "signature": "royaltyInfo(uint256,uint256)"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 813,
-          "end_line": 830,
+          "start_line": 812,
+          "end_line": 825,
           "element_type": "node",
           "name": "StreamCoreExternalReads.resolveRoyalty(pointer.target,_gasParameters[_GGP_ROYALTY_RESOLVER_GAS_LIMIT].value,_gasParameters[_GGP_ROYALTY_RETURN_GAS_BUFFER].value,abi.encodeWithSelector(bytes4(keccak256(bytes)(royaltyReceiverAndBps(address,uint256,uint256,uint256,bool))),address(this),tokenId,salePrice,collectionId,mappingExists),salePrice)",
           "signature": ""
@@ -1458,14 +1458,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:b3c229c891f5aa86444797b47f10f4cb43a48de520de3d0f5130226c71d25b80",
+      "fingerprint": "sha256:4666ec4f0e0c5f30166e09005cef90b29d29741e62227417b5432e76ca752923",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCoreExternalReads.sol",
-        "start_line": 434,
-        "end_line": 452,
+        "start_line": 431,
+        "end_line": 445,
         "element_type": "function",
         "name": "boundedRouterString",
         "signature": "boundedRouterString(address,bytes,uint256,uint256)"
@@ -1473,16 +1473,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamCoreExternalReads.sol",
-          "start_line": 434,
-          "end_line": 452,
+          "start_line": 431,
+          "end_line": 445,
           "element_type": "function",
           "name": "boundedRouterString",
           "signature": "boundedRouterString(address,bytes,uint256,uint256)"
         },
         {
           "path": "smart-contracts/StreamCoreExternalReads.sol",
-          "start_line": 451,
-          "end_line": 451,
+          "start_line": 444,
+          "end_line": 444,
           "element_type": "node",
           "name": "StreamCoreReadBuffer.decodeRequiredString(data)",
           "signature": ""

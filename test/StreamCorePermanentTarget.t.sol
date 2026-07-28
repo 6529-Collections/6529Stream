@@ -354,6 +354,8 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         0xaef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4;
     bytes32 private constant _POINTER_MODULE_REGISTRY =
         0xde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c4;
+    bytes32 private constant _POINTER_ROYALTY_RESOLVER =
+        0xafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c91;
 
     bytes32 private constant _GGP_ROYALTY_RESOLVER_GAS_LIMIT =
         0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda;
@@ -667,6 +669,18 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
             address(_core),
             abi.encodeCall(
                 _core.updateSatellitePointer, (_POINTER_ARTIST_REGISTRY, address(candidate))
+            )
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.SatellitePointerInterfaceUnresolved.selector, _POINTER_ROYALTY_RESOLVER
+            )
+        );
+        _executor.execute(
+            address(_core),
+            abi.encodeCall(
+                _core.updateSatellitePointer, (_POINTER_ROYALTY_RESOLVER, address(candidate))
             )
         );
     }

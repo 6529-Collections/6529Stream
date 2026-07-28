@@ -1,8 +1,8 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-high/medium baseline. The current baseline contains 28 open findings: 3 High
-and 25 Medium. Those rows are a review and burn-down queue; they are not proof
+high/medium baseline. The current baseline contains 32 open findings: 2 High
+and 30 Medium. Those rows are a review and burn-down queue; they are not proof
 of exploitability, an audit completion claim, or evidence that the protocol is
 ready for public beta or production.
 
@@ -22,27 +22,28 @@ hash-locked for the Linux CI/release boundary through
 
 ## Current Capture
 
-The canonical unfiltered capture was produced at source commit
-`baa99be668689d7b3357cc54f8d2f112c4444fdc` on
-`2026-07-28T02:40:06Z`. It contains 3,156 findings across all impacts and
-scopes: 49 High, 802 Medium, 1,259 Low, 1,006 Informational, and 40
+The canonical unfiltered capture was produced from the exact source bytes
+frozen at commit `6931aaa6db64e288ee2d67b6b0566ad986d2c856` on
+`2026-07-28T13:20:58Z`. It contains 3,213 findings across all impacts and
+scopes: 49 High, 825 Medium, 1,265 Low, 1,032 Informational, and 42
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| First-party production | 3 | 25 | 28 |
+| First-party production | 2 | 30 | 32 |
 | Vendored | 1 | 9 | 10 |
-| Test | 45 | 761 | 806 |
+| Test | 46 | 779 | 825 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
-The shared return-gas-buffer planning source and target fixture introduced no
-new first-party production High/Medium finding. The prior operation-identity
-cutover removed two `uninitialized-local` rows after
-the affected locals were made explicit and the fully assigned struct path was
-documented narrowly for Slither; the focused operation-identity tests preserve
-the behavior. This reduces the open inventory from 30 to 28 without accepting
-any remaining row or changing public-beta or production readiness.
+The permanent-Core refresh removed the former High uninitialized burn-block
+mapping row and one transitional completion-order row, while adding six
+review-sensitive Medium rows for permanent-Core callback ordering, royalty
+arithmetic, the explicit block-zero guard, and returned router tuples. The net
+inventory moves from 28 to 32 without accepting, suppressing, or marking false
+positive any remaining row. Focused tests preserve the former burn-block fix
+and the new permanent-Core paths; public-beta and production readiness remain
+blocked.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to

@@ -13,8 +13,10 @@ source-of-truth view without claiming public beta or production readiness.
 [`stream-core-permanent-interface.json`](stream-core-permanent-interface.json)
 is the normative pre-genesis target for the complete Permanent `StreamCore`
 function/event interface. It is intentionally separate from `latest/` and from
-the implementation-derived `baselines/v0.1.0/abi-surface.json`: the target is
-not generated from today's oversized transitional Core. Custom errors,
+the current implementation-derived `baselines/v0.1.0/abi-surface.json`; the
+target is not generated from the implementation. Its retirement proof instead
+uses the immutable pre-cutover
+`baselines/pre-permanent-core/abi-surface.json`. Custom errors,
 constructor, and Medium/Replaceable surfaces remain separately cataloged;
 fallback and receive are fail-closed `required_absent` categories checked
 against the implementation. Its closed `bytecode_budget_groups` catalog assigns
@@ -27,12 +29,13 @@ ordered active surface is pinned to SHA-256
 second reviewer-pinned canonical-JSON digest over every target semantic,
 including metadata, coverage, groups, required absence, bootstrap policy, and
 all ordered active/retired rows, is
-`sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d`.
-The implementation check also requires every current-baseline Core
-function/event shape to have exactly one active or retired disposition and every
-retired row to match that baseline. Target, contract-config, and baseline JSON
-inputs reject invalid UTF-8, duplicate members, non-finite/floating-point
-values, and integers outside the I-JSON safe range.
+`sha256:7303445a540a0eb0fb70e64b77fa317be6e68369ec38a5adadf3f282040ead98`.
+The implementation check compares the current baseline to the current ABI and
+requires every pre-cutover Core function/event shape to have exactly one active
+or retired disposition, with every retired row matching the immutable
+pre-cutover baseline. Target, contract-config, and baseline JSON inputs reject
+invalid UTF-8, duplicate members, non-finite/floating-point values, and integers
+outside the I-JSON safe range.
 
 Build and validate the canonical target-isolated release profile first:
 

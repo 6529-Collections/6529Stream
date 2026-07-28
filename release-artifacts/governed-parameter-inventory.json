@@ -117,7 +117,7 @@
     "planning_evidence": {
       "status": "as_built_permanent_core_source",
       "path": "release-artifacts/evidence/royalty-return-gas-buffer.json",
-      "sha256": "1070ac92e1940a179eab9165945fd0300b4d0efa5dd6e633fa48fcd6ac7223e5",
+      "sha256": "adca5d3d7fdf5724c2b6da398e577475c60925a88ff9c9607a9e3ea6e58ffcf3",
       "onchain_authority": false
     },
     "independent_raise_chain": {

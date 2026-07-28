@@ -18,7 +18,16 @@ the release policy in `docs/release-policy.md`.
   transitional Core and restores the stricter 22,184-byte objective. The two
   #670 concrete artist/revenue interface rows and exact candidate-instance
   bindings under #656/#684 remain unresolved, so this is pre-audit source
-  completion rather than a deployment or readiness claim.
+  completion rather than a deployment or readiness claim. The refreshed
+  permanent-source Slither inventory has 32 Open first-party High/Medium rows
+  (2 High and 30 Medium); no row is accepted or suppressed. ABI validation now
+  keeps the current 53-function/18-event implementation baseline separate from
+  an immutable 87-function/14-event pre-cutover snapshot, so compatibility and
+  retirement-closure checks prove their distinct intended histories. The
+  aggregate size/warning wrapper also retains the exact test-only legacy Core
+  warning surface without treating its 11-byte EIP-170 overage as production;
+  any other overage or compiler error remains fail-closed, while isolated
+  release artifacts remain the production size authority.
 - Completed issue #671's shared
   `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150
   admission helper, authenticated permanent-Core three-row implementation,

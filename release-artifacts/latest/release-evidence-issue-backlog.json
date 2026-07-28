@@ -9,8 +9,8 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:f5a9b76c746e07bd2c877d3a3b8fad1b94675ebfb0af435597cb557c5983a122",
-      "size_bytes": 74164
+      "sha256": "sha256:1677d1c61239dc770fa318c7bba45b8911c0124fadf520eb72e72864ce748782",
+      "size_bytes": 74215
     }
   },
   "release_version": "v0.1.0-local",
@@ -149,7 +149,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:447affe4703c65a20ec4d651ab1279fc0a1fd34897df31bac04a68b74efc8054",
+        "sha256": "sha256:ebcccad03d5a25527de2fb9d1d5e9308a3f8a8faab6e94d8e55ecd0dfe77615b",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -263,7 +263,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-        "sha256": "sha256:5e89b6d1d6633bfa585c28014209172d00bc0e15c1b85dac1aee65ffc6c44649",
+        "sha256": "sha256:b29b4d231d89cc5fdbd4937bca57ed84f3a8cb81b3bc638107268eaf99456154",
         "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
         "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
@@ -320,7 +320,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:9dc2506fddbfbf07c639738ed174959f086ccf945d429f36692d4f2eaf328ab0",
+        "sha256": "sha256:a722c1f7723832c9b462fa7554f4393a45f17093c74bc3d1ab0c09ab96147757",
         "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
         "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."

@@ -159,8 +159,8 @@ contributors who start from the README.
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  permanent target-isolated `StreamCore` runtime at 18,997 bytes with 5,579
-  bytes of EIP-170 headroom. The complete linked target is 5,131 bytes smaller
+  permanent target-isolated `StreamCore` runtime at 18,997 bytes with 5,579 bytes
+  of EIP-170 headroom. The complete linked target is 5,131 bytes smaller
   than the 24,128-byte transitional build, passes the non-waivable 2,000-byte
   production margin by 3,579 bytes, and is 3,187 bytes below the approved
   22,184-byte objective. Historical 21,792-byte measurements remain
@@ -228,9 +228,9 @@ contributors who start from the README.
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 28 open
-  findings: 3 High and 25 Medium. One row is a confirmed Core state gap, five
-  rows require design review, and 22 remain pending disposition. None is
+- The normalized first-party production Slither baseline contains 32 open
+  findings: 2 High and 30 Medium. Zero rows are confirmed gaps, six rows
+  require design review, and 26 remain pending disposition. None is
   accepted or classified as a false positive. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue

@@ -1409,12 +1409,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 8_999,
             ),
             Path("scripts/check_record_family_authorization.py"): (
-                "255dbad891416458370fe598f863c21301b307f4d27e1343b3a64f9a48ecb2b0",
+                "d40a3ceab77d96d3168e77667d48980c855621a0a78968582e739bce12c7026f",
                 100_553,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "16e710846ab118b976a2401e845292d3ab5217a2848081d06d753f1415130576",
-                46_537,
+                "f28f795cb9c05ddf36bf086dabafef41226795e7791068631eb62f3728aa79d5",
+                46_988,
             ),
         }
         self.assertEqual(
@@ -2313,8 +2313,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 434)
-        self.assertEqual(summary.checksum_manifest_records, 434)
+        self.assertEqual(summary.checksum_entries, 435)
+        self.assertEqual(summary.checksum_manifest_records, 435)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2326,8 +2326,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 434)
-        self.assertEqual(data["checksum_manifest_records"], 434)
+        self.assertEqual(data["checksum_entries"], 435)
+        self.assertEqual(data["checksum_manifest_records"], 435)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -284,7 +284,7 @@ The NatSpec coverage step checks
 against the protocol surface report and first-party Solidity sources. It
 requires nearby NatSpec for release-surface functions, public variable getters,
 events, and custom errors unless the current gap is listed with an explicit
-reason. The current baseline has 648 explicit exclusions, so it is a checked
+reason. The current baseline has 888 explicit exclusions, so it is a checked
 burn-down queue rather than proof that API documentation is complete. See
 [`natspec-coverage.md`](natspec-coverage.md).
 
@@ -595,10 +595,15 @@ A separate reviewer-pinned canonical-JSON lock covers every target semantic,
 including all top-level metadata, authorization and ownership policy, normative
 homes, coverage counts, bytecode-budget groups, required-absence and bootstrap
 policy, and every ordered active or retired function/event row, at SHA-256
-`sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d`.
-Implementation `--check` also closes the retirement catalog in both directions:
-every current baseline Core function/event shape must have exactly one active or
-retired disposition, and every retired row must match a current-baseline shape.
+`sha256:7303445a540a0eb0fb70e64b77fa317be6e68369ec38a5adadf3f282040ead98`.
+Implementation `--check` compares the live ABI against the current
+`baselines/v0.1.0/abi-surface.json` and separately closes the retirement
+catalog against the immutable
+`baselines/pre-permanent-core/abi-surface.json`: every pre-cutover Core
+function/event shape must have exactly one active or retired disposition, and
+every retired row must match that pre-cutover snapshot. This separation prevents
+the permanent implementation baseline from erasing the evidence for its own
+pre-genesis retirements.
 The target, contract config, and ABI baseline are loaded as strict UTF-8,
 duplicate-free, schema-restricted I-JSON; invalid UTF-8, duplicate members,
 non-finite or floating-point values, and integers outside the I-JSON safe range
@@ -2096,8 +2101,8 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `408c1b894f947fc0f8db34259f1c82ecd7e91439` on
-`2026-07-28T09:41:42Z` records 3,213 findings: 49 High, 825 Medium, 1,265 Low,
+at source commit `6931aaa6db64e288ee2d67b6b0566ad986d2c856` on
+`2026-07-28T13:20:58Z` records 3,213 findings: 49 High, 825 Medium, 1,265 Low,
 1,032 Informational, and 42 Optimization. Its High/Medium scope totals are
 first-party production `2/30/32`, vendored `1/9/10`, test `46/779/825`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and

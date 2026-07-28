@@ -141,13 +141,13 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   discovery proof, 1/1 provenance, collector-verifiable permanence, explicit
   royalty philosophy, quiet warning/lint baselines, and continued `StreamCore`
   size discipline.
-  Current public beta is still blocked by the 28 Open first-party production
+  Current public beta is still blocked by the 32 Open first-party production
   Slither High/Medium rows and the separately tracked High Governance Executor
   native-value risk `RISK-GOV-003` under issue #658, plus missing external
   audit, testnet/live deployment evidence, verified addresses, explorer
   verification, metadata browser evidence, and randomizer operations evidence.
-  Production is additionally blocked by issue #654 Core headroom/state and
-  complete-target-ABI work, issue #656 instance-aware genesis reconciliation,
+  Production is additionally blocked by issue #654 final #670 pointer
+  integration and candidate remeasurement, issue #656 instance-aware genesis reconciliation,
   issue #684 governed-parameter candidate host/evidence completion, retained live ceremony evidence,
   production deployment manifests, production signatures, signed tags,
   explorer verification, live randomizer evidence, #656-bound Governance V2
@@ -250,7 +250,7 @@ reference inputs for roadmap quality, not automatic implementation mandates.
 | Production size | The permanent IR-optimized `StreamCore` runtime is 18,997 bytes with 5,579 bytes of EIP-170 headroom, 5,131 bytes smaller than the 24,128-byte transitional build and 3,187 bytes below the approved 22,184-byte objective | `forge build --sizes --via-ir --skip test --skip script --force`; `python scripts/check_contract_size_budget.py`; `python scripts/check_release_mode.py --phase production-release` | Core size passes without an exception; candidate, audit, static-analysis, and live-evidence blockers remain independent |
 | Governed parameters | The schema-validated 22-GGP/3-GTP inventory pins exact raise-only policy, 50 parameter/profile bindings, evidence requirements, and fixed-stipend review obligations. Concrete candidate bindings remain honestly `not_available` and guarded-consumer lists remain `planning`, so the ordinary structural gate passes while production `--require-complete` fails closed; candidate completion is also blocked pending #656's structured instance/linked-library model | `python scripts/test_governed_parameter_inventory.py`; `python scripts/check_governed_parameter_inventory.py`; production decision: `python scripts/test_governed_parameter_inventory.py --require-complete`; `release-artifacts/governed-parameter-inventory.json` | No public-beta blocker by itself; production remains blocked by [issue #684](https://github.com/6529-Collections/6529Stream/issues/684), [issue #656](https://github.com/6529-Collections/6529Stream/issues/656), and `RISK-GOV-004` until every required host instance, value, floor, exhaustive consumer review, reviewed evidence binding, fixed-stipend decision, and linked-library binding is complete |
 | Formatting | Merged PR #322 keeps 34 formatting-required files passing `forge fmt --check` and converts the raw all-files diagnostic allowance into 17 explicit vendored/provenance formatting exemptions documented in checker tests, tooling docs, and vendored-library provenance policy | `python scripts/test_solidity_formatting.py`, `python scripts/check_solidity_formatting.py`, `make fmt-check`; raw diagnostic: `forge fmt --check smart-contracts`; CI run `27494893331` | Scoped gate passes in CI; vendored/provenance exemptions are explicit, reviewed, and unable to hide new first-party formatting drift |
-| Static analysis | The normalized first-party production baseline contains 28 open findings: 3 High and 25 Medium. One is a confirmed gap, five require design review, and 22 remain pending disposition; none is accepted or marked false positive. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issue #685 adds the closed-world runtime/catalog boundary without accepting the residual deployment/review risk | `python scripts/test_slither_baseline.py`; `python scripts/check_slither_baseline.py --baseline-only`; `python scripts/check_slither_baseline.py --run-slither`; `python scripts/check_governance_action_policy.py`; `ops/SLITHER_BASELINE.json`; `ops/SLITHER_BASELINE.md`; `release-artifacts/governance-action-policy.json`; `release-artifacts/latest/risk-register.json` | [Issue #658](https://github.com/6529-Collections/6529Stream/issues/658) remains an explicit public-beta/audit/production blocker until every row and `RISK-GOV-003` have reviewed remediation or disposition proof and the exact drift gate stays green; issue #656 owns exact action-policy candidate deployment binding |
+| Static analysis | The normalized first-party production baseline contains 32 open findings: 2 High and 30 Medium. Zero are confirmed gaps, six require design review, and 26 remain pending disposition; none is accepted or marked false positive. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issue #685 adds the closed-world runtime/catalog boundary without accepting the residual deployment/review risk | `python scripts/test_slither_baseline.py`; `python scripts/check_slither_baseline.py --baseline-only`; `python scripts/check_slither_baseline.py --run-slither`; `python scripts/check_governance_action_policy.py`; `ops/SLITHER_BASELINE.json`; `ops/SLITHER_BASELINE.md`; `release-artifacts/governance-action-policy.json`; `release-artifacts/latest/risk-register.json` | [Issue #658](https://github.com/6529-Collections/6529Stream/issues/658) remains an explicit public-beta/audit/production blocker until every row and `RISK-GOV-003` have reviewed remediation or disposition proof and the exact drift gate stays green; issue #656 owns exact action-policy candidate deployment binding |
 | Deployment | Partial local baseline: deploy-and-wire rehearsal script, local auction ceremony rehearsal, local emergency redeployment rehearsal, deployment-rehearsal generated metadata browser sandbox proof, manifest schema, address-book schema, ceremony evidence schema, randomizer operations evidence schema, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated Anvil and broadcast-derived address books, reviewed fork-mainnet broadcast, generated fork-mainnet broadcast manifest/address book, reviewed fork ceremony evidence bundle, local Anvil ceremony evidence bundle, local Anvil randomizer operations evidence bundle, manifest parsing test, and generated ABI/bytecode checksum inputs exist; testnet rehearsal, production broadcast retention, live ceremony evidence contents, and fork/testnet/live randomizer operations evidence contents remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`, `forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`, `scripts/check_rehearsal_metadata_browser_sandbox.py`, `test/StreamDeploymentManifest.t.sol`, `scripts/generate_broadcast_manifest_input.py --check`, `scripts/generate_broadcast_manifest_input.py --template deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --broadcast deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json --output deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --manifest-output deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_deployment_manifest.py --check`, `scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_address_books.py --check`, `scripts/test_ceremony_evidence.py`, `scripts/check_ceremony_evidence.py`, `scripts/test_randomizer_operations.py`, `scripts/check_randomizer_operations.py`, `deployments/broadcasts/`, `deployments/schema/deployment-manifest.schema.json`, `deployments/schema/address-book.schema.json`, `deployments/schema/ceremony-evidence.schema.json`, `deployments/schema/randomizer-operations-evidence.schema.json`, `deployments/address-books/`, `deployments/ceremony-evidence/`, `deployments/randomizer-operations/`, and `release-artifacts/latest/abi-checksums.json` | Anvil deployment, local metadata browser rehearsal, local auction ceremony rehearsal, local emergency redeployment rehearsal, local ceremony evidence, local randomizer operations evidence, reviewed fork retained evidence, and fork ceremony evidence pass |
 | Release artifacts | Deterministic local release artifacts include ABI/bytecode checksums, a generated protocol surface report, source verification inputs, dependency manifests, address books, release manifests, checksum bundles, signed-tag/signature gates, a generated risk register, and a bytecode-to-release proof tying committed deployment manifests/address books/source-verification inputs to expected local runtime/creation bytecode hashes; reviewed live bytecode/explorer proof remains future evidence | `python scripts/test_protocol_surface_report.py`, `python scripts/generate_protocol_surface_report.py --check`, `python scripts/test_risk_register.py`, `python scripts/check_risk_register.py`, `python scripts/generate_risk_register.py --check`, `python scripts/generate_release_manifest.py --check`, `python scripts/test_release_manifest.py`, `python scripts/test_bytecode_release_proof.py`, `python scripts/generate_bytecode_release_proof.py --check`, `python scripts/test_release_checksums.py`, `python scripts/generate_release_checksums.py --check`, `release-artifacts/latest/protocol-surface-report.json`, `release-artifacts/latest/risk-register.json`, `release-artifacts/latest/bytecode-release-proof.json` | Local/fork bytecode proof is generated, checksum-covered, and checked without claiming live production verification; the generated protocol surface report keeps functions, selectors, events, topic0 values, custom errors, ABI hashes, bytecode hashes, and runtime sizes visible for reviewers; the generated risk register keeps launch blockers and accepted local-baseline risks visible; public beta still requires reviewed non-local evidence and production requires live bytecode/explorer proof |
 | Docs | Architecture map, threat model, audit package, incident-response runbook, drop authorization signing guide with unsigned payload generator and retained signing evidence template, signer custody readiness guide/template, release-readiness dashboard, public-beta evidence status, generated public-beta and production-release blocker reports, per-requirement public-beta and production-release evidence templates, external audit retained-artifact template/checker, non-local release evidence intake, metadata schema, and metadata generator, status, known blockers, ADRs, security, deployment, release, metadata, dependency, randomizer, auction-custody, tooling, and release-policy docs exist for the local baseline; completed external audit report and actual testnet/live retained evidence remain missing | `python scripts/check_architecture_threat_model.py`, `python scripts/check_audit_package.py`, `python scripts/check_incident_response.py`, `python scripts/check_drop_authorization_fixtures.py`, `python scripts/test_drop_authorization_signing_evidence.py`, `python scripts/check_drop_authorization_signing_evidence.py`, `python scripts/test_signer_custody_readiness.py`, `python scripts/check_signer_custody_readiness.py`, `python scripts/check_release_readiness.py`, `python scripts/test_public_beta_blocker_report.py`, `python scripts/generate_public_beta_blocker_report.py --check`, `python scripts/test_production_release_blocker_report.py`, `python scripts/generate_production_release_blocker_report.py --check`, `python scripts/check_public_beta_evidence.py`, `python scripts/test_non_local_release_evidence_generator.py`, `python scripts/test_external_audit_report_evidence.py`, `python scripts/check_external_audit_report_evidence.py`, `python scripts/check_non_local_release_evidence.py`, `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`, `docs/incident-response.md`, `docs/drop-authorization-signing.md`, `docs/signer-custody-readiness.md`, `docs/release-readiness.md`, `docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`, `release-artifacts/evidence/public-beta-templates/`, `release-artifacts/evidence/production-release-templates/`, `docs/status.md`, `docs/known-blockers.md`, and `SECURITY.md` | Architecture, security, deployment, protocol, operations, incident response, drop authorization signing, payload generation, retained signing evidence, signer custody readiness evidence, public-beta evidence, external audit evidence template/checker, per-requirement public-beta and production-release templates, generated blocker reports, non-local release evidence, release-readiness, and audit docs merged as a local baseline, with completed external audit/review artifacts linked when available |
@@ -380,10 +380,8 @@ Required evidence:
 
 Status: In Progress.
 Owner: TBD.
-Blocking issues: [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-for the confirmed Core state gap and production bytecode margin, and
-[issue #658](https://github.com/6529-Collections/6529Stream/issues/658) for the
-28 Open first-party production Slither High/Medium rows plus the separately
+Blocking issue: [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) for the
+32 Open first-party production Slither High/Medium rows plus the separately
 tracked High Governance Executor native-value risk `RISK-GOV-003`.
 Evidence: `ops/SLITHER_BASELINE.json`, `ops/SLITHER_BASELINE.md`, and the
 issue-linked P0 implementation/test matrix below.
@@ -492,7 +490,7 @@ Status: In Progress. The local package index and scaffolding are complete;
 static-analysis disposition and external audit execution remain open.
 Owner: TBD.
 Blocking issues: [issue #658](https://github.com/6529-Collections/6529Stream/issues/658)
-for row-level review and disposition of 28 Open first-party production Slither
+for row-level review and disposition of 32 Open first-party production Slither
 High/Medium findings and remediation or reviewed disposition of the separately
 tracked High Governance Executor native-value risk `RISK-GOV-003`.
 Evidence: `docs/audit-package.md`, `docs/architecture.md`,
@@ -524,12 +522,12 @@ Required evidence:
 Status: In Progress.
 Owner: TBD.
 Blocking issues: [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-for Core production bytecode margin and its confirmed state gap,
+for final #670 pointer integration and candidate remeasurement,
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656) for
 instance-aware genesis evidence, [issue #684](https://github.com/6529-Collections/6529Stream/issues/684)
 for complete governed-parameter candidate hosts and evidence, and
 [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) for the
-28 Open first-party production Slither High/Medium findings and independent
+32 Open first-party production Slither High/Medium findings and independent
 review of `RISK-GOV-003`. Issue #685 supplies the local closed-world
 action/native-value implementation and catalog, but exact candidate binding and
 deployment evidence remain blocked by #656.
@@ -1849,7 +1847,7 @@ Problem:
 Current behavior:
 
 - `ops/SLITHER_BASELINE.json` records the exact normalized first-party
-  production set: 3 High and 25 Medium rows, all Open. A fast metadata/parity
+  production set: 2 High and 30 Medium rows, all Open. A fast metadata/parity
   gate runs in the aggregate checks and a dedicated CI job reruns the pinned
   analyzer for exact semantic-set drift. This establishes truthful inventory,
   not safety or acceptance. The separate High open blocker `RISK-GOV-003`
@@ -2843,15 +2841,15 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `baa99be668689d7b3357cc54f8d2f112c4444fdc`.
-- Captured at: `2026-07-28T02:40:06Z`.
+- Source commit: `6931aaa6db64e288ee2d67b6b0566ad986d2c856`.
+- Captured at: `2026-07-28T13:20:58Z`.
 - Live gate: `python scripts/check_slither_baseline.py --run-slither`.
-- Status: exact normalized drift is gated; all 28 first-party production rows
+- Status: exact normalized drift is gated; all 32 first-party production rows
   remain Open under issue #658.
-- Raw analyzed run: 3,156 findings across all impacts/scopes: 49 High, 802
-  Medium, 1,259 Low, 1,006 Informational, and 40 Optimization. High/Medium scope
-  totals are first-party production `3/25/28`, vendored `1/9/10`, test
-  `45/761/806`, script `0/7/7`, and other `0/0/0`.
+- Raw analyzed run: 3,213 findings across all impacts/scopes: 49 High, 825
+  Medium, 1,265 Low, 1,032 Informational, and 42 Optimization. High/Medium scope
+  totals are first-party production `2/30/32`, vendored `1/9/10`, test
+  `46/779/825`, script `0/7/7`, and other `0/0/0`.
 - Bounded assembly makes the Governance Executor's proposal-selected
   native-value call invisible to Slither's `arbitrary-send-eth` detector
   without removing the authority. The issue #685 slice adds the closed-world
@@ -2863,16 +2861,16 @@ Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 3 |
-| Medium | 25 |
+| High | 2 |
+| Medium | 30 |
 
 Classification summary:
 
 | Classification | Count | Status | Required action |
 | --- | ---: | --- | --- |
-| Confirmed gap | 1 | Open | Remediate with focused regression and issue-linked evidence |
-| Design review | 5 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
-| Pending disposition | 22 | Open | Complete row-level review; no implicit acceptance or suppression |
+| Confirmed gap | 0 | Open | No current row; any future confirmed gap must be remediated with issue-linked evidence |
+| Design review | 6 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
+| Pending disposition | 26 | Open | Complete row-level review; no implicit acceptance or suppression |
 
 ## Appendix B: Test Matrix
 

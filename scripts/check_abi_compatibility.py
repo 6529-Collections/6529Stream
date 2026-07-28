@@ -43,7 +43,7 @@ TARGET_FULL_MANIFEST_LOCK_SCHEMA = (
     "6529stream.stream-core-permanent-interface-semantic-lock.v1"
 )
 TARGET_FULL_MANIFEST_LOCK_SHA256 = (
-    "sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d"
+    "sha256:7303445a540a0eb0fb70e64b77fa317be6e68369ec38a5adadf3f282040ead98"
 )
 TARGET_ACTIVE_FUNCTION_SURFACES = (
     ("abortPreparedMintFromManager(uint256,bytes32)", "nonpayable", ()),
@@ -944,8 +944,10 @@ def validate_target_manifest(
         "permanence_class": "Permanent",
         "completeness": "complete_permanent_functions_and_events",
         "bytecode_measurement_authority": "complete_linked_via_ir_runtime_measurement_only",
-        "implementation_comparison": "deferred_until_complete_core_cutover",
-        "implementation_baseline": "release-artifacts/baselines/v0.1.0/abi-surface.json",
+        "implementation_comparison": "as_built_permanent_core_cutover",
+        "implementation_baseline": (
+            "release-artifacts/baselines/pre-permanent-core/abi-surface.json"
+        ),
         "excluded_abi_categories": ["custom_errors", "constructor"],
         "required_absent_abi_categories": ["fallback", "receive"],
         "excluded_permanence_classes": ["Medium", "Replaceable"],
@@ -1600,6 +1602,15 @@ def load_baseline(path: Path) -> dict[str, Any]:
     return baseline
 
 
+def load_target_retirement_baseline(
+    repo_root: Path,
+    target_manifest: dict[str, Any],
+) -> dict[str, Any]:
+    """Load the immutable pre-cutover ABI used to prove every retirement."""
+    relative_path = Path(target_manifest["coverage"]["implementation_baseline"])
+    return load_baseline(repo_root / relative_path)
+
+
 def entries_by_key(entries: list[dict[str, Any]], contract: str, category: str) -> dict[str, Any]:
     mapped: dict[str, Any] = {}
     for entry in entries:
@@ -1800,7 +1811,14 @@ def check_compatibility(
     )
     if target_manifest is not None:
         validate_target_required_absence(target_manifest, current)
-        validate_target_retirement_baseline_closure(target_manifest, baseline)
+        retirement_baseline = load_target_retirement_baseline(
+            repo_root,
+            target_manifest,
+        )
+        validate_target_retirement_baseline_closure(
+            target_manifest,
+            retirement_baseline,
+        )
     report = compare_abi_surfaces(baseline, current)
     print_report(report)
     return 0 if report["compatible"] else 1
