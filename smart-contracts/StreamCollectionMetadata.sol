@@ -395,10 +395,8 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
     }
 
     function _requireKnownCollection(uint256 collectionId) private view {
-        if (
-            collectionId == 0
-                || collectionId > IStreamCore(streamCore).lastAllocatedCollectionId()
-        ) {
+        if (collectionId == 0 || collectionId > IStreamCore(streamCore).lastAllocatedCollectionId())
+        {
             revert CollectionDoesNotExist(collectionId);
         }
     }

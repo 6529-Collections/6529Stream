@@ -20,8 +20,7 @@ library StreamCoreReadBuffer {
     ) internal pure returns (bool) {
         if (availableGas < gasLimit) return false;
         uint256 afterLimit = availableGas - gasLimit;
-        uint256 eip150Retention =
-            gasLimit / 63 + (gasLimit % 63 == 0 ? 0 : 1);
+        uint256 eip150Retention = gasLimit / 63 + (gasLimit % 63 == 0 ? 0 : 1);
         if (afterLimit < eip150Retention) return false;
         return afterLimit - eip150Retention >= completionBuffer;
     }

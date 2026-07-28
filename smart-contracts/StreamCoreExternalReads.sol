@@ -149,11 +149,7 @@ library StreamCoreExternalReads {
             return (true, pointerType, bytes4(0));
         }
         if (pointerType == _POINTER_ARTWORK_FINALITY_RECOVERY) {
-            return (
-                true,
-                _MODULE_ARTWORK_FINALITY_RECOVERY,
-                _INTERFACE_ARTWORK_FINALITY_RECOVERY
-            );
+            return (true, _MODULE_ARTWORK_FINALITY_RECOVERY, _INTERFACE_ARTWORK_FINALITY_RECOVERY);
         }
         if (pointerType == _POINTER_ROYALTY_RESOLVER) {
             return (true, _MODULE_REVENUE_RESOLVER, bytes4(0));
@@ -338,10 +334,11 @@ library StreamCoreExternalReads {
         );
     }
 
-    function gasParameterStateHash(
-        bytes32 scopeHash,
-        StreamCoreGasParameterState memory parameter
-    ) public pure returns (bytes32) {
+    function gasParameterStateHash(bytes32 scopeHash, StreamCoreGasParameterState memory parameter)
+        public
+        pure
+        returns (bytes32)
+    {
         return keccak256(
             abi.encode(
                 _STREAM_GAS_PARAMETER_STATE_V2,
@@ -437,11 +434,7 @@ library StreamCoreExternalReads {
         uint256 gasLimit,
         uint256 completionBuffer
     ) public view returns (uint8 status, string memory value) {
-        if (
-            !StreamCoreReadBuffer.hasSufficientParentGas(
-                gasleft(), gasLimit, completionBuffer
-            )
-        ) {
+        if (!StreamCoreReadBuffer.hasSufficientParentGas(gasleft(), gasLimit, completionBuffer)) {
             return (StreamCoreReadBuffer.READ_CALL_FAILED, "");
         }
         (bool ok, bool oversized, bytes memory data) =
@@ -460,11 +453,7 @@ library StreamCoreExternalReads {
         bytes memory callData,
         uint256 salePrice
     ) public view returns (address receiver, uint256 royaltyAmount) {
-        if (
-            !StreamCoreReadBuffer.hasSufficientParentGas(
-                gasleft(), gasLimit, completionBuffer
-            )
-        ) {
+        if (!StreamCoreReadBuffer.hasSufficientParentGas(gasleft(), gasLimit, completionBuffer)) {
             return (address(0), 0);
         }
         bool ok;

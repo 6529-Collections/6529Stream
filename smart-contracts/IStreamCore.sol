@@ -223,15 +223,9 @@ interface IStreamCoreGasParameters {
     function gasParameterInfo(bytes32 parameterId)
         external
         view
-        returns (
-            uint256 value,
-            uint256 floor,
-            uint8 failureClass,
-            uint64 revision
-        );
+        returns (uint256 value, uint256 floor, uint8 failureClass, uint64 revision);
 
     function raiseGasParameter(bytes32 parameterId, uint256 newValue) external;
-
 }
 
 interface IStreamCoreMetadataEmitters {

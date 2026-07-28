@@ -224,8 +224,7 @@ contract StreamCore is ERC721, IStreamCore {
         returns (bool)
     {
         return interfaceId == type(IERC2981).interfaceId || interfaceId == _INTERFACE_ERC4906
-            || interfaceId == _INTERFACE_ERC7572
-            || interfaceId == _INTERFACE_FINALITY_RECOVERY_CORE
+            || interfaceId == _INTERFACE_ERC7572 || interfaceId == _INTERFACE_FINALITY_RECOVERY_CORE
             || super.supportsInterface(interfaceId);
     }
 
@@ -815,11 +814,7 @@ contract StreamCore is ERC721, IStreamCore {
             _gasParameters[_GGP_ROYALTY_RESOLVER_GAS_LIMIT].value,
             _gasParameters[_GGP_ROYALTY_RETURN_GAS_BUFFER].value,
             abi.encodeWithSelector(
-                bytes4(
-                    keccak256(
-                        "royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)"
-                    )
-                ),
+                bytes4(keccak256("royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)")),
                 address(this),
                 tokenId,
                 salePrice,
@@ -930,13 +925,9 @@ contract StreamCore is ERC721, IStreamCore {
         bytes memory callData = abi.encodeWithSelector(
             _ON_TOKEN_MINTED_SELECTOR, collectionId, tokenId, initialRecipient, mintCommitment
         );
-        if (
-            !StreamCoreReadBuffer.hasSufficientParentGas(
-                gasleft(),
-                callGas,
-                _ENTROPY_PARENT_GAS_RESERVE + _ENTROPY_CALL_UPFRONT_GAS
-            )
-        ) {
+        if (!StreamCoreReadBuffer.hasSufficientParentGas(
+                gasleft(), callGas, _ENTROPY_PARENT_GAS_RESERVE + _ENTROPY_CALL_UPFRONT_GAS
+            )) {
             revert EntropyRegistrationFailed();
         }
         bool ok;
