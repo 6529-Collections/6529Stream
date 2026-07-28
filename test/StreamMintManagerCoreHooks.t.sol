@@ -7,7 +7,7 @@ import "./helpers/StreamFixture.sol";
 import "../smart-contracts/IERC721Receiver.sol";
 import "../smart-contracts/IRandomizer.sol";
 import "../smart-contracts/RandomizerVRF.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamRandomizerLifecycle.sol";
 
 contract MockMintManager {

@@ -10,7 +10,7 @@ import "../smart-contracts/StreamAssetPolicyRegistry.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCollectionMetadata.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "../test/helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";

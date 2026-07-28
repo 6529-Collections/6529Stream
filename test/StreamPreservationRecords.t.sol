@@ -5,7 +5,7 @@ import "../smart-contracts/IStreamPreservationRecords.sol";
 import "../smart-contracts/IERC165.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamCollectionMetadata.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
 import "../smart-contracts/StreamRecordFamilyRegistry.sol";

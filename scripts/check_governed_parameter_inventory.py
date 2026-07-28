@@ -1819,8 +1819,8 @@ def _validate_shared_buffer_planning(
         label,
     )
     _expect(
-        planning["status"] == "planning_target_fixture",
-        f"{label}.status must remain planning_target_fixture",
+        planning["status"] == "as_built_permanent_core_source",
+        f"{label}.status must bind the as-built permanent Core source",
     )
     parameter = _expect_keys(
         planning["parameter"], {"family", "name", "parameter_id"}, f"{label}.parameter"
@@ -1874,8 +1874,8 @@ def _validate_shared_buffer_planning(
         f"{label}.planning_evidence",
     )
     _expect(
-        evidence["status"] == "planning_target_fixture",
-        f"{label}.planning_evidence.status must remain planning",
+        evidence["status"] == "as_built_permanent_core_source",
+        f"{label}.planning_evidence.status must bind the as-built permanent Core source",
     )
     _expect(
         evidence["onchain_authority"] is False,
@@ -1906,12 +1906,12 @@ def _validate_shared_buffer_planning(
     document = _load_json(path, f"{label}.planning_evidence document")
     _expect(
         document.get("schema_version")
-        == "6529stream.royalty-return-gas-buffer.v1",
+        == "6529stream.royalty-return-gas-buffer.v2",
         f"{label}.planning_evidence schema drifted",
     )
     _expect(
-        document.get("status") == "planning_target_fixture",
-        f"{label}.planning_evidence document must remain planning",
+        document.get("status") == "as_built_permanent_core_source",
+        f"{label}.planning_evidence document must bind the as-built permanent Core source",
     )
     _expect(
         document.get("shared_parameter", {}).get("guarded_consumers") == consumers,
@@ -1927,9 +1927,34 @@ def _validate_shared_buffer_planning(
         == expected_floor["value"],
         f"{label}.planning_evidence floor drifted",
     )
+    core_boundary = _expect_keys(
+        document.get("core_boundary"),
+        {
+            "implementation_status",
+            "stream_core_source",
+            "stream_core_runtime_bytes",
+            "stream_core_eip170_margin_bytes",
+            "transitional_stream_core_runtime_bytes",
+            "stream_core_delta_bytes",
+            "production_complete_runtime_ceiling_bytes",
+            "implementation_owner",
+            "candidate_instance_binding",
+            "candidate_instance_blocked_by",
+        },
+        f"{label}.planning_evidence.core_boundary",
+    )
+    runtime_bytes = _expect_int(
+        core_boundary["stream_core_runtime_bytes"],
+        f"{label}.planning_evidence.core_boundary.stream_core_runtime_bytes",
+        minimum=1,
+    )
     _expect(
-        document.get("core_boundary", {}).get("stream_core_delta_bytes") == 0,
-        f"{label}.planning_evidence must record zero StreamCore delta",
+        runtime_bytes <= 22_576,
+        f"{label}.planning_evidence StreamCore runtime exceeds production ceiling",
+    )
+    _expect(
+        core_boundary["stream_core_delta_bytes"] == runtime_bytes - 24_128,
+        f"{label}.planning_evidence StreamCore delta is not runtime-derived",
     )
 
     raise_chain = _expect_keys(
@@ -1948,7 +1973,7 @@ def _validate_shared_buffer_planning(
     _expect(
         raise_chain
         == {
-            "status": "planning_target_fixture",
+            "status": "as_built_source_and_target_fixture",
             "action_class_id": 1,
             "minimum_delay_seconds": 172_800,
             "maximum_raise_multiplier": {"numerator": 2, "denominator": 1},
@@ -1983,7 +2008,8 @@ def _validate_shared_buffer_planning(
         f"{label} floor does not match parameter row",
     )
     completeness.append(
-        "shared_buffer_planning is target-fixture-only and fixed-stipend compatibility is missing"
+        "shared_buffer_planning binds as-built permanent Core source but candidate "
+        "and fixed-stipend compatibility remain missing"
     )
 
 

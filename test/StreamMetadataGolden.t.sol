@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/IRandomizer.sol";
 import "../smart-contracts/IRandomizerLifecycle.sol";
-import "../smart-contracts/IStreamCore.sol";
+import "../smart-contracts/IStreamLegacyCore.sol";
 import "../smart-contracts/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -60,7 +60,12 @@ contract MetadataLifecycleRandomizer is IRandomizer, IRandomizerLifecycle {
         lifecycleSupported = value;
     }
 
-    function finalizeToken(IStreamCore core, uint256 collectionId, uint256 tokenId, bytes32 hash)
+    function finalizeToken(
+        IStreamLegacyCore core,
+        uint256 collectionId,
+        uint256 tokenId,
+        bytes32 hash
+    )
         external
     {
         core.setTokenHash(collectionId, tokenId, hash);
@@ -232,7 +237,10 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
             COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
         );
         lifecycleRandomizer.finalizeToken(
-            IStreamCore(address(deployed.core)), COLLECTION_ID, TOKEN_ID, bytes32(uint256(9))
+            IStreamLegacyCore(address(deployed.core)),
+            COLLECTION_ID,
+            TOKEN_ID,
+            bytes32(uint256(9))
         );
 
         deployed.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
@@ -249,7 +257,10 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
             COLLECTION_ID, TOKEN_ID, IRandomizerLifecycle.RandomnessRequestState.Stale
         );
         lifecycleRandomizer.finalizeToken(
-            IStreamCore(address(deployed.core)), COLLECTION_ID, TOKEN_ID, bytes32(uint256(9))
+            IStreamLegacyCore(address(deployed.core)),
+            COLLECTION_ID,
+            TOKEN_ID,
+            bytes32(uint256(9))
         );
         lifecycleRandomizer.setStateLookupReverts(true);
 

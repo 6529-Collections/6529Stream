@@ -10,7 +10,7 @@
 
 pragma solidity ^0.8.19;
 
-import "./IStreamCore.sol";
+import "./IStreamLegacyCore.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamDrops.sol";
 import "./StreamPauseDomains.sol";
@@ -35,7 +35,7 @@ contract StreamMinter {
     mapping(uint256 => bool) private mintToAuctionStatus;
 
     //external contracts declaration
-    IStreamCore public gencore;
+    IStreamLegacyCore public gencore;
     IStreamAdmins private adminsContract;
 
     // events
@@ -86,7 +86,7 @@ contract StreamMinter {
 
     // constructor
     constructor(address _gencore, address _adminsContract, address _streamDrops) {
-        gencore = IStreamCore(_gencore);
+        gencore = IStreamLegacyCore(_gencore);
         adminsContract = IStreamAdmins(_adminsContract);
         streamDrops = _streamDrops;
     }
@@ -230,13 +230,13 @@ contract StreamMinter {
     {
         if (_opt == 1) {
             _requireContractMarker(
-                _newContract, IStreamCore.isCoreContract.selector, "Contract is not Core"
+                _newContract, IStreamLegacyCore.isCoreContract.selector, "Contract is not Core"
             );
             address oldContract = address(gencore);
             if (oldContract == _newContract) {
                 return;
             }
-            gencore = IStreamCore(_newContract);
+            gencore = IStreamLegacyCore(_newContract);
             emit MinterContractReferenceUpdated(1, oldContract, _newContract, msg.sender);
         } else if (_opt == 2) {
             _requireContractMarker(

@@ -33,14 +33,38 @@ def seed_required_targets(root: Path) -> None:
                 """
 import "./IERC2981.sol";
 contract StreamCore is IERC2981 {
-    address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
-    uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
-    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
+    bytes32 private constant _POINTER_ROYALTY_RESOLVER = bytes32(uint256(1));
+    bytes32 private constant _GGP_ROYALTY_RESOLVER_GAS_LIMIT = bytes32(uint256(2));
+    bytes32 private constant _GGP_ROYALTY_RETURN_GAS_BUFFER = bytes32(uint256(3));
     function supportsInterface(bytes4 interfaceId) public view returns (bool) {
         return interfaceId == type(IERC2981).interfaceId;
     }
-    function royaltyInfo(uint256, uint256 salePrice) public view returns (address, uint256) {
-        return (_DEFAULT_ROYALTY_RECEIVER, salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR);
+    function royaltyInfo(uint256, uint256) public view returns (address, uint256) {
+        bytes4 selector =
+            bytes4(keccak256("royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)"));
+        selector;
+        return StreamCoreExternalReads.resolveRoyalty(address(0), 0, 0, "", 0);
+    }
+}
+""",
+            )
+        elif relative == "smart-contracts/StreamCoreExternalReads.sol":
+            write_text(
+                root / relative,
+                """
+library StreamCoreExternalReads {
+    uint256 private constant _MAX_ROYALTY_BPS = 1_000;
+    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
+    function resolveRoyalty(address, uint256, uint256, bytes memory, uint256 salePrice)
+        public
+        pure
+        returns (address, uint256)
+    {
+        uint256 bps = _MAX_ROYALTY_BPS;
+        uint256 amount = (salePrice / _ROYALTY_DENOMINATOR) * bps
+            + ((salePrice % _ROYALTY_DENOMINATOR) * bps) / _ROYALTY_DENOMINATOR;
+        amount;
+        return (address(0), 0);
     }
 }
 """,
@@ -55,6 +79,16 @@ contract StreamRoyaltyTest {
     uint256 private constant ROYALTY_BPS = 690;
     uint256 private constant ROYALTY_DENOMINATOR = 10_000;
     function testDefaultRoyaltyIsFixedAt690BasisPoints() public {}
+}
+""",
+            )
+        elif relative == "test/StreamCorePermanentTarget.t.sol":
+            write_text(
+                root / relative,
+                """
+contract StreamCorePermanentTargetTest {
+    bytes32 private constant _POINTER_ROYALTY_RESOLVER = bytes32(uint256(1));
+    function testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled() public {}
 }
 """,
             )
@@ -94,7 +128,9 @@ IERC2981 and ERC-2981 are source inputs.
 royaltyInfo(), supportsInterface(0x2a55205a), fixed default royalty, 690 basis
 points, 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377, 10,000, no runtime
 royalty setters, no per-token override, and no per-collection override are
-named.
+named. The permanent target uses an authenticated royalty resolver pointer,
+fails soft to `(address(0), 0)`, and leaves the concrete #670 royalty interface
+row unresolved.
 
 ## Royalty Philosophy
 
@@ -191,39 +227,11 @@ class RoyaltyPolicyTests(unittest.TestCase):
 
             self.assertEqual(result, 0)
 
-    def test_accepts_optimized_assembly_royalty_source(self) -> None:
-        """The checker accepts the size-optimized retained royalty implementation."""
+    def test_accepts_permanent_resolver_royalty_source(self) -> None:
+        """The checker accepts the permanent resolver-backed royalty implementation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            write_text(
-                root / "smart-contracts" / "StreamCore.sol",
-                """
-contract StreamCore {
-    address private constant _DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377;
-    uint256 private constant _DEFAULT_ROYALTY_BPS = 690;
-    uint256 private constant _ROYALTY_DENOMINATOR = 10_000;
-    function supportsInterface(bytes4 interfaceId) public view returns (bool) {
-        assembly ("memory-safe") {
-            let id := shr(224, interfaceId)
-            mstore(0x00, eq(id, 0x2a55205a))
-            return(0x00, 0x20)
-        }
-    }
-    function royaltyInfo(uint256, uint256 salePrice) public view returns (address, uint256) {
-        assembly ("memory-safe") {
-            let numerator := mul(salePrice, 690)
-            if and(salePrice, iszero(eq(div(numerator, salePrice), 690))) {
-                revert(0x00, 0x00)
-            }
-            mstore(0x00, _DEFAULT_ROYALTY_RECEIVER)
-            mstore(0x20, div(numerator, 10000))
-            return(0x00, 0x40)
-        }
-    }
-}
-""",
-            )
             write_text(root / checker.DEFAULT_ROYALTY_POLICY, minimal_royalty_policy())
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -382,14 +390,15 @@ contract StreamCore {
                 )
 
     def test_rejects_source_constant_drift(self) -> None:
-        """Documented royalty constants must stay tied to source constants."""
+        """The permanent royalty selector must stay tied to the policy."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
             source = root / "smart-contracts" / "StreamCore.sol"
             source.write_text(
                 source.read_text(encoding="utf-8").replace(
-                    "_DEFAULT_ROYALTY_BPS = 690", "_DEFAULT_ROYALTY_BPS = 700"
+                    "royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)",
+                    "royaltyReceiverAndBps(address,uint256)",
                 ),
                 encoding="utf-8",
                 newline="\n",

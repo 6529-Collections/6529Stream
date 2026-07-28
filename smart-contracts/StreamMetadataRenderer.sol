@@ -48,6 +48,44 @@ library StreamMetadataRenderer {
     uint8 private constant _RAW_ATTRIBUTE_TRAIT_TYPE_KEY = 1;
     uint8 private constant _RAW_ATTRIBUTE_VALUE_KEY = 2;
 
+    /// @notice Builds Core's deterministic minted-token metadata fallback.
+    /// @dev Public library visibility keeps Base64 and decimal formatting out of Core runtime.
+    function coreFallbackTokenURI(uint256 tokenId, uint8 status)
+        public
+        pure
+        returns (string memory)
+    {
+        bytes memory json = abi.encodePacked(
+            '{"name":"6529 Stream #',
+            tokenId.toString(),
+            '","description":"Stream metadata is temporarily unavailable.",',
+            '"image":"","properties":{"stream":{"error":"',
+            _coreRouterError(status),
+            '"}}}'
+        );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(json)));
+    }
+
+    /// @notice Builds Core's deterministic ERC-7572 metadata fallback.
+    /// @dev Public library visibility keeps Base64 formatting out of Core runtime.
+    function coreFallbackContractURI(uint8 status) public pure returns (string memory) {
+        bytes memory json = abi.encodePacked(
+            '{"name":"6529 Stream","description":"Stream contract metadata is temporarily unavailable.",',
+            '"image":"","properties":{"stream":{"error":"',
+            _coreRouterError(status),
+            '"}}}'
+        );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(json)));
+    }
+
+    function _coreRouterError(uint8 status) private pure returns (string memory) {
+        if (status == 4) return "ROUTER_UNSET";
+        if (status == 5) return "ROUTER_NO_CODE";
+        if (status == 7) return "ROUTER_RETURNDATA_OVERSIZED";
+        if (status == 8) return "ROUTER_MALFORMED";
+        return "ROUTER_REVERTED";
+    }
+
     function onchainTokenURI(
         string memory schemaVersion,
         string memory metadataState,

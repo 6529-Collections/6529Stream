@@ -125,7 +125,7 @@ COMPLETION_BLOCKER: Final = (
 )
 
 SOURCE_IMPLEMENTATION_COMMIT: Final = (
-    "018c8788750980e143c38ace0666684bf641ec4f"
+    "6931aaa6db64e288ee2d67b6b0566ad986d2c856"
 )
 EXPECTED_SOURCE_BINDINGS: Final = (
     (
@@ -146,7 +146,7 @@ EXPECTED_SOURCE_BINDINGS: Final = (
     ),
     (
         "smart-contracts/StreamCollectionMetadata.sol",
-        "5324ff8e8791ce0bfff46649c7969a9884d4c0ef4249b54daf597d93218270d7",
+        "f25195871f147b2ca47ba12b5a6bff434112e86107ce6371564d7760218770ac",
     ),
     (
         "smart-contracts/IStreamPreservationRecords.sol",
@@ -154,11 +154,11 @@ EXPECTED_SOURCE_BINDINGS: Final = (
     ),
     (
         "smart-contracts/StreamPreservationRecords.sol",
-        "c440703f28bc06e965b1d03b11c38e659097fadac12fbb10b64a39de2efb2da8",
+        "271e622ebffdf852e3bb42faa47d08f2731a0c219dea30fda2e6c8a1530ad9ca",
     ),
     (
         "script/RehearseDeployment.s.sol",
-        "492c39fb0ccbfda1fe33b0aeb0e45ca2ceb16fde1151ad68cbcded59174b950b",
+        "8ada36c26e300a1497cc9ee422a4c34504ae08014dd7c4bdf9f9d505d7e43026",
     ),
 )
 

@@ -9,7 +9,7 @@ import "../smart-contracts/IStreamMintGate.sol";
 import "../smart-contracts/IStreamMintLedger.sol";
 import "../smart-contracts/IStreamMintManager.sol";
 import "../smart-contracts/IStreamMintModuleRegistry.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamMetadataRenderer.sol";
 import "../smart-contracts/StreamMintLedger.sol";
 import "../smart-contracts/StreamMintManager.sol";

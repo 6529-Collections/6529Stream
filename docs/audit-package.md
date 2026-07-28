@@ -144,8 +144,8 @@ Static-analysis review inputs:
 - [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
   normalized first-party production high/medium finding set;
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
-  mirror. All 28 rows (3 High and 25 Medium) are Open: one confirmed gap, five
-  design-review rows, and 22 pending dispositions. No row is accepted or marked
+  mirror. All 32 rows (2 High and 30 Medium) are Open: zero confirmed gaps, six
+  design-review rows, and 26 pending dispositions. No row is accepted or marked
   false positive.
 - The bounded assembly call in `StreamGovernanceExecutor` makes its
   proposal-selected native-value authority invisible to Slither without
@@ -278,7 +278,7 @@ Known unresolved blockers are tracked in
 [`docs/known-blockers.md`](known-blockers.md) and
 [`ops/ROADMAP.md`](../ops/ROADMAP.md), then summarized in the generated
 [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
-Current major unresolved categories include the 28 open first-party production
+Current major unresolved categories include the 32 open first-party production
 Slither high/medium findings, the separately tracked `RISK-GOV-003` Governance
 Executor native-value blocker, the #684 / `RISK-GOV-004` governed-parameter
 production-binding blocker, and external evidence gaps for

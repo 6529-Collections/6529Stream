@@ -3150,10 +3150,10 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
         self.assertEqual(len(manifest["source"]["covered_paths"]), 263)
-        self.assertEqual(len(manifest["files"]), 434)
+        self.assertEqual(len(manifest["files"]), 435)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            434,
+            435,
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
@@ -3461,7 +3461,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 434)
+        self.assertEqual(len(classifications), 435)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

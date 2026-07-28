@@ -8,16 +8,16 @@
   "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
   "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
   "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-  "sha256": "sha256:447affe4703c65a20ec4d651ab1279fc0a1fd34897df31bac04a68b74efc8054",
+  "sha256": "sha256:ebcccad03d5a25527de2fb9d1d5e9308a3f8a8faab6e94d8e55ecd0dfe77615b",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous operator",
-  "reviewer": "pending operation-identity PR #707 review; historical CodeRabbit status success on PR #347 and PR #349",
+  "reviewer": "pending permanent-Core PR review; historical CodeRabbit status success on PR #347 and PR #349",
   "public_beta_requirement_id": "fork_deployment_rehearsal",
   "source": {
     "repository": "https://github.com/6529-Collections/6529Stream",
     "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
     "source_dirty": false,
-    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; operation-identity PR #707 review pending"
+    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; permanent-Core PR review pending"
   },
   "redaction_policy": {
     "no_secrets": true,
@@ -31,5 +31,5 @@
     ]
   },
   "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-  "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The ADR 0018 operation-identity cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+  "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. The permanent-Core metadata/router cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 }

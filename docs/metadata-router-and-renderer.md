@@ -317,14 +317,18 @@ Production implementation requirements [MRR-CORE-TOKENURI]:
    accounts for EIP-150's 63/64 gas forwarding rule plus the current
    `ROYALTY_RETURN_GAS_BUFFER`, the shared launch-v1 Core parent-completion
    buffer, so a caller cannot pass the precheck while the router receives less
-   than `METADATA_ROUTER_GAS_LIMIT`. The multiplicative reference threshold is
-   `(METADATA_ROUTER_GAS_LIMIT * 64) / 63 +
-   ROYALTY_RETURN_GAS_BUFFER`. CI must test calls just below, at, and above the
-   precheck threshold, mirroring the royalty-path precheck tests in
-   [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
+   than `METADATA_ROUTER_GAS_LIMIT`. The exact reference threshold is
+   `METADATA_ROUTER_GAS_LIMIT + ceil(METADATA_ROUTER_GAS_LIMIT / 63) +
+   ROYALTY_RETURN_GAS_BUFFER`, implemented with overflow-safe subtraction
+   comparisons. `testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove`
+   and
+   `testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove` pin the
+   actual Core calls just below, at, and above this threshold.
 4. Core copies at most `MAX_TOKEN_URI_RETURNDATA = 65,536` ABI bytes from
    returndata before decoding, supporting a maximum canonical non-empty string
    length of 65,472 bytes. A router cannot force unbounded memory allocation.
+   `testMetadataRouterMaximumBoundedReturnCompletes` pins completion at that
+   maximum bounded return.
 5. Revert, malformed ABI, oversized returndata, or an empty required response
    returns the documented fallback for minted tokens. These failures must not
    make minted-token `tokenURI()` revert.

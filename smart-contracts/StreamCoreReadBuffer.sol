@@ -11,7 +11,7 @@ library StreamCoreReadBuffer {
     uint8 internal constant READ_RETURNDATA_MALFORMED = 8;
 
     /// @notice Returns whether `availableGas` covers full EIP-150 forwarding plus completion.
-    /// @dev The exact forwarding term is `gasLimit + floor(gasLimit / 63)`. Subtraction-form
+    /// @dev The exact forwarding term is `gasLimit + ceil(gasLimit / 63)`. Subtraction-form
     ///      comparisons avoid multiplication and addition overflow at every uint256 tuple.
     function hasSufficientParentGas(
         uint256 availableGas,
@@ -20,7 +20,7 @@ library StreamCoreReadBuffer {
     ) internal pure returns (bool) {
         if (availableGas < gasLimit) return false;
         uint256 afterLimit = availableGas - gasLimit;
-        uint256 eip150Retention = gasLimit / 63;
+        uint256 eip150Retention = gasLimit / 63 + (gasLimit % 63 == 0 ? 0 : 1);
         if (afterLimit < eip150Retention) return false;
         return afterLimit - eip150Retention >= completionBuffer;
     }

@@ -6,10 +6,10 @@ import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
 import "../smart-contracts/IERC721Receiver.sol";
 import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IStreamCore.sol";
+import "../smart-contracts/IStreamLegacyCore.sol";
 
 contract TrackingRandomizer is IRandomizer {
-    IStreamCore private immutable core;
+    IStreamLegacyCore private immutable core;
     bytes32 private immutable marker;
 
     uint256 public callCount;
@@ -18,7 +18,7 @@ contract TrackingRandomizer is IRandomizer {
     uint256 public lastSaltfunO;
 
     constructor(address core_, bytes32 marker_) {
-        core = IStreamCore(core_);
+        core = IStreamLegacyCore(core_);
         marker = marker_;
     }
 

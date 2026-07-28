@@ -109,7 +109,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
-        try core_.isCoreContract() returns (bool ok) {
+        try core_.supportsInterface(0x80ac58cd) returns (bool ok) {
             if (!ok) {
                 revert InvalidCoreContract(address(core_));
             }
