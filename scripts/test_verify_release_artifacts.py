@@ -1413,7 +1413,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 100_553,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "f28f795cb9c05ddf36bf086dabafef41226795e7791068631eb62f3728aa79d5",
+                "8124a7981c2870b6816db733f4c963c8aa573036cb061a35810937560d4b98bc",
                 46_988,
             ),
         }

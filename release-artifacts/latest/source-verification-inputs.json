@@ -364,8 +364,8 @@
     },
     "smart-contracts/IStreamEntropyCoordinator.sol": {
       "path": "smart-contracts/IStreamEntropyCoordinator.sol",
-      "sha256": "sha256:d0fc1174ed178bfd01163386239ec8a3c20e5ad1e56e37799773f7dbe5460f5a",
-      "solc_keccak256": "0x5d2c8c54bbd067b620b1c390d882601a91e6770415213eaa5460c877567833fe",
+      "sha256": "sha256:9f7f42f7e0a8e20d46136bd6bcbe7aa150e5ade2fde99dad86e937540f327119",
+      "solc_keccak256": "0x0e3cb5bbf3880b45a63b6eedb82be768a82bab6f1e369b4c8c9f53699d5099fe",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -373,8 +373,8 @@
     },
     "smart-contracts/IStreamLegacyCore.sol": {
       "path": "smart-contracts/IStreamLegacyCore.sol",
-      "sha256": "sha256:f510e30dd9dcd0dbd581857432f3946c3ab05eb0f092d127e4cd888a8fdd04f8",
-      "solc_keccak256": "0x524dbce381412a6a78e0b309f3979340b2ae085441073d091d7c9221a3e6d698",
+      "sha256": "sha256:5f597387b046d75a11ff07aac7bdc6e9dad829aa52404cc9fc6af0fb5c6f1b73",
+      "solc_keccak256": "0x5db393c13a957002bffe53e297154680c3658e2ce3bf305ea5d38aa7c659cf8a",
       "license": "MIT",
       "used_by": [
         "NextGenRandomizerRNG",
@@ -384,8 +384,8 @@
     },
     "smart-contracts/IStreamMetadataRouter.sol": {
       "path": "smart-contracts/IStreamMetadataRouter.sol",
-      "sha256": "sha256:5b91c05a6764da7036136dde048bdb4d7731a77403923d392012fc278a0a6eea",
-      "solc_keccak256": "0x16d93c81293e1481e8eb602cb3ff5379184b7c93c3c25972b31045be95f8ac3c",
+      "sha256": "sha256:545a360ee1c3967fa41e86daa882963b14f971bfcbc4384803b90c004a9bb030",
+      "solc_keccak256": "0xa38b6b02346f9bf0a46e77b66f9bde1516834c9ea77948a47096fa6c3b082c6d",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -523,8 +523,8 @@
     },
     "smart-contracts/IStreamSystemManifest.sol": {
       "path": "smart-contracts/IStreamSystemManifest.sol",
-      "sha256": "sha256:f6be63ab58385b944d35cb15ab7b285487aa8a63788ee6c91b214538d13853b7",
-      "solc_keccak256": "0x7c8b8f1ea9ea903f8480a8907945c5c24eebac0e7796837698d571092b42baa0",
+      "sha256": "sha256:d89a9e2971703e5b5aa948c85a9847ddfba9e56fc9ea6f80463e339750930b11",
+      "solc_keccak256": "0x000805c87f7c9f4003b89ea2362cd8e67869f6c738bc56ae36d0c86e11a34d34",
       "license": "MIT",
       "used_by": [
         "StreamCore"
@@ -986,7 +986,7 @@
       "source_sha256": "sha256:d34b36e9e1d287731334a978ed22fc74da6b7f96850a067a83f96f790ed393da",
       "source_solc_keccak256": "0xa44fb9ce528dc6d3cd50c2f95cee0764d1ebcd0ca8b56e45bcd5c70078cffab7",
       "artifact_path": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
-      "artifact_sha256": "sha256:5c6e5c65cbe633af680388e9a99dd3e9a9edfab9b5794e591bd6084ebdb6dc2d",
+      "artifact_sha256": "sha256:5675fe3ad04116279708e946381fcdcd53ebd96b6ce93e8c1f8a45f63af748b5",
       "compilation_target": "smart-contracts/RandomizerRNG.sol:NextGenRandomizerRNG",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1059,7 +1059,7 @@
       "source_sha256": "sha256:dd3f7272232dd78be4ec20c1ba56dc3ee04716c19d5e7ba13d04e615ea7fd058",
       "source_solc_keccak256": "0xdefcc74d89abf9feac60cc16c47287c035482fcff280dd5ed081c65a47627e51",
       "artifact_path": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:20a9f6e12c1a59b7bbbe9f786eb4ec482d1e6a0e5e1dc9ffc59f22ac73eaf641",
+      "artifact_sha256": "sha256:c0a2c68ca7948064d9ec076e75f8286f0e75870d6ab0ce4e8c13d81eeff3d64e",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1582,7 +1582,7 @@
       "source_sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
       "source_solc_keccak256": "0xb104f2e8aab73d9763830fbf6b792bf9fdb849b7b66f89e168c576219f5ddd0f",
       "artifact_path": "out-release/StreamCore.sol/StreamCore.json",
-      "artifact_sha256": "sha256:9ef44429d14954605bae8426162fa75ecd4bbd8d733d20628853e080545e0c8a",
+      "artifact_sha256": "sha256:3243fc4ecc249b4daeaf6e9679a8edd3f135cb5c78ad4c6bc3c467cbb128e99c",
       "compilation_target": "smart-contracts/StreamCore.sol:StreamCore",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -2296,7 +2296,7 @@
       "source_sha256": "sha256:e056ddd54309ead9bee19a48b968e242786e4a3046cafe3456a4765f3d41f893",
       "source_solc_keccak256": "0xe402f493c7c356282caeb2d6203a34824cb098a1d8fefa601f3d0d9d775aa2d1",
       "artifact_path": "out-release/StreamMinter.sol/StreamMinter.json",
-      "artifact_sha256": "sha256:dc99c0cc2369570b24b4272849d35e7eb92da2fa61a0d7ef44308c06a85006d5",
+      "artifact_sha256": "sha256:ef5cbdec7b37c6381dbaa49e95b07fdc02b84e415c2146a7c2bb5ff40c7ef504",
       "compilation_target": "smart-contracts/StreamMinter.sol:StreamMinter",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",

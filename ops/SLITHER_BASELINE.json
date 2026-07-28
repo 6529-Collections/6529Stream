@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "6931aaa6db64e288ee2d67b6b0566ad986d2c856",
-    "captured_at_utc": "2026-07-28T13:20:58Z",
+    "analyzed_commit": "24173efe3f4722b6d50085effae489927cbcb712",
+    "captured_at_utc": "2026-07-28T18:48:50Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 255,
     "capture_json_success": true,
-    "raw_json_size_bytes": 338343451,
-    "raw_json_sha256": "sha256:1936959b42f69eb4942819dac948c55aa4d2457a42b5f9e24933c730f3842654",
-    "solidity_tree_sha256": "sha256:ef36965c441d972b02b839dd235bba3381132fae0661355fb13f6eac2584ef99",
+    "raw_json_size_bytes": 338394717,
+    "raw_json_sha256": "sha256:b502fe72ff0463485646d5b30fcad5535728683b562e3e00cacb7d915694d917",
+    "solidity_tree_sha256": "sha256:9b75a59e5b9d138a407fa59c455df6bb015574fe04a159d38ccefa2a6adb796c",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -37,11 +37,11 @@
   },
   "capture_counts": {
     "High": 49,
-    "Medium": 825,
+    "Medium": 826,
     "Low": 1265,
     "Informational": 1032,
     "Optimization": 42,
-    "total": 3213
+    "total": 3214
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
@@ -56,8 +56,8 @@
     },
     "test": {
       "High": 46,
-      "Medium": 779,
-      "total": 825
+      "Medium": 780,
+      "total": 826
     },
     "script": {
       "High": 0,
