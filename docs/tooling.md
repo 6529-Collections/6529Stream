@@ -770,6 +770,33 @@ artifact remains target-fixture planning evidence, changes no production Core
 bytecode, and cannot substitute for #654's complete call-boundary enforcement
 and as-built remeasurement of the actual Core seam.
 
+The shared royalty/metadata completion-buffer planning gate runs:
+
+```sh
+make royalty-return-gas-buffer-check
+```
+
+It executes the hostile evidence tests, checks deterministic generation, runs
+the focused via-IR Solidity suite, and verifies the six-scenario snapshot:
+
+```sh
+python scripts/test_royalty_return_gas_buffer.py
+python scripts/generate_royalty_return_gas_buffer.py --check
+python scripts/check_royalty_return_gas_buffer.py
+forge test --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol -vvv
+forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --match-test testMeasure --check release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap
+```
+
+The generated
+[`royalty-return-gas-buffer.json`](../release-artifacts/royalty-return-gas-buffer.json)
+binds the reusable overflow-safe admission source, authenticated three-row
+target fixture, maximum bounded metadata ABI return, six completion
+measurements, measurement-derived planning floor/genesis values, independent
+raise-chain tests, and unchanged 24,128-byte transitional Core proof. It has no
+onchain authority and adds no 23rd GGP. The governed inventory deliberately
+keeps generic candidate measurement and fixed-stipend facts incomplete; #654,
+#656, and #684 remain production gates.
+
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at
 `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`:
@@ -1562,7 +1589,11 @@ plus those four adapters, and
 ARRNG-or-Pyth callback provider the genesis profile selects. The shared
 `ROYALTY_RETURN_GAS_BUFFER` policy covers Core completion after
 `royaltyInfo()`, `tokenURI()`, and `contractURI()` and requires floor/evidence
-for the worst measured parent-side work across those paths.
+for the worst measured parent-side work across those paths. Its dedicated
+`shared_buffer_planning` record binds the issue #671 target-fixture checksum,
+1,460,000 planning floor, 2,910,000 planning genesis value, 64-byte royalty and
+65,536-byte metadata limits, class-1 delayed independent raise-chain semantics,
+and the explicit candidate fixed-stipend production conflict.
 
 The committed artifact uses explicit `not_available` candidate bindings where
 concrete deployment facts or reviewed evidence do not exist. That is valid for

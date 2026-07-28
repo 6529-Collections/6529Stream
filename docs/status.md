@@ -123,10 +123,13 @@ The current Gate A smoke baseline proves:
   raise-chain semantics. This independent production blocker is
   retained as `RISK-GOV-004` and tracked by
   [issue #684](https://github.com/6529-Collections/6529Stream/issues/684).
-  The shared-buffer specification reconciliation is only the documentation
-  slice of [issue #671](https://github.com/6529-Collections/6529Stream/issues/671);
-  its Core implementation, threshold/raise-chain tests, candidate measurement,
-  and exact-target rehearsal remain open.
+  [Issue #671](https://github.com/6529-Collections/6529Stream/issues/671)
+  now binds a zero-Core-delta reusable admission source, hostile
+  threshold/returndata/full-budget tests, six via-IR completion measurements,
+  and the target-fixture planning floor/genesis tuple into the governed
+  inventory. Transitional `StreamCore` remains exactly 24,128 bytes; #654 owns
+  final integration and as-built remeasurement, and #656/#684 still block exact
+  candidate, fixed-stipend, cadence, rehearsal, and independent-review evidence.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

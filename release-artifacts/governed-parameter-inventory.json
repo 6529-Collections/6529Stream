@@ -81,6 +81,66 @@
     "candidate_artifact_sha256": null,
     "host_bindings": []
   },
+  "shared_buffer_planning": {
+    "status": "planning_target_fixture",
+    "parameter": {
+      "family": "GGP",
+      "name": "ROYALTY_RETURN_GAS_BUFFER",
+      "parameter_id": "0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7"
+    },
+    "host_profile": {
+      "id": 1,
+      "key": "STREAM_CORE",
+      "candidate_instance": "not_available"
+    },
+    "guarded_consumers": [
+      "StreamCore.royaltyInfo(uint256,uint256)",
+      "StreamCore.tokenURI(uint256)",
+      "StreamCore.contractURI()"
+    ],
+    "failure_class": {
+      "id": 1,
+      "name": "FORWARDING_CAP"
+    },
+    "genesis_value": {
+      "status": "planning",
+      "value": 2910000
+    },
+    "immutable_floor": {
+      "status": "planning",
+      "value": 1460000
+    },
+    "returndata_limits": {
+      "royalty_exact_bytes": 64,
+      "metadata_max_abi_bytes": 65536
+    },
+    "planning_evidence": {
+      "status": "planning_target_fixture",
+      "path": "release-artifacts/royalty-return-gas-buffer.json",
+      "sha256": "2822fe78828f3d5e275269e188bff916ad48beacb0f8b07fc5f0683f5ba52753",
+      "onchain_authority": false
+    },
+    "independent_raise_chain": {
+      "status": "planning_target_fixture",
+      "action_class_id": 1,
+      "minimum_delay_seconds": 172800,
+      "maximum_raise_multiplier": {
+        "numerator": 2,
+        "denominator": 1
+      },
+      "one_write_per_action_per_parameter": true,
+      "limit_parameters": [
+        "ROYALTY_RESOLVER_GAS_LIMIT",
+        "METADATA_ROUTER_GAS_LIMIT"
+      ],
+      "near_uint256_behavior": "no_overflow_and_fail_closed"
+    },
+    "fixed_stipend_compatibility": {
+      "status": "missing",
+      "disposition": "production_gate_conflict_until_candidate_upstream_budgets_cover_tuple",
+      "blocked_by_issue": "#684"
+    }
+  },
   "parameters": [
     {
       "order": 1,
@@ -158,8 +218,8 @@
         ]
       },
       "gas": {
-        "genesis_value": { "status": "planning", "value": 15000 },
-        "immutable_floor": { "status": "missing", "value": null },
+        "genesis_value": { "status": "planning", "value": 2910000 },
+        "immutable_floor": { "status": "planning", "value": 1460000 },
         "failure_class": {
           "status": "complete",
           "id": 1,

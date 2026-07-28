@@ -224,10 +224,14 @@ contributors who start from the README.
   structured production-candidate model and exact reconciliation proof, and
   rejects self-reported complete evidence until #684 supplies candidate-bound
   measurement/cadence, reproduction, and reachable raise-chain semantics.
-  The shared-buffer text is only the specification slice of
-  [issue #671](https://github.com/6529-Collections/6529Stream/issues/671);
-  Core implementation, threshold/raise-chain tests, candidate measurement,
-  and exact-target rehearsal remain open.
+  [Issue #671](https://github.com/6529-Collections/6529Stream/issues/671)
+  now supplies the zero-Core-delta reusable admission source, hostile
+  threshold/returndata/full-budget tests, six-scenario checksum-bound planning
+  measurement, and an inventory-bound 1,460,000 floor / 2,910,000 genesis
+  planning tuple. The current `StreamCore` remains unchanged at 24,128 bytes.
+  Exact Core integration and as-built remeasurement remain #654 work, while
+  candidate measurement, fixed-stipend compatibility, rehearsal, cadence, and
+  independent review remain blocked by #656/#684.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

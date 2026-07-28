@@ -1,0 +1,6 @@
+StreamRoyaltyReturnGasBufferTest:testMeasureContractUriFallbackCompletion() (gas: 26689)
+StreamRoyaltyReturnGasBufferTest:testMeasureContractUriMaximumCompletion() (gas: 725735)
+StreamRoyaltyReturnGasBufferTest:testMeasureRoyaltyFallbackCompletion() (gas: 9581)
+StreamRoyaltyReturnGasBufferTest:testMeasureRoyaltySuccessCompletion() (gas: 9947)
+StreamRoyaltyReturnGasBufferTest:testMeasureTokenUriFallbackCompletion() (gas: 27648)
+StreamRoyaltyReturnGasBufferTest:testMeasureTokenUriMaximumCompletion() (gas: 725682)

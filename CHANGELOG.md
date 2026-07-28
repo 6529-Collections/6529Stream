@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the issue #671 zero-Core-delta shared
+  `ROYALTY_RETURN_GAS_BUFFER` safety component: an overflow-safe EIP-150
+  admission helper, authenticated three-row target fixture, bounded 65,536-byte
+  metadata ABI return, hostile full-budget/malformed/oversized and independent
+  raise-chain tests, and six-scenario checksum-bound via-IR evidence. The
+  governed inventory records the measurement-derived 1,460,000 planning floor
+  and 2,910,000 planning genesis value without adding a 23rd GGP. Transitional
+  `StreamCore` stays 24,128 bytes; #654 owns final integration and as-built
+  measurement, while #656/#684 keep candidate, fixed-stipend, cadence,
+  rehearsal, and review readiness fail-closed.
 - Implemented accepted ADR 0018's pre-genesis atomic operation-identity
   cutover: the manager derives and reserves one batch root plus one operation
   ID per token before ledger consumption; the ledger owns manager-scoped root,
@@ -25,7 +35,7 @@ the release policy in `docs/release-policy.md`.
   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` raises.
   Separate measurement references must describe the same candidate and
   complete proposed tuple; actual candidate-bound measurements remain blocked
-  on issues #684 and #671, so maturity and release readiness are unchanged.
+  on issues #684 and #656, so maturity and release readiness are unchanged.
 - Rebound the issue #690 record-family source catalog and checker to the
   merged #699 source commit so candidate-source replay verifies the complete
   interface, registry, metadata, preservation, and rehearsal binding set.

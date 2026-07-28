@@ -23,6 +23,9 @@ SOURCE_VERIFICATION_PATH = Path(
     "release-artifacts/latest/source-verification-inputs.json"
 )
 FIXTURE_SOURCE_PATH = Path("smart-contracts/StreamCore.sol")
+SHARED_BUFFER_EVIDENCE_PATH = Path(
+    "release-artifacts/royalty-return-gas-buffer.json"
+)
 NORMATIVE_PATHS = tuple(
     sorted(
         {Path(row["normative_path"]) for row in checker.EXPECTED_ROWS}
@@ -79,6 +82,7 @@ class GovernedParameterInventoryTests(unittest.TestCase):
             checker.DEFAULT_SCHEMA,
             SOURCE_VERIFICATION_PATH,
             FIXTURE_SOURCE_PATH,
+            SHARED_BUFFER_EVIDENCE_PATH,
         )
         for relative in required:
             target = root / relative
@@ -422,6 +426,47 @@ class GovernedParameterInventoryTests(unittest.TestCase):
                     "consumers"
                 ]
             )
+
+    def test_shared_buffer_planning_is_explicit_and_candidate_incomplete(self) -> None:
+        inventory = load_inventory()
+        planning = inventory["shared_buffer_planning"]
+        self.assertEqual(planning["status"], "planning_target_fixture")
+        self.assertEqual(
+            planning["guarded_consumers"],
+            [
+                "StreamCore.royaltyInfo(uint256,uint256)",
+                "StreamCore.tokenURI(uint256)",
+                "StreamCore.contractURI()",
+            ],
+        )
+        self.assertEqual(planning["genesis_value"]["value"], 2_910_000)
+        self.assertEqual(planning["immutable_floor"]["value"], 1_460_000)
+        self.assertEqual(
+            planning["fixed_stipend_compatibility"]["status"], "missing"
+        )
+        checker.validate_inventory(ROOT, INVENTORY_PATH)
+
+    def test_shared_buffer_planning_hash_and_raise_chain_are_bound(self) -> None:
+        self._validate_mutation(
+            lambda value: value["shared_buffer_planning"]["planning_evidence"].__setitem__(
+                "sha256", "0" * 64
+            ),
+            "planning_evidence.sha256 mismatch",
+        )
+        self._validate_mutation(
+            lambda value: value["shared_buffer_planning"][
+                "independent_raise_chain"
+            ]["limit_parameters"].reverse(),
+            "does not satisfy.*schema",
+        )
+
+    def test_shared_buffer_cannot_overclaim_fixed_stipend_completion(self) -> None:
+        self._validate_mutation(
+            lambda value: value["shared_buffer_planning"][
+                "fixed_stipend_compatibility"
+            ].__setitem__("status", "complete"),
+            "does not satisfy.*schema",
+        )
 
     def test_structured_measurement_and_fixed_evidence_are_categorically_blocked(
         self,

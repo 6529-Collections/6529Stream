@@ -455,8 +455,8 @@ EXPECTED_ROWS: Final = (
             "StreamCore.contractURI()",
         ),
         1,
-        _fact("planning", 15_000),
-        _fact("missing", None),
+        _fact("planning", 2_910_000),
+        _fact("planning", 1_460_000),
         fixed_disposition="evidence_required",
         fixed_consumers=(
             "royaltyInfo(uint256,uint256)",
@@ -1791,6 +1791,200 @@ def _validate_candidate(
         completeness.append(f"candidate_binding is {status}")
 
 
+def _validate_shared_buffer_planning(
+    value: Any,
+    parameters: list[dict[str, Any]],
+    repo_root: Path,
+    completeness: list[str],
+) -> None:
+    label = "shared_buffer_planning"
+    planning = _expect_keys(
+        value,
+        {
+            "status",
+            "parameter",
+            "host_profile",
+            "guarded_consumers",
+            "failure_class",
+            "genesis_value",
+            "immutable_floor",
+            "returndata_limits",
+            "planning_evidence",
+            "independent_raise_chain",
+            "fixed_stipend_compatibility",
+        },
+        label,
+    )
+    _expect(
+        planning["status"] == "planning_target_fixture",
+        f"{label}.status must remain planning_target_fixture",
+    )
+    parameter = _expect_keys(
+        planning["parameter"], {"family", "name", "parameter_id"}, f"{label}.parameter"
+    )
+    expected_parameter = EXPECTED_ROWS[1]
+    expected_parameter_id = (
+        "0x0af6f5a1a5059e398191fa0af185be12"
+        "fee6d609933826603244c7f247793be7"
+    )
+    _expect(parameter["family"] == "GGP", f"{label}.parameter.family drifted")
+    _expect(
+        parameter["name"] == expected_parameter["name"],
+        f"{label}.parameter.name drifted",
+    )
+    _expect(
+        parameter["parameter_id"] == expected_parameter_id,
+        f"{label}.parameter.parameter_id drifted",
+    )
+    _expect(
+        planning["host_profile"]
+        == {"id": 1, "key": "STREAM_CORE", "candidate_instance": "not_available"},
+        f"{label}.host_profile drifted",
+    )
+    consumers = list(expected_parameter["guarded_consumers"])
+    _expect(
+        planning["guarded_consumers"] == consumers,
+        f"{label}.guarded_consumers drifted",
+    )
+    _expect(
+        planning["failure_class"] == {"id": 1, "name": "FORWARDING_CAP"},
+        f"{label}.failure_class drifted",
+    )
+    expected_genesis = {"status": "planning", "value": 2_910_000}
+    expected_floor = {"status": "planning", "value": 1_460_000}
+    _expect(
+        planning["genesis_value"] == expected_genesis,
+        f"{label}.genesis_value drifted",
+    )
+    _expect(
+        planning["immutable_floor"] == expected_floor,
+        f"{label}.immutable_floor drifted",
+    )
+    _expect(
+        planning["returndata_limits"]
+        == {"royalty_exact_bytes": 64, "metadata_max_abi_bytes": 65_536},
+        f"{label}.returndata_limits drifted",
+    )
+
+    evidence = _expect_keys(
+        planning["planning_evidence"],
+        {"status", "path", "sha256", "onchain_authority"},
+        f"{label}.planning_evidence",
+    )
+    _expect(
+        evidence["status"] == "planning_target_fixture",
+        f"{label}.planning_evidence.status must remain planning",
+    )
+    _expect(
+        evidence["onchain_authority"] is False,
+        f"{label}.planning_evidence must have no onchain authority",
+    )
+    path = _resolve_reference(
+        repo_root,
+        evidence["path"],
+        f"{label}.planning_evidence.path",
+        required_root="release-artifacts",
+    )
+    _expect(
+        path.relative_to(repo_root).as_posix()
+        == "release-artifacts/royalty-return-gas-buffer.json",
+        f"{label}.planning_evidence.path drifted",
+    )
+    recorded_sha = _expect_string(
+        evidence["sha256"], f"{label}.planning_evidence.sha256"
+    )
+    _expect(
+        SHA256_RE.fullmatch(recorded_sha) is not None,
+        f"{label}.planning_evidence.sha256 is malformed",
+    )
+    _expect(
+        recorded_sha == _sha256(path),
+        f"{label}.planning_evidence.sha256 mismatch",
+    )
+    document = _load_json(path, f"{label}.planning_evidence document")
+    _expect(
+        document.get("schema_version")
+        == "6529stream.royalty-return-gas-buffer.v1",
+        f"{label}.planning_evidence schema drifted",
+    )
+    _expect(
+        document.get("status") == "planning_target_fixture",
+        f"{label}.planning_evidence document must remain planning",
+    )
+    _expect(
+        document.get("shared_parameter", {}).get("guarded_consumers") == consumers,
+        f"{label}.planning_evidence consumers drifted",
+    )
+    _expect(
+        document.get("sizing", {}).get("planning_genesis_value")
+        == expected_genesis["value"],
+        f"{label}.planning_evidence genesis drifted",
+    )
+    _expect(
+        document.get("sizing", {}).get("planning_immutable_floor")
+        == expected_floor["value"],
+        f"{label}.planning_evidence floor drifted",
+    )
+    _expect(
+        document.get("core_boundary", {}).get("stream_core_delta_bytes") == 0,
+        f"{label}.planning_evidence must record zero StreamCore delta",
+    )
+
+    raise_chain = _expect_keys(
+        planning["independent_raise_chain"],
+        {
+            "status",
+            "action_class_id",
+            "minimum_delay_seconds",
+            "maximum_raise_multiplier",
+            "one_write_per_action_per_parameter",
+            "limit_parameters",
+            "near_uint256_behavior",
+        },
+        f"{label}.independent_raise_chain",
+    )
+    _expect(
+        raise_chain
+        == {
+            "status": "planning_target_fixture",
+            "action_class_id": 1,
+            "minimum_delay_seconds": 172_800,
+            "maximum_raise_multiplier": {"numerator": 2, "denominator": 1},
+            "one_write_per_action_per_parameter": True,
+            "limit_parameters": [
+                "ROYALTY_RESOLVER_GAS_LIMIT",
+                "METADATA_ROUTER_GAS_LIMIT",
+            ],
+            "near_uint256_behavior": "no_overflow_and_fail_closed",
+        },
+        f"{label}.independent_raise_chain drifted",
+    )
+    _expect(
+        planning["fixed_stipend_compatibility"]
+        == {
+            "status": "missing",
+            "disposition": (
+                "production_gate_conflict_until_candidate_upstream_budgets_cover_tuple"
+            ),
+            "blocked_by_issue": "#684",
+        },
+        f"{label}.fixed_stipend_compatibility drifted",
+    )
+
+    royalty_row = parameters[1]
+    _expect(
+        royalty_row["gas"]["genesis_value"] == expected_genesis,
+        f"{label} genesis does not match parameter row",
+    )
+    _expect(
+        royalty_row["gas"]["immutable_floor"] == expected_floor,
+        f"{label} floor does not match parameter row",
+    )
+    completeness.append(
+        "shared_buffer_planning is target-fixture-only and fixed-stipend compatibility is missing"
+    )
+
+
 def validate_inventory(
     repo_root: Path,
     inventory_path: Path = DEFAULT_INVENTORY,
@@ -1818,6 +2012,7 @@ def validate_inventory(
             "governance_policy",
             "inventory_summary",
             "candidate_binding",
+            "shared_buffer_planning",
             "parameters",
         },
         "inventory",
@@ -1843,6 +2038,12 @@ def validate_inventory(
     profiles = _profile_map(root, inventory["genesis_profile"])
     expected_bindings = _validate_parameters(
         inventory["parameters"], root, profiles, completeness
+    )
+    _validate_shared_buffer_planning(
+        inventory["shared_buffer_planning"],
+        inventory["parameters"],
+        root,
+        completeness,
     )
     _validate_candidate(
         inventory["candidate_binding"],

@@ -322,8 +322,9 @@ Production implementation requirements [MRR-CORE-TOKENURI]:
    ROYALTY_RETURN_GAS_BUFFER`. CI must test calls just below, at, and above the
    precheck threshold, mirroring the royalty-path precheck tests in
    [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
-4. Core copies at most `MAX_TOKEN_URI_RETURNDATA` bytes from returndata before
-   decoding. A router cannot force unbounded memory allocation.
+4. Core copies at most `MAX_TOKEN_URI_RETURNDATA = 65,536` ABI bytes from
+   returndata before decoding, supporting a maximum canonical non-empty string
+   length of 65,472 bytes. A router cannot force unbounded memory allocation.
 5. Revert, malformed ABI, oversized returndata, or an empty required response
    returns the documented fallback for minted tokens. These failures must not
    make minted-token `tokenURI()` revert.
@@ -382,6 +383,16 @@ home,
    service. It uses the same authority-only class-`1` path as every other
    GGP; no lower, emergency, probe, rebind, conditional, or permissionless
    mutation exists (ADR 0017).
+
+The checksum-bound issue #671 target fixture and six-scenario via-IR snapshot
+live in `release-artifacts/royalty-return-gas-buffer.json` and
+`release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap`. The maximum
+canonical `tokenURI()` and `contractURI()` returns, malformed and oversized
+fail-safe paths, shared-row threshold residues, full-stipend calls, independent
+2x raise orderings, and the uint256 terminal raise chain are checked. The
+derived 1,460,000 floor and 2,910,000 genesis value remain planning values until
+#654 integrates and remeasures the complete Core, and #656/#684 bind and review
+the exact candidate and upstream fixed-stipend budgets.
 
 The fallback JSON schema must be canonicalized and hash-committed in the
 release manifest. The schema defines exact required fields, optional fields,
