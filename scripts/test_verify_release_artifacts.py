@@ -1409,7 +1409,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 8_999,
             ),
             Path("scripts/check_record_family_authorization.py"): (
-                "d40a3ceab77d96d3168e77667d48980c855621a0a78968582e739bce12c7026f",
+                "7fcdf573e3841e539c9bce91b882121a50c941225a1ad292e7df4506bccccae4",
                 100_553,
             ),
             Path("scripts/check_slither_baseline.py"): (

@@ -69,9 +69,10 @@ the release policy in `docs/release-policy.md`.
   complete proposed tuple; actual candidate-bound measurements remain blocked
   on issues #684 and #656, so maturity and release readiness are unchanged.
 - Rebound the issue #690 record-family source catalog and checker to the
-  merged #699 source commit so candidate-source replay verifies the complete
-  interface, registry, metadata, preservation, and rehearsal binding set.
-  Candidate-bound deployment evidence remains unavailable and both release
+  actual #709 squash commit after the reviewed PR-only source commit became
+  unreachable from `main`. Candidate-source replay again verifies the complete
+  interface, registry, metadata, preservation, and rehearsal binding set;
+  candidate-bound deployment evidence remains unavailable and both release
   modes remain fail-closed.
 - Reserved the external-call gas inventory's `artist-authority` call lane for
   the exact future issue #670
