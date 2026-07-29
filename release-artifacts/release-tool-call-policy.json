@@ -13591,7 +13591,7 @@
     {
       "path": "scripts/check_record_family_authorization.py",
       "role": "runtime",
-      "source_sha256": "d40a3ceab77d96d3168e77667d48980c855621a0a78968582e739bce12c7026f",
+      "source_sha256": "7fcdf573e3841e539c9bce91b882121a50c941225a1ad292e7df4506bccccae4",
       "size_bytes": 100553,
       "imports": [
         {
@@ -30673,7 +30673,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "35809b98c4b25e99dca9013e1be35cd73482c072ddbe89e1cfd451667eb7243f",
+      "source_sha256": "0a8ff0fab0081b20202061b8db7caa8f4c72c5f4b5c86666a8bf99a4a1410e74",
       "size_bytes": 177513,
       "imports": [
         {
@@ -50997,7 +50997,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "01a65940426a817f630244cfb6b92ad4ce62b87ae0ed144e08b2e7f0c182fcff",
+      "source_sha256": "5e9720e443907ab76ad42f7f82ce21cedb4f2fbfcefb045f1a1c6d6b3e17ce27",
       "size_bytes": 169204,
       "imports": [
         {
