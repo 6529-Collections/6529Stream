@@ -264,7 +264,7 @@ contract StreamRoyaltyReturnGasBufferTest is CharacterizationTestBase {
         uint256 gasLimit,
         uint256 buffer
     ) private pure {
-        uint256 threshold = gasLimit + gasLimit / 63 + buffer;
+        uint256 threshold = gasLimit + gasLimit / 63 + (gasLimit % 63 == 0 ? 0 : 1) + buffer;
         target.parentGasSufficient(threshold - 1, gasLimit, buffer)
             .assertFalse("below threshold admitted");
         target.parentGasSufficient(threshold, gasLimit, buffer).assertTrue("at threshold rejected");

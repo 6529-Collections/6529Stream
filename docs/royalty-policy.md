@@ -25,11 +25,14 @@ claim from the committed local baseline.
 This document does not add a maintained marketplace integration, does not prove
 OpenSea, Reservoir, Blur, Manifold, or any other marketplace honors royalties,
 does not create creator-fee enforcement, and does not change contract bytecode.
-The current `StreamCore` runtime remains size-sensitive, so royalty enforcement
-features require a separate design decision, size-budget review, ABI/event
-review, and release artifact update before implementation.
-Any future StreamCore size-budget exception for royalty behavior must be
-explicitly accepted before code is added.
+The permanent `StreamCore` target now carries a bounded resolver-backed
+ERC-2981 read without adding royalty-payment enforcement. The concrete #670
+royalty interface row is still unresolved, so the resolver pointer cannot be
+installed in a conforming genesis configuration yet. Future enforcement
+features still require a separate design decision, size-budget review,
+ABI/event review, and release artifact update. Any future StreamCore
+size-budget exception for royalty behavior must be explicitly accepted before
+code is added.
 
 ## Source Of Truth
 
@@ -37,9 +40,9 @@ Use the following tracked sources before making any royalty claim:
 
 | Need | Source of truth | Notes |
 | --- | --- | --- |
-| Current royalty implementation | [`smart-contracts/StreamCore.sol`](../smart-contracts/StreamCore.sol) | Exposes fixed ERC-2981-compatible `royaltyInfo()` behavior |
+| Permanent royalty implementation | [`smart-contracts/StreamCore.sol`](../smart-contracts/StreamCore.sol), [`smart-contracts/StreamCoreExternalReads.sol`](../smart-contracts/StreamCoreExternalReads.sol) | Exposes ERC-2981-compatible `royaltyInfo()` through an authenticated, gas-bounded resolver read with a zero-royalty failure tuple |
 | Royalty interface | [`smart-contracts/IERC2981.sol`](../smart-contracts/IERC2981.sol), [`smart-contracts/ERC2981.sol`](../smart-contracts/ERC2981.sol) | `IERC2981` is used by `StreamCore`; the full vendored helper remains review material |
-| Royalty tests | [`test/StreamRoyalty.t.sol`](../test/StreamRoyalty.t.sol) | Covers interface support, fixed receiver, sale-price math, zero-sale behavior, arbitrary token IDs, and checked overflow semantics |
+| Royalty tests | [`test/StreamCorePermanentTarget.t.sol`](../test/StreamCorePermanentTarget.t.sol), [`test/StreamRoyalty.t.sol`](../test/StreamRoyalty.t.sol) | The permanent-target test rejects installation while #670's concrete interface row is unresolved; the retained legacy characterization covers the historical fixed receiver and 690-bps math |
 | Metadata boundary | [`docs/metadata.md`](metadata.md), [`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md) | Metadata and marketplace display evidence are separate from royalty enforcement |
 | Integration entrypoint | [`docs/integrations/README.md`](integrations/README.md) | Routes frontend, mobile, Electron, indexer, operator UI, and backend signing-service teams |
 | Event and indexer context | [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md) | Event replay and indexer reconstruction do not prove marketplace royalty payment |
@@ -58,23 +61,27 @@ Use the following tracked sources before making any royalty claim:
 `royaltyInfo()`. It reports `supportsInterface(0x2a55205a)` for the ERC-2981
 interface ID.
 
-Current behavior for this release line:
+Current permanent-target behavior for this release line:
 
-- `royaltyInfo()` returns a fixed default royalty receiver:
-  `0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377`.
-- The fixed default royalty is `690 basis points`, interpreted against a
-  denominator of `10,000`.
-- The royalty amount is calculated as `salePrice * 690 / 10_000`.
-- The same fixed default royalty applies to arbitrary token IDs.
-- A zero sale price returns a zero royalty amount.
-- Royalty math uses Solidity checked arithmetic and reverts on overflow.
-- `StreamCore` has no runtime royalty setters.
-- There is no per-token override in the current release line.
-- There is no per-collection override in the current release line.
+- `royaltyInfo()` reads through the authenticated royalty resolver pointer,
+  using governed resolver gas and the shared completion buffer.
+- Missing code, insufficient parent gas, a failed read, malformed returndata,
+  a zero receiver, zero bps, or bps above `1,000` fails soft to
+  `(address(0), 0)`.
+- Valid resolver output uses a denominator of `10,000` and overflow-safe
+  quotient/remainder math.
+- `StreamCore` has no runtime royalty setters, no per-token override, and no
+  per-collection override of its own; those values belong to the accepted
+  resolver design.
+- The concrete #670 royalty interface row remains unresolved. The permanent
+  target therefore rejects installation of that pointer rather than claiming
+  a deployable royalty configuration.
 
-This behavior is intentionally narrow because `StreamCore` is close to the
-EIP-170 production bytecode limit and already carries the core drop, metadata,
-admin, mint, auction, and randomness surface.
+The retained legacy characterization in `test/StreamRoyalty.t.sol` separately
+pins the former fixed default royalty: receiver
+`0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377`, `690 basis points`, and
+`salePrice * 690 / 10_000`. That historical baseline is not the permanent
+Core's resolver implementation and must not be used as candidate evidence.
 
 ## Royalty Philosophy
 
@@ -98,9 +105,10 @@ For this release line:
 
 ## Governance And Change Policy
 
-The current royalty policy is immutable at runtime in `StreamCore`. There is no
-admin function that changes the receiver, denominator, fee numerator,
-per-token royalty, or per-collection royalty after deployment.
+The permanent `StreamCore` has no direct admin function that changes a royalty
+receiver, denominator, fee numerator, per-token royalty, or per-collection
+royalty. Its authenticated royalty resolver pointer is a governed system
+dependency, and its exact interface remains blocked on #670.
 
 Any future change must be treated as release-impacting and reviewed before it is
 advertised:
@@ -183,14 +191,17 @@ building against. They should:
 - document any off-chain marketplace assumptions, API dependencies, or
   aggregator-specific display logic.
 
-Operator UIs should not present a royalty edit flow for the current release
-line because no runtime royalty admin function exists.
+Operator UIs should not present a Core-native royalty edit flow for the current
+release line because no runtime royalty setter exists in `StreamCore`.
 
 ## Evidence And Readiness Boundaries
 
 Local tests and docs prove only the committed local baseline:
 
-- `test/StreamRoyalty.t.sol` proves local `royaltyInfo()` behavior.
+- `test/StreamCorePermanentTarget.t.sol` proves unresolved artist and royalty
+  pointer interfaces cannot be installed.
+- `test/StreamRoyalty.t.sol` proves only the retained legacy fixed-royalty
+  characterization.
 - The release manifest and ABI checksums prove committed artifact consistency.
 - The event topic catalog proves no royalty-payment event exists in the current
   release surface.
@@ -212,16 +223,21 @@ a local integration boundary and not release readiness proof.
 
 Royalty coverage should stay split across layers:
 
-- Solidity tests cover `royaltyInfo()`, `supportsInterface(0x2a55205a)`, fixed
-  receiver, fixed default royalty, arbitrary token IDs, zero sale price, large
-  sale prices, and checked overflow behavior.
+- Permanent-target Solidity tests cover `supportsInterface(0x2a55205a)` and
+  fail-closed installation while the concrete #670 royalty interface row is
+  unresolved. Retained legacy tests separately cover the fixed receiver, fixed
+  default royalty, arbitrary token IDs, zero sale price, large sale prices, and
+  checked overflow behavior.
 - Documentation checks cover the non-enforcement boundary, governance policy,
   marketplace display wording, readiness caveats, validation commands, and
   source links.
-- The royalty policy checker cross-checks the documented receiver, `690` bps,
-  `10_000` denominator, ERC-2981 interface support, and retained royalty
-  regression names against `smart-contracts/StreamCore.sol` and
-  `test/StreamRoyalty.t.sol`.
+- The royalty policy checker cross-checks the authenticated royalty resolver
+  pointer, governed gas rows, selector preimage, bounded response validation,
+  `10_000` denominator, ERC-2981 interface support, unresolved-pointer
+  regression, and retained `690`-bps legacy characterization against
+  `smart-contracts/StreamCore.sol`,
+  `smart-contracts/StreamCoreExternalReads.sol`,
+  `test/StreamCorePermanentTarget.t.sol`, and `test/StreamRoyalty.t.sol`.
 - Integration tests that use marketplaces, wallet flows, or indexers belong in
   retained non-local evidence before public beta or production claims.
 - If future work adds setter, override, satellite, validator, or enforcement

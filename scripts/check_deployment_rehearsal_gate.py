@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -50,6 +51,8 @@ MAKE_TARGETS = [
     "deploy-rehearsal:",
     "deploy-rehearsal-standalone:",
 ]
+
+FOUNDRY_CI_TIMEOUT_MINUTES = 90
 
 
 class DeploymentRehearsalGateError(ValueError):
@@ -134,6 +137,29 @@ def _validate_makefile(repo_root: Path, text: str) -> None:
 def _validate_ci(repo_root: Path, text: str) -> None:
     """Validate CI commands and distinct retained log names."""
     ci_path = repo_root / ".github/workflows/ci.yml"
+    foundry_sections = text.split("\n  foundry:\n")
+    if len(foundry_sections) != 2 or "\n    steps:" not in foundry_sections[1]:
+        raise DeploymentRehearsalGateError(
+            ".github/workflows/ci.yml must contain exactly one foundry job"
+        )
+    foundry_header = foundry_sections[1].split("\n    steps:", 1)[0]
+    timeout_matches = re.findall(
+        r"(?m)^    timeout-minutes:\s*([0-9]+)\s*$",
+        foundry_header,
+    )
+    if len(timeout_matches) != 1:
+        raise DeploymentRehearsalGateError(
+            ".github/workflows/ci.yml foundry job must declare exactly one "
+            "timeout-minutes value"
+        )
+    actual_timeout = int(timeout_matches[0])
+    if actual_timeout < FOUNDRY_CI_TIMEOUT_MINUTES:
+        raise DeploymentRehearsalGateError(
+            ".github/workflows/ci.yml foundry timeout must be at least "
+            f"{FOUNDRY_CI_TIMEOUT_MINUTES} minutes for deployment rehearsal "
+            f"headroom; got {actual_timeout}"
+        )
+
     actual_logs = _extract_ci_rehearsal_log_targets(text)
     if len(actual_logs) != len(set(actual_logs)):
         raise DeploymentRehearsalGateError(

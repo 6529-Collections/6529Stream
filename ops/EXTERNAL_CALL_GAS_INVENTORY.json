@@ -125,6 +125,42 @@
       "disposition": "open-remediation-required"
     },
     {
+      "path": "smart-contracts/StreamCore.sol",
+      "site": "_completeMint",
+      "kind": "yul-call",
+      "operation": "call",
+      "expression": "callGas",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamCoreExternalReads.sol",
+      "site": "_boundedStaticReadDetailed",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamCoreExternalReads.sol",
+      "site": "resolveRoyalty",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
       "path": "smart-contracts/StreamSplitWallet.sol",
       "site": "_readAssetStatusWord",
       "kind": "yul-call",
@@ -226,6 +262,26 @@
       "expected_count": 1,
       "path_class": "user-path",
       "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamCore.sol",
+      "identifier": "_ENTROPY_CALL_UPFRONT_GAS",
+      "value": 3300,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamCore.sol",
+      "identifier": "_ENTROPY_PARENT_GAS_RESERVE",
+      "value": 162000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
       "issue": "#669",
       "disposition": "open-remediation-required"
     },

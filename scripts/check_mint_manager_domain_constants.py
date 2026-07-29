@@ -2082,15 +2082,14 @@ IMPLEMENTATION_STATUS_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "  reservation precede ledger consumption",
         "Exact typed primary settlement and repeated-sale\n"
         "  replay remain ADR 0019 / #694 blockers",
-        "24,128 bytes, leaving\n"
-        "  448 bytes of EIP-170",
+        "18,997 bytes, leaving\n"
+        "  5,579 bytes of EIP-170",
     ),
     KNOWN_BLOCKERS_PATH: (
         "Accepted ADR 0018's atomic cutover now implements\n"
         "  one ledger-owned root plus `N` token operation IDs",
-        "The measured\n"
-        "  24-byte Core reduction is net-negative but does not satisfy the complete\n"
-        "  target.",
+        "The complete linked target is 5,131 bytes smaller\n"
+        "  than the 24,128-byte transitional build",
         "Exact typed primary settlement\n"
         "  and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /\n"
         "  #694",

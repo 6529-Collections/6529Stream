@@ -80,10 +80,10 @@ class CompletionGasEvidenceTests(unittest.TestCase):
                 1,
             )
 
-    def test_rejects_nonplanning_status(self) -> None:
+    def test_rejects_non_as_built_status(self) -> None:
         self._check_mutation(
             lambda value: value.__setitem__("status", "complete"),
-            "must remain planning",
+            "must bind the as-built Core",
         )
 
     def test_rejects_non_via_ir_profile(self) -> None:
@@ -140,12 +140,26 @@ class CompletionGasEvidenceTests(unittest.TestCase):
             "admission proof scope drift",
         )
 
-    def test_rejects_excluded_call_boundary_cost_drift(self) -> None:
+    def test_rejects_included_call_boundary_cost_drift(self) -> None:
         self._check_mutation(
-            lambda value: value["admission_model"][
-                "excluded_call_boundary_costs"
-            ].pop(),
-            "excluded call-boundary costs drift",
+            lambda value: value["admission_model"]["included_call_boundary_costs"].pop(),
+            "included call-boundary costs drift",
+        )
+
+    def test_rejects_call_upfront_reserve_drift(self) -> None:
+        self._check_mutation(
+            lambda value: value["admission_model"].__setitem__(
+                "call_upfront_reserve_gas", 3_299
+            ),
+            "cold CALL upfront reserve drift",
+        )
+
+    def test_rejects_actual_boundary_test_drift(self) -> None:
+        self._check_mutation(
+            lambda value: value["admission_model"].__setitem__(
+                "actual_boundary_test", "fixture-only"
+            ),
+            "actual Core boundary test drift",
         )
 
     def test_rejects_registration_gas_limit_source_drift(self) -> None:
@@ -192,9 +206,10 @@ class CompletionGasEvidenceTests(unittest.TestCase):
     def test_rejects_stream_core_delta_claim(self) -> None:
         self._check_mutation(
             lambda value: value["core_boundary"].__setitem__(
-                "stream_core_delta_bytes", -1
+                "stream_core_delta_bytes",
+                value["core_boundary"]["stream_core_delta_bytes"] + 1,
             ),
-            "zero StreamCore delta",
+            "StreamCore delta is not runtime-derived",
         )
 
     def test_rejects_complete_target_ceiling_drift(self) -> None:
@@ -214,16 +229,16 @@ class CompletionGasEvidenceTests(unittest.TestCase):
             "StreamCore EIP-170 margin is not runtime-derived",
         )
 
-    def test_rejects_missing_planning_limitations(self) -> None:
+    def test_rejects_missing_as_built_limitations(self) -> None:
         self._check_mutation(
             lambda value: value.__setitem__("limitations", []),
-            "planning limitations drift",
+            "as-built limitations drift",
         )
 
-    def test_rejects_incomplete_planning_limitations(self) -> None:
+    def test_rejects_incomplete_as_built_limitations(self) -> None:
         self._check_mutation(
             lambda value: value["limitations"].pop(1),
-            "planning limitations drift",
+            "as-built limitations drift",
         )
 
     def test_rejects_missing_eoa_callback_boundary(self) -> None:
@@ -248,40 +263,42 @@ class CompletionGasEvidenceTests(unittest.TestCase):
             ):
                 checker._validate_spec_fragments(root)
 
-    def test_rejects_missing_complete_call_boundary_requirement(self) -> None:
+    def test_rejects_missing_as_built_call_boundary_proof(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._seed_spec_root(root)
             path = root / "docs/stream-entropy-coordinator.md"
             original = path.read_text(encoding="utf-8")
             target = (
-                "Issue #654 must evaluate\n"
-                "   and measure the complete low-level-call admission boundary"
+                "`testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold`"
             )
             mutated = original.replace(
                 target,
-                "Issue #654 must reuse the planning lower bound",
+                "`removedExactBoundaryProof`",
                 1,
             )
             self.assertNotEqual(
                 original,
                 mutated,
-                "stale complete-call-boundary mutation anchor",
+                "stale as-built-call-boundary mutation anchor",
             )
             path.write_text(mutated, encoding="utf-8")
             with self.assertRaisesRegex(
                 checker.CompletionGasCheckError,
-                "missing #672 spec fragment.*complete low-level-call",
+                "missing #672 spec fragment.*testActualCoreCallBoundary",
             ):
                 checker._validate_spec_fragments(root)
 
-    def test_rejects_exact_admission_overclaim(self) -> None:
+    def test_rejects_stale_planning_only_claim(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self._seed_spec_root(root)
             path = root / "docs/stream-entropy-coordinator.md"
             with path.open("a", encoding="utf-8") as stream:
-                stream.write("\nCore's exact admission requirement is the fixture formula.\n")
+                stream.write(
+                    "\nThis is checksum-bound target-fixture planning evidence, "
+                    "not an as-built StreamCore measurement.\n"
+                )
             with self.assertRaisesRegex(
                 checker.CompletionGasCheckError,
                 "forbidden #672 spec claim present",

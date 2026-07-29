@@ -430,7 +430,7 @@ class GovernedParameterInventoryTests(unittest.TestCase):
     def test_shared_buffer_planning_is_explicit_and_candidate_incomplete(self) -> None:
         inventory = load_inventory()
         planning = inventory["shared_buffer_planning"]
-        self.assertEqual(planning["status"], "planning_target_fixture")
+        self.assertEqual(planning["status"], "as_built_permanent_core_source")
         self.assertEqual(
             planning["guarded_consumers"],
             [
@@ -464,7 +464,7 @@ class GovernedParameterInventoryTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         evidence_path = root / SHARED_BUFFER_EVIDENCE_PATH
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
-        evidence["core_boundary"]["stream_core_delta_bytes"] = 1
+        evidence["core_boundary"]["stream_core_delta_bytes"] += 1
         write_json(evidence_path, evidence)
         inventory["shared_buffer_planning"]["planning_evidence"]["sha256"] = sha256(
             evidence_path
@@ -472,7 +472,7 @@ class GovernedParameterInventoryTests(unittest.TestCase):
         write_json(inventory_path, inventory)
         with self.assertRaisesRegex(
             checker.GovernedParameterInventoryError,
-            "must record zero StreamCore delta",
+            "StreamCore delta is not runtime-derived",
         ):
             checker._validate_shared_buffer_planning(
                 inventory["shared_buffer_planning"],

@@ -123,8 +123,10 @@ class AbiCompatibilityTests(unittest.TestCase):
                 "permanence_class": "Permanent",
                 "completeness": "complete_permanent_functions_and_events",
                 "bytecode_measurement_authority": "complete_linked_via_ir_runtime_measurement_only",
-                "implementation_comparison": "deferred_until_complete_core_cutover",
-                "implementation_baseline": "release-artifacts/baselines/v0.1.0/abi-surface.json",
+                "implementation_comparison": "as_built_permanent_core_cutover",
+                "implementation_baseline": (
+                    "release-artifacts/baselines/pre-permanent-core/abi-surface.json"
+                ),
                 "excluded_abi_categories": [
                     "custom_errors",
                     "constructor",
@@ -1028,12 +1030,29 @@ class AbiCompatibilityTests(unittest.TestCase):
                         f"{label} target",
                     )
 
-    def test_retired_catalog_closes_both_directions_against_current_baseline(self) -> None:
+    def test_retired_catalog_closes_both_directions_against_pre_cutover_baseline(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         manifest = checker.load_strict_json(
             repo_root / checker.DEFAULT_TARGET_MANIFEST
         )
-        baseline = checker.load_baseline(repo_root / checker.DEFAULT_BASELINE)
+        baseline = checker.load_target_retirement_baseline(repo_root, manifest)
+        current = checker.load_baseline(repo_root / checker.DEFAULT_BASELINE)
+        self.assertEqual(
+            len(baseline["contracts"]["StreamCore"]["entries"]["functions"]),
+            87,
+        )
+        self.assertEqual(
+            len(baseline["contracts"]["StreamCore"]["entries"]["events"]),
+            14,
+        )
+        self.assertEqual(
+            len(current["contracts"]["StreamCore"]["entries"]["functions"]),
+            53,
+        )
+        self.assertEqual(
+            len(current["contracts"]["StreamCore"]["entries"]["events"]),
+            18,
+        )
         checker.validate_target_retirement_baseline_closure(manifest, baseline)
 
         missing = deepcopy(manifest)

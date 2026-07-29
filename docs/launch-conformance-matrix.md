@@ -954,19 +954,17 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
     [EC-REGGAS] — with an EIP-150-aware parent gas precheck that reads the
     live value and enforces
-    `ceil(ENTROPY_REGISTRATION_GAS_LIMIT * 64 / 63)` plus the
-    checksum-bound EOA-recipient completion tail reserve. The target-fixture
-    suite covers pure below/at/above policy-predicate tests, a separate
-    high-parent-gas full-stipend scenario, first-mint all-cold storage, atomic
-    rollback, and the separate unbounded contract-receiver callback boundary.
-    It does not prove exact admission or forwarding at the actual low-level
-    `CALL` boundary because ABI setup, memory expansion, `CALL` costs, and
-    intervening source work are not part of the predicate. The current #672
-    planning proof has zero Core delta; #654 must measure those complete
-    pre-call costs, enforce the candidate-instance threshold, prove the exact
-    forwarded stipend plus EOA-recipient completion tail, compile this real
-    seam with the complete target, and preserve mint rollback on registration
-    failure. The GGP raise plus replaceable coordinator pointer recovery chain is tested
+    `ENTROPY_REGISTRATION_GAS_LIMIT +
+    ceil(ENTROPY_REGISTRATION_GAS_LIMIT / 63)` plus the checksum-bound
+    EOA-recipient completion tail and cold-call reserve. The
+    as-built permanent-Core below/at/above call-boundary test encodes calldata
+    before admission, executes the actual low-level call, proves the exact
+    governed stipend at the threshold, and preserves the EOA-recipient
+    completion tail. First-mint all-cold storage, atomic rollback, nonempty
+    returndata rejection, and the separate unbounded contract-receiver
+    callback boundary are also pinned. The linked permanent Core is measured
+    under via-IR; candidate-instance binding remains separately incomplete.
+    The GGP raise plus replaceable coordinator pointer recovery chain is tested
     (ADR 0010 decision D1.5; [EC-REGGAS-COMPLETION]).
 20. CI asserts every production event in the event catalog has at most three
     `indexed` fields, matching the Solidity log topic limit.

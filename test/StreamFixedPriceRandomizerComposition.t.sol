@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/RandomizerRNG.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamPauseDomains.sol";
 import "../smart-contracts/StreamRandomizerLifecycle.sol";

@@ -451,6 +451,60 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path)
 
+    def test_source_requirements_pin_permanent_core_satellite_layout(self) -> None:
+        self.assertEqual(
+            checker.SOURCE_REQUIREMENTS[Path("smart-contracts/StreamCore.sol")],
+            [
+                "error CollectionIsFrozen",
+                "emit MetadataUpdate",
+                "emit BatchMetadataUpdate",
+                "emit CollectionFrozen",
+                "function freezeCollection",
+                "function tokenURI",
+                "function contractURI",
+                "StreamCoreExternalReads.boundedRouterString",
+            ],
+        )
+        self.assertEqual(
+            checker.SOURCE_REQUIREMENTS[
+                Path("smart-contracts/IStreamCollectionMetadata.sol")
+            ],
+            [
+                "error MetadataMutationPaused",
+                "error CollectionMetadataFrozen",
+                "event CollectionMetadataSnapshotPublished",
+                "event CollectionMetadataLockedEvent",
+                "function publishCollectionSnapshot",
+                "function collectionSnapshot",
+                "function latestCollectionSnapshotHash",
+                "function isLocked",
+            ],
+        )
+        self.assertIn(
+            Path("smart-contracts/StreamCollectionMetadata.sol"),
+            checker.SOURCE_REQUIREMENTS,
+        )
+        self.assertIn(
+            Path("test/StreamCorePermanentTarget.t.sol"),
+            checker.SOURCE_REQUIREMENTS,
+        )
+        self.assertNotIn(
+            Path("test/helpers/LegacyStreamCore.sol"),
+            checker.SOURCE_REQUIREMENTS,
+        )
+        for obsolete_anchor in (
+            "error FrozenCollectionDependencyRegistry",
+            "error MetadataFrozen",
+            "event DependencyVersionPinned",
+            "function collectionDependencyVersionState",
+            "function collectionFreezeManifestHash",
+            "function _pinCollectionDependency",
+        ):
+            self.assertNotIn(
+                obsolete_anchor,
+                checker.SOURCE_REQUIREMENTS[Path("smart-contracts/StreamCore.sol")],
+            )
+
     def test_missing_source_anchor_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

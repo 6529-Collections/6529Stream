@@ -159,43 +159,29 @@ contributors who start from the README.
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  current target-isolated `StreamCore` runtime measurement at 24,128 bytes with
-  448 bytes of EIP-170 headroom,
-  which passes deployability and the interim 384-byte development floor but
-  sits below the 512-byte warning threshold and the normative 2,000-byte
-  production deployment minimum. The accepted CON-012 development exception
-  cannot survive the deployment gate;
-  [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
-  production release until real headroom is recovered while every mandatory
-  Core hook is retained. ADR 0017 avoids adding the superseded
-  probe/lower/emergency/conditional/rebinding machinery, but that machinery was
-  not present in the measured Core and the ADR does not reduce this baseline.
-  Historical measurements show the prior refactor reached
-  21,792 bytes, then the manager/prepared-mint boundary added exactly 2,360 bytes
-  while the legacy Drops/Minter route remained live. The remediation is a
-  pre-genesis ABI cutover and caller migration, not another additive parallel
-  API: satellite-only slices must keep zero Core delta and Core-changing slices
-  must measure net-negative until the complete linked production-profile
-  `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement. Accepted ADR 0018's atomic cutover now implements
+  permanent target-isolated `StreamCore` runtime at 18,997 bytes with 5,579 bytes
+  of EIP-170 headroom. The complete linked target is 5,131 bytes smaller
+  than the 24,128-byte transitional build, passes the non-waivable 2,000-byte
+  production margin by 3,579 bytes, and is 3,187 bytes below the approved
+  22,184-byte objective. Historical 21,792-byte measurements remain
+  non-additive. Accepted ADR 0018's atomic cutover now implements
   one ledger-owned root plus `N` token operation IDs, derive/reserve-before-
   ledger ordering, manager-scoped replay, whole-transaction rollback, and Core
-  current-pair equality without lifetime operation-ID storage. The measured
-  24-byte Core reduction is net-negative but does not satisfy the complete
-  target. The remaining #654 lane must implement and remeasure the actual
-  post-entropy admission boundary and the restricted Core ERC-4906
-  single/batch refresh emitters required by #667 before the exact production
-  margin can pass. Exact typed primary settlement
+  current-pair equality without lifetime operation-ID storage. The permanent
+  Core also implements the measured post-entropy admission boundary and the
+  restricted ERC-4906 single/batch refresh emitters required by #667. Exact
+  typed primary settlement
   and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /
   #694; operation-root uniqueness does not close them. The final Core recovery seam is
   the canonical `IStreamFinalityRecoveryCore` interface:
   `lastAllocatedTokenId()` (`0x254b22bc`) XOR
   `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) gives the
-  exact ERC-165 interface ID `0xb5c73a01`. Core must advertise IERC165 and
-  exactly that ID, reject `0xffffffff`, and implement the real batch emitter;
+  exact ERC-165 interface ID `0xb5c73a01`. Core advertises IERC165 and exactly
+  that ID, rejects `0xffffffff`, and implements the real batch emitter;
   fallback-only selector handling is nonconformant. Issue #667 owns its
-  fail-closed constructor probe and registry consumer without editing Core;
-  #654 owns the Core ABI, implementation, negative tests, and measured runtime.
+  fail-closed constructor probe and registry consumer. Remaining blockers are
+  concrete #670 artist/revenue pointer rows and #656/#684 candidate evidence,
+  not Core bytecode headroom.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
@@ -225,13 +211,13 @@ contributors who start from the README.
   rejects self-reported complete evidence until #684 supplies candidate-bound
   measurement/cadence, reproduction, and reachable raise-chain semantics.
   [Issue #671](https://github.com/6529-Collections/6529Stream/issues/671)
-  now supplies the zero-Core-delta reusable admission source, hostile
-  threshold/returndata/full-budget tests, six-scenario checksum-bound planning
-  measurement, and an inventory-bound 1,460,000 floor / 2,910,000 genesis
-  planning tuple. The current `StreamCore` remains unchanged at 24,128 bytes.
-  Exact Core integration and as-built remeasurement remain #654 work, while
-  candidate measurement, fixed-stipend compatibility, rehearsal, cadence, and
-  independent review remain blocked by #656/#684.
+  now supplies the permanent-Core shared admission implementation, hostile
+  threshold/returndata/full-budget tests, six-scenario checksum-bound
+  measurement, actual `royaltyInfo()`/`tokenURI()`/`contractURI()` boundary
+  regressions, and an inventory-bound 1,460,000 floor / 2,910,000 genesis
+  planning tuple. Candidate measurement, fixed-stipend compatibility,
+  rehearsal, cadence, and independent review remain blocked by
+  #656/#670/#684.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
@@ -242,9 +228,9 @@ contributors who start from the README.
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 28 open
-  findings: 3 High and 25 Medium. One row is a confirmed Core state gap, five
-  rows require design review, and 22 remain pending disposition. None is
+- The normalized first-party production Slither baseline contains 32 open
+  findings: 2 High and 30 Medium. Zero rows are confirmed gaps, six rows
+  require design review, and 26 remain pending disposition. None is
   accepted or classified as a false positive. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue

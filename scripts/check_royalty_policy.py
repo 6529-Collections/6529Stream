@@ -45,6 +45,9 @@ REQUIRED_PHRASES = [
     "no runtime royalty setters",
     "no per-token override",
     "no per-collection override",
+    "authenticated royalty resolver pointer",
+    "fails soft to `(address(0), 0)`",
+    "concrete #670 royalty interface row",
     "royalty disclosure, not payment enforcement",
     "No production-readiness claim depends on marketplaces honoring royalties",
     "permissionless-transfer composability",
@@ -79,6 +82,9 @@ REQUIRED_SECTION_PHRASES = {
         "no runtime royalty setters",
         "no per-token override",
         "no per-collection override",
+        "authenticated royalty resolver pointer",
+        "fails soft to `(address(0), 0)`",
+        "concrete #670 royalty interface row",
     ],
     "Governance And Change Policy": [
         "Changing the default royalty receiver",
@@ -150,16 +156,26 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/event-topic-catalog.json",
     "release-artifacts/latest/risk-register.json",
     "smart-contracts/StreamCore.sol",
+    "smart-contracts/StreamCoreExternalReads.sol",
     "smart-contracts/IERC2981.sol",
     "smart-contracts/ERC2981.sol",
     "test/StreamRoyalty.t.sol",
+    "test/StreamCorePermanentTarget.t.sol",
 ]
 
 SOURCE_CONSTANT_ASSERTIONS = {
     "smart-contracts/StreamCore.sol": [
-        "_DEFAULT_ROYALTY_RECEIVER = 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377",
-        "_DEFAULT_ROYALTY_BPS = 690",
+        "_POINTER_ROYALTY_RESOLVER",
+        "_GGP_ROYALTY_RESOLVER_GAS_LIMIT",
+        "_GGP_ROYALTY_RETURN_GAS_BUFFER",
+        "StreamCoreExternalReads.resolveRoyalty",
+        'royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)',
+    ],
+    "smart-contracts/StreamCoreExternalReads.sol": [
+        "_MAX_ROYALTY_BPS = 1_000",
         "_ROYALTY_DENOMINATOR = 10_000",
+        "function resolveRoyalty(",
+        "return (address(0), 0)",
     ],
     "test/StreamRoyalty.t.sol": [
         "ERC2981_INTERFACE_ID = 0x2a55205a",
@@ -167,6 +183,10 @@ SOURCE_CONSTANT_ASSERTIONS = {
         "ROYALTY_BPS = 690",
         "ROYALTY_DENOMINATOR = 10_000",
         "testDefaultRoyaltyIsFixedAt690BasisPoints",
+    ],
+    "test/StreamCorePermanentTarget.t.sol": [
+        "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled",
+        "_POINTER_ROYALTY_RESOLVER",
     ],
 }
 
@@ -179,14 +199,14 @@ SOURCE_ALTERNATIVE_ASSERTIONS = {
                 ["0x2a55205a"],
             ],
         ),
+    ],
+    "smart-contracts/StreamCoreExternalReads.sol": [
         (
-            "checked 690 bps royalty math",
+            "bounded resolver royalty math",
             [
-                ["salePrice * _DEFAULT_ROYALTY_BPS / _ROYALTY_DENOMINATOR"],
                 [
-                    "let numerator := mul(salePrice, 690)",
-                    "if and(salePrice, iszero(eq(div(numerator, salePrice), 690)))",
-                    "mstore(0x20, div(numerator, 10000))",
+                    "(salePrice / _ROYALTY_DENOMINATOR) * bps",
+                    "((salePrice % _ROYALTY_DENOMINATOR) * bps) / _ROYALTY_DENOMINATOR",
                 ],
             ],
         ),

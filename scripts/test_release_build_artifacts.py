@@ -33,6 +33,13 @@ WARNING_DISPOSITIONS_PATH = REPO_ROOT / "docs" / "warning-dispositions.md"
 DEPLOYMENT_README_PATH = REPO_ROOT / "deployments" / "README.md"
 RELEASE_ARTIFACTS_README_PATH = REPO_ROOT / "release-artifacts" / "README.md"
 SIZE_LOG_PATH = REPO_ROOT / "scripts" / "run_forge_size_log.py"
+SIZE_LOG_SPEC = importlib.util.spec_from_file_location(
+    "run_forge_size_log",
+    SIZE_LOG_PATH,
+)
+assert SIZE_LOG_SPEC is not None and SIZE_LOG_SPEC.loader is not None
+size_log = importlib.util.module_from_spec(SIZE_LOG_SPEC)
+SIZE_LOG_SPEC.loader.exec_module(size_log)
 SPEC = importlib.util.spec_from_file_location("build_release_artifacts", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 builder = importlib.util.module_from_spec(SPEC)
@@ -304,6 +311,43 @@ class FakeForge:
 
 
 class ReleaseBuildArtifactTests(unittest.TestCase):
+    def test_aggregate_size_log_accepts_only_exact_test_helper_overflow(self) -> None:
+        expected = "\n".join(
+            [
+                "Compiler run successful with warnings:",
+                (
+                    "| LegacyStreamCore | 24,587 | 25,748 | -11 | "
+                    "23,404 |"
+                ),
+                size_log.RUNTIME_SIZE_ERROR,
+            ]
+        )
+        self.assertTrue(size_log.accepted_test_only_runtime_overflow(expected))
+
+        mutations = {
+            "production overflow": expected.replace(
+                size_log.RUNTIME_SIZE_ERROR,
+                (
+                    "| StreamCore | 24,577 | 25,000 | -1 | 24,152 |\n"
+                    + size_log.RUNTIME_SIZE_ERROR
+                ),
+            ),
+            "helper size drift": expected.replace("24,587", "24,588").replace(
+                "-11",
+                "-12",
+            ),
+            "compile failure": expected.replace(
+                "Compiler run successful with warnings:",
+                "Compiler run failed:",
+            ),
+            "unexpected error": expected + "\nError: another failure",
+        }
+        for label, candidate in mutations.items():
+            with self.subTest(label=label):
+                self.assertFalse(
+                    size_log.accepted_test_only_runtime_overflow(candidate)
+                )
+
     def test_strict_json_decoder_preserves_ijson_policy(self) -> None:
         cases = (
             (b'{"value":1.5}', "floating-point JSON is forbidden"),

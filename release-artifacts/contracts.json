@@ -148,6 +148,16 @@
         "measured_delta_bytes": -392,
         "runtime_margin_bytes": 2784,
         "decision": "accepted-headroom-recovery"
+      },
+      {
+        "id": "CORE-REDUCTION-2026-07-28-001",
+        "issue": "https://github.com/6529-Collections/6529Stream/issues/654",
+        "summary": "Replace the transitional Core with the locked permanent ABI, linked bounded external reads, authenticated metadata/entropy pointers, exact mint completion gas admission, and restricted metadata emitters.",
+        "baseline_runtime_size_bytes": 24128,
+        "runtime_size_bytes": 18997,
+        "measured_delta_bytes": -5131,
+        "runtime_margin_bytes": 5579,
+        "decision": "accepted-permanent-core-cutover-and-headroom-recovery"
       }
     ]
   },
@@ -235,6 +245,10 @@
       "source": "smart-contracts/IStreamDrops.sol"
     },
     {
+      "name": "IStreamEntropyCoordinator",
+      "source": "smart-contracts/IStreamEntropyCoordinator.sol"
+    },
+    {
       "name": "IStreamGasParameterHost",
       "source": "smart-contracts/IStreamGasParameterHost.sol",
       "interface_id": "0xc5eef2ab"
@@ -246,6 +260,10 @@
     {
       "name": "IStreamGovernedParameterAuthority",
       "source": "smart-contracts/IStreamGovernedParameterAuthority.sol"
+    },
+    {
+      "name": "IStreamMetadataRouter",
+      "source": "smart-contracts/IStreamMetadataRouter.sol"
     },
     {
       "name": "IStreamMinter",
@@ -278,6 +296,10 @@
     {
       "name": "IStreamRevenueResolver",
       "source": "smart-contracts/IStreamRevenueResolver.sol"
+    },
+    {
+      "name": "IStreamSystemManifest",
+      "source": "smart-contracts/IStreamSystemManifest.sol"
     },
     {
       "name": "IStreamSplitFactory",
