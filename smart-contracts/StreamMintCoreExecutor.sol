@@ -68,9 +68,9 @@ library StreamMintCoreExecutor {
         (tokenId,) = core.mintFromManager(
             batch.collectionId,
             batch.initialRecipients[tokenIndex],
-            string(batch.tokenData[tokenIndex]),
-            uint256(batch.mintCommitments[tokenIndex]),
-            tokenDataHash
+            batch.tokenData[tokenIndex],
+            tokenDataHash,
+            batch.mintCommitments[tokenIndex]
         );
         TokenExecutionFact memory fact = _tokenExecutionFact(
             batch, tokenIndex, operationRoot, operationId, tokenId, tokenDataHash
@@ -101,7 +101,7 @@ library StreamMintCoreExecutor {
         bytes32 tokenDataHash = keccak256(batch.tokenData[tokenIndex]);
         uint256 collectionSerial;
         (tokenId, collectionSerial) = core.prepareMintFromManager(
-            batch.collectionId, string(batch.tokenData[tokenIndex]), tokenDataHash, operationId
+            batch.collectionId, batch.tokenData[tokenIndex], tokenDataHash, operationId
         );
         TokenExecutionFact memory fact = _tokenExecutionFact(
             batch, tokenIndex, operationRoot, operationId, tokenId, tokenDataHash
@@ -119,7 +119,7 @@ library StreamMintCoreExecutor {
             fact.mintCommitment
         );
         core.completePreparedMintFromManager(
-            tokenId, fact.initialRecipient, operationId, uint256(fact.mintCommitment)
+            tokenId, fact.initialRecipient, operationId, fact.mintCommitment
         );
         emit PreparedMintCompleted(
             schemaVersion,

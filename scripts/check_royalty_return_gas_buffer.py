@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate issue #671 checksum-bound shared Core read-buffer planning evidence."""
+"""Validate issue #671 checksum-bound shared Core read-buffer as-built evidence."""
 
 from __future__ import annotations
 
@@ -21,20 +21,27 @@ REQUIRED_SPEC_FRAGMENTS = {
         "including maximum permitted returndata, canonical decoding, fallback "
         "construction, and return handling",
         "strictly monotonic, and bounded to at most 2x the current value per action",
+        "as-built permanent `StreamCore`",
+        "gasLimit + ceil(gasLimit / 63) + sharedBuffer",
     ),
     "docs/metadata-router-and-renderer.md": (
         "Launch v1 defines no 23rd, metadata-specific buffer parameter.",
         "Every raise of `METADATA_ROUTER_GAS_LIMIT` or the shared buffer replays "
         "all affected threshold measurements",
+        "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+        "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+        "testMetadataRouterMaximumBoundedReturnCompletes",
     ),
     "docs/adr/0017-raise-only-parameter-governance.md": (
-        "`G >= L`, then `G - L >= floor(L / 63)`",
+        "`G >= L`, then `G - L >= ceil(L / 63)`",
         "precheck residues `L mod 63 = 0`, `1`, and `62`",
     ),
 }
 FORBIDDEN_SPEC_FRAGMENTS = (
     "shared-buffer evidence makes StreamCore production-ready",
     "ROYALTY_METADATA_RETURN_GAS_BUFFER",
+    "gasLimit + floor(gasLimit / 63) + sharedBuffer",
+    "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
 )
 
 
@@ -125,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     ) as exc:
         print(f"shared-buffer evidence check failed: {exc}", file=sys.stderr)
         return 1
-    print("shared-buffer planning evidence is current")
+    print("shared-buffer as-built evidence is current")
     return 0
 
 

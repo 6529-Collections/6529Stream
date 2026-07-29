@@ -29,7 +29,7 @@ EXPECTED_SOLC_WARNINGS = {
     ),
     (
         "5667",
-        "smart-contracts/StreamCore.sol",
+        "test/helpers/LegacyStreamCore.sol",
         "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
     ),
     (
@@ -49,7 +49,7 @@ EXPECTED_SOLC_WARNINGS = {
     ),
     (
         "2018",
-        "smart-contracts/StreamCore.sol",
+        "test/helpers/LegacyStreamCore.sol",
         "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
     ),
     (
@@ -90,18 +90,17 @@ REQUIRED_PHRASES = [
     "SOLC-UNUSED-RANDOMIZER-SALT-NXT",
     "SOLC-UNUSED-RANDOMIZER-SALT-RNG",
     "SOLC-UNUSED-RANDOMIZER-SALT-VRF",
-    "SOLC-UNUSED-ROYALTY-TOKENID",
+    "SOLC-TEST-UNUSED-LEGACY-ROYALTY-TOKENID",
     "SOLC-PURE-RANDOMIZER-NXT",
     "SOLC-PURE-RANDOMIZER-RNG",
     "SOLC-PURE-RANDOMIZER-VRF",
     "SOLC-PURE-MINTER-MARKER",
-    "SOLC-PURE-ROYALTY",
+    "SOLC-TEST-PURE-LEGACY-ROYALTY",
     "SOLC-TEST-SELFDESTRUCT-HELPERS",
     "DOC-MDBOOK-VRF-HTML",
     "LINT-VENDORED-SIGNEDMATH-TYPECAST",
     "LINT-VENDORED-MATH-SHIFT",
     "LINT-BLOCK-TIMESTAMP-AUCTION",
-    "LINT-BLOCK-TIMESTAMP-CORE",
     "LINT-BLOCK-TIMESTAMP-DROPS",
     "LINT-BLOCK-TIMESTAMP-MINTER",
     "LINT-BLOCK-TIMESTAMP-MINT-MANAGER",
@@ -163,6 +162,7 @@ REQUIRED_LINK_TARGETS = [
     "test/StreamEmergencyWithdraw.t.sol",
     "test/StreamFixedPricePayments.t.sol",
     "test/StreamRandomizerPayments.t.sol",
+    "test/helpers/LegacyStreamCore.sol",
     "test/helpers/ProtocolStateMachine.sol",
 ]
 
@@ -190,7 +190,6 @@ SOURCE_MARKERS = {
     ],
     "smart-contracts/StreamCore.sol": [
         "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
-        "block.timestamp",
     ],
     "smart-contracts/StreamMinter.sol": [
         "function isMinterContract() external view returns (bool)",
@@ -211,6 +210,9 @@ SOURCE_MARKERS = {
     "test/StreamEmergencyWithdraw.t.sol": ["selfdestruct(target);"],
     "test/StreamFixedPricePayments.t.sol": ["selfdestruct(target);"],
     "test/StreamRandomizerPayments.t.sol": ["selfdestruct(target);"],
+    "test/helpers/LegacyStreamCore.sol": [
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)"
+    ],
 }
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

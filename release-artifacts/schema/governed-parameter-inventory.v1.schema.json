@@ -201,7 +201,7 @@
         "fixed_stipend_compatibility"
       ],
       "properties": {
-        "status": { "const": "planning_target_fixture" },
+        "status": { "const": "as_built_permanent_core_source" },
         "parameter": {
           "type": "object",
           "additionalProperties": false,
@@ -276,7 +276,7 @@
           "additionalProperties": false,
           "required": ["status", "path", "sha256", "onchain_authority"],
           "properties": {
-            "status": { "const": "planning_target_fixture" },
+            "status": { "const": "as_built_permanent_core_source" },
             "path": { "const": "release-artifacts/evidence/royalty-return-gas-buffer.json" },
             "sha256": {
               "type": "string",
@@ -298,7 +298,7 @@
             "near_uint256_behavior"
           ],
           "properties": {
-            "status": { "const": "planning_target_fixture" },
+            "status": { "const": "as_built_source_and_target_fixture" },
             "action_class_id": { "const": 1 },
             "minimum_delay_seconds": { "const": 172800 },
             "maximum_raise_multiplier": {

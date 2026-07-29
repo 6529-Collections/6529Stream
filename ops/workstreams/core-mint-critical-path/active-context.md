@@ -64,42 +64,47 @@
 
 ## Current Slice
 
-- Issue: `#671`.
-- Branch: `codex/issue-671-royalty-buffer-safety`.
-- Base: merged `#688` / `origin/main`
-  `6f74978fc2db3332fb77f39f6a604ea200f29bb1`.
-- Result: one storage-free overflow-safe admission source and an authenticated
-  three-row target fixture feed `ROYALTY_RETURN_GAS_BUFFER` into
-  `royaltyInfo()`, `tokenURI()`, and `contractURI()` without adding a 23rd GGP
-  or changing transitional Core bytecode. Hostile tests cover maximum bounded
-  returndata, malformed/oversized/reverting calls, full forwarded stipends,
-  below/at/above thresholds, residues, independent 2x orderings, and the
-  uint256 terminal raise chain.
+- Issues: `#654` permanent-Core implementation plus remaining `#671`
+  integration acceptance and `#672` as-built binding.
+- Branch: `codex/issue-654-entropy-router`.
+- Base: merged `#671` evidence / `origin/main`
+  `408c1b894f947fc0f8db34259f1c82ecd7e91439`.
+- Result: the permanent Core consumes the storage-free overflow-safe admission
+  source and authenticated three-row buffer model for `royaltyInfo()`,
+  `tokenURI()`, and `contractURI()` without adding a 23rd GGP. Hostile tests
+  cover maximum bounded returndata, malformed/oversized/reverting calls, full
+  forwarded stipends, below/at/above actual Core thresholds, residues,
+  independent 2x orderings, and the uint256 terminal raise chain.
 - Measurement state: the six-scenario via-IR snapshot records a conservative
   725,735-gas worst completion path, deriving a 1,460,000 planning floor and
   2,910,000 planning genesis value. The checksum-bound artifact has no onchain
   authority, and candidate measurement/fixed-stipend facts remain incomplete.
-- Size and closure state: `StreamCore` remains exactly 24,128 bytes with zero
-  #671 delta. Do not claim candidate or production completion; #654 owns final
-  Core integration and as-built remeasurement, while #656/#684 own candidate,
-  fixed-stipend, cadence, rehearsal, and independent-review evidence.
+- Size and closure state: the permanent `StreamCore` implementation measures
+  18,997 bytes with 5,579 bytes of EIP-170 margin, a 5,131-byte reduction from
+  the 24,128-byte transitional build. The actual #671 read boundaries and #672
+  entropy completion seam are included. Do not claim candidate or production
+  completion: the two concrete #670 artist/revenue pointer rows remain
+  unresolved, while #656/#684 own candidate, fixed-stipend, cadence, rehearsal,
+  and independent-review evidence.
 
 ## Next Slice
 
-- Issue: `#654`, only after #671 merges.
-- Required result: consume the checked #671 source/evidence while implementing
-  the complete final Core surface below the 22,576-byte production ceiling.
+- Finish focused/release/full validation and publish the permanent-Core slice.
+- Close #671 and #672 after merge.
+- Keep #654 open if #670's concrete artist/revenue pointer rows remain
+  unresolved, then rebase and remeasure after #670 lands.
 - Preserve #656/#684 fail-closed candidate and reviewed-evidence boundaries.
 
 ## Integration Gate
 
-The active Core/mint order is `#688 -> #671 -> #654`. The #671 publication
+The active Core/mint order is the permanent-Core slice, then #670 pointer
+completion, then final #654 candidate remeasurement. The current publication
 must preserve the accepted ADR 0017 arithmetic and raise ordering, exact 22-GGP
-catalog, zero transitional-Core delta, and honest candidate incompleteness. It
-must also:
+catalog, measured net-negative Core delta, and honest candidate incompleteness.
+It must also:
 
-1. retain the #672 zero-Core-delta evidence and 128,886-gas planning snapshot;
-2. prove the #671 Core delta is exactly zero on the final base;
+1. bind the #672 128,886-gas snapshot to the actual Core call boundary;
+2. prove the exact #671 permanent-Core runtime and three read boundaries;
 3. preserve ADR 0019/#694 settlement and repeated-sale blockers;
 4. regenerate canonical source artifacts and the six-step release tail;
 5. pass focused Foundry, exact Slither, offline release verification, and one
@@ -108,20 +113,19 @@ must also:
 
 ## Sequencing Guard
 
-PR #704 merged the #672 planning/measurement slice. Do not begin #654's final
-Core implementation until the atomic #688 cutover and #671 shared-buffer slice
-have merged.
+PR #704 merged the #672 planning/measurement slice and PR #708 merged #671's
+evidence slice. The permanent Core now consumes both; no earlier serialization
+hold remains.
 
 Prior extraction reached a measured 21,792-byte Core runtime. The later
 manager/prepared-mint slice produced the 24,152-byte pre-cutover transitional
 build while legacy mint behavior remained live; 24,152 is later duplication,
 not the pre-manager extraction baseline. The atomic operation-identity cutover
 retires the duplicate mint path and lifetime Core replay map and measures
-24,128 bytes, a 24-byte net reduction. The #672 slice was
-spec/test/measurement-only with zero Core delta. The complete target must be at most
-22,576 bytes to preserve the exact 2,000-byte production margin, with
-restoration to the approved at-most-22,184-byte baseline as the objective.
-Historical scratch deltas are not additive savings.
+24,128 bytes, a 24-byte net reduction. The complete permanent target now
+measures 18,997 bytes, leaving 5,579 bytes of EIP-170 margin and restoring the
+approved at-most-22,184-byte objective. Historical scratch deltas are not
+additive savings.
 
 ## Future Core Dependency
 
@@ -137,22 +141,18 @@ permanent target already pins:
 - standard ERC-4906 `MetadataUpdate` / `BatchMetadataUpdate`; and
 - `StreamMetadataRefresh(uint16,bytes32,uint256,uint256)`.
 
-Current Core source does not yet implement those restricted selectors. Keep
-that source/ABI/bytecode seam in the `#654` complete-target measurement stage,
-after `#672`, because adding the real emitter spends Core runtime and must be
-compiled before proving the exact 2,000-byte production margin. Do not
+Current Core source implements those restricted selectors and their ERC-165
+advertisement; focused tests and the runtime measurement include them. Do not
 implement `#667`'s registry lifecycle or `#670`'s artist/royalty satellites in
-this lane. Before finalizing `#654`, report the emitter's selector/event ABI,
-caller/range validation, measured runtime delta, and release-artifact overlap
-to the coordinator.
+this lane. The merge handoff must report the emitter selector/event ABI,
+caller/range validation, measured runtime, and release-artifact overlap.
 
 The #654 conformance proof must also show `supportsInterface(IERC165) == true`,
 `supportsInterface(0xb5c73a01) == true`, and
 `supportsInterface(0xffffffff) == false`, plus a real batch-emitter execution
 path. A fallback-only target is nonconformant. Issue #667 owns the fail-closed
-constructor probe and registry consumer and may merge its satellite source
-without Core edits, but no production candidate or completeness claim can
-precede the #654 Core seam.
+constructor probe and registry consumer. No production candidate or
+completeness claim follows from the source seam alone.
 
 ## Maturity Guard
 

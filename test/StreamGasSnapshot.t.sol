@@ -6,7 +6,7 @@ import "../smart-contracts/IStreamCore.sol";
 import "../smart-contracts/IStreamMintLedger.sol";
 import "../smart-contracts/IStreamMintManager.sol";
 import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamCore.sol";
+import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMintLedger.sol";

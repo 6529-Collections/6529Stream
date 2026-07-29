@@ -1,7 +1,7 @@
 {
-  "schema_version": "6529stream.royalty-return-gas-buffer.v1",
+  "schema_version": "6529stream.royalty-return-gas-buffer.v2",
   "generated_by": "scripts/generate_royalty_return_gas_buffer.py:1",
-  "status": "planning_target_fixture",
+  "status": "as_built_permanent_core_source",
   "issue": 671,
   "compiler_profile": {
     "solc_version": "0.8.19",
@@ -15,8 +15,18 @@
   "sources": [
     {
       "path": "smart-contracts/StreamCoreReadBuffer.sol",
-      "sha256": "sha256:593fa4f0f47b916f75e4eb34c82a17c863a60c9a1ff4199ec680c047961a1c07",
-      "size_bytes": 2684
+      "sha256": "sha256:8efd67d74274d1dcce42045d2f7ed694733b6edda141241c4279e6b0159833e6",
+      "size_bytes": 2714
+    },
+    {
+      "path": "smart-contracts/StreamCoreExternalReads.sol",
+      "sha256": "sha256:c66e89f43262d3e073f2dcb8eab70a96f676f0ba8aeb0cd12c2318b45dd3dc26",
+      "size_bytes": 25747
+    },
+    {
+      "path": "smart-contracts/StreamCore.sol",
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
     },
     {
       "path": "smart-contracts/StreamGasParameterHost.sol",
@@ -30,23 +40,28 @@
     },
     {
       "path": "test/StreamRoyaltyReturnGasBuffer.t.sol",
-      "sha256": "sha256:9e976a23f7e0354f429d7d210a3a93497b3bb632c76ccfb57a01a9b8fa55a7ac",
-      "size_bytes": 16131
+      "sha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde",
+      "size_bytes": 16162
+    },
+    {
+      "path": "test/StreamCorePermanentTarget.t.sol",
+      "sha256": "sha256:0b1a12b22f9b0ccd69de9cb5e8157d4ac929503daf2731defecf5c357ed217d6",
+      "size_bytes": 34182
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
-      "sha256": "sha256:3270cf84f2132af6c677108d181006dac7a91cde8696701b06953c50fc72a3b8",
-      "size_bytes": 15463
+      "sha256": "sha256:176df402d15e1468269c858b207751b64628734be4153805d803d298b99cb8e0",
+      "size_bytes": 15465
     },
     {
       "path": "docs/revenue-splits-and-royalties.md",
-      "sha256": "sha256:9370fb3f5a663abdf30821cf0fbe1d3a226f69dc5e701f87155ac0ef053bf70e",
-      "size_bytes": 241455
+      "sha256": "sha256:71152e9fcf7efa05344b840670f1b1988fa7075f03c66d39aa2d974cf42780f0",
+      "size_bytes": 241727
     },
     {
       "path": "docs/metadata-router-and-renderer.md",
-      "sha256": "sha256:08d4a06d7d4fb0d280df79790038761f938f114e0e3c29a3dec3008955705888",
-      "size_bytes": 155078
+      "sha256": "sha256:24ba3c38a04f37fb495dff1ef73e021e997df4a95be49cf2de7c88c9a6c278ec",
+      "size_bytes": 155276
     }
   ],
   "shared_parameter": {
@@ -132,7 +147,7 @@
     "genesis_margin_gas": 2184265
   },
   "admission_model": {
-    "formula": "gasLimit + floor(gasLimit / 63) + sharedBuffer",
+    "formula": "gasLimit + ceil(gasLimit / 63) + sharedBuffer",
     "implementation": "overflow_safe_subtraction_comparisons",
     "residues_tested_mod_63": [
       0,
@@ -149,17 +164,17 @@
       {
         "consumer": "royaltyInfo(uint256,uint256)",
         "gas_limit": 50000,
-        "minimum_parent_gas": 2960793
+        "minimum_parent_gas": 2960794
       },
       {
         "consumer": "tokenURI(uint256)",
         "gas_limit": 500000,
-        "minimum_parent_gas": 3417936
+        "minimum_parent_gas": 3417937
       },
       {
         "consumer": "contractURI()",
         "gas_limit": 500000,
-        "minimum_parent_gas": 3417936
+        "minimum_parent_gas": 3417937
       }
     ]
   },
@@ -201,24 +216,30 @@
     "blocked_by_issue": "#684"
   },
   "core_boundary": {
-    "implementation_status": "reusable_source_and_target_fixture_only",
+    "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:4e90f9ae1bb3b4979f055b8cf92362ffb7033e73be89df84cad1c1c3315f525f",
-      "size_bytes": 70421
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
     },
-    "stream_core_runtime_bytes": 24128,
-    "stream_core_eip170_margin_bytes": 448,
-    "stream_core_delta_bytes": 0,
+    "stream_core_runtime_bytes": 18997,
+    "stream_core_eip170_margin_bytes": 5579,
+    "transitional_stream_core_runtime_bytes": 24128,
+    "stream_core_delta_bytes": -5131,
     "production_complete_runtime_ceiling_bytes": 22576,
-    "implementation_owner": "#654"
+    "implementation_owner": "#654 permanent-Core slice",
+    "candidate_instance_binding": "missing",
+    "candidate_instance_blocked_by": [
+      "#656",
+      "#670"
+    ]
   },
   "limitations": [
-    "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
-    "The reusable library owns no storage or mutation surface; the target fixture proves one authenticated shared host row feeds all three consumers.",
-    "The below/at/above threshold suite exercises the pure admission predicate; separate high-parent-gas paths prove full-stipend consumption and fail-safe completion, while #654 must prove the exact as-built external call boundary.",
-    "Issue #654 must integrate and remeasure the complete candidate StreamCore call boundary without increasing transitional Core bytecode in this slice.",
-    "Issue #656 must bind the exact production candidate, host instance, source verification, and deployed tuple.",
+    "This artifact binds the conservative target-fixture measurements to the as-built permanent StreamCore source, linked via-IR runtime receipt, and actual Core metadata read boundaries.",
+    "The reusable library owns no storage or mutation surface; the permanent Core reads one authenticated shared host row for royaltyInfo, tokenURI, and contractURI.",
+    "Actual Core tokenURI and contractURI tests prove below/at/above routing, exact maximum bounded returndata, malformed/oversized fallback, and event-free return handling.",
+    "The royalty resolver pointer remains intentionally un-installable until issue #670 supplies the accepted exact interface and concrete target; the target fixture retains royaltyInfo threshold coverage.",
+    "Issue #656 must bind the exact deployment candidate, host instance, source verification, and deployed tuple.",
     "Issue #684 must add candidate-instance-bound cadence, fixed-stipend, reproduction, and reachable raise-chain evidence before production.",
     "The committed generic governed-parameter measurement and fixed-stipend fields remain incomplete and fail closed in production mode.",
     "This artifact has no onchain authority, adds no probe or 23rd GGP, and makes no production-readiness claim."

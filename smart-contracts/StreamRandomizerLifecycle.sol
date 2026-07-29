@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.19;
 
-import "./IStreamCore.sol";
+import "./IStreamLegacyCore.sol";
 
 abstract contract StreamRandomizerLifecycle {
     uint256 public constant MAX_RANDOMNESS_POST_PROCESSING_RETRIES = 3;
@@ -222,7 +222,7 @@ abstract contract StreamRandomizerLifecycle {
     }
 
     function _fulfillRandomnessRequest(
-        IStreamCore _core,
+        IStreamLegacyCore _core,
         uint256 _requestId,
         uint256[] memory _randomWords
     ) internal returns (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed) {
@@ -357,7 +357,7 @@ abstract contract StreamRandomizerLifecycle {
         request.failureDataHash = failureDataHash;
     }
 
-    function _prepareRandomnessPostProcessingRetry(IStreamCore _core, uint256 _requestId)
+    function _prepareRandomnessPostProcessingRetry(IStreamLegacyCore _core, uint256 _requestId)
         internal
         returns (uint256 collectionId, uint256 tokenId, bytes32 derivedSeed, uint256 retryCount)
     {

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate checksum-bound planning evidence for issue #671 shared Core read buffer."""
+"""Generate checksum-bound as-built evidence for issue #671 shared Core read buffer."""
 
 from __future__ import annotations
 
@@ -23,18 +23,21 @@ SNAPSHOT_PATH = (
     REPO_ROOT
     / "release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap"
 )
-BYTECODE_PROOF_PATH = REPO_ROOT / "release-artifacts/latest/bytecode-release-proof.json"
+RELEASE_BUILD_MANIFEST_PATH = REPO_ROOT / "out-release/release-build-manifest.json"
 FOUNDRY_CONFIG_PATH = REPO_ROOT / "foundry.toml"
 LIBRARY_PATH = REPO_ROOT / "smart-contracts/StreamCoreReadBuffer.sol"
+EXTERNAL_READS_PATH = REPO_ROOT / "smart-contracts/StreamCoreExternalReads.sol"
+CORE_PATH = REPO_ROOT / "smart-contracts/StreamCore.sol"
 HOST_PATH = REPO_ROOT / "smart-contracts/StreamGasParameterHost.sol"
 HARNESS_PATH = REPO_ROOT / "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol"
 TEST_PATH = REPO_ROOT / "test/StreamRoyaltyReturnGasBuffer.t.sol"
+CORE_TEST_PATH = REPO_ROOT / "test/StreamCorePermanentTarget.t.sol"
 NORMATIVE_PATHS = (
     REPO_ROOT / "docs/adr/0017-raise-only-parameter-governance.md",
     REPO_ROOT / "docs/revenue-splits-and-royalties.md",
     REPO_ROOT / "docs/metadata-router-and-renderer.md",
 )
-SCHEMA_VERSION = "6529stream.royalty-return-gas-buffer.v1"
+SCHEMA_VERSION = "6529stream.royalty-return-gas-buffer.v2"
 SNAPSHOT_LINE_RE = re.compile(
     r"^(?P<test>[^ ]+) \(gas: (?P<gas>[0-9]+)\)$"
 )
@@ -64,10 +67,11 @@ ROYALTY_LIMIT_GENESIS = 50_000
 METADATA_LIMIT_GENESIS = 500_000
 MAX_METADATA_RETURNDATA = 65_536
 ROYALTY_RETURNDATA = 64
+TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES = 24_128
 
 
 class SharedBufferGenerationError(ValueError):
-    """Raised when shared-buffer planning evidence cannot be generated."""
+    """Raised when shared-buffer as-built evidence cannot be generated."""
 
 
 def file_sha256(path: Path) -> str:
@@ -215,48 +219,108 @@ def _compiler_profile() -> dict[str, Any]:
 
 
 def _stream_core_boundary() -> dict[str, Any]:
-    proof = json.loads(BYTECODE_PROOF_PATH.read_text(encoding="utf-8"))
+    manifest = json.loads(RELEASE_BUILD_MANIFEST_PATH.read_text(encoding="utf-8"))
     rows = [
         row
-        for row in proof.get("contract_proofs", [])
-        if row.get("contract", {}).get("name") == "StreamCore"
+        for row in manifest.get("targets", [])
+        if row.get("kind") == "production_contract"
+        and row.get("name") == "StreamCore"
+        and row.get("source") == "smart-contracts/StreamCore.sol"
     ]
-    if not rows:
-        raise SharedBufferGenerationError("bytecode proof has no StreamCore rows")
-    sizes = {
-        (
-            row["sizes"]["runtime_bytecode_bytes"],
-            row["sizes"]["runtime_margin_bytes"],
-            row["source_verification"]["source_sha256"],
-        )
-        for row in rows
-    }
-    if len(sizes) != 1:
+    if len(rows) != 1:
         raise SharedBufferGenerationError(
-            "bytecode proof StreamCore rows disagree on source or runtime size"
+            "release build manifest must contain exactly one StreamCore target"
         )
-    runtime_bytes, margin_bytes, source_sha256 = next(iter(sizes))
-    core_path = REPO_ROOT / "smart-contracts/StreamCore.sol"
-    if source_sha256 != f"sha256:{file_sha256(core_path)}":
+    row = rows[0]
+    source_rows = [
+        source
+        for source in row.get("metadata_sources", [])
+        if source.get("path") == "smart-contracts/StreamCore.sol"
+    ]
+    if len(source_rows) != 1:
         raise SharedBufferGenerationError(
-            "bytecode proof StreamCore source hash is stale"
+            "release build manifest must bind exactly one StreamCore source"
         )
+    source_sha256 = source_rows[0].get("sha256")
+    if source_sha256 != f"sha256:{file_sha256(CORE_PATH)}":
+        raise SharedBufferGenerationError(
+            "release build manifest StreamCore source hash is stale"
+        )
+    artifact_path = (REPO_ROOT / row["artifact_path"]).resolve()
+    if not artifact_path.is_relative_to((REPO_ROOT / "out-release").resolve()):
+        raise SharedBufferGenerationError("StreamCore artifact escaped out-release")
+    if f"sha256:{file_sha256(artifact_path)}" != row.get("artifact_sha256"):
+        raise SharedBufferGenerationError("StreamCore artifact hash is stale")
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    runtime_object = artifact.get("deployedBytecode", {}).get("object")
+    if (
+        not isinstance(runtime_object, str)
+        or not runtime_object.startswith("0x")
+        or len(runtime_object) <= 2
+        or len(runtime_object[2:]) % 2 != 0
+    ):
+        raise SharedBufferGenerationError("StreamCore runtime bytecode is malformed")
+    runtime_bytes = len(runtime_object[2:]) // 2
+    margin_bytes = 24_576 - runtime_bytes
+    if runtime_bytes > 22_576:
+        raise SharedBufferGenerationError(
+            f"as-built StreamCore runtime exceeds the production ceiling: {runtime_bytes}"
+        )
+    if margin_bytes != 24_576 - runtime_bytes:
+        raise SharedBufferGenerationError("bytecode proof StreamCore margin is inconsistent")
     return {
-        "implementation_status": "reusable_source_and_target_fixture_only",
-        "stream_core_source": _source_binding(core_path),
+        "implementation_status": "as_built_permanent_core_source",
+        "stream_core_source": _source_binding(CORE_PATH),
         "stream_core_runtime_bytes": runtime_bytes,
         "stream_core_eip170_margin_bytes": margin_bytes,
-        "stream_core_delta_bytes": 0,
+        "transitional_stream_core_runtime_bytes": TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES,
+        "stream_core_delta_bytes": runtime_bytes - TRANSITIONAL_STREAM_CORE_RUNTIME_BYTES,
         "production_complete_runtime_ceiling_bytes": 22_576,
-        "implementation_owner": "#654",
+        "implementation_owner": "#654 permanent-Core slice",
+        "candidate_instance_binding": "missing",
+        "candidate_instance_blocked_by": ["#656", "#670"],
     }
 
 
 def _parent_threshold(gas_limit: int, buffer: int) -> int:
-    return gas_limit + gas_limit // 63 + buffer
+    return gas_limit + (gas_limit + 62) // 63 + buffer
+
+
+def _validate_as_built_source() -> None:
+    library = LIBRARY_PATH.read_text(encoding="utf-8")
+    core = CORE_PATH.read_text(encoding="utf-8")
+    core_test = CORE_TEST_PATH.read_text(encoding="utf-8")
+    for fragment in (
+        "gasLimit / 63 + (gasLimit % 63 == 0 ? 0 : 1)",
+        "uint256 private constant _MAX_ROUTER_RETURNDATA = 65_536;",
+    ):
+        if fragment not in f"{library}\n{EXTERNAL_READS_PATH.read_text(encoding='utf-8')}":
+            raise SharedBufferGenerationError(
+                f"missing as-built shared-buffer source fragment: {fragment}"
+            )
+    for fragment in (
+        "_gasParameters[_GGP_ROYALTY_RETURN_GAS_BUFFER].value",
+        "StreamCoreExternalReads.boundedRouterString(",
+        "StreamCoreExternalReads.resolveRoyalty(",
+    ):
+        if fragment not in core:
+            raise SharedBufferGenerationError(
+                f"missing as-built Core shared-buffer fragment: {fragment}"
+            )
+    for test_name in (
+        "testActualCoreTokenUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+        "testActualCoreContractUriBoundaryRejectsBelowAndRoutesAtAndAbove",
+        "testMetadataRouterMaximumBoundedReturnCompletes",
+        "testMetadataRouterSuccessAndEveryFailureFallsBack",
+    ):
+        if f"function {test_name}(" not in core_test:
+            raise SharedBufferGenerationError(
+                f"missing as-built shared-buffer regression test: {test_name}"
+            )
 
 
 def build_evidence() -> dict[str, Any]:
+    _validate_as_built_source()
     measurements = _parse_snapshot()
     worst_test, worst_gas = max(measurements.items(), key=lambda item: item[1])
     floor = _round_up(worst_gas * FLOOR_MULTIPLIER)
@@ -283,14 +347,17 @@ def build_evidence() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_by": "scripts/generate_royalty_return_gas_buffer.py:1",
-        "status": "planning_target_fixture",
+        "status": "as_built_permanent_core_source",
         "issue": 671,
         "compiler_profile": _compiler_profile(),
         "sources": [
             _source_binding(LIBRARY_PATH),
+            _source_binding(EXTERNAL_READS_PATH),
+            _source_binding(CORE_PATH),
             _source_binding(HOST_PATH),
             _source_binding(HARNESS_PATH),
             _source_binding(TEST_PATH),
+            _source_binding(CORE_TEST_PATH),
             *[_source_binding(path) for path in NORMATIVE_PATHS],
         ],
         "shared_parameter": {
@@ -349,7 +416,7 @@ def build_evidence() -> dict[str, Any]:
             "genesis_margin_gas": genesis - worst_gas,
         },
         "admission_model": {
-            "formula": "gasLimit + floor(gasLimit / 63) + sharedBuffer",
+            "formula": "gasLimit + ceil(gasLimit / 63) + sharedBuffer",
             "implementation": "overflow_safe_subtraction_comparisons",
             "residues_tested_mod_63": [0, 1, 62],
             "boundary_points_tested": ["below", "at", "above"],
@@ -414,11 +481,11 @@ def build_evidence() -> dict[str, Any]:
         },
         "core_boundary": _stream_core_boundary(),
         "limitations": [
-            "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
-            "The reusable library owns no storage or mutation surface; the target fixture proves one authenticated shared host row feeds all three consumers.",
-            "The below/at/above threshold suite exercises the pure admission predicate; separate high-parent-gas paths prove full-stipend consumption and fail-safe completion, while #654 must prove the exact as-built external call boundary.",
-            "Issue #654 must integrate and remeasure the complete candidate StreamCore call boundary without increasing transitional Core bytecode in this slice.",
-            "Issue #656 must bind the exact production candidate, host instance, source verification, and deployed tuple.",
+            "This artifact binds the conservative target-fixture measurements to the as-built permanent StreamCore source, linked via-IR runtime receipt, and actual Core metadata read boundaries.",
+            "The reusable library owns no storage or mutation surface; the permanent Core reads one authenticated shared host row for royaltyInfo, tokenURI, and contractURI.",
+            "Actual Core tokenURI and contractURI tests prove below/at/above routing, exact maximum bounded returndata, malformed/oversized fallback, and event-free return handling.",
+            "The royalty resolver pointer remains intentionally un-installable until issue #670 supplies the accepted exact interface and concrete target; the target fixture retains royaltyInfo threshold coverage.",
+            "Issue #656 must bind the exact deployment candidate, host instance, source verification, and deployed tuple.",
             "Issue #684 must add candidate-instance-bound cadence, fixed-stipend, reproduction, and reachable raise-chain evidence before production.",
             "The committed generic governed-parameter measurement and fixed-stipend fields remain incomplete and fail closed in production mode.",
             "This artifact has no onchain authority, adds no probe or 23rd GGP, and makes no production-readiness claim.",
@@ -459,7 +526,7 @@ def main(argv: list[str] | None = None) -> int:
         if current != rendered.encode("utf-8"):
             print("shared-buffer evidence is stale", file=sys.stderr)
             return 1
-        print("shared-buffer planning evidence is current")
+        print("shared-buffer as-built evidence is current")
         return 0
 
     output.parent.mkdir(parents=True, exist_ok=True)

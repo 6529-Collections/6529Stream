@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "baa99be668689d7b3357cc54f8d2f112c4444fdc",
-    "captured_at_utc": "2026-07-28T02:40:06Z",
+    "analyzed_commit": "24173efe3f4722b6d50085effae489927cbcb712",
+    "captured_at_utc": "2026-07-28T18:48:50Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 255,
     "capture_json_success": true,
-    "raw_json_size_bytes": 335515806,
-    "raw_json_sha256": "sha256:a650007b9e3777e4a9cfea19aec687973083bbbf37da7c4471350c70c7c44ac8",
-    "solidity_tree_sha256": "sha256:936478b9f7ebcc92272d367d817dcad096db01d917f99a1ffe5edcc0aaa0d947",
+    "raw_json_size_bytes": 338394717,
+    "raw_json_sha256": "sha256:b502fe72ff0463485646d5b30fcad5535728683b562e3e00cacb7d915694d917",
+    "solidity_tree_sha256": "sha256:9b75a59e5b9d138a407fa59c455df6bb015574fe04a159d38ccefa2a6adb796c",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -37,17 +37,17 @@
   },
   "capture_counts": {
     "High": 49,
-    "Medium": 802,
-    "Low": 1259,
-    "Informational": 1006,
-    "Optimization": 40,
-    "total": 3156
+    "Medium": 826,
+    "Low": 1265,
+    "Informational": 1032,
+    "Optimization": 42,
+    "total": 3214
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
-      "High": 3,
-      "Medium": 25,
-      "total": 28
+      "High": 2,
+      "Medium": 30,
+      "total": 32
     },
     "vendored": {
       "High": 1,
@@ -55,9 +55,9 @@
       "total": 10
     },
     "test": {
-      "High": 45,
-      "Medium": 761,
-      "total": 806
+      "High": 46,
+      "Medium": 780,
+      "total": 826
     },
     "script": {
       "High": 0,
@@ -71,9 +71,9 @@
     }
   },
   "counts": {
-    "High": 3,
-    "Medium": 25,
-    "total": 28
+    "High": 2,
+    "Medium": 30,
+    "total": 32
   },
   "findings": [
     {
@@ -177,48 +177,96 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "detector": "uninitialized-state",
-      "impact": "High",
+      "fingerprint": "sha256:3d09984af13111e85ffc3bb4d781a1f598ccf37bdba1a8ea57a2d12a3b010730",
+      "detector": "divide-before-multiply",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/StreamCoreExternalReads.sol",
+        "start_line": 449,
+        "end_line": 487,
+        "element_type": "function",
+        "name": "resolveRoyalty",
+        "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "start_line": 449,
+          "end_line": 487,
+          "element_type": "function",
+          "name": "resolveRoyalty",
+          "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
+        },
+        {
+          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "start_line": 484,
+          "end_line": 485,
+          "element_type": "node",
+          "name": "royaltyAmount = (salePrice / _ROYALTY_DENOMINATOR) * bps + ((salePrice % _ROYALTY_DENOMINATOR) * bps) / _ROYALTY_DENOMINATOR",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither flags the overflow-safe quotient-and-remainder royalty multiplication decomposition. Exact arithmetic equivalence, overflow bounds, and resolver-output behavior require independent review; the row is not accepted or suppressed.",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/654",
+        "https://github.com/6529-Collections/6529Stream/issues/670",
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Property-test the decomposition against floor(salePrice * bps / 10_000) across edge values without overflowing the oracle.",
+        "Prove bps bounds and unchecked intermediate bounds for every accepted resolver response.",
+        "Record independent reviewer disposition before changing this row."
+      ],
+      "owner": "Protocol maintainers and independent security reviewers",
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:4fb9bd5e82acd402b9d1fc1a0f77a982799e716ce99fd40c44a10c77594c0bae",
+      "detector": "incorrect-equality",
+      "impact": "Medium",
       "confidence": "High",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 185,
-        "end_line": 185,
-        "element_type": "variable",
-        "name": "collectionBurnsBlockedAtBlockHeights",
-        "signature": ""
+        "start_line": 1041,
+        "end_line": 1044,
+        "element_type": "function",
+        "name": "_blockNumber64",
+        "signature": "_blockNumber64()"
       },
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 185,
-          "end_line": 185,
-          "element_type": "variable",
-          "name": "collectionBurnsBlockedAtBlockHeights",
-          "signature": ""
+          "start_line": 1041,
+          "end_line": 1044,
+          "element_type": "function",
+          "name": "_blockNumber64",
+          "signature": "_blockNumber64()"
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 620,
-          "end_line": 622,
-          "element_type": "function",
-          "name": "collectionBurnsBlockedAtBlock",
-          "signature": "collectionBurnsBlockedAtBlock(uint256)"
+          "start_line": 1042,
+          "end_line": 1042,
+          "element_type": "node",
+          "name": "block.number == 0 || block.number > type()(uint64).max",
+          "signature": ""
         }
       ],
-      "fingerprint": "sha256:6ee25e333e0e15fc0b2e14a4c0e64c9c4b301bf8bedba0fbfcac96fa8772eae4",
       "source_kind": "first_party_production",
       "status": "Open",
-      "triage_class": "confirmed_gap",
-      "rationale": "Confirmed read-never-written StreamCore burn-block state. Issue #654 tracks the missing writer and compatibility-safe remediation; this row is not accepted or suppressed.",
+      "triage_class": "pending_disposition",
+      "rationale": "The exact-equality branch is the explicit zero-block rejection in the uint64 block-height conversion. Its chain-boundary assumptions require focused proof and review; the row is not accepted or suppressed.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "Implement or remove the state surface under issue #654 with an explicit compatibility decision.",
-        "Add writer authorization, transition, read-path, and negative tests, plus golden ABI and behavior evidence.",
-        "Obtain independent review of the remediation before changing this row to Fixed or accepted risk."
+        "Test the zero, uint64 maximum, and overflow block-height boundaries on the permanent Core path.",
+        "Document whether block zero is intentionally unsupported for every target environment.",
+        "Record independent reviewer disposition before changing this row."
       ],
       "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
@@ -316,16 +364,17 @@
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:90b373dcccf3c48614d86ea6322ce40a9d59e18a550db4d6c24bf0b439fe5b2e",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamCore.sol",
-        "start_line": 517,
-        "end_line": 539,
+        "start_line": 521,
+        "end_line": 536,
         "element_type": "function",
-        "name": "completePreparedMintFromManager",
-        "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)"
+        "name": "mintFromManager",
+        "signature": "mintFromManager(uint256,address,bytes,bytes32,bytes32)"
       },
       "semantic_elements": [
         {
@@ -338,49 +387,104 @@
         },
         {
           "path": "smart-contracts/StreamCore.sol",
-          "start_line": 517,
-          "end_line": 539,
+          "start_line": 521,
+          "end_line": 536,
           "element_type": "function",
-          "name": "completePreparedMintFromManager",
-          "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)"
+          "name": "mintFromManager",
+          "signature": "mintFromManager(uint256,address,bytes,bytes32,bytes32)"
+        },
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 534,
+          "end_line": 534,
+          "element_type": "node",
+          "name": "_completeMint(collectionId,tokenId,initialRecipient,mintCommitment)",
+          "signature": ""
         },
         {
           "path": "smart-contracts/StreamCore.sol",
           "start_line": 535,
           "end_line": 535,
           "element_type": "node",
-          "name": "_safeMint(initialRecipient,tokenId)",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/StreamCore.sol",
-          "start_line": 536,
-          "end_line": 537,
-          "element_type": "node",
-          "name": "collectionAdditionalData[collectionId].randomizer.calculateTokenHash(collectionId,tokenId,_saltfun_o)",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/StreamCore.sol",
-          "start_line": 538,
-          "end_line": 538,
-          "element_type": "node",
-          "name": "pendingPreparedMintTokenId = 0",
+          "name": "_completionTokenId = 0",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:5abddcac429d8e5ce402ad1019a09b2ef700dd884be4cea1117758a30f7b8fd2",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
-      "rationale": "Design-sensitive external-call ordering in prepared-mint completion and its receiver/randomizer callbacks requires a complete effects/callback review. The row is not accepted or suppressed.",
+      "rationale": "Manager mint completion calls the entropy coordinator and ERC-721 receiver before clearing the completion guard. The guard and manager authority are explicit, but the complete callback and rollback ordering remains review-sensitive; the row is not accepted or suppressed.",
       "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.",
-        "Add adversarial tests for duplicate completion, callback reentry, rollback, and state-ordering.",
-        "Record independent reviewer disposition under issue #658."
+        "Document the entropy, ERC-721 receiver, manager, governance, and metadata callback graph and the state committed before each call.",
+        "Retain adversarial callback reentry, duplicate completion, and atomic rollback tests for the direct mint path.",
+        "Record independent reviewer disposition before changing this row."
+      ],
+      "owner": "Protocol maintainers and independent security reviewers",
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:678e3d8465a078d6f69fd1592452717c7e2624f1ff0d4942f4529bbc5b67d9fc",
+      "detector": "reentrancy-no-eth",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/StreamCore.sol",
+        "start_line": 555,
+        "end_line": 579,
+        "element_type": "function",
+        "name": "completePreparedMintFromManager",
+        "signature": "completePreparedMintFromManager(uint256,address,bytes32,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/ERC721.sol",
+          "start_line": 407,
+          "end_line": 418,
+          "element_type": "node",
+          "name": "retval = IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 555,
+          "end_line": 579,
+          "element_type": "function",
+          "name": "completePreparedMintFromManager",
+          "signature": "completePreparedMintFromManager(uint256,address,bytes32,bytes32)"
+        },
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 577,
+          "end_line": 577,
+          "element_type": "node",
+          "name": "_completeMint(collectionId,tokenId,initialRecipient,mintCommitment)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 578,
+          "end_line": 578,
+          "element_type": "node",
+          "name": "_completionTokenId = 0",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "design_review",
+      "rationale": "Prepared-mint completion calls the entropy coordinator and ERC-721 receiver before clearing the completion guard. Pending identity is cleared first and rollback is atomic, but the complete callback ordering remains review-sensitive; the row is not accepted or suppressed.",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/654",
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Document the prepared-mint callback graph and the state committed or cleared before each external call.",
+        "Retain adversarial callback reentry, replacement-manager abort, duplicate completion, and atomic rollback tests.",
+        "Record independent reviewer disposition before changing this row."
       ],
       "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
@@ -1301,6 +1405,102 @@
         "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
         "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
         "Record independent reviewer disposition under issue #658."
+      ],
+      "owner": "Protocol maintainers and independent security reviewers",
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:57e768ce4a554b85bf8fa3b73ae4d6971a3eafc44f99d69457095d49a327513d",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/StreamCore.sol",
+        "start_line": 803,
+        "end_line": 826,
+        "element_type": "function",
+        "name": "royaltyInfo",
+        "signature": "royaltyInfo(uint256,uint256)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 803,
+          "end_line": 826,
+          "element_type": "function",
+          "name": "royaltyInfo",
+          "signature": "royaltyInfo(uint256,uint256)"
+        },
+        {
+          "path": "smart-contracts/StreamCore.sol",
+          "start_line": 812,
+          "end_line": 825,
+          "element_type": "node",
+          "name": "StreamCoreExternalReads.resolveRoyalty(pointer.target,_gasParameters[_GGP_ROYALTY_RESOLVER_GAS_LIMIT].value,_gasParameters[_GGP_ROYALTY_RETURN_GAS_BUFFER].value,abi.encodeWithSelector(bytes4(keccak256(bytes)(royaltyReceiverAndBps(address,uint256,uint256,uint256,bool))),address(this),tokenId,salePrice,collectionId,mappingExists),salePrice)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports the tail-returned royalty resolver tuple as an unused return. The ABI-level receiver/amount propagation and fail-soft behavior require explicit proof and review; the row is not accepted or suppressed.",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/654",
+        "https://github.com/6529-Collections/6529Stream/issues/670",
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Retain exact success, zero-royalty, malformed, oversized, reverting, and full-gas-budget royalty return tests.",
+        "Verify the compiled ABI and caller-observed tuple match the resolver result on every accepted path.",
+        "Record independent reviewer disposition before changing this row."
+      ],
+      "owner": "Protocol maintainers and independent security reviewers",
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:4666ec4f0e0c5f30166e09005cef90b29d29741e62227417b5432e76ca752923",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/StreamCoreExternalReads.sol",
+        "start_line": 431,
+        "end_line": 445,
+        "element_type": "function",
+        "name": "boundedRouterString",
+        "signature": "boundedRouterString(address,bytes,uint256,uint256)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "start_line": 431,
+          "end_line": 445,
+          "element_type": "function",
+          "name": "boundedRouterString",
+          "signature": "boundedRouterString(address,bytes,uint256,uint256)"
+        },
+        {
+          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "start_line": 444,
+          "end_line": 444,
+          "element_type": "node",
+          "name": "StreamCoreReadBuffer.decodeRequiredString(data)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports the tail-returned bounded router decode tuple as an unused return. Exact status/string propagation and fail-safe behavior require explicit proof and review; the row is not accepted or suppressed.",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/654",
+        "https://github.com/6529-Collections/6529Stream/issues/671",
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Retain exact success, malformed, oversized, reverting, maximum-returndata, and full-gas-budget router tests.",
+        "Verify the compiled ABI and Core-observed status/string tuple match the decoder result.",
+        "Record independent reviewer disposition before changing this row."
       ],
       "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"

@@ -113,8 +113,8 @@ The current production profile is:
 
 - canonical command: `python scripts/build_release_artifacts.py`;
 - aggregate diagnostic: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 24,128 bytes;
-- current EIP-170 margin: 448 bytes;
+- current `StreamCore` runtime: 18,997 bytes;
+- current EIP-170 margin: 5,579 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
 - interim development floor: 384-byte minimum runtime margin;
@@ -156,19 +156,20 @@ The default classification for future feature work is:
 | Frontend, mobile, Electron, SDK, analytics, and indexer behavior | Integration docs, generated artifacts, release manifests, and off-chain code | No Core spend |
 | Deployment, ceremony, audit, release, signature, and evidence workflows | Release artifacts, deployment manifests, address books, runbooks, and retained evidence | No Core spend |
 
-This policy is intentionally conservative even when an accepted exception keeps
-the current runtime above the approved baseline. CON-012 spent Core bytecode on
-the mint-manager boundary and explicit token identity reads; the atomic
-operation-identity cutover later removed 24 net runtime bytes, leaving 448 bytes
-of current EIP-170 margin. That passes the interim development floor but fails
-the non-waivable 2,000-byte production deployment minimum; interim exception
-records cannot survive the deployment gate. The approved bytecode-spend
-baseline remains 22,184 bytes with 2,392 bytes of EIP-170 margin, and
-[issue #654](https://github.com/6529-Collections/6529Stream/issues/654) tracks
-the required recovery through real compression, extraction, or authorized
-relocation. The goal is to keep `StreamCore` deployable, auditable, and stable
-while allowing world-class 1/1 drop surfaces to evolve through explicit,
-versioned extension points.
+This policy remains conservative after the permanent-Core extraction. CON-012
+spent Core bytecode on the mint-manager boundary and explicit token identity
+reads; the atomic operation-identity cutover later removed 24 net runtime
+bytes. The permanent-Core metadata/router and authenticated external-read
+relocation then reduced runtime by another 5,131 bytes to 18,997 bytes, leaving
+5,579 bytes of EIP-170 margin. That is below the approved 22,184-byte objective
+and above the non-waivable 2,000-byte production deployment margin. The size
+result does not make the protocol production-ready:
+[issue #654](https://github.com/6529-Collections/6529Stream/issues/654) remains
+open for the two unresolved #670 artist and royalty pointer interface bindings,
+and audit, deployment, and retained non-local evidence gates remain separate.
+The goal is to keep `StreamCore` deployable, auditable, and stable while
+allowing world-class 1/1 drop surfaces to evolve through explicit, versioned
+extension points.
 
 ## Actor And Role Boundaries
 

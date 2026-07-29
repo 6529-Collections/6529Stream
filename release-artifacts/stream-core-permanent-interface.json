@@ -6,8 +6,8 @@
     "permanence_class": "Permanent",
     "completeness": "complete_permanent_functions_and_events",
     "bytecode_measurement_authority": "complete_linked_via_ir_runtime_measurement_only",
-    "implementation_comparison": "deferred_until_complete_core_cutover",
-    "implementation_baseline": "release-artifacts/baselines/v0.1.0/abi-surface.json",
+    "implementation_comparison": "as_built_permanent_core_cutover",
+    "implementation_baseline": "release-artifacts/baselines/pre-permanent-core/abi-surface.json",
     "excluded_abi_categories": [
       "custom_errors",
       "constructor"

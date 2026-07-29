@@ -92,15 +92,17 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 3, "Medium": 25, "total": 28})
-        self.assertEqual(len(data["findings"]), 28)
+        self.assertEqual(data["counts"], {"High": 2, "Medium": 30, "total": 32})
+        self.assertEqual(len(data["findings"]), 32)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
 
     def test_committed_triage_boundary_is_exact_and_all_open(self) -> None:
         rows = load_baseline()["findings"]
-        triage: dict[str, int] = {}
+        triage: dict[str, int] = {
+            key: 0 for key in checker.EXPECTED_TRIAGE_COUNTS
+        }
         for row in rows:
             triage[row["triage_class"]] = triage.get(row["triage_class"], 0) + 1
             self.assertEqual(row["status"], "Open")

@@ -12,7 +12,7 @@ pragma solidity ^0.8.19;
 
 import "./VRFCoordinatorV2Interface.sol";
 import "./VRFConsumerBaseV2.sol";
-import "./IStreamCore.sol";
+import "./IStreamLegacyCore.sol";
 import "./IStreamAdmins.sol";
 import "./StreamPauseDomains.sol";
 import "./StreamRandomizerLifecycle.sol";
@@ -30,7 +30,7 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
     uint32 public numWords = 1;
 
     address gencore;
-    IStreamCore public gencoreContract;
+    IStreamLegacyCore public gencoreContract;
     IStreamAdmins private adminsContract;
 
     constructor(
@@ -42,7 +42,7 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
         COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
         s_subscriptionId = subscriptionId;
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
         adminsContract = IStreamAdmins(_adminsContract);
     }
 
@@ -174,7 +174,7 @@ contract NextGenRandomizerVRF is VRFConsumerBaseV2, StreamRandomizerLifecycle {
         FunctionAdminRequired(this.updateCoreContract.selector)
     {
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
     }
 
     // get randomizer contract status

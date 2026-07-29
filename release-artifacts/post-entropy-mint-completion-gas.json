@@ -1,7 +1,7 @@
 {
-  "schema_version": "6529stream.post-entropy-mint-completion-gas.v1",
+  "schema_version": "6529stream.post-entropy-mint-completion-gas.v2",
   "generated_by": "scripts/generate_post_entropy_completion_gas.py:1",
-  "status": "planning_target_fixture",
+  "status": "as_built_permanent_core_source",
   "issue": 672,
   "compiler_profile": {
     "solc_version": "0.8.19",
@@ -24,19 +24,34 @@
       "size_bytes": 9118
     },
     {
+      "path": "smart-contracts/StreamCore.sol",
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
+    },
+    {
+      "path": "smart-contracts/StreamCoreReadBuffer.sol",
+      "sha256": "sha256:8efd67d74274d1dcce42045d2f7ed694733b6edda141241c4279e6b0159833e6",
+      "size_bytes": 2714
+    },
+    {
+      "path": "test/StreamCorePermanentTarget.t.sol",
+      "sha256": "sha256:0b1a12b22f9b0ccd69de9cb5e8157d4ac929503daf2731defecf5c357ed217d6",
+      "size_bytes": 34182
+    },
+    {
       "path": "docs/stream-entropy-coordinator.md",
-      "sha256": "sha256:3c867a5ea1a17373c6054bdde81802bf7cbad0dd2f059acbe5b3ea2756e5e00b",
-      "size_bytes": 168338
+      "sha256": "sha256:bac56a39f1a8b7f02c76b45a8f3b1dd24d7edddb65f38a480524b694b508a596",
+      "size_bytes": 168207
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:3e386a592412a29616a725ae4c92c4812467d2935d86ecfef740cab938714f82",
-      "size_bytes": 138333
+      "sha256": "sha256:0c7c336d84025f36ca5b210f0b42bc59a457c15a7c02fd01946c0801972dc585",
+      "size_bytes": 138119
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:4f1269651e84ae155d67e38e807deddda4e9e2d180463803c405f1469bcf9e2d",
-      "size_bytes": 161695
+      "sha256": "sha256:e55353a964ed423e00a1c1d20150041d000e329a9b389bb2fc031d97f7db7140",
+      "size_bytes": 161511
     }
   ],
   "measurement": {
@@ -63,20 +78,26 @@
     }
   },
   "admission_model": {
-    "formula": "ceil(registrationGasLimit * 64 / 63) + POST_ENTROPY_PARENT_RESERVE",
+    "formula": "registrationGasLimit + ceil(registrationGasLimit / 63) + POST_ENTROPY_PARENT_RESERVE + ENTROPY_CALL_UPFRONT_GAS",
     "eip150_numerator": 64,
     "eip150_denominator": 63,
     "measurement_margin_bps": 2500,
     "rounding_quantum_gas": 1000,
     "post_entropy_parent_reserve_gas": 162000,
     "reference_registration_gas_limit": 120000,
-    "reference_planning_parent_gas_lower_bound": 283905,
+    "reference_as_built_parent_gas_requirement": 287205,
     "registration_gas_limit_source": "live ENTROPY_REGISTRATION_GAS_LIMIT governed parameter",
-    "proof_scope": "planning_eip150_and_eoa_tail_terms_only",
-    "excluded_call_boundary_costs": [
+    "proof_scope": "as_built_complete_low_level_call_boundary",
+    "included_call_boundary_costs": [
       "ABI argument encoding and memory expansion",
-      "low-level CALL upfront and dynamic costs",
+      "cold low-level CALL upfront and account-access costs",
       "source-level work between the admission check and CALL opcode"
+    ],
+    "call_upfront_reserve_gas": 3300,
+    "actual_boundary_test": "StreamCorePermanentTargetTest:testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold()",
+    "rollback_tests": [
+      "StreamCorePermanentTargetTest:testEntropyFailureRollsBackAllCoreState()",
+      "StreamCorePermanentTargetTest:testEntropyReturnDataFailsClosedAndRollsBack()"
     ],
     "legacy_unmeasured_parent_allowance_gas": 30000
   },
@@ -86,25 +107,30 @@
     "failure_behavior": "whole_transaction_revert"
   },
   "core_boundary": {
-    "implementation_status": "target_fixture_only",
+    "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
       "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:4e90f9ae1bb3b4979f055b8cf92362ffb7033e73be89df84cad1c1c3315f525f",
-      "size_bytes": 70421
+      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
+      "size_bytes": 49312
     },
-    "stream_core_runtime_bytes": 24128,
-    "stream_core_eip170_margin_bytes": 448,
-    "stream_core_delta_bytes": 0,
+    "stream_core_runtime_bytes": 18997,
+    "stream_core_eip170_margin_bytes": 5579,
+    "transitional_stream_core_runtime_bytes": 24128,
+    "stream_core_delta_bytes": -5131,
     "production_complete_runtime_ceiling_bytes": 22576,
     "approved_runtime_objective_bytes": 22184,
-    "implementation_owner": "#654"
+    "implementation_owner": "#654 permanent-Core slice",
+    "candidate_instance_binding": "missing",
+    "candidate_instance_blocked_by": [
+      "#656",
+      "#670"
+    ]
   },
   "limitations": [
-    "This is checksum-bound target-fixture planning evidence, not an as-built StreamCore measurement.",
-    "The admission formula is a planning lower bound over EIP-150 forwarding and the measured EOA tail; this fixture does not prove an exact as-built gasleft threshold at the low-level CALL boundary.",
-    "The target fixture checks the pure below/at/above policy predicate and a high-parent-gas full-stipend path separately; it does not prove full-stipend forwarding from an exact supplied threshold.",
-    "Issue #654 must measure and enforce the complete low-level-call admission boundary, including ABI encoding, memory expansion, CALL upfront and dynamic costs, and source-level pre-call work, then prove the exact forwarded stipend and post-return reserve against the linked Core.",
-    "The committed governed-parameter inventory remains incomplete and is not updated by this artifact.",
+    "This artifact binds the measured EOA tail to the as-built permanent StreamCore source, its linked via-IR runtime receipt, and an executable exact-boundary/full-stipend regression test.",
+    "The fixed reserve covers the measured EOA-recipient completion tail; contract-recipient callback gas remains caller-supplied and unbounded.",
+    "The exact deployment instance and the two unresolved artist/revenue pointer rows remain blocked by issues #656 and #670.",
+    "The governed-parameter candidate binding remains incomplete under issue #684.",
     "This artifact makes no production-readiness or deployment claim."
   ]
 }

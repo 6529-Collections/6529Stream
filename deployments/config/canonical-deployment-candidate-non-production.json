@@ -10,10 +10,10 @@
   },
   "release_build": {
     "receipt_path": "out-release/release-build-manifest.json",
-    "receipt_sha256": "sha256:338d38cea3ecd01133f1ec66e712a3ad39b5f8d672c3b4bce3f880b95c421840",
-    "target_catalog_sha256": "sha256:af81ff0e51aada4bc352787fb0e6c1d05b683be0bb97d15f2948dfb2a6926c9f",
+    "receipt_sha256": "sha256:4130cf7525cb622b311546138544b272a76dbec508181a2f44f5df41eed36d40",
+    "target_catalog_sha256": "sha256:70f6fa8a37ed9611f8c99ff468820d41053552035cb2e548b4968df477264e3d",
     "config_path": "release-artifacts/contracts.json",
-    "config_sha256": "sha256:fc711231ec90ee09467542c08af0b4ad268a35e1144573dc566907d9183c207e",
+    "config_sha256": "sha256:26b0fa377cb7cc83d51af65838a6f6d4919e0753e81c5f5a14ed05c6e3ea0292",
     "foundry_config_path": "foundry.toml",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313"
   },
@@ -27,7 +27,7 @@
         "name": "DependencyRegistry",
         "source": "smart-contracts/DependencyRegistry.sol",
         "artifact_relative_path": "DependencyRegistry.sol/DependencyRegistry.json",
-        "artifact_sha256": "sha256:bf74a1c36ea1c29de7a37f4343bc91894e71d37855ad7907e2e71820450b37e0"
+        "artifact_sha256": "sha256:bed52c47b12c36d75c3212bdc782f41889ac8ba7a2a1a08f9a88db224ec6b596"
       },
       "depends_on": [],
       "constructor": {

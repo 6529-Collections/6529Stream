@@ -52,6 +52,8 @@ def wrapper_text(commands: list[str] | None = None) -> str:
 def ci_text(
     commands: list[str] | None = None,
     logs: list[str] | None = None,
+    *,
+    timeout_minutes: int = checker.FOUNDRY_CI_TIMEOUT_MINUTES,
 ) -> str:
     """Build a minimal CI fixture with commands and retained log names."""
     selected_commands = commands or [command for _, command in checker.REHEARSAL_COMMANDS]
@@ -60,6 +62,7 @@ def ci_text(
         "name: fixture",
         "jobs:",
         "  foundry:",
+        f"    timeout-minutes: {timeout_minutes}",
         "    steps:",
         "      - name: Deployment rehearsal",
         "        run: |",
@@ -85,6 +88,7 @@ def write_gate_tree(
     powershell_commands: list[str] | None = None,
     ci_commands: list[str] | None = None,
     ci_logs: list[str] | None = None,
+    ci_timeout_minutes: int = checker.FOUNDRY_CI_TIMEOUT_MINUTES,
 ) -> None:
     """Write a minimal repository tree consumed by the checker."""
     write_text(
@@ -96,7 +100,14 @@ def write_gate_tree(
     )
     write_text(root / "scripts" / "check.sh", wrapper_text(shell_commands))
     write_text(root / "scripts" / "check.ps1", wrapper_text(powershell_commands))
-    write_text(root / ".github" / "workflows" / "ci.yml", ci_text(ci_commands, ci_logs))
+    write_text(
+        root / ".github" / "workflows" / "ci.yml",
+        ci_text(
+            ci_commands,
+            ci_logs,
+            timeout_minutes=ci_timeout_minutes,
+        ),
+    )
 
 
 class DeploymentRehearsalGateTests(unittest.TestCase):
@@ -108,7 +119,19 @@ class DeploymentRehearsalGateTests(unittest.TestCase):
         workflow = (repo_root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         foundry_header = workflow.split("  foundry:", 1)[1].split("    steps:", 1)[0]
 
-        self.assertIn("timeout-minutes: 60", foundry_header)
+        self.assertIn("timeout-minutes: 90", foundry_header)
+
+    def test_rejects_foundry_timeout_without_rehearsal_headroom(self) -> None:
+        """The checker fails closed when the aggregate lane cannot finish."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_gate_tree(root, ci_timeout_minutes=60)
+
+            with self.assertRaisesRegex(
+                checker.DeploymentRehearsalGateError,
+                "foundry timeout must be at least 90 minutes.*got 60",
+            ):
+                checker.validate_deployment_rehearsal_gate(root)
 
     def test_accepts_committed_repo_wiring(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]

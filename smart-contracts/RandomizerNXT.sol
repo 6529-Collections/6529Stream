@@ -12,20 +12,20 @@ pragma solidity ^0.8.19;
 
 import "./IXRandoms.sol";
 import "./IStreamAdmins.sol";
-import "./IStreamCore.sol";
+import "./IStreamLegacyCore.sol";
 import "./StreamPauseDomains.sol";
 
 contract NextGenRandomizerNXT {
     IXRandoms public randoms;
     IStreamAdmins private adminsContract;
-    IStreamCore public gencoreContract;
+    IStreamLegacyCore public gencoreContract;
     address gencore;
 
     constructor(address _randoms, address _admin, address _gencore) {
         randoms = IXRandoms(_randoms);
         adminsContract = IStreamAdmins(_admin);
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
     }
 
     // certain functions can only be called by a global or function admin
@@ -63,7 +63,7 @@ contract NextGenRandomizerNXT {
         FunctionAdminRequired(this.updateCoreContract.selector)
     {
         gencore = _gencore;
-        gencoreContract = IStreamCore(_gencore);
+        gencoreContract = IStreamLegacyCore(_gencore);
     }
 
     // function that calculates the random hash and returns it to the gencore contract
