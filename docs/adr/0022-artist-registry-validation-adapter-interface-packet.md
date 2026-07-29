@@ -264,10 +264,10 @@ use exact returndata length, bounded copy, canonical decoding, and no
 returndata bubbling. Revert, out-of-gas, fallback-only success, short,
 oversized, malformed, or noncanonical data fails closed.
 
-**BLOCKING REVIEW DECISION AR-04:** Approve the eleven preimages and values, all
-probe names/selectors, the exact six-probe construction order/calldata/results,
-and the dependency-binding preimage. Probe 2 and both interface XORs must be
-updated together if any candidate selector changes.
+**BLOCKING REVIEW DECISION AR-04:** Approve the twelve ASCII-hash preimages and
+values, all probe names/selectors, the exact six-probe construction
+order/calldata/results, and the dependency-binding preimage. Probe 2 and both
+interface XORs must be updated together if any candidate selector changes.
 
 **BLOCKING REVIEW DECISION AR-05:** Approve the chain-specific dependency
 binding with no fixed external address and a transition-bound ordered signer

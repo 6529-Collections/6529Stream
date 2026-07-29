@@ -33,7 +33,7 @@ This packet turns ADR 0021's architecture into one reviewable V1 candidate:
 - one resolver that remains the only state owner and authority boundary;
 - nine fixed-width operation entries;
 - three fixed-width identity probes;
-- one 29-word result transcript for every operation entry;
+- one 29-word result transcript for every adapter-invoked operation path;
 - a closed `STATICCALL` graph; and
 - exact canonical-ABI, digest, failure, and size rules.
 
@@ -88,7 +88,8 @@ If this packet is later approved, all of these invariants are indivisible:
 
 ## Candidate fixed constants
 
-All hashes in this table are Keccak-256 of the exact ASCII string shown.
+All string-derived hash values in this table are Keccak-256 of the exact ASCII
+string shown.
 
 | Name | Exact preimage or rule | Candidate value |
 | --- | --- | --- |
@@ -225,7 +226,9 @@ or active manager proven by the resolver.
 
 ## Candidate adapter ABI
 
-Every operation returns `bytes32[29]`. The marker and binding getters return
+Every adapter-invoked operation returns `bytes32[29]`. O9's idempotent no-op
+and rejection paths are host-only: they make no adapter call and therefore
+produce no adapter transcript. The marker and binding getters return
 `bytes32`; the schema getter returns `uint16`; `supportsInterface` returns
 `bool`. Return types do not affect selectors.
 
@@ -921,17 +924,18 @@ The snapshot state machine is then exact:
    ID, and appends frozen continuity exactly once. Because the token assignment
    is born exact and permanent, neither mutable-descendant counter changes.
    The resolver returns `tokenRoyaltyAssignmentHash`.
-2. **Idempotent no-op.** This branch exists only when the three stored source
-   hashes equal the supplied/recomputed source assignment, assignment-policy,
-   and expected canonical royalty hashes; the stored operation root and ID
-   equal the request; the token answer and per-key assignment hash form the
-   complete expected exact-permanent snapshot; and every remaining snapshot
-   word is self-consistent. The resolver performs one complete host proof,
-   makes no adapter call, changes no snapshot, counter, or continuity state,
-   emits no event, and returns the recomputed canonical
-   `tokenRoyaltyAssignmentHash`.
-3. **Mismatch or partial existing state.** Any other nonempty or partial state
-   rejects after that one host proof and before an adapter call. This includes
+2. **Idempotent no-op.** This host-only branch exists only when the three
+   stored source hashes equal the supplied/recomputed source assignment,
+   assignment-policy, and expected canonical royalty hashes; the stored
+   operation root and ID equal the request; the token answer and per-key
+   assignment hash form the complete expected exact-permanent snapshot; and
+   every remaining snapshot word is self-consistent. The resolver performs one
+   complete host proof, makes no adapter call and produces no adapter
+   transcript, changes no snapshot, counter, or continuity state, emits no
+   event, and returns the recomputed canonical `tokenRoyaltyAssignmentHash`.
+3. **Mismatch or partial existing state.** This host-only rejection path
+   covers any other nonempty or partial state and rejects after that one host
+   proof and before an adapter call. This includes
    a different expected source royalty hash, same expected hash with different
    source per-key or metadata hashes, same expected hash with a different root
    or operation ID, mismatched token answer/assignment, missing stored proof
@@ -1000,7 +1004,8 @@ Every operation entry returns exactly `bytes32[29]`, or 928 bytes:
 
 Words 5 through 9 are populated and must match the immutable dependency tuple
 for every entry, even when that entry does not call a particular dependency.
-They are live `EXTCODEHASH` observations, not authorization.
+Word 5 is the dependency binding hash; words 6 through 9 are live
+`EXTCODEHASH` observations, not authorization.
 
 All fields not explicitly populated by the following table are exactly zero:
 
@@ -1474,8 +1479,10 @@ this Proposed file is not a disposition.
 ### BLOCKING REVIEW DECISION R1: entry set and uniform transcript
 
 Accept, revise, or reject the exact nine-entry extraction, the three identity
-getters, and the uniform 29-word/928-byte result. ADR 0021 does not mechanically
-dictate this exact split.
+getters, and the uniform 29-word/928-byte result for every adapter-invoked
+operation path. O9's idempotent no-op and rejection paths are host-only and
+produce no adapter transcript. ADR 0021 does not mechanically dictate this
+exact split.
 
 ### BLOCKING REVIEW DECISION R2: primary type and authorization matrix
 
