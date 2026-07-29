@@ -5,9 +5,10 @@
   "maturity": "pre-audit",
   "status": {
     "bounded_measurement_prototype_execution": "authorized",
-    "packet_publication": "blocked_pending_evidence",
-    "packet_acceptance": "blocked_pending_evidence_and_explicit_decisions",
-    "normative_freeze": "blocked_pending_evidence_and_explicit_decisions",
+    "semantic_interface_decision": "accepted_with_three_finality_implementation_stops",
+    "packet_publication": "blocked_pending_integration_and_review",
+    "packet_acceptance": "blocked_pending_empirical_evidence_and_finality_supplement",
+    "normative_freeze": "blocked_pending_empirical_evidence_and_finality_supplement",
     "production_source_implementation": "blocked_pending_normative_freeze",
     "deployment": "blocked",
     "readiness_promotion": "blocked"
@@ -289,7 +290,17 @@
       "one_cap_and_revision_authenticated_before_adapter": true,
       "same_cap_applied_independently_per_contract_signer": true,
       "adapter_storage_or_raise_authority": false,
-      "revision_source_abi": "blocked_pending_AR25_decision",
+      "revision_source_abi": {
+        "interface": "IStreamGasParameterHost",
+        "signature": "gasParameterInfo(bytes32)",
+        "selector": "0xec2ef90a",
+        "return_abi": "(uint256 value,uint256 floor,uint8 failureClass,uint64 revision)",
+        "return_bytes": 128,
+        "immutable_floor": 90000,
+        "genesis_value": 150000,
+        "failure_class": 2,
+        "genesis_revision": 1
+      },
       "forbidden": [
         "caller_selected_cap",
         "fixed_adapter_cap",
@@ -424,7 +435,7 @@
     {
       "id": "ARTIST_GGP_AND_GAS",
       "phase": "freeze",
-      "status": "blocked_pending_revision_ABI_measurement_and_issue_684",
+      "status": "blocked_pending_measurement_and_issue_684",
       "measured_values": null,
       "requirements": [
         "exact_cap_revision_source_ABI",

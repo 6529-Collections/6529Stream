@@ -224,8 +224,13 @@ parameter.
 
 The registry authenticates one live cap and revision before the adapter call.
 The same pair is committed in the request and applied independently to each
-ERC-1271 signer. The exact source getter/ABI for the revision is not yet frozen
-and is a stop gate. A caller-selected cap, fixed adapter cap, shared
+ERC-1271 signer. The accepted semantic decision pins the source to
+`IStreamGasParameterHost.gasParameterInfo(bytes32)` (selector `0xec2ef90a`)
+with exactly 128 return bytes decoded as
+`(uint256 value,uint256 floor,uint8 failureClass,uint64 revision)`. For
+`ARTIST_ERC1271_VERIFY_GAS`, the registry requires the exact 90,000 floor,
+150,000 genesis value, failure class `2`, and nonzero monotonic revision
+(genesis revision `1`). A caller-selected cap, fixed adapter cap, shared
 first-come signer pool, lower, emergency path, overloaded parameter, or
 twenty-third GGP is forbidden.
 

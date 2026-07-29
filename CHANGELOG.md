@@ -115,6 +115,17 @@ the release policy in `docs/release-policy.md`.
   `RISK-GOV-002` therefore remains `open_blocker`; public-beta and production
   release modes remain fail closed, and protocol maturity/readiness are
   unchanged.
+- Accepted the pre-genesis semantic interface for issue #670's immutable
+  revenue-resolver and artist-registry validation adapters. The decision pins
+  the 57 artist operation families and semantic selectors, 28 unambiguous
+  EIP-712 typehashes, exact signer/dynamic-input bounds, the registry-owned
+  ERC-1271 gas-parameter ABI, private dependency IDs `38` and `39`, and
+  machine-readable mechanical, operation-matrix, and security gate artifacts.
+  This is an architecture and semantic freeze only: three
+  finality-dependent artist operations, executable golden vectors, empirical
+  EIP-150 reserves, final runtime/initcode margins, complete 57-write source,
+  deployment bindings, audit, and release approval remain blocking. Protocol
+  maturity and readiness are unchanged.
 - Accepted ADR 0021's immutable revenue-resolver validation-adapter
   architecture for pre-genesis implementation. Source work remains blocked
   until the complete normative interface appendix and freeze commit are
