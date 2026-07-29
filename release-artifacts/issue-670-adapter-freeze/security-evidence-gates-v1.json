@@ -1,0 +1,561 @@
+{
+  "schema_version": 1,
+  "artifact": "6529Stream issue 670 validation-adapter security evidence gates",
+  "source_commit": "8a045029185efc807edeac08d6f76b95c4387dd1",
+  "maturity": "pre-audit",
+  "status": {
+    "bounded_measurement_prototype_execution": "authorized",
+    "packet_publication": "blocked_pending_evidence",
+    "packet_acceptance": "blocked_pending_evidence_and_explicit_decisions",
+    "normative_freeze": "blocked_pending_evidence_and_explicit_decisions",
+    "production_source_implementation": "blocked_pending_normative_freeze",
+    "deployment": "blocked",
+    "readiness_promotion": "blocked"
+  },
+  "authorization": {
+    "source": "explicit user instruction in the parent task",
+    "bounded_pre_freeze_measurement_prototype": {
+      "authorized": true,
+      "allowed": [
+        "isolated reversible gas-measurement prototypes",
+        "isolated reversible byte-size and initcode-measurement prototypes",
+        "canonical calldata and returndata measurement harnesses",
+        "EIP-150 reserve measurement harnesses",
+        "direct-callsite and opcode measurement harnesses",
+        "discardable compiler and static-analysis experiments"
+      ],
+      "forbidden": [
+        "production deployment",
+        "broadcast",
+        "Registry V2 registration",
+        "Governance V2 action",
+        "Core pointer installation",
+        "secret or signer material",
+        "unreviewed normative choice",
+        "readiness claim",
+        "treating a prototype result as an accepted constant"
+      ],
+      "evidence_rule": "No result passes a gate until retained inputs, commands, outputs, compiler and fork settings, and independent reproduction are recorded."
+    }
+  },
+  "shared_invariants": {
+    "authority": "host_only",
+    "state_owner": "host_only",
+    "adapter_result_is_authorization": false,
+    "lock_before_validation_or_external_call": true,
+    "only_pre_transcript_write": "transient_non_reentrant_lock",
+    "durable_write_before_complete_transcript": false,
+    "normative_event_before_complete_transcript": false,
+    "external_call_after_first_durable_write": false,
+    "bounded_returndata_copy": true,
+    "bubble_revert_data": false,
+    "fail_closed_on_malformed_or_mismatched_data": true,
+    "failure_rolls_back": [
+      "lock",
+      "nonce",
+      "replay_state",
+      "counter",
+      "assignment",
+      "freeze",
+      "snapshot",
+      "record",
+      "continuity",
+      "payload_index",
+      "signature_evidence",
+      "event"
+    ],
+    "adapter_forbidden_features": [
+      "mutable_storage",
+      "authority",
+      "payable_path",
+      "fallback",
+      "receive",
+      "proxy",
+      "DELEGATECALL",
+      "CALLCODE",
+      "CREATE",
+      "CREATE2",
+      "SELFDESTRUCT",
+      "arbitrary_direct_target",
+      "arbitrary_selector",
+      "generic_router"
+    ],
+    "replacement": "new_host_plus_continuity_registry_and_governed_pointer_process"
+  },
+  "revenue": {
+    "host_only_calls": [
+      {
+        "target": "GovernanceV2",
+        "selector": "currentAction()",
+        "use": "default primary set replace clear and every governance-routed primary freeze",
+        "pre_post_match": "byte_exact"
+      },
+      {
+        "target": "Core",
+        "selector": "getSatellitePointer(bytes32)",
+        "use": "O9 active mint manager discovery"
+      },
+      {
+        "target": "active_mint_manager",
+        "selector": "mintLedger()",
+        "use": "O9 exact constructor-pinned ledger"
+      },
+      {
+        "target": "mint_ledger",
+        "selector": "isManagerOperationRootUsed(address,bytes32)",
+        "required_result": "canonical_true"
+      },
+      {
+        "target": "Core",
+        "selector": "preparedMint(uint256)",
+        "use": "O9 exact existing operation and collection"
+      }
+    ],
+    "adapter_direct_staticcalls": [
+      {
+        "target": "pinned_Core",
+        "selectors": [
+          "lastAllocatedCollectionId()",
+          "tokenCollectionIdentity(uint256)"
+        ]
+      },
+      {
+        "target": "pinned_split_factory",
+        "selectors": [
+          "profileExists(bytes32)",
+          "splitWalletExists(bytes32)",
+          "walletFor(bytes32)",
+          "profileEntriesHash(bytes32)",
+          "profileMetadataURIHash(bytes32)"
+        ]
+      },
+      {
+        "target": "factory_derived_wallet_with_allowed_runtime_codehash",
+        "selectors": [
+          "profileId()"
+        ]
+      },
+      {
+        "target": "pinned_artist_registry",
+        "selectors": [
+          "requireEconomicsConsent(uint256,bytes32,uint8,uint256,bytes32)",
+          "isRoyaltyFreezeAuthorized(uint256,bytes32)"
+        ],
+        "caller_sensitive_behavior_allowed": false
+      }
+    ],
+    "adapter_forbidden_direct_targets": [
+      "GovernanceV2",
+      "Core_pointer_discovery",
+      "mint_manager",
+      "mint_ledger",
+      "Core_preparedMint",
+      "resolver",
+      "asset_policy_registry"
+    ],
+    "marketplace_read_external_calls": false,
+    "o9": {
+      "create": {
+        "full_host_proof_before_adapter": true,
+        "adapter_transcript_required": true,
+        "identical_host_proof_after_transcript": true,
+        "state_and_counter_recheck_before_write": true,
+        "artist_consent_argument": "token_per_key_nextAssignmentHash"
+      },
+      "idempotent_noop": {
+        "full_host_proof": true,
+        "adapter_call": false,
+        "adapter_transcript": false,
+        "writes": false,
+        "events": false
+      },
+      "mismatch_or_partial_state": {
+        "full_host_proof": true,
+        "adapter_call": false,
+        "writes": false,
+        "events": false,
+        "result": "reject"
+      },
+      "distinct_hash_roles": [
+        "source_per_key_assignment_hash",
+        "source_assignment_policy_hash",
+        "canonical_source_royalty_hash",
+        "token_per_key_next_assignment_hash",
+        "canonical_token_royalty_hash"
+      ]
+    }
+  },
+  "artist": {
+    "registry_only_dependencies": [
+      "Core",
+      "role_registry",
+      "GovernanceV2",
+      "pointer_registry",
+      "finality_registry",
+      "predecessor_registry"
+    ],
+    "adapter_direct_targets": [
+      {
+        "target": "ecrecover_precompile",
+        "mode": "EOA"
+      },
+      {
+        "target": "exact_request_bound_signer",
+        "selector": "isValidSignature(bytes32,bytes)",
+        "mode": "ERC1271",
+        "call": "zero_value_STATICCALL",
+        "gas": "exact_authenticated_per_signer_GGP_cap"
+      }
+    ],
+    "erc1271_transitive_execution": {
+      "classification": "opaque_adversarial_static_execution",
+      "may_call_transitively": true,
+      "transitive_targets_are_adapter_dependencies": false,
+      "transitive_targets_confer_authority": false,
+      "contained_by": [
+        "STATICCALL_context",
+        "registry_lock",
+        "per_signer_GGP_cap",
+        "bounded_returndata",
+        "exact_magic_check",
+        "fail_closed_transcript"
+      ]
+    },
+    "signer_bundle": {
+      "minimum_participants": 1,
+      "maximum_participants": 33,
+      "participant_indices": "strictly_increasing_unique",
+      "primary_index": 0,
+      "collaborator_index_range": [
+        1,
+        32
+      ],
+      "rotation_participants": 2,
+      "duplicate_signers_allowed": false,
+      "direct_mode": {
+        "maximum_rows": 1,
+        "signer": "registry_authenticated_original_msg_sender",
+        "inner_signature_bytes": 0,
+        "external_signature_call": false
+      },
+      "eoa_mode": {
+        "live_code": false,
+        "signature_lengths": [
+          64,
+          65
+        ],
+        "canonical_low_s": true,
+        "canonical_v": true,
+        "nonzero_exact_recovery": true
+      },
+      "erc1271_mode": {
+        "registry_authenticated_nonzero_signer_codehash": true,
+        "adapter_live_codehash_recheck": true,
+        "exact_operation_eip712_digest": true,
+        "nonempty_bounded_signature": true,
+        "one_call_per_participant": true,
+        "exact_return_shape": "blocked_pending_AR23_decision"
+      },
+      "reject_before_adapter": [
+        "duplicate_index",
+        "duplicate_signer",
+        "reordered_proof",
+        "missing_required_signer",
+        "surplus_signer",
+        "unlinked_signer",
+        "policy_ineligible_signer"
+      ]
+    },
+    "signature_and_replay": {
+      "domain": "StreamArtistRegistry_EIP712",
+      "full_57_row_matrix_required": true,
+      "unsigned_branch_marker": "NONE",
+      "missing_distinct_typehashes": [
+        "refuseArtistBinding",
+        "revokeArtistDelegation"
+      ],
+      "raw_signature_in_typed_intent_or_record_identity": false,
+      "exact_current_state_digest_preimages_required": true,
+      "exact_replay_state_digest_preimages_required": true,
+      "unordered_artist_scoped_nonces_required": true,
+      "revoked_digest_and_nonce_checks_required": true
+    },
+    "ggp": {
+      "host": "StreamArtistRegistry",
+      "key": "ARTIST_ERC1271_VERIFY_GAS",
+      "floor": 90000,
+      "genesis": 150000,
+      "raise_policy": "delayed_monotonic_governed",
+      "one_cap_and_revision_authenticated_before_adapter": true,
+      "same_cap_applied_independently_per_contract_signer": true,
+      "adapter_storage_or_raise_authority": false,
+      "revision_source_abi": "blocked_pending_AR25_decision",
+      "forbidden": [
+        "caller_selected_cap",
+        "fixed_adapter_cap",
+        "shared_first_come_signer_pool",
+        "lower",
+        "emergency_path",
+        "overloaded_parameter",
+        "new_twenty_third_GGP"
+      ]
+    }
+  },
+  "core_and_finality": {
+    "addresses": "not_recorded",
+    "constructor_codehashes": "not_recorded",
+    "runtime_codehashes": "not_recorded",
+    "binding_requirements": [
+      "exact_constructor_identity",
+      "expected_runtime_codehash",
+      "live_runtime_codehash_before_relevant_read",
+      "exact_selector",
+      "exact_calldata",
+      "exact_returndata_length",
+      "canonical_decode",
+      "lock_held",
+      "before_adapter",
+      "before_first_durable_write"
+    ],
+    "steward_sanction_predicates": [
+      "current_vested_steward",
+      "stewardAppointedAtBlock_nonzero",
+      "effective_nonforbidden_CAP_SANCTION",
+      "collection_scope_only",
+      "noncollection_identifiers_zero",
+      "exact_artist_binding_generation",
+      "collectionBurnsBlockedAtBlock_nonzero",
+      "collectionBurnsBlockedAtBlock_not_after_steward_appointment"
+    ],
+    "steward_recovery_additional_predicates": [
+      "exact_current_executed_finality_record",
+      "same_Core_and_collection",
+      "collection_scope_only",
+      "noncollection_identifiers_zero_or_absent_under_frozen_ABI",
+      "exact_recovery_manifest",
+      "exact_artwork_bytes_changing_recovery_path",
+      "finality_and_burn_cutoff_current_at_lock_held_transition"
+    ],
+    "pending_freeze_evidence": [
+      "construction_and_runtime_codehashes",
+      "selectors_calldata_and_returndata",
+      "current_and_executed_predicates",
+      "grant_and_governance_lineage",
+      "current_state_digest_preimages",
+      "one_way_latch_assumptions",
+      "same_transaction_reread_policy",
+      "event_mappings",
+      "positive_and_hostile_vectors"
+    ]
+  },
+  "gates": [
+    {
+      "id": "NORMATIVE_FREEZE",
+      "phase": "freeze",
+      "status": "blocked_pending_explicit_decisions_and_artifacts",
+      "requirements": [
+        "revenue_R1_through_R13_dispositioned",
+        "artist_AR01_through_AR33_dispositioned",
+        "complete_field_signature_state_record_event_matrices",
+        "explicit_freeze_commit"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "ARTIST_57_WRITE_COMPLETENESS",
+      "phase": "implementation_acceptance",
+      "status": "blocked_pending_implementation_and_evidence",
+      "requirements": [
+        "all_57_writes",
+        "all_44_checkpoint_absences_completed",
+        "all_Permanent_nonempty_reads",
+        "exact_empty_behavior",
+        "records_events_history_continuity",
+        "hostile_authority_replay_rollback_tests"
+      ],
+      "forbidden_shortcut": "zero_stub_or_omitted_transition",
+      "stop_on_failure": true
+    },
+    {
+      "id": "SIGNATURE_REPLAY",
+      "phase": "freeze",
+      "status": "blocked_pending_matrix_typehashes_and_vectors",
+      "requirements": [
+        "57_row_EIP712_or_NONE_matrix",
+        "distinct_refusal_typehash",
+        "distinct_delegation_revocation_typehash",
+        "signer_bundle_codec",
+        "per_operation_modes",
+        "nonce_revocation_current_and_replay_preimages",
+        "record_and_event_vectors"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "DYNAMIC_ABI",
+      "phase": "freeze",
+      "status": "blocked_pending_bounds_codec_and_vectors",
+      "requirements": [
+        "exact_root_and_nested_offsets",
+        "exact_empty_rules",
+        "capability_override_maximum",
+        "supersession_and_merkle_maxima",
+        "aggregate_signature_and_archival_proof_transport",
+        "dynamic_hash_preimages",
+        "overflow_and_hostile_vectors"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "REVENUE_GAS",
+      "phase": "freeze",
+      "status": "blocked_pending_measurement",
+      "measured_values": null,
+      "requirements": [
+        "cold_and_warm_nested_EIP150",
+        "maximum_transcript_handling",
+        "minimum_parent_post_call_reserve",
+        "failure_reserve",
+        "compiler_and_fork_inputs",
+        "independent_reproduction"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "ARTIST_GGP_AND_GAS",
+      "phase": "freeze",
+      "status": "blocked_pending_revision_ABI_measurement_and_issue_684",
+      "measured_values": null,
+      "requirements": [
+        "exact_cap_revision_source_ABI",
+        "reverse_composed_1_2_33_participant_reserves",
+        "mixed_EOA_ERC1271_vectors",
+        "maximum_bundle_and_wallet_class",
+        "failure_reserve",
+        "overflow_and_starvation_boundaries",
+        "issue_684_candidate_host_evidence",
+        "independent_reproduction"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "EXTERNAL_CALLGRAPH",
+      "phase": "implementation_acceptance",
+      "status": "blocked_pending_opcode_proof_and_issue_669",
+      "requirements": [
+        "static_opcode_and_callsite_proof",
+        "issue_669_closed_inventory",
+        "hostile_callback_reentrancy_and_gas_tests"
+      ],
+      "stop_on_unlisted_direct_target_or_selector": true,
+      "stop_on_failure": true
+    },
+    {
+      "id": "CORE_FINALITY_DEPENDENCIES",
+      "phase": "freeze_and_implementation_acceptance",
+      "status": "blocked_pending_AR32_and_final_serialized_dependencies",
+      "requirements": [
+        "exact_constructor_and_runtime_identities",
+        "exact_selectors_and_decoders",
+        "collection_scope_current_and_executed_predicates",
+        "state_preimages_and_reread_rules",
+        "positive_and_hostile_vectors"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "SLITHER_AND_SECURITY_CHECKS",
+      "phase": "implementation_acceptance",
+      "status": "blocked_pending_final_source",
+      "requirements": [
+        "retained_Slither_output",
+        "every_finding_dispositioned",
+        "repository_security_checks",
+        "independent_security_review"
+      ],
+      "stop_on_missing_or_unreviewed_actionable_finding": true,
+      "stop_on_failure": true
+    },
+    {
+      "id": "RUNTIME_SIZE",
+      "phase": "implementation_acceptance",
+      "status": "blocked_pending_final_isolated_build",
+      "maximum_bytes_per_contract": 22576,
+      "measured_bytes": null,
+      "required_boundary_tests": {
+        "22576": "pass",
+        "22577": "fail"
+      },
+      "stop_on_failure": true
+    },
+    {
+      "id": "INITCODE_SIZE",
+      "phase": "implementation_acceptance",
+      "status": "blocked_pending_final_exact_constructor_build",
+      "maximum_bytes_per_contract": 47152,
+      "measured_bytes": null,
+      "required_boundary_tests": {
+        "47152": "pass",
+        "47153": "fail"
+      },
+      "stop_on_failure": true
+    },
+    {
+      "id": "DEPLOYMENT_EVIDENCE",
+      "phase": "deployment_acceptance",
+      "status": "blocked",
+      "requirements": [
+        "exact_constructor_arguments",
+        "initcode_and_runtime_hashes",
+        "source_verification",
+        "deployment_receipts",
+        "authority_and_GGP_handoff",
+        "RegistryV2_and_GovernanceV2_rehearsal",
+        "39_contract_37_registry_projection",
+        "acyclic_order"
+      ],
+      "stop_on_failure": true
+    },
+    {
+      "id": "RELEASE_CHAIN",
+      "phase": "release_acceptance",
+      "status": "blocked",
+      "requirements": [
+        "focused_and_full_Foundry",
+        "release_generators",
+        "manifest_lockfile_and_checksums",
+        "Windows_aggregate_gate",
+        "whitespace_checks",
+        "independent_security_and_integration_review"
+      ],
+      "stop_on_failure": true
+    }
+  ],
+  "stop_policy": {
+    "missing_evidence_is_failure": true,
+    "behavior_omission_allowed": false,
+    "readiness_waiver_allowed": false,
+    "on_gas_or_size_failure": "stop_for_new_reviewed_versioned_architecture",
+    "requires_new_explicit_design": [
+      "second_adapter",
+      "state_split",
+      "proxy",
+      "delegatecall",
+      "mutable_dependency",
+      "emergency_bypass",
+      "overloaded_GGP",
+      "reduced_behavior"
+    ]
+  },
+  "unrecorded_values": [
+    "measured_gas",
+    "measured_runtime_size",
+    "measured_initcode_size",
+    "Core_runtime_codehash",
+    "finality_runtime_codehash",
+    "adapter_runtime_codehash",
+    "initcode_hash",
+    "deployment_address",
+    "deployment_receipt"
+  ]
+}
