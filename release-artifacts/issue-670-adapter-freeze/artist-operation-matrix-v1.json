@@ -14,7 +14,7 @@
     "replay_state_digest": "keccak256(abi.encode(REPLAY_STATE_DOMAIN, block.chainid, registry, registryWriteSelector, signerSetHash, keccak256(abi.encode(row.replay_facts in listed order))))",
     "record_hash": "A named source domain means the exact domain preimage and field order in docs/stream-artist-authority.md AA-DOMAINS at source_commit. NONE means the transition creates no new record hash. EXISTING:<name> means the event/state transition consumes the named existing record without rehashing it.",
     "event_binding": "Event names bind the exact declarations and field order in docs/stream-artist-authority.md AA-EVENTS at source_commit. Events emit only after transcript acceptance and durable state writes.",
-    "implementation_stop": "Each operation row carries its base stop list. Versioned implementation_stop_overlays apply afterward in listed order. Only an exact listed stop removal is permitted; every unlisted row and stop remains unchanged. Any nonempty effective stop list is a hard failure.",
+    "implementation_stop": "Each operation row carries its base stop list. Versioned implementation_stop_overlays apply afterward in listed order. Only an exact listed stop removal is permitted; every unlisted row and stop remains unchanged. A row whose effective stop list is nonempty MUST NOT be implemented.",
     "overlay_precedence": "base operation implementation_stop, then the exact generated versioned overlay set, then effective_implementation_stops"
   },
   "domains": {

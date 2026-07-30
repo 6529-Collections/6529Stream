@@ -20,6 +20,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 VECTOR_PATH = REPO_ROOT / generator.DEFAULT_OUTPUT
 MATRIX_PATH = REPO_ROOT / generator.DEFAULT_MATRIX_OUTPUT
 SUPPLEMENT_PATH = REPO_ROOT / generator.DEFAULT_FINALITY_SUPPLEMENT
+SECURITY_PATH = REPO_ROOT / generator.DEFAULT_SECURITY_EVIDENCE
 
 
 class Issue670AdapterFreezeTests(unittest.TestCase):
@@ -28,6 +29,7 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
         cls.vector, cls.raw = checker.load_json_strict(VECTOR_PATH)
         cls.matrix, cls.matrix_raw = checker.load_json_strict(MATRIX_PATH)
         cls.supplement, _ = checker.load_json_strict(SUPPLEMENT_PATH)
+        cls.security, _ = checker.load_json_strict(SECURITY_PATH)
 
     def test_committed_artifact_is_current_and_canonical(self) -> None:
         validated = checker.check_artifact(VECTOR_PATH, REPO_ROOT)
@@ -181,6 +183,10 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
         self.assertEqual(effective["12"], [])
         self.assertEqual(effective["13"], [])
         self.assertEqual(effective["22"], [generator.FINALITY_STOP_ID])
+        self.assertEqual(
+            self.supplement["status"]["supplement_scope"],
+            generator.FINALITY_SUPPLEMENT_SCOPE,
+        )
 
         for row in validated["operations"]:
             row_id = row[0]
@@ -188,6 +194,27 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
                 self.assertEqual(row[17], [generator.FINALITY_STOP_ID])
                 continue
             self.assertEqual(effective[str(row_id)], row[17])
+
+    def test_security_evidence_retains_resolved_decisions_and_gates(
+        self,
+    ) -> None:
+        validated = checker.check_security_evidence(SECURITY_PATH)
+        self.assertEqual(
+            validated["artist"]["signer_bundle"]["erc1271_mode"][
+                "exact_return_shape"
+            ],
+            generator.erc1271_exact_return_shape_evidence(),
+        )
+        self.assertEqual(
+            validated["artist"]["signature_and_replay"][
+                "missing_distinct_typehashes"
+            ],
+            [],
+        )
+        self.assertEqual(
+            [gate["id"] for gate in validated["gates"]],
+            list(generator.SECURITY_GATE_IDS),
+        )
 
     def test_checker_rejects_mechanical_and_maturity_mutations(self) -> None:
         mutations = (
@@ -270,7 +297,7 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
             ):
                 checker.validate_artifact(candidate, REPO_ROOT)
 
-    def test_overlay_rejects_row_22_resolution(self) -> None:
+    def test_matrix_validation_rejects_supplement_overlay_mismatch(self) -> None:
         supplement = copy.deepcopy(self.supplement)
         supplement["matrix_overlay"]["resolutions"][0]["row_id"] = 22
         with self.assertRaisesRegex(
@@ -278,6 +305,94 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
             "matrix_overlay does not match generated matrix",
         ):
             checker.validate_operation_matrix(self.matrix, supplement)
+
+    def test_overlay_application_rejects_unlisted_row_resolutions(self) -> None:
+        operations = copy.deepcopy(list(generator.ARTIST_OPERATION_MATRIX_ROWS))
+        for row_id in (22, 57):
+            with self.subTest(row_id=row_id):
+                overlay = generator.finality_stop_overlay()
+                overlay["resolutions"].append(
+                    {
+                        "row_id": row_id,
+                        "write": operations[row_id - 1][1],
+                        "remove": [generator.FINALITY_STOP_ID],
+                        "decision": "GO",
+                    }
+                )
+                with self.assertRaisesRegex(
+                    generator.AdapterFreezeError,
+                    "may resolve only rows 12 and 13",
+                ):
+                    generator.apply_implementation_stop_overlays(
+                        operations, [overlay]
+                    )
+
+    def test_finality_scope_mismatch_fails_closed(self) -> None:
+        supplement = copy.deepcopy(self.supplement)
+        supplement["status"]["supplement_scope"] = (
+            "proposed_packet_evaluation_only"
+        )
+        with self.assertRaisesRegex(
+            generator.AdapterFreezeError,
+            r"status\.supplement_scope must match overlay scope",
+        ):
+            checker.validate_operation_matrix(self.matrix, supplement)
+
+    def test_matrix_rejects_unknown_signature_rule_and_typehash(self) -> None:
+        mutations = (
+            (7, "UNKNOWN_SIGNATURE_RULE", "row 1 signature rule is unknown"),
+            (8, "UNKNOWN_TYPEHASH", "row 1 typehash is unknown"),
+        )
+        for column, value, message in mutations:
+            with self.subTest(column=column):
+                rows = copy.deepcopy(generator.ARTIST_OPERATION_MATRIX_ROWS)
+                rows[0][column] = value
+                with mock.patch.object(
+                    generator,
+                    "ARTIST_OPERATION_MATRIX_ROWS",
+                    rows,
+                ):
+                    with self.assertRaisesRegex(
+                        generator.AdapterFreezeError,
+                        message,
+                    ):
+                        generator.artist_operation_matrix_artifact()
+
+    def test_matrix_renderer_accepts_empty_outer_sections(self) -> None:
+        minimal = {
+            "typehashes": {},
+            "operations": [],
+        }
+        rendered = generator.operation_matrix_json_bytes(minimal)
+        self.assertEqual(json.loads(rendered), minimal)
+
+    def test_security_evidence_rejects_stale_resolved_decisions(self) -> None:
+        mutations = (
+            (
+                "return shape",
+                lambda value: value["artist"]["signer_bundle"]["erc1271_mode"].__setitem__(
+                    "exact_return_shape", "blocked_pending_AR23_decision"
+                ),
+                "return shape must match",
+            ),
+            (
+                "typehashes",
+                lambda value: value["artist"]["signature_and_replay"].__setitem__(
+                    "missing_distinct_typehashes",
+                    ["refuseArtistBinding", "revokeArtistDelegation"],
+                ),
+                "missing_distinct_typehashes must be empty",
+            ),
+        )
+        for label, mutate, message in mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(self.security)
+                mutate(candidate)
+                with self.assertRaisesRegex(
+                    generator.AdapterFreezeError,
+                    message,
+                ):
+                    checker.validate_security_evidence(candidate)
 
     def test_checker_rejects_noncanonical_json_and_duplicate_keys(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

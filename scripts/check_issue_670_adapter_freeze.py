@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed checker for issue #670 adapter vectors and semantic matrix."""
+"""Fail-closed checker for issue #670 adapter freeze evidence."""
 
 from __future__ import annotations
 
@@ -185,6 +185,10 @@ def validate_operation_matrix(
         )
 
     status = supplement.get("status", {})
+    if status.get("supplement_scope") != generator.FINALITY_SUPPLEMENT_SCOPE:
+        raise generator.AdapterFreezeError(
+            "finality supplement status.supplement_scope must match overlay scope"
+        )
     expected_status = {
         "row_12_recordArtistSanction": "GO",
         "row_13_confirmSanctionFinalized": "GO",
@@ -232,6 +236,64 @@ def validate_operation_matrix(
     return candidate
 
 
+def validate_security_evidence(candidate: Any) -> dict[str, Any]:
+    """Validate resolved security decisions without waiving remaining gates."""
+    if not isinstance(candidate, dict):
+        raise generator.AdapterFreezeError(
+            "security evidence root must be a JSON object"
+        )
+    artist = candidate.get("artist")
+    if not isinstance(artist, dict):
+        raise generator.AdapterFreezeError(
+            "security evidence artist section must be a JSON object"
+        )
+    signer_bundle = artist.get("signer_bundle")
+    if not isinstance(signer_bundle, dict):
+        raise generator.AdapterFreezeError(
+            "security evidence signer_bundle must be a JSON object"
+        )
+    erc1271 = signer_bundle.get("erc1271_mode")
+    if not isinstance(erc1271, dict):
+        raise generator.AdapterFreezeError(
+            "security evidence erc1271_mode must be a JSON object"
+        )
+    expected_return_shape = generator.erc1271_exact_return_shape_evidence()
+    if erc1271.get("exact_return_shape") != expected_return_shape:
+        raise generator.AdapterFreezeError(
+            "security evidence ERC-1271 return shape must match the accepted "
+            "decision and retain implementation-evidence requirements"
+        )
+
+    signature_and_replay = artist.get("signature_and_replay")
+    if not isinstance(signature_and_replay, dict):
+        raise generator.AdapterFreezeError(
+            "security evidence signature_and_replay must be a JSON object"
+        )
+    if signature_and_replay.get("missing_distinct_typehashes") != []:
+        raise generator.AdapterFreezeError(
+            "security evidence missing_distinct_typehashes must be empty"
+        )
+
+    gates = candidate.get("gates")
+    if not isinstance(gates, list):
+        raise generator.AdapterFreezeError(
+            "security evidence gates must be a list"
+        )
+    gate_ids = [
+        gate.get("id") if isinstance(gate, dict) else None
+        for gate in gates
+    ]
+    if gate_ids != list(generator.SECURITY_GATE_IDS):
+        raise generator.AdapterFreezeError(
+            "security evidence must preserve the reviewed gate inventory"
+        )
+    if any(gate.get("stop_on_failure") is not True for gate in gates):
+        raise generator.AdapterFreezeError(
+            "security evidence gates must remain fail closed"
+        )
+    return candidate
+
+
 def check_artifact(path: Path, repo_root: Path) -> dict[str, Any]:
     candidate, raw = load_json_strict(path)
     validated = validate_artifact(candidate, repo_root)
@@ -257,6 +319,11 @@ def check_operation_matrix(
     return validated
 
 
+def check_security_evidence(path: Path) -> dict[str, Any]:
+    candidate, _ = load_json_strict(path)
+    return validate_security_evidence(candidate)
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -275,6 +342,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         default=generator.DEFAULT_FINALITY_SUPPLEMENT,
     )
+    parser.add_argument(
+        "--security-evidence",
+        type=Path,
+        default=generator.DEFAULT_SECURITY_EVIDENCE,
+    )
     return parser.parse_args(argv)
 
 
@@ -290,9 +362,13 @@ def main(argv: list[str] | None = None) -> int:
     supplement = args.finality_supplement
     if not supplement.is_absolute():
         supplement = repo_root / supplement
+    security_evidence = args.security_evidence
+    if not security_evidence.is_absolute():
+        security_evidence = repo_root / security_evidence
     try:
         validated = check_artifact(artifact, repo_root)
         validated_matrix = check_operation_matrix(matrix, supplement)
+        validated_security = check_security_evidence(security_evidence)
         print(
             "issue #670 mechanical adapter vectors verified: "
             f"{len(validated['revenue_resolver_packet']['adapter_interface']['entries'])} "
@@ -300,7 +376,9 @@ def main(argv: list[str] | None = None) -> int:
             f"{len(validated['artist_registry_packet']['adapter_interface']['operations'])} "
             "artist entries; "
             f"{len(validated_matrix['implementation_stop_overlays'])} "
-            "versioned stop overlay; acceptance remains external"
+            "versioned stop overlay; "
+            f"{len(validated_security['gates'])} security gates; "
+            "acceptance remains external"
         )
         return 0
     except generator.AdapterFreezeError as exc:

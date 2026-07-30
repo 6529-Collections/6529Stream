@@ -3,7 +3,7 @@
   "source_commit": "8a045029185efc807edeac08d6f76b95c4387dd1",
   "maturity": "pre-audit",
   "status": {
-    "supplement_scope": "proposed_packet_evaluation_only",
+    "supplement_scope": "proposed_packet_evaluation_and_measurement_only",
     "row_12_recordArtistSanction": "GO",
     "row_13_confirmSanctionFinalized": "GO",
     "row_22_recordRecoveryApproval": "NO_GO",

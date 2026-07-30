@@ -263,7 +263,12 @@
         "exact_operation_eip712_digest": true,
         "nonempty_bounded_signature": true,
         "one_call_per_participant": true,
-        "exact_return_shape": "blocked_pending_AR23_decision"
+        "exact_return_shape": {
+          "semantic_decision": "accepted",
+          "return_bytes": 32,
+          "accepted_return": "0x1626ba7e00000000000000000000000000000000000000000000000000000000",
+          "implementation_evidence": "required_positive_and_hostile_executable_vectors"
+        }
       },
       "reject_before_adapter": [
         "duplicate_index",
@@ -279,10 +284,7 @@
       "domain": "StreamArtistRegistry_EIP712",
       "full_57_row_matrix_required": true,
       "unsigned_branch_marker": "NONE",
-      "missing_distinct_typehashes": [
-        "refuseArtistBinding",
-        "revokeArtistDelegation"
-      ],
+      "missing_distinct_typehashes": [],
       "raw_signature_in_typed_intent_or_record_identity": false,
       "exact_current_state_digest_preimages_required": true,
       "exact_replay_state_digest_preimages_required": true,

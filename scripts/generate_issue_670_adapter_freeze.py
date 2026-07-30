@@ -30,9 +30,31 @@ DEFAULT_FINALITY_SUPPLEMENT = Path(
     "release-artifacts/issue-670-adapter-freeze/"
     "finality-dependency-supplement-v1.json"
 )
+DEFAULT_SECURITY_EVIDENCE = Path(
+    "release-artifacts/issue-670-adapter-freeze/"
+    "security-evidence-gates-v1.json"
+)
 
 FINALITY_OVERLAY_ID = "artist-finality-dependency-supplement-v1"
 FINALITY_STOP_ID = "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+FINALITY_SUPPLEMENT_SCOPE = (
+    "proposed_packet_evaluation_and_measurement_only"
+)
+SECURITY_GATE_IDS = (
+    "NORMATIVE_FREEZE",
+    "ARTIST_57_WRITE_COMPLETENESS",
+    "SIGNATURE_REPLAY",
+    "DYNAMIC_ABI",
+    "REVENUE_GAS",
+    "ARTIST_GGP_AND_GAS",
+    "EXTERNAL_CALLGRAPH",
+    "CORE_FINALITY_DEPENDENCIES",
+    "SLITHER_AND_SECURITY_CHECKS",
+    "RUNTIME_SIZE",
+    "INITCODE_SIZE",
+    "DEPLOYMENT_EVIDENCE",
+    "RELEASE_CHAIN",
+)
 
 SOURCE_FILES = (
     (
@@ -1667,7 +1689,7 @@ def finality_stop_overlay() -> dict[str, Any]:
         ),
         "artifact": DEFAULT_FINALITY_SUPPLEMENT.as_posix(),
         "precedence": "applied_after_base_operation_implementation_stop",
-        "scope": "proposed_packet_evaluation_and_measurement_only",
+        "scope": FINALITY_SUPPLEMENT_SCOPE,
         "stop_id": FINALITY_STOP_ID,
         "resolutions": [
             {
@@ -1701,7 +1723,7 @@ def apply_implementation_stop_overlays(
     operations: list[list[Any]], overlays: list[dict[str, Any]]
 ) -> dict[str, list[str]]:
     """Apply reviewed overlays without permitting implicit stop removal."""
-    if len(overlays) != 1 or overlays[0] != finality_stop_overlay():
+    if len(overlays) != 1:
         raise AdapterFreezeError("artist matrix overlay set is not the reviewed v1 set")
 
     rows = {row[0]: row for row in operations}
@@ -1711,10 +1733,18 @@ def apply_implementation_stop_overlays(
     base = copy.deepcopy(effective)
 
     overlay = overlays[0]
-    resolution_ids = [item["row_id"] for item in overlay["resolutions"]]
+    resolutions = overlay.get("resolutions")
+    if not isinstance(resolutions, list):
+        raise AdapterFreezeError("finality overlay resolutions must be a list")
+    resolution_ids = [
+        item.get("row_id") if isinstance(item, dict) else None
+        for item in resolutions
+    ]
     if resolution_ids != [12, 13]:
         raise AdapterFreezeError("finality overlay may resolve only rows 12 and 13")
-    for resolution in overlay["resolutions"]:
+    if overlay != finality_stop_overlay():
+        raise AdapterFreezeError("artist matrix overlay set is not the reviewed v1 set")
+    for resolution in resolutions:
         row_id = resolution["row_id"]
         row = rows[row_id]
         if row[1] != resolution["write"]:
@@ -1743,6 +1773,21 @@ def apply_implementation_stop_overlays(
     return {str(row_id): effective[row_id] for row_id in sorted(effective)}
 
 
+def erc1271_exact_return_shape_evidence() -> dict[str, Any]:
+    """Return the accepted shape and still-required implementation evidence."""
+    return {
+        "semantic_decision": "accepted",
+        "return_bytes": 32,
+        "accepted_return": (
+            "0x1626ba7e000000000000000000000000"
+            "00000000000000000000000000000000"
+        ),
+        "implementation_evidence": (
+            "required_positive_and_hostile_executable_vectors"
+        ),
+    }
+
+
 def artist_matrix_typehashes() -> dict[str, list[str]]:
     """Derive the accepted matrix typehash catalog in its frozen order."""
     specifications = {
@@ -1762,9 +1807,54 @@ def artist_matrix_typehashes() -> dict[str, list[str]]:
     return result
 
 
+def artist_matrix_signature_rules() -> dict[str, str]:
+    """Return the accepted matrix signature-rule vocabulary."""
+    return {
+        "NONE": (
+            "No signer bundle. primarySigner, signerSetHash, nonce/time, "
+            "ERC1271 cap/revision and signature-result words are zero."
+        ),
+        "DIRECT_OR_DEADLINE": (
+            "Direct mode uses the registry allocator nonce and "
+            "block.timestamp; no structHash or signedDigest. EOA/ERC1271 mode "
+            "signs the named deadline typehash; deadline is signed and the "
+            "record/event signedAt is registry-observed block.timestamp."
+        ),
+        "DIRECT_OR_SIGNED_AT": (
+            "Direct mode uses the registry allocator nonce and "
+            "block.timestamp; no structHash or signedDigest. EOA/ERC1271 mode "
+            "signs the named long-lived typehash including signedAt; deadline "
+            "is zero."
+        ),
+        "DIRECT_OR_NONCE_ONLY": (
+            "Direct mode uses the registry allocator nonce and "
+            "block.timestamp. EOA/ERC1271 mode signs the named nonce-bearing "
+            "validity payload; record time is not part of that typehash."
+        ),
+        "TWO_SIDED_DEADLINE": (
+            "Exactly old and new participants. Direct mode is allowed on at "
+            "most one side. Signed sides use the row's distinct old/new "
+            "deadline typehashes; record stagedAt is registry-observed "
+            "block.timestamp."
+        ),
+        "GOVERNANCE_OR_PERMISSIONLESS": (
+            "No signer bundle. Exact Governance V2 context is required only "
+            "on the governance branch; otherwise all governance words are "
+            "zero."
+        ),
+        "DIRECT_CALLER": (
+            "No signer bundle. authenticatedCaller is proven registry-side; "
+            "an allocator nonce and block.timestamp are used only when the "
+            "source record/event requires them."
+        ),
+    }
+
+
 def artist_operation_matrix_artifact() -> dict[str, Any]:
     """Build the generated semantic matrix plus its effective stop view."""
     operations = copy.deepcopy(list(ARTIST_OPERATION_MATRIX_ROWS))
+    signature_rules = artist_matrix_signature_rules()
+    typehashes = artist_matrix_typehashes()
     specs = {
         number: (write_name, family, expected)
         for number, write_name, _, family, expected in ARTIST_OPERATION_SPECS
@@ -1789,6 +1879,17 @@ def artist_operation_matrix_artifact() -> dict[str, Any]:
             row[4],
             f"artist matrix row {expected_number} write selector",
         )
+        if row[7] not in signature_rules:
+            raise AdapterFreezeError(
+                f"artist matrix row {expected_number} signature rule is unknown"
+            )
+        row_typehashes = row[8].split("|")
+        if row_typehashes != ["NONE"] and any(
+            name not in typehashes for name in row_typehashes
+        ):
+            raise AdapterFreezeError(
+                f"artist matrix row {expected_number} typehash is unknown"
+            )
         field_count = len(row[10].split(";"))
         require_equal(
             int(row[9], 16),
@@ -1893,8 +1994,8 @@ def artist_operation_matrix_artifact() -> dict[str, Any]:
                 "Each operation row carries its base stop list. Versioned "
                 "implementation_stop_overlays apply afterward in listed order. "
                 "Only an exact listed stop removal is permitted; every unlisted "
-                "row and stop remains unchanged. Any nonempty effective stop "
-                "list is a hard failure."
+                "row and stop remains unchanged. A row whose effective stop "
+                "list is nonempty MUST NOT be implemented."
             ),
             "overlay_precedence": (
                 "base operation implementation_stop, then the exact generated "
@@ -1949,46 +2050,8 @@ def artist_operation_matrix_artifact() -> dict[str, Any]:
                 "independently to each ERC-1271 STATICCALL."
             ),
         },
-        "signature_rules": {
-            "NONE": (
-                "No signer bundle. primarySigner, signerSetHash, nonce/time, "
-                "ERC1271 cap/revision and signature-result words are zero."
-            ),
-            "DIRECT_OR_DEADLINE": (
-                "Direct mode uses the registry allocator nonce and "
-                "block.timestamp; no structHash or signedDigest. EOA/ERC1271 mode "
-                "signs the named deadline typehash; deadline is signed and the "
-                "record/event signedAt is registry-observed block.timestamp."
-            ),
-            "DIRECT_OR_SIGNED_AT": (
-                "Direct mode uses the registry allocator nonce and "
-                "block.timestamp; no structHash or signedDigest. EOA/ERC1271 mode "
-                "signs the named long-lived typehash including signedAt; deadline "
-                "is zero."
-            ),
-            "DIRECT_OR_NONCE_ONLY": (
-                "Direct mode uses the registry allocator nonce and "
-                "block.timestamp. EOA/ERC1271 mode signs the named nonce-bearing "
-                "validity payload; record time is not part of that typehash."
-            ),
-            "TWO_SIDED_DEADLINE": (
-                "Exactly old and new participants. Direct mode is allowed on at "
-                "most one side. Signed sides use the row's distinct old/new "
-                "deadline typehashes; record stagedAt is registry-observed "
-                "block.timestamp."
-            ),
-            "GOVERNANCE_OR_PERMISSIONLESS": (
-                "No signer bundle. Exact Governance V2 context is required only "
-                "on the governance branch; otherwise all governance words are "
-                "zero."
-            ),
-            "DIRECT_CALLER": (
-                "No signer bundle. authenticatedCaller is proven registry-side; "
-                "an allocator nonce and block.timestamp are used only when the "
-                "source record/event requires them."
-            ),
-        },
-        "typehashes": artist_matrix_typehashes(),
+        "signature_rules": signature_rules,
+        "typehashes": typehashes,
         "dynamic_profiles": {
             "F": "none",
             "Q": (
@@ -2096,6 +2159,8 @@ def operation_matrix_json_bytes(value: dict[str, Any]) -> bytes:
         raise AdapterFreezeError("operation matrix render inputs are incomplete")
 
     def object_inner(mapping: dict[str, Any]) -> str:
+        if not mapping:
+            return ""
         rendered = json.dumps(
             mapping,
             ensure_ascii=False,
@@ -2129,17 +2194,24 @@ def operation_matrix_json_bytes(value: dict[str, Any]) -> bytes:
         )
         for row in operations
     )
-    rendered = (
-        "{\n"
-        + object_inner(before_typehashes)
-        + ',\n  "typehashes": {\n'
+    sections = []
+    before = object_inner(before_typehashes)
+    if before:
+        sections.append(before)
+    sections.append(
+        '  "typehashes": {\n'
         + compact_typehashes
-        + "\n  },\n"
-        + object_inner(after_typehashes)
-        + ',\n  "operations": [\n'
-        + compact_rows
-        + "\n  ]\n}\n"
+        + "\n  }"
     )
+    after = object_inner(after_typehashes)
+    if after:
+        sections.append(after)
+    sections.append(
+        '  "operations": [\n'
+        + compact_rows
+        + "\n  ]"
+    )
+    rendered = "{\n" + ",\n".join(sections) + "\n}\n"
     return rendered.encode("utf-8")
 
 
