@@ -2,10 +2,12 @@
 
 ## Status
 
-**Execution authorized only for bounded, reversible pre-freeze measurement
-prototypes. Packet publication, packet acceptance, normative freeze, production
-source implementation, deployment, and readiness promotion remain blocked
-until the evidence gates in this document pass.**
+**The architecture and semantic interface are accepted only in the narrow
+pre-genesis sense recorded by the semantic-freeze decision and finality
+overlay. Packet publication and acceptance, implementation acceptance,
+production source, deployment, and readiness promotion remain blocked until
+the evidence gates in this document pass. Execution remains authorized only
+for bounded, reversible pre-freeze measurement prototypes.**
 
 This document records security invariants and stop gates for the candidate
 interface packets:
@@ -18,9 +20,11 @@ Its machine-readable companion is
 Both artifacts are based on `origin/main`
 `8a045029185efc807edeac08d6f76b95c4387dd1`.
 
-This document does not accept ADR 0022, approve either candidate packet,
-choose an unresolved protocol design, freeze an interface, authorize production
-implementation, supply missing measurements, or authorize deployment.
+This document does not independently accept ADR 0022 or either candidate
+packet. It does not broaden the accepted semantic-interface freeze, resolve an
+implementation stop, authorize production implementation, accept a prototype,
+or authorize deployment. The accepted semantic decision remains distinct from
+packet, implementation, deployment, audit, and release acceptance.
 
 ## Bounded pre-freeze measurement authorization
 
@@ -73,8 +77,10 @@ The following rules apply to both host/adapter pairs:
    replay consumption, counter, assignment, freeze, snapshot, record,
    continuity append, payload, signature evidence, or event may survive.
 10. Adapter address, runtime code hash, interface, marker, schema, and
-    dependency binding are constructor-pinned. Every validation call rechecks
-    live adapter code.
+    dependency binding are constructor-pinned. The host checks the live adapter
+    `EXTCODEHASH` immediately before every adapter call and again during the
+    post-transcript reread before mutation. These adapter-identity checks are
+    separate from every ERC-1271 signer-codehash check.
 11. Neither adapter has mutable storage, authority, payable behavior, fallback,
     receive function, proxy, `DELEGATECALL`, `CALLCODE`, deployment opcode,
     `SELFDESTRUCT`, arbitrary direct target, arbitrary selector, or generic
@@ -197,10 +203,15 @@ The candidate bundle is bounded to one through 33 canonical proofs:
   bytes;
 - EOA mode requires no live code, canonical 64-byte EIP-2098 or 65-byte
   `(r,s,v)`, nonzero exact recovery, low `s`, and canonical `v`;
-- ERC-1271 mode requires a nonzero registry-authenticated signer code hash, an
-  exact live adapter recheck, the exact operation EIP-712 digest, one capped
-  `STATICCALL`, exact accepted return shape, and fail-closed error handling;
-  and
+- ERC-1271 mode requires a nonzero registry-authenticated signer code hash.
+  Immediately before every capped signer `STATICCALL`, the adapter computes
+  `EXTCODEHASH(signer)` and requires exact equality with that authenticated
+  hash. During the registry's post-transcript reread, the registry recomputes
+  `EXTCODEHASH(signer)` for every ERC-1271 proof and requires the same equality
+  before mutation. These signer checks do not substitute for the registry's
+  separate live adapter-codehash checks. The call also requires the exact
+  operation EIP-712 digest, exact accepted return shape, and fail-closed error
+  handling; and
 - the registry validates counts, ordering, identities, authority classes,
   modes, code hashes, nonce/deadline/timestamp rules, signature bounds,
   signer-set hash, and dynamic hashes before calling. The adapter repeats the
@@ -235,6 +246,16 @@ first-come signer pool, lower, emergency path, overloaded parameter, or
 twenty-third GGP is forbidden.
 
 ## Core and finality dependency predicates
+
+The reviewed finality supplement overlays the accepted semantic-interface
+decision as
+`accepted_with_row_22_finality_implementation_stop`. It resolves the
+finality-dependency design question for matrix rows 12
+`recordArtistSanction` and 13 `confirmSanctionFinalized` only for current
+Proposed-packet evaluation and measurement. It does not accept the packet or
+an implementation. Row 22 `recordRecoveryApproval` remains a hard
+implementation stop; no optimistic recovery predicate or placeholder ABI is
+permitted.
 
 No address or runtime hash is supplied by this document. The accepted packet
 must bind exact constructor identities and expected runtime code hashes and
@@ -300,10 +321,18 @@ introduced without a new explicit design decision.
 
 ## Current disposition
 
-The topology, transcript, signature, dependency, and evidence shapes above are
-security requirements for review. They are not accepted protocol decisions.
-No measured gas, runtime size, initcode size, runtime code hash, initcode hash,
-deployment address, or receipt is recorded here.
+The semantic-interface topology and operation meanings are accepted only as
+recorded in the semantic-freeze decision, with rows 12 and 13 resolved solely
+for Proposed-packet evaluation and row 22 still implementation-stopped by the
+finality overlay. The security, empirical, implementation, and deployment
+gates above remain fail-closed. This document therefore records no packet
+acceptance, implementation acceptance, deployment authorization, audit claim,
+or readiness promotion.
+
+Prototype measurements retained elsewhere do not by themselves pass these
+gates. Final compiler receipts, exact constructor-appended initcode, runtime
+and initcode hashes, deployment addresses, and deployment receipts remain
+unaccepted here.
 
 The next permissible work is limited to:
 

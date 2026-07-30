@@ -5,10 +5,11 @@
   "maturity": "pre-audit",
   "status": {
     "bounded_measurement_prototype_execution": "authorized",
-    "semantic_interface_decision": "accepted_with_three_finality_implementation_stops",
+    "semantic_interface_decision": "accepted_with_row_22_finality_implementation_stop",
+    "semantic_interface_scope": "accepted_pre_genesis_architecture_and_semantics_only",
     "packet_publication": "blocked_pending_integration_and_review",
-    "packet_acceptance": "blocked_pending_empirical_evidence_and_finality_supplement",
-    "normative_freeze": "blocked_pending_empirical_evidence_and_finality_supplement",
+    "packet_acceptance": "blocked_pending_remaining_empirical_integration_and_review_evidence",
+    "normative_freeze": "blocked_pending_remaining_empirical_integration_and_review_evidence",
     "production_source_implementation": "blocked_pending_normative_freeze",
     "deployment": "blocked",
     "readiness_promotion": "blocked"
@@ -81,6 +82,11 @@
       "arbitrary_selector",
       "generic_router"
     ],
+    "adapter_codehash_rechecks": [
+      "host_EXTCODEHASH_adapter_immediately_before_every_adapter_call",
+      "host_EXTCODEHASH_adapter_during_post_transcript_reread_before_mutation"
+    ],
+    "adapter_codehash_checks_are_distinct_from_signer_codehash_checks": true,
     "replacement": "new_host_plus_continuity_registry_and_governed_pointer_process"
   },
   "revenue": {
@@ -251,7 +257,9 @@
       },
       "erc1271_mode": {
         "registry_authenticated_nonzero_signer_codehash": true,
-        "adapter_live_codehash_recheck": true,
+        "adapter_EXTCODEHASH_signer_immediately_before_every_ERC1271_call_equals_registry_authenticated_hash": true,
+        "registry_EXTCODEHASH_signer_during_post_transcript_reread_equals_registry_authenticated_hash": true,
+        "signer_codehash_checks_do_not_substitute_for_adapter_codehash_rechecks": true,
         "exact_operation_eip712_digest": true,
         "nonempty_bounded_signature": true,
         "one_call_per_participant": true,
@@ -313,6 +321,15 @@
     }
   },
   "core_and_finality": {
+    "semantic_interface_decision": "accepted_with_row_22_finality_implementation_stop",
+    "finality_overlay": {
+      "row_12_recordArtistSanction": "resolved_for_current_Proposed_packet_evaluation_and_measurement_only",
+      "row_13_confirmSanctionFinalized": "resolved_for_current_Proposed_packet_evaluation_and_measurement_only",
+      "row_22_recordRecoveryApproval": "hard_implementation_stop",
+      "packet_acceptance_effect": "none",
+      "implementation_acceptance_effect": "row_22_remains_blocked",
+      "deployment_authorization_effect": "none"
+    },
     "addresses": "not_recorded",
     "constructor_codehashes": "not_recorded",
     "runtime_codehashes": "not_recorded",
