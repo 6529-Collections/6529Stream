@@ -1,0 +1,216 @@
+{
+  "schema": "6529stream-empirical-adapter-measurements-v1",
+  "status": {
+    "evidence_kind": "reversible_measurement_prototype",
+    "packet_approval": false,
+    "implementation_acceptance": false,
+    "deployment_authorization": false,
+    "production_readiness": false
+  },
+  "provenance": {
+    "candidate_packet_base": "8a045029185efc807edeac08d6f76b95c4387dd1",
+    "revenue_prototype_commit": "a32a56db6ecdcf5ff0bcce4d4a3d03fc40bc4d89",
+    "artist_prototype_commit": "1bd8c628cc04ce4977c6387b83b052688498187a"
+  },
+  "compiler": {
+    "solidity": "0.8.19",
+    "via_ir": true,
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "evm_version": "paris",
+    "bytecode_hash": "none",
+    "cbor_metadata": false
+  },
+  "ceilings_bytes": {
+    "strict_runtime": 22576,
+    "eip170_runtime": 24576,
+    "strict_full_initcode": 47152,
+    "eip3860_full_initcode": 49152
+  },
+  "revenue": {
+    "verdicts": {
+      "strict_runtime_ceiling": "GO_FOR_THIS_CEILING_ONLY",
+      "strict_full_initcode_ceiling": "PASS_MEASUREMENT_ONLY",
+      "semantic_acceptance": "NOT_ESTABLISHED",
+      "packet_or_implementation_acceptance": "NO_CLAIM"
+    },
+    "sizes_bytes": {
+      "runtime": 21744,
+      "creation_code_without_constructor_arguments": 23891,
+      "constructor_arguments": 640,
+      "full_initcode": 24531,
+      "strict_runtime_margin": 832,
+      "strict_full_initcode_margin": 22621
+    },
+    "deployment_gas_local": 4786414,
+    "interface": {
+      "interface_id_excluding_inherited_erc165": "0xb4165b1a",
+      "selectors": {
+        "revenueResolverValidationAdapterMarkerV1": "0xb3573c09",
+        "revenueResolverValidationAdapterSchemaV1": "0x94bf44c4",
+        "dependencyBindingHash": "0x371b62f3",
+        "computePrimaryAssignmentHashV1": "0xaa3a3b3e",
+        "validateSetPrimaryAssignmentV1": "0x6396e4ca",
+        "validateClearPrimaryAssignmentV1": "0xae8de4e2",
+        "validateFreezePrimaryAssignmentV1": "0xa76cbd87",
+        "validateSetRoyaltyAssignmentV1": "0x7e18b9d4",
+        "validateClearRoyaltyAssignmentV1": "0x02c57ac5",
+        "validateFreezeRoyaltyAssignmentV1": "0x5e1f43f2",
+        "validateFreezeArtistRoyaltyAssignmentV1": "0x600e740d",
+        "validateSnapshotTokenRoyaltyAtMintV1": "0x2664335b"
+      }
+    },
+    "focused_tests": {
+      "passed": 7,
+      "failed": 0,
+      "scope": "O1 and O2 success plus focused construction, ABI, dependency, artist-return, payable, and unknown-selector hostile cases"
+    },
+    "gas_report": {
+      "context": "local mocks; mixed success and intentional rejection calls; not an approved reserve",
+      "computePrimaryAssignmentHashV1": {
+        "calls": 8,
+        "minimum": 362,
+        "average": 13484,
+        "median": 4451,
+        "maximum": 48605
+      },
+      "validateSetPrimaryAssignmentV1": {
+        "calls": 2,
+        "minimum": 51480,
+        "average": 60856,
+        "median": 60856,
+        "maximum": 70233
+      }
+    },
+    "preserved_gaps": [
+      "Core, factory, and artist marker/schema facts lack an approved live probe surface.",
+      "O9 omits the source frozen-bit field even though sourceAssignmentHash commits that bit; the prototype checks both exact canonical forms without choosing normative semantics.",
+      "O2 requires nonzero nextPolicyHash while O4 requires zero currentAssignmentPolicyHash for the no-loosening branch, although both occupy the same primary assignment hash slot.",
+      "The exact O9 ABI requires via-IR and fails the branch default non-via-IR profile with Stack too deep.",
+      "Focused tests do not satisfy the full hostile matrix, all-entry golden vectors, differential proof, resolver integration, or release gates.",
+      "No host lock, authentication, pre/post recheck, replay, mutation-order, rollback, or atomicity proof is present, and no reverse-composed EIP-150 reserve is measured or approved.",
+      "The full-initcode length is creation code plus 640 static constructor bytes, but the exact constructor-appended initcode receipt, bytes, and hash are not retained.",
+      "Positive-path execution coverage is limited to O1 and O2; O3 through O9 have no successful-path evidence here."
+    ]
+  },
+  "artist": {
+    "verdicts": {
+      "strict_runtime_ceiling": "NO-GO",
+      "eip170_runtime_ceiling": "NO-GO",
+      "strict_full_initcode_ceiling": "PASS_MEASUREMENT_ONLY",
+      "semantic_success": "NO-GO",
+      "packet_or_implementation_acceptance": "NO_CLAIM"
+    },
+    "sizes_bytes": {
+      "runtime": 29698,
+      "creation_code_without_constructor_arguments": 30005,
+      "constructor_arguments": 0,
+      "full_initcode": 30005,
+      "strict_runtime_excess": 7122,
+      "eip170_runtime_excess": 5122,
+      "strict_full_initcode_margin": 17147
+    },
+    "interface": {
+      "validation_entry_count": 57,
+      "validation_entry_selector_xor": "0x2efcc794",
+      "full_interface_id_excluding_inherited_erc165": "0x7cdddcdd",
+      "probe_selectors": {
+        "artistRegistryValidationAdapterMarker": "0x24a325eb",
+        "artistRegistryValidationAdapterSchema": "0x41995c51",
+        "dependencyBindingHash": "0x371b62f3"
+      },
+      "validation_entry_selectors": {
+        "validateAcceptArtistBindingV1": "0xbff12590",
+        "validateAcceptCollaboratorIdentityV1": "0x8dd23f69",
+        "validateAcceptCollaboratorV1": "0x50a122eb",
+        "validateApproveArtistRotationV1": "0x46f527b9",
+        "validateApprovePlatformWorksCorrectionV1": "0x8b1b5cb4",
+        "validateAuthorizeArtistContentFreezeV1": "0x9e07a80c",
+        "validateAuthorizeArtistRoyaltyFreezeV1": "0x63633323",
+        "validateCancelArtistDormancyV1": "0xa1d218c5",
+        "validateCancelAttributionRepudiationV1": "0xb0f5885f",
+        "validateCancelEstateActivationV1": "0xdf4208c9",
+        "validateCommitArtistHistoryImportRootV1": "0x1910f961",
+        "validateCompleteArtistDormancyV1": "0x414e73ba",
+        "validateConfirmSanctionFinalizedV1": "0x9c32b4f8",
+        "validateContestArtistIdentityV1": "0x46fef903",
+        "validateDeclarePlatformWorksV1": "0xd483390f",
+        "validateDesignateSuccessorV1": "0x2e8b0ad5",
+        "validateExecuteArtistRotationV1": "0x4ff765e7",
+        "validateExecuteAttributionRepudiationV1": "0xd61f0e0e",
+        "validateExecuteEstateActivationV1": "0x405071c7",
+        "validateFileAttributionClaimV1": "0x2b9f95ab",
+        "validateFilePlatformWorksClaimV1": "0x9f2ab3c0",
+        "validateGrantArtistDelegationV1": "0xfd29f33e",
+        "validateInitiateArtistDormancyV1": "0x36857dd3",
+        "validateObserveRegistryCutoverV1": "0x8d630c57",
+        "validateOpenAttributionDisputeV1": "0xe5faa2a1",
+        "validateProposeArtistBindingV1": "0xd413fdec",
+        "validateProposeCollaboratorIdentityV1": "0xfb6d79d5",
+        "validateRecordArtistAttestationV1": "0x45001de2",
+        "validateRecordArtistSanctionV1": "0xb8cc3b3e",
+        "validateRecordContentConsentV1": "0x6d52cdea",
+        "validateRecordContentRatificationV1": "0x9f5e1872",
+        "validateRecordCounterStatementV1": "0xa3c13205",
+        "validateRecordEconomicsConsentV1": "0x795e4001",
+        "validateRecordEstateDirectiveV1": "0x55c714a4",
+        "validateRecordIdentityRevisionV1": "0x88ba1b08",
+        "validateRecordPayoutDesignationV1": "0x43fd541e",
+        "validateRecordPolicyConsentV1": "0xcdaecafe",
+        "validateRecordRecoveryApprovalV1": "0x696ed9d5",
+        "validateRecordSaleConsentV1": "0x417c166a",
+        "validateRecordStewardSanctionGrantV1": "0x8c4a56d2",
+        "validateRecordUnavailabilityFindingV1": "0xfedbc352",
+        "validateRecoverArtistIdentityV1": "0xee2e0831",
+        "validateRefuseArtistBindingV1": "0x9f94e137",
+        "validateRequestEstateActivationV1": "0x219a1989",
+        "validateResolveAttributionDisputeV1": "0xd082de90",
+        "validateRevokeArtistAuthorizationV1": "0x798ea3ac",
+        "validateRevokeArtistDelegationV1": "0x37c7ed3b",
+        "validateRevokeAttributionV1": "0xaeed9215",
+        "validateRevokePriorAddressStandingV1": "0x8381ab55",
+        "validateRotateArtistAddressV1": "0x8de2d745",
+        "validateSetArtistGuardiansV1": "0x8857dc0e",
+        "validateSetPlatformWorksContestV1": "0xc4b983cc",
+        "validateVerifyImportedLaneTipV1": "0xf53d3e24",
+        "validateVetoArtistRotationV1": "0xd143916d",
+        "validateVetoAttributionRepudiationV1": "0x252d66bd",
+        "validateVetoIdentityRecoveryV1": "0x81ab3e62",
+        "validateWithdrawArtistBindingV1": "0x55cc8780"
+      }
+    },
+    "foundry_chain_31337_dependency_binding": "0xf20c4ab74bab5090d4589e5c8abde377745276a5f7b5771d0c3ff9717759f324",
+    "focused_tests": {
+      "passed": 8,
+      "failed": 0,
+      "successful_validation_transcripts": 0,
+      "terminal_failure": "MeasurementOnlySemanticGap",
+      "covered_abi_families": 13
+    },
+    "gas_to_terminal_semantic_gap": {
+      "context": "EOA-only local measurement ending in deliberate revert; not success gas or an approved reserve",
+      "one_eoa": 36329,
+      "two_eoa": 49455,
+      "thirty_three_eoa": 627718
+    },
+    "preserved_gaps": [
+      "All 57 entries terminate with MeasurementOnlySemanticGap and return no success transcript.",
+      "Per-entry field masks, registry-write selectors, operation typehashes, state/replay semantics, record hashes, and result population are unfrozen.",
+      "Refusal and delegation-revocation typehashes are missing; displayName, deadline/signedAt, empty dynamic values, and several maxima remain unresolved.",
+      "ERC-1271 policy, reverse-composed and outer gas reserves, and adversarial gas measurements remain unapproved.",
+      "Core burn-cutoff and finality dependencies plus registry mutation, replay, reentrancy, atomicity, selector-isolation, and golden-vector evidence remain unresolved.",
+      "Runtime exceeds both the strict packet ceiling and EIP-170.",
+      "validateProposeArtistBindingV1 omits common-context validation, so substituted adapter, adapter-codehash, or dependency-binding context can reach the terminal gap; nested collaborator and capability-override ordering is not semantically canonical.",
+      "Signer verification uses currentStateDigest although the later transcript computes a nonzero full intent, and signerSetHash is trusted rather than recomputed, making the signer transcript internally noncanonical."
+    ]
+  },
+  "commands": [
+    "forge build --via-ir --sizes --force smart-contracts/StreamRevenueResolverValidationAdapter.sol",
+    "forge build --via-ir --sizes --force smart-contracts/StreamArtistRegistryValidationAdapter.sol",
+    "forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol -vvv",
+    "forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol --gas-report",
+    "forge test --via-ir --code-size-limit 50000 --match-path test/StreamArtistRegistryValidationAdapter.t.sol -vv",
+    "forge inspect --via-ir IStreamRevenueResolverValidationAdapter methodIdentifiers --json",
+    "forge inspect --via-ir IStreamArtistRegistryValidationAdapter methodIdentifiers --json"
+  ]
+}
