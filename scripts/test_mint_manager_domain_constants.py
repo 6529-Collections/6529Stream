@@ -335,13 +335,6 @@ class MintManagerDomainConstantTests(unittest.TestCase):
                 "Implemented accepted ADR 0018's pre-genesis atomic operation-identity",
                 "Accepted-but-unimplemented ADR 0018 operation identity",
             ),
-            (
-                checker.STATUS_PATH,
-                "18,997 bytes, leaving\n"
-                "  5,579 bytes of EIP-170",
-                "24,128 bytes, leaving\n"
-                "  448 bytes of EIP-170",
-            ),
         )
         for path, current, stale in mutations:
             with self.subTest(path=path):

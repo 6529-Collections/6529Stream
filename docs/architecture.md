@@ -113,10 +113,10 @@ The current production profile is:
 
 - canonical command: `python scripts/build_release_artifacts.py`;
 - aggregate diagnostic: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 18,997 bytes;
-- current EIP-170 margin: 5,579 bytes;
+- mutable `StreamCore` runtime and margin:
+  [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json);
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
-- approved baseline EIP-170 margin: 2,392 bytes;
+- approved baseline EIP-170 margin is 2,392 bytes;
 - interim development floor: 384-byte minimum runtime margin;
 - development warning threshold: 512-byte warning runtime margin;
 - production deployment minimum: 2,000-byte runtime margin under the
@@ -158,15 +158,17 @@ The default classification for future feature work is:
 
 This policy remains conservative after the permanent-Core extraction. CON-012
 spent Core bytecode on the mint-manager boundary and explicit token identity
-reads; the atomic operation-identity cutover later removed 24 net runtime
-bytes. The permanent-Core metadata/router and authenticated external-read
-relocation then reduced runtime by another 5,131 bytes to 18,997 bytes, leaving
-5,579 bytes of EIP-170 margin. That is below the approved 22,184-byte objective
-and above the non-waivable 2,000-byte production deployment margin. The size
-result does not make the protocol production-ready:
-[issue #654](https://github.com/6529-Collections/6529Stream/issues/654) remains
-open for the two unresolved #670 artist and royalty pointer interface bindings,
-and audit, deployment, and retained non-local evidence gates remain separate.
+reads; the atomic operation-identity cutover later removed duplicate runtime.
+The permanent-Core metadata/router and authenticated external-read relocation
+then restored the approved 22,184-byte objective and the non-waivable
+2,000-byte production deployment margin. Exact mutable measurements remain in
+the canonical bytecode proof. The artifact-backed result satisfies
+[issue #654](https://github.com/6529-Collections/6529Stream/issues/654)'s Core
+headroom requirement, but it does not make the protocol production-ready. The
+unimplemented #670 satellites still require concrete source/security
+acceptance: ADR 0021's revenue architecture is Accepted but source-blocked,
+while ADR 0022's artist architecture remains Proposed. Audit, deployment,
+candidate-instance, and retained non-local evidence gates remain separate.
 The goal is to keep `StreamCore` deployable, auditable, and stable while
 allowing world-class 1/1 drop surfaces to evolve through explicit, versioned
 extension points.

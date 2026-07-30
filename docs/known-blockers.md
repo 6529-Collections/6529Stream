@@ -158,13 +158,12 @@ contributors who start from the README.
   canonical isolated `python scripts/build_release_artifacts.py` output. The
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
-  committed `release-artifacts/latest/bytecode-release-proof.json` records the
-  permanent target-isolated `StreamCore` runtime at 18,997 bytes with 5,579 bytes
-  of EIP-170 headroom. The complete linked target is 5,131 bytes smaller
-  than the 24,128-byte transitional build, passes the non-waivable 2,000-byte
-  production margin by 3,579 bytes, and is 3,187 bytes below the approved
-  22,184-byte objective. Historical 21,792-byte measurements remain
-  non-additive. Accepted ADR 0018's atomic cutover now implements
+  committed
+  [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+  owns the permanent target-isolated `StreamCore` runtime and margin. The
+  complete linked target passes the non-waivable 2,000-byte production margin
+  and the approved 22,184-byte objective. Historical 21,792-byte measurements
+  remain non-additive. Accepted ADR 0018's atomic cutover now implements
   one ledger-owned root plus `N` token operation IDs, derive/reserve-before-
   ledger ordering, manager-scoped replay, whole-transaction rollback, and Core
   current-pair equality without lifetime operation-ID storage. The permanent

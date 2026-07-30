@@ -321,21 +321,22 @@ measured delta, maximum approved runtime size, and mitigation before
 Accepted headroom-recovery records use `measured_delta_bytes` as
 `runtime_size_bytes - baseline_runtime_size_bytes`, which makes reductions
 negative and bytecode spend positive.
-The current approved `StreamCore` runtime baseline is 22,184 bytes with
-2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
-under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,128 bytes
-with 448 bytes of EIP-170 margin.
-This CON-014 branch also refreshes via-IR bytecode hashes for contracts whose
-source files are otherwise unchanged in the diff. `StreamCore` changes because
-its imported `IStreamMintManager` source expands from the prior marker-only
-interface to the full launch manager ABI while preserving Core's external ABI
-method identifiers; Core storage changes include the prepared-mint manager
-tracking added for this slice. `StreamPrimarySaleSettlement` has
-unchanged source, ABI method identifiers, and storage layout; the regenerated
-proof refreshes the stale prior via-IR release artifact baseline to the current
-compiled output. These changes are release-evidence changes, not hidden source
-edits to those contracts.
+The approved `StreamCore` runtime baseline is 22,184 bytes; its approved
+baseline EIP-170 margin is 2,392 bytes. Mutable runtime and margin are owned by the
+`StreamCore` row in
+`release-artifacts/latest/bytecode-release-proof.json`, not by copied tooling
+prose. The architecture/status preflight and risk generation step both read the
+cycle-free pre-tail `abi-checksums.json` measurement, so an honest Core-size
+change can update the single marked `docs/status.md` projection before the new
+manifest and proof exist. `scripts/generate_risk_register.py --check` then
+validates the final proof's up-to-date release-manifest and ABI-checksum bindings,
+requires every `StreamCore` proof row to agree, and requires exact ABI/proof
+parity against the non-waivable 2,000-byte production margin. Missing, stale,
+malformed, duplicate-owner, orphan, or internally inconsistent measurements
+fail closed without creating a `risk -> manifest -> proof` dependency cycle. This
+artifact-backed local size result does not replace concrete
+candidate integration, independent audit, deployment, or reviewed live-bytecode
+evidence.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
@@ -1040,9 +1041,12 @@ The non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
-The current 448-byte margin intentionally leaves production release mode red
-until the tracked slimming work lands; ordinary `make check` remains usable for
-development.
+Runtime and margin are read from
+`release-artifacts/latest/bytecode-release-proof.json`; copied tooling prose is
+not a measurement authority. Passing the local Core-size requirement does not
+clear the independent candidate, audit, deployment, and retained-live-evidence
+requirements that keep production release mode red. Ordinary `make check`
+remains usable for development.
 
 The public-beta evidence step validates
 [`public-beta-evidence.md`](public-beta-evidence.md) and
@@ -1472,10 +1476,10 @@ would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
 
 Canonical checksum generation uses the exact reviewed covered-path inventory
-and independently pins the seven release-tool roots, 22-module runtime closure,
+and independently pins the seven release-tool roots, 23-module runtime closure,
 and nine focused trust-policy tests as ordinary, in-repository files. The
 canonical, manually reviewed
-`release-artifacts/release-tool-call-policy.json` records exactly those 31
+`release-artifacts/release-tool-call-policy.json` records exactly those 32
 runtime and focused-test paths, including each source SHA-256 and byte size plus
 its import, member, and call multisets. Its schema is
 `release-artifacts/schema/release-tool-call-policy.v1.schema.json`. The
@@ -1486,7 +1490,7 @@ checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
 The revised canonical projection contains exactly 263 configured roots,
-expanding to exactly 432 covered-file entries in each checksum index. The twelve
+expanding to exactly 435 covered-file entries in each checksum index. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
 `smart-contracts/` or `script/`. The #672 planning package adds six exact roots
@@ -1846,7 +1850,14 @@ regenerate the tracked release baseline.
 The release-tool call policy and its schema are reviewed inputs, not generated
 outputs. Any change to one of the 32 reviewed tool/test sources or to an allowed
 dangerous exception must update and review the policy before the generated
-tail. Preserve the canonical tail order: risk register, release notes, release
+tail with:
+
+```bash
+python scripts/generate_release_checksums.py --refresh-release-tool-call-policy
+```
+
+Preserve the canonical tail order after that reviewed-input refresh: risk
+register, release notes, release
 manifest, bytecode proof, candidate lockfile, then checksum bundle. This keeps
 the dependency graph acyclic: the policy never records its own digest or a
 generated-tail digest, while manifest and lockfile supply the policy/schema

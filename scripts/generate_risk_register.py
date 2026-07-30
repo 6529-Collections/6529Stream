@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import hashlib
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -19,6 +21,104 @@ import check_slither_baseline as slither_baseline_checker
 GENERATOR_VERSION = "1"
 DEFAULT_OUTPUT = checker.DEFAULT_REGISTER
 SLITHER_RISK_ID = "RISK-SLITHER-001"
+SIZE_RISK_ID = "RISK-SIZE-001"
+BYTECODE_PROOF_PATH = Path("release-artifacts/latest/bytecode-release-proof.json")
+RELEASE_MANIFEST_PATH = Path("release-artifacts/latest/release-manifest.json")
+ABI_CHECKSUMS_PATH = Path("release-artifacts/latest/abi-checksums.json")
+BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
+ABI_CHECKSUMS_SCHEMA = "6529stream.abi-checksums.v1"
+STREAM_CORE_CONTRACT = "StreamCore"
+EIP170_RUNTIME_LIMIT_BYTES = 24_576
+PRODUCTION_MINIMUM_MARGIN_BYTES = 2_000
+LIVE_SIZE_MIRROR_REQUIREMENTS: dict[Path, tuple[str, ...]] = {
+    Path("docs/architecture.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/launch-conformance-matrix.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+        "matrix does not duplicate the mutable runtime or margin",
+    ),
+    Path("docs/launch-v1-target-architecture.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+        "rather than duplicating",
+        "mutable measurements here",
+    ),
+    Path("docs/tooling.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+        "not by copied tooling\nprose",
+    ),
+    Path("docs/release-policy.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/status.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/known-blockers.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/release-readiness.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/public-beta-evidence.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("docs/production-readiness-execution.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("ops/ROADMAP.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("ops/EXECUTION_BACKLOG.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+    ),
+    Path("ops/AUTONOMOUS_RUN.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+        "are not duplicated in this active run state",
+    ),
+    Path("ops/workstreams/core-mint-critical-path/active-context.md"): (
+        "release-artifacts/latest/bytecode-release-proof.json",
+        "not duplicated in this active context",
+    ),
+}
+STALE_SIZE_MIRROR_PATTERNS = (
+    r"(?<!then-)current 24,128",
+    r"448 bytes of EIP-170",
+    r"current 448-byte margin",
+    r"1,552 bytes",
+)
+STABLE_SIZE_POLICY_FRAGMENTS = (
+    "approved baseline EIP-170 margin is 2,392 bytes",
+)
+LIVE_SIZE_MEASUREMENT_PATTERN = re.compile(
+    r"(?i)\b(?:now\s+)?measures?\s+\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\bruntime(?:\s+(?:bytecode|size))?\s*(?:is|as|of|:|=)\s*"
+    r"\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:current\s+)?(?:StreamCore|Core|permanent\s+target)"
+    r"(?:\s+runtime(?:\s+bytecode)?)?\s*(?:is|equals?|:|=)\s*"
+    r"\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)\s*:\s*"
+    r"\d[\d,]*\s+runtime(?:\s+bytecode)?\s+bytes\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)(?:\s+runtime)?\s+size\s+"
+    r"(?:is|equals?|:)\s*\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:EIP-170\s+)?(?:margin|headroom)\s*"
+    r"(?:is|equals?|of|:)\s*\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)\b[^\n]{0,40}\bhas\s+"
+    r"(?:a\s+)?\d[\d,]*\s*(?:-byte|bytes)(?:\s+of)?\s+"
+    r"(?:runtime(?:\s+bytecode)?|headroom|margin)\b",
+)
+STATUS_SIZE_PROJECTION_PATH = Path("docs/status.md")
+STATUS_SIZE_PROJECTION_START = "<!-- streamcore-size-projection:start -->"
+STATUS_SIZE_PROJECTION_END = "<!-- streamcore-size-projection:end -->"
+STATUS_SIZE_PROJECTION_PATTERN = re.compile(
+    r"(?i)`StreamCore` production runtime as "
+    r"(?P<runtime>\d[\d,]*) bytes,\s+"
+    r"leaving\s+(?P<margin>\d[\d,]*) bytes of EIP-170 headroom",
+)
+HISTORICAL_SIZE_BLOCK_START = "<!-- historical-streamcore-size:start -->"
+HISTORICAL_SIZE_BLOCK_END = "<!-- historical-streamcore-size:end -->"
+AUTONOMOUS_CURRENT_RUN_HEADING = "\n## Current Run Notes"
+AUTONOMOUS_PACKAGING_HEADING = "\n## Packaging Notes"
+AUTONOMOUS_ACTIVE_END = "\n## PR Queue"
 ISSUE_LINKS_PATH = issue_links_checker.DEFAULT_ISSUE_LINKS.as_posix()
 ISSUE_BACKLOG_PATH = issue_links_checker.DEFAULT_BACKLOG.as_posix()
 
@@ -465,31 +565,23 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-REL-001"],
     },
     {
-        "id": "RISK-SIZE-001",
-        "title": "StreamCore misses the normative production headroom gate",
+        "id": SIZE_RISK_ID,
         "area": "core_size",
         "severity": "high",
-        "status": "open_blocker",
         "owner": "protocol",
         "target_gate": "Gate G",
         "source": "launch conformance matrix, target architecture, and artifact-backed size proof",
-        "mitigation": (
-            "Recover real Core headroom through measured compression, extraction, or "
-            "authorized relocation while retaining every mandatory hook; keep non-critical "
-            "product surfaces satellite-first."
-        ),
-        "residual_risk": (
-            "The current 24,128-byte runtime leaves 448 bytes of EIP-170 headroom, "
-            "1,552 bytes below the non-waivable 2,000-byte production deployment minimum."
-        ),
         "evidence_paths": [
             "docs/known-blockers.md",
             "ops/ROADMAP.md",
             "docs/status.md",
+            "release-artifacts/latest/abi-checksums.json",
         ],
         "checks": [
             "python scripts/build_release_artifacts.py",
             "python scripts/check_contract_size_budget.py",
+            "python scripts/test_risk_register.py",
+            "python scripts/generate_risk_register.py --check",
             "python scripts/check_release_mode.py --phase production-release",
             "python scripts/generate_release_manifest.py --check",
         ],
@@ -656,8 +748,390 @@ def slither_open_residual_risk(repo_root: Path) -> str:
     )
 
 
-def build_register(repo_root: Path) -> dict[str, Any]:
+def _load_bytecode_proof(repo_root: Path) -> dict[str, Any]:
+    proof_path = repo_root / BYTECODE_PROOF_PATH
+    try:
+        with proof_path.open("r", encoding="utf-8") as handle:
+            proof = json.load(handle)
+    except FileNotFoundError as exc:
+        raise checker.RiskRegisterError(
+            f"missing StreamCore bytecode proof: {BYTECODE_PROOF_PATH.as_posix()}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise checker.RiskRegisterError(
+            f"invalid StreamCore bytecode proof JSON: {exc}"
+        ) from exc
+    if not isinstance(proof, dict):
+        raise checker.RiskRegisterError("StreamCore bytecode proof must be an object")
+    if proof.get("schema_version") != BYTECODE_PROOF_SCHEMA:
+        raise checker.RiskRegisterError(
+            f"StreamCore bytecode proof must use schema {BYTECODE_PROOF_SCHEMA}"
+        )
+    return proof
+
+
+def _require_proof_int(value: Any, path: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise checker.RiskRegisterError(f"{path} must be an integer")
+    return value
+
+
+def _validate_proof_source_file_binding(
+    repo_root: Path,
+    proof: dict[str, Any],
+    *,
+    field: str,
+    expected_path: Path,
+    label: str,
+) -> None:
+    source = proof.get("source")
+    if not isinstance(source, dict):
+        raise checker.RiskRegisterError("bytecode proof source must be an object")
+    record = source.get(field)
+    if not isinstance(record, dict):
+        raise checker.RiskRegisterError(
+            f"bytecode proof source.{field} must be an object"
+        )
+    expected_path_text = expected_path.as_posix()
+    if record.get("path") != expected_path_text:
+        raise checker.RiskRegisterError(
+            f"bytecode proof {label} path must be {expected_path_text}"
+        )
+    source_path = repo_root / expected_path
+    if not source_path.is_file():
+        raise checker.RiskRegisterError(
+            f"missing bytecode-proof {label}: {expected_path_text}"
+        )
+    source_bytes = source_path.read_bytes()
+    actual_sha256 = "sha256:" + hashlib.sha256(source_bytes).hexdigest()
+    actual_size = len(source_bytes)
+    if record.get("sha256") != actual_sha256 or record.get("size_bytes") != actual_size:
+        raise checker.RiskRegisterError(
+            f"stale StreamCore bytecode proof {label} binding: "
+            f"expected {actual_sha256}/{actual_size}, "
+            f"got {record.get('sha256')}/{record.get('size_bytes')}"
+        )
+
+
+def _validate_measurement(
+    *,
+    runtime: Any,
+    limit: Any,
+    margin: Any,
+    prefix: str,
+) -> tuple[int, int]:
+    runtime_int = _require_proof_int(runtime, f"{prefix}.runtime")
+    limit_int = _require_proof_int(limit, f"{prefix}.eip170_runtime_limit")
+    margin_int = _require_proof_int(margin, f"{prefix}.runtime_margin")
+    if runtime_int < 0 or margin_int < 0:
+        raise checker.RiskRegisterError(f"{prefix} sizes must be non-negative")
+    if limit_int != EIP170_RUNTIME_LIMIT_BYTES:
+        raise checker.RiskRegisterError(
+            f"{prefix} EIP-170 limit must be {EIP170_RUNTIME_LIMIT_BYTES:,}, "
+            f"got {limit_int:,}"
+        )
+    if margin_int != limit_int - runtime_int:
+        raise checker.RiskRegisterError(
+            f"{prefix} margin is inconsistent: "
+            f"{margin_int:,} != {limit_int:,} - {runtime_int:,}"
+        )
+    return runtime_int, margin_int
+
+
+def stream_core_release_measurement(repo_root: Path) -> tuple[int, int]:
+    """Return the cycle-free pre-tail StreamCore measurement."""
+    path = repo_root / ABI_CHECKSUMS_PATH
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            artifact = json.load(handle)
+    except FileNotFoundError as exc:
+        raise checker.RiskRegisterError(
+            f"missing StreamCore ABI checksums: {ABI_CHECKSUMS_PATH.as_posix()}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise checker.RiskRegisterError(
+            f"invalid StreamCore ABI checksums JSON: {exc}"
+        ) from exc
+    if not isinstance(artifact, dict):
+        raise checker.RiskRegisterError("StreamCore ABI checksums must be an object")
+    if artifact.get("schema_version") != ABI_CHECKSUMS_SCHEMA:
+        raise checker.RiskRegisterError(
+            f"StreamCore ABI checksums must use schema {ABI_CHECKSUMS_SCHEMA}"
+        )
+    contracts = artifact.get("contracts")
+    if not isinstance(contracts, dict):
+        raise checker.RiskRegisterError("ABI checksums contracts must be an object")
+    row = contracts.get(STREAM_CORE_CONTRACT)
+    if not isinstance(row, dict):
+        raise checker.RiskRegisterError(
+            "ABI checksums have no StreamCore contract row"
+        )
+    return _validate_measurement(
+        runtime=row.get("deployed_bytecode_size_bytes"),
+        limit=row.get("eip170_runtime_limit_bytes"),
+        margin=row.get("deployed_runtime_margin_bytes"),
+        prefix="abi-checksums.contracts.StreamCore",
+    )
+
+
+def stream_core_proof_measurement(repo_root: Path) -> tuple[int, int]:
+    """Return the final proof measurement after validating its bound sources."""
+    proof = _load_bytecode_proof(repo_root)
+    _validate_proof_source_file_binding(
+        repo_root,
+        proof,
+        field="release_manifest",
+        expected_path=RELEASE_MANIFEST_PATH,
+        label="release-manifest",
+    )
+    _validate_proof_source_file_binding(
+        repo_root,
+        proof,
+        field="abi_checksums",
+        expected_path=ABI_CHECKSUMS_PATH,
+        label="ABI-checksums",
+    )
+    contract_proofs = proof.get("contract_proofs")
+    if not isinstance(contract_proofs, list):
+        raise checker.RiskRegisterError(
+            "bytecode proof contract_proofs must be an array"
+        )
+
+    measurements: list[tuple[int, int]] = []
+    for index, contract_proof in enumerate(contract_proofs):
+        if not isinstance(contract_proof, dict):
+            continue
+        contract = contract_proof.get("contract")
+        if not isinstance(contract, dict) or contract.get("name") != STREAM_CORE_CONTRACT:
+            continue
+        sizes = contract_proof.get("sizes")
+        if not isinstance(sizes, dict):
+            raise checker.RiskRegisterError(
+                f"StreamCore bytecode proof row {index} sizes must be an object"
+            )
+        measurements.append(
+            _validate_measurement(
+                runtime=sizes.get("runtime_bytecode_bytes"),
+                limit=sizes.get("eip170_runtime_limit_bytes"),
+                margin=sizes.get("runtime_margin_bytes"),
+                prefix=f"StreamCore bytecode proof row {index}",
+            )
+        )
+
+    if not measurements:
+        raise checker.RiskRegisterError(
+            "bytecode proof has no StreamCore contract proof"
+        )
+    distinct = sorted(set(measurements))
+    if len(distinct) != 1:
+        rendered = ", ".join(f"{runtime:,}/{margin:,}" for runtime, margin in distinct)
+        raise checker.RiskRegisterError(
+            "StreamCore bytecode proof measurements disagree: " + rendered
+        )
+    return distinct[0]
+
+
+def stream_core_size_measurement(
+    repo_root: Path,
+    *,
+    require_current_proof: bool = True,
+) -> tuple[int, int]:
+    """Return the pre-tail measurement and optionally require final-proof parity."""
+    release_measurement = stream_core_release_measurement(repo_root)
+    if require_current_proof:
+        proof_measurement = stream_core_proof_measurement(repo_root)
+        if proof_measurement != release_measurement:
+            raise checker.RiskRegisterError(
+                "StreamCore ABI/proof measurements disagree: "
+                f"ABI {release_measurement[0]:,}/{release_measurement[1]:,}, "
+                f"proof {proof_measurement[0]:,}/{proof_measurement[1]:,}"
+            )
+    return release_measurement
+
+
+def stream_core_size_risk_fields(
+    repo_root: Path,
+    *,
+    require_current_proof: bool = True,
+) -> dict[str, str]:
+    """Derive Core-size risk state from the cycle-free measurement/final proof."""
+    runtime, margin = stream_core_size_measurement(
+        repo_root,
+        require_current_proof=require_current_proof,
+    )
+    if margin >= PRODUCTION_MINIMUM_MARGIN_BYTES:
+        surplus = margin - PRODUCTION_MINIMUM_MARGIN_BYTES
+        relation = (
+            "exactly meets"
+            if surplus == 0
+            else f"is {surplus:,} {'byte' if surplus == 1 else 'bytes'} above"
+        )
+        return {
+            "title": "StreamCore satisfies the normative production headroom gate locally",
+            "status": "mitigated_local",
+            "mitigation": (
+                "Preserve the artifact-backed production margin while retaining every "
+                "mandatory Core hook and keeping non-critical product surfaces satellite-first."
+            ),
+            "residual_risk": (
+                f"The current {runtime:,}-byte runtime leaves {margin:,} bytes of "
+                f"EIP-170 headroom and {relation} the non-waivable "
+                f"{PRODUCTION_MINIMUM_MARGIN_BYTES:,}-byte production deployment minimum. "
+                "This local build proof does not replace concrete candidate integration, "
+                "independent audit, deployment, or reviewed live-bytecode evidence."
+            ),
+        }
+
+    shortfall = PRODUCTION_MINIMUM_MARGIN_BYTES - margin
+    shortfall_unit = "byte" if shortfall == 1 else "bytes"
+    return {
+        "title": "StreamCore misses the normative production headroom gate",
+        "status": "open_blocker",
+        "mitigation": (
+            "Recover real Core headroom through measured compression, extraction, or "
+            "authorized relocation while retaining every mandatory hook; keep non-critical "
+            "product surfaces satellite-first."
+        ),
+        "residual_risk": (
+            f"The current {runtime:,}-byte runtime leaves {margin:,} bytes of "
+            f"EIP-170 headroom, {shortfall:,} {shortfall_unit} below the non-waivable "
+            f"{PRODUCTION_MINIMUM_MARGIN_BYTES:,}-byte production deployment minimum."
+        ),
+    }
+
+
+def _strip_historical_size_blocks(relative_path: Path, text: str) -> str:
+    start_count = text.count(HISTORICAL_SIZE_BLOCK_START)
+    end_count = text.count(HISTORICAL_SIZE_BLOCK_END)
+    pattern = re.compile(
+        r"(?s)"
+        + re.escape(HISTORICAL_SIZE_BLOCK_START)
+        + r".*?"
+        + re.escape(HISTORICAL_SIZE_BLOCK_END),
+    )
+    matches = list(pattern.finditer(text))
+    if start_count != end_count or len(matches) != start_count:
+        raise checker.RiskRegisterError(
+            f"{relative_path.as_posix()} has malformed historical Core-size markers"
+        )
+    return pattern.sub("", text)
+
+
+def _live_size_scan_text(relative_path: Path, text: str) -> str:
+    scan_text = text
+    if relative_path == Path("ops/AUTONOMOUS_RUN.md"):
+        for heading in (
+            AUTONOMOUS_CURRENT_RUN_HEADING,
+            AUTONOMOUS_PACKAGING_HEADING,
+            AUTONOMOUS_ACTIVE_END,
+        ):
+            if scan_text.count(heading) != 1:
+                raise checker.RiskRegisterError(
+                    "ops/AUTONOMOUS_RUN.md must contain exactly one active-state "
+                    f"boundary heading {heading.strip()!r}"
+                )
+        positions = [
+            scan_text.index(AUTONOMOUS_CURRENT_RUN_HEADING),
+            scan_text.index(AUTONOMOUS_PACKAGING_HEADING),
+            scan_text.index(AUTONOMOUS_ACTIVE_END),
+        ]
+        if positions != sorted(positions):
+            raise checker.RiskRegisterError(
+                "ops/AUTONOMOUS_RUN.md active-state boundary headings are misordered"
+            )
+        scan_text = scan_text.split(AUTONOMOUS_ACTIVE_END, 1)[0]
+    return _strip_historical_size_blocks(relative_path, scan_text)
+
+
+def _validate_status_size_projection(repo_root: Path, text: str) -> str:
+    relative_path = STATUS_SIZE_PROJECTION_PATH
+    if (
+        text.count(STATUS_SIZE_PROJECTION_START) != 1
+        or text.count(STATUS_SIZE_PROJECTION_END) != 1
+    ):
+        raise checker.RiskRegisterError(
+            "docs/status.md must contain exactly one marked StreamCore size projection"
+        )
+    start = text.index(STATUS_SIZE_PROJECTION_START)
+    end = text.index(STATUS_SIZE_PROJECTION_END)
+    if end <= start:
+        raise checker.RiskRegisterError(
+            "docs/status.md has misordered StreamCore size projection markers"
+        )
+    owner = text[start + len(STATUS_SIZE_PROJECTION_START) : end]
+    matches = list(STATUS_SIZE_PROJECTION_PATTERN.finditer(owner))
+    if len(matches) != 1:
+        raise checker.RiskRegisterError(
+            "docs/status.md must contain exactly one canonical StreamCore size "
+            "pair inside its marked projection"
+        )
+    live_measurements = list(LIVE_SIZE_MEASUREMENT_PATTERN.finditer(owner))
+    if len(live_measurements) != 1:
+        raise checker.RiskRegisterError(
+            "docs/status.md marked projection must contain exactly one live "
+            "StreamCore measurement"
+        )
+    match = matches[0]
+    projected = (
+        int(match.group("runtime").replace(",", "")),
+        int(match.group("margin").replace(",", "")),
+    )
+    expected = stream_core_release_measurement(repo_root)
+    if projected != expected:
+        raise checker.RiskRegisterError(
+            "docs/status.md size projection does not match ABI checksums: "
+            f"expected {expected[0]:,}/{expected[1]:,}, "
+            f"got {projected[0]:,}/{projected[1]:,}"
+        )
+    outside = text[:start] + text[end + len(STATUS_SIZE_PROJECTION_END) :]
+    return _strip_historical_size_blocks(relative_path, outside)
+
+
+def validate_live_size_mirrors(repo_root: Path) -> None:
+    """Keep mutable Core measurements owned by the canonical proof."""
+    for relative_path, required_fragments in LIVE_SIZE_MIRROR_REQUIREMENTS.items():
+        path = repo_root / relative_path
+        try:
+            text = path.read_text(encoding="utf-8")
+        except FileNotFoundError as exc:
+            raise checker.RiskRegisterError(
+                f"missing live Core-size mirror: {relative_path.as_posix()}"
+            ) from exc
+        for fragment in required_fragments:
+            if fragment not in text:
+                raise checker.RiskRegisterError(
+                    f"{relative_path.as_posix()} is missing canonical Core-size "
+                    f"proof ownership fragment: {fragment!r}"
+                )
+        scan_text = (
+            _validate_status_size_projection(repo_root, text)
+            if relative_path == STATUS_SIZE_PROJECTION_PATH
+            else _live_size_scan_text(relative_path, text)
+        )
+        for pattern in STALE_SIZE_MIRROR_PATTERNS:
+            if re.search(f"(?i){pattern}", scan_text):
+                raise checker.RiskRegisterError(
+                    f"{relative_path.as_posix()} repeats stale current Core-size "
+                    f"value matching: {pattern!r}"
+                )
+        normalized = re.sub(r"\s*\n\s*", " ", scan_text)
+        for stable_fragment in STABLE_SIZE_POLICY_FRAGMENTS:
+            normalized = normalized.replace(stable_fragment, "")
+        match = LIVE_SIZE_MEASUREMENT_PATTERN.search(normalized)
+        if match:
+            raise checker.RiskRegisterError(
+                f"{relative_path.as_posix()} owns a mutable live Core-size "
+                f"claim outside docs/status.md: {match.group(0)!r}"
+            )
+
+
+def build_register(
+    repo_root: Path,
+    *,
+    require_current_proof: bool = True,
+) -> dict[str, Any]:
     """Build the deterministic risk register object."""
+    validate_live_size_mirrors(repo_root)
     issue_urls = canonical_issue_urls(repo_root)
     risks = []
     for definition in sorted(RISK_DEFINITIONS, key=lambda item: str(item["id"])):
@@ -671,6 +1145,13 @@ def build_register(repo_root: Path) -> dict[str, Any]:
             risk["tracking"] = resolve_tracking_urls(
                 issue_urls,
                 tracking_requirements,
+            )
+        if risk["id"] == SIZE_RISK_ID:
+            risk.update(
+                stream_core_size_risk_fields(
+                    repo_root,
+                    require_current_proof=require_current_proof,
+                )
             )
         if risk["id"] == SLITHER_RISK_ID:
             risk["residual_risk"] = slither_open_residual_risk(repo_root)
@@ -734,10 +1215,24 @@ def json_text(value: Any) -> str:
     return json.dumps(value, indent=2, ensure_ascii=False) + "\n"
 
 
-def write_output(repo_root: Path, output_path: Path) -> Path:
-    """Write the generated risk register."""
+def write_output(
+    repo_root: Path,
+    output_path: Path,
+    *,
+    require_current_proof: bool = False,
+) -> Path:
+    """Write the generated risk register from the cycle-free pre-tail input."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json_text(build_register(repo_root)), encoding="utf-8", newline="\n")
+    output_path.write_text(
+        json_text(
+            build_register(
+                repo_root,
+                require_current_proof=require_current_proof,
+            )
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
     return output_path
 
 
@@ -745,7 +1240,7 @@ def check_output(repo_root: Path, output_path: Path) -> int:
     """Check the committed register against generated output and schema."""
     with tempfile.TemporaryDirectory() as temp_dir:
         candidate = Path(temp_dir) / output_path.name
-        write_output(repo_root, candidate)
+        write_output(repo_root, candidate, require_current_proof=True)
         if not output_path.is_file():
             print(f"missing {output_path}", file=sys.stderr)
             return 1

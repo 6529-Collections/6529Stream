@@ -16,11 +16,36 @@ DEFAULT_STATUS = Path("docs/status.md")
 DEFAULT_RELEASE_POLICY = Path("docs/release-policy.md")
 DEFAULT_KNOWN_BLOCKERS = Path("docs/known-blockers.md")
 DEFAULT_BYTECODE_PROOF = Path("release-artifacts/latest/bytecode-release-proof.json")
+DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
+ABI_CHECKSUMS_SCHEMA = "6529stream.abi-checksums.v1"
+EIP170_RUNTIME_LIMIT_BYTES = 24_576
+STATUS_SIZE_PROJECTION_START = "<!-- streamcore-size-projection:start -->"
+STATUS_SIZE_PROJECTION_END = "<!-- streamcore-size-projection:end -->"
+STATUS_SIZE_PROJECTION_PATTERN = re.compile(
+    r"`StreamCore` production runtime as (?P<runtime>\d[\d,]*) bytes,\s+"
+    r"leaving\s+(?P<margin>\d[\d,]*) bytes of EIP-170 headroom",
+    flags=re.IGNORECASE,
+)
+LIVE_SIZE_MEASUREMENT_PATTERN = re.compile(
+    r"\b(?:now\s+)?measures?\s+\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\bruntime(?:\s+(?:bytecode|size))?\s*(?:is|as|of|:|=)\s*"
+    r"\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:current\s+)?(?:StreamCore|Core|permanent\s+target)"
+    r"(?:\s+runtime(?:\s+bytecode)?)?\s*(?:is|equals?|:|=)\s*"
+    r"\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)\s*:\s*"
+    r"\d[\d,]*\s+runtime(?:\s+bytecode)?\s+bytes\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)(?:\s+runtime)?\s+size\s+"
+    r"(?:is|equals?|:)\s*\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:EIP-170\s+)?(?:margin|headroom)\s*"
+    r"(?:is|equals?|of|:)\s*\d[\d,]*\s*(?:-byte|bytes)\b"
+    r"|\b(?:StreamCore|Core|permanent\s+target)\b[^\n]{0,40}\bhas\s+"
+    r"(?:a\s+)?\d[\d,]*\s*(?:-byte|bytes)(?:\s+of)?\s+"
+    r"(?:runtime(?:\s+bytecode)?|headroom|margin)\b",
+    flags=re.IGNORECASE,
+)
 SIZE_EVIDENCE_DOCUMENTS = [
-    DEFAULT_ARCHITECTURE,
     DEFAULT_STATUS,
-    DEFAULT_RELEASE_POLICY,
-    DEFAULT_KNOWN_BLOCKERS,
 ]
 
 REQUIRED_HEADINGS = {
@@ -250,65 +275,59 @@ def bytes_phrase(value: int) -> str:
     return f"{value:,} bytes"
 
 
-def streamcore_size_from_bytecode_proof(
-    repo_root: Path, proof_path: Path = DEFAULT_BYTECODE_PROOF
+def streamcore_size_from_abi_checksums(
+    repo_root: Path, artifact_path: Path = DEFAULT_ABI_CHECKSUMS
 ) -> tuple[int, int]:
-    if not proof_path.is_absolute():
-        proof_path = repo_root / proof_path
-    if not proof_path.is_file():
-        relative = normalize_repo_path(proof_path, repo_root)
-        raise ArchitectureThreatModelError(f"missing bytecode release proof: {relative}")
+    """Read the cycle-free pre-tail StreamCore size measurement."""
+    if not artifact_path.is_absolute():
+        artifact_path = repo_root / artifact_path
+    if not artifact_path.is_file():
+        relative = normalize_repo_path(artifact_path, repo_root)
+        raise ArchitectureThreatModelError(f"missing ABI checksums: {relative}")
 
     try:
-        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        relative = normalize_repo_path(proof_path, repo_root)
+        relative = normalize_repo_path(artifact_path, repo_root)
         raise ArchitectureThreatModelError(
             f"{relative} is not valid JSON: {exc.msg}"
         ) from exc
 
-    contract_proofs = proof.get("contract_proofs")
-    if not isinstance(contract_proofs, list):
-        relative = normalize_repo_path(proof_path, repo_root)
+    if not isinstance(artifact, dict):
+        raise ArchitectureThreatModelError("ABI checksums must be an object")
+    if artifact.get("schema_version") != ABI_CHECKSUMS_SCHEMA:
         raise ArchitectureThreatModelError(
-            f"{relative} is missing a contract_proofs array"
+            f"ABI checksums must use schema {ABI_CHECKSUMS_SCHEMA}"
         )
-
-    size_pairs = set()
-    for contract_proof in contract_proofs:
-        if not isinstance(contract_proof, dict):
-            continue
-        contract = contract_proof.get("contract")
-        if not isinstance(contract, dict) or contract.get("name") != "StreamCore":
-            continue
-        sizes = contract_proof.get("sizes")
-        if not isinstance(sizes, dict):
-            raise ArchitectureThreatModelError(
-                "bytecode release proof has StreamCore evidence without sizes"
-            )
-        runtime = sizes.get("runtime_bytecode_bytes")
-        margin = sizes.get("runtime_margin_bytes")
-        if not isinstance(runtime, int) or not isinstance(margin, int):
-            raise ArchitectureThreatModelError(
-                "bytecode release proof has non-integer StreamCore size evidence"
-            )
-        size_pairs.add((runtime, margin))
-
-    if not size_pairs:
+    contracts = artifact.get("contracts")
+    if not isinstance(contracts, dict):
+        raise ArchitectureThreatModelError("ABI checksums contracts must be an object")
+    row = contracts.get("StreamCore")
+    if not isinstance(row, dict):
         raise ArchitectureThreatModelError(
-            "bytecode release proof is missing StreamCore size evidence"
+            "ABI checksums are missing StreamCore size evidence"
         )
-    if len(size_pairs) > 1:
-        formatted = ", ".join(
-            f"{bytes_phrase(runtime)} runtime / {bytes_phrase(margin)} margin"
-            for runtime, margin in sorted(size_pairs)
-        )
+    runtime = row.get("deployed_bytecode_size_bytes")
+    limit = row.get("eip170_runtime_limit_bytes")
+    margin = row.get("deployed_runtime_margin_bytes")
+    if any(
+        not isinstance(value, int) or isinstance(value, bool)
+        for value in (runtime, limit, margin)
+    ):
         raise ArchitectureThreatModelError(
-            "bytecode release proof has inconsistent StreamCore size evidence: "
-            + formatted
+            "ABI checksums have non-integer StreamCore size evidence"
         )
-
-    return next(iter(size_pairs))
+    if limit != EIP170_RUNTIME_LIMIT_BYTES:
+        raise ArchitectureThreatModelError(
+            "ABI checksums have an inconsistent StreamCore EIP-170 limit: "
+            f"{limit:,} != {EIP170_RUNTIME_LIMIT_BYTES:,}"
+        )
+    if margin != limit - runtime:
+        raise ArchitectureThreatModelError(
+            "ABI checksums have inconsistent StreamCore size evidence: "
+            f"{margin:,} != {limit:,} - {runtime:,}"
+        )
+    return runtime, margin
 
 
 def size_evidence_document_paths(
@@ -330,9 +349,6 @@ def validate_streamcore_size_evidence(
     runtime: int,
     margin: int,
 ) -> None:
-    runtime_phrase = bytes_phrase(runtime)
-    margin_phrase = bytes_phrase(margin)
-
     for document_path in size_evidence_document_paths(repo_root, architecture_path):
         if document_path in documents:
             text = documents[document_path]
@@ -344,11 +360,53 @@ def validate_streamcore_size_evidence(
                 )
             text = document_path.read_text(encoding="utf-8")
 
-        if runtime_phrase not in text or margin_phrase not in text:
+        if (
+            text.count(STATUS_SIZE_PROJECTION_START) != 1
+            or text.count(STATUS_SIZE_PROJECTION_END) != 1
+        ):
             relative = normalize_repo_path(document_path, repo_root)
             raise ArchitectureThreatModelError(
-                f"{relative} size evidence does not match bytecode release proof: "
-                f"expected {runtime_phrase} runtime and {margin_phrase} margin"
+                f"{relative} must contain exactly one marked StreamCore size projection"
+            )
+        start = text.index(STATUS_SIZE_PROJECTION_START)
+        end = text.index(STATUS_SIZE_PROJECTION_END)
+        if end <= start:
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} has misordered StreamCore size projection markers"
+            )
+        owner = text[start + len(STATUS_SIZE_PROJECTION_START) : end]
+        matches = list(STATUS_SIZE_PROJECTION_PATTERN.finditer(owner))
+        if len(matches) != 1:
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} must contain exactly one canonical StreamCore size pair "
+                "inside its marked projection"
+            )
+        live_measurements = list(LIVE_SIZE_MEASUREMENT_PATTERN.finditer(owner))
+        if len(live_measurements) != 1:
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} marked projection must contain exactly one live "
+                "StreamCore measurement"
+            )
+        match = matches[0]
+        projected = (
+            int(match.group("runtime").replace(",", "")),
+            int(match.group("margin").replace(",", "")),
+        )
+        if projected != (runtime, margin):
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} size evidence does not match ABI checksums: "
+                f"expected {bytes_phrase(runtime)} runtime and "
+                f"{bytes_phrase(margin)} margin"
+            )
+        outside = text[:start] + text[end + len(STATUS_SIZE_PROJECTION_END) :]
+        if LIVE_SIZE_MEASUREMENT_PATTERN.search(outside):
+            relative = normalize_repo_path(document_path, repo_root)
+            raise ArchitectureThreatModelError(
+                f"{relative} contains StreamCore size evidence outside the marked projection"
             )
 
 
@@ -424,7 +482,7 @@ def validate_architecture_threat_model(
             + ", ".join(missing_size_policy)
         )
 
-    runtime, margin = streamcore_size_from_bytecode_proof(repo_root)
+    runtime, margin = streamcore_size_from_abi_checksums(repo_root)
     validate_streamcore_size_evidence(
         repo_root, architecture_path, documents, runtime, margin
     )

@@ -221,11 +221,10 @@ normative 2,000-byte EIP-170 deployment headroom rule from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
 Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
-The permanent target measurement is 18,997 runtime bytes with 5,579 bytes of
-headroom, a 5,131-byte reduction from the 24,128-byte transitional
-operation-identity build. It passes the non-waivable 2,000-byte production
-margin by 3,579 bytes and is 3,187 bytes below the approved 22,184-byte
-objective. This resolves the Core-size row only; concrete #670 pointer
+The permanent target measurement in
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+passes the non-waivable 2,000-byte production margin and the approved
+22,184-byte objective. This resolves the Core-size row only; concrete #670 pointer
 contracts, candidate-instance reconciliation, governed-parameter evidence,
 audit, and live release evidence remain independently blocking.
 
@@ -286,9 +285,9 @@ that stricter decision, so #684 and `RISK-GOV-004` remain open.
 | Area | Current state | Blocks public beta | Blocks production release |
 | --- | --- | --- | --- |
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
-| StreamCore deployment headroom | The permanent target measures 18,997 runtime bytes with 5,579 bytes of EIP-170 margin, 5,131 bytes smaller than the 24,128-byte transitional build and 3,187 bytes below the approved 22,184-byte objective. The size requirement is satisfied without an exception; this does not clear candidate, audit, or live evidence rows | No | No |
+| StreamCore deployment headroom | The canonical bytecode proof passes the 2,000-byte production margin and approved 22,184-byte objective without an exception; this does not clear candidate, audit, or live evidence rows | No | No |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
-| Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, and the shared Core completion buffer. Issue #671 now binds the as-built 18,997-byte permanent Core, actual royalty/metadata boundaries, independent raise-chain tests, six via-IR measurements, and inventory-bound 1,460,000 floor / 2,910,000 genesis planning values without adding a 23rd GGP. Candidate bindings remain honestly `not_available`; concrete #670 artist/revenue rows, exhaustive consumer review, candidate-bound sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are incomplete. #656/#684 and `RISK-GOV-004` keep this non-waivable production gate red | No | Yes |
+| Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, and the shared Core completion buffer. Issue #671 binds the as-built permanent Core, actual royalty/metadata boundaries, independent raise-chain tests, six via-IR measurements, and inventory-bound 1,460,000 floor / 2,910,000 genesis planning values without adding a 23rd GGP. Candidate bindings remain honestly `not_available`; concrete #670 artist/revenue rows, exhaustive consumer review, candidate-bound sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are incomplete. #656/#684 and `RISK-GOV-004` keep this non-waivable production gate red | No | Yes |
 | Record-family authorization | The checked planning inventory pins five selector/global-admin mutation surfaces, eight authorization classes, fourteen family groups, and eight fail-open behaviors. The retained-evidence and strict grant-map schemas plus the template require candidate, classifier, grant-map, snapshot-intersection, lifecycle, phase, runtime, and independent-review bindings, but current contracts enforce none of that family-scoped policy; issue #690 and `RISK-GOV-002` remain open | Yes | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
