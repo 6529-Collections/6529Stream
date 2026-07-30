@@ -58,33 +58,55 @@ def seed_bytecode_proof(
     )
 
 
-def seed_size_evidence_docs(root: Path, runtime: int = 22390, margin: int = 2186) -> None:
-    for relative in [
-        checker.DEFAULT_STATUS,
-        checker.DEFAULT_RELEASE_POLICY,
-        checker.DEFAULT_KNOWN_BLOCKERS,
-    ]:
-        write_text(
-            root / relative,
-            (
-                f"StreamCore production runtime size is {runtime:,} bytes with "
-                f"{margin:,} bytes of EIP-170 headroom.\n"
-            ),
+def seed_abi_checksums(
+    root: Path,
+    runtime: int = 22390,
+    margin: int = 2186,
+    *,
+    include_streamcore: bool = True,
+) -> None:
+    contracts = {}
+    if include_streamcore:
+        contracts["StreamCore"] = {
+            "deployed_bytecode_size_bytes": runtime,
+            "eip170_runtime_limit_bytes": 24576,
+            "deployed_runtime_margin_bytes": margin,
+        }
+    write_text(
+        root / checker.DEFAULT_ABI_CHECKSUMS,
+        json.dumps(
+            {
+                "schema_version": checker.ABI_CHECKSUMS_SCHEMA,
+                "contracts": contracts,
+            },
+            indent=2,
         )
+        + "\n",
+    )
+
+
+def seed_size_evidence_docs(root: Path, runtime: int = 22390, margin: int = 2186) -> None:
+    write_text(
+        root / checker.DEFAULT_STATUS,
+        (
+            f"{checker.STATUS_SIZE_PROJECTION_START}\n"
+            f"The proof records the permanent, target-isolated `StreamCore` "
+            f"production runtime as {runtime:,} bytes, leaving {margin:,} bytes "
+            f"of EIP-170 headroom.\n"
+            f"{checker.STATUS_SIZE_PROJECTION_END}\n"
+        )
+    )
 
 
 def seed_required_targets(root: Path) -> None:
     for relative in checker.REQUIRED_LINK_TARGETS:
         if Path(relative) == checker.DEFAULT_BYTECODE_PROOF:
             seed_bytecode_proof(root)
-        elif Path(relative) in [
-            checker.DEFAULT_STATUS,
-            checker.DEFAULT_RELEASE_POLICY,
-            checker.DEFAULT_KNOWN_BLOCKERS,
-        ]:
+        elif Path(relative) == checker.DEFAULT_STATUS:
             seed_size_evidence_docs(root)
         else:
             write_text(root / relative, f"seed for {relative}\n")
+    seed_abi_checksums(root)
 
 
 def target_links() -> str:
@@ -397,27 +419,13 @@ class ArchitectureThreatModelTests(unittest.TestCase):
                     root / checker.DEFAULT_THREAT_MODEL,
                 )
 
-    def test_rejects_architecture_size_drift_from_bytecode_proof(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            seed_required_targets(root)
-            write_text(
-                root / checker.DEFAULT_ARCHITECTURE,
-                minimal_architecture_doc(runtime=23661, margin=915),
-            )
-            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+    def test_keeps_one_human_size_projection_bound_to_abi_checksums(self) -> None:
+        self.assertEqual(
+            checker.SIZE_EVIDENCE_DOCUMENTS,
+            [checker.DEFAULT_STATUS],
+        )
 
-            with self.assertRaisesRegex(
-                checker.ArchitectureThreatModelError,
-                "size evidence does not match bytecode release proof",
-            ):
-                checker.validate_architecture_threat_model(
-                    root,
-                    root / checker.DEFAULT_ARCHITECTURE,
-                    root / checker.DEFAULT_THREAT_MODEL,
-                )
-
-    def test_rejects_status_size_drift_from_bytecode_proof(self) -> None:
+    def test_rejects_status_size_drift_from_abi_checksums(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
@@ -427,7 +435,7 @@ class ArchitectureThreatModelTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.ArchitectureThreatModelError,
-                "size evidence does not match bytecode release proof",
+                "size evidence does not match ABI checksums",
             ):
                 checker.validate_architecture_threat_model(
                     root,
@@ -435,11 +443,11 @@ class ArchitectureThreatModelTests(unittest.TestCase):
                     root / checker.DEFAULT_THREAT_MODEL,
                 )
 
-    def test_rejects_inconsistent_streamcore_size_proof(self) -> None:
+    def test_rejects_inconsistent_streamcore_size_checksums(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            seed_bytecode_proof(root, [(22390, 2186), (23661, 915)])
+            seed_abi_checksums(root, runtime=22390, margin=915)
             write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
             write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
 
@@ -453,17 +461,129 @@ class ArchitectureThreatModelTests(unittest.TestCase):
                     root / checker.DEFAULT_THREAT_MODEL,
                 )
 
-    def test_rejects_missing_streamcore_size_proof(self) -> None:
+    def test_rejects_missing_streamcore_size_checksums(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            seed_bytecode_proof(root, [])
+            seed_abi_checksums(root, include_streamcore=False)
             write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
             write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
 
             with self.assertRaisesRegex(
                 checker.ArchitectureThreatModelError,
                 "missing StreamCore size evidence",
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_orphan_size_pair_outside_marked_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            status = root / checker.DEFAULT_STATUS
+            status.write_text(
+                status.read_text(encoding="utf-8")
+                + "\nThe linked Core now measures 18,997 bytes.\n",
+                encoding="utf-8",
+            )
+            write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
+            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError,
+                "outside the marked projection",
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_alternate_orphan_size_wording(self) -> None:
+        claims = (
+            "The permanent StreamCore size is 19,000 bytes with 5,576 bytes "
+            "of EIP-170 headroom.",
+            "The EIP-170 margin is 5,576 bytes for the permanent StreamCore.",
+            "The permanent StreamCore has 19,000 bytes of runtime bytecode.",
+            "StreamCore: 19,000 runtime bytes and 5,576 margin bytes.",
+            "Current Core is 19,000 bytes.",
+            "Core has a 19,000-byte runtime.",
+            "runtime bytecode is 19,000 bytes.",
+            "runtime = 19,000 bytes.",
+        )
+        for claim in claims:
+            with self.subTest(claim=claim):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_required_targets(root)
+                    status = root / checker.DEFAULT_STATUS
+                    status.write_text(
+                        status.read_text(encoding="utf-8") + "\n" + claim + "\n",
+                        encoding="utf-8",
+                    )
+                    write_text(
+                        root / checker.DEFAULT_ARCHITECTURE,
+                        minimal_architecture_doc(),
+                    )
+                    write_text(
+                        root / checker.DEFAULT_THREAT_MODEL,
+                        minimal_threat_model_doc(),
+                    )
+
+                    with self.assertRaisesRegex(
+                        checker.ArchitectureThreatModelError,
+                        "outside the marked projection",
+                    ):
+                        checker.validate_architecture_threat_model(
+                            root,
+                            root / checker.DEFAULT_ARCHITECTURE,
+                            root / checker.DEFAULT_THREAT_MODEL,
+                        )
+
+    def test_rejects_conflicting_size_inside_marked_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            status = root / checker.DEFAULT_STATUS
+            status.write_text(
+                status.read_text(encoding="utf-8").replace(
+                    checker.STATUS_SIZE_PROJECTION_END,
+                    "The permanent StreamCore size is 19,000 bytes with "
+                    "5,576 bytes of EIP-170 headroom.\n"
+                    + checker.STATUS_SIZE_PROJECTION_END,
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
+            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError,
+                "exactly one live StreamCore measurement",
+            ):
+                checker.validate_architecture_threat_model(
+                    root,
+                    root / checker.DEFAULT_ARCHITECTURE,
+                    root / checker.DEFAULT_THREAT_MODEL,
+                )
+
+    def test_rejects_duplicate_size_projection_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            status = root / checker.DEFAULT_STATUS
+            original = status.read_text(encoding="utf-8")
+            status.write_text(original + "\n" + original, encoding="utf-8")
+            write_text(root / checker.DEFAULT_ARCHITECTURE, minimal_architecture_doc())
+            write_text(root / checker.DEFAULT_THREAT_MODEL, minimal_threat_model_doc())
+
+            with self.assertRaisesRegex(
+                checker.ArchitectureThreatModelError,
+                "exactly one marked StreamCore size projection",
             ):
                 checker.validate_architecture_threat_model(
                     root,

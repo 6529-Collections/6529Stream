@@ -114,6 +114,7 @@ before either PR is published, and neither lane may modify Core for this edge.
   control-plane ERC-165 cap, and added the canonical deployment-plan
   materializer. PR #683 then merged the Governance V2 foundation, and issue
   #665 closed for its named execution-context/ModuleRegistry scope.
+<!-- historical-streamcore-size:start -->
 - PR #686 merged ADR 0017's 22-GGP/3-GTP raise-only target as
   `b4af30a58c22f79bafad241c6e4fab7a4a76063b`: probe/lower/emergency/rebind
   surfaces are absent, per-parameter same-action replay is rejected, and the
@@ -122,6 +123,7 @@ before either PR is published, and neither lane may modify Core for this edge.
   bytes of margin, so issue #654 stays open. Issue #684 owns exact production
   parameter host/evidence binding, #671 owns the shared-buffer implementation,
   tests, and measurement, while #685 owns `RISK-GOV-003`.
+<!-- historical-streamcore-size:end -->
 - Final candidate validation passed on 2026-07-24: the isolated
   `make release-artifacts-verify` gate completed in 375.1 seconds, and the full
   Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
@@ -160,13 +162,18 @@ before either PR is published, and neither lane may modify Core for this edge.
   incomplete. The current #684 slice establishes the exact 25-row inventory
   and fail-closed completeness boundary; later #684 work must replace every
   unavailable candidate binding with reviewed production facts.
+<!-- historical-streamcore-size:start -->
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
   runtime bytes; CON-012 then added exactly 2,360 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the
   24,152-byte pre-cutover transitional Core. The atomic operation-identity
   cutover retires that duplicate path and the Core lifetime root replay map,
-  producing the current 24,128-byte runtime and 448-byte margin. The current
-  build is already non-enumerable and is not a complete mandatory-hook proof.
+  producing the then-current 24,128-byte runtime and 448-byte margin. That
+  historical cutover build was already non-enumerable but was not a complete
+  mandatory-hook proof. Current complete-target runtime and margin are owned by
+  [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+  and are not duplicated in this active run state.
+<!-- historical-streamcore-size:end -->
 - PR #663's authoritative final-follow-up local gate passed in 1,021.7 seconds,
   and latest-head Windows, Slither, Foundry, CodeRabbit, and independent review
   were clean before merge. Earlier independent review found

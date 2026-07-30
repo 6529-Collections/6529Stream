@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:8fd368defa74f6bc898f4d45fbb5c653b2485c0ba3171807f0aa5e08605309cf"
+      "sha256": "sha256:6e6602c43681aa97e32c6f871e1d42d329e3ae6eb9bbaaa012ca8fa20f1ef3dd"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:1c4ec862c7117e3ce7da094134f462eabde7de121780d1e294ecbae595443130"
+      "sha256": "sha256:e8c66ea78833387e14e433c89ba16c428b6efade6aedc483948680e7db27d75b"
     },
     {
       "path": "docs/audit-package.md",
@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:69a3569e95917922a4b98359f2f7929beb093bd7282dfb0f241532b691974990"
+      "sha256": "sha256:8b5cd5aefce9a142a7b0488dc559e7bfdd0e6ee78155401a7a0d09906c65c77f"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:ff116c3b24fa537db63f59dd4241c4e2b244a8efcf5adbb27ecd5a951249ec39"
+      "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -150,7 +150,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1c4ec862c7117e3ce7da094134f462eabde7de121780d1e294ecbae595443130"
+          "sha256": "sha256:e8c66ea78833387e14e433c89ba16c428b6efade6aedc483948680e7db27d75b"
         }
       ],
       "risk_acceptance": null
@@ -183,7 +183,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:69a3569e95917922a4b98359f2f7929beb093bd7282dfb0f241532b691974990"
+          "sha256": "sha256:8b5cd5aefce9a142a7b0488dc559e7bfdd0e6ee78155401a7a0d09906c65c77f"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -313,7 +313,7 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:ff116c3b24fa537db63f59dd4241c4e2b244a8efcf5adbb27ecd5a951249ec39"
+          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
         },
         {
           "path": "test/StreamGovernanceExecutor.t.sol",
@@ -355,11 +355,11 @@
         },
         {
           "path": "docs/launch-v1-target-architecture.md",
-          "sha256": "sha256:e55353a964ed423e00a1c1d20150041d000e329a9b389bb2fc031d97f7db7140"
+          "sha256": "sha256:5f3b45605b109a6d92eefce643272dedb42f7da857047e0b8bcf095a8db0b9ea"
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:ff116c3b24fa537db63f59dd4241c4e2b244a8efcf5adbb27ecd5a951249ec39"
+          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
@@ -418,7 +418,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:69a3569e95917922a4b98359f2f7929beb093bd7282dfb0f241532b691974990"
+          "sha256": "sha256:8b5cd5aefce9a142a7b0488dc559e7bfdd0e6ee78155401a7a0d09906c65c77f"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -461,11 +461,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:8fd368defa74f6bc898f4d45fbb5c653b2485c0ba3171807f0aa5e08605309cf"
+          "sha256": "sha256:6e6602c43681aa97e32c6f871e1d42d329e3ae6eb9bbaaa012ca8fa20f1ef3dd"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1c4ec862c7117e3ce7da094134f462eabde7de121780d1e294ecbae595443130"
+          "sha256": "sha256:e8c66ea78833387e14e433c89ba16c428b6efade6aedc483948680e7db27d75b"
         },
         {
           "path": "docs/metadata.md",
@@ -561,18 +561,16 @@
     },
     {
       "id": "RISK-SIZE-001",
-      "title": "StreamCore misses the normative production headroom gate",
       "area": "core_size",
       "severity": "high",
-      "status": "open_blocker",
       "owner": "protocol",
       "target_gate": "Gate G",
       "source": "launch conformance matrix, target architecture, and artifact-backed size proof",
-      "mitigation": "Recover real Core headroom through measured compression, extraction, or authorized relocation while retaining every mandatory hook; keep non-critical product surfaces satellite-first.",
-      "residual_risk": "The current 24,128-byte runtime leaves 448 bytes of EIP-170 headroom, 1,552 bytes below the non-waivable 2,000-byte production deployment minimum.",
       "checks": [
         "python scripts/build_release_artifacts.py",
         "python scripts/check_contract_size_budget.py",
+        "python scripts/test_risk_register.py",
+        "python scripts/generate_risk_register.py --check",
         "python scripts/check_release_mode.py --phase production-release",
         "python scripts/generate_release_manifest.py --check"
       ],
@@ -580,18 +578,26 @@
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/115"
       ],
+      "title": "StreamCore satisfies the normative production headroom gate locally",
+      "status": "mitigated_local",
+      "mitigation": "Preserve the artifact-backed production margin while retaining every mandatory Core hook and keeping non-critical product surfaces satellite-first.",
+      "residual_risk": "The current 18,997-byte runtime leaves 5,579 bytes of EIP-170 headroom and is 3,579 bytes above the non-waivable 2,000-byte production deployment minimum. This local build proof does not replace concrete candidate integration, independent audit, deployment, or reviewed live-bytecode evidence.",
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:ff116c3b24fa537db63f59dd4241c4e2b244a8efcf5adbb27ecd5a951249ec39"
+          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:8fd368defa74f6bc898f4d45fbb5c653b2485c0ba3171807f0aa5e08605309cf"
+          "sha256": "sha256:6e6602c43681aa97e32c6f871e1d42d329e3ae6eb9bbaaa012ca8fa20f1ef3dd"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:08924f19d2b433d818fd799a45b2e9a7615e7a3a79b293cca41420027017528c"
+          "sha256": "sha256:288482aa63cab360b049d33a728b523b1c67175a360635302bc6d9626d84629d"
+        },
+        {
+          "path": "release-artifacts/latest/abi-checksums.json",
+          "sha256": "sha256:06620a8df52e17e34838e82626f1176e3584d6051987ad456d06cf56aa4d8e09"
         }
       ],
       "risk_acceptance": null
@@ -662,15 +668,15 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:8fd368defa74f6bc898f4d45fbb5c653b2485c0ba3171807f0aa5e08605309cf"
+          "sha256": "sha256:6e6602c43681aa97e32c6f871e1d42d329e3ae6eb9bbaaa012ca8fa20f1ef3dd"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:1c4ec862c7117e3ce7da094134f462eabde7de121780d1e294ecbae595443130"
+          "sha256": "sha256:e8c66ea78833387e14e433c89ba16c428b6efade6aedc483948680e7db27d75b"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:15a166a721f68edfa8a530e4aac09c0338fa1ba8a64ed6848cbbe7f8c425f6c5"
+          "sha256": "sha256:e7c882a88664e2368c7bced4c2326081070a39f2ca625b846a8a255c85e75024"
         },
         {
           "path": "docs/warning-dispositions.md",

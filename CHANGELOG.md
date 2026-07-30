@@ -7,6 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Closed the local Core headroom obligation under issue #654 by deriving
+  `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
+  exact parity with the final `StreamCore` bytecode-proof row and the
+  non-waivable 2,000-byte production floor. Missing, malformed, inconsistent,
+  stale-bound, or sub-threshold proof evidence now fails closed; live
+  normative/tooling mirrors point to the proof instead of owning mutable size
+  strings, and the exact `check_contract_size_budget.py` command is bound in
+  both release checksum indexes. The permanent target's local size result does not
+  implement or accept the concrete #670 satellites: ADR 0021's revenue
+  architecture is Accepted but source-blocked, while ADR 0022's artist
+  architecture remains Proposed. It does not advance the pre-audit maturity,
+  candidate, audit, deployment, or retained-live-evidence gates.
 - Implemented the locked permanent `StreamCore` target with authenticated
   metadata-router, system-manifest, entropy-coordinator, artist-registry, and
   revenue-resolver pointer rows; linked bounded external reads; manager-only
@@ -55,12 +67,15 @@ the release policy in `docs/release-policy.md`.
   authorization, nullifier, phase, and current/bound-policy validation; and
   Core retains only current prepared-pair operation-ID equality. The exact
   typed primary-settlement callback and execution-ID-bound repeated-sale key
-  remain ADR 0019 / #694 blockers, and #654 still owns the complete Core
-  headroom/finality seam. The refreshed exact Slither inventory introduces no
+  remain ADR 0019 / #694 blockers. The complete Core headroom/finality seam is
+  now closed under #654 by the permanent target and proof-derived release gate.
+  The refreshed exact Slither inventory introduces no
   new first-party High/Medium finding and removes two prior
   `uninitialized-local` rows after explicit initialization and narrow analyzer
-  annotations, leaving 28 Open rows. Generated as-built and release surfaces
-  are refreshed without promoting protocol maturity or readiness.
+  annotations, leaving 28 Open rows at that checkpoint. The later
+  permanent-Core capture above supersedes that historical count with the
+  current canonical 32 Open rows. Generated as-built and release surfaces are
+  refreshed without promoting protocol maturity or readiness.
 - Clarified ADR 0017's resolution of issue #673: launch v1 removes the royalty
   probe-record model and every related authorization path, and the
   overflow-safe 64/63 Core precheck remains safe for either ordering of monotonic

@@ -47,7 +47,9 @@ The current Gate A smoke baseline proves:
   without making Forge deployment scripts or broadcasts consume the canonical
   initcode. That deployment binding remains a production blocker under
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
-  the pre-audit, not-production-ready posture is unchanged. The committed
+  the pre-audit, not-production-ready posture is unchanged.
+  <!-- streamcore-size-projection:start -->
+  The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the permanent,
   target-isolated `StreamCore` production runtime as 18,997 bytes, leaving
   5,579 bytes of EIP-170 headroom under the IR-optimized deployment profile.
@@ -58,6 +60,7 @@ The current Gate A smoke baseline proves:
   complete linked build is the current size proof. The permanent Core now
   includes the locked mint, metadata, entropy, governed-parameter, pointer, and
   restricted ERC-4906 seams rather than relying on a temporary size exception.
+  <!-- streamcore-size-projection:end -->
   Accepted ADR 0018 is now implemented in the current pre-genesis source:
   one manager batch root is replay-protected in the ledger, exactly one unique
   operation ID identifies each token transition, derivation and nonce
@@ -112,8 +115,8 @@ The current Gate A smoke baseline proves:
   now binds the reusable admission source to the permanent Core's three actual
   read paths, hostile threshold/returndata/full-budget tests, six via-IR
   completion measurements, actual Core below/at/above regressions, and the
-  planning floor/genesis tuple in the governed inventory. The linked Core
-  measures 18,997 bytes. Issues #656/#670/#684 still block exact candidate,
+  planning floor/genesis tuple in the governed inventory. Issues #656/#670/#684
+  still block exact candidate,
   fixed-stipend, cadence, rehearsal, and independent-review evidence.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity

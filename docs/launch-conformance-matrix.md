@@ -699,26 +699,27 @@ Core's frozen `SYSTEM_MANIFEST` generic pointer. Its five-function manifest
 interface, two binding getters, ERC-165 surface, and publication event consume
 no Core target entry or Core budget group.
 
-Non-normative reconciliation note: the current artifact-backed transitional
-build is 24,128 runtime bytes with 448 bytes of EIP-170 headroom. It
-exceeds the 22,576-byte deployment ceiling by 1,552 bytes before the net cost of
-any missing mandatory target work. Closing that measured gap is the engineering
-workstream tracked by
-[#654](https://github.com/6529-Collections/6529Stream/issues/654); target-surface
-deletions are not counted as savings until a complete linked build realizes
-them. The first passing complete build is published as release evidence.
+Non-normative reconciliation note: the artifact-backed measurement is
+the `StreamCore` row in
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json).
+The risk-register generator derives the pre-tail size-gate state from the
+cycle-free ABI checksum measurement and requires exact parity with that final
+proof and the non-waivable 2,000-byte production margin in check mode; this
+matrix does not duplicate the mutable runtime or margin. Issue
+[#654](https://github.com/6529-Collections/6529Stream/issues/654) owns final
+complete-target reconciliation. Concrete candidate integration, audit,
+deployment, and reviewed live-bytecode evidence remain independent gates even
+when the local size row passes.
 
-The complete-stack size equation is fail-closed: starting from this 24,128-byte
-evidence, gross recovery must cover at least `1,552 + A`, where `A` is the
-measured net runtime cost of every mandatory Core hook absent from that
-evidence after same-build removals. Via-IR optimization makes isolated scratch
-deltas non-additive, so no spreadsheet sum, partial-hook build, compiler-only
-experiment, or retired surface that was never in measured Core can satisfy the
-gate. The only pass is the pinned production build containing the complete
-[PV1-HOOKS] surface at or below 22,576 bytes. Until that pass, an additive-only
-Core PR is prohibited; a Core-changing slice must pair its mandatory addition
-with actual removal and report a net-negative runtime delta, or remain
-satellite-only with zero Core delta ([PV1-CORE-CUTOVER]).
+The complete-stack size equation is fail-closed. Via-IR optimization makes
+isolated scratch deltas non-additive, so no spreadsheet sum, partial-hook build,
+compiler-only experiment, or retired surface that was never in measured Core
+can satisfy the gate. The only pass is the pinned production build containing
+the complete [PV1-HOOKS] surface at or below 22,576 bytes. If a future complete
+build exceeds that ceiling, an additive-only Core PR is prohibited: a
+Core-changing slice must pair its mandatory addition with actual removal and
+report a net-negative runtime delta, or remain satellite-only with zero Core
+delta ([PV1-CORE-CUTOVER]).
 
 Additional paid-mint/finality/escrow deployment tests:
 

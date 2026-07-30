@@ -149,13 +149,13 @@ The important distinction is:
 - Marketplace/indexer compatibility now has reviewed fork/testnet retained
   evidence; live marketplace/indexer evidence is still required before
   production release claims.
-- `StreamCore` bytecode headroom remains below the production threshold. The
-  earlier refactor reached 21,792 runtime bytes, but CON-012 added exactly 2,360
-  bytes of manager/prepared-mint hooks while legacy callers remained live. Until
-  issue #654's complete target-Core build is at or below 22,576 bytes, new work
-  must be satellite-only with zero Core delta or pair a mandatory Core addition
-  with real removal and a measured net-negative delta; a development exception
-  is not a production strategy.
+- `StreamCore` bytecode headroom now passes the production threshold in the
+  complete artifact-backed target, satisfying issue #654 without a development
+  exception. The earlier 21,792-byte result and the later CON-012 transitional
+  build are historical, non-additive measurements. Future work must preserve
+  the 2,000-byte production margin: remain satellite-only with zero Core delta,
+  or pair a mandatory Core addition with real removal and a measured
+  net-negative delta.
 - Compiler/lint/NatSpec warning noise should be burned down or dispositioned
   before making "world-class" release claims, including unused randomizer
   parameters, pure/view mutability suggestions, invalid NatSpec tags, and
@@ -179,7 +179,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| Permanent `StreamCore` measures 18,997 runtime bytes with 5,579 bytes of EIP-170 headroom, 5,131 bytes smaller than the 24,128-byte transitional operation-identity build and 3,187 bytes below the approved 22,184-byte objective | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Size requirement passes; preserve the margin while #670 concrete pointer rows and #656/#684 candidate evidence remain open |
+| The permanent `StreamCore` target satisfies the proof-derived 2,000-byte EIP-170 floor and approved size objective | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654), [bytecode release proof](../release-artifacts/latest/bytecode-release-proof.json) | Size requirement passes; preserve the proof-bound margin while #670 concrete pointer rows and #656/#684 candidate evidence remain open |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -1837,10 +1837,12 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Permanent-Core implementation and headroom recovery are complete in
-source and target-fixture evidence. The target lock and prerequisite caller
-cutovers are consumed; issue #654 remains open only for the two concrete #670
-artist/revenue pointer rows and final candidate-bound remeasurement.
+Status: Complete. Permanent-Core implementation and headroom recovery are
+complete in source and artifact-backed target evidence. The target lock and
+prerequisite caller cutovers are consumed, and the proof-derived production
+margin satisfies issue #654 without an exception. Concrete #670 satellite
+implementation/security acceptance and candidate-bound evidence remain
+separate release blockers.
 
 Gate: C/E/G.
 
@@ -1848,10 +1850,14 @@ Resolved size problem: the prior 24,128-byte `StreamCore` was a transitional bui
 pre-cutover 24,152-byte baseline spent exactly 2,360 bytes on the
 manager/prepared-mint boundary while the legacy mint and product path remained
 live. The atomic operation-identity cutover removed that duplication for a
-24-byte net reduction, but the current build still omits mandatory launch hooks. The
-production ceiling is 22,576 bytes. The permanent linked target now measures
-18,997 bytes, leaving 5,579 bytes of EIP-170 margin and restoring the approved
-22,184-byte objective without an exception.
+24-byte net reduction. The permanent target includes the accepted Core pointer
+rows and mandatory launch hooks. The unimplemented #670 satellites remain
+outside this size acceptance: ADR 0021's revenue architecture is Accepted but
+source-blocked, while ADR 0022's artist architecture remains Proposed. The
+production ceiling is 22,576 bytes. The permanent linked target satisfies the
+proof-derived 2,000-byte EIP-170 floor and restores the approved 22,184-byte
+objective without an exception; the current measurement is owned by the
+[bytecode release proof](../release-artifacts/latest/bytecode-release-proof.json).
 
 Acceptance criteria:
 
@@ -3848,10 +3854,12 @@ Status: Merged in PR #427; issue #426 closed completed.
 
 Gate: G.
 
-Problem resolved for the permanent target: `StreamCore` measures 18,997 bytes
-with 5,579 bytes of EIP-170 margin, 3,187 bytes below the reviewed 22,184-byte
-objective. The satellite-first policy remains binding because future product
-surfaces must preserve that sustainable margin.
+Problem resolved for the permanent target: `StreamCore` satisfies the
+proof-derived 2,000-byte EIP-170 floor and the reviewed 22,184-byte objective.
+The current measurement is owned by the
+[bytecode release proof](../release-artifacts/latest/bytecode-release-proof.json).
+The satellite-first policy remains binding because future product surfaces
+must preserve that sustainable margin.
 
 Outcome: The repo has a documented architecture policy for future product
 features: prefer satellite contracts, read adapters, libraries, release
@@ -4099,7 +4107,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
-| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Permanent target implemented at 18,997 bytes with 5,579 bytes of margin; #654 remains open for #670 concrete pointer rows and final candidate-bound remeasurement |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Complete: the permanent target passes the proof-derived 2,000-byte headroom gate in the [bytecode release proof](../release-artifacts/latest/bytecode-release-proof.json); the unimplemented #670 satellites remain separate blockers (ADR 0021 revenue architecture Accepted but source-blocked; ADR 0022 artist architecture Proposed) |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

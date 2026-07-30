@@ -345,8 +345,8 @@ and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget),
 tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
 The requirement is a non-waivable deployment rule, not an evidence-manifest
 row. Missing, malformed, inconsistent, or sub-threshold artifact fields fail
-closed. The permanent target measures 18,997 runtime bytes with 5,579 bytes of
-margin, 5,131 bytes smaller than the 24,128-byte transitional build and 3,187
-bytes below the approved 22,184-byte objective. The size rule is satisfied;
-candidate-instance, governed-parameter, audit, and live evidence gates remain
-independent.
+closed. The permanent target measurement in
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
+passes the approved 22,184-byte objective and the non-waivable production
+margin. Candidate-instance, governed-parameter, audit, and live evidence gates
+remain independent.

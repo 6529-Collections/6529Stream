@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -91,6 +93,103 @@ def seed_issue_link_inputs(root: Path) -> tuple[dict[str, object], dict[str, obj
     return issue_links, backlog
 
 
+def seed_stream_core_proof(
+    root: Path,
+    measurements: list[tuple[int, int]] | None = None,
+    *,
+    manifest_sha256: str | None = None,
+    manifest_size: int | None = None,
+) -> None:
+    rows = [(18_997, 5_579)] if measurements is None else measurements
+    abi_measurement = rows[0] if rows else (18_997, 5_579)
+    seed_stream_core_abi_checksums(root, abi_measurement)
+    manifest_path = root / generator.RELEASE_MANIFEST_PATH
+    write_json(manifest_path, {"schema_version": "unit-test"})
+    manifest_bytes = manifest_path.read_bytes()
+    actual_sha256 = "sha256:" + hashlib.sha256(manifest_bytes).hexdigest()
+    actual_size = len(manifest_bytes)
+    abi_path = root / generator.ABI_CHECKSUMS_PATH
+    abi_bytes = abi_path.read_bytes()
+    write_json(
+        root / generator.BYTECODE_PROOF_PATH,
+        {
+            "schema_version": generator.BYTECODE_PROOF_SCHEMA,
+            "source": {
+                "release_manifest": {
+                    "path": generator.RELEASE_MANIFEST_PATH.as_posix(),
+                    "sha256": manifest_sha256 or actual_sha256,
+                    "size_bytes": actual_size if manifest_size is None else manifest_size,
+                },
+                "abi_checksums": {
+                    "path": generator.ABI_CHECKSUMS_PATH.as_posix(),
+                    "sha256": "sha256:" + hashlib.sha256(abi_bytes).hexdigest(),
+                    "size_bytes": len(abi_bytes),
+                }
+            },
+            "contract_proofs": [
+                {
+                    "contract": {"name": generator.STREAM_CORE_CONTRACT},
+                    "sizes": {
+                        "runtime_bytecode_bytes": runtime,
+                        "creation_bytecode_bytes": runtime,
+                        "eip170_runtime_limit_bytes": (
+                            generator.EIP170_RUNTIME_LIMIT_BYTES
+                        ),
+                        "runtime_margin_bytes": margin,
+                    },
+                }
+                for runtime, margin in rows
+            ],
+        },
+    )
+
+
+def seed_stream_core_abi_checksums(
+    root: Path,
+    measurement: tuple[int, int] = (18_997, 5_579),
+) -> None:
+    runtime, margin = measurement
+    write_json(
+        root / generator.ABI_CHECKSUMS_PATH,
+        {
+            "schema_version": generator.ABI_CHECKSUMS_SCHEMA,
+            "contracts": {
+                generator.STREAM_CORE_CONTRACT: {
+                    "deployed_bytecode_size_bytes": runtime,
+                    "eip170_runtime_limit_bytes": (
+                        generator.EIP170_RUNTIME_LIMIT_BYTES
+                    ),
+                    "deployed_runtime_margin_bytes": margin,
+                }
+            },
+        },
+    )
+
+
+def seed_live_size_mirrors(root: Path) -> None:
+    seed_stream_core_abi_checksums(root)
+    for relative_path, fragments in generator.LIVE_SIZE_MIRROR_REQUIREMENTS.items():
+        text = "\n".join(fragments) + "\n"
+        if relative_path == generator.STATUS_SIZE_PROJECTION_PATH:
+            text += (
+                f"{generator.STATUS_SIZE_PROJECTION_START}\n"
+                "The proof records the permanent, target-isolated `StreamCore` "
+                "production runtime as 18,997 bytes, leaving 5,579 bytes of "
+                "EIP-170 headroom.\n"
+                f"{generator.STATUS_SIZE_PROJECTION_END}\n"
+            )
+        if relative_path == Path("ops/AUTONOMOUS_RUN.md"):
+            text += (
+                generator.AUTONOMOUS_CURRENT_RUN_HEADING
+                + "\n"
+                + generator.AUTONOMOUS_PACKAGING_HEADING
+                + "\n"
+                + generator.AUTONOMOUS_ACTIVE_END
+                + "\n"
+            )
+        write_text(root / relative_path, text)
+
+
 def minimal_register(root: Path) -> dict[str, object]:
     source = seed_file(root, "docs/source.md")
     evidence = seed_file(root, "docs/evidence.md")
@@ -163,6 +262,556 @@ def minimal_register(root: Path) -> dict[str, object]:
 
 
 class RiskRegisterTests(unittest.TestCase):
+    def test_size_risk_is_derived_below_production_floor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [(22_577, 1_999)])
+
+            fields = generator.stream_core_size_risk_fields(root)
+
+            self.assertEqual(fields["status"], "open_blocker")
+            self.assertIn("22,577-byte runtime", fields["residual_risk"])
+            self.assertIn("1,999 bytes of EIP-170", fields["residual_risk"])
+            self.assertIn("1 byte below", fields["residual_risk"])
+
+    def test_size_risk_is_derived_at_production_floor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [(22_576, 2_000)])
+
+            fields = generator.stream_core_size_risk_fields(root)
+
+            self.assertEqual(fields["status"], "mitigated_local")
+            self.assertIn("exactly meets", fields["residual_risk"])
+
+    def test_size_risk_is_derived_above_production_floor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root)
+
+            fields = generator.stream_core_size_risk_fields(root)
+
+            self.assertEqual(fields["status"], "mitigated_local")
+            self.assertIn("18,997-byte runtime", fields["residual_risk"])
+            self.assertIn("5,579 bytes of EIP-170", fields["residual_risk"])
+            self.assertIn("3,579 bytes above", fields["residual_risk"])
+
+    def test_size_risk_rejects_missing_proof(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_abi_checksums(root)
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "missing StreamCore bytecode proof",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_size_risk_rejects_missing_abi_checksums(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "missing StreamCore ABI checksums",
+            ):
+                generator.stream_core_size_measurement(
+                    root,
+                    require_current_proof=False,
+                )
+
+    def test_size_risk_rejects_malformed_abi_checksums(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(root / generator.ABI_CHECKSUMS_PATH, "{not json}\n")
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "invalid StreamCore ABI checksums JSON",
+            ):
+                generator.stream_core_size_measurement(
+                    root,
+                    require_current_proof=False,
+                )
+
+    def test_size_risk_rejects_missing_stream_core_abi_row(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_json(
+                root / generator.ABI_CHECKSUMS_PATH,
+                {
+                    "schema_version": generator.ABI_CHECKSUMS_SCHEMA,
+                    "contracts": {},
+                },
+            )
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "ABI checksums have no StreamCore contract row",
+            ):
+                generator.stream_core_size_measurement(
+                    root,
+                    require_current_proof=False,
+                )
+
+    def test_size_risk_rejects_missing_stream_core_row(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [])
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "bytecode proof has no StreamCore contract proof",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_size_risk_rejects_inconsistent_proof_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [(18_997, 5_579), (19_000, 5_576)])
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "measurements disagree",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_size_risk_rejects_inconsistent_margin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [(18_997, 5_578)])
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "margin is inconsistent",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_size_risk_rejects_stale_manifest_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, manifest_sha256="sha256:" + ("0" * 64))
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "stale StreamCore bytecode proof release-manifest binding",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_size_risk_generation_is_cycle_free_and_final_proof_is_required(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root)
+            seed_stream_core_abi_checksums(root, (19_000, 5_576))
+
+            generated = generator.stream_core_size_measurement(
+                root,
+                require_current_proof=False,
+            )
+            self.assertEqual(generated, (19_000, 5_576))
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "stale StreamCore bytecode proof ABI-checksums binding",
+            ):
+                generator.stream_core_size_measurement(root)
+
+            seed_stream_core_proof(root, [(19_000, 5_576)])
+            self.assertEqual(
+                generator.stream_core_size_measurement(root),
+                (19_000, 5_576),
+            )
+
+    def test_size_risk_rejects_proof_measurement_that_disagrees_with_abi(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_stream_core_proof(root, [(18_997, 5_579)])
+            proof_path = root / generator.BYTECODE_PROOF_PATH
+            proof = json.loads(proof_path.read_text(encoding="utf-8"))
+            proof["contract_proofs"][0]["sizes"].update(
+                {
+                    "runtime_bytecode_bytes": 19_000,
+                    "runtime_margin_bytes": 5_576,
+                }
+            )
+            write_json(proof_path, proof)
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "ABI/proof measurements disagree",
+            ):
+                generator.stream_core_size_measurement(root)
+
+    def test_write_path_explicitly_uses_cycle_free_pre_tail_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output = root / "risk-register.json"
+            register = minimal_register(root)
+            with mock.patch.object(
+                generator,
+                "build_register",
+                return_value=register,
+            ) as build:
+                generator.write_output(root, output)
+
+            build.assert_called_once_with(root, require_current_proof=False)
+
+    def test_size_risk_definition_does_not_own_transient_measurements(self) -> None:
+        definition = next(
+            risk
+            for risk in generator.RISK_DEFINITIONS
+            if risk["id"] == generator.SIZE_RISK_ID
+        )
+        for dynamic_field in ("title", "status", "mitigation", "residual_risk"):
+            self.assertNotIn(dynamic_field, definition)
+        self.assertIn(
+            "release-artifacts/latest/abi-checksums.json",
+            definition["evidence_paths"],
+        )
+        self.assertNotIn(
+            "release-artifacts/latest/bytecode-release-proof.json",
+            definition["evidence_paths"],
+        )
+        self.assertIn(
+            "python scripts/generate_risk_register.py --check",
+            definition["checks"],
+        )
+
+        generated = generator.build_register(REPO_ROOT)
+        risk = next(
+            risk
+            for risk in generated["risks"]
+            if risk["id"] == generator.SIZE_RISK_ID
+        )
+        self.assertEqual(risk["status"], "mitigated_local")
+        rendered = json.dumps(risk, sort_keys=True)
+        self.assertNotIn("24,128", rendered)
+        self.assertNotIn("448 bytes", rendered)
+        self.assertNotIn("1,552", rendered)
+
+    def test_live_size_mirrors_reject_stale_hardcoded_values(self) -> None:
+        stale_claims = (
+            "The current 24,128-byte runtime is authoritative.\n",
+            "The runtime leaves 448 bytes of EIP-170 headroom.\n",
+            "The current 448-byte margin is authoritative.\n",
+            "The build is 1,552 bytes below the required margin.\n",
+        )
+        for relative_path in generator.LIVE_SIZE_MIRROR_REQUIREMENTS:
+            for stale_claim in stale_claims:
+                with self.subTest(
+                    path=relative_path.as_posix(),
+                    stale_claim=stale_claim.strip(),
+                ):
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        root = Path(temp_dir)
+                        seed_live_size_mirrors(root)
+                        path = root / relative_path
+                        if relative_path == Path("ops/AUTONOMOUS_RUN.md"):
+                            text = path.read_text(encoding="utf-8").replace(
+                                generator.AUTONOMOUS_ACTIVE_END,
+                                stale_claim + generator.AUTONOMOUS_ACTIVE_END,
+                                1,
+                            )
+                            write_text(path, text)
+                        else:
+                            with path.open(
+                                "a", encoding="utf-8", newline="\n"
+                            ) as handle:
+                                handle.write(stale_claim)
+
+                        with self.assertRaisesRegex(
+                            generator.checker.RiskRegisterError,
+                            "repeats stale current Core-size value",
+                        ):
+                            generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_hard_wrapped_stale_values(self) -> None:
+        stale_claims = (
+            "The current\n24,128-byte runtime is authoritative.\n",
+            "The runtime leaves 448\nbytes of EIP-170 headroom.\n",
+            "The current 448-byte\nmargin is authoritative.\n",
+            "The build is 1,552\nbytes below the required margin.\n",
+        )
+        target = Path("ops/workstreams/core-mint-critical-path/active-context.md")
+        for stale_claim in stale_claims:
+            with self.subTest(stale_claim=stale_claim.strip()):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_live_size_mirrors(root)
+                    with (root / target).open(
+                        "a", encoding="utf-8", newline="\n"
+                    ) as handle:
+                        handle.write(stale_claim)
+
+                    with self.assertRaisesRegex(
+                        generator.checker.RiskRegisterError,
+                        "repeats stale current Core-size value",
+                    ):
+                        generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_require_canonical_proof_owner(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = next(iter(generator.LIVE_SIZE_MIRROR_REQUIREMENTS))
+            text = (root / target).read_text(encoding="utf-8")
+            text = text.replace(
+                "release-artifacts/latest/bytecode-release-proof.json",
+                "docs/copied-size-table.md",
+                1,
+            )
+            write_text(root / target, text)
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "missing canonical Core-size proof ownership fragment",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_preserve_historical_then_current_value(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = next(iter(generator.LIVE_SIZE_MIRROR_REQUIREMENTS))
+            with (root / target).open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    "The historical then-current 24,128-byte runtime is not "
+                    "current authority.\n"
+                )
+
+            generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_arbitrary_current_measurement(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = next(iter(generator.LIVE_SIZE_MIRROR_REQUIREMENTS))
+            with (root / target).open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    "The current StreamCore runtime is 19,000 bytes with "
+                    "5,576 bytes of headroom.\n"
+                )
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "owns a mutable live Core-size claim",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_now_measures_outside_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = Path(
+                "ops/workstreams/core-mint-critical-path/active-context.md"
+            )
+            with (root / target).open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    "The permanent target now measures 19,000 bytes, leaving "
+                    "5,576 bytes of EIP-170 headroom.\n"
+                )
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "owns a mutable live Core-size claim",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_alternate_live_measurement_wording(self) -> None:
+        claims = (
+            "The permanent StreamCore size is 19,000 bytes with 5,576 bytes "
+            "of EIP-170 headroom.",
+            "The EIP-170 margin is 5,576 bytes for the permanent StreamCore.",
+            "The permanent StreamCore has 19,000 bytes of runtime bytecode.",
+            "StreamCore: 19,000 runtime bytes and 5,576 margin bytes.",
+            "Current Core is 19,000 bytes.",
+            "Core has a 19,000-byte runtime.",
+            "runtime bytecode is 19,000 bytes.",
+            "runtime = 19,000 bytes.",
+        )
+        target = Path("ops/workstreams/core-mint-critical-path/active-context.md")
+        for claim in claims:
+            with self.subTest(claim=claim):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_live_size_mirrors(root)
+                    with (root / target).open(
+                        "a", encoding="utf-8", newline="\n"
+                    ) as handle:
+                        handle.write(claim + "\n")
+
+                    with self.assertRaisesRegex(
+                        generator.checker.RiskRegisterError,
+                        "owns a mutable live Core-size claim",
+                    ):
+                        generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_allow_explicit_historical_block(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = Path(
+                "ops/workstreams/core-mint-critical-path/active-context.md"
+            )
+            with (root / target).open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    f"{generator.HISTORICAL_SIZE_BLOCK_START}\n"
+                    "At that historical checkpoint, the target measured "
+                    "19,000 bytes.\n"
+                    f"{generator.HISTORICAL_SIZE_BLOCK_END}\n"
+                )
+
+            generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_duplicate_status_projection(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / generator.STATUS_SIZE_PROJECTION_PATH
+            text = path.read_text(encoding="utf-8")
+            owner = text[
+                text.index(generator.STATUS_SIZE_PROJECTION_START) :
+                text.index(generator.STATUS_SIZE_PROJECTION_END)
+                + len(generator.STATUS_SIZE_PROJECTION_END)
+            ]
+            write_text(path, text + "\n" + owner + "\n")
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "exactly one marked StreamCore size projection",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_status_projection_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / generator.STATUS_SIZE_PROJECTION_PATH
+            text = path.read_text(encoding="utf-8").replace(
+                "18,997 bytes, leaving 5,579 bytes",
+                "19,000 bytes, leaving 5,576 bytes",
+                1,
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "size projection does not match ABI checksums",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_status_orphan_measurement(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / generator.STATUS_SIZE_PROJECTION_PATH
+            with path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write("The linked Core now measures 19,000 bytes.\n")
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "owns a mutable live Core-size claim",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_conflicting_measurement_inside_status(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / generator.STATUS_SIZE_PROJECTION_PATH
+            write_text(
+                path,
+                path.read_text(encoding="utf-8").replace(
+                    generator.STATUS_SIZE_PROJECTION_END,
+                    "The permanent StreamCore size is 19,000 bytes with "
+                    "5,576 bytes of EIP-170 headroom.\n"
+                    + generator.STATUS_SIZE_PROJECTION_END,
+                    1,
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "exactly one live StreamCore measurement",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_duplicate_autonomous_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / "ops/AUTONOMOUS_RUN.md"
+            write_text(
+                path,
+                path.read_text(encoding="utf-8").replace(
+                    generator.AUTONOMOUS_PACKAGING_HEADING,
+                    generator.AUTONOMOUS_PACKAGING_HEADING
+                    + generator.AUTONOMOUS_PACKAGING_HEADING,
+                    1,
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "exactly one active-state boundary heading",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_reject_moved_autonomous_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            path = root / "ops/AUTONOMOUS_RUN.md"
+            text = path.read_text(encoding="utf-8").replace(
+                generator.AUTONOMOUS_PACKAGING_HEADING,
+                "",
+                1,
+            )
+            write_text(
+                path,
+                generator.AUTONOMOUS_PACKAGING_HEADING + text,
+            )
+
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "boundary headings are misordered",
+            ):
+                generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_allow_stable_headroom_floor(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            relative = next(iter(generator.LIVE_SIZE_MIRROR_REQUIREMENTS))
+            path = root / relative
+            path.write_text(
+                path.read_text(encoding="utf-8")
+                + "\nThe current StreamCore build must retain at least "
+                "2,000 bytes of EIP-170 headroom.\n",
+                encoding="utf-8",
+            )
+
+            generator.validate_live_size_mirrors(root)
+
+    def test_live_size_mirrors_allow_exact_approved_baseline_margin(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            target = Path("docs/architecture.md")
+            with (root / target).open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(
+                    "approved baseline EIP-170 margin is 2,392 bytes\n"
+                )
+
+            generator.validate_live_size_mirrors(root)
+
+            text = (root / target).read_text(encoding="utf-8").replace(
+                "approved baseline EIP-170 margin is 2,392 bytes",
+                "approved baseline EIP-170 margin is 2,391 bytes",
+                1,
+            )
+            write_text(root / target, text)
+            with self.assertRaisesRegex(
+                generator.checker.RiskRegisterError,
+                "owns a mutable live Core-size claim",
+            ):
+                generator.validate_live_size_mirrors(root)
+
     def test_external_risks_track_canonical_evidence_issues(self) -> None:
         issue_links = json.loads((REPO_ROOT / ISSUE_LINKS_PATH).read_text(encoding="utf-8"))
         keys = [(link["phase"], link["requirement_id"]) for link in issue_links["links"]]

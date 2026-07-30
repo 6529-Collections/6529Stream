@@ -1,5 +1,25 @@
 # Active Context
 
+## 2026-07-30 Final Core Headroom Closure
+
+- Active issue: `#654`.
+- Active branch: `codex/issue-654-final-closure`.
+- Base: merged #670 bounded evidence-acceptance PR #714 at
+  `ff78a39356497cccc2f810880a21a33b9213bb52`.
+- The permanent target and its existing metadata/system Core-side rows are
+  implemented; this does not include the concrete #670 artist/revenue
+  satellites. The
+  `StreamCore` row in the canonical bytecode proof is the final mutable runtime
+  and margin owner. The risk generation step uses the cycle-free ABI checksum
+  measurement, and check mode requires exact final-proof parity against the
+  2,000-byte production floor.
+- This closure satisfies the artifact-backed Core headroom requirement without
+  claiming concrete #670 satellite source acceptance. ADR 0021's revenue
+  architecture is Accepted but source-blocked; ADR 0022's artist architecture
+  remains Proposed. Candidate-instance, governed-parameter, audit, deployment,
+  and retained live evidence gates remain independently blocking.
+- Historical runtime measurements below are chronology, not current authority.
+
 ## 2026-07-27 Atomic Operation-Identity Cutover
 
 - The explicit protocol-owner shipping mandate releases this workstream to
@@ -24,15 +44,16 @@
 - #671 is the next separate slice. It owns the shared
   `ROYALTY_RETURN_GAS_BUFFER` Core-read semantics and proof but must not add a
   23rd GGP or edit #684's missing candidate/evidence facts opportunistically.
-- #654 remains the final Core slice. Missing entropy-coordinator, metadata
-  router, restricted ERC-4906 emitters, and interface-support seams are work to
-  implement and measure there rather than reasons to idle now.
-- Size control is unchanged: the atomic operation-identity cutover measures
-  24,128 bytes, a 24-byte reduction from the 24,152-byte pre-cutover
-  transitional baseline. Every pre-#654 Core-changing slice must prove an exact
-  net-negative runtime. The complete target must be at most 22,576
-  bytes for the exact 2,000-byte EIP-170 margin; the objective is at most
-  22,184 bytes. The historical 21,792-byte low-water mark is non-additive.
+- #654 is the final Core closure slice. The complete permanent target is
+  implemented; this branch reconciles the bounded #670 evidence/semantic freeze,
+  artifact-backed remeasurement, risk state, and live mirrors without
+  overstating candidate, audit, deployment, or retained-live-evidence maturity.
+- Core runtime and margin are owned by the `StreamCore` row in
+  [`release-artifacts/latest/bytecode-release-proof.json`](../../../release-artifacts/latest/bytecode-release-proof.json),
+  not duplicated in this active context. The complete target must remain at
+  most 22,576 bytes for the exact 2,000-byte EIP-170 margin; the objective is at
+  most 22,184 bytes. The historical 21,792-byte low-water mark and transitional
+  operation-identity measurements are non-additive.
 - The ten-minute serialization heartbeat was deleted when the shipping mandate
   explicitly released the lane.
 - Current #672 measurement: 128,886 gas for the via-IR first-mint,
@@ -59,13 +80,14 @@
   Solidity/test/as-built cutover is now implemented locally and measures
   net-negative before #671 and #654. The prepared-operation identity and
   `isManagerOperationRootUsed` seam are current; typed primary settlement and
-  repeat-sale correlation remain ADR 0019/#694 blockers, and #654 still owns
-  the complete Core finality/headroom seam.
+  repeat-sale correlation remain ADR 0019/#694 blockers. The permanent-Core
+  implementation then completed the finality/headroom seam now closed under
+  #654.
 
-## Current Slice
+## Historical Permanent-Core Implementation Slice
 
-- Issues: `#654` permanent-Core implementation plus remaining `#671`
-  integration acceptance and `#672` as-built binding.
+- Issues at that point: `#654` permanent-Core implementation plus remaining
+  `#671` integration acceptance and `#672` as-built binding.
 - Branch: `codex/issue-654-entropy-router`.
 - Base: merged `#671` evidence / `origin/main`
   `408c1b894f947fc0f8db34259f1c82ecd7e91439`.
@@ -79,29 +101,34 @@
   725,735-gas worst completion path, deriving a 1,460,000 planning floor and
   2,910,000 planning genesis value. The checksum-bound artifact has no onchain
   authority, and candidate measurement/fixed-stipend facts remain incomplete.
-- Size and closure state: the permanent `StreamCore` implementation measures
-  18,997 bytes with 5,579 bytes of EIP-170 margin, a 5,131-byte reduction from
-  the 24,128-byte transitional build. The actual #671 read boundaries and #672
-  entropy completion seam are included. Do not claim candidate or production
-  completion: the two concrete #670 artist/revenue pointer rows remain
-  unresolved, while #656/#684 own candidate, fixed-stipend, cadence, rehearsal,
-  and independent-review evidence.
+<!-- historical-streamcore-size:start -->
+- Historical measurement checkpoint: the permanent `StreamCore` implementation
+  measured 18,997 bytes with 5,579 bytes of EIP-170 margin, a 5,131-byte
+  reduction from the 24,128-byte transitional build. Those figures are retained
+  as chronology only; the current authority is the bytecode proof linked above.
+  The actual #671 read boundaries and #672 entropy completion seam were included.
+  Do not claim candidate or production completion: the two concrete #670
+  artist/revenue pointer rows remain unresolved, while #656/#684 own candidate,
+  fixed-stipend, cadence, rehearsal, and independent-review evidence.
+<!-- historical-streamcore-size:end -->
 
-## Next Slice
+## Final Closure Actions
 
-- Finish focused/release/full validation and publish the permanent-Core slice.
-- Close #671 and #672 after merge.
-- Keep #654 open if #670's concrete artist/revenue pointer rows remain
-  unresolved, then rebase and remeasure after #670 lands.
+- Derive `RISK-SIZE-001` from the canonical proof and exact production floor.
+- Reject below-floor, missing, inconsistent, and stale proof evidence.
+- Refresh the canonical release tail once and close #654 only after exact-head
+  focused, release, Slither, and full Windows validation is green.
+- Keep the unimplemented #670 satellite source/security gates separate from
+  Core headroom acceptance.
 - Preserve #656/#684 fail-closed candidate and reviewed-evidence boundaries.
 
 ## Integration Gate
 
-The active Core/mint order is the permanent-Core slice, then #670 pointer
-completion, then final #654 candidate remeasurement. The current publication
-must preserve the accepted ADR 0017 arithmetic and raise ordering, exact 22-GGP
-catalog, measured net-negative Core delta, and honest candidate incompleteness.
-It must also:
+The active Core/mint order is final #654 artifact-backed closure while concrete
+#670 adapter implementation/security acceptance stays separate. The current
+publication must preserve the accepted ADR 0017 arithmetic and raise ordering,
+exact 22-GGP catalog, measured net-negative Core delta, and honest candidate
+incompleteness. It must also:
 
 1. bind the #672 128,886-gas snapshot to the actual Core call boundary;
 2. prove the exact #671 permanent-Core runtime and three read boundaries;
@@ -117,15 +144,19 @@ PR #704 merged the #672 planning/measurement slice and PR #708 merged #671's
 evidence slice. The permanent Core now consumes both; no earlier serialization
 hold remains.
 
+<!-- historical-streamcore-size:start -->
 Prior extraction reached a measured 21,792-byte Core runtime. The later
 manager/prepared-mint slice produced the 24,152-byte pre-cutover transitional
 build while legacy mint behavior remained live; 24,152 is later duplication,
 not the pre-manager extraction baseline. The atomic operation-identity cutover
 retires the duplicate mint path and lifetime Core replay map and measures
-24,128 bytes, a 24-byte net reduction. The complete permanent target now
-measures 18,997 bytes, leaving 5,579 bytes of EIP-170 margin and restoring the
-approved at-most-22,184-byte objective. Historical scratch deltas are not
+24,128 bytes, a 24-byte net reduction. Historical scratch deltas are not
 additive savings.
+<!-- historical-streamcore-size:end -->
+
+The complete permanent target satisfies the proof-derived 2,000-byte margin and
+approved at-most-22,184-byte objective. Its mutable measurement is owned only by
+the bytecode proof linked above.
 
 ## Future Core Dependency
 

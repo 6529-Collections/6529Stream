@@ -511,30 +511,31 @@ table above. The bytecode-spend baseline and exception ledger in
 `release-artifacts/contracts.json` remain the pre-deployment development
 control; interim exceptions cannot survive to the deployment gate.
 
-Implementation evidence (non-normative). Current artifact-backed
-CON-012-lineage Core hook proof:
+Implementation evidence (non-normative). Complete-target Core proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. Current measured `StreamCore` runtime: 24,128 bytes.
-3. EIP-170 margin: 448 bytes.
-4. The margin remains above the interim 384-byte development floor but below
-   the 512-byte warning threshold and the normative 2,000-byte production
-   deployment requirement.
-5. The Core hook keeps the immediate manager mint ABI minimal and leaves
+2. Runtime and EIP-170 margin are the `StreamCore` measurements in
+   [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json).
+   The risk-register generator derives pre-tail pass/fail state from the
+   cycle-free ABI checksum measurement and requires exact final-proof parity
+   against the normative 2,000-byte production margin rather than duplicating
+   mutable measurements here.
+3. The complete target currently passes the local size requirement. Concrete
+   candidate integration, audit, deployment, and reviewed live-bytecode
+   evidence remain separate release gates.
+4. The Core hook keeps the immediate manager mint ABI minimal and leaves
    beneficiary/payment evidence, batch commitments, operation events, and
    richer mint policy to the manager, ledger, sale adapter, and settlement
    satellites.
-6. This build inherits plain, non-enumerable `ERC721` and contains no
+5. This build inherits plain, non-enumerable `ERC721` and contains no
    `ERC721Enumerable` index storage. ADR 0012 decision T10 is already reflected
    and offers no remaining implementation savings.
-7. The current build is 1,552 bytes above the 22,576-byte deployment ceiling
-   and 3,135 bytes above the 21,000-byte planning allocation. The Core size
-   reconciliation workstream in
+6. The Core size reconciliation workstream in
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
    (Genesis Deployment Profile), tracked by
-   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654), must
-   recover real bytes through compression, actual extraction, or authorized
-   relocation while retaining every mandatory hook.
+   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654),
+   closes only against the complete linked proof while retaining every
+   mandatory hook.
 
 Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
 
@@ -545,18 +546,17 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    tests, and the ABI baseline move atomically before a release candidate is
    named. Transitional source compatibility is not a reason to keep legacy
    selectors in the permanent Core.
-2. While measured Core is above the 22,576-byte deployment ceiling, no PR may
-   land an additive Core-only mandatory hook. A Core-changing PR must be
+2. If measured Core is above the 22,576-byte deployment ceiling, no PR may land
+   an additive Core-only mandatory hook. A Core-changing PR must be
    satellite-first with zero Core delta, or pair the hook with actual removal
-   and produce a net-negative measured Core delta. The final implementation PR
+   and produce a net-negative measured Core delta. Every implementation proof
    must compile every mandatory hook in [PV1-HOOKS] together; a partial build
    below the ceiling is not the passing proof.
-3. From the current 24,128-byte evidence, the minimum full-stack recovery is
-   `1,552 + A` bytes, where `A` is the measured net runtime cost of all
-   mandatory Core hooks absent from that evidence after any same-PR removals.
-   Scratch deletions and individually measured experiments are non-additive
-   under via-IR and never satisfy this equation. Only the final linked runtime
-   from the pinned production build does.
+3. For any above-ceiling complete build, minimum recovery is the exact measured
+   shortfall plus the net runtime cost of mandatory hooks still absent after
+   same-build removals. Scratch deletions and individually measured experiments
+   are non-additive under via-IR and never satisfy this equation. Only the final
+   linked runtime from the pinned production build does.
 4. The implementation order is binding because it prevents a dead caller,
    unsafe receiver-callback ordering, or a temporary Core-size regression:
 
