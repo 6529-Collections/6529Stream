@@ -1108,13 +1108,13 @@ def validate_live_size_mirrors(repo_root: Path) -> None:
             if relative_path == STATUS_SIZE_PROJECTION_PATH
             else _live_size_scan_text(relative_path, text)
         )
+        normalized = re.sub(r"\s*\n\s*", " ", scan_text)
         for pattern in STALE_SIZE_MIRROR_PATTERNS:
-            if re.search(f"(?i){pattern}", scan_text):
+            if re.search(f"(?i){pattern}", normalized):
                 raise checker.RiskRegisterError(
                     f"{relative_path.as_posix()} repeats stale current Core-size "
                     f"value matching: {pattern!r}"
                 )
-        normalized = re.sub(r"\s*\n\s*", " ", scan_text)
         for stable_fragment in STABLE_SIZE_POLICY_FRAGMENTS:
             normalized = normalized.replace(stable_fragment, "")
         match = LIVE_SIZE_MEASUREMENT_PATTERN.search(normalized)

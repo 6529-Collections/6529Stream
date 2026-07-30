@@ -426,8 +426,8 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "5e9720e443907ab76ad42f7f82ce21cedb4f2fbfcefb045f1a1c6d6b3e17ce27",
-        169_204,
+        "5c423ad639b37c9812f8cbc73b05d884f1447ea825f8b56aabe8da02911828e7",
+        169_343,
     ),
 }
 
@@ -506,6 +506,7 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/generate_dependency_provenance_attestation.py"),
     Path("scripts/check_release_mode.py"),
     Path("scripts/test_release_mode.py"),
+    Path("scripts/check_contract_size_budget.py"),
     Path("scripts/check_genesis_deployment_profile.py"),
     Path("scripts/test_genesis_deployment_profile.py"),
     Path("ops/EXTERNAL_CALL_GAS_INVENTORY.json"),

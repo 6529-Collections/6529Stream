@@ -1489,8 +1489,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 263 configured roots,
-expanding to exactly 435 covered-file entries in each checksum index. The twelve
+The revised canonical projection contains exactly 264 configured roots,
+expanding to exactly 436 covered-file entries in each checksum index. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
 `smart-contracts/` or `script/`. The #672 planning package adds six exact roots
@@ -1498,7 +1498,9 @@ for its artifact, generator/checker/tests, and two Solidity target-fixture
 sources; its dedicated via-IR snapshot is the seventh new record under the
 already covered baseline directory. The Governance V2 policy artifact, checker,
 and tests add three exact roots; those files plus the policy schema under the
-already covered schema directory add four exact entries.
+already covered schema directory add four exact entries. The additional exact
+root binds `scripts/check_contract_size_budget.py`, which is executed directly
+by `RISK-SIZE-001`.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,

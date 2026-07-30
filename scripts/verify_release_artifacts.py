@@ -492,10 +492,11 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 263
+CANONICAL_COVERED_PATH_COUNT = 264
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "f0d9c5a914c206c766e2721a0b4e8992a1a0ee81809458e0a4f596199b535995"
+    "692767c10abbe4cbed8e9e256f28a2fcdc0e7343f5a31690bc5d0d19da410465"
 )
+RISK_SIZE_CHECKER_PATH = Path("scripts/check_contract_size_budget.py")
 
 
 class ReleaseArtifactVerificationError(RuntimeError):
@@ -2957,6 +2958,7 @@ def verify_release_tool_trust_bindings(
     for required_path in (
         REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
         + REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+        + (RISK_SIZE_CHECKER_PATH,)
     ):
         relative_path = required_path.as_posix()
         if relative_path not in covered_file_snapshots:
@@ -3001,7 +3003,7 @@ def verify_release_tool_trust_bindings(
         sorted(
             set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE).union(
                 REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
-            )
+            ).union({RISK_SIZE_CHECKER_PATH})
         )
     )
     for required_path in required_paths:

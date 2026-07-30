@@ -520,6 +520,30 @@ class RiskRegisterTests(unittest.TestCase):
                         ):
                             generator.validate_live_size_mirrors(root)
 
+    def test_live_size_mirrors_reject_hard_wrapped_stale_values(self) -> None:
+        stale_claims = (
+            "The current\n24,128-byte runtime is authoritative.\n",
+            "The runtime leaves 448\nbytes of EIP-170 headroom.\n",
+            "The current 448-byte\nmargin is authoritative.\n",
+            "The build is 1,552\nbytes below the required margin.\n",
+        )
+        target = Path("ops/workstreams/core-mint-critical-path/active-context.md")
+        for stale_claim in stale_claims:
+            with self.subTest(stale_claim=stale_claim.strip()):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_live_size_mirrors(root)
+                    with (root / target).open(
+                        "a", encoding="utf-8", newline="\n"
+                    ) as handle:
+                        handle.write(stale_claim)
+
+                    with self.assertRaisesRegex(
+                        generator.checker.RiskRegisterError,
+                        "repeats stale current Core-size value",
+                    ):
+                        generator.validate_live_size_mirrors(root)
+
     def test_live_size_mirrors_require_canonical_proof_owner(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

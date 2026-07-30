@@ -154,7 +154,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 263)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 264)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3149,11 +3149,16 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 263)
-        self.assertEqual(len(manifest["files"]), 435)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 264)
+        self.assertEqual(len(manifest["files"]), 436)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            435,
+            436,
+        )
+
+    def test_committed_checksums_bind_risk_size_checker(self) -> None:
+        self.assert_committed_checksums_cover(
+            {Path("scripts/check_contract_size_budget.py")}
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
@@ -3216,6 +3221,10 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("release-artifacts/provenance"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(
             Path("scripts/generate_dependency_provenance_attestation.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("scripts/check_contract_size_budget.py"),
             generator.DEFAULT_COVERED_PATHS,
         )
         self.assertIn(
@@ -3461,7 +3470,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 435)
+        self.assertEqual(len(classifications), 436)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")
