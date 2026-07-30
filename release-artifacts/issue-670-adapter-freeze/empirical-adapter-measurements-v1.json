@@ -87,7 +87,10 @@
       "O9 omits the source frozen-bit field even though sourceAssignmentHash commits that bit; the prototype checks both exact canonical forms without choosing normative semantics.",
       "O2 requires nonzero nextPolicyHash while O4 requires zero currentAssignmentPolicyHash for the no-loosening branch, although both occupy the same primary assignment hash slot.",
       "The exact O9 ABI requires via-IR and fails the branch default non-via-IR profile with Stack too deep.",
-      "Focused tests do not satisfy the full hostile matrix, all-entry golden vectors, differential proof, resolver integration, or release gates."
+      "Focused tests do not satisfy the full hostile matrix, all-entry golden vectors, differential proof, resolver integration, or release gates.",
+      "No host lock, authentication, pre/post recheck, replay, mutation-order, rollback, or atomicity proof is present, and no reverse-composed EIP-150 reserve is measured or approved.",
+      "The full-initcode length is creation code plus 640 static constructor bytes, but the exact constructor-appended initcode receipt, bytes, and hash are not retained.",
+      "Positive-path execution coverage is limited to O1 and O2; O3 through O9 have no successful-path evidence here."
     ]
   },
   "artist": {
@@ -196,7 +199,9 @@
       "Refusal and delegation-revocation typehashes are missing; displayName, deadline/signedAt, empty dynamic values, and several maxima remain unresolved.",
       "ERC-1271 policy, reverse-composed and outer gas reserves, and adversarial gas measurements remain unapproved.",
       "Core burn-cutoff and finality dependencies plus registry mutation, replay, reentrancy, atomicity, selector-isolation, and golden-vector evidence remain unresolved.",
-      "Runtime exceeds both the strict packet ceiling and EIP-170."
+      "Runtime exceeds both the strict packet ceiling and EIP-170.",
+      "validateProposeArtistBindingV1 omits common-context validation, so substituted adapter, adapter-codehash, or dependency-binding context can reach the terminal gap; nested collaborator and capability-override ordering is not semantically canonical.",
+      "Signer verification uses currentStateDigest although the later transcript computes a nonzero full intent, and signerSetHash is trusted rather than recomputed, making the signer transcript internally noncanonical."
     ]
   },
   "commands": [
@@ -204,7 +209,7 @@
     "forge build --via-ir --sizes --force smart-contracts/StreamArtistRegistryValidationAdapter.sol",
     "forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol -vvv",
     "forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol --gas-report",
-    "forge test --via-ir --match-path test/StreamArtistRegistryValidationAdapter.t.sol -vv",
+    "forge test --via-ir --code-size-limit 50000 --match-path test/StreamArtistRegistryValidationAdapter.t.sol -vv",
     "forge inspect --via-ir IStreamRevenueResolverValidationAdapter methodIdentifiers --json",
     "forge inspect --via-ir IStreamArtistRegistryValidationAdapter methodIdentifiers --json"
   ]

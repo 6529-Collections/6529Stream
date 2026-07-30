@@ -59,7 +59,7 @@ Focused behavior and gas commands:
 ```powershell
 forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol -vvv
 forge test --via-ir --match-path test/StreamRevenueResolverValidationAdapter.t.sol --gas-report
-forge test --via-ir --match-path test/StreamArtistRegistryValidationAdapter.t.sol -vv
+forge test --via-ir --code-size-limit 50000 --match-path test/StreamArtistRegistryValidationAdapter.t.sol -vv
 ```
 
 Revenue focused tests passed 7/7. The gas report observed:
@@ -116,6 +116,19 @@ prototype's constructor-derived dependency binding is
 5. The focused suite is not the packet's complete hostile matrix, nine-entry
    golden-vector set, differential proof, resolver atomicity/reentrancy
    integration, or release evidence.
+6. The prototype does not prove the resolver host's lock acquisition,
+   authentication, pre/post dependency and storage rechecks, replay handling,
+   mutation ordering, or rollback/atomicity behavior. It also does not measure
+   or approve the reverse-composed EIP-150 reserve needed around the
+   resolver-to-adapter call.
+7. The reported 24,531-byte full-initcode length is deterministic arithmetic
+   over creation code plus the 640-byte static constructor encoding, but this
+   artifact does not retain the exact constructor-appended initcode bytes,
+   compiler receipt, or initcode hash required by the packet's final evidence
+   gate.
+8. Successful validation coverage is limited to O1 and O2. O3 through O9 have
+   selector and implementation measurement coverage but no positive-path
+   execution evidence here.
 
 ### Artist
 
@@ -135,6 +148,16 @@ prototype's constructor-derived dependency binding is
    selector-isolation, and golden-vector tests.
 6. The runtime exceeds both the packet's strict ceiling and EIP-170. Removing
    checks or substituting stubs is not an acceptable way to claim success.
+7. `validateProposeArtistBindingV1` does not invoke the prototype's common
+   context validator. A wrong adapter address, adapter codehash, or dependency
+   binding can therefore reach the terminal semantic-gap revert, and its
+   nested collaborator/capability-override ordering is not proven
+   semantically canonical.
+8. Signer verification consumes `currentStateDigest`, while the later
+   transcript path computes a distinct nonzero full-intent digest.
+   `signerSetHash` is also trusted from the request rather than recomputed from
+   the signer bundle. The resulting signer transcript is internally
+   noncanonical even before the terminal semantic gap.
 
 ## Conclusion
 
