@@ -77,6 +77,8 @@
     },
     "artist_registry_component": {
       "address": "address(registry)",
+      "creation_code_hash": null,
+      "init_code_hash": null,
       "expected_runtime_code_hash": null,
       "module_version": null,
       "module_manifest_hash": null,
@@ -519,6 +521,8 @@
     "finality_registry_init_code_hash",
     "finality_registry_expected_runtime_code_hash",
     "artist_registry_address",
+    "artist_registry_creation_code_hash",
+    "artist_registry_init_code_hash",
     "artist_registry_expected_runtime_code_hash",
     "artist_registry_module_version",
     "artist_registry_module_manifest_hash",

@@ -67,7 +67,7 @@ Revenue focused tests passed 7/7. The gas report observed:
 | Entry | Calls | Minimum | Average | Median | Maximum | Interpretation |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | O1 `computePrimaryAssignmentHashV1` | 8 | 362 | 13,484 | 4,451 | 48,605 | Mixed successful and intentionally rejected calls |
-| O2 `validateSetPrimaryAssignmentV1` | 2 | 51,480 | 60,856 | 60,856 | One successful and one artist-malformed failure path |
+| O2 `validateSetPrimaryAssignmentV1` | 2 | 51,480 | 60,856 | 60,856 | 70,233 | One successful and one artist-malformed failure path |
 
 These are local mock-path observations, not cold/warm production bounds or an
 approved reserve. The same report measured a 24,531-byte deployment and
