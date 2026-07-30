@@ -9,6 +9,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import check_issue_670_adapter_freeze as checker
 import generate_issue_670_adapter_freeze as generator
@@ -17,12 +18,16 @@ import generate_issue_670_adapter_freeze as generator
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 VECTOR_PATH = REPO_ROOT / generator.DEFAULT_OUTPUT
+MATRIX_PATH = REPO_ROOT / generator.DEFAULT_MATRIX_OUTPUT
+SUPPLEMENT_PATH = REPO_ROOT / generator.DEFAULT_FINALITY_SUPPLEMENT
 
 
 class Issue670AdapterFreezeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.vector, cls.raw = checker.load_json_strict(VECTOR_PATH)
+        cls.matrix, cls.matrix_raw = checker.load_json_strict(MATRIX_PATH)
+        cls.supplement, _ = checker.load_json_strict(SUPPLEMENT_PATH)
 
     def test_committed_artifact_is_current_and_canonical(self) -> None:
         validated = checker.check_artifact(VECTOR_PATH, REPO_ROOT)
@@ -158,6 +163,32 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
             "0x1626ba7e",
         )
 
+    def test_generated_matrix_applies_only_the_reviewed_finality_overlay(
+        self,
+    ) -> None:
+        validated = checker.check_operation_matrix(
+            MATRIX_PATH, SUPPLEMENT_PATH
+        )
+        self.assertEqual(
+            self.matrix_raw,
+            generator.operation_matrix_json_bytes(validated),
+        )
+        self.assertEqual(
+            validated["implementation_stop_overlays"],
+            [generator.finality_stop_overlay()],
+        )
+        effective = validated["effective_implementation_stops"]
+        self.assertEqual(effective["12"], [])
+        self.assertEqual(effective["13"], [])
+        self.assertEqual(effective["22"], [generator.FINALITY_STOP_ID])
+
+        for row in validated["operations"]:
+            row_id = row[0]
+            if row_id in {12, 13}:
+                self.assertEqual(row[17], [generator.FINALITY_STOP_ID])
+                continue
+            self.assertEqual(effective[str(row_id)], row[17])
+
     def test_checker_rejects_mechanical_and_maturity_mutations(self) -> None:
         mutations = (
             (
@@ -202,18 +233,6 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
                     "supplied_typehashes"
                 ][0].__setitem__("value", "0x" + "00" * 32),
             ),
-            (
-                "external gate completion",
-                lambda value: value["required_external_artifacts"][0].__setitem__(
-                    "satisfied_by_this_artifact", True
-                ),
-            ),
-            (
-                "implementation authorization",
-                lambda value: value["status"].__setitem__(
-                    "implementation_authorized", True
-                ),
-            ),
         )
         for label, mutate in mutations:
             with self.subTest(label=label):
@@ -224,6 +243,41 @@ class Issue670AdapterFreezeTests(unittest.TestCase):
                     "stale or invalid",
                 ):
                     checker.validate_artifact(candidate, REPO_ROOT)
+
+    def test_external_gate_mutation_reaches_dedicated_guard(self) -> None:
+        candidate = copy.deepcopy(self.vector)
+        candidate["required_external_artifacts"][0][
+            "satisfied_by_this_artifact"
+        ] = True
+        with mock.patch.object(
+            generator, "build_artifact", return_value=candidate
+        ):
+            with self.assertRaisesRegex(
+                generator.AdapterFreezeError,
+                r"required_external_artifacts\[0\] cannot be satisfied here",
+            ):
+                checker.validate_artifact(candidate, REPO_ROOT)
+
+    def test_implementation_mutation_reaches_dedicated_guard(self) -> None:
+        candidate = copy.deepcopy(self.vector)
+        candidate["status"]["implementation_authorized"] = True
+        with mock.patch.object(
+            generator, "build_artifact", return_value=candidate
+        ):
+            with self.assertRaisesRegex(
+                generator.AdapterFreezeError,
+                r"status\.implementation_authorized must remain false",
+            ):
+                checker.validate_artifact(candidate, REPO_ROOT)
+
+    def test_overlay_rejects_row_22_resolution(self) -> None:
+        supplement = copy.deepcopy(self.supplement)
+        supplement["matrix_overlay"]["resolutions"][0]["row_id"] = 22
+        with self.assertRaisesRegex(
+            generator.AdapterFreezeError,
+            "matrix_overlay does not match generated matrix",
+        ):
+            checker.validate_operation_matrix(self.matrix, supplement)
 
     def test_checker_rejects_noncanonical_json_and_duplicate_keys(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

@@ -32,6 +32,23 @@ It has this narrow overlay effect:
 | 13 | `confirmSanctionFinalized` | GO | The finality-dependency stop is resolved for current Proposed-packet evaluation and measurement only |
 | 22 | `recordRecoveryApproval` | NO-GO | `FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN` remains a hard implementation stop |
 
+The table is not an independent prose override. Its machine authority is the
+supplement artifact's `matrix_overlay`, whose precedence is:
+
+1. start from every operation's generated base `implementation_stop` list;
+2. apply `artist-finality-dependency-supplement-v1` afterward;
+3. remove only
+   `FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN` from rows 12 and 13; and
+4. preserve row 22, every unlisted row, and every unlisted stop exactly.
+
+The generated matrix publishes the resulting
+`effective_implementation_stops`, and the issue-670 checker requires its
+overlay object to equal this supplement's object byte-for-structure. A GO in
+this document has no effect unless that generated precedence calculation
+produces an empty effective list for the same row. Unknown overlays,
+additional row resolutions, stop substitution, and effective-state drift
+fail closed.
+
 Rows 12 and 13 do not depend on finality recovery. Row 12 records a sanction
 that the current finality registry can later consume. Row 13 confirms an
 already executed, immutable collection-finality record through the current

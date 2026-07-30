@@ -24,8 +24,47 @@
     "normative_finality_source": "docs/stream-long-term-architecture.md",
     "adr_0020": "docs/adr/0020-executor-only-finality-recovery.md"
   },
+  "matrix_overlay": {
+    "overlay_id": "artist-finality-dependency-supplement-v1",
+    "overlay_schema": "6529stream.artist-validation-finality-dependency-supplement.v1",
+    "artifact": "release-artifacts/issue-670-adapter-freeze/finality-dependency-supplement-v1.json",
+    "precedence": "applied_after_base_operation_implementation_stop",
+    "scope": "proposed_packet_evaluation_and_measurement_only",
+    "stop_id": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN",
+    "resolutions": [
+      {
+        "row_id": 12,
+        "write": "recordArtistSanction",
+        "remove": [
+          "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+        ],
+        "decision": "GO"
+      },
+      {
+        "row_id": 13,
+        "write": "confirmSanctionFinalized",
+        "remove": [
+          "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+        ],
+        "decision": "GO"
+      }
+    ],
+    "preserved_rows": [
+      {
+        "row_id": 22,
+        "write": "recordRecoveryApproval",
+        "effective_stops": [
+          "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+        ],
+        "decision": "NO_GO"
+      }
+    ],
+    "unlisted_rows": "preserve_base_implementation_stop_exactly",
+    "unlisted_stops": "preserve_base_implementation_stop_exactly",
+    "implementation_authorized": false
+  },
   "interpretation": {
-    "overlay_rule": "For operation-matrix rows 12 and 13 only, this reviewed supplement resolves FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN for Proposed-packet evaluation. The same stop remains effective for row 22.",
+    "overlay_rule": "Apply matrix_overlay after each operation row's base implementation_stop list. It removes only FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN from rows 12 and 13 for Proposed-packet evaluation and measurement. Row 22, every unlisted row, and every unlisted stop remain unchanged.",
     "go_meaning": "GO permits the current Proposed packet semantics and measurement prototypes to use the frozen dependency transcript. It is not implementation acceptance, packet acceptance, deployment authorization, or a readiness claim.",
     "no_go_meaning": "NO_GO is a hard implementation stop. No optimistic bit, placeholder ABI, zero stub, or inferred recovery predicate may replace the missing accepted reconciliation.",
     "dependency_owner": "The registry owns every dependency address, code-identity check, state read, predicate, commitment, and reread. The stateless validation adapter calls neither Core nor the finality registry.",

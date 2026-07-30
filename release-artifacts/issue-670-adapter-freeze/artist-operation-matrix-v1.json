@@ -14,7 +14,8 @@
     "replay_state_digest": "keccak256(abi.encode(REPLAY_STATE_DOMAIN, block.chainid, registry, registryWriteSelector, signerSetHash, keccak256(abi.encode(row.replay_facts in listed order))))",
     "record_hash": "A named source domain means the exact domain preimage and field order in docs/stream-artist-authority.md AA-DOMAINS at source_commit. NONE means the transition creates no new record hash. EXISTING:<name> means the event/state transition consumes the named existing record without rehashing it.",
     "event_binding": "Event names bind the exact declarations and field order in docs/stream-artist-authority.md AA-EVENTS at source_commit. Events emit only after transcript acceptance and durable state writes.",
-    "implementation_stop": "A nonempty stop list is a hard failure. It cannot be waived by a passing test, size pressure, deployment timing, or reviewer silence."
+    "implementation_stop": "Each operation row carries its base stop list. Versioned implementation_stop_overlays apply afterward in listed order. Only an exact listed stop removal is permitted; every unlisted row and stop remains unchanged. Any nonempty effective stop list is a hard failure.",
+    "overlay_precedence": "base operation implementation_stop, then the exact generated versioned overlay set, then effective_implementation_stops"
   },
   "domains": {
     "CURRENT_STATE_DOMAIN": {
@@ -149,6 +150,108 @@
     "events",
     "implementation_stop"
   ],
+  "implementation_stop_overlays": [
+    {
+      "overlay_id": "artist-finality-dependency-supplement-v1",
+      "overlay_schema": "6529stream.artist-validation-finality-dependency-supplement.v1",
+      "artifact": "release-artifacts/issue-670-adapter-freeze/finality-dependency-supplement-v1.json",
+      "precedence": "applied_after_base_operation_implementation_stop",
+      "scope": "proposed_packet_evaluation_and_measurement_only",
+      "stop_id": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN",
+      "resolutions": [
+        {
+          "row_id": 12,
+          "write": "recordArtistSanction",
+          "remove": [
+            "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+          ],
+          "decision": "GO"
+        },
+        {
+          "row_id": 13,
+          "write": "confirmSanctionFinalized",
+          "remove": [
+            "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+          ],
+          "decision": "GO"
+        }
+      ],
+      "preserved_rows": [
+        {
+          "row_id": 22,
+          "write": "recordRecoveryApproval",
+          "effective_stops": [
+            "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+          ],
+          "decision": "NO_GO"
+        }
+      ],
+      "unlisted_rows": "preserve_base_implementation_stop_exactly",
+      "unlisted_stops": "preserve_base_implementation_stop_exactly",
+      "implementation_authorized": false
+    }
+  ],
+  "effective_implementation_stops": {
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
+    "5": [],
+    "6": [],
+    "7": [],
+    "8": [],
+    "9": [],
+    "10": [],
+    "11": [],
+    "12": [],
+    "13": [],
+    "14": [],
+    "15": [],
+    "16": [],
+    "17": [],
+    "18": [],
+    "19": [],
+    "20": [],
+    "21": [],
+    "22": [
+      "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+    ],
+    "23": [],
+    "24": [],
+    "25": [],
+    "26": [],
+    "27": [],
+    "28": [],
+    "29": [],
+    "30": [],
+    "31": [],
+    "32": [],
+    "33": [],
+    "34": [],
+    "35": [],
+    "36": [],
+    "37": [],
+    "38": [],
+    "39": [],
+    "40": [],
+    "41": [],
+    "42": [],
+    "43": [],
+    "44": [],
+    "45": [],
+    "46": [],
+    "47": [],
+    "48": [],
+    "49": [],
+    "50": [],
+    "51": [],
+    "52": [],
+    "53": [],
+    "54": [],
+    "55": [],
+    "56": [],
+    "57": []
+  },
   "operations": [
     [1, "proposeArtistBinding", "B", "0xd413fdec", "0xdd14ebb0", "6529STREAM_ARTIST_REGISTRY_WRITE_PROPOSE_ARTIST_BINDING_V1", "ROLE_ARTIST_REGISTRY_ADMIN; corrective generation also requires terminal arbiter action", "NONE", "NONE", "0x003fff", "collectionId:u256;artistId:b32;artistAddress:addr;bindingGeneration:u64;identityRecordHash:b32;consentMode:u8;saleConsentScope:u8;registryImmutabilityElection:u8;collabPolicyMode:u8;collabThreshold:u32;collaboratorSetHash:b32;capabilityPolicySetHash:b32;reasonHash:b32;registrationNonce:u256", "collection attribution state; next generation; collection identity; prior terminal correction approval", "proposal key; registration allocator nonce", "ARTIST_BINDING_DOMAIN", "ARTIST_ID_DOMAIN", "CORE", "ArtistIdentityRegistered|ArtistBindingProposed|ArtistAttributionStateChanged", []],
     [2, "acceptArtistBinding", "Q", "0xbff12590", "0x139b4368", "6529STREAM_ARTIST_REGISTRY_WRITE_ACCEPT_ARTIST_BINDING_V1", "exact proposed artist; collaborator policy where applicable", "DIRECT_OR_DEADLINE", "STREAM_ARTIST_ACCEPTANCE_TYPEHASH", "0x00007f", "collectionId:u256;artistId:b32;bindingGeneration:u64;bindingHash:b32;identityRecordHash:b32;acceptanceKind:u8;currentAttributionState:u8", "live proposal; signer is named artist; required collaborator acceptance set; binding generation", "artist nonce allocator; signed digest revocation; acceptance uniqueness", "ACCEPTANCE_RECORD_DOMAIN", "NONE", "CORE|SIGNER", "ArtistBindingAccepted|ArtistAttributionStateChanged", []],

@@ -349,33 +349,47 @@ The following are the dispositions for AR-01 through AR-33:
 | AR-29 | Resolve with the exact bundle, row-hash, aggregate signer-set hash, participant bounds, and per-row signature rules. |
 | AR-30 | Resolve with state-carried, record-committed, nonduplicated display names. |
 | AR-31 | Resolve semantically through the matrix and source-pinned typehash/record/event declarations; executable vectors remain an implementation gate. |
-| AR-32 | Do not waive. The three matrix rows carrying the finality stop remain implementation-prohibited until the exact finality dependency supplement below exists. |
+| AR-32 | Resolve the finality-dependency sub-gate for rows 12 and 13 through the reviewed versioned supplement; preserve row 22's stop pending Accepted ADR 0020 and merged issue #667 reconciliation. Every non-finality implementation gate remains unchanged. |
 | AR-33 | Resolve with the distinct binding-refusal typehash above. |
 
 ## Implementation Stops
 
 ### Finality dependency
 
-`recordArtistSanction`, `confirmSanctionFinalized`, and
-`recordRecoveryApproval` remain implementation-stopped until one reviewed
-supplement pins:
+The reviewed
+[`finality dependency supplement`](0021-0022-validation-adapter-finality-supplement.md)
+and its
+[`versioned machine overlay`](../../release-artifacts/issue-670-adapter-freeze/finality-dependency-supplement-v1.json)
+resolve only `FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN` for matrix rows
+12 (`recordArtistSanction`) and 13 (`confirmSanctionFinalized`), and only for
+current Proposed-packet evaluation and measurement. They pin those rows'
+deployment-bound code identities, exact selectors and canonical return
+decoders, current-state preimages, predicates, rereads, events, and hostile
+vectors. ADR 0020 recovery semantics are not a dependency of either row.
 
-- whether ADR 0020 is accepted, revised, or excluded;
-- finality-registry and Core burn-cutoff construction/runtime code hashes as
-  deployment bindings;
-- every called selector, exact calldata, success requirement, return length,
-  and canonical decoding rule;
-- exact collection-scope, executed/current-record, manifest, grant,
-  appointment, burn-height, and governance-lineage predicates;
-- current-state and field-bank preimages;
-- same-transaction reread and one-way-latch behavior;
-- sanction/recovery event mapping; and
-- positive and hostile vectors for zero/equal/after appointment burn heights,
-  prohibited scopes, stale/foreign records, changed manifests,
-  superseded/provisional grants, forbidden capabilities, and code drift.
+Machine precedence is fail-closed:
 
-No implementation may omit those operations, ship zero stubs, or substitute
-an optimistic truth bit.
+1. each matrix row contributes its base `implementation_stop` list;
+2. generated `implementation_stop_overlays` apply afterward in listed order;
+3. an overlay may remove only an exact stop from an exact listed row; and
+4. every unlisted row and stop remains unchanged in
+   `effective_implementation_stops`.
+
+The repository generator emits that base-plus-overlay view, and the checker
+requires the matrix overlay to equal the supplement's `matrix_overlay`.
+Unknown overlays, row substitution, stop substitution, or effective-state
+drift fail.
+
+Row 22 (`recordRecoveryApproval`) remains NO-GO with the finality stop intact.
+It requires Accepted ADR 0020 and merged issue `#667` reconciliation before a
+later reviewed supplement can pin the recovery host/ABI, current executed
+record and manifest predicates, reconciled current-state preimage, reread
+rules, and event mapping.
+
+Rows 12 and 13 are still not implementation-authorized: executable vectors,
+gas and size evidence, static analysis, integration, deployment, and release
+gates below remain unchanged. No implementation may omit an operation, ship a
+zero stub, or substitute an optimistic truth bit.
 
 ### Executable vector evidence
 

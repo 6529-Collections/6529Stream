@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed checker for the issue #670 mechanical adapter vectors."""
+"""Fail-closed checker for issue #670 adapter vectors and semantic matrix."""
 
 from __future__ import annotations
 
@@ -134,6 +134,104 @@ def validate_artifact(candidate: Any, repo_root: Path) -> dict[str, Any]:
     return candidate
 
 
+def validate_operation_matrix(
+    candidate: Any, supplement: Any
+) -> dict[str, Any]:
+    """Validate generated matrix precedence and the reviewed overlay contract."""
+    if not isinstance(candidate, dict):
+        raise generator.AdapterFreezeError(
+            "artist operation matrix root must be a JSON object"
+        )
+    if not isinstance(supplement, dict):
+        raise generator.AdapterFreezeError(
+            "finality supplement root must be a JSON object"
+        )
+
+    expected = generator.artist_operation_matrix_artifact()
+    difference = first_difference(candidate, expected)
+    if difference:
+        raise generator.AdapterFreezeError(
+            f"artist operation matrix is stale or invalid: {difference}"
+        )
+
+    overlays = candidate["implementation_stop_overlays"]
+    if overlays != [generator.finality_stop_overlay()]:
+        raise generator.AdapterFreezeError(
+            "implementation_stop_overlays must equal the reviewed v1 overlay"
+        )
+    if supplement.get("schema") != overlays[0]["overlay_schema"]:
+        raise generator.AdapterFreezeError(
+            "finality supplement schema does not match matrix overlay"
+        )
+    if supplement.get("matrix_overlay") != overlays[0]:
+        raise generator.AdapterFreezeError(
+            "finality supplement matrix_overlay does not match generated matrix"
+        )
+
+    effective = generator.apply_implementation_stop_overlays(
+        candidate["operations"], overlays
+    )
+    if candidate["effective_implementation_stops"] != effective:
+        raise generator.AdapterFreezeError(
+            "effective_implementation_stops do not match overlay application"
+        )
+    if effective["12"] or effective["13"]:
+        raise generator.AdapterFreezeError(
+            "finality supplement must resolve only row 12/13 finality stops"
+        )
+    if effective["22"] != [generator.FINALITY_STOP_ID]:
+        raise generator.AdapterFreezeError(
+            "finality supplement must preserve the row 22 finality stop"
+        )
+
+    status = supplement.get("status", {})
+    expected_status = {
+        "row_12_recordArtistSanction": "GO",
+        "row_13_confirmSanctionFinalized": "GO",
+        "row_22_recordRecoveryApproval": "NO_GO",
+    }
+    for field, expected_value in expected_status.items():
+        if status.get(field) != expected_value:
+            raise generator.AdapterFreezeError(
+                f"finality supplement status.{field} must be {expected_value}"
+            )
+    if status.get("production_source_implementation") != "not_authorized":
+        raise generator.AdapterFreezeError(
+            "finality supplement production implementation must remain unauthorized"
+        )
+
+    decisions = supplement.get("row_decisions")
+    if not isinstance(decisions, list):
+        raise generator.AdapterFreezeError(
+            "finality supplement row_decisions must be a list"
+        )
+    decisions_by_row = {
+        record.get("row"): record
+        for record in decisions
+        if isinstance(record, dict)
+    }
+    if set(decisions_by_row) != {12, 13, 22} or len(decisions) != 3:
+        raise generator.AdapterFreezeError(
+            "finality supplement row_decisions must be exactly rows 12, 13, and 22"
+        )
+    expected_decisions = {
+        12: ("recordArtistSanction", "GO"),
+        13: ("confirmSanctionFinalized", "GO"),
+        22: ("recordRecoveryApproval", "NO_GO"),
+    }
+    for row_id, (write, decision) in expected_decisions.items():
+        record = decisions_by_row[row_id]
+        if record.get("operation") != write or record.get("decision") != decision:
+            raise generator.AdapterFreezeError(
+                f"finality supplement row {row_id} decision mismatch"
+            )
+        if record.get("implementation_authorized") is not False:
+            raise generator.AdapterFreezeError(
+                f"finality supplement row {row_id} cannot authorize implementation"
+            )
+    return candidate
+
+
 def check_artifact(path: Path, repo_root: Path) -> dict[str, Any]:
     candidate, raw = load_json_strict(path)
     validated = validate_artifact(candidate, repo_root)
@@ -141,6 +239,20 @@ def check_artifact(path: Path, repo_root: Path) -> dict[str, Any]:
     if raw != canonical:
         raise generator.AdapterFreezeError(
             "artifact bytes are not the canonical sorted two-space JSON encoding"
+        )
+    return validated
+
+
+def check_operation_matrix(
+    path: Path, supplement_path: Path
+) -> dict[str, Any]:
+    candidate, raw = load_json_strict(path)
+    supplement, _ = load_json_strict(supplement_path)
+    validated = validate_operation_matrix(candidate, supplement)
+    canonical = generator.operation_matrix_json_bytes(validated)
+    if raw != canonical:
+        raise generator.AdapterFreezeError(
+            "artist operation matrix bytes do not match generated encoding"
         )
     return validated
 
@@ -153,6 +265,16 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=Path(__file__).resolve().parent.parent,
     )
     parser.add_argument("--artifact", type=Path, default=generator.DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--matrix",
+        type=Path,
+        default=generator.DEFAULT_MATRIX_OUTPUT,
+    )
+    parser.add_argument(
+        "--finality-supplement",
+        type=Path,
+        default=generator.DEFAULT_FINALITY_SUPPLEMENT,
+    )
     return parser.parse_args(argv)
 
 
@@ -162,14 +284,23 @@ def main(argv: list[str] | None = None) -> int:
     artifact = args.artifact
     if not artifact.is_absolute():
         artifact = repo_root / artifact
+    matrix = args.matrix
+    if not matrix.is_absolute():
+        matrix = repo_root / matrix
+    supplement = args.finality_supplement
+    if not supplement.is_absolute():
+        supplement = repo_root / supplement
     try:
         validated = check_artifact(artifact, repo_root)
+        validated_matrix = check_operation_matrix(matrix, supplement)
         print(
             "issue #670 mechanical adapter vectors verified: "
             f"{len(validated['revenue_resolver_packet']['adapter_interface']['entries'])} "
             "revenue entries, "
             f"{len(validated['artist_registry_packet']['adapter_interface']['operations'])} "
-            "artist entries; acceptance remains external"
+            "artist entries; "
+            f"{len(validated_matrix['implementation_stop_overlays'])} "
+            "versioned stop overlay; acceptance remains external"
         )
         return 0
     except generator.AdapterFreezeError as exc:
