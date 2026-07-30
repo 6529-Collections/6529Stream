@@ -1,0 +1,528 @@
+{
+  "schema": "6529stream.artist-validation-finality-dependency-supplement.v1",
+  "source_commit": "8a045029185efc807edeac08d6f76b95c4387dd1",
+  "maturity": "pre-audit",
+  "status": {
+    "supplement_scope": "proposed_packet_evaluation_only",
+    "row_12_recordArtistSanction": "GO",
+    "row_13_confirmSanctionFinalized": "GO",
+    "row_22_recordRecoveryApproval": "NO_GO",
+    "semantic_interface_decision": "accepted_with_row_22_finality_implementation_stop",
+    "packet_acceptance": "blocked_pending_remaining_empirical_and_integration_evidence",
+    "normative_freeze": "blocked_pending_remaining_empirical_and_integration_evidence",
+    "production_source_implementation": "not_authorized",
+    "deployment": "blocked",
+    "readiness_promotion": "blocked"
+  },
+  "authority": {
+    "decision": "docs/adr/0021-0022-validation-adapter-finality-supplement.md",
+    "interface_freeze": "docs/adr/0021-0022-validation-adapter-interface-freeze.md",
+    "security_freeze": "docs/adr/0021-0022-validation-adapter-security-freeze.md",
+    "operation_matrix": "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json",
+    "candidate_packet": "docs/adr/0022-artist-registry-validation-adapter-interface-packet.md",
+    "normative_artist_source": "docs/stream-artist-authority.md",
+    "normative_finality_source": "docs/stream-long-term-architecture.md",
+    "adr_0020": "docs/adr/0020-executor-only-finality-recovery.md"
+  },
+  "interpretation": {
+    "overlay_rule": "For operation-matrix rows 12 and 13 only, this reviewed supplement resolves FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN for Proposed-packet evaluation. The same stop remains effective for row 22.",
+    "go_meaning": "GO permits the current Proposed packet semantics and measurement prototypes to use the frozen dependency transcript. It is not implementation acceptance, packet acceptance, deployment authorization, or a readiness claim.",
+    "no_go_meaning": "NO_GO is a hard implementation stop. No optimistic bit, placeholder ABI, zero stub, or inferred recovery predicate may replace the missing accepted reconciliation.",
+    "dependency_owner": "The registry owns every dependency address, code-identity check, state read, predicate, commitment, and reread. The stateless validation adapter calls neither Core nor the finality registry.",
+    "failure_rule": "Any call failure, noncanonical return, length mismatch, predicate mismatch, stale observation, unexpected code identity, or reread drift fails before a durable write or normative event."
+  },
+  "constants": {
+    "CURRENT_STATE_DOMAIN": {
+      "preimage": "6529STREAM_ARTIST_REGISTRY_VALIDATION_CURRENT_STATE_V1",
+      "value": "0x608b904cf3adbb53bf0f90c572aa8e10a499172c67714a5ed48d322c6d0767b4"
+    },
+    "COMPONENT_ARTIST_SANCTION": {
+      "preimage": "ARTIST_SANCTION",
+      "value": "0x1e14b418e60392f62e7baf2e6edfcfb6dfeab92fb4428eff216b492ed5cef047"
+    },
+    "COLLECTION_SCOPE": 0,
+    "ATTR_ARTIST_ACCEPTED": 2,
+    "ATTR_ARTIST_SANCTIONED": 3,
+    "AUTH_STEWARD": "source-pinned authority-class numeric value",
+    "CAP_SANCTION": "source-pinned capability bit",
+    "MAX_FINALITY_COMPONENTS": 32,
+    "FINALITY_COMPONENT_COLLECTION_INTERFACE_ID": "0x1300f2d7",
+    "EVENT_SCHEMA_VERSION": 1
+  },
+  "deployment_bindings": {
+    "rule": "Addresses and hashes are deployment inputs, not literal source-build constants in this supplement.",
+    "required_for_each_dependency": [
+      "exact nonzero constructor-bound address",
+      "keccak256 of compiler-produced creation bytecode",
+      "keccak256 of exact initcode including constructor arguments",
+      "expected deployed runtime EXTCODEHASH",
+      "deployment manifest and receipt binding those values"
+    ],
+    "core": {
+      "address": null,
+      "creation_code_hash": null,
+      "init_code_hash": null,
+      "expected_runtime_code_hash": null,
+      "value_source": "deployment",
+      "live_rule": "address.code.length > 0 and EXTCODEHASH(address) == expected_runtime_code_hash"
+    },
+    "finality_registry": {
+      "address": null,
+      "creation_code_hash": null,
+      "init_code_hash": null,
+      "expected_runtime_code_hash": null,
+      "value_source": "deployment",
+      "constructor_identity_rule": "The retained deployment record binds this finality registry to the same Core and artist-registry line used by the operation.",
+      "live_rule": "address.code.length > 0 and EXTCODEHASH(address) == expected_runtime_code_hash"
+    },
+    "artist_registry_component": {
+      "address": "address(registry)",
+      "expected_runtime_code_hash": null,
+      "module_version": null,
+      "module_manifest_hash": null,
+      "value_source": "deployment",
+      "live_rule": "EXTCODEHASH(address(registry)) equals the deployment-supplied expected runtime code hash"
+    },
+    "forbidden_substitutions": [
+      "source artifact runtime hash used without deployment binding",
+      "zero hash",
+      "latest-release hash selected at runtime",
+      "mutable registry lookup",
+      "successful call treated as code-identity proof",
+      "constructor address inferred from caller-supplied data"
+    ]
+  },
+  "strict_call_policy": {
+    "opcode": "STATICCALL",
+    "lock": "registry-wide lock acquired before the first dependency observation",
+    "call_target": "constructor-bound deployment address only",
+    "pre_call_code_check": true,
+    "success_required": true,
+    "bounded_returndata_copy": true,
+    "exact_returndata_length_required": true,
+    "canonical_abi_required": true,
+    "bubble_revert_data": false,
+    "dependency_call_after_first_durable_write": false
+  },
+  "abi": {
+    "core_collection_burns_blocked_at_block": {
+      "applies_to": [
+        "row_12_AUTH_STEWARD"
+      ],
+      "signature": "collectionBurnsBlockedAtBlock(uint256)",
+      "selector": "0x74a5ded9",
+      "calldata": "0x74a5ded9 || abi.encode(uint256(collectionId))",
+      "calldata_length_bytes": 36,
+      "success": "STATICCALL success == true",
+      "returndata_length_bytes": 32,
+      "decode": "uint64 burnBlockedAtBlock",
+      "canonical_rules": [
+        "upper 192 bits are zero",
+        "burnBlockedAtBlock is nonzero",
+        "burnBlockedAtBlock <= stewardAppointedAtBlock"
+      ]
+    },
+    "finality_collection_record": {
+      "applies_to": [
+        "row_13"
+      ],
+      "signature": "collectionFinalityRecord(uint256)",
+      "selector": "0x980d80c5",
+      "calldata": "0x980d80c5 || abi.encode(uint256(collectionId))",
+      "calldata_length_bytes": 36,
+      "success": "STATICCALL success == true",
+      "decode": "(bool finalized,bytes32 finalityRecordHash,bytes32 manifestContentHash,bytes32 manifestURIHash,string finalityManifestURI,bytes32 componentsHash,address manifestPointer,uint64 finalizedAt)",
+      "canonical_rules": [
+        "outer tuple offset word equals 0x20",
+        "tuple head is exactly eight words",
+        "bool word is exactly 0 or 1",
+        "string offset relative to the tuple start equals 0x100",
+        "string tail immediately follows the tuple head",
+        "string padding bytes are zero",
+        "address upper 96 bits are zero",
+        "uint64 upper 192 bits are zero",
+        "returndata length equals 320 + ceil32(length(bytes(finalityManifestURI)))",
+        "no gaps, aliases, overlaps, or trailing bytes"
+      ]
+    },
+    "finality_component_count": {
+      "applies_to": [
+        "row_13"
+      ],
+      "signature": "finalityComponentCount(uint256)",
+      "selector": "0x880b294f",
+      "calldata": "0x880b294f || abi.encode(uint256(collectionId))",
+      "calldata_length_bytes": 36,
+      "success": "STATICCALL success == true",
+      "returndata_length_bytes": 32,
+      "decode": "uint256 componentCount",
+      "canonical_rules": [
+        "1 <= componentCount <= 32"
+      ]
+    },
+    "finality_components": {
+      "applies_to": [
+        "row_13"
+      ],
+      "signature": "finalityComponents(uint256,uint256,uint256)",
+      "selector": "0x1825f65a",
+      "calldata": "0x1825f65a || abi.encode(uint256(collectionId), uint256(0), uint256(componentCount))",
+      "calldata_length_bytes": 100,
+      "success": "STATICCALL success == true",
+      "decode": "(bytes32 componentType,address component,bytes4 interfaceId,bytes32 codeHash,bytes32 moduleVersion,bytes32 manifestHash,bytes32 dataHash)[] components",
+      "canonical_rules": [
+        "outer array offset word equals 0x20",
+        "array length equals componentCount",
+        "each element is exactly seven static ABI words",
+        "address upper 96 bits are zero",
+        "bytes4 is left-aligned and its lower 224 bits are zero",
+        "returndata length equals 64 + 224 * componentCount",
+        "no element offsets, gaps, aliases, overlaps, or trailing bytes"
+      ]
+    },
+    "finality_verify": {
+      "applies_to": [
+        "row_13"
+      ],
+      "signature": "verifyFinality(uint256)",
+      "selector": "0xf060d767",
+      "calldata": "0xf060d767 || abi.encode(uint256(collectionId))",
+      "calldata_length_bytes": 36,
+      "success": "STATICCALL success == true",
+      "returndata_length_bytes": 96,
+      "decode": "(bool currentRouteMatches,bytes32 finalityRecordHash,bytes32 componentsHash)",
+      "canonical_rules": [
+        "bool word is exactly 0 or 1",
+        "no trailing bytes"
+      ]
+    }
+  },
+  "current_state_digest": {
+    "outer_recipe": "keccak256(abi.encode(CURRENT_STATE_DOMAIN, block.chainid, registry, registryWriteSelector, keccak256(abi.encode(fields[0],...,fields[23])), keccak256(abi.encode(row_current_state_facts_in_the_exact_order_below))))",
+    "narrow_value_rule": "Every address, bytes4, bool, uint8, and uint64 fact is canonically ABI-extended.",
+    "row_12": {
+      "registry_write_selector": "0xb569ac0b",
+      "field_mask": "0x0000ff",
+      "fields": [
+        "artistId",
+        "scopeType",
+        "collectionId",
+        "tokenId",
+        "scopeId",
+        "sanctionSubjectHash",
+        "statementHash",
+        "bindingGeneration"
+      ],
+      "current_state_fact_order": [
+        "boundCore",
+        "expectedCoreRuntimeCodeHash",
+        "observedCoreRuntimeCodeHash",
+        "boundFinalityRegistry",
+        "expectedFinalityRuntimeCodeHash",
+        "observedFinalityRuntimeCodeHash",
+        "bindingHash",
+        "bindingArtistId",
+        "bindingGeneration",
+        "attributionState",
+        "signer",
+        "authorityClass",
+        "authorityStateHash",
+        "collaboratorPolicyHash",
+        "stewardAppointedAtBlock",
+        "sanctionGrantRecordHash",
+        "sanctionGrantSourceClass",
+        "sanctionGrantLineageHash",
+        "effectiveCapabilityMask",
+        "coreBurnsBlockedAtBlock",
+        "componentType",
+        "componentAddress",
+        "componentInterfaceId",
+        "componentCodeHash",
+        "componentModuleVersion",
+        "componentManifestHash",
+        "candidateSanctionRecordHash"
+      ],
+      "authority_state_hash_recipe": "keccak256(abi.encode(artistId, signer, authorityClass, operativeAuthorityRecordHash, authorityRevision, delegationRecordHash, delegationUseCount, delegationMaxUses))",
+      "sanction_grant_lineage_hash_recipe": "keccak256(abi.encode(grantSourceClass, grantRecordHash, grantingArtistId, grantedSteward, grantedCapabilityMask, provisional, superseded, revoked, terminalGovernanceActionId))",
+      "component_fact_recipe": "abi.encode(COMPONENT_ARTIST_SANCTION, address(registry), bytes4(0x1300f2d7), expectedArtistRegistryRuntimeCodeHash, artistRegistryModuleVersion, artistRegistryModuleManifestHash, candidateSanctionRecordHash)"
+    },
+    "row_13": {
+      "registry_write_selector": "0x20afefab",
+      "field_mask": "0x00003f",
+      "fields": [
+        "collectionId",
+        "artistId",
+        "bindingGeneration",
+        "sanctionRecordHash",
+        "finalityRecordHash",
+        "priorAttributionState"
+      ],
+      "current_state_fact_order": [
+        "boundCore",
+        "expectedCoreRuntimeCodeHash",
+        "observedCoreRuntimeCodeHash",
+        "boundFinalityRegistry",
+        "expectedFinalityRuntimeCodeHash",
+        "observedFinalityRuntimeCodeHash",
+        "bindingHash",
+        "bindingArtistId",
+        "bindingGeneration",
+        "priorAttributionState",
+        "sanctionRecordHash",
+        "sanctionSigner",
+        "sanctionAuthorityClass",
+        "recordFinalized",
+        "recordFinalityRecordHash",
+        "recordManifestContentHash",
+        "recordManifestURIHash",
+        "keccak256(bytes(recordFinalityManifestURI))",
+        "recordComponentsHash",
+        "recordManifestPointer",
+        "recordFinalizedAt",
+        "componentCount",
+        "keccak256(abi.encode(components))",
+        "sanctionComponentIndex",
+        "sanctionComponentType",
+        "sanctionComponentAddress",
+        "sanctionComponentInterfaceId",
+        "sanctionComponentCodeHash",
+        "sanctionComponentModuleVersion",
+        "sanctionComponentManifestHash",
+        "sanctionComponentDataHash",
+        "verifyCurrentRouteMatches",
+        "verifyFinalityRecordHash",
+        "verifyComponentsHash"
+      ]
+    }
+  },
+  "row_predicates": {
+    "row_12": {
+      "all_authorities": [
+        "binding and generation are the exact live binding for artistId and collectionId",
+        "attribution state permits a sanction and is neither DISPUTED nor REVOKED",
+        "signer authority and collaborator policy are current",
+        "scopeType is a known value and tokenId/scopeId have the source-pinned canonical shape",
+        "bound Core, finality registry, and artist-registry component code identities equal deployment bindings",
+        "candidate componentType equals COMPONENT_ARTIST_SANCTION",
+        "candidate component address equals address(registry)",
+        "candidate component interfaceId equals 0x1300f2d7",
+        "candidate component codeHash equals the deployment-supplied artist-registry runtime code hash",
+        "candidate component dataHash equals candidateSanctionRecordHash"
+      ],
+      "steward_additional": [
+        "signer is the currently vested steward",
+        "stewardAppointedAtBlock is nonzero",
+        "CAP_SANCTION comes from an operative nonprovisional nonsuperseded nonrevoked artist-signed grant or a separately executed TERMINAL_FREEZE governance grant",
+        "scopeType equals COLLECTION",
+        "tokenId equals zero",
+        "scopeId equals bytes32(0)",
+        "collectionBurnsBlockedAtBlock is nonzero",
+        "collectionBurnsBlockedAtBlock <= stewardAppointedAtBlock"
+      ],
+      "finality_call_count": 0,
+      "core_call_count_non_steward": 0,
+      "core_call_count_steward_per_observation_pass": 1
+    },
+    "row_13": {
+      "predicates": [
+        "caller supplies no authority; the transition is permissionless truth confirmation",
+        "binding and generation are the exact live collection binding",
+        "priorAttributionState equals ATTR_ARTIST_ACCEPTED",
+        "stored sanction is verified, undisputed, unrevoked, collection scope, and exact for collectionId, artistId, and bindingGeneration",
+        "record.finalized equals true",
+        "record.finalityRecordHash equals the supplied nonzero finalityRecordHash",
+        "record.finalizedAt is nonzero",
+        "record.componentsHash is nonzero",
+        "verify.currentRouteMatches equals true",
+        "verify.finalityRecordHash equals record.finalityRecordHash",
+        "verify.componentsHash equals record.componentsHash",
+        "componentCount equals components.length and is between 1 and 32",
+        "components contain exactly one COMPONENT_ARTIST_SANCTION entry",
+        "the sanction entry component equals address(registry)",
+        "the sanction entry interfaceId equals 0x1300f2d7",
+        "the sanction entry codeHash equals the deployment-supplied artist-registry runtime code hash",
+        "the sanction entry moduleVersion and manifestHash equal the deployment-bound artist-registry component facts",
+        "the sanction entry dataHash equals sanctionRecordHash",
+        "all entries are in the finality registry's canonical sorted-unique order"
+      ],
+      "final_state": "ATTR_ARTIST_SANCTIONED"
+    }
+  },
+  "reread_policy": {
+    "phase_order": [
+      "acquire registry-wide lock",
+      "check dependency addresses and live code hashes",
+      "perform the first complete dependency observation pass",
+      "compute currentStateDigest from the first pass",
+      "call and accept the stateless validation adapter",
+      "repeat every applicable code check and dependency call with identical calldata",
+      "require exact decoded-value and raw-returndata equality with the first pass",
+      "recheck host-local binding, authority, grant, sanction, and transition facts",
+      "perform durable writes",
+      "emit the exact normative event",
+      "release lock and return"
+    ],
+    "row_12_steward": "Reread Core code hash and collectionBurnsBlockedAtBlock with identical calldata. The accepted Core burn latch is one-way, but that property does not waive the exact reread.",
+    "row_12_non_steward": "Recheck Core/finality/artist-registry deployment code identities and every host-local fact; no Core or finality function call is introduced.",
+    "row_13": "Reread collectionFinalityRecord, finalityComponentCount, finalityComponents, and verifyFinality with identical calldata, plus all dependency code identities. Every raw return and decoded fact must match the first pass, and verify.currentRouteMatches must remain true.",
+    "one_way_latches": [
+      "Core collection burn activation is zero until set and then immutable",
+      "an executed collection finality record and its stored component array are immutable on the current finality line"
+    ],
+    "drift_result": "revert with no durable write, replay consumption, record, state transition, or normative event"
+  },
+  "events": {
+    "row_12": {
+      "name": "ArtistSanctionRecorded",
+      "signature": "ArtistSanctionRecorded(uint16,uint256,bytes32,address,uint8,uint256,bytes32,bytes32,uint8,bytes32,uint256,uint64)",
+      "topic0": "0x00cfc4063860e8d8cd8c29da90a36444dccff1df759a393fcc583a01a700218b",
+      "indexed": [
+        "collectionId",
+        "sanctionSubjectHash",
+        "signer"
+      ],
+      "field_order_and_values": [
+        "schemaVersion = 1",
+        "collectionId = request.collectionId",
+        "sanctionSubjectHash = request.sanctionSubjectHash",
+        "signer = accepted primary sanction signer",
+        "scopeType = request.scopeType",
+        "tokenId = request.tokenId",
+        "scopeId = request.scopeId",
+        "sanctionRecordHash = computed SANCTION_RECORD_DOMAIN hash",
+        "authorityClass = accepted signer authority class",
+        "statementHash = request.statementHash",
+        "nonce = accepted primary signer nonce",
+        "signedAt = accepted transcript signedAt"
+      ],
+      "emission": "after accepted reread and sanction durable writes only"
+    },
+    "row_13": {
+      "name": "ArtistAttributionStateChanged",
+      "signature": "ArtistAttributionStateChanged(uint16,uint256,uint8,uint64,uint8,address,uint8,bytes32,bytes32,string)",
+      "topic0": "0x877e2283bb85a0b53841839cfca5709d9d3df88f3c606a3cbfb567996d774da5",
+      "indexed": [
+        "collectionId",
+        "newState"
+      ],
+      "field_order_and_values": [
+        "schemaVersion = 1",
+        "collectionId = request.collectionId",
+        "newState = ATTR_ARTIST_SANCTIONED",
+        "bindingGeneration = request.bindingGeneration",
+        "oldState = ATTR_ARTIST_ACCEPTED",
+        "actor = msg.sender",
+        "authorityClass = stored sanction authority class",
+        "recordHash = request.sanctionRecordHash",
+        "reasonHash = request.finalityRecordHash",
+        "reasonURI = empty string"
+      ],
+      "emission": "after accepted reread and attribution-state durable write only"
+    },
+    "row_22": {
+      "name": "ArtistRecoveryApprovalRecorded",
+      "emission": "forbidden while row 22 is NO_GO"
+    }
+  },
+  "row_decisions": [
+    {
+      "row": 12,
+      "operation": "recordArtistSanction",
+      "validation_selector": "0xb8cc3b3e",
+      "registry_write_selector": "0xb569ac0b",
+      "decision": "GO",
+      "decision_scope": "current Proposed packet and measurement only",
+      "adr_0020_dependency": "none",
+      "matrix_stop_resolution": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN is resolved for this row by this supplement",
+      "implementation_authorized": false
+    },
+    {
+      "row": 13,
+      "operation": "confirmSanctionFinalized",
+      "validation_selector": "0x9c32b4f8",
+      "registry_write_selector": "0x20afefab",
+      "decision": "GO",
+      "decision_scope": "current Proposed packet and measurement only",
+      "adr_0020_dependency": "none; the current immutable executed collection-finality record is sufficient",
+      "matrix_stop_resolution": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN is resolved for this row by this supplement",
+      "implementation_authorized": false
+    },
+    {
+      "row": 22,
+      "operation": "recordRecoveryApproval",
+      "validation_selector": "0x696ed9d5",
+      "registry_write_selector": "0xd5d802ba",
+      "decision": "NO_GO",
+      "decision_scope": "hard implementation stop",
+      "adr_0020_dependency": "ADR 0020 must be Accepted and issue 667 reconciliation must be merged before a new reviewed supplement can freeze this row",
+      "matrix_stop_resolution": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN remains effective",
+      "missing_freeze": [
+        "accepted recovery authority model",
+        "exact recovery-host address and deployment identity",
+        "exact current executed recovery-record ABI",
+        "exact collection-scope and old-record predicates",
+        "exact staged recovery-manifest ABI and artwork-bytes-changing predicate",
+        "exact one-way and reread semantics after accepted reconciliation",
+        "exact current-state preimage and event mapping against reconciled source"
+      ],
+      "implementation_authorized": false
+    }
+  ],
+  "required_vectors": {
+    "row_12_positive": [
+      "artist, successor, and permitted delegate sanction without a Core function call",
+      "steward collection sanction with burn height before appointment",
+      "steward collection sanction with burn height equal to appointment",
+      "operative artist-signed CAP_SANCTION grant",
+      "separately executed TERMINAL_FREEZE governance CAP_SANCTION grant"
+    ],
+    "row_12_hostile": [
+      "zero burn height",
+      "burn height after appointment",
+      "zero appointment",
+      "TOKEN, RELEASE, SEASON, VIEW, and unknown steward scope",
+      "nonzero tokenId or scopeId in collection scope",
+      "provisional, superseded, revoked, or wrong-steward grant",
+      "missing or forbidden CAP_SANCTION",
+      "foreign Core or finality registry",
+      "zero, missing, mismatched, or changed runtime code hash",
+      "Core returndata short, long, noncanonical, reverted, or changed on reread"
+    ],
+    "row_13_positive": [
+      "exact executed collection finality record containing exactly one matching sanction component",
+      "permissionless caller",
+      "unchanged record, components, verify result, and code identities on reread"
+    ],
+    "row_13_hostile": [
+      "unfinalized, zero, stale, or foreign finality record",
+      "wrong Core, collection, artist, or binding generation",
+      "wrong prior attribution state",
+      "zero, missing, duplicate, wrong-type, wrong-address, wrong-interface, wrong-codehash, or wrong-dataHash sanction component",
+      "component count zero, above 32, or different from returned array length",
+      "unsorted or duplicate component entries",
+      "verifyFinality false or hash mismatch",
+      "malformed dynamic tuple, string, array, address, bytes4, bool, or uint64 encoding",
+      "short or trailing returndata",
+      "changed finality record, component array, route match, or dependency code on reread"
+    ],
+    "row_22": [
+      "no vectors can convert NO_GO to GO before accepted ADR 0020 and merged issue 667 reconciliation"
+    ]
+  },
+  "unrecorded_deployment_values": [
+    "Core_address",
+    "Core_creation_code_hash",
+    "Core_init_code_hash",
+    "Core_expected_runtime_code_hash",
+    "finality_registry_address",
+    "finality_registry_creation_code_hash",
+    "finality_registry_init_code_hash",
+    "finality_registry_expected_runtime_code_hash",
+    "artist_registry_address",
+    "artist_registry_expected_runtime_code_hash",
+    "artist_registry_module_version",
+    "artist_registry_module_manifest_hash",
+    "deployment_manifest_hash",
+    "deployment_receipt"
+  ]
+}
