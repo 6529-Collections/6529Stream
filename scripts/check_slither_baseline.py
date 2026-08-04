@@ -67,7 +67,12 @@ EXPECTED_SCOPE_COUNTS = {
 EXPECTED_TRIAGE_COUNTS = {
     "confirmed_gap": 0,
     "design_review": 6,
-    "pending_disposition": 26,
+    "pending_disposition": 24,
+    "false_positive": 2,
+}
+EXPECTED_STATUS_COUNTS = {
+    "Open": 30,
+    "False Positive": 2,
 }
 EXPECTED_DETECTOR_COUNTS = {
     ("High", "arbitrary-send-eth"): 1,
@@ -557,6 +562,7 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
     validated_rows: List[Dict[str, Any]] = []
     fingerprints = set()
     triage_counts: Counter[str] = Counter()
+    status_counts: Counter[str] = Counter()
     detector_counts: Counter[Tuple[str, str]] = Counter()
     impact_counts: Counter[str] = Counter()
     for index, row_value in enumerate(rows):
@@ -591,12 +597,13 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
         if classify_source(source["path"]) != "first_party_production":
             raise SlitherBaselineError(f"{label} is outside first-party production scope")
         validate_source_anchor(repo_root, source, f"{label}.source")
-        if row["status"] != "Open":
-            raise SlitherBaselineError(f"{label}.status must remain Open in the current baseline")
+        status = require_string(row["status"], f"{label}.status")
+        if status not in EXPECTED_STATUS_COUNTS:
+            raise SlitherBaselineError(f"{label}.status is unsupported")
         triage_class = require_string(row["triage_class"], f"{label}.triage_class")
         if triage_class not in EXPECTED_TRIAGE_COUNTS:
             raise SlitherBaselineError(f"{label}.triage_class is unsupported")
-        require_string(row["rationale"], f"{label}.rationale")
+        rationale = require_string(row["rationale"], f"{label}.rationale")
         require_string(row["owner"], f"{label}.owner")
         issues = require_list(row["issues"], f"{label}.issues")
         if not issues or not all(
@@ -610,6 +617,27 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
         proof = require_list(row["required_proof"], f"{label}.required_proof")
         if not proof or not all(isinstance(item, str) and item.strip() for item in proof):
             raise SlitherBaselineError(f"{label}.required_proof must be non-empty strings")
+        if status == "Open" and triage_class == "false_positive":
+            raise SlitherBaselineError(
+                f"{label}.false_positive triage requires False Positive status"
+            )
+        if status == "False Positive":
+            if triage_class != "false_positive":
+                raise SlitherBaselineError(
+                    f"{label}.False Positive status requires false_positive triage"
+                )
+            if "false positive" not in rationale.lower():
+                raise SlitherBaselineError(
+                    f"{label}.False Positive rationale must state the disposition"
+                )
+            if not any("smart-contracts/" in item for item in proof):
+                raise SlitherBaselineError(
+                    f"{label}.False Positive proof must cite production source"
+                )
+            if not any("test/" in item for item in proof):
+                raise SlitherBaselineError(
+                    f"{label}.False Positive proof must cite focused executable tests"
+                )
         if row["gate"] != "Gate C / Gate F":
             raise SlitherBaselineError(f"{label}.gate must be 'Gate C / Gate F'")
         expected_fingerprint = semantic_fingerprint(row)
@@ -640,6 +668,7 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
                 f"{label} leaves a design-review detector in pending_disposition"
             )
         triage_counts[triage_class] += 1
+        status_counts[status] += 1
         detector_counts[(impact, detector)] += 1
         impact_counts[impact] += 1
         validated_rows.append(row)
@@ -649,6 +678,13 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
     if normalized_triage_counts != EXPECTED_TRIAGE_COUNTS:
         raise SlitherBaselineError(
             f"triage counts must be {EXPECTED_TRIAGE_COUNTS}, got {normalized_triage_counts}"
+        )
+    normalized_status_counts = {
+        key: status_counts[key] for key in EXPECTED_STATUS_COUNTS
+    }
+    if normalized_status_counts != EXPECTED_STATUS_COUNTS:
+        raise SlitherBaselineError(
+            f"status counts must be {EXPECTED_STATUS_COUNTS}, got {normalized_status_counts}"
         )
     if dict(detector_counts) != EXPECTED_DETECTOR_COUNTS:
         raise SlitherBaselineError(
@@ -678,13 +714,17 @@ def markdown_count_table(counts: Mapping[str, Any], impacts: Sequence[str]) -> L
 def render_markdown(data: Mapping[str, Any]) -> str:
     provenance = data["provenance"]
     scope_counts = data["captured_high_medium_scope_counts"]
+    status_counts = Counter(row["status"] for row in data["findings"])
+    open_count = status_counts["Open"]
+    disposition_count = data["counts"]["total"] - open_count
     lines = [
         "# Slither Baseline",
         "",
         "This is the current first-party production High/Medium Slither inventory.",
         "Passing the drift gate means the inventory matches the analyzed source; it does",
         "not accept any finding, complete a security audit, or make the protocol ready for",
-        f"public beta or production. All {data['counts']['total']} current rows remain `Open` under issue #658.",
+        f"public beta or production. {open_count} current rows remain `Open` and "
+        f"{disposition_count} have reviewed dispositions under issue #658.",
         "",
         "## Capture Provenance",
         "",
@@ -745,7 +785,7 @@ def render_markdown(data: Mapping[str, Any]) -> str:
             "The JSON companion is canonical. This table is a deterministic mirror checked",
             "by `scripts/check_slither_baseline.py --baseline-only`.",
             "",
-            "| Fingerprint | Impact | Detector | Confidence | Source | Status | Triage | Owner | Issues | Rationale | Required proof | Gate |",
+            "| Fingerprint | Impact | Detector | Confidence | Source | Status | Triage | Owner | Issues | Rationale | Required proof / disposition evidence | Gate |",
             "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
@@ -777,13 +817,22 @@ def render_markdown(data: Mapping[str, Any]) -> str:
     lines.extend(
         [
             "",
+            "## Status Counts",
+            "",
+            "| Status | Rows |",
+            "| --- | ---: |",
+            f"| `Open` | {EXPECTED_STATUS_COUNTS['Open']} |",
+            f"| `False Positive` | {EXPECTED_STATUS_COUNTS['False Positive']} |",
+            f"| Total | {sum(EXPECTED_STATUS_COUNTS.values())} |",
+            "",
             "## Triage Counts",
             "",
-            "| Classification | Open rows |",
+            "| Classification | Rows |",
             "| --- | ---: |",
             f"| `confirmed_gap` | {EXPECTED_TRIAGE_COUNTS['confirmed_gap']} |",
             f"| `design_review` | {EXPECTED_TRIAGE_COUNTS['design_review']} |",
             f"| `pending_disposition` | {EXPECTED_TRIAGE_COUNTS['pending_disposition']} |",
+            f"| `false_positive` | {EXPECTED_TRIAGE_COUNTS['false_positive']} |",
             f"| Total | {sum(EXPECTED_TRIAGE_COUNTS.values())} |",
             "",
             "## Triage Boundary",
@@ -801,6 +850,8 @@ def render_markdown(data: Mapping[str, Any]) -> str:
             "- `pending_disposition` covers default/sentinel/ignored-field, arithmetic,",
             "  equality, and unused-return candidates. Each",
             "  row needs its own executable proof before `Accepted` or `False Positive`.",
+            "- `false_positive` records a detector-specific, source-traced disposition with",
+            "  focused executable evidence; it does not suppress or remove the live row.",
             "- No broad detector suppression is part of this baseline.",
             "- A removed row also fails drift until this inventory and its disposition",
             "  history are deliberately refreshed.",

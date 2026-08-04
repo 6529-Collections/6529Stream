@@ -1,10 +1,12 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-high/medium baseline. The current baseline contains 32 open findings: 2 High
-and 30 Medium. Those rows are a review and burn-down queue; they are not proof
-of exploitability, an audit completion claim, or evidence that the protocol is
-ready for public beta or production.
+high/medium baseline. The current baseline contains 32 retained findings: 2
+High and 30 Medium. Thirty rows remain Open and two Medium
+`incorrect-equality` rows have narrow, source-traced False Positive
+dispositions backed by focused tests. The retained rows are a review and
+burn-down queue; they are not proof of exploitability, an audit completion
+claim, or evidence that the protocol is ready for public beta or production.
 
 Slither is a direct pin in `requirements-tools.txt` and is transitively
 hash-locked for the Linux CI/release boundary through

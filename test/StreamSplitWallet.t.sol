@@ -592,6 +592,25 @@ contract StreamSplitWalletTest is CharacterizationTestBase {
             .assertEq(type(uint256).max, "full precision entitlement");
     }
 
+    function testReleaseZeroSentinelRevertsAndPositiveBoundaryReleases() public {
+        IStreamSplitWallet wallet = _createSingleAccountWallet(ACCOUNT_A);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamSplitWallet.NoReleasableFunds.selector, address(0), ACCOUNT_A
+            )
+        );
+        wallet.release(address(0), ACCOUNT_A, payable(ACCOUNT_A));
+        wallet.assetObservationInitialized(address(0)).assertFalse("zero release has no effects");
+        wallet.totalReleased(address(0)).assertEq(0, "zero release total");
+
+        (bool sent,) = payable(address(wallet)).call{ value: 1 }("");
+        sent.assertTrue("fund one wei");
+        wallet.release(address(0), ACCOUNT_A, payable(ACCOUNT_A))
+            .assertEq(1, "positive boundary releases");
+        wallet.totalReleased(address(0)).assertEq(1, "positive release total");
+    }
+
     function testSyncAssetRecordsInitializationIncreaseAndSkipsUnchangedObservations() public {
         IStreamSplitWallet wallet = _createTwoAccountWallet();
         bytes32 profileId = wallet.profileId();

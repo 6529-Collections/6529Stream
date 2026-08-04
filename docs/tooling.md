@@ -2322,10 +2322,13 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 32 open findings: 2 High and 30 Medium. The
+The current checked baseline has 32 retained findings: 2 High and 30 Medium.
+Thirty remain Open and two Medium `StreamSplitWallet` `incorrect-equality`
+rows have focused, source-traced False Positive dispositions. The
 compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
-classifications, rationales, and open proof requirements in
+classifications, rationales, and open proof requirements or disposition
+evidence in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
 at source commit `baf459c1f29ec6ee9bfdac81006c8cc71b83d982` on
 `2026-08-09T19:48:03Z` records 3,242 findings: 49 High, 847 Medium, 1,269 Low,
