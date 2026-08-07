@@ -42,6 +42,11 @@ class WindowsCiWrapperTests(unittest.TestCase):
 
     def test_windows_job_runs_and_retains_full_builder_authority(self) -> None:
         self.assertIn("name: Full release-builder test authority", self.windows_job)
+        self.assertIn("name: Initialize Windows release-builder log", self.windows_job)
+        self.assertIn(
+            '"Release-builder authority did not start." |',
+            self.windows_job,
+        )
         self.assertIn("timeout-minutes: 20", self.windows_job)
         self.assertIn(
             "python scripts/test_release_build_artifacts.py 2>&1 |",
@@ -51,6 +56,8 @@ class WindowsCiWrapperTests(unittest.TestCase):
             "Tee-Object -FilePath ci-logs\\release-build-tests-windows.log",
             self.windows_job,
         )
+        self.assertIn("$testExit = $LASTEXITCODE", self.windows_job)
+        self.assertIn("exit $testExit", self.windows_job)
         self.assertIn("name: Upload Windows release-builder log", self.windows_job)
         self.assertIn("if: always()", self.windows_job)
         self.assertIn("name: release-build-tests-windows", self.windows_job)

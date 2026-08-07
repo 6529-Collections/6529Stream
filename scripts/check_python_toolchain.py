@@ -9,6 +9,7 @@ from pathlib import Path
 
 
 PYTHON_VERSION = "3.12.13"
+WINDOWS_PYTHON_VERSION = "3.12.10"
 SETUP_PYTHON_SHA = "ece7cb06caefa5fff74198d8649806c4678c61a1"
 FOUNDRY_TOOLCHAIN_SHA = "c7450ba673e133f5ee30098b3b54f444d3a2ca2d"
 FOUNDRY_VERSION = "v1.7.1"
@@ -146,6 +147,14 @@ WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
     CI_WORKFLOW_PATH: 3,
     RELEASE_WORKFLOW_PATH: 1,
 }
+WORKFLOW_PYTHON_VERSIONS = {
+    CI_WORKFLOW_PATH: (
+        WINDOWS_PYTHON_VERSION,
+        PYTHON_VERSION,
+        PYTHON_VERSION,
+    ),
+    RELEASE_WORKFLOW_PATH: (PYTHON_VERSION,),
+}
 WORKFLOW_SOLC_SELECT_COUNTS = {
     CI_WORKFLOW_PATH: 2,
     RELEASE_WORKFLOW_PATH: 1,
@@ -156,12 +165,28 @@ WORKFLOW_EXPECTED_JOB_NAMES = {
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
     CI_WORKFLOW_PATH: {
-        "windows-wrapper": {"playwright": 0, "solc_select": 1},
-        "slither-baseline": {"playwright": 0, "solc_select": 1},
-        "foundry": {"playwright": 1, "solc_select": 0},
+        "windows-wrapper": {
+            "python_version": WINDOWS_PYTHON_VERSION,
+            "playwright": 0,
+            "solc_select": 1,
+        },
+        "slither-baseline": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 0,
+            "solc_select": 1,
+        },
+        "foundry": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 1,
+            "solc_select": 0,
+        },
     },
     RELEASE_WORKFLOW_PATH: {
-        "release-mode": {"playwright": 1, "solc_select": 1},
+        "release-mode": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 1,
+            "solc_select": 1,
+        },
     },
 }
 JOB_KEY_RE = re.compile(r"^  ([A-Za-z0-9_-]+):\s*$")
@@ -530,10 +555,16 @@ def check_workflow(path: Path, text: str) -> list[str]:
         for line in text.splitlines()
         if re.match(r"^\s*python-version\s*:", line)
     ]
-    if python_pins != [python_pin] * expected_instances:
+    expected_python_pins = [
+        f'python-version: "{version}"'
+        for version in WORKFLOW_PYTHON_VERSIONS.get(
+            path, (PYTHON_VERSION,) * expected_instances,
+        )
+    ]
+    if python_pins != expected_python_pins:
         errors.append(
             f"{path} Python runtime pins must be exactly "
-            f"{[python_pin] * expected_instances!r}, got {python_pins!r}"
+            f"{expected_python_pins!r}, got {python_pins!r}"
         )
 
     foundry_pins = [
@@ -647,9 +678,13 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path} job names must be exactly {sorted(expected_job_names)!r}, "
                 f"got {sorted(job_blocks)!r}"
             )
+        python_pin_needles = tuple(
+            f'python-version: "{version}"'
+            for version in sorted({PYTHON_VERSION, WINDOWS_PYTHON_VERSION})
+        )
         toolchain_needles = (
             setup_ref,
-            python_pin,
+            *python_pin_needles,
             foundry_ref,
             f"version: {FOUNDRY_VERSION}",
             LOCK_INSTALL_COMMAND,
@@ -669,9 +704,12 @@ def check_workflow(path: Path, text: str) -> list[str]:
                     )
                 continue
 
+            job_python_pin = (
+                f'python-version: "{profile["python_version"]}"'
+            )
             expected_counts = {
                 setup_ref: 1,
-                python_pin: 1,
+                job_python_pin: 1,
                 foundry_ref: 1,
                 f"version: {FOUNDRY_VERSION}": 1,
                 LOCK_INSTALL_COMMAND: 1,
@@ -764,7 +802,9 @@ def main() -> int:
 
     print(
         "Python toolchain lock is valid: "
-        f"CPython {PYTHON_VERSION}, {package_count} hashed packages, "
+        f"Linux/release CPython {PYTHON_VERSION}, "
+        f"Windows CPython {WINDOWS_PYTHON_VERSION}, "
+        f"{package_count} hashed packages, "
         f"{len(WORKFLOW_PATHS)} aligned workflows."
     )
     return 0

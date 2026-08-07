@@ -81,7 +81,9 @@ FORGE_BUILD_TIMESTAMP_RE = re.compile(
 PORTABLE_FORGE_BUILD_TIMESTAMP = "Build Timestamp: <platform-packaging-timestamp>"
 IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
 
+R4_EVIDENCE_EVENT_SCHEMA = "6529stream.release-builder-event.r4.v1"
 EVIDENCE_EVENT_SCHEMA = "6529stream.release-builder-event.v1"
+R4_EVIDENCE_TERMINAL_SCHEMA = "6529stream.release-builder-terminal.r4.v1"
 EVIDENCE_TERMINAL_SCHEMA = "6529stream.release-builder-terminal.v1"
 R4_SOURCE_AGGREGATE_SHA256 = (
     "1EB0A58B8A1DCA624493839D41FA5267078E7FBA67B4AE6DF9205DD003659857"
@@ -709,6 +711,7 @@ def r4_publish_json_no_replace(directory: Path, name: str, value: Any) -> tuple[
             continue
     else:
         raise EvidenceFailure("EVIDENCE_TEMP_COLLISION", "unable to allocate a unique evidence temp")
+    flush_error: BaseException | None = None
     try:
         view = memoryview(raw)
         while view:
@@ -718,12 +721,22 @@ def r4_publish_json_no_replace(directory: Path, name: str, value: Any) -> tuple[
             view = view[written:]
         os.fsync(descriptor)
     except BaseException as exc:
+        flush_error = exc
+    finally:
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            if flush_error is None:
+                flush_error = exc
+    if flush_error is not None:
+        try:
+            os.unlink(temp)
+        except OSError:
+            pass
         raise EvidenceFailure(
             "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION",
-            f"unable to flush {temp}: {exc}",
-        ) from exc
-    finally:
-        os.close(descriptor)
+            f"unable to flush {temp}: {flush_error}",
+        ) from flush_error
     _r4_windows_move_no_replace(temp, destination, "PUBLISH_EVIDENCE_NO_REPLACE")
     return raw, _r4_sha256_bytes(raw)
 
@@ -796,7 +809,7 @@ class R4ExecutionJournal:
     ) -> dict[str, Any]:
         sequence = self.sequence + 1
         event = {
-            "schema": EVIDENCE_EVENT_SCHEMA,
+            "schema": R4_EVIDENCE_EVENT_SCHEMA,
             "invocation_id": self.invocation_id,
             "sequence": sequence,
             "previous_event_sha256": self.event_head_sha256,
@@ -969,7 +982,7 @@ class R4ExecutionJournal:
         if self.terminal is not None:
             raise EvidenceFailure("TERMINAL_EXISTS", "terminal already published")
         terminal = {
-            "schema": EVIDENCE_TERMINAL_SCHEMA,
+            "schema": R4_EVIDENCE_TERMINAL_SCHEMA,
             "invocation_id": self.invocation_id,
             "status": status,
             "first_red": first_red,
@@ -1077,6 +1090,7 @@ def publish_json_no_replace(
         raise EvidenceFailure(
             "EVIDENCE_TEMP_COLLISION", "unable to allocate a unique evidence temp",
         )
+    flush_error: BaseException | None = None
     try:
         view = memoryview(raw)
         while view:
@@ -1086,11 +1100,21 @@ def publish_json_no_replace(
             view = view[written:]
         os.fsync(descriptor)
     except BaseException as exc:
-        raise EvidenceFailure(
-            "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION", f"unable to flush {temp}: {exc}",
-        ) from exc
+        flush_error = exc
     finally:
-        os.close(descriptor)
+        try:
+            os.close(descriptor)
+        except BaseException as exc:
+            if flush_error is None:
+                flush_error = exc
+    if flush_error is not None:
+        try:
+            os.unlink(temp)
+        except OSError:
+            pass
+        raise EvidenceFailure(
+            "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION", f"unable to flush {temp}: {flush_error}",
+        ) from flush_error
     _windows_move_no_replace(temp, destination, "PUBLISH_EVIDENCE_NO_REPLACE")
     return raw, sha256_bytes(raw)
 
@@ -2289,7 +2313,7 @@ def _build_release_output_evidence_r11(
                         call_ordinal=group_index + 1, authority=authority,
                     ) from exc
                 evaluation["artifact_json_decoded"] = True
-                artifact = artifact_value if isinstance(artifact_value, dict) else artifact_value
+                artifact = artifact_value
                 bindings = _r11_metadata_and_bindings(
                     repo_root, artifact, sha256_bytes(artifact_bytes), authority,
                     target, foundry_config_path, compiler_input, solc,
@@ -2571,7 +2595,7 @@ def _read_event_prefix(evidence_dir: Path) -> tuple[list[dict[str, Any]], list[d
             break
         try:
             event, raw, digest = _load_canonical_evidence(path)
-            if event.get("schema") != EVIDENCE_EVENT_SCHEMA:
+            if event.get("schema") != R4_EVIDENCE_EVENT_SCHEMA:
                 raise EvidenceFailure("EVENT_SCHEMA", f"invalid event schema in {filename}")
             if event.get("sequence") != sequence:
                 raise EvidenceFailure("EVENT_SEQUENCE", f"invalid event sequence in {filename}")
@@ -2639,9 +2663,12 @@ def _snapshot_output_files(output: Path) -> list[dict[str, Any]]:
     ]
 
 
-def validate_authoritative_output(output: Path, evidence_dir: Path) -> dict[str, Any]:
+def r4_validate_authoritative_output(output: Path, evidence_dir: Path) -> dict[str, Any]:
     terminal, _, _ = _load_canonical_evidence(evidence_dir / "terminal.json")
-    if terminal.get("schema") != EVIDENCE_TERMINAL_SCHEMA or terminal.get("status") != "GO":
+    if (
+        terminal.get("schema") != R4_EVIDENCE_TERMINAL_SCHEMA
+        or terminal.get("status") != "GO"
+    ):
         raise EvidenceFailure("TERMINAL_NOT_GO", "authoritative output requires terminal GO")
     events, anomalies = _read_event_prefix(evidence_dir)
     if anomalies or len(events) != R4_SUCCESS_EVENT_COUNT:
@@ -3548,7 +3575,7 @@ def _bytecode_operation(
     return result
 
 
-def validate_ordered_bytecode(
+def r4_validate_ordered_bytecode(
     artifact: dict[str, Any],
     target_authority: dict[str, Any],
     *,
@@ -4648,7 +4675,7 @@ def _prepare_evidence_run(
         },
         "source_aggregate": {
             "path": str(repo_root / "smart-contracts"),
-            "identity": windows_path_identity(repo_root / "smart-contracts", directory=True),
+            "identity": r4_windows_path_identity(repo_root / "smart-contracts", directory=True),
             "byte_count": sum(record["byte_count"] for record in source_records),
             "sha256": "sha256:" + R4_SOURCE_AGGREGATE_SHA256.lower(),
             "kind": "directory",
@@ -4877,7 +4904,7 @@ def _build_release_output_evidence(
             artifact = admitted_artifacts.get(authority["target"])
             if artifact is None:
                 raise EvidenceFailure("ARTIFACT_ADMISSION_MISSING", f"missing admitted artifact {authority['target']}")
-            measurement = validate_ordered_bytecode(artifact, authority)
+            measurement = r4_validate_ordered_bytecode(artifact, authority)
             measurements[authority["semantic_id"]] = measurement
             results["artifacts"].append(measurement)
             if gate_index in R4_AGGREGATE_GATES:
@@ -5005,7 +5032,7 @@ def build_release_output(
                 str(lexical_repo).rstrip("\\") + "\\" + str(value).replace("/", "\\")
             )
 
-        return _build_release_output_evidence(
+        return _build_release_output_evidence_r11(
             lexical_repo,
             lexical_repo_child(config_path),
             lexical_repo_child(foundry_config_path),
@@ -11206,8 +11233,9 @@ def validate_authoritative_output(output: Path, evidence_dir: Path) -> dict[str,
     return require_dict(load_json_bytes(manifest_raw, output / MANIFEST_FILENAME), "manifest")
 
 
-# Bind evidence mode only after the complete R11 closure exists.  The legacy
-# unpaired entrypoints above retain their original definitions and call sites.
+# Preserve the public compatibility aliases only after the complete R11 closure
+# exists. The active build path calls the R11 implementation directly; the R4
+# functions remain explicitly named for historical regression coverage.
 _prepare_evidence_run = _prepare_evidence_run_r11
 _build_release_output_evidence = _build_release_output_evidence_r11
 

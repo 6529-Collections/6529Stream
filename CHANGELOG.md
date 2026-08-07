@@ -11,10 +11,14 @@ the release policy in `docs/release-policy.md`.
   authoritative Windows runs now use run-scoped Forge and Solc leases, reject
   overlapping consumers and stale terminals, remain importable for the pinned
   Linux CI parity lane, and exercise the complete 121-test builder suite on
-  Windows. The fail-closed toolchain inventory now treats that Windows authority
-  job as the third isolated pinned CI toolchain group, and its scoped wiring
-  policy test is checksum-covered by both the generator and the independent
-  offline-verifier root-set pin. Refreshed the exact non-production
+  Windows. The native job pins the final setup-python Windows 3.12 build
+  (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed
+  inventory verifies those per-platform pins. Historical R4 journals now use
+  distinct event and terminal schemas, shadowed R4 validators have explicit
+  names, and failed evidence flushes remove temporary residue without masking
+  the primary diagnostic. The scoped Windows wiring policy test remains
+  checksum-covered by both the generator and the independent offline-verifier
+  root-set pin. Refreshed the exact non-production
   deployment-fixture receipt pin and deterministic release tail; no contract,
   live deployment, audit, or readiness status changed.
 - Closed the local Core headroom obligation under issue #654 by deriving

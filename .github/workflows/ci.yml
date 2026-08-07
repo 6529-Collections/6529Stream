@@ -26,10 +26,17 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Initialize Windows release-builder log
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force ci-logs | Out-Null
+          "Release-builder authority did not start." |
+            Set-Content -Encoding utf8 ci-logs\release-build-tests-windows.log
+
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
-          python-version: "3.12.13"
+          python-version: "3.12.10"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d

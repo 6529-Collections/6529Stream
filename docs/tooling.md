@@ -8,7 +8,8 @@
 | --- | --- |
 | Foundry | `v1.7.1` |
 | Solidity compiler | `0.8.19` |
-| Python (CI/release) | `3.12.13` |
+| Python (Linux CI/release) | `3.12.13` |
+| Python (native Windows CI) | `3.12.10` |
 | Slither | `0.11.5` |
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
@@ -23,8 +24,9 @@
 human-maintained list of direct tool intent. The generated
 [`requirements-tools.lock`](../requirements-tools.lock) is the complete checked
 CI/release dependency graph. Every direct and transitive package is pinned to
-one version and has one or more reviewed SHA-256 artifact hashes. Ordinary CI
-and manual release mode both select CPython `3.12.13` through the full-SHA
+one version and has one or more reviewed SHA-256 artifact hashes. Linux CI and
+manual release mode select CPython `3.12.13`; native Windows CI selects the
+final Windows-backed 3.12 runtime, CPython `3.12.10`. Both use the full-SHA
 pinned `actions/setup-python` action and install exactly the same lock with:
 
 ```bash
@@ -40,8 +42,10 @@ keeps unreviewed source builds out of the checked evidence paths.
 `scripts/bootstrap-ec2.sh` and `scripts/bootstrap-windows.ps1` remain
 contributor conveniences for heterogeneous local Python installations. They
 consume the readable direct requirements and do not upgrade pip, but they are
-not release-evidence install paths. A release or audit run must use the exact
-Linux runtime and hashed lock above.
+not release-evidence install paths. Manual Linux release mode and Linux audit
+runs must use the exact Linux runtime and hashed lock above. Native Windows CI
+uses CPython `3.12.10`, the final setup-python Windows build in the 3.12 line,
+with the same hashed lock and its pinned Windows toolchain setup.
 
 ### Refresh And Review
 

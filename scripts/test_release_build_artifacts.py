@@ -6369,6 +6369,16 @@ class R4AuthoritativeEvidenceHistory:
                 explicit_exit["operands"]["stderr_sha256"],
                 "sha256:" + hashlib.sha256(captured_stderr).hexdigest(),
             )
+            self.assertEqual(
+                explicit_exit["schema"], builder.R4_EVIDENCE_EVENT_SCHEMA,
+            )
+            self.assertNotEqual(
+                builder.R4_EVIDENCE_EVENT_SCHEMA, builder.EVIDENCE_EVENT_SCHEMA,
+            )
+            self.assertNotEqual(
+                builder.R4_EVIDENCE_TERMINAL_SCHEMA,
+                builder.EVIDENCE_TERMINAL_SCHEMA,
+            )
             second = builder.R4ExecutionJournal(
                 evidence,
                 journal.invocation_id,
@@ -6409,10 +6419,24 @@ class R4AuthoritativeEvidenceHistory:
                 previous = builder.sha256_bytes(raw)
             self.assertEqual(terminal["event_count"], 5)
             self.assertEqual(terminal["event_head_sha256"], previous)
+            self.assertEqual(
+                terminal["schema"], builder.R4_EVIDENCE_TERMINAL_SCHEMA,
+            )
             self.assertTrue(
                 {"sequence", "previous_event_sha256", "own_sha256", "forward_event_sha256"}
                 .isdisjoint(terminal)
             )
+            with self.assertRaises((TypeError, ValueError, builder.EvidenceFailure)):
+                builder._r11_validate_event(event)
+            with self.assertRaises((TypeError, ValueError, builder.EvidenceFailure)):
+                builder.r11_validate_builder_terminal(terminal)
+            first_path = evidence / builder._event_filename(0)
+            first = json.loads(first_path.read_bytes())
+            first["schema"] = builder.EVIDENCE_EVENT_SCHEMA
+            first_path.write_bytes(builder.r4_canonical_evidence_bytes(first))
+            events, anomalies = builder._read_event_prefix(evidence)
+            self.assertEqual(events, [])
+            self.assertEqual(anomalies[0]["status"], "invalid")
 
     @unittest.skipUnless(os.name == "nt", "R4 evidence mode is Windows-only")
     def test_10_success_has_exact_18_direct_calls_and_38_file_topology(self) -> None:
@@ -6519,6 +6543,7 @@ class R4AuthoritativeEvidenceHistory:
                     {"status": "NO_GO"},
                 )
             self.assertFalse(destination.exists())
+            self.assertEqual(list(evidence.iterdir()), [])
             destination.write_bytes(b"immutable\n")
             assert_r4_failure(
                 self,
@@ -6529,6 +6554,56 @@ class R4AuthoritativeEvidenceHistory:
                 {"status": "GO"},
             )
             self.assertEqual(destination.read_bytes(), b"immutable\n")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            evidence = Path(temp_dir)
+            with patch.object(builder.os, "fsync", side_effect=OSError("fixture")):
+                assert_r4_failure(
+                    self,
+                    "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION",
+                    builder.publish_json_no_replace,
+                    evidence,
+                    "event.json",
+                    {"sequence": 0},
+                )
+            self.assertEqual(list(evidence.iterdir()), [])
+
+        for publisher in (
+            builder.r4_publish_json_no_replace,
+            builder.publish_json_no_replace,
+        ):
+            with self.subTest(publisher=publisher.__name__):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    evidence = Path(temp_dir)
+                    with patch.object(
+                        builder.os, "write", side_effect=OSError("write fixture"),
+                    ):
+                        assert_r4_failure(
+                            self,
+                            "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION",
+                            publisher,
+                            evidence,
+                            "event.json",
+                            {"sequence": 0},
+                        )
+                    self.assertEqual(list(evidence.iterdir()), [])
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            evidence = Path(temp_dir)
+            with (
+                patch.object(builder.os, "fsync", side_effect=OSError("flush fixture")),
+                patch.object(builder.os, "unlink", side_effect=OSError("cleanup fixture")),
+            ):
+                failure = assert_r4_failure(
+                    self,
+                    "OP_EVIDENCE_TEMP_FLUSH_EXCEPTION",
+                    builder.publish_json_no_replace,
+                    evidence,
+                    "event.json",
+                    {"sequence": 0},
+                )
+            self.assertEqual(str(failure.__cause__), "flush fixture")
+            self.assertFalse((evidence / "event.json").exists())
 
         real_publish = builder.r4_publish_json_no_replace
         for failing_name, expected_calls in (
@@ -9884,6 +9959,18 @@ class R11AuthoritativeEvidenceTests(
         self.assertEqual(len(builder.R4_TARGET_AUTHORITIES), 19)
         self.assertIs(builder._build_release_output_evidence, builder._build_release_output_evidence_r11)
         self.assertIs(builder._prepare_evidence_run, builder._prepare_evidence_run_r11)
+        self.assertIsNot(
+            builder.r4_validate_ordered_bytecode,
+            builder.validate_ordered_bytecode,
+        )
+        self.assertIsNot(
+            builder.r4_validate_authoritative_output,
+            builder.validate_authoritative_output,
+        )
+        self.assertIn(
+            "return _build_release_output_evidence_r11(",
+            inspect.getsource(builder.build_release_output),
+        )
 
     def test_r11_02_cli_pairing_and_recovery_exclusion(self) -> None:
         paired = builder.parse_args(
@@ -13166,6 +13253,8 @@ class R11AuthoritativeEvidenceTests(
         self.assertNotIn("advapi32", builder_source.casefold())
 
     def test_r11_35_discovery_manifest_preserves_every_r4_case_once(self) -> None:
+        # These counts prove the complete suite partition; 37, 34, 50, and 121
+        # must move together when a test method is added or removed.
         legacy = {
             name for name, value in ReleaseBuildArtifactTests.__dict__.items()
             if name.startswith("test_") and callable(value)

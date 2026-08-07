@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
         with:
-          python-version: "{checker.PYTHON_VERSION}"
+          python-version: "{checker.WINDOWS_PYTHON_VERSION}"
       - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}
         with:
           version: {checker.FOUNDRY_VERSION}
@@ -185,6 +185,20 @@ class PythonToolchainTests(unittest.TestCase):
                 valid_multi_job_ci_workflow(),
             ),
             [],
+        )
+
+    def test_ci_rejects_linux_runtime_pin_in_windows_job(self) -> None:
+        """The native Windows job requires its final supported 3.12 binary."""
+
+        workflow = valid_multi_job_ci_workflow().replace(
+            f'          python-version: "{checker.WINDOWS_PYTHON_VERSION}"',
+            f'          python-version: "{checker.PYTHON_VERSION}"',
+            1,
+        )
+        errors = checker.check_workflow(checker.CI_WORKFLOW_PATH, workflow)
+        self.assertTrue(any("Python runtime pins" in error for error in errors))
+        self.assertTrue(
+            any("job 'windows-wrapper'" in error for error in errors)
         )
 
     def test_three_job_ci_rejects_one_unpinned_runtime(self) -> None:
