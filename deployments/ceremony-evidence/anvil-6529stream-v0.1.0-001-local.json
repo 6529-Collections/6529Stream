@@ -24,16 +24,16 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:bbabb0de9a40778d7f2abf7b20bd1c5678d336c504f0ee004ade6c826f42026b"
+      "sha256": "sha256:20da463b28b73f3b8484831a8b76157037529640b70cd4eb556cf6b8cc43c49a"
     },
     "deployment_manifest_canonical_sha256": "sha256:6434b17f3c6a6fec2be3f5ce7822288b5c68eebffc6079aa06033d994151f674",
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:d277d4dd48b008f56cbf69346e51d19065f4a93fb41267140bf2d6ff13b36f5c"
+      "sha256": "sha256:6ffbc6c1ce1e7b96563fc6638420d5dc69e0e9118019ec1250935660cabe6558"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:06620a8df52e17e34838e82626f1176e3584d6051987ad456d06cf56aa4d8e09"
+      "sha256": "sha256:00c3f9a693c5743fd4f035f651aa7445bd0815d3b1aeeb20c6cbddbaf93a884c"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -48,7 +48,7 @@
       "evidence": [
         {
           "path": "script/RehearseDeployment.s.sol",
-          "sha256": "sha256:8ada36c26e300a1497cc9ee422a4c34504ae08014dd7c4bdf9f9d505d7e43026"
+          "sha256": "sha256:640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1"
         }
       ],
       "notes": "Local Anvil rehearsal transfers StreamAdmins and StreamCore ownership to the Safe placeholder and removes the temporary deployer global admin."
@@ -58,7 +58,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:bbabb0de9a40778d7f2abf7b20bd1c5678d336c504f0ee004ade6c826f42026b"
+          "sha256": "sha256:20da463b28b73f3b8484831a8b76157037529640b70cd4eb556cf6b8cc43c49a"
         }
       ],
       "notes": "The local manifest records the drop signer placeholder and signer-manager Safe placeholder."
@@ -69,7 +69,7 @@
       "evidence": [
         {
           "path": "script/RehearseMetadataBrowser.s.sol",
-          "sha256": "sha256:7c8ff2ae5a1d1a61b04eb7862110980e8ab67bbe3ce94f371924c2592773ce83"
+          "sha256": "sha256:84079b960916213a42e478d06b3b25156acc128fdf65924564f7ac8420ae62bd"
         }
       ],
       "notes": "Local deployment-rehearsal metadata executes inside the committed Chromium sandbox check."
@@ -80,7 +80,7 @@
       "evidence": [
         {
           "path": "script/RehearseAuctionCeremony.s.sol",
-          "sha256": "sha256:27c1a3ccbbf7944754aee4a6a5d9614960772496a8c5544a16babe56a6ff5dca"
+          "sha256": "sha256:f9cb15d00f9188db5b8df3e4c52b780cd9bf206297ef6789e57a17caabc69f15"
         }
       ],
       "notes": "Local auction ceremony mints a signed auction drop, receives a bid, settles, withdraws proceeds, and ends with zero owed funds."
@@ -91,7 +91,7 @@
       "evidence": [
         {
           "path": "script/RehearseEmergencyRedeployment.s.sol",
-          "sha256": "sha256:b5a9a6f1df038d89a499ac769229aab82de5856b59bba37ed4cf77cfe163d7a2"
+          "sha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
         }
       ],
       "notes": "Local emergency redeployment rehearsal proves distinct old/replacement versions, manifests, drop domains, contract addresses, Safe-rooted ceremony state, deployer-admin removal, and replacement fixed-price mint smoke."
@@ -106,17 +106,17 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:bbabb0de9a40778d7f2abf7b20bd1c5678d336c504f0ee004ade6c826f42026b"
+      "sha256": "sha256:20da463b28b73f3b8484831a8b76157037529640b70cd4eb556cf6b8cc43c49a"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:d277d4dd48b008f56cbf69346e51d19065f4a93fb41267140bf2d6ff13b36f5c"
+      "sha256": "sha256:6ffbc6c1ce1e7b96563fc6638420d5dc69e0e9118019ec1250935660cabe6558"
     },
     {
       "category": "abi_checksums",
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:06620a8df52e17e34838e82626f1176e3584d6051987ad456d06cf56aa4d8e09"
+      "sha256": "sha256:00c3f9a693c5743fd4f035f651aa7445bd0815d3b1aeeb20c6cbddbaf93a884c"
     }
   ],
   "redaction_policy": {

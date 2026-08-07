@@ -15,7 +15,7 @@ unreleased drop payloads.
 ## Maturity And Scope
 
 The authoritative implementation is
-[`smart-contracts/StreamDrops.sol`](../smart-contracts/StreamDrops.sol). The
+[`smart-contracts/domains/mint/StreamDrops.sol`](../smart-contracts/domains/mint/StreamDrops.sol). The
 accepted protocol decision is
 [`docs/adr/0001-drop-authorization.md`](adr/0001-drop-authorization.md), and
 the target-state Solidity coverage lives in

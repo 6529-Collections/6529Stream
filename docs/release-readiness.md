@@ -409,13 +409,13 @@ The current local baseline includes:
   `deployments/record-family-authorization/`; production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
   Record-family semantic revalidation binds exactly twelve source inputs:
-  `smart-contracts/IStreamRecordFamilyAuthorityProvider.sol`,
-  `smart-contracts/IStreamRecordFamilyRegistry.sol`,
-  `smart-contracts/StreamRecordFamilyRegistry.sol`,
-  `smart-contracts/StreamCollectionMetadata.sol`,
-  `smart-contracts/IStreamCollectionMetadata.sol`,
-  `smart-contracts/StreamPreservationRecords.sol`,
-  `smart-contracts/IStreamPreservationRecords.sol`,
+  `smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol`,
+  `smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol`,
+  `smart-contracts/domains/records/StreamRecordFamilyRegistry.sol`,
+  `smart-contracts/domains/metadata/StreamCollectionMetadata.sol`,
+  `smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol`,
+  `smart-contracts/domains/preservation/StreamPreservationRecords.sol`,
+  `smart-contracts/interfaces/stream/IStreamPreservationRecords.sol`,
   `script/RehearseDeployment.s.sol`, plus the catalog-named suites
   `test/StreamRecordFamilyAuthorization.t.sol`,
   `test/StreamCollectionMetadata.t.sol`,

@@ -109,12 +109,12 @@ REQUIRED_LINK_TARGETS = [
     "docs/integrations/events-and-indexing.md",
     "docs/integrations/mobile-walletconnect.md",
     "docs/integrations/electron-security-wallets.md",
-    "smart-contracts/StreamDrops.sol",
-    "smart-contracts/AuctionContract.sol",
-    "smart-contracts/StreamCuratorsPool.sol",
-    "smart-contracts/StreamMinter.sol",
-    "smart-contracts/RandomizerRNG.sol",
-    "smart-contracts/StreamPauseDomains.sol",
+    "smart-contracts/domains/mint/StreamDrops.sol",
+    "smart-contracts/domains/auctions/AuctionContract.sol",
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
+    "smart-contracts/domains/mint/StreamMinter.sol",
+    "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+    "smart-contracts/domains/access/StreamPauseDomains.sol",
     "test/StreamFixedPricePayments.t.sol",
     "test/StreamAuctionPayments.t.sol",
     "test/StreamCuratorsPool.t.sol",
@@ -122,7 +122,7 @@ REQUIRED_LINK_TARGETS = [
 ]
 
 SOURCE_EXPECTATIONS = {
-    "smart-contracts/StreamDrops.sol": [
+    "smart-contracts/domains/mint/StreamDrops.sol": [
         "fixedPricePosterCredits",
         "fixedPriceProtocolCredits",
         "fixedPriceCuratorReserveCredits",
@@ -139,7 +139,7 @@ SOURCE_EXPECTATIONS = {
         "totalReserved",
         "emergencyWithdrawable",
     ],
-    "smart-contracts/AuctionContract.sol": [
+    "smart-contracts/domains/auctions/AuctionContract.sol": [
         "auctionBidderCredits",
         "auctionPosterCredits",
         "auctionProtocolCredits",
@@ -154,7 +154,7 @@ SOURCE_EXPECTATIONS = {
         "totalProceedsOwed",
         "emergencyWithdrawable",
     ],
-    "smart-contracts/StreamCuratorsPool.sol": [
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol": [
         "curatorCredits",
         "Reward",
         "withdrawCuratorCreditTo",
@@ -164,13 +164,13 @@ SOURCE_EXPECTATIONS = {
         "totalReserved",
         "emergencyWithdrawable",
     ],
-    "smart-contracts/StreamMinter.sol": [
+    "smart-contracts/domains/mint/StreamMinter.sol": [
         "totalOwed",
         "surplus",
         "emergencyWithdrawable",
         "EmergencyWithdrawal",
     ],
-    "smart-contracts/RandomizerRNG.sol": [
+    "smart-contracts/integrations/randomizers/RandomizerRNG.sol": [
         "totalOwed",
         "totalReserved",
         "emergencyWithdrawable",

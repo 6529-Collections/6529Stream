@@ -231,7 +231,7 @@ class AuctionFlowsTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_auction_flows_doc()
             text = original.replace(
-                "- [smart-contracts/AuctionContract.sol](../../smart-contracts/AuctionContract.sol)\n",
+                "- [smart-contracts/domains/auctions/AuctionContract.sol](../../smart-contracts/domains/auctions/AuctionContract.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -245,7 +245,7 @@ class AuctionFlowsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/AuctionContract.sol").unlink()
+            (root / "smart-contracts/domains/auctions/AuctionContract.sol").unlink()
             write_text(root / checker.DEFAULT_AUCTION_FLOWS, minimal_auction_flows_doc())
 
             with self.assertRaisesRegex(checker.AuctionFlowsError, "linked targets are missing"):

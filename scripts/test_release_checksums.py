@@ -154,7 +154,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 265)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 271)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -196,7 +196,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             with self.subTest(path=path, mutation="substitution"):
                 covered = [
                     (
-                        Path("smart-contracts/StreamCore.sol")
+                        Path("smart-contracts/core/StreamCore.sol")
                         if candidate == path
                         else candidate
                     )
@@ -3149,11 +3149,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 265)
-        self.assertEqual(len(manifest["files"]), 437)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 271)
+        self.assertEqual(len(manifest["files"]), 444)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            437,
+            444,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3471,7 +3471,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 437)
+        self.assertEqual(len(classifications), 444)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

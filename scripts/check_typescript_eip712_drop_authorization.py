@@ -110,7 +110,7 @@ REQUIRED_LINK_TARGETS = [
     "test/fixtures/drop-authorization/payload-generator/auction-output.json",
     "scripts/generate_drop_authorization_payload.py",
     "scripts/check_drop_authorization_fixtures.py",
-    "smart-contracts/StreamDrops.sol",
+    "smart-contracts/domains/mint/StreamDrops.sol",
     "test/StreamDropsEIP712.t.sol",
     "test/StreamDropsERC1271.t.sol",
     "test/StreamSafeERC1271ForkSmoke.t.sol",

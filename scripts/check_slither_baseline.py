@@ -79,10 +79,10 @@ EXPECTED_DETECTOR_COUNTS = {
     ("Medium", "unused-return"): 14,
 }
 VENDORED_PATHS = (
-    "smart-contracts/Base64.sol",
-    "smart-contracts/Math.sol",
-    "smart-contracts/SignedMath.sol",
-    "smart-contracts/Strings.sol",
+    "smart-contracts/vendor/openzeppelin/Base64.sol",
+    "smart-contracts/vendor/openzeppelin/Math.sol",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+    "smart-contracts/vendor/openzeppelin/Strings.sol",
 )
 SCOPE_ORDER = (
     "first_party_production",
@@ -620,7 +620,7 @@ def validate_baseline_data(repo_root: Path, data_value: Any) -> Dict[str, Any]:
         if triage_class == "confirmed_gap":
             if not (
                 detector == "uninitialized-state"
-                and source["path"] == "smart-contracts/StreamCore.sol"
+                and source["path"] == "smart-contracts/core/StreamCore.sol"
                 and source["name"] == "collectionBurnsBlockedAtBlockHeights"
                 and any(issue.endswith("/654") for issue in issues)
             ):

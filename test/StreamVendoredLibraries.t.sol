@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/Base64.sol";
-import "../smart-contracts/Math.sol";
+import "../smart-contracts/vendor/openzeppelin/Base64.sol";
+import "../smart-contracts/vendor/openzeppelin/Math.sol";
 import "./helpers/Assertions.sol";
 
 contract VendoredLibraryHarness {

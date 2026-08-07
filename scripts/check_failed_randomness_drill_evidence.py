@@ -179,7 +179,7 @@ REQUIRED_COMMANDS = [
 SOURCE_REQUIREMENTS = {
     # These checks are intentionally brittle substring guards. They make the
     # evidence checker fail loudly if the source/test anchors it documents move.
-    Path("smart-contracts/StreamRandomizerLifecycle.sol"): [
+    Path("smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol"): [
         "event RandomnessRequested",
         "event RandomnessFulfilled",
         "event RandomnessRequestMarkedStale",
@@ -191,12 +191,12 @@ SOURCE_REQUIREMENTS = {
         "function _prepareRandomnessPostProcessingRetry",
         "StaleRandomnessRequest",
     ],
-    Path("smart-contracts/RandomizerVRF.sol"): [
+    Path("smart-contracts/integrations/randomizers/RandomizerVRF.sol"): [
         "function fulfillRandomWords",
         "function markStaleRequest",
         "function retryRandomnessPostProcessing",
     ],
-    Path("smart-contracts/RandomizerRNG.sol"): [
+    Path("smart-contracts/integrations/randomizers/RandomizerRNG.sol"): [
         "function fulfillRandomWords",
         "function markStaleRequest",
         "function retryRandomnessPostProcessing",

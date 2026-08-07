@@ -183,7 +183,7 @@ def valid_fixture(fixture_id: str, sale_mode: int) -> dict[str, object]:
         "fixture_id": fixture_id,
         "description": f"{fixture_id} fixture",
         "source": {
-            "contract": "smart-contracts/StreamDrops.sol",
+            "contract": "smart-contracts/domains/mint/StreamDrops.sol",
             "adr": "docs/adr/0001-drop-authorization.md",
             "tests": ["test/StreamDropsEIP712.t.sol"],
         },
@@ -321,7 +321,7 @@ class DropAuthorizationFixtureTests(unittest.TestCase):
             seed_valid_fixture_tree(root)
             guide = root / checker.DEFAULT_GUIDE
             text = guide.read_text(encoding="utf-8").replace(
-                "- [smart-contracts/StreamDrops.sol](../smart-contracts/StreamDrops.sol)\n",
+                "- [smart-contracts/domains/mint/StreamDrops.sol](../smart-contracts/domains/mint/StreamDrops.sol)\n",
                 "",
             )
             write_text(guide, text)

@@ -1,28 +1,34 @@
 # Solidity Source Map
 
 The Foundry source root is [`smart-contracts/`](../smart-contracts), configured
-by [`foundry.toml`](../foundry.toml). The directory is currently flat, so this
-guide provides a stable conceptual map without making source paths part of a
-new hierarchy.
+by [`foundry.toml`](../foundry.toml). Its domain-first hierarchy separates
+first-party implementations from protocol interfaces, external integrations,
+vendored sources, shared libraries, and compatibility-only surfaces.
 
-This page is a navigation aid. The release contract catalog and generated
-surface artifacts, not this prose, are authoritative for the contracts and
-interfaces included in a release.
+The exact 120-file migration is recorded immutably in the reviewed
+[`source-layout.json`](../smart-contracts/source-layout.json) manifest. That
+manifest and `scripts/check_solidity_source_layout.py` are authoritative for
+source placement. The release contract catalog and generated surface artifacts,
+not this prose, remain authoritative for the contracts and interfaces included
+in a release.
 
-## File Families
+## Directory Boundaries
 
-| Family | Naming signal | Responsibility |
+| Directory | Responsibility |
 | --- | --- | --- |
-| Protocol implementations | Primarily `Stream*.sol` | First-party state, policy, registries, adapters, and protocol services |
-| Protocol interfaces | Primarily `IStream*.sol` | External and cross-contract boundaries implemented by Stream components |
-| Standards and provider interfaces | `IERC*.sol`, `IRandomizer.sol`, `IArrng*.sol`, and provider-specific names | ERC surfaces and external randomness/integration boundaries |
-| Randomizer adapters | `Randomizer*.sol` and `StreamRandomizerLifecycle.sol` | Provider request, callback, retry, migration, and lifecycle behavior |
-| Vendored libraries and bases | OpenZeppelin-style standards and utilities without the `Stream` prefix | Locally retained upstream code governed by [`vendored-libraries.md`](vendored-libraries.md) |
-| Historical lineage and compatibility | Legacy or NextGen-named surfaces identified by architecture and release policy | Compatibility or provenance surfaces; presence in the source tree does not make them release targets |
+| [`core/`](../smart-contracts/core) | Permanent Core implementation and its tightly coupled bounded-read libraries |
+| [`domains/`](../smart-contracts/domains) | First-party implementations grouped by access, auctions, dependencies, finality, governance, metadata, minting, modules, parameters, preservation, records, and revenue |
+| [`interfaces/stream/`](../smart-contracts/interfaces/stream) | Current protocol ABI boundaries implemented or consumed by Stream components |
+| [`interfaces/standards/`](../smart-contracts/interfaces/standards) | Minimal protocol-owned standard interfaces that are not vendored copies |
+| [`interfaces/compatibility/`](../smart-contracts/interfaces/compatibility) | ABI-only legacy and compatibility interfaces; contracts and libraries are forbidden here |
+| [`integrations/`](../smart-contracts/integrations) | Arrng, delegation, NextGen, and randomizer provider boundaries and adapters |
+| [`libraries/`](../smart-contracts/libraries) | Shared first-party utilities that are not owned by one domain |
+| [`vendor/`](../smart-contracts/vendor) | Locally retained OpenZeppelin and Chainlink sources, preserving provider provenance and formatting boundaries |
+| [`compatibility/`](../smart-contracts/compatibility) | Non-interface historical implementations or adapters; ABI-only interfaces are forbidden here |
 
-Naming is a search aid, not proof of release scope. Use the machine-readable
-catalogs below before treating any file as production, deployed, permanent, or
-supported.
+Directory placement is a review boundary, not proof of release scope. Use the
+machine-readable catalogs below before treating any file as production,
+deployed, permanent, or supported.
 
 ## Component Map
 
@@ -67,7 +73,7 @@ Useful read-only searches:
 
 ```bash
 rg -n "^(abstract )?(contract|interface|library) " smart-contracts
-rg -n "^import " smart-contracts/StreamCore.sol
+rg -n "^import " smart-contracts/core/StreamCore.sol
 rg -n "ContractOrFunctionName" smart-contracts test docs
 rg -n "smart-contracts/.+\\.sol" release-artifacts/contracts.json
 ```
@@ -77,23 +83,39 @@ report and the tests as well as the declaring source file. Cross-contract
 behavior often has focused tests, composition tests, invariant tests, and
 release-artifact checks.
 
-## Why Paths Should Not Move Casually
+## Migration And Drift Guard
 
-Moving files into new subdirectories would improve visual grouping but would
-also change imports, compiler source identifiers, source-verification inputs,
-release manifests, checksums, baselines, documentation links, and reviewer
-history. It may also make a behavior-neutral change look like a large protocol
-diff.
+Issue #716 moved the former flat source tree once as a dedicated,
+behavior-neutral migration. The move changed imports, compiler source
+identifiers, source-verification inputs, release manifests, checksums,
+baselines, documentation links, and reviewer paths without changing protocol
+logic.
 
 Therefore:
 
-- do not reorganize Solidity paths as opportunistic cleanup;
+- keep new Solidity sources inside the reviewed hierarchy; the checker permits
+  approved nested additions but the historical 120-row migration map itself
+  must not be edited;
+- do not reorganize paths again as opportunistic cleanup;
 - keep vendored files under the provenance and formatting policy in
   [`vendored-libraries.md`](vendored-libraries.md);
-- use a focused, approved migration if source-path organization becomes worth
-  the release-evidence churn; and
+- run `python scripts/test_solidity_source_layout.py`,
+  `python scripts/test_solidity_layout_equivalence.py`, and
+  `python scripts/check_solidity_source_layout.py` after path changes;
+- validate the retained 120-file semantic receipt with
+  `python scripts/check_solidity_layout_equivalence.py --check-source`; and
 - update generated artifacts from their generators rather than editing them by
   hand.
+
+The equivalence receipt at
+`release-artifacts/evidence/solidity-layout-equivalence.json` records both the
+exact normalized source/compiler-input match and the raw compiler-output delta.
+Solidity 0.8.19 via-IR changes internal function ordering and jump destinations
+when source identities move, so the receipt deliberately does not claim raw
+byte-for-byte initcode or runtime equality. It instead requires exact source
+semantics after import resolution plus exact ABI, method-identifier, event,
+error, and storage-layout surfaces, and reports every raw bytecode mismatch for
+review.
 
 ## Validation
 

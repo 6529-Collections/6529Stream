@@ -816,7 +816,7 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
                 [
                     {
                         "name": "StreamAdmins",
-                        "source": "smart-contracts/StreamAdmins.sol",
+                        "source": "smart-contracts/domains/access/StreamAdmins.sol",
                         "deployment_scope": "singleton",
                     }
                 ]

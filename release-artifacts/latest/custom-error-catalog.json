@@ -138,7 +138,7 @@
     {
       "id": "DependencyRegistry:DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
       "contract": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "name": "DependencyChunkIndexOutOfBounds",
       "signature": "DependencyChunkIndexOutOfBounds(bytes32,uint256,uint256)",
       "selector": "0xf385ff46",
@@ -178,7 +178,7 @@
     {
       "id": "DependencyRegistry:DependencyFieldInvalidUTF8(bytes32)",
       "contract": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "name": "DependencyFieldInvalidUTF8",
       "signature": "DependencyFieldInvalidUTF8(bytes32)",
       "selector": "0xf533e9d7",
@@ -206,7 +206,7 @@
     {
       "id": "DependencyRegistry:DependencyFieldTooLarge(bytes32,uint256,uint256)",
       "contract": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "name": "DependencyFieldTooLarge",
       "signature": "DependencyFieldTooLarge(bytes32,uint256,uint256)",
       "selector": "0x6f01a118",
@@ -246,7 +246,7 @@
     {
       "id": "DependencyRegistry:DependencyKeyReserved(bytes32)",
       "contract": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "name": "DependencyKeyReserved",
       "signature": "DependencyKeyReserved(bytes32)",
       "selector": "0x09fd460b",
@@ -274,7 +274,7 @@
     {
       "id": "DependencyRegistry:DependencyVersionMissing(bytes32,uint256)",
       "contract": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "name": "DependencyVersionMissing",
       "signature": "DependencyVersionMissing(bytes32,uint256)",
       "selector": "0x01b533a8",
@@ -308,7 +308,7 @@
     {
       "id": "NextGenRandomizerRNG:EmptyRandomWords(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "EmptyRandomWords",
       "signature": "EmptyRandomWords(uint256)",
       "selector": "0xc488549d",
@@ -336,7 +336,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomizerRequestReentrancy()",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomizerRequestReentrancy",
       "signature": "RandomizerRequestReentrancy()",
       "selector": "0x7a189929",
@@ -357,7 +357,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomnessPostProcessingRetryLimitReached",
       "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "selector": "0x5e315374",
@@ -397,7 +397,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestAlreadyExists(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomnessRequestAlreadyExists",
       "signature": "RandomnessRequestAlreadyExists(uint256)",
       "selector": "0xbc1cb82b",
@@ -425,7 +425,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomnessRequestNotFailedPostProcessing",
       "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "selector": "0x8b6fdc0a",
@@ -459,7 +459,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomnessRequestNotFulfilled",
       "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
       "selector": "0xfae276cd",
@@ -493,7 +493,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotPending(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "RandomnessRequestNotPending",
       "signature": "RandomnessRequestNotPending(uint256,uint8)",
       "selector": "0x685e6fed",
@@ -527,7 +527,7 @@
     {
       "id": "NextGenRandomizerRNG:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "StaleRandomnessRequest",
       "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "selector": "0x95d22d86",
@@ -579,7 +579,7 @@
     {
       "id": "NextGenRandomizerRNG:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "TokenRandomnessRequestAlreadyExists",
       "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "selector": "0xa68fbeff",
@@ -613,7 +613,7 @@
     {
       "id": "NextGenRandomizerRNG:UnknownRandomnessRequest(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "UnknownRandomnessRequest",
       "signature": "UnknownRandomnessRequest(uint256)",
       "selector": "0xab2112a6",
@@ -641,7 +641,7 @@
     {
       "id": "NextGenRandomizerRNG:WrongRandomnessProvider(uint256,address,address)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "WrongRandomnessProvider",
       "signature": "WrongRandomnessProvider(uint256,address,address)",
       "selector": "0xc1ae599b",
@@ -681,7 +681,7 @@
     {
       "id": "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "WrongRandomnessTokenCollection",
       "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "selector": "0xd6d556a3",
@@ -727,7 +727,7 @@
     {
       "id": "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "name": "ZeroDerivedSeed",
       "signature": "ZeroDerivedSeed(uint256)",
       "selector": "0x490dd684",
@@ -755,7 +755,7 @@
     {
       "id": "NextGenRandomizerVRF:EmptyRandomWords(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "EmptyRandomWords",
       "signature": "EmptyRandomWords(uint256)",
       "selector": "0xc488549d",
@@ -783,7 +783,7 @@
     {
       "id": "NextGenRandomizerVRF:OnlyCoordinatorCanFulfill(address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "OnlyCoordinatorCanFulfill",
       "signature": "OnlyCoordinatorCanFulfill(address,address)",
       "selector": "0x1cf993f4",
@@ -816,7 +816,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "RandomnessPostProcessingRetryLimitReached",
       "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "selector": "0x5e315374",
@@ -856,7 +856,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestAlreadyExists(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "RandomnessRequestAlreadyExists",
       "signature": "RandomnessRequestAlreadyExists(uint256)",
       "selector": "0xbc1cb82b",
@@ -884,7 +884,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "RandomnessRequestNotFailedPostProcessing",
       "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "selector": "0x8b6fdc0a",
@@ -918,7 +918,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotFulfilled(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "RandomnessRequestNotFulfilled",
       "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
       "selector": "0xfae276cd",
@@ -952,7 +952,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotPending(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "RandomnessRequestNotPending",
       "signature": "RandomnessRequestNotPending(uint256,uint8)",
       "selector": "0x685e6fed",
@@ -986,7 +986,7 @@
     {
       "id": "NextGenRandomizerVRF:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "StaleRandomnessRequest",
       "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "selector": "0x95d22d86",
@@ -1038,7 +1038,7 @@
     {
       "id": "NextGenRandomizerVRF:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "TokenRandomnessRequestAlreadyExists",
       "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "selector": "0xa68fbeff",
@@ -1072,7 +1072,7 @@
     {
       "id": "NextGenRandomizerVRF:UnknownRandomnessRequest(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "UnknownRandomnessRequest",
       "signature": "UnknownRandomnessRequest(uint256)",
       "selector": "0xab2112a6",
@@ -1100,7 +1100,7 @@
     {
       "id": "NextGenRandomizerVRF:WrongRandomnessProvider(uint256,address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "WrongRandomnessProvider",
       "signature": "WrongRandomnessProvider(uint256,address,address)",
       "selector": "0xc1ae599b",
@@ -1140,7 +1140,7 @@
     {
       "id": "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "WrongRandomnessTokenCollection",
       "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "selector": "0xd6d556a3",
@@ -1186,7 +1186,7 @@
     {
       "id": "NextGenRandomizerVRF:ZeroDerivedSeed(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "name": "ZeroDerivedSeed",
       "signature": "ZeroDerivedSeed(uint256)",
       "selector": "0x490dd684",
@@ -1214,7 +1214,7 @@
     {
       "id": "StreamAssetPolicyRegistry:AssetPolicyUnchanged(address,uint8,bytes32)",
       "contract": "StreamAssetPolicyRegistry",
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "name": "AssetPolicyUnchanged",
       "signature": "AssetPolicyUnchanged(address,uint8,bytes32)",
       "selector": "0xd1ccd55e",
@@ -1252,7 +1252,7 @@
     {
       "id": "StreamAssetPolicyRegistry:InvalidAsset(address)",
       "contract": "StreamAssetPolicyRegistry",
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "name": "InvalidAsset",
       "signature": "InvalidAsset(address)",
       "selector": "0x6f79c78a",
@@ -1278,7 +1278,7 @@
     {
       "id": "StreamAssetPolicyRegistry:InvalidAssetPolicyHash(address,uint8,bytes32)",
       "contract": "StreamAssetPolicyRegistry",
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "name": "InvalidAssetPolicyHash",
       "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)",
       "selector": "0x0548647a",
@@ -1316,7 +1316,7 @@
     {
       "id": "StreamAssetPolicyRegistry:InvalidAssetStatus(uint8)",
       "contract": "StreamAssetPolicyRegistry",
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "name": "InvalidAssetStatus",
       "signature": "InvalidAssetStatus(uint8)",
       "selector": "0x2fd5f330",
@@ -1342,7 +1342,7 @@
     {
       "id": "StreamAuctions:ReentrancyGuardReentrantCall()",
       "contract": "StreamAuctions",
-      "source": "smart-contracts/AuctionContract.sol",
+      "source": "smart-contracts/domains/auctions/AuctionContract.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -1362,7 +1362,7 @@
     {
       "id": "StreamCollectionMetadata:AuthorityProviderCallFailed(uint8,address)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "AuthorityProviderCallFailed",
       "signature": "AuthorityProviderCallFailed(uint8,address)",
       "selector": "0x41ffda09",
@@ -1395,7 +1395,7 @@
     {
       "id": "StreamCollectionMetadata:AuthorityProviderNoOp(uint8,address)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "AuthorityProviderNoOp",
       "signature": "AuthorityProviderNoOp(uint8,address)",
       "selector": "0x1155bc73",
@@ -1428,7 +1428,7 @@
     {
       "id": "StreamCollectionMetadata:CollectionDoesNotExist(uint256)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "CollectionDoesNotExist",
       "signature": "CollectionDoesNotExist(uint256)",
       "selector": "0x32f74e98",
@@ -1457,7 +1457,7 @@
     {
       "id": "StreamCollectionMetadata:CollectionMetadataFrozen(uint256)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "CollectionMetadataFrozen",
       "signature": "CollectionMetadataFrozen(uint256)",
       "selector": "0xc727a46d",
@@ -1486,7 +1486,7 @@
     {
       "id": "StreamCollectionMetadata:CollectionMetadataLocked(uint256,bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "CollectionMetadataLocked",
       "signature": "CollectionMetadataLocked(uint256,bytes32)",
       "selector": "0xe479c13f",
@@ -1521,7 +1521,7 @@
     {
       "id": "StreamCollectionMetadata:CollectionSnapshotAlreadyPublished(uint256,bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "CollectionSnapshotAlreadyPublished",
       "signature": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
       "selector": "0x6abe154a",
@@ -1556,7 +1556,7 @@
     {
       "id": "StreamCollectionMetadata:FunctionAdminUnauthorized(address,bytes4)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "FunctionAdminUnauthorized",
       "signature": "FunctionAdminUnauthorized(address,bytes4)",
       "selector": "0xc5e92023",
@@ -1590,7 +1590,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidAdminContract()",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidAdminContract",
       "signature": "InvalidAdminContract()",
       "selector": "0x313ee3c2",
@@ -1611,7 +1611,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidAuthorityProvider(uint8,address)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidAuthorityProvider",
       "signature": "InvalidAuthorityProvider(uint8,address)",
       "selector": "0x60ad02aa",
@@ -1644,7 +1644,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidAuthorizationClassMask",
       "signature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
       "selector": "0x4a3549de",
@@ -1683,7 +1683,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidCoreContract()",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidCoreContract",
       "signature": "InvalidCoreContract()",
       "selector": "0xf48e6f72",
@@ -1704,7 +1704,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidMetadataRecord(bytes32,bytes32,bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidMetadataRecord",
       "signature": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
       "selector": "0x95d3a198",
@@ -1745,7 +1745,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidRecordFamilyRegistry()",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidRecordFamilyRegistry",
       "signature": "InvalidRecordFamilyRegistry()",
       "selector": "0x1372e27c",
@@ -1765,7 +1765,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidRecordType(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidRecordType",
       "signature": "InvalidRecordType(bytes32)",
       "selector": "0x51909c48",
@@ -1793,7 +1793,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidSnapshotFamilySet(uint256,bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidSnapshotFamilySet",
       "signature": "InvalidSnapshotFamilySet(uint256,bytes32)",
       "selector": "0x379e2255",
@@ -1827,7 +1827,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidSnapshotId(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidSnapshotId",
       "signature": "InvalidSnapshotId(bytes32)",
       "selector": "0xe8bdc90d",
@@ -1856,7 +1856,7 @@
     {
       "id": "StreamCollectionMetadata:InvalidSnapshotRecordType(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "InvalidSnapshotRecordType",
       "signature": "InvalidSnapshotRecordType(bytes32)",
       "selector": "0x84800cbc",
@@ -1884,7 +1884,7 @@
     {
       "id": "StreamCollectionMetadata:MetadataMutationPaused()",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "MetadataMutationPaused",
       "signature": "MetadataMutationPaused()",
       "selector": "0x1c9aebc3",
@@ -1905,7 +1905,7 @@
     {
       "id": "StreamCollectionMetadata:MetadataRecordTypeLimitExceeded(uint256,uint256)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "MetadataRecordTypeLimitExceeded",
       "signature": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
       "selector": "0x23f3c54c",
@@ -1940,7 +1940,7 @@
     {
       "id": "StreamCollectionMetadata:MetadataRevisionMismatch(bytes32,uint64,uint64)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "MetadataRevisionMismatch",
       "signature": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
       "selector": "0xd8f1cf15",
@@ -1981,7 +1981,7 @@
     {
       "id": "StreamCollectionMetadata:MetadataURITooLarge(uint256,uint256)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "MetadataURITooLarge",
       "signature": "MetadataURITooLarge(uint256,uint256)",
       "selector": "0xbf37f79e",
@@ -2016,7 +2016,7 @@
     {
       "id": "StreamCollectionMetadata:RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordFamilyGrantNoOp",
       "signature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
       "selector": "0x291112fa",
@@ -2061,7 +2061,7 @@
     {
       "id": "StreamCollectionMetadata:RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordFamilyGrantNotAllowed",
       "signature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
       "selector": "0xa5701b56",
@@ -2100,7 +2100,7 @@
     {
       "id": "StreamCollectionMetadata:RecordFamilyRegistryOwnerRequired(address)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordFamilyRegistryOwnerRequired",
       "signature": "RecordFamilyRegistryOwnerRequired(address)",
       "selector": "0x144bf3a1",
@@ -2127,7 +2127,7 @@
     {
       "id": "StreamCollectionMetadata:RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordFamilyUnauthorized",
       "signature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
       "selector": "0x5862473e",
@@ -2172,7 +2172,7 @@
     {
       "id": "StreamCollectionMetadata:RecordTypeAlreadyAdmitted(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordTypeAlreadyAdmitted",
       "signature": "RecordTypeAlreadyAdmitted(bytes32)",
       "selector": "0x7de24345",
@@ -2199,7 +2199,7 @@
     {
       "id": "StreamCollectionMetadata:RecordTypeNotAdmitted(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "RecordTypeNotAdmitted",
       "signature": "RecordTypeNotAdmitted(bytes32)",
       "selector": "0x6742729e",
@@ -2227,7 +2227,7 @@
     {
       "id": "StreamCollectionMetadata:UnknownAuthorizationClass(uint8)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "UnknownAuthorizationClass",
       "signature": "UnknownAuthorizationClass(uint8)",
       "selector": "0xa2e6f7cd",
@@ -2254,7 +2254,7 @@
     {
       "id": "StreamCollectionMetadata:UnknownRecordFamily(bytes32)",
       "contract": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "name": "UnknownRecordFamily",
       "signature": "UnknownRecordFamily(bytes32)",
       "selector": "0x84dbb611",
@@ -2281,7 +2281,7 @@
     {
       "id": "StreamContractMetadata:EmptyContractURI()",
       "contract": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "name": "EmptyContractURI",
       "signature": "EmptyContractURI()",
       "selector": "0x9fcc7185",
@@ -2302,7 +2302,7 @@
     {
       "id": "StreamContractMetadata:FunctionAdminUnauthorized()",
       "contract": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "name": "FunctionAdminUnauthorized",
       "signature": "FunctionAdminUnauthorized()",
       "selector": "0x9a763740",
@@ -2322,7 +2322,7 @@
     {
       "id": "StreamContractMetadata:InvalidAdminContract()",
       "contract": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "name": "InvalidAdminContract",
       "signature": "InvalidAdminContract()",
       "selector": "0x313ee3c2",
@@ -2342,7 +2342,7 @@
     {
       "id": "StreamContractMetadata:InvalidCoreContract()",
       "contract": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "name": "InvalidCoreContract",
       "signature": "InvalidCoreContract()",
       "selector": "0xf48e6f72",
@@ -2363,7 +2363,7 @@
     {
       "id": "StreamContractMetadata:MetadataMutationPaused()",
       "contract": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "name": "MetadataMutationPaused",
       "signature": "MetadataMutationPaused()",
       "selector": "0x1c9aebc3",
@@ -2383,7 +2383,7 @@
     {
       "id": "StreamCore:CollectionBurnsAreBlocked(uint256)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "CollectionBurnsAreBlocked",
       "signature": "CollectionBurnsAreBlocked(uint256)",
       "selector": "0x8e95dae2",
@@ -2410,7 +2410,7 @@
     {
       "id": "StreamCore:CollectionIsFrozen(uint256)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "CollectionIsFrozen",
       "signature": "CollectionIsFrozen(uint256)",
       "selector": "0xd11c9275",
@@ -2438,7 +2438,7 @@
     {
       "id": "StreamCore:CollectionSupplyReached(uint256)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "CollectionSupplyReached",
       "signature": "CollectionSupplyReached(uint256)",
       "selector": "0x7a23851c",
@@ -2465,7 +2465,7 @@
     {
       "id": "StreamCore:CollectionUnknown(uint256)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "CollectionUnknown",
       "signature": "CollectionUnknown(uint256)",
       "selector": "0x298d9f19",
@@ -2493,7 +2493,7 @@
     {
       "id": "StreamCore:EntropyRegistrationFailed()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "EntropyRegistrationFailed",
       "signature": "EntropyRegistrationFailed()",
       "selector": "0xda2e5cde",
@@ -2514,7 +2514,7 @@
     {
       "id": "StreamCore:GasParameterTransitionInvalid(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "GasParameterTransitionInvalid",
       "signature": "GasParameterTransitionInvalid(bytes32)",
       "selector": "0x5707406f",
@@ -2541,7 +2541,7 @@
     {
       "id": "StreamCore:GasParameterUnknown(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "GasParameterUnknown",
       "signature": "GasParameterUnknown(bytes32)",
       "selector": "0xe01a85d2",
@@ -2568,7 +2568,7 @@
     {
       "id": "StreamCore:GovernanceActionAlreadyApplied(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "GovernanceActionAlreadyApplied",
       "signature": "GovernanceActionAlreadyApplied(bytes32)",
       "selector": "0x5be5bdcf",
@@ -2595,7 +2595,7 @@
     {
       "id": "StreamCore:GovernanceActionClassMismatch(uint8,uint8)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "GovernanceActionClassMismatch",
       "signature": "GovernanceActionClassMismatch(uint8,uint8)",
       "selector": "0x810e23cd",
@@ -2628,7 +2628,7 @@
     {
       "id": "StreamCore:GovernanceTransitionMismatch()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "GovernanceTransitionMismatch",
       "signature": "GovernanceTransitionMismatch()",
       "selector": "0x640550d5",
@@ -2648,7 +2648,7 @@
     {
       "id": "StreamCore:InvalidBlockHeight()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidBlockHeight",
       "signature": "InvalidBlockHeight()",
       "selector": "0x822380d8",
@@ -2668,7 +2668,7 @@
     {
       "id": "StreamCore:InvalidCollectionConfiguration()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidCollectionConfiguration",
       "signature": "InvalidCollectionConfiguration()",
       "selector": "0xa79258c6",
@@ -2688,7 +2688,7 @@
     {
       "id": "StreamCore:InvalidCollectionTransition()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidCollectionTransition",
       "signature": "InvalidCollectionTransition()",
       "selector": "0x974029dd",
@@ -2708,7 +2708,7 @@
     {
       "id": "StreamCore:InvalidCoreConfiguration()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidCoreConfiguration",
       "signature": "InvalidCoreConfiguration()",
       "selector": "0x17e0fe03",
@@ -2728,7 +2728,7 @@
     {
       "id": "StreamCore:InvalidGasParameterConfiguration(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidGasParameterConfiguration",
       "signature": "InvalidGasParameterConfiguration(bytes32)",
       "selector": "0x86bfec6b",
@@ -2755,7 +2755,7 @@
     {
       "id": "StreamCore:InvalidGenesisModuleRegistry(address)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidGenesisModuleRegistry",
       "signature": "InvalidGenesisModuleRegistry(address)",
       "selector": "0x00aaf4e7",
@@ -2782,7 +2782,7 @@
     {
       "id": "StreamCore:InvalidMetadataRefresh()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidMetadataRefresh",
       "signature": "InvalidMetadataRefresh()",
       "selector": "0x0792d60a",
@@ -2803,7 +2803,7 @@
     {
       "id": "StreamCore:InvalidMintRecipient()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidMintRecipient",
       "signature": "InvalidMintRecipient()",
       "selector": "0x02f14b44",
@@ -2823,7 +2823,7 @@
     {
       "id": "StreamCore:InvalidSatellitePointer(bytes32,address)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidSatellitePointer",
       "signature": "InvalidSatellitePointer(bytes32,address)",
       "selector": "0xf09b3f8d",
@@ -2856,7 +2856,7 @@
     {
       "id": "StreamCore:InvalidTokenData()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "InvalidTokenData",
       "signature": "InvalidTokenData()",
       "selector": "0xafb5d0c3",
@@ -2877,7 +2877,7 @@
     {
       "id": "StreamCore:MintExecutionInProgress()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "MintExecutionInProgress",
       "signature": "MintExecutionInProgress()",
       "selector": "0x27684b38",
@@ -2897,7 +2897,7 @@
     {
       "id": "StreamCore:NoExecutingGovernanceAction()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "NoExecutingGovernanceAction",
       "signature": "NoExecutingGovernanceAction()",
       "selector": "0xb8456c92",
@@ -2917,7 +2917,7 @@
     {
       "id": "StreamCore:NotMintManager(address)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "NotMintManager",
       "signature": "NotMintManager(address)",
       "selector": "0xee1b59ca",
@@ -2945,7 +2945,7 @@
     {
       "id": "StreamCore:PreparedMintAbortNotReplacement()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "PreparedMintAbortNotReplacement",
       "signature": "PreparedMintAbortNotReplacement()",
       "selector": "0xee0b7fc9",
@@ -2965,7 +2965,7 @@
     {
       "id": "StreamCore:PreparedMintAlreadyPending()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "PreparedMintAlreadyPending",
       "signature": "PreparedMintAlreadyPending()",
       "selector": "0xa8c1ba13",
@@ -2986,7 +2986,7 @@
     {
       "id": "StreamCore:PreparedMintMismatch()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "PreparedMintMismatch",
       "signature": "PreparedMintMismatch()",
       "selector": "0x8660201d",
@@ -3007,7 +3007,7 @@
     {
       "id": "StreamCore:PreparedMintNotFound()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "PreparedMintNotFound",
       "signature": "PreparedMintNotFound()",
       "selector": "0x89beec16",
@@ -3028,7 +3028,7 @@
     {
       "id": "StreamCore:RevisionOverflow()",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "RevisionOverflow",
       "signature": "RevisionOverflow()",
       "selector": "0x59afdf7b",
@@ -3048,7 +3048,7 @@
     {
       "id": "StreamCore:SatellitePointerFrozen(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "SatellitePointerFrozen",
       "signature": "SatellitePointerFrozen(bytes32)",
       "selector": "0xaf49532c",
@@ -3075,7 +3075,7 @@
     {
       "id": "StreamCore:SatellitePointerInterfaceUnresolved(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "SatellitePointerInterfaceUnresolved",
       "signature": "SatellitePointerInterfaceUnresolved(bytes32)",
       "selector": "0x0929a4b9",
@@ -3102,7 +3102,7 @@
     {
       "id": "StreamCore:SatellitePointerNoOp(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "SatellitePointerNoOp",
       "signature": "SatellitePointerNoOp(bytes32)",
       "selector": "0x739a6047",
@@ -3129,7 +3129,7 @@
     {
       "id": "StreamCore:UnauthorizedGovernanceExecutor(address)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "UnauthorizedGovernanceExecutor",
       "signature": "UnauthorizedGovernanceExecutor(address)",
       "selector": "0xdd2aa8bd",
@@ -3156,7 +3156,7 @@
     {
       "id": "StreamCore:UnauthorizedMetadataEmitter(address)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "UnauthorizedMetadataEmitter",
       "signature": "UnauthorizedMetadataEmitter(address)",
       "selector": "0xe335d3cd",
@@ -3183,7 +3183,7 @@
     {
       "id": "StreamCore:UnknownSatellitePointer(bytes32)",
       "contract": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "name": "UnknownSatellitePointer",
       "signature": "UnknownSatellitePointer(bytes32)",
       "selector": "0x804f8a64",
@@ -3210,7 +3210,7 @@
     {
       "id": "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
       "contract": "StreamCuratorsPool",
-      "source": "smart-contracts/StreamCuratorsPool.sol",
+      "source": "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -3230,7 +3230,7 @@
     {
       "id": "StreamDrops:ReentrancyGuardReentrantCall()",
       "contract": "StreamDrops",
-      "source": "smart-contracts/StreamDrops.sol",
+      "source": "smart-contracts/domains/mint/StreamDrops.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -3250,7 +3250,7 @@
     {
       "id": "StreamMintLedger:AuthorizationAlreadyConsumed(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "AuthorizationAlreadyConsumed",
       "signature": "AuthorizationAlreadyConsumed(bytes32)",
       "selector": "0x1fa74eff",
@@ -3276,7 +3276,7 @@
     {
       "id": "StreamMintLedger:CounterCapExceeded(bytes32,uint256,uint256)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterCapExceeded",
       "signature": "CounterCapExceeded(bytes32,uint256,uint256)",
       "selector": "0xb9351ed6",
@@ -3314,7 +3314,7 @@
     {
       "id": "StreamMintLedger:CounterPolicyLengthMismatch(uint256,uint256)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterPolicyLengthMismatch",
       "signature": "CounterPolicyLengthMismatch(uint256,uint256)",
       "selector": "0x73515794",
@@ -3346,7 +3346,7 @@
     {
       "id": "StreamMintLedger:CounterPolicyMismatch(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterPolicyMismatch",
       "signature": "CounterPolicyMismatch(bytes32)",
       "selector": "0xfc27079f",
@@ -3372,7 +3372,7 @@
     {
       "id": "StreamMintLedger:CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterPolicyNotRegistered",
       "signature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
       "selector": "0x39974ca3",
@@ -3416,7 +3416,7 @@
     {
       "id": "StreamMintLedger:CounterValueKeyMismatch(bytes32,bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterValueKeyMismatch",
       "signature": "CounterValueKeyMismatch(bytes32,bytes32)",
       "selector": "0x28b04095",
@@ -3448,7 +3448,7 @@
     {
       "id": "StreamMintLedger:CounterValueOverflow(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "CounterValueOverflow",
       "signature": "CounterValueOverflow(bytes32)",
       "selector": "0x3cc24c87",
@@ -3474,7 +3474,7 @@
     {
       "id": "StreamMintLedger:DuplicateCounterPolicy(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "DuplicateCounterPolicy",
       "signature": "DuplicateCounterPolicy(bytes32)",
       "selector": "0xcf64ab23",
@@ -3500,7 +3500,7 @@
     {
       "id": "StreamMintLedger:InvalidCounterPolicy(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "InvalidCounterPolicy",
       "signature": "InvalidCounterPolicy(bytes32)",
       "selector": "0x728f72d5",
@@ -3526,7 +3526,7 @@
     {
       "id": "StreamMintLedger:InvalidLedgerWriter(address)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "InvalidLedgerWriter",
       "signature": "InvalidLedgerWriter(address)",
       "selector": "0x4de4b4bf",
@@ -3552,7 +3552,7 @@
     {
       "id": "StreamMintLedger:InvalidPhasePolicy(address,uint256,bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "InvalidPhasePolicy",
       "signature": "InvalidPhasePolicy(address,uint256,bytes32)",
       "selector": "0xfc104ec9",
@@ -3590,7 +3590,7 @@
     {
       "id": "StreamMintLedger:InvalidPolicyGrace(uint64)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "InvalidPolicyGrace",
       "signature": "InvalidPolicyGrace(uint64)",
       "selector": "0x91bb4b51",
@@ -3616,7 +3616,7 @@
     {
       "id": "StreamMintLedger:NullifierAlreadyConsumed(bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "NullifierAlreadyConsumed",
       "signature": "NullifierAlreadyConsumed(bytes32)",
       "selector": "0x350e9ad3",
@@ -3642,7 +3642,7 @@
     {
       "id": "StreamMintLedger:OperationRootAlreadyConsumed(address,bytes32)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "OperationRootAlreadyConsumed",
       "signature": "OperationRootAlreadyConsumed(address,bytes32)",
       "selector": "0xaf7509a9",
@@ -3674,7 +3674,7 @@
     {
       "id": "StreamMintLedger:OperationRootRequired()",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "OperationRootRequired",
       "signature": "OperationRootRequired()",
       "selector": "0xe713d8d4",
@@ -3693,7 +3693,7 @@
     {
       "id": "StreamMintLedger:UnauthorizedLedgerWriter(address)",
       "contract": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "name": "UnauthorizedLedgerWriter",
       "signature": "UnauthorizedLedgerWriter(address)",
       "selector": "0xe44bbd7a",
@@ -3719,7 +3719,7 @@
     {
       "id": "StreamMintManager:DuplicateMintCounter(bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "DuplicateMintCounter",
       "signature": "DuplicateMintCounter(bytes32)",
       "selector": "0x1cc5fd11",
@@ -3746,7 +3746,7 @@
     {
       "id": "StreamMintManager:InvalidCoreContract(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidCoreContract",
       "signature": "InvalidCoreContract(address)",
       "selector": "0xd666e879",
@@ -3774,7 +3774,7 @@
     {
       "id": "StreamMintManager:InvalidMintBatchLimit(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintBatchLimit",
       "signature": "InvalidMintBatchLimit(uint256,uint256)",
       "selector": "0x4d54173b",
@@ -3807,7 +3807,7 @@
     {
       "id": "StreamMintManager:InvalidMintCounter(bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintCounter",
       "signature": "InvalidMintCounter(bytes32)",
       "selector": "0x0c26d1d4",
@@ -3834,7 +3834,7 @@
     {
       "id": "StreamMintManager:InvalidMintExecutor(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintExecutor",
       "signature": "InvalidMintExecutor(address)",
       "selector": "0xd73c1507",
@@ -3861,7 +3861,7 @@
     {
       "id": "StreamMintManager:InvalidMintGate(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintGate",
       "signature": "InvalidMintGate(address)",
       "selector": "0x0b2748a2",
@@ -3888,7 +3888,7 @@
     {
       "id": "StreamMintManager:InvalidMintLedgerContract(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintLedgerContract",
       "signature": "InvalidMintLedgerContract(address)",
       "selector": "0xcddcda49",
@@ -3916,7 +3916,7 @@
     {
       "id": "StreamMintManager:InvalidMintModuleRegistry(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintModuleRegistry",
       "signature": "InvalidMintModuleRegistry(address)",
       "selector": "0xdd79f9ed",
@@ -3943,7 +3943,7 @@
     {
       "id": "StreamMintManager:InvalidMintPhase(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintPhase",
       "signature": "InvalidMintPhase(uint256,bytes32)",
       "selector": "0x8618418d",
@@ -3976,7 +3976,7 @@
     {
       "id": "StreamMintManager:InvalidMintRecipient(uint256,address,address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "InvalidMintRecipient",
       "signature": "InvalidMintRecipient(uint256,address,address)",
       "selector": "0xc7f7068c",
@@ -4015,7 +4015,7 @@
     {
       "id": "StreamMintManager:MintArrayLengthMismatch()",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintArrayLengthMismatch",
       "signature": "MintArrayLengthMismatch()",
       "selector": "0x3757dfe5",
@@ -4035,7 +4035,7 @@
     {
       "id": "StreamMintManager:MintAuthorizationRequired(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintAuthorizationRequired",
       "signature": "MintAuthorizationRequired(uint256,bytes32)",
       "selector": "0x8bad6e46",
@@ -4068,7 +4068,7 @@
     {
       "id": "StreamMintManager:MintBatchQuantityLimitExceeded(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintBatchQuantityLimitExceeded",
       "signature": "MintBatchQuantityLimitExceeded(uint256,uint256)",
       "selector": "0x11662916",
@@ -4101,7 +4101,7 @@
     {
       "id": "StreamMintManager:MintCounterCapExceeded(bytes32,uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintCounterCapExceeded",
       "signature": "MintCounterCapExceeded(bytes32,uint256,uint256)",
       "selector": "0x77f94e67",
@@ -4140,7 +4140,7 @@
     {
       "id": "StreamMintManager:MintCounterCountLimitExceeded(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintCounterCountLimitExceeded",
       "signature": "MintCounterCountLimitExceeded(uint256,uint256)",
       "selector": "0x554ab6ea",
@@ -4173,7 +4173,7 @@
     {
       "id": "StreamMintManager:MintCounterSubjectMissing(bytes32,uint8)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintCounterSubjectMissing",
       "signature": "MintCounterSubjectMissing(bytes32,uint8)",
       "selector": "0xb57f553b",
@@ -4206,7 +4206,7 @@
     {
       "id": "StreamMintManager:MintExecutorCountLimitExceeded(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintExecutorCountLimitExceeded",
       "signature": "MintExecutorCountLimitExceeded(uint256,uint256)",
       "selector": "0x444c5839",
@@ -4239,7 +4239,7 @@
     {
       "id": "StreamMintManager:MintGateAuthorizationMismatch(bytes32,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateAuthorizationMismatch",
       "signature": "MintGateAuthorizationMismatch(bytes32,bytes32)",
       "selector": "0xd050b946",
@@ -4272,7 +4272,7 @@
     {
       "id": "StreamMintManager:MintGateAuthorizerMismatch(address,address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateAuthorizerMismatch",
       "signature": "MintGateAuthorizerMismatch(address,address)",
       "selector": "0xc91ccdfe",
@@ -4305,7 +4305,7 @@
     {
       "id": "StreamMintManager:MintGateCodehashChanged(address,bytes32,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateCodehashChanged",
       "signature": "MintGateCodehashChanged(address,bytes32,bytes32)",
       "selector": "0xab17a6ce",
@@ -4344,7 +4344,7 @@
     {
       "id": "StreamMintManager:MintGateHashRequired(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateHashRequired",
       "signature": "MintGateHashRequired(address)",
       "selector": "0xccc57313",
@@ -4371,7 +4371,7 @@
     {
       "id": "StreamMintManager:MintGateNotActive(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateNotActive",
       "signature": "MintGateNotActive(address)",
       "selector": "0x14ca2493",
@@ -4398,7 +4398,7 @@
     {
       "id": "StreamMintManager:MintGateNullifierCountExceeded(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateNullifierCountExceeded",
       "signature": "MintGateNullifierCountExceeded(uint256,uint256)",
       "selector": "0x2ca5a6ef",
@@ -4431,7 +4431,7 @@
     {
       "id": "StreamMintManager:MintGateNullifiersUnsupported(bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateNullifiersUnsupported",
       "signature": "MintGateNullifiersUnsupported(bytes32)",
       "selector": "0xf4ad211d",
@@ -4458,7 +4458,7 @@
     {
       "id": "StreamMintManager:MintGateQuantityExceeded(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateQuantityExceeded",
       "signature": "MintGateQuantityExceeded(uint256,uint256)",
       "selector": "0x38e521b0",
@@ -4491,7 +4491,7 @@
     {
       "id": "StreamMintManager:MintGateValidationFailed(address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintGateValidationFailed",
       "signature": "MintGateValidationFailed(address)",
       "selector": "0x74ca49e0",
@@ -4518,7 +4518,7 @@
     {
       "id": "StreamMintManager:MintInvalidAuthorizerKind(uint8,address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintInvalidAuthorizerKind",
       "signature": "MintInvalidAuthorizerKind(uint8,address)",
       "selector": "0xbfc07066",
@@ -4551,7 +4551,7 @@
     {
       "id": "StreamMintManager:MintOperationIdDuplicate(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintOperationIdDuplicate",
       "signature": "MintOperationIdDuplicate(uint256,uint256)",
       "selector": "0x3bde9aea",
@@ -4584,7 +4584,7 @@
     {
       "id": "StreamMintManager:MintOperationIdRequired(uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintOperationIdRequired",
       "signature": "MintOperationIdRequired(uint256)",
       "selector": "0x320b658f",
@@ -4611,7 +4611,7 @@
     {
       "id": "StreamMintManager:MintOperationNonceOverflow(uint256,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintOperationNonceOverflow",
       "signature": "MintOperationNonceOverflow(uint256,uint256)",
       "selector": "0xee0b56bc",
@@ -4644,7 +4644,7 @@
     {
       "id": "StreamMintManager:MintOperationRootRequired()",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintOperationRootRequired",
       "signature": "MintOperationRootRequired()",
       "selector": "0x963f2548",
@@ -4664,7 +4664,7 @@
     {
       "id": "StreamMintManager:MintPhaseAlreadyConfigured(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPhaseAlreadyConfigured",
       "signature": "MintPhaseAlreadyConfigured(uint256,bytes32)",
       "selector": "0x2e5f06bd",
@@ -4697,7 +4697,7 @@
     {
       "id": "StreamMintManager:MintPhaseDoesNotExist(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPhaseDoesNotExist",
       "signature": "MintPhaseDoesNotExist(uint256,bytes32)",
       "selector": "0x696c1e95",
@@ -4730,7 +4730,7 @@
     {
       "id": "StreamMintManager:MintPhaseEnded(uint256,bytes32,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPhaseEnded",
       "signature": "MintPhaseEnded(uint256,bytes32,uint256)",
       "selector": "0xac5a2a7d",
@@ -4769,7 +4769,7 @@
     {
       "id": "StreamMintManager:MintPhaseNotStarted(uint256,bytes32,uint256)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPhaseNotStarted",
       "signature": "MintPhaseNotStarted(uint256,bytes32,uint256)",
       "selector": "0xc8f7bde0",
@@ -4808,7 +4808,7 @@
     {
       "id": "StreamMintManager:MintPhasePaused(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPhasePaused",
       "signature": "MintPhasePaused(uint256,bytes32)",
       "selector": "0x84e3035d",
@@ -4841,7 +4841,7 @@
     {
       "id": "StreamMintManager:MintPolicyHashMismatch(bytes32,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPolicyHashMismatch",
       "signature": "MintPolicyHashMismatch(bytes32,bytes32)",
       "selector": "0x4fdd1265",
@@ -4874,7 +4874,7 @@
     {
       "id": "StreamMintManager:MintPolicyHashRequired(uint256,bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "MintPolicyHashRequired",
       "signature": "MintPolicyHashRequired(uint256,bytes32)",
       "selector": "0x26d18337",
@@ -4907,7 +4907,7 @@
     {
       "id": "StreamMintManager:ReentrancyGuardReentrantCall()",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -4927,7 +4927,7 @@
     {
       "id": "StreamMintManager:UnauthorizedMintExecutor(uint256,bytes32,address)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "UnauthorizedMintExecutor",
       "signature": "UnauthorizedMintExecutor(uint256,bytes32,address)",
       "selector": "0x50f3ebfd",
@@ -4966,7 +4966,7 @@
     {
       "id": "StreamMintManager:UnsupportedMintCounterMode(bytes32)",
       "contract": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "name": "UnsupportedMintCounterMode",
       "signature": "UnsupportedMintCounterMode(bytes32)",
       "selector": "0x176274ae",
@@ -4993,7 +4993,7 @@
     {
       "id": "StreamMintModuleRegistry:InvalidMintModule(address)",
       "contract": "StreamMintModuleRegistry",
-      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "name": "InvalidMintModule",
       "signature": "InvalidMintModule(address)",
       "selector": "0xcc59458b",
@@ -5020,7 +5020,7 @@
     {
       "id": "StreamMintModuleRegistry:InvalidMintModuleInfo(address)",
       "contract": "StreamMintModuleRegistry",
-      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "name": "InvalidMintModuleInfo",
       "signature": "InvalidMintModuleInfo(address)",
       "selector": "0x713411c0",
@@ -5047,7 +5047,7 @@
     {
       "id": "StreamMintModuleRegistry:MintModuleCodehashMismatch(address,bytes32,bytes32)",
       "contract": "StreamMintModuleRegistry",
-      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "name": "MintModuleCodehashMismatch",
       "signature": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
       "selector": "0xcc46738f",
@@ -5086,7 +5086,7 @@
     {
       "id": "StreamMintModuleRegistry:MintModuleInterfaceUnsupported(address,bytes4)",
       "contract": "StreamMintModuleRegistry",
-      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "name": "MintModuleInterfaceUnsupported",
       "signature": "MintModuleInterfaceUnsupported(address,bytes4)",
       "selector": "0xee60a789",
@@ -5119,7 +5119,7 @@
     {
       "id": "StreamPreservationRecords:CollectionDoesNotExist(uint256)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "CollectionDoesNotExist",
       "signature": "CollectionDoesNotExist(uint256)",
       "selector": "0x32f74e98",
@@ -5148,7 +5148,7 @@
     {
       "id": "StreamPreservationRecords:CollectionRecordAlreadyExists(bytes32)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "CollectionRecordAlreadyExists",
       "signature": "CollectionRecordAlreadyExists(bytes32)",
       "selector": "0x37610c08",
@@ -5177,7 +5177,7 @@
     {
       "id": "StreamPreservationRecords:FunctionAdminUnauthorized(address,bytes4)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "FunctionAdminUnauthorized",
       "signature": "FunctionAdminUnauthorized(address,bytes4)",
       "selector": "0xc5e92023",
@@ -5211,7 +5211,7 @@
     {
       "id": "StreamPreservationRecords:InvalidAdminContract()",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "InvalidAdminContract",
       "signature": "InvalidAdminContract()",
       "selector": "0x313ee3c2",
@@ -5232,7 +5232,7 @@
     {
       "id": "StreamPreservationRecords:InvalidCollectionRecord(bytes32,bytes32,bytes32)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "InvalidCollectionRecord",
       "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
       "selector": "0xa9359e59",
@@ -5273,7 +5273,7 @@
     {
       "id": "StreamPreservationRecords:InvalidCoreContract()",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "InvalidCoreContract",
       "signature": "InvalidCoreContract()",
       "selector": "0xf48e6f72",
@@ -5294,7 +5294,7 @@
     {
       "id": "StreamPreservationRecords:InvalidHashRef(uint16,uint256)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "InvalidHashRef",
       "signature": "InvalidHashRef(uint16,uint256)",
       "selector": "0x60a92160",
@@ -5329,7 +5329,7 @@
     {
       "id": "StreamPreservationRecords:InvalidRecordFamilyRegistry()",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "InvalidRecordFamilyRegistry",
       "signature": "InvalidRecordFamilyRegistry()",
       "selector": "0x1372e27c",
@@ -5349,7 +5349,7 @@
     {
       "id": "StreamPreservationRecords:MetadataMutationPaused()",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "MetadataMutationPaused",
       "signature": "MetadataMutationPaused()",
       "selector": "0x1c9aebc3",
@@ -5370,7 +5370,7 @@
     {
       "id": "StreamPreservationRecords:PreservationURITooLarge(uint256,uint256)",
       "contract": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "name": "PreservationURITooLarge",
       "signature": "PreservationURITooLarge(uint256,uint256)",
       "selector": "0x502ad1b0",
@@ -5405,7 +5405,7 @@
     {
       "id": "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "AssetNotActive",
       "signature": "AssetNotActive(address,uint8)",
       "selector": "0xa142d392",
@@ -5437,7 +5437,7 @@
     {
       "id": "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "AssetPolicyReadFailed",
       "signature": "AssetPolicyReadFailed(address,address)",
       "selector": "0x9a787919",
@@ -5469,7 +5469,7 @@
     {
       "id": "StreamPrimarySaleSettlement:ERC20BalanceReadFailed(address,address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "ERC20BalanceReadFailed",
       "signature": "ERC20BalanceReadFailed(address,address)",
       "selector": "0x409f04fb",
@@ -5501,7 +5501,7 @@
     {
       "id": "StreamPrimarySaleSettlement:ERC20TransferFailed(address,address,address,uint256)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "ERC20TransferFailed",
       "signature": "ERC20TransferFailed(address,address,address,uint256)",
       "selector": "0x94e6808a",
@@ -5545,7 +5545,7 @@
     {
       "id": "StreamPrimarySaleSettlement:ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "ERC20TransferInvariantBroken",
       "signature": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
       "selector": "0x9a7bc4bc",
@@ -5607,7 +5607,7 @@
     {
       "id": "StreamPrimarySaleSettlement:IncorrectNativeValue(uint256,uint256)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "IncorrectNativeValue",
       "signature": "IncorrectNativeValue(uint256,uint256)",
       "selector": "0x1da106e1",
@@ -5639,7 +5639,7 @@
     {
       "id": "StreamPrimarySaleSettlement:InvalidPolicyMode(uint8)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "InvalidPolicyMode",
       "signature": "InvalidPolicyMode(uint8)",
       "selector": "0xdd42018a",
@@ -5665,7 +5665,7 @@
     {
       "id": "StreamPrimarySaleSettlement:InvalidPrimarySale(bytes32)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "InvalidPrimarySale",
       "signature": "InvalidPrimarySale(bytes32)",
       "selector": "0x29e17005",
@@ -5691,7 +5691,7 @@
     {
       "id": "StreamPrimarySaleSettlement:InvalidSettlementCaller(address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "InvalidSettlementCaller",
       "signature": "InvalidSettlementCaller(address)",
       "selector": "0xcb671fef",
@@ -5717,7 +5717,7 @@
     {
       "id": "StreamPrimarySaleSettlement:NativeTransferFailed(address,uint256)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "NativeTransferFailed",
       "signature": "NativeTransferFailed(address,uint256)",
       "selector": "0xa5b05eec",
@@ -5749,7 +5749,7 @@
     {
       "id": "StreamPrimarySaleSettlement:PrimaryAssignmentMissing(bytes32,uint256,uint256)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "PrimaryAssignmentMissing",
       "signature": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
       "selector": "0x7a302634",
@@ -5787,7 +5787,7 @@
     {
       "id": "StreamPrimarySaleSettlement:PrimaryPolicyHashMismatch(bytes32,bytes32)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "PrimaryPolicyHashMismatch",
       "signature": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
       "selector": "0xc4179bcf",
@@ -5819,7 +5819,7 @@
     {
       "id": "StreamPrimarySaleSettlement:ReentrancyGuardReentrantCall()",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -5838,7 +5838,7 @@
     {
       "id": "StreamPrimarySaleSettlement:SettlementAlreadyConsumed(bytes32)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "SettlementAlreadyConsumed",
       "signature": "SettlementAlreadyConsumed(bytes32)",
       "selector": "0xf6cbcb00",
@@ -5864,7 +5864,7 @@
     {
       "id": "StreamPrimarySaleSettlement:UnauthorizedSettlementCaller(address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "UnauthorizedSettlementCaller",
       "signature": "UnauthorizedSettlementCaller(address)",
       "selector": "0x84f10348",
@@ -5891,7 +5891,7 @@
     {
       "id": "StreamPrimarySaleSettlement:UnsupportedAsset(address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "UnsupportedAsset",
       "signature": "UnsupportedAsset(address)",
       "selector": "0xee84f40b",
@@ -5917,7 +5917,7 @@
     {
       "id": "StreamPrimarySaleSettlement:UnverifiedSplitWallet(bytes32,address)",
       "contract": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "name": "UnverifiedSplitWallet",
       "signature": "UnverifiedSplitWallet(bytes32,address)",
       "selector": "0x0d8bd514",
@@ -5949,7 +5949,7 @@
     {
       "id": "StreamRevenueResolver:InvalidAssignmentScope(uint8,uint256)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidAssignmentScope",
       "signature": "InvalidAssignmentScope(uint8,uint256)",
       "selector": "0x31b6efe6",
@@ -5981,7 +5981,7 @@
     {
       "id": "StreamRevenueResolver:InvalidAssignmentType(uint8)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidAssignmentType",
       "signature": "InvalidAssignmentType(uint8)",
       "selector": "0x64619be4",
@@ -6007,7 +6007,7 @@
     {
       "id": "StreamRevenueResolver:InvalidMaterializedAccount(bytes32)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidMaterializedAccount",
       "signature": "InvalidMaterializedAccount(bytes32)",
       "selector": "0x6a717330",
@@ -6033,7 +6033,7 @@
     {
       "id": "StreamRevenueResolver:InvalidPrimaryPolicyHash()",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidPrimaryPolicyHash",
       "signature": "InvalidPrimaryPolicyHash()",
       "selector": "0x963c043a",
@@ -6052,7 +6052,7 @@
     {
       "id": "StreamRevenueResolver:InvalidPrimaryTemplateEntry(uint256)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidPrimaryTemplateEntry",
       "signature": "InvalidPrimaryTemplateEntry(uint256)",
       "selector": "0x8c3f5079",
@@ -6078,7 +6078,7 @@
     {
       "id": "StreamRevenueResolver:InvalidPrimaryTemplateTotal(uint256)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidPrimaryTemplateTotal",
       "signature": "InvalidPrimaryTemplateTotal(uint256)",
       "selector": "0x3be6f55d",
@@ -6104,7 +6104,7 @@
     {
       "id": "StreamRevenueResolver:InvalidRevenueClass(bytes32)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidRevenueClass",
       "signature": "InvalidRevenueClass(bytes32)",
       "selector": "0xbda654e9",
@@ -6130,7 +6130,7 @@
     {
       "id": "StreamRevenueResolver:InvalidSplitFactory(address)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "InvalidSplitFactory",
       "signature": "InvalidSplitFactory(address)",
       "selector": "0x8ff489f6",
@@ -6157,7 +6157,7 @@
     {
       "id": "StreamRevenueResolver:PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "PrimaryAssignmentFrozen",
       "signature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
       "selector": "0x10c06f4c",
@@ -6195,7 +6195,7 @@
     {
       "id": "StreamRevenueResolver:PrimaryAssignmentMissing(bytes32,uint8,uint256)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "PrimaryAssignmentMissing",
       "signature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
       "selector": "0x36f9576d",
@@ -6233,7 +6233,7 @@
     {
       "id": "StreamRevenueResolver:UnknownPrimaryTemplate(bytes32)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "UnknownPrimaryTemplate",
       "signature": "UnknownPrimaryTemplate(bytes32)",
       "selector": "0xf2ff63c1",
@@ -6259,7 +6259,7 @@
     {
       "id": "StreamRevenueResolver:UnsupportedAccountSource(bytes32)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "UnsupportedAccountSource",
       "signature": "UnsupportedAccountSource(bytes32)",
       "selector": "0xa46a80f9",
@@ -6285,7 +6285,7 @@
     {
       "id": "StreamRevenueResolver:UnverifiedSplitProfile(bytes32)",
       "contract": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "name": "UnverifiedSplitProfile",
       "signature": "UnverifiedSplitProfile(bytes32)",
       "selector": "0x193fd9f7",
@@ -6311,7 +6311,7 @@
     {
       "id": "StreamSplitFactory:DuplicateSplitEntry(address,bytes32)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "DuplicateSplitEntry",
       "signature": "DuplicateSplitEntry(address,bytes32)",
       "selector": "0x5c8b9654",
@@ -6343,7 +6343,7 @@
     {
       "id": "StreamSplitFactory:InvalidAssetPolicyRegistry(address)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "InvalidAssetPolicyRegistry",
       "signature": "InvalidAssetPolicyRegistry(address)",
       "selector": "0x0f54b539",
@@ -6369,7 +6369,7 @@
     {
       "id": "StreamSplitFactory:InvalidEntryCount(uint256)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "InvalidEntryCount",
       "signature": "InvalidEntryCount(uint256)",
       "selector": "0x22658d16",
@@ -6395,7 +6395,7 @@
     {
       "id": "StreamSplitFactory:InvalidSplitAccount(uint256)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "InvalidSplitAccount",
       "signature": "InvalidSplitAccount(uint256)",
       "selector": "0x6d4b65f3",
@@ -6421,7 +6421,7 @@
     {
       "id": "StreamSplitFactory:InvalidSplitShare(uint256)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "InvalidSplitShare",
       "signature": "InvalidSplitShare(uint256)",
       "selector": "0x8f954ada",
@@ -6447,7 +6447,7 @@
     {
       "id": "StreamSplitFactory:InvalidSplitTotal(uint256)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "InvalidSplitTotal",
       "signature": "InvalidSplitTotal(uint256)",
       "selector": "0x01527a8a",
@@ -6473,7 +6473,7 @@
     {
       "id": "StreamSplitFactory:SplitWalletAddressPoisoned(bytes32,address)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "SplitWalletAddressPoisoned",
       "signature": "SplitWalletAddressPoisoned(bytes32,address)",
       "selector": "0xdba25228",
@@ -6505,7 +6505,7 @@
     {
       "id": "StreamSplitFactory:UnknownProfile(bytes32)",
       "contract": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "name": "UnknownProfile",
       "signature": "UnknownProfile(bytes32)",
       "selector": "0x0ef313a6",
@@ -6531,7 +6531,7 @@
     {
       "id": "StreamSplitWallet:AlreadyInitialized()",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "AlreadyInitialized",
       "signature": "AlreadyInitialized()",
       "selector": "0x0dc149f0",
@@ -6550,7 +6550,7 @@
     {
       "id": "StreamSplitWallet:AssetNotActive(address,uint8)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "AssetNotActive",
       "signature": "AssetNotActive(address,uint8)",
       "selector": "0xa142d392",
@@ -6582,7 +6582,7 @@
     {
       "id": "StreamSplitWallet:AssetPolicyReadFailed(address,address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "AssetPolicyReadFailed",
       "signature": "AssetPolicyReadFailed(address,address)",
       "selector": "0x9a787919",
@@ -6614,7 +6614,7 @@
     {
       "id": "StreamSplitWallet:ERC20BalanceReadFailed(address,address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ERC20BalanceReadFailed",
       "signature": "ERC20BalanceReadFailed(address,address)",
       "selector": "0x409f04fb",
@@ -6646,7 +6646,7 @@
     {
       "id": "StreamSplitWallet:ERC20TransferFailed(address,address,uint256)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ERC20TransferFailed",
       "signature": "ERC20TransferFailed(address,address,uint256)",
       "selector": "0x07a1d487",
@@ -6684,7 +6684,7 @@
     {
       "id": "StreamSplitWallet:ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ERC20TransferInvariantBroken",
       "signature": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
       "selector": "0xb73991f1",
@@ -6740,7 +6740,7 @@
     {
       "id": "StreamSplitWallet:InvalidInitializationInput()",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "InvalidInitializationInput",
       "signature": "InvalidInitializationInput()",
       "selector": "0xa52f77b6",
@@ -6759,7 +6759,7 @@
     {
       "id": "StreamSplitWallet:NativeReceiptInvariantBroken(uint256,uint256)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "NativeReceiptInvariantBroken",
       "signature": "NativeReceiptInvariantBroken(uint256,uint256)",
       "selector": "0x4b360bc7",
@@ -6791,7 +6791,7 @@
     {
       "id": "StreamSplitWallet:NativeTransferFailed(address,uint256)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "NativeTransferFailed",
       "signature": "NativeTransferFailed(address,uint256)",
       "selector": "0xa5b05eec",
@@ -6823,7 +6823,7 @@
     {
       "id": "StreamSplitWallet:NoReleasableFunds(address,address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "NoReleasableFunds",
       "signature": "NoReleasableFunds(address,address)",
       "selector": "0x434d6937",
@@ -6855,7 +6855,7 @@
     {
       "id": "StreamSplitWallet:ObservedReceiptsDecreased(address,uint256,uint256)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ObservedReceiptsDecreased",
       "signature": "ObservedReceiptsDecreased(address,uint256,uint256)",
       "selector": "0x769b1382",
@@ -6893,7 +6893,7 @@
     {
       "id": "StreamSplitWallet:ReentrancyGuardReentrantCall()",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -6912,7 +6912,7 @@
     {
       "id": "StreamSplitWallet:UnauthorizedInitializer(address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "UnauthorizedInitializer",
       "signature": "UnauthorizedInitializer(address)",
       "selector": "0x5e898b91",
@@ -6939,7 +6939,7 @@
     {
       "id": "StreamSplitWallet:UnauthorizedReleaseRecipient(address,address,address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "UnauthorizedReleaseRecipient",
       "signature": "UnauthorizedReleaseRecipient(address,address,address)",
       "selector": "0x702eac7b",
@@ -6978,7 +6978,7 @@
     {
       "id": "StreamSplitWallet:UnsupportedAsset(address)",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "UnsupportedAsset",
       "signature": "UnsupportedAsset(address)",
       "selector": "0xee84f40b",
@@ -7004,7 +7004,7 @@
     {
       "id": "StreamSplitWallet:ZeroRecipient()",
       "contract": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "name": "ZeroRecipient",
       "signature": "ZeroRecipient()",
       "selector": "0xd27b4443",

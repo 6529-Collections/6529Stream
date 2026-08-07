@@ -12,7 +12,7 @@ Accepted.
 | Issue | [P0-AUTH-ADR](https://github.com/6529-Collections/6529Stream/issues/17) |
 | Blocks | `P0-AUTH-001`, `P0-AUTH-002`, `P0-AUTH-003` |
 | Related issues | [P0-AUTH-001](https://github.com/6529-Collections/6529Stream/issues/18), [P0-AUTH-002](https://github.com/6529-Collections/6529Stream/issues/10), [P0-AUTH-003](https://github.com/6529-Collections/6529Stream/issues/19) |
-| Affected contract | `smart-contracts/StreamDrops.sol` |
+| Affected contract | `smart-contracts/domains/mint/StreamDrops.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -56,20 +56,20 @@ closed.
 
 Historical source references from the pre-EIP-712 baseline:
 
-- `smart-contracts/StreamDrops.sol#L58-L61`: `authorized` requires
+- `smart-contracts/domains/mint/StreamDrops.sol#L58-L61`: `authorized` requires
   `msg.sender == tdhSigner`.
-- `smart-contracts/StreamDrops.sol#L81-L146`: `mintDrop` accepts an explicit
+- `smart-contracts/domains/mint/StreamDrops.sol#L81-L146`: `mintDrop` accepts an explicit
   recipient, computes a packed drop ID, marks it executed, pushes fixed-price
   ETH, mints, and stores execution state.
-- `smart-contracts/StreamDrops.sol#L92-L104`: drop ID is derived from
+- `smart-contracts/domains/mint/StreamDrops.sol#L92-L104`: drop ID is derived from
   `abi.encodePacked` string fragments including the explicit recipient.
-- `smart-contracts/StreamDrops.sol#L105-L106`: replay prevention is keyed only by
+- `smart-contracts/domains/mint/StreamDrops.sol#L105-L106`: replay prevention is keyed only by
   `dropExecuted[dropId]`.
-- `smart-contracts/StreamDrops.sol#L113-L144`: fixed-price recipient and stored
+- `smart-contracts/domains/mint/StreamDrops.sol#L113-L144`: fixed-price recipient and stored
   execution address use the explicit `_recipient`; auction `_recipient` must be
   `address(0)`, while the stored execution address uses the poster for the
   current no-bid settlement fallback.
-- `smart-contracts/StreamDrops.sol#L235-L257`:
+- `smart-contracts/domains/mint/StreamDrops.sol#L235-L257`:
   `retrieveMessageAndDropID` exposes the same packed string hashing model.
 - `ops/SLITHER_BASELINE.md`: high-impact `encode-packed-collision` findings are
   tracked for both `mintDrop` and `retrieveMessageAndDropID`.

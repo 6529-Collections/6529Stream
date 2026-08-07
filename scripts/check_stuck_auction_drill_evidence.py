@@ -181,7 +181,7 @@ SOURCE_REQUIREMENTS = {
     # These are intentionally brittle substring guards. If core auction,
     # pause, or payment recovery semantics move, the retained-evidence gate
     # should fail until this schema is reviewed with the new source anchors.
-    Path("smart-contracts/AuctionContract.sol"): [
+    Path("smart-contracts/domains/auctions/AuctionContract.sol"): [
         "event AuctionCancelled",
         "event NoBidSettlementPending",
         "event BidderCreditWithdrawn",
@@ -193,7 +193,7 @@ SOURCE_REQUIREMENTS = {
         "function totalOwed",
         "function emergencyWithdrawable",
     ],
-    Path("smart-contracts/StreamPauseDomains.sol"): [
+    Path("smart-contracts/domains/access/StreamPauseDomains.sol"): [
         "AUCTION_BID",
         "AUCTION_SETTLEMENT",
         "6529stream.pause.AuctionBid",

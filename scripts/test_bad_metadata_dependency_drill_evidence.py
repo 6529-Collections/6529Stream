@@ -453,7 +453,7 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
 
     def test_source_requirements_pin_permanent_core_satellite_layout(self) -> None:
         self.assertEqual(
-            checker.SOURCE_REQUIREMENTS[Path("smart-contracts/StreamCore.sol")],
+            checker.SOURCE_REQUIREMENTS[Path("smart-contracts/core/StreamCore.sol")],
             [
                 "error CollectionIsFrozen",
                 "emit MetadataUpdate",
@@ -467,7 +467,7 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
         )
         self.assertEqual(
             checker.SOURCE_REQUIREMENTS[
-                Path("smart-contracts/IStreamCollectionMetadata.sol")
+                Path("smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol")
             ],
             [
                 "error MetadataMutationPaused",
@@ -481,7 +481,7 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
             ],
         )
         self.assertIn(
-            Path("smart-contracts/StreamCollectionMetadata.sol"),
+            Path("smart-contracts/domains/metadata/StreamCollectionMetadata.sol"),
             checker.SOURCE_REQUIREMENTS,
         )
         self.assertIn(
@@ -502,7 +502,7 @@ class BadMetadataDependencyDrillEvidenceTests(unittest.TestCase):
         ):
             self.assertNotIn(
                 obsolete_anchor,
-                checker.SOURCE_REQUIREMENTS[Path("smart-contracts/StreamCore.sol")],
+                checker.SOURCE_REQUIREMENTS[Path("smart-contracts/core/StreamCore.sol")],
             )
 
     def test_missing_source_anchor_fails(self) -> None:

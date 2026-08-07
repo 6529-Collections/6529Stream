@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamRecordFamilyAuthorityProvider.sol";
-import "../smart-contracts/IStreamRecordFamilyRegistry.sol";
-import "../smart-contracts/StreamCollectionMetadata.sol";
+import "../smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol";
+import "../smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol";
+import "../smart-contracts/domains/metadata/StreamCollectionMetadata.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

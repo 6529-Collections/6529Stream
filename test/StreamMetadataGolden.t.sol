@@ -2,10 +2,10 @@
 pragma solidity ^0.8.19;
 
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IRandomizerLifecycle.sol";
-import "../smart-contracts/IStreamLegacyCore.sol";
-import "../smart-contracts/Strings.sol";
+import "../smart-contracts/interfaces/stream/IRandomizer.sol";
+import "../smart-contracts/interfaces/stream/IRandomizerLifecycle.sol";
+import "../smart-contracts/interfaces/compatibility/IStreamLegacyCore.sol";
+import "../smart-contracts/vendor/openzeppelin/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

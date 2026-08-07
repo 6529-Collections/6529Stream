@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamGasParameterHost.sol";
-import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/IStreamRoleRegistry.sol";
-import "../smart-contracts/IStreamTimeParameterHost.sol";
-import "../smart-contracts/StreamGasParameterStore.sol";
-import "../smart-contracts/StreamGovernanceBootstrap.sol";
-import "../smart-contracts/StreamGovernanceExecutor.sol";
-import "../smart-contracts/StreamRoleRegistry.sol";
-import "../smart-contracts/StreamRoles.sol";
-import "../smart-contracts/StreamTimeParameterStore.sol";
+import "../smart-contracts/interfaces/stream/IStreamGasParameterHost.sol";
+import "../smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../smart-contracts/interfaces/stream/IStreamRoleRegistry.sol";
+import "../smart-contracts/interfaces/stream/IStreamTimeParameterHost.sol";
+import "../smart-contracts/domains/parameters/StreamGasParameterStore.sol";
+import "../smart-contracts/domains/governance/StreamGovernanceBootstrap.sol";
+import "../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
+import "../smart-contracts/domains/governance/StreamRoleRegistry.sol";
+import "../smart-contracts/domains/governance/StreamRoles.sol";
+import "../smart-contracts/domains/parameters/StreamTimeParameterStore.sol";
 import "./helpers/StreamGovernanceBootstrapHarness.sol";
 import "./helpers/StreamGovernanceV2HolderRehearsalMocks.sol";
 

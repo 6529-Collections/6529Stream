@@ -10,10 +10,10 @@ here.
 
 | Local file | Upstream source | Upstream SHA-256 | Local SHA-256 | Local delta |
 | --- | --- | --- | --- | --- |
-| `smart-contracts/Base64.sol` | [OpenZeppelin Contracts v4.7.0 `contracts/utils/Base64.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.7.0/contracts/utils/Base64.sol) | `9FBD7A4462F54BBB6B0BD03231738E5F081A092E9A8FD789FB4D1AECA3758AEC` | `3735F85C6E229E85144FBB306CD46F83BCD6965DF4705A97D06AA22F2AB8261E` | Local pragma is `^0.8.19` instead of upstream `^0.8.0`; encoding logic is unchanged. |
-| `smart-contracts/Math.sol` | [OpenZeppelin Contracts v4.8.0 `contracts/utils/math/Math.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.8.0/contracts/utils/math/Math.sol) | `8059D642EC219D0B9B62FBC76912079529CF494CAC988ABE5E371F1168B29B0F` | `D684AE61F88D564DE2D0515BC6356D0972C3CF9421F185A862D30662B7E1AD21` | Local copy keeps equivalent arithmetic with formatting deltas, an added denominator-zero comment, an overflow revert string, and `1 << (result << 3)` instead of upstream `1 << (result * 8)`. The arithmetic result is unchanged; overflow revert data differs. |
-| `smart-contracts/SignedMath.sol` | [OpenZeppelin Contracts v4.8.0 `contracts/utils/math/SignedMath.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.8.0/contracts/utils/math/SignedMath.sol) | `420A5A5D8D94611A04B39D6CF5F02492552ED4257EA82ABA3C765B1AD52F77F6` | `AEECC7E5AD0F981B63B486E2F296BB12439CA6C500FA1E62C7471AD7F72CA429` | Content matches upstream except local file ending. |
-| `smart-contracts/Strings.sol` | [OpenZeppelin Contracts v4.9.0 `contracts/utils/Strings.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.9.0/contracts/utils/Strings.sol) | `CB2DF477077A5963AB50A52768CB74EC6F32177177A78611DDBBE2C07E2D36DE` | `FD2B96FEACEA647D67A888537B75C4673C4193F444FAAE892634E5FC11C922D2` | Local imports point at sibling files in `smart-contracts/`; code behavior is otherwise unchanged. |
+| `smart-contracts/vendor/openzeppelin/Base64.sol` | [OpenZeppelin Contracts v4.7.0 `contracts/utils/Base64.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.7.0/contracts/utils/Base64.sol) | `9FBD7A4462F54BBB6B0BD03231738E5F081A092E9A8FD789FB4D1AECA3758AEC` | `3735F85C6E229E85144FBB306CD46F83BCD6965DF4705A97D06AA22F2AB8261E` | Local pragma is `^0.8.19` instead of upstream `^0.8.0`; encoding logic is unchanged. |
+| `smart-contracts/vendor/openzeppelin/Math.sol` | [OpenZeppelin Contracts v4.8.0 `contracts/utils/math/Math.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.8.0/contracts/utils/math/Math.sol) | `8059D642EC219D0B9B62FBC76912079529CF494CAC988ABE5E371F1168B29B0F` | `D684AE61F88D564DE2D0515BC6356D0972C3CF9421F185A862D30662B7E1AD21` | Local copy keeps equivalent arithmetic with formatting deltas, an added denominator-zero comment, an overflow revert string, and `1 << (result << 3)` instead of upstream `1 << (result * 8)`. The arithmetic result is unchanged; overflow revert data differs. |
+| `smart-contracts/vendor/openzeppelin/SignedMath.sol` | [OpenZeppelin Contracts v4.8.0 `contracts/utils/math/SignedMath.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.8.0/contracts/utils/math/SignedMath.sol) | `420A5A5D8D94611A04B39D6CF5F02492552ED4257EA82ABA3C765B1AD52F77F6` | `AEECC7E5AD0F981B63B486E2F296BB12439CA6C500FA1E62C7471AD7F72CA429` | Content matches upstream except local file ending. |
+| `smart-contracts/vendor/openzeppelin/Strings.sol` | [OpenZeppelin Contracts v4.9.0 `contracts/utils/Strings.sol`](https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/v4.9.0/contracts/utils/Strings.sol) | `CB2DF477077A5963AB50A52768CB74EC6F32177177A78611DDBBE2C07E2D36DE` | `FD2B96FEACEA647D67A888537B75C4673C4193F444FAAE892634E5FC11C922D2` | Local imports point at sibling files in `smart-contracts/`; code behavior is otherwise unchanged. |
 
 ## Slither Disposition
 
@@ -39,10 +39,10 @@ rounding-up behavior, overflow, and zero-denominator reverts.
 Use these commands when updating a vendored file:
 
 ```powershell
-Get-FileHash smart-contracts\Base64.sol -Algorithm SHA256
-Get-FileHash smart-contracts\Math.sol -Algorithm SHA256
-Get-FileHash smart-contracts\SignedMath.sol -Algorithm SHA256
-Get-FileHash smart-contracts\Strings.sol -Algorithm SHA256
+Get-FileHash smart-contracts\vendor\openzeppelin\Base64.sol -Algorithm SHA256
+Get-FileHash smart-contracts\vendor\openzeppelin\Math.sol -Algorithm SHA256
+Get-FileHash smart-contracts\vendor\openzeppelin\SignedMath.sol -Algorithm SHA256
+Get-FileHash smart-contracts\vendor\openzeppelin\Strings.sol -Algorithm SHA256
 forge test --match-path test\StreamVendoredLibraries.t.sol -vvv
 ```
 
@@ -66,22 +66,22 @@ gate.
 
 | Exempt file | Source family recorded in file header | Policy rationale |
 | --- | --- | --- |
-| `smart-contracts/Address.sol` | OpenZeppelin Contracts v4.8.0 `utils/Address.sol` | Retain upstream-style layout while provenance remains source-header based. |
-| `smart-contracts/Base64.sol` | OpenZeppelin Contracts v4.7.0 `utils/Base64.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
-| `smart-contracts/Context.sol` | OpenZeppelin Contracts v4.4.1 `utils/Context.sol` | Retain upstream-style layout while inherited utility provenance stays visible. |
-| `smart-contracts/ERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/ERC165.sol` | Retain upstream-style layout for the local ERC165 base. |
-| `smart-contracts/ERC2981.sol` | OpenZeppelin Contracts v5.0.0 `token/common/ERC2981.sol` | Retain upstream-style layout for royalty-standard behavior review. |
-| `smart-contracts/ERC721.sol` | OpenZeppelin Contracts v4.8.2 `token/ERC721/ERC721.sol` | Retain upstream-style layout for the local ERC721 base. |
-| `smart-contracts/IERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/IERC165.sol` | Retain upstream-style layout for the ERC165 interface. |
-| `smart-contracts/IERC2981.sol` | OpenZeppelin Contracts v5.0.0 `interfaces/IERC2981.sol` | Retain upstream-style layout for royalty-interface review. |
-| `smart-contracts/IERC721.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/IERC721.sol` | Retain upstream-style layout for the ERC721 interface. |
-| `smart-contracts/IERC721Metadata.sol` | OpenZeppelin Contracts v4.4.1 `token/ERC721/extensions/IERC721Metadata.sol` | Retain upstream-style layout for the ERC721 metadata interface. |
-| `smart-contracts/IERC721Receiver.sol` | OpenZeppelin Contracts v4.6.0 `token/ERC721/IERC721Receiver.sol` | Retain upstream-style layout for receiver-interface review. |
-| `smart-contracts/Math.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/Math.sol` | Hash-tracked in the manifest above; keep local formatting stable for Slither disposition review. |
-| `smart-contracts/MerkleProof.sol` | OpenZeppelin Contracts v4.9.0 `utils/cryptography/MerkleProof.sol` | Retain upstream-style layout for Merkle-proof helper review. |
-| `smart-contracts/Ownable.sol` | OpenZeppelin Contracts v4.7.0 `access/Ownable.sol` | Retain upstream-style layout for ownership-helper review. |
-| `smart-contracts/ReentrancyGuard.sol` | OpenZeppelin Contracts v5.0.0 `utils/ReentrancyGuard.sol` | Retain upstream-style layout for reentrancy-guard review. |
-| `smart-contracts/SignedMath.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/SignedMath.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
+| `smart-contracts/vendor/openzeppelin/Address.sol` | OpenZeppelin Contracts v4.8.0 `utils/Address.sol` | Retain upstream-style layout while provenance remains source-header based. |
+| `smart-contracts/vendor/openzeppelin/Base64.sol` | OpenZeppelin Contracts v4.7.0 `utils/Base64.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
+| `smart-contracts/vendor/openzeppelin/Context.sol` | OpenZeppelin Contracts v4.4.1 `utils/Context.sol` | Retain upstream-style layout while inherited utility provenance stays visible. |
+| `smart-contracts/vendor/openzeppelin/ERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/ERC165.sol` | Retain upstream-style layout for the local ERC165 base. |
+| `smart-contracts/vendor/openzeppelin/ERC2981.sol` | OpenZeppelin Contracts v5.0.0 `token/common/ERC2981.sol` | Retain upstream-style layout for royalty-standard behavior review. |
+| `smart-contracts/vendor/openzeppelin/ERC721.sol` | OpenZeppelin Contracts v4.8.2 `token/ERC721/ERC721.sol` | Retain upstream-style layout for the local ERC721 base. |
+| `smart-contracts/vendor/openzeppelin/IERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/IERC165.sol` | Retain upstream-style layout for the ERC165 interface. |
+| `smart-contracts/vendor/openzeppelin/IERC2981.sol` | OpenZeppelin Contracts v5.0.0 `interfaces/IERC2981.sol` | Retain upstream-style layout for royalty-interface review. |
+| `smart-contracts/vendor/openzeppelin/IERC721.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/IERC721.sol` | Retain upstream-style layout for the ERC721 interface. |
+| `smart-contracts/vendor/openzeppelin/IERC721Metadata.sol` | OpenZeppelin Contracts v4.4.1 `token/ERC721/extensions/IERC721Metadata.sol` | Retain upstream-style layout for the ERC721 metadata interface. |
+| `smart-contracts/vendor/openzeppelin/IERC721Receiver.sol` | OpenZeppelin Contracts v4.6.0 `token/ERC721/IERC721Receiver.sol` | Retain upstream-style layout for receiver-interface review. |
+| `smart-contracts/vendor/openzeppelin/Math.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/Math.sol` | Hash-tracked in the manifest above; keep local formatting stable for Slither disposition review. |
+| `smart-contracts/vendor/openzeppelin/MerkleProof.sol` | OpenZeppelin Contracts v4.9.0 `utils/cryptography/MerkleProof.sol` | Retain upstream-style layout for Merkle-proof helper review. |
+| `smart-contracts/vendor/openzeppelin/Ownable.sol` | OpenZeppelin Contracts v4.7.0 `access/Ownable.sol` | Retain upstream-style layout for ownership-helper review. |
+| `smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol` | OpenZeppelin Contracts v5.0.0 `utils/ReentrancyGuard.sol` | Retain upstream-style layout for reentrancy-guard review. |
+| `smart-contracts/vendor/openzeppelin/SignedMath.sol` | OpenZeppelin Contracts v4.8.0 `utils/math/SignedMath.sol` | Hash-tracked in the manifest above; keep local formatting stable for provenance review. |
 
 When removing an exemption because a vendored file has been deliberately
 formatted or replaced with a package import, update this manifest, rerun

@@ -117,7 +117,7 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/interface-ids.json",
     "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
     "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "smart-contracts/StreamDrops.sol",
+    "smart-contracts/domains/mint/StreamDrops.sol",
     "test/StreamFixedPricePayments.t.sol",
     "test/StreamDropsEIP712.t.sol",
     "test/StreamDropsERC1271.t.sol",

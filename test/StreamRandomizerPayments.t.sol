@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/RandomizerRNG.sol";
-import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamRandomizerLifecycle.sol";
+import "../smart-contracts/integrations/randomizers/RandomizerRNG.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
+import "../smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./mocks/MockRandomizerCore.sol";

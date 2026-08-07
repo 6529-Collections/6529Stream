@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/IStreamMinter.sol";
+import "../../smart-contracts/interfaces/stream/IStreamMinter.sol";
 
 contract MockStreamMinter is IStreamMinter {
     uint256 public nextTokenId = 1_000_000_000;

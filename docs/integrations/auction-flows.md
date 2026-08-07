@@ -65,11 +65,11 @@ The auction path is:
    depending on whether the poster can receive ERC-721 custody.
 
 The integration surface is spread across
-[`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol),
-[`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol),
-[`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol),
-[`smart-contracts/IStreamAuctions.sol`](../../smart-contracts/IStreamAuctions.sol),
-and [`smart-contracts/StreamPauseDomains.sol`](../../smart-contracts/StreamPauseDomains.sol).
+[`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol),
+[`smart-contracts/domains/mint/StreamMinter.sol`](../../smart-contracts/domains/mint/StreamMinter.sol),
+[`smart-contracts/domains/auctions/AuctionContract.sol`](../../smart-contracts/domains/auctions/AuctionContract.sol),
+[`smart-contracts/interfaces/stream/IStreamAuctions.sol`](../../smart-contracts/interfaces/stream/IStreamAuctions.sol),
+and [`smart-contracts/domains/access/StreamPauseDomains.sol`](../../smart-contracts/domains/access/StreamPauseDomains.sol).
 
 ## Source Of Truth
 
@@ -94,11 +94,11 @@ Use tracked generated artifacts and checked docs, not hand-maintained copies.
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Interface lookup source |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) | Local development addresses |
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
-| Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Bid, settlement, credit, and pause logic |
-| Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Authorization validation and auction registration bridge |
-| Minter contract | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | NFT mint and auction custody transfer bridge |
-| Auction interface | [`smart-contracts/IStreamAuctions.sol`](../../smart-contracts/IStreamAuctions.sol) | Integration-facing auction calls |
-| Pause domains | [`smart-contracts/StreamPauseDomains.sol`](../../smart-contracts/StreamPauseDomains.sol) | `AUCTION_BID` and `AUCTION_SETTLEMENT` keys |
+| Auction contract | [`smart-contracts/domains/auctions/AuctionContract.sol`](../../smart-contracts/domains/auctions/AuctionContract.sol) | Bid, settlement, credit, and pause logic |
+| Drops contract | [`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol) | Authorization validation and auction registration bridge |
+| Minter contract | [`smart-contracts/domains/mint/StreamMinter.sol`](../../smart-contracts/domains/mint/StreamMinter.sol) | NFT mint and auction custody transfer bridge |
+| Auction interface | [`smart-contracts/interfaces/stream/IStreamAuctions.sol`](../../smart-contracts/interfaces/stream/IStreamAuctions.sol) | Integration-facing auction calls |
+| Pause domains | [`smart-contracts/domains/access/StreamPauseDomains.sol`](../../smart-contracts/domains/access/StreamPauseDomains.sol) | `AUCTION_BID` and `AUCTION_SETTLEMENT` keys |
 | Auction custody tests | [`test/StreamAuctionCustody.t.sol`](../../test/StreamAuctionCustody.t.sol) | Custody and no-bid characterization |
 | Auction payment tests | [`test/StreamAuctionPayments.t.sol`](../../test/StreamAuctionPayments.t.sol) | Bidder/proceeds credit behavior |
 | Auction invariant tests | [`test/StreamAuctionInvariant.t.sol`](../../test/StreamAuctionInvariant.t.sol) | Auction accounting invariant baseline |

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/StreamArtworkFinalityTypes.sol";
+import "../../smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol";
 
 /// @notice Governance-authority mock for the IStreamFinalityGovernanceAuthority seam.
 contract MockFinalityAuthority {

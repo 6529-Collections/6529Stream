@@ -20,8 +20,8 @@ Use this guide with:
 - [release-artifacts/latest/abi-checksums.json](../../release-artifacts/latest/abi-checksums.json)
 - [release-artifacts/latest/bytecode-release-proof.json](../../release-artifacts/latest/bytecode-release-proof.json)
 - [deployments/address-books/anvil-6529stream-v0.1.0-001.json](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json)
-- [smart-contracts/IStreamCompatibility.sol](../../smart-contracts/IStreamCompatibility.sol)
-- [smart-contracts/StreamContractMetadata.sol](../../smart-contracts/StreamContractMetadata.sol)
+- [smart-contracts/interfaces/compatibility/IStreamCompatibility.sol](../../smart-contracts/interfaces/compatibility/IStreamCompatibility.sol)
+- [smart-contracts/domains/metadata/StreamContractMetadata.sol](../../smart-contracts/domains/metadata/StreamContractMetadata.sol)
 - [test/StreamContractMetadata.t.sol](../../test/StreamContractMetadata.t.sol)
 
 ## Compatibility Adapter

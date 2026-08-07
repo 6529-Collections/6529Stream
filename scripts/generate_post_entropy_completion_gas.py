@@ -25,8 +25,8 @@ RELEASE_BUILD_MANIFEST_PATH = REPO_ROOT / "out-release/release-build-manifest.js
 FOUNDRY_CONFIG_PATH = REPO_ROOT / "foundry.toml"
 HARNESS_PATH = REPO_ROOT / "test/helpers/StreamPostEntropyCompletionGasHarness.sol"
 MEASUREMENT_TEST_PATH = REPO_ROOT / "test/StreamPostEntropyCompletionGas.t.sol"
-CORE_PATH = REPO_ROOT / "smart-contracts/StreamCore.sol"
-CORE_BUFFER_PATH = REPO_ROOT / "smart-contracts/StreamCoreReadBuffer.sol"
+CORE_PATH = REPO_ROOT / "smart-contracts/core/StreamCore.sol"
+CORE_BUFFER_PATH = REPO_ROOT / "smart-contracts/core/StreamCoreReadBuffer.sol"
 CORE_TEST_PATH = REPO_ROOT / "test/StreamCorePermanentTarget.t.sol"
 NORMATIVE_PATHS = (
     REPO_ROOT / "docs/stream-entropy-coordinator.md",
@@ -150,7 +150,7 @@ def _stream_core_boundary() -> dict[str, Any]:
         for row in manifest.get("targets", [])
         if row.get("kind") == "production_contract"
         and row.get("name") == "StreamCore"
-        and row.get("source") == "smart-contracts/StreamCore.sol"
+        and row.get("source") == "smart-contracts/core/StreamCore.sol"
     ]
     if len(rows) != 1:
         raise CompletionGasGenerationError(
@@ -160,7 +160,7 @@ def _stream_core_boundary() -> dict[str, Any]:
     source_rows = [
         source
         for source in row.get("metadata_sources", [])
-        if source.get("path") == "smart-contracts/StreamCore.sol"
+        if source.get("path") == "smart-contracts/core/StreamCore.sol"
     ]
     if len(source_rows) != 1:
         raise CompletionGasGenerationError(

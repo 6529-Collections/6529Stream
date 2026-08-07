@@ -17,15 +17,15 @@ SPEC.loader.exec_module(checker)
 
 class SolidityFormattingTests(unittest.TestCase):
     def test_parses_windows_and_posix_diff_headers(self) -> None:
-        output = """Diff in smart-contracts\\Address.sol:
+        output = """Diff in smart-contracts\\vendor\\openzeppelin\\Address.sol:
 line noise
-Diff in smart-contracts/Math.sol:
-Diff in smart-contracts\\Address.sol:
+Diff in smart-contracts/vendor/openzeppelin/Math.sol:
+Diff in smart-contracts\\vendor\\openzeppelin\\Address.sol:
 """
 
         self.assertEqual(
             checker.parse_fmt_diff_files(output),
-            ["smart-contracts/Address.sol", "smart-contracts/Math.sol"],
+            ["smart-contracts/vendor/openzeppelin/Address.sol", "smart-contracts/vendor/openzeppelin/Math.sol"],
         )
 
     def test_filters_line_ending_only_forge_fmt_diff(self) -> None:
@@ -46,16 +46,16 @@ Diff in smart-contracts\\Address.sol:
         )
 
     def test_retains_real_forge_fmt_diff(self) -> None:
-        output = """Diff in smart-contracts\\StreamSplitWallet.sol:
+        output = """Diff in smart-contracts\\domains\\revenue\\StreamSplitWallet.sol:
 1        |-contract StreamSplitWallet{
     1    |+contract StreamSplitWallet {
 """
 
         self.assertEqual(
             checker.filter_line_ending_only_fmt_diffs(
-                output, ["smart-contracts/StreamSplitWallet.sol"]
+                output, ["smart-contracts/domains/revenue/StreamSplitWallet.sol"]
             ),
-            ["smart-contracts/StreamSplitWallet.sol"],
+            ["smart-contracts/domains/revenue/StreamSplitWallet.sol"],
         )
 
     def test_required_formatting_failure_without_parseable_diff_is_reported(self) -> None:
@@ -70,44 +70,44 @@ not a diff header
 
     def test_required_files_exclude_vendored_exemptions(self) -> None:
         files = [
-            "smart-contracts/Address.sol",
-            "smart-contracts/Math.sol",
-            "smart-contracts/StreamCore.sol",
+            "smart-contracts/vendor/openzeppelin/Address.sol",
+            "smart-contracts/vendor/openzeppelin/Math.sol",
+            "smart-contracts/core/StreamCore.sol",
         ]
 
         self.assertEqual(
             checker.formatting_required_files(files),
-            ["smart-contracts/StreamCore.sol"],
+            ["smart-contracts/core/StreamCore.sol"],
         )
 
     def test_vendored_exemptions_accept_exact_current_diff_set(self) -> None:
-        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/core/StreamCore.sol"})
         checker.validate_vendored_exemptions(
             files, sorted(checker.VENDORED_FORMATTING_EXEMPTIONS)
         )
 
     def test_vendored_exemptions_reject_new_unformatted_file(self) -> None:
-        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/core/StreamCore.sol"})
 
         with self.assertRaisesRegex(checker.SolidityFormattingError, "unexpected"):
             checker.validate_vendored_exemptions(
                 files,
                 sorted(
-                    checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"}
+                    checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/core/StreamCore.sol"}
                 ),
             )
 
     def test_vendored_exemptions_reject_formatted_file_without_policy_update(self) -> None:
-        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/StreamCore.sol"})
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS | {"smart-contracts/core/StreamCore.sol"})
         diff_files = sorted(
-            checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/Address.sol"}
+            checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/vendor/openzeppelin/Address.sol"}
         )
 
         with self.assertRaisesRegex(checker.SolidityFormattingError, "exemption set changed"):
             checker.validate_vendored_exemptions(files, diff_files)
 
     def test_vendored_exemptions_reject_missing_exempt_file(self) -> None:
-        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/Address.sol"})
+        files = sorted(checker.VENDORED_FORMATTING_EXEMPTIONS - {"smart-contracts/vendor/openzeppelin/Address.sol"})
 
         with self.assertRaisesRegex(checker.SolidityFormattingError, "missing file"):
             checker.validate_vendored_exemptions(

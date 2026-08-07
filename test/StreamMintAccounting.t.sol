@@ -4,9 +4,9 @@ pragma solidity ^0.8.19;
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
-import "../smart-contracts/IERC721Receiver.sol";
-import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IStreamLegacyCore.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC721Receiver.sol";
+import "../smart-contracts/interfaces/stream/IRandomizer.sol";
+import "../smart-contracts/interfaces/compatibility/IStreamLegacyCore.sol";
 
 contract TrackingRandomizer is IRandomizer {
     IStreamLegacyCore private immutable core;

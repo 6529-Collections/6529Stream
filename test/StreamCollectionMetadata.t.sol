@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IERC165.sol";
-import "../smart-contracts/IStreamCollectionMetadata.sol";
-import "../smart-contracts/StreamCollectionMetadata.sol";
-import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol";
+import "../smart-contracts/domains/metadata/StreamCollectionMetadata.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamMetadataRenderer.sol";
-import "../smart-contracts/StreamRecordFamilyRegistry.sol";
+import "../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
+import "../smart-contracts/domains/records/StreamRecordFamilyRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

@@ -14,29 +14,29 @@
   },
   "sources": [
     {
-      "path": "smart-contracts/StreamCoreReadBuffer.sol",
+      "path": "smart-contracts/core/StreamCoreReadBuffer.sol",
       "sha256": "sha256:8efd67d74274d1dcce42045d2f7ed694733b6edda141241c4279e6b0159833e6",
       "size_bytes": 2714
     },
     {
-      "path": "smart-contracts/StreamCoreExternalReads.sol",
-      "sha256": "sha256:c66e89f43262d3e073f2dcb8eab70a96f676f0ba8aeb0cd12c2318b45dd3dc26",
-      "size_bytes": 25747
+      "path": "smart-contracts/core/StreamCoreExternalReads.sol",
+      "sha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24",
+      "size_bytes": 25920
     },
     {
-      "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
-      "size_bytes": 49312
+      "path": "smart-contracts/core/StreamCore.sol",
+      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
+      "size_bytes": 49391
     },
     {
-      "path": "smart-contracts/StreamGasParameterHost.sol",
-      "sha256": "sha256:06d174cbb5c5912310cbaeddbf020ec63e4bad75273eb5436cfb2d3953df1435",
-      "size_bytes": 11903
+      "path": "smart-contracts/domains/parameters/StreamGasParameterHost.sol",
+      "sha256": "sha256:d63bbc51d3345816f4915899dbaad338766c9957ed2a7910e3e2499b00f87bb4",
+      "size_bytes": 11947
     },
     {
       "path": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol",
-      "sha256": "sha256:5eb83f22bee83a8940d67c0ffdfffd94c3f14c0858485cfb188801adbd2c42ae",
-      "size_bytes": 11211
+      "sha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92",
+      "size_bytes": 11313
     },
     {
       "path": "test/StreamRoyaltyReturnGasBuffer.t.sol",
@@ -45,8 +45,8 @@
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:0b1a12b22f9b0ccd69de9cb5e8157d4ac929503daf2731defecf5c357ed217d6",
-      "size_bytes": 34182
+      "sha256": "sha256:dc6aad65df6dd02a7b683ad0d995ab4aaa16b2439bbfcd3e0695fe0c33c730bd",
+      "size_bytes": 34264
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -218,9 +218,9 @@
   "core_boundary": {
     "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
-      "path": "smart-contracts/StreamCore.sol",
-      "sha256": "sha256:61b22cd961b141f9fdd4416a21490d7333d3e47fd543cb16cb79ed255a1dafee",
-      "size_bytes": 49312
+      "path": "smart-contracts/core/StreamCore.sol",
+      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
+      "size_bytes": 49391
     },
     "stream_core_runtime_bytes": 18997,
     "stream_core_eip170_margin_bytes": 5579,

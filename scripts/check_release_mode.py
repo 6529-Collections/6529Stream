@@ -39,7 +39,7 @@ PRODUCTION_PHASE = evidence_checker.PRODUCTION_PHASE
 
 ABI_CHECKSUMS_SCHEMA = "6529stream.abi-checksums.v1"
 STREAM_CORE_NAME = "StreamCore"
-STREAM_CORE_SOURCE = "smart-contracts/StreamCore.sol"
+STREAM_CORE_SOURCE = "smart-contracts/core/StreamCore.sol"
 EIP170_RUNTIME_LIMIT_BYTES = 24_576
 # Governing deployment rule: docs/launch-conformance-matrix.md (Genesis
 # Deployment Profile), docs/launch-v1-target-architecture.md (Core Hook Budget),

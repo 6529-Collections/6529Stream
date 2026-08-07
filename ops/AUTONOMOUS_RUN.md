@@ -515,11 +515,11 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 2026-06-18 20:40 | Merge PR #576 and start CON-008 | PR #576 merged as `591b254bdc585e58fbb0fbb0180b61cad6c238be` after CodeRabbit, Windows PowerShell wrapper, Foundry smoke, and 6529bot follow-up were clean; issue #575 closed completed and tracker issue #227 remains open. The only remaining open GitHub issues are true public-beta/production external evidence blockers, so issue #577 and branch `codex/streamcore-measured-micro-headroom` now target a local, substantive `StreamCore` headroom pass. Volta's independent exploration found no large safe win, but identified measured micro-optimization candidates; this PR keeps only changes that reduce `StreamCore` below the approved 22,184-byte runtime baseline without ABI or behavior changes. |
 | 2026-06-18 21:25 | Prepare CON-008 local draft | Implemented behavior-preserving `StreamCore` storage-caching and invariant-bounded unchecked counter arithmetic in collection creation, mint, burn, randomizer, freeze, final-supply, metadata, and read-helper paths. The production via-IR build now measures `StreamCore` at 21,792 runtime bytes with 2,784 bytes of EIP-170 margin, recovering 392 bytes below the approved 22,184-byte spend ceiling. Refreshed release manifests, retained evidence hash chains, bytecode proof, docs, changelog, contract policy metadata, and durable state. Next action is final validation, commit, push, open the issue-linked PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-18 21:38 | Validate CON-008 local draft | Final pre-publish validation passed for the aggregate release/documentation gate (`make release-manifest-check release-checksums-check changelog-check autonomous-state-check architecture-threat-model-check`) and Windows-safe whitespace check (`codex-diff-check`). The aggregate gate rebuilt production via-IR sizes and reconfirmed `StreamCore` at 21,792 runtime bytes with 2,784 bytes of EIP-170 margin. Next action is to refresh checksum artifacts after this state update, rerun the focused drift gates, commit, push, open the issue-linked PR for #577, request CodeRabbit, and wait for CI/bot feedback. |
-| 2026-06-18 21:45 | Open PR #578 for CON-008 | Pushed commit `2c3a0ce7f5651364871350ee5b88f6a43ebbb200` on branch `codex/streamcore-measured-micro-headroom` and opened PR #578 at `https://github.com/6529-Collections/6529Stream/pull/578`, closing issue #577. CodeRabbit was requested in comment `4746375896`. Local validation passed, including full `forge test -vvv`, the production via-IR size build, bytecode budget/spend policy checks, ABI compatibility, changelog, release manifest/checksum/state/architecture gates, `forge fmt --check smart-contracts\StreamCore.sol`, and `codex-diff-check`. Next action is to push this PR-number state update, wait for CI/CodeRabbit/bot feedback, resolve anything actionable, then merge only when clean. |
-| 2026-06-18 21:56 | Address PR #578 bot review notes | 6529bot general review requested explicit coverage for the new unchecked counter paths and clarification of the accepted-reduction delta sign convention. Added targeted `StreamMintAccounting` regressions proving a supply-exhausted mint after burn does not advance circulation/airdrop counters, final supply uses minted-ever rather than live supply after burn, and repeated finalization does not drift max-token or supply bounds. Extended the Core bytecode-spend policy checker and tests so accepted headroom-recovery records must use `measured_delta_bytes = runtime_size_bytes - baseline_runtime_size_bytes`, making reductions negative and bytecode spend positive; documented that rule in release/tooling docs and refreshed release artifacts. Local validation passed: `forge test -vvv` with 417 tests, focused `StreamMintAccounting`, `scripts/test_core_bytecode_spend_policy.py`, `forge fmt --check test\StreamMintAccounting.t.sol smart-contracts\StreamCore.sol`, and `make release-checksums`. Next action is final check-mode gates, commit/push the response head, then wait for latest CI/bot feedback. |
+| 2026-06-18 21:45 | Open PR #578 for CON-008 | Pushed commit `2c3a0ce7f5651364871350ee5b88f6a43ebbb200` on branch `codex/streamcore-measured-micro-headroom` and opened PR #578 at `https://github.com/6529-Collections/6529Stream/pull/578`, closing issue #577. CodeRabbit was requested in comment `4746375896`. Local validation passed, including full `forge test -vvv`, the production via-IR size build, bytecode budget/spend policy checks, ABI compatibility, changelog, release manifest/checksum/state/architecture gates, `forge fmt --check smart-contracts\core\StreamCore.sol`, and `codex-diff-check`. Next action is to push this PR-number state update, wait for CI/CodeRabbit/bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-18 21:56 | Address PR #578 bot review notes | 6529bot general review requested explicit coverage for the new unchecked counter paths and clarification of the accepted-reduction delta sign convention. Added targeted `StreamMintAccounting` regressions proving a supply-exhausted mint after burn does not advance circulation/airdrop counters, final supply uses minted-ever rather than live supply after burn, and repeated finalization does not drift max-token or supply bounds. Extended the Core bytecode-spend policy checker and tests so accepted headroom-recovery records must use `measured_delta_bytes = runtime_size_bytes - baseline_runtime_size_bytes`, making reductions negative and bytecode spend positive; documented that rule in release/tooling docs and refreshed release artifacts. Local validation passed: `forge test -vvv` with 417 tests, focused `StreamMintAccounting`, `scripts/test_core_bytecode_spend_policy.py`, `forge fmt --check test\StreamMintAccounting.t.sol smart-contracts\core\StreamCore.sol`, and `make release-checksums`. Next action is final check-mode gates, commit/push the response head, then wait for latest CI/bot feedback. |
 | 2026-06-18 22:25 | Fix PR #578 CI gas snapshot drift | GitHub `Foundry smoke` on head `d191bbd7174d854c81ec7f384480d312138f2289` passed build and all 417 Solidity tests, then failed the `Gas snapshot` step because `StreamGasSnapshotTest::testGasDependencyScriptRead` and `testGasFinalOnchainTokenURI` were each 29 gas above the committed baseline while `testGasFixedPriceMint` was 851 gas below it. Regenerated `release-artifacts/baselines/v0.1.0/gas-snapshot.snap`, refreshed release checksums/manifests, and verified `forge snapshot --match-path test\StreamGasSnapshot.t.sol --check release-artifacts\baselines\v0.1.0\gas-snapshot.snap`, the aggregate release/state gates, bytecode budget/spend policy checks, and `codex-diff-check`. Next action is to commit/push the CI-fix head, wait for rerun CI and bot feedback, then merge when clean. |
 | 2026-06-18 22:48 | Address PR #578 stale-randomizer review thread | CodeRabbit identified that `StreamCore.mint` cached `collectionData.randomizer` before `_safeMint`, so an authorized `onERC721Received` callback that rotated the collection randomizer could leave mint post-processing calling a stale provider rejected by `setTokenHash`. Updated `_mintProcessing` to read the current collection randomizer after `_safeMint`, added `testMintUsesRandomizerRotatedDuringSafeMintCallback` proving only the replacement provider is called and token hash is finalized, and refreshed the fixed-price mint gas snapshot from `626524` to `626573`. Production via-IR runtime is now `StreamCore` `21,792` bytes with `2,784` bytes of EIP-170 margin, still below the `22,184` approved spend ceiling. Release checksums/evidence were regenerated and focused mint-accounting, gas snapshot, formatting, production size, bytecode-spend, ABI, and whitespace gates passed. Next action is commit/push, reply/resolve the CodeRabbit thread, and wait for CI/bot feedback. |
-| 2026-06-18 23:39 | Refresh PR #578 post-format release artifacts | GitHub `Foundry smoke` on head `eb465b49314d35880c396cbb8140ce9b86ac50a3` failed the release-artifact catalog step because final formatting changed bytecode metadata hashes after the previous artifact refresh. Regenerated the post-format ABI checksum, release manifest/checksum, evidence, provenance, permanence, deployment, and retained-artifact hash chain, preserving the measured `StreamCore` production runtime at `21,792` bytes with `2,784` bytes of EIP-170 margin. Local verification passed: `forge fmt --check smart-contracts\StreamCore.sol test\StreamMintAccounting.t.sol`, focused mint/accounting tests, gas snapshot check, production via-IR size build, contract-size budget, Core bytecode-spend policy, ABI compatibility, architecture/threat-model, changelog, release-artifact freshness, and `codex-diff-check`. Next action is to regenerate release checksums after this state edit, commit/push the artifact refresh, and wait for the refreshed PR #578 checks. |
+| 2026-06-18 23:39 | Refresh PR #578 post-format release artifacts | GitHub `Foundry smoke` on head `eb465b49314d35880c396cbb8140ce9b86ac50a3` failed the release-artifact catalog step because final formatting changed bytecode metadata hashes after the previous artifact refresh. Regenerated the post-format ABI checksum, release manifest/checksum, evidence, provenance, permanence, deployment, and retained-artifact hash chain, preserving the measured `StreamCore` production runtime at `21,792` bytes with `2,784` bytes of EIP-170 margin. Local verification passed: `forge fmt --check smart-contracts\core\StreamCore.sol test\StreamMintAccounting.t.sol`, focused mint/accounting tests, gas snapshot check, production via-IR size build, contract-size budget, Core bytecode-spend policy, ABI compatibility, architecture/threat-model, changelog, release-artifact freshness, and `codex-diff-check`. Next action is to regenerate release checksums after this state edit, commit/push the artifact refresh, and wait for the refreshed PR #578 checks. |
 | 2026-06-18 23:58 | Merge PR #578 and start Sepolia preflight | PR #578 merged as `17797c44a39b0956c2aa80594f9a1ec18e4a9587` after Foundry smoke, Windows wrapper, CodeRabbit status, resolved review threads, and 6529bot follow-up were clean. Issue #577 closed completed. The remaining open roadmap items are primarily real external evidence blockers, so issue #579 and branch `codex/sepolia-evidence-preflight` now add a local no-secret preflight checker for future Sepolia public-beta evidence runs supporting #217, #221, and #222 without closing them or changing readiness claims. |
 | 2026-06-19 00:17 | Open PR #580 for Sepolia evidence preflight | PR #580 is open at `https://github.com/6529-Collections/6529Stream/pull/580` for issue #579. The branch adds `scripts/check_sepolia_evidence_preflight.py`, focused tests, Makefile/Bash/PowerShell gate wiring, release-readiness documentation, operator runbook commands, no-secret JSON report behavior, and regenerated release evidence/manifest/checksum artifacts. Local validation passed: `make sepolia-evidence-preflight-check`, release evidence packet/backlog/body-sync checks, release-manifest/checksum check modes, changelog/autonomous-state checks, `python -m compileall -q scripts\check_sepolia_evidence_preflight.py scripts\test_sepolia_evidence_preflight.py scripts\check_release_readiness.py`, and `codex-diff-check`. Next action is to push this PR-number state update, request CodeRabbit review, wait for CI and bot feedback, then fix or merge when clean. |
 | 2026-06-19 00:24 | Address PR #580 6529bot polish | CodeRabbit was rate-limited after the explicit `@coderabbitai review` request, while 6529bot security reported no findings and 6529bot general marked the PR good to merge with nice-to-have polish. Updated the preflight checker to reject symlinked prerequisite files, validate commands against the specific runbook that owns each command, clarify that the report `value` field is a fixed display label never sourced from environment values, and make readiness state selection explicit. Expanded the redaction test to assert secret values are absent from stdout/stderr as well as the JSON report, and added symlink rejection coverage. Next action is to regenerate release artifacts, push the bot-polish commit, wait for CI and latest 6529bot/CodeRabbit availability, then merge when clean. |
@@ -719,7 +719,7 @@ Goal:
 
 Validation completed locally:
 
-- `forge fmt smart-contracts\StreamMinter.sol test\StreamMinterEvents.t.sol`
+- `forge fmt smart-contracts\domains\mint\StreamMinter.sol test\StreamMinterEvents.t.sol`
 - `forge test --match-path test\StreamMinterEvents.t.sol -vvv`
 - `forge test --match-path test\StreamMinterValidation.t.sol -vvv`
 - `forge snapshot --match-path test\StreamGasSnapshot.t.sol --snap release-artifacts\baselines\v0.1.0\gas-snapshot.snap`
@@ -3521,13 +3521,13 @@ Final CI run `27493830680` passed on head `ee18669`. Merge decision comment
 Goal:
 
 - Reformat the non-vendored provider and legacy integration slice:
-  `smart-contracts/ArrngConsumer.sol`,
-  `smart-contracts/IArrngConsumer.sol`,
-  `smart-contracts/IArrngController.sol`,
-  `smart-contracts/IDelegationManagementContract.sol`,
-  `smart-contracts/IRandomizer.sol`,
-  `smart-contracts/VRFConsumerBaseV2.sol`, and
-  `smart-contracts/VRFCoordinatorV2Interface.sol`.
+  `smart-contracts/integrations/arrng/ArrngConsumer.sol`,
+  `smart-contracts/integrations/arrng/IArrngConsumer.sol`,
+  `smart-contracts/integrations/arrng/IArrngController.sol`,
+  `smart-contracts/integrations/delegation/IDelegationManagementContract.sol`,
+  `smart-contracts/interfaces/stream/IRandomizer.sol`,
+  `smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol`, and
+  `smart-contracts/vendor/chainlink/VRFCoordinatorV2Interface.sol`.
 - Remove successfully formatted files from `DEFERRED_FORMATTING_FILES`.
 - Keep OpenZeppelin-style vendored/provenance-sensitive files untouched for a
   later dedicated provenance PR.
@@ -3566,7 +3566,7 @@ CI fix local validation passed:
 
 Focused local validation passed:
 
-- `forge fmt --check smart-contracts\ArrngConsumer.sol smart-contracts\IArrngConsumer.sol smart-contracts\IArrngController.sol smart-contracts\IDelegationManagementContract.sol smart-contracts\IRandomizer.sol smart-contracts\VRFConsumerBaseV2.sol smart-contracts\VRFCoordinatorV2Interface.sol`.
+- `forge fmt --check smart-contracts\integrations\arrng\ArrngConsumer.sol smart-contracts\integrations\arrng\IArrngConsumer.sol smart-contracts\integrations\arrng\IArrngController.sol smart-contracts\integrations\delegation\IDelegationManagementContract.sol smart-contracts\interfaces\stream\IRandomizer.sol smart-contracts\vendor\chainlink\VRFConsumerBaseV2.sol smart-contracts\vendor\chainlink\VRFCoordinatorV2Interface.sol`.
 - `python scripts\test_solidity_formatting.py`.
 - `python scripts\check_solidity_formatting.py`.
 - `make fmt-check`.
@@ -3616,9 +3616,9 @@ Merge decision comment: `4701109319`.
 
 Goal:
 
-- Reformat only `smart-contracts/INextGenCore2.sol`,
-  `smart-contracts/IStreamDrops.sol`, and
-  `smart-contracts/IStreamMinter.sol` with `forge fmt`.
+- Reformat only `smart-contracts/integrations/nextgen/INextGenCore2.sol`,
+  `smart-contracts/interfaces/stream/IStreamDrops.sol`, and
+  `smart-contracts/interfaces/stream/IStreamMinter.sol` with `forge fmt`.
 - Remove those first-party interfaces from `DEFERRED_FORMATTING_FILES`.
 - Update the scoped formatting checker tests so they still cover a genuinely
   deferred legacy/provider file.
@@ -3630,7 +3630,7 @@ Goal:
 
 Validation:
 
-- `forge fmt --check smart-contracts\INextGenCore2.sol smart-contracts\IStreamDrops.sol smart-contracts\IStreamMinter.sol`.
+- `forge fmt --check smart-contracts\integrations\nextgen\INextGenCore2.sol smart-contracts\interfaces\stream\IStreamDrops.sol smart-contracts\interfaces\stream\IStreamMinter.sol`.
 - `python scripts\test_solidity_formatting.py`.
 - `python scripts\check_solidity_formatting.py`.
 - `make fmt-check`.
@@ -9399,7 +9399,7 @@ Goal:
 
 Initial candidate files:
 
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamMetadataGolden.t.sol`
 - `test/StreamCoreCustomErrors.t.sol`
 - `CHANGELOG.md`
@@ -9458,13 +9458,13 @@ Local validation:
 - `make check`: passed.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`:
   passed.
-- `forge fmt --check smart-contracts\StreamCore.sol
-  smart-contracts\StreamMetadataRenderer.sol
+- `forge fmt --check smart-contracts\core\StreamCore.sol
+  smart-contracts\domains\metadata\StreamMetadataRenderer.sol
   test\StreamRandomizerLifecycle.t.sol`: passed.
 - `git diff --check`: passed.
 - Post-CodeRabbit follow-up validation:
   `forge test --match-path test\StreamRandomizerLifecycle.t.sol -vvv` passed
-  21 tests; `forge fmt --check smart-contracts\StreamCore.sol
+  21 tests; `forge fmt --check smart-contracts\core\StreamCore.sol
   test\StreamRandomizerLifecycle.t.sol` passed; `git diff --check` passed;
   `make release-checksums` regenerated source-verification and checksum
   artifacts for the source/comment and state-file changes;
@@ -9502,7 +9502,7 @@ Goal:
 
 Initial candidate files:
 
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamMetadataGolden.t.sol`
 - `test/fixtures/metadata/`
 - `docs/metadata.md`
@@ -9557,7 +9557,7 @@ Local validation:
   remain in the final diff.
 - `forge build --sizes --via-ir --skip test --skip script --force`: passes with
   `StreamCore` at 24,348 runtime bytes and 228 bytes of EIP-170 headroom.
-- `forge fmt smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataGolden.t.sol test\StreamMetadataEvents.t.sol`
+- `forge fmt smart-contracts\core\StreamCore.sol smart-contracts\domains\metadata\StreamMetadataRenderer.sol test\StreamMetadataGolden.t.sol test\StreamMetadataEvents.t.sol`
   completed after the size experiments.
 - `make release-checksums`: passes and refreshes deterministic release,
   deployment, address-book, source-verification, and checksum artifacts.
@@ -9567,7 +9567,7 @@ Local validation:
   rehearsal.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`:
   passes with the same 226-test local gate on Windows.
-- `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`:
+- `forge fmt --check smart-contracts\core\StreamCore.sol test\StreamMetadataGolden.t.sol`:
   passes.
 - `git diff --check`: passes.
 
@@ -9688,8 +9688,8 @@ Goal:
 
 Initial candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/StreamMetadataRenderer.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/domains/metadata/StreamMetadataRenderer.sol`
 - `test/StreamMetadataUtf8.t.sol`
 - `docs/metadata.md`
 - `docs/status.md`
@@ -9756,8 +9756,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamMetadataRenderer.sol`
-- `smart-contracts/DependencyRegistry.sol`
+- `smart-contracts/domains/metadata/StreamMetadataRenderer.sol`
+- `smart-contracts/domains/dependencies/DependencyRegistry.sol`
 - `test/StreamMetadataUtf8.t.sol`
 - `docs/metadata.md`
 - `docs/status.md`
@@ -9771,7 +9771,7 @@ Candidate files:
 Validation started at `2026-06-11 22:20 UTC`:
 
 - `forge build --sizes --via-ir --skip test --skip script --force`
-- `forge fmt --check smart-contracts\DependencyRegistry.sol smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataUtf8.t.sol`
+- `forge fmt --check smart-contracts\domains\dependencies\DependencyRegistry.sol smart-contracts\domains\metadata\StreamMetadataRenderer.sol test\StreamMetadataUtf8.t.sol`
 - `forge test --match-path test\StreamMetadataUtf8.t.sol -vvv`
 - `forge test --match-path test\StreamDependencyRegistry.t.sol -vvv`
 - `make release-checksums`
@@ -9835,7 +9835,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamMetadataRenderer.sol`
+- `smart-contracts/domains/metadata/StreamMetadataRenderer.sol`
 - `test/StreamMetadataEscaping.t.sol`
 - `docs/metadata.md`
 - `docs/status.md`
@@ -9860,8 +9860,8 @@ Validation started at `2026-06-11 21:16 UTC`:
 - Bootstrapped pinned Foundry `v1.7.1` locally with
   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1`
   after direct `forge` commands were missing from PATH.
-- `forge fmt smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
-- `forge fmt --check smart-contracts\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
+- `forge fmt smart-contracts\domains\metadata\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
+- `forge fmt --check smart-contracts\domains\metadata\StreamMetadataRenderer.sol test\StreamMetadataEscaping.t.sol`
 - `forge test --match-path test\StreamMetadataEscaping.t.sol -vvv`
 - `make release-checksums`
 - `make check`
@@ -10030,7 +10030,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamCoreCustomErrors.t.sol`
 - `docs/status.md`
 - `ops/ROADMAP.md`
@@ -10051,7 +10051,7 @@ Validation:
 - `make release-checksums` passed and regenerated release/deployment artifacts.
 - `make check` passed.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
-- `forge fmt --check smart-contracts\StreamCore.sol
+- `forge fmt --check smart-contracts\core\StreamCore.sol
   test\StreamCoreCustomErrors.t.sol` passed.
 - `git diff --check` passed, with only the known Windows line-ending warning
   for `release-artifacts/latest/SHA256SUMS`.
@@ -10090,8 +10090,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/StreamMetadataRenderer.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/domains/metadata/StreamMetadataRenderer.sol`
 - `test/StreamMetadataUriPolicy.t.sol`
 - `test/StreamInitialization.t.sol`
 - `test/StreamDependencyRegistry.t.sol`
@@ -10199,8 +10199,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/StreamMetadataRenderer.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/domains/metadata/StreamMetadataRenderer.sol`
 - `test/StreamMetadataUriPolicy.t.sol`
 - `docs/metadata.md`
 - `docs/known-blockers.md`
@@ -11243,8 +11243,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamDrops.sol`
-- `smart-contracts/IArrngController.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
+- `smart-contracts/integrations/arrng/IArrngController.sol`
 - `test/StreamDropsCharacterization.t.sol`
 - `test/StreamDropsIntegrationCharacterization.t.sol`
 - `test/helpers/CharacterizationTestBase.sol`
@@ -11327,7 +11327,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
 - `test/StreamDropsCharacterization.t.sol`
 - `test/StreamDropsIntegrationCharacterization.t.sol`
 - `test/StreamDropsEIP712.t.sol`
@@ -11415,7 +11415,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
 - `test/StreamDropsERC1271.t.sol`
 - `test/StreamDropsEIP712.t.sol`
 - `test/README.md`
@@ -11434,7 +11434,7 @@ Validation:
 - `make check` passed with 59 tests and the known Solidity warning baseline.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with 59
   tests and the known Solidity warning baseline.
-- `forge fmt --check` passed for `smart-contracts\StreamDrops.sol`,
+- `forge fmt --check` passed for `smart-contracts\domains\mint\StreamDrops.sol`,
   `test\StreamDropsERC1271.t.sol`, and `test\StreamDropsEIP712.t.sol`.
 - `git diff --check` passed.
 - Markdown heading scan passed for touched README, docs, roadmap, and autonomous
@@ -11485,7 +11485,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/AuctionContract.sol`
+- `smart-contracts/domains/auctions/AuctionContract.sol`
 - `test/StreamAuctionPayments.t.sol`
 - `test/README.md`
 - `docs/known-blockers.md`
@@ -11516,7 +11516,7 @@ Validation:
 - `make check` passed with 69 tests.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed with 69 tests.
-- `forge fmt --check smart-contracts\AuctionContract.sol test\StreamAuctionPayments.t.sol`
+- `forge fmt --check smart-contracts\domains\auctions\AuctionContract.sol test\StreamAuctionPayments.t.sol`
   passed.
 - `git diff --check` passed.
 - Markdown heading scan passed for touched docs/state files.
@@ -11573,9 +11573,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/AuctionContract.sol`
-- `smart-contracts/StreamDrops.sol`
-- `smart-contracts/IStreamAuctions.sol`
+- `smart-contracts/domains/auctions/AuctionContract.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
+- `smart-contracts/interfaces/stream/IStreamAuctions.sol`
 - `docs/auction-custody.md`
 - `test/StreamAuctionCustody.t.sol`
 - `test/StreamAuctionPayments.t.sol`
@@ -11681,7 +11681,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamDrops.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
 - `test/StreamFixedPricePayments.t.sol`
 - `test/StreamDropsIntegrationCharacterization.t.sol`
 - `docs/adr/0003-payment-accounting.md`
@@ -11783,7 +11783,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCuratorsPool.sol`
+- `smart-contracts/domains/revenue/StreamCuratorsPool.sol`
 - `test/StreamCuratorsPool.t.sol`
 - `docs/adr/0003-payment-accounting.md`
 - `docs/status.md`
@@ -11822,7 +11822,7 @@ Validation:
   warning baseline.
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   passed with 109 tests.
-- `forge fmt --check smart-contracts\StreamCuratorsPool.sol test\StreamCuratorsPool.t.sol`
+- `forge fmt --check smart-contracts\domains\revenue\StreamCuratorsPool.sol test\StreamCuratorsPool.t.sol`
   passed.
 - `git diff --check` passed.
 - Repo-local Slither ran through `.venv-tools\Scripts\slither.exe` with Foundry
@@ -11875,9 +11875,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamMinter.sol`
-- `smart-contracts/RandomizerRNG.sol`
-- `smart-contracts/AuctionContract.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
+- `smart-contracts/domains/auctions/AuctionContract.sol`
 - `test/StreamEmergencyWithdraw.t.sol`
 - `docs/adr/0002-auction-custody.md`
 - `docs/adr/0003-payment-accounting.md`
@@ -11974,10 +11974,10 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamAdmins.sol`
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/domains/access/StreamAdmins.sol`
+- `smart-contracts/core/StreamCore.sol`
 - Admin-related callers using `FunctionAdminRequired`
-- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
 - `test/StreamAdminSelectors.t.sol`
 - `test/StreamMinterValidation.t.sol`
 - Existing admin characterization tests
@@ -12092,11 +12092,11 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamAdmins.sol`
-- `smart-contracts/IStreamAdmins.sol`
-- `smart-contracts/StreamDrops.sol`
-- `smart-contracts/AuctionContract.sol`
-- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/domains/access/StreamAdmins.sol`
+- `smart-contracts/interfaces/stream/IStreamAdmins.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
+- `smart-contracts/domains/auctions/AuctionContract.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
 - Randomizer request surface if locally reachable
 - Metadata mutation surfaces if locally reachable
 - `test/StreamPauseControls.t.sol`
@@ -12210,12 +12210,12 @@ Goal:
 
 Initial candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
-- `smart-contracts/RandomizerRNG.sol`
-- `smart-contracts/RandomizerVRF.sol`
-- `smart-contracts/RandomizerNXT.sol`
-- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol`
+- `smart-contracts/integrations/randomizers/RandomizerNXT.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
 - `test/mocks/MockRandomizerCore.sol`
 - `test/StreamEmergencyWithdraw.t.sol`
@@ -12297,7 +12297,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
 - `test/README.md`
 - `docs/known-blockers.md`
@@ -12311,7 +12311,7 @@ Validation completed at `2026-06-10 14:34 UTC`:
 - `make check` passed: 153 tests, 0 failed.
 - `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` passed:
   153 tests, 0 failed.
-- `forge fmt --check smart-contracts/StreamRandomizerLifecycle.sol test/StreamRandomizerLifecycle.t.sol`
+- `forge fmt --check smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol test/StreamRandomizerLifecycle.t.sol`
   passed.
 - `git diff --check` passed.
 - Heading and traceability greps passed for roadmap, run state, test README,
@@ -12387,9 +12387,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/IRandomizerLifecycle.sol`
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/StreamRandomizerLifecycle.sol`
+- `smart-contracts/interfaces/stream/IRandomizerLifecycle.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
 - `test/helpers/CharacterizationTestBase.sol`
 - `docs/adr/0005-randomness.md`
@@ -12451,9 +12451,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamRandomizerLifecycle.sol`
-- `smart-contracts/RandomizerVRF.sol`
-- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
 - `test/mocks/MockRandomizerCore.sol`
 - `docs/adr/0005-randomness.md`
@@ -12544,9 +12544,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamRandomizerLifecycle.sol`
-- `smart-contracts/RandomizerVRF.sol`
-- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
 - `test/StreamRandomizerRetry.t.sol`
 - `test/helpers/CharacterizationTestBase.sol`
 - `docs/adr/0005-randomness.md`
@@ -12583,8 +12583,8 @@ Validation so far:
 - Full Windows wrapper
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed: 170
   tests, 0 failed.
-- `forge fmt --check smart-contracts\StreamRandomizerLifecycle.sol
-  smart-contracts\RandomizerVRF.sol smart-contracts\RandomizerRNG.sol
+- `forge fmt --check smart-contracts\integrations\randomizers\StreamRandomizerLifecycle.sol
+  smart-contracts\integrations\randomizers\RandomizerVRF.sol smart-contracts\integrations\randomizers\RandomizerRNG.sol
   test\StreamRandomizerRetry.t.sol test\helpers\CharacterizationTestBase.sol`
   passed.
 - `git diff --check` passed.
@@ -12635,10 +12635,10 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamRandomizerLifecycle.sol`
-- `smart-contracts/IRandomizerLifecycle.sol`
-- `smart-contracts/RandomizerVRF.sol`
-- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
+- `smart-contracts/interfaces/stream/IRandomizerLifecycle.sol`
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
 - `test/StreamRandomizerLifecycle.t.sol`
 - `test/StreamRandomizerRetry.t.sol`
 - `test/StreamRandomizerSeed.t.sol` if a dedicated focused suite is cleaner
@@ -12687,7 +12687,7 @@ Validation so far:
   passed: 19 tests, 0 failed.
 - Focused `forge test --match-contract StreamRandomizerRetryTest -vvv` passed:
   10 tests, 0 failed.
-- `forge fmt --check smart-contracts\StreamRandomizerLifecycle.sol
+- `forge fmt --check smart-contracts\integrations\randomizers\StreamRandomizerLifecycle.sol
   test\StreamRandomizerLifecycle.t.sol test\StreamRandomizerRetry.t.sol`
   passed.
 - `git diff --check` passed.
@@ -12759,9 +12759,9 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/DependencyRegistry.sol`
-- `smart-contracts/IDependencyRegistry.sol`
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/domains/dependencies/DependencyRegistry.sol`
+- `smart-contracts/interfaces/stream/IDependencyRegistry.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamMetadataEncoding.t.sol`
 - `docs/adr/0006-metadata-freeze.md`
 - `docs/known-blockers.md`
@@ -12799,8 +12799,8 @@ Validation so far:
   removing the target rows: `slither_exit=-1`, `total=685`, `high=8`,
   `medium=28`, `low=63`, `informational=580`, `optimization=6`,
   `encode-packed-collision=0`, and `uninitialized-local=10`.
-- `forge fmt --check smart-contracts\DependencyRegistry.sol
-  smart-contracts\IDependencyRegistry.sol smart-contracts\StreamCore.sol
+- `forge fmt --check smart-contracts\domains\dependencies\DependencyRegistry.sol
+  smart-contracts\interfaces\stream\IDependencyRegistry.sol smart-contracts\core\StreamCore.sol
   test\StreamMetadataEncoding.t.sol` passed.
 - Focused `forge test --match-contract StreamMetadataEncodingTest -vvv`
   passed: 2 tests, 0 failed.
@@ -12823,8 +12823,8 @@ Validation so far:
 - Follow-up addressed the non-blocking NatSpec and zero-chunk test observations
   by documenting the new public hash views and adding
   `testEmptyDependencyContentHashIsDeterministic`.
-- Follow-up `forge fmt --check smart-contracts\DependencyRegistry.sol
-  smart-contracts\StreamCore.sol test\StreamMetadataEncoding.t.sol` passed.
+- Follow-up `forge fmt --check smart-contracts\domains\dependencies\DependencyRegistry.sol
+  smart-contracts\core\StreamCore.sol test\StreamMetadataEncoding.t.sol` passed.
 - Follow-up focused `forge test --match-contract StreamMetadataEncodingTest
   -vvv` passed: 3 tests, 0 failed.
 - Follow-up `make check` passed: 174 tests, 0 failed.
@@ -12867,8 +12867,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
 - `test/StreamMintAccounting.t.sol`
 - `docs/known-blockers.md`
 - `docs/status.md`
@@ -12893,8 +12893,8 @@ Validation:
 
 - PR #71 merge checked locally by fast-forwarding `main` to
   `20bd9d9d1fa36b7142f3a81b9ab0c86060c9f943`.
-- `forge fmt --check smart-contracts\StreamCore.sol
-  smart-contracts\IStreamCore.sol test\StreamMintAccounting.t.sol` passed.
+- `forge fmt --check smart-contracts\core\StreamCore.sol
+  smart-contracts\interfaces\stream\IStreamCore.sol test\StreamMintAccounting.t.sol` passed.
 - Focused `forge test --match-contract StreamMintAccountingTest -vvv` passed:
   2 tests, 0 failed.
 - `make check` passed: 176 tests, 0 failed.
@@ -12948,7 +12948,7 @@ Goal:
 Candidate files:
 
 - `smart-contracts/XRandoms.sol`
-- `smart-contracts/IXRandoms.sol`
+- `smart-contracts/integrations/randomizers/IXRandoms.sol`
 - `docs/adr/0005-randomness.md`
 - `docs/known-blockers.md`
 - `docs/status.md`
@@ -12960,7 +12960,7 @@ Candidate files:
 Implementation notes:
 
 - Deleted `smart-contracts/XRandoms.sol`.
-- Kept `smart-contracts/IXRandoms.sol` because `RandomizerNXT` and the inline
+- Kept `smart-contracts/integrations/randomizers/IXRandoms.sol` because `RandomizerNXT` and the inline
   `MockXRandoms` regression still need the interface.
 - Formatted `IXRandoms` so the touched legacy boundary passes targeted
   `forge fmt --check`.
@@ -12977,8 +12977,8 @@ Validation so far:
 - `make check` passed on the final local head: 176 tests, 0 failed.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed on the
   final local head: 176 tests, 0 failed.
-- `forge fmt --check smart-contracts\IXRandoms.sol
-  smart-contracts\RandomizerNXT.sol test\StreamRandomizerLifecycle.t.sol`
+- `forge fmt --check smart-contracts\integrations\randomizers\IXRandoms.sol
+  smart-contracts\integrations\randomizers\RandomizerNXT.sol test\StreamRandomizerLifecycle.t.sol`
   passed.
 - `git diff --check` passed.
 - Markdown heading scan passed for the roadmap, Slither baseline, autonomous
@@ -13025,10 +13025,10 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/Bytes32Strings.sol`
-- `smart-contracts/NFTdelegation.sol`
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/libraries/Bytes32Strings.sol`
+- `smart-contracts/integrations/delegation/NFTdelegation.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
 - `test/StreamInitialization.t.sol`
 - `docs/known-blockers.md`
 - `docs/status.md`
@@ -13051,9 +13051,9 @@ Implementation notes:
 
 Validation so far:
 
-- `forge fmt --check smart-contracts\Bytes32Strings.sol
-  smart-contracts\NFTdelegation.sol smart-contracts\StreamCore.sol
-  smart-contracts\StreamMinter.sol test\StreamInitialization.t.sol` passed.
+- `forge fmt --check smart-contracts\libraries\Bytes32Strings.sol
+  smart-contracts\integrations\delegation\NFTdelegation.sol smart-contracts\core\StreamCore.sol
+  smart-contracts\domains\mint\StreamMinter.sol test\StreamInitialization.t.sol` passed.
 - Focused `forge test --match-path test\StreamInitialization.t.sol -vvv`
   passed: 6 tests, 0 failed.
 - `make check` passed on the final local head: 182 tests, 0 failed.
@@ -13108,7 +13108,7 @@ Goal:
 Candidate files:
 
 - `docs/vendored-libraries.md`
-- `smart-contracts/Strings.sol`
+- `smart-contracts/vendor/openzeppelin/Strings.sol`
 - `test/StreamVendoredLibraries.t.sol`
 - `docs/known-blockers.md`
 - `docs/status.md`
@@ -13283,11 +13283,11 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamDrops.sol`
-- `smart-contracts/AuctionContract.sol`
-- `smart-contracts/StreamCuratorsPool.sol`
-- `smart-contracts/StreamMinter.sol`
-- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/domains/mint/StreamDrops.sol`
+- `smart-contracts/domains/auctions/AuctionContract.sol`
+- `smart-contracts/domains/revenue/StreamCuratorsPool.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
 - `test/StreamPaymentsInvariant.t.sol`
 - `docs/adr/0003-payment-accounting.md`
 - `docs/status.md`
@@ -13316,9 +13316,9 @@ Validation so far:
 - `make check` passed with 188 tests.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with
   188 tests.
-- `forge fmt --check smart-contracts\StreamDrops.sol
-  smart-contracts\AuctionContract.sol smart-contracts\StreamCuratorsPool.sol
-  smart-contracts\StreamMinter.sol smart-contracts\RandomizerRNG.sol
+- `forge fmt --check smart-contracts\domains\mint\StreamDrops.sol
+  smart-contracts\domains\auctions\AuctionContract.sol smart-contracts\domains\revenue\StreamCuratorsPool.sol
+  smart-contracts\domains\mint\StreamMinter.sol smart-contracts\integrations\randomizers\RandomizerRNG.sol
   test\StreamPaymentsInvariant.t.sol` passed.
 - `git diff --check` passed.
 - `rg -n "totalReserved\(\)|surplus\(\)|P0-PAY-002|Add payment ledger view
@@ -13367,7 +13367,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamAdmins.sol`
+- `smart-contracts/domains/access/StreamAdmins.sol`
 - `test/StreamAdmins.t.sol`
 - `test/StreamAdminSelectors.t.sol`
 - `test/StreamSignerAdmin.t.sol`
@@ -13563,8 +13563,8 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/IERC4906.sol`
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/interfaces/standards/IERC4906.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamMetadataEvents.t.sol`
 - `docs/metadata.md`
 - `docs/status.md`
@@ -13614,7 +13614,7 @@ Validation:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 210 tests,
   0 failed.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\IERC4906.sol smart-contracts\StreamCore.sol test\StreamMetadataEvents.t.sol`.
+  `forge fmt --check smart-contracts\interfaces\standards\IERC4906.sol smart-contracts\core\StreamCore.sol test\StreamMetadataEvents.t.sol`.
 - Diff whitespace check passed: `git diff --check`.
 - Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
   `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
@@ -13676,7 +13676,7 @@ Goal:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
 - `test/StreamMetadataGolden.t.sol`
 - `test/fixtures/metadata/onchain-pending-schema-v1-token-uri.txt`
 - `test/fixtures/metadata/onchain-final-schema-v1-token-uri.txt`
@@ -13718,7 +13718,7 @@ Validation so far:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` with 212 tests,
   0 failed.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataGolden.t.sol`.
+  `forge fmt --check smart-contracts\core\StreamCore.sol test\StreamMetadataGolden.t.sol`.
 - Diff whitespace check passed: `git diff --check`.
 - Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
   `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
@@ -13793,8 +13793,8 @@ Out of scope:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
 - `test/StreamMetadataFreeze.t.sol`
 - `docs/metadata.md`
 - `docs/status.md`
@@ -13839,7 +13839,7 @@ Validation so far:
 - Windows wrapper passed:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\StreamCore.sol test\StreamMetadataFreeze.t.sol`.
+  `forge fmt --check smart-contracts\core\StreamCore.sol test\StreamMetadataFreeze.t.sol`.
 - Diff whitespace check passed: `git diff --check`.
 - Markdown heading scan passed for `docs\metadata.md`, `docs\status.md`,
   `docs\known-blockers.md`, `test\README.md`, `ops\ROADMAP.md`, and
@@ -13905,10 +13905,10 @@ Out of scope:
 
 Candidate files:
 
-- `smart-contracts/DependencyRegistry.sol`
-- `smart-contracts/IDependencyRegistry.sol`
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
+- `smart-contracts/domains/dependencies/DependencyRegistry.sol`
+- `smart-contracts/interfaces/stream/IDependencyRegistry.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
 - `test/StreamDependencyRegistry.t.sol`
 - `test/StreamMetadataEncoding.t.sol`
 - `docs/metadata.md`
@@ -13987,9 +13987,9 @@ Local validation:
 - Windows canonical gate passed:
   `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\DependencyRegistry.sol
-  smart-contracts\IDependencyRegistry.sol smart-contracts\StreamCore.sol
-  smart-contracts\IStreamCore.sol test\StreamDependencyRegistry.t.sol
+  `forge fmt --check smart-contracts\domains\dependencies\DependencyRegistry.sol
+  smart-contracts\interfaces\stream\IDependencyRegistry.sol smart-contracts\core\StreamCore.sol
+  smart-contracts\interfaces\stream\IStreamCore.sol test\StreamDependencyRegistry.t.sol
   test\StreamMetadataEncoding.t.sol`.
 - Whitespace check passed: `git diff --check`.
 - Markdown heading scan and traceability grep passed for roadmap/docs/test
@@ -14070,11 +14070,11 @@ Out of scope:
 
 Candidate files:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
-- `smart-contracts/StreamRandomizerLifecycle.sol`
-- `smart-contracts/RandomizerVRF.sol`
-- `smart-contracts/RandomizerRNG.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
+- `smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol`
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol`
 - `test/StreamCoreBurn.t.sol`
 - `test/mocks/MockRandomizerCore.sol`
 - `docs/metadata.md`
@@ -14122,7 +14122,7 @@ Local validation:
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed with the
   full Forge suite on Windows.
 - Touched-file formatting passed:
-  `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\IStreamCore.sol smart-contracts\StreamRandomizerLifecycle.sol smart-contracts\RandomizerVRF.sol smart-contracts\RandomizerRNG.sol test\mocks\MockRandomizerCore.sol test\StreamCoreBurn.t.sol`.
+  `forge fmt --check smart-contracts\core\StreamCore.sol smart-contracts\interfaces\stream\IStreamCore.sol smart-contracts\integrations\randomizers\StreamRandomizerLifecycle.sol smart-contracts\integrations\randomizers\RandomizerVRF.sol smart-contracts\integrations\randomizers\RandomizerRNG.sol test\mocks\MockRandomizerCore.sol test\StreamCoreBurn.t.sol`.
 - `git diff --check` passed.
 - Heading and traceability scans passed across roadmap, durable state, metadata
   docs, status docs, ADRs, touched contracts, and burn tests.
@@ -14185,7 +14185,7 @@ Validation so far:
 
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path test/StreamMetadataEscaping.t.sol -vvv`
   passed with 6 tests.
-- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt smart-contracts\StreamCore.sol test\helpers\CharacterizationTestBase.sol test\StreamMetadataEscaping.t.sol`
+- `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt smart-contracts\core\StreamCore.sol test\helpers\CharacterizationTestBase.sol test\StreamMetadataEscaping.t.sol`
   applied the required formatting.
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; forge test --match-path 'test/StreamMetadata*.t.sol' -vvv`
   passed with 31 metadata tests.
@@ -14278,7 +14278,7 @@ Validation:
   metadata tests.
 - `make check` passed.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
-- `forge fmt --check smart-contracts\StreamCore.sol
+- `forge fmt --check smart-contracts\core\StreamCore.sol
   test\StreamMetadataEscaping.t.sol test\StreamInitialization.t.sol
   test\helpers\TestHashingUtils.sol` passed.
 - `git diff --check` passed.
@@ -14355,7 +14355,7 @@ Validation completed at `2026-06-11 06:13 UTC`:
 - `make check` passed locally after adding the production size gate.
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passed.
 - `$env:Path="$HOME\.foundry\bin;$env:Path"; forge fmt --check
-  smart-contracts\StreamCore.sol smart-contracts\StreamMetadataRenderer.sol
+  smart-contracts\core\StreamCore.sol smart-contracts\domains\metadata\StreamMetadataRenderer.sol
   test\StreamMetadataEvents.t.sol` passed.
 - `git diff --check` passed.
 - `forge build --sizes --via-ir --skip test --skip script --force` passed and reports
@@ -14380,7 +14380,7 @@ CodeRabbit response completed locally at `2026-06-11 06:31 UTC`:
   Slither count to the static-analysis row and correcting the appendix impact
   table to `Low=93`, `Informational=590`.
 - Validation after the review fixes:
-  - `forge fmt --check smart-contracts\StreamMetadataRenderer.sol
+  - `forge fmt --check smart-contracts\domains\metadata\StreamMetadataRenderer.sol
     test\StreamMetadataEscaping.t.sol` passed.
   - `forge test --match-contract 'StreamMetadata(Escaping|Golden|Events)Test'
     -vvv` passed with 26 tests.
@@ -15330,8 +15330,8 @@ Goal:
 
 Initial scope:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/DependencyRegistry.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/domains/dependencies/DependencyRegistry.sol`
 - `test/StreamMetadataSizeLimits.t.sol`
 - metadata/status/blocker docs, roadmap/test/run-state traceability,
   changelog, and generated release/deployment artifacts
@@ -15364,7 +15364,7 @@ Validation status:
 - Windows `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` passes.
 - `git diff --check` passes.
 - Touched-file formatting passes:
-  `forge fmt --check smart-contracts\StreamCore.sol smart-contracts\DependencyRegistry.sol test\StreamMetadataSizeLimits.t.sol`.
+  `forge fmt --check smart-contracts\core\StreamCore.sol smart-contracts\domains\dependencies\DependencyRegistry.sol test\StreamMetadataSizeLimits.t.sol`.
 - Full `forge fmt --check smart-contracts` still fails on existing legacy
   formatting outside this PR and remains tracked as a broader repo cleanup.
 - GitHub CI run `27356813758` passed.
@@ -16382,7 +16382,7 @@ Outcome:
 | 2026-06-17 04:15 | Merge OSS-001 and start INT-011 curator rewards flow | PR #485 merged as `8ee5900a88b520c4f61052ca85f1a41672af62ab` after CI run `27664952104`, CodeRabbit status, and 6529bot follow-up were clean; issue #484 closed completed. Issue #486 and branch `codex/curator-rewards-flow-spec` now track INT-011. The draft adds a checked `docs/integrations/curator-rewards.md` guide for reward root publication, domain-separated Merkle leaf encoding, direct/delegated claims, pull-payment credits, withdrawal/failure UX, events, indexer reconstruction, and operator boundaries. Next action is to finish gate wiring, refresh release artifacts, run focused/full checks, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 04:35 | Validate INT-011 curator rewards flow | Added the checked curator rewards frontend/indexer flow spec plus `scripts/check_curator_rewards_flow.py`, focused checker tests, integrations README coverage, Makefile/Bash/PowerShell/CI gate wiring, tooling docs, changelog, release-manifest/checksum coverage, regenerated release artifacts, and backlog/run-state updates. Focused curator rewards, integrations README, release-notes, release-manifest, bytecode-proof, release-checksum, release verifier, changelog, Python compile, and whitespace checks passed. Full `make check` and standalone Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` both passed with existing compiler/Foundry warning noise only; an earlier parallel Windows run failed on a temporary forge-size log lock caused by concurrent local gates and was rerun successfully by itself. Next action is to commit, push, open the INT-011 PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 04:36 | Open PR #487 for INT-011 | PR #487 is open at `https://github.com/6529-Collections/6529Stream/pull/487`, closes issue #486, and packages the curator rewards integration guide, checker/tests, local/CI/Windows gate wiring, integration index coverage, tooling docs, generated release artifacts, and backlog/run-state traceability. CodeRabbit review was requested in comment `4725989010`. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
-| 2026-06-17 04:40 | Address PR #487 review nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with doc-maintainability nice-to-haves. Accepted the useful low-risk suggestions by normalizing required command matching and making `scripts/check_curator_rewards_flow.py` cross-check the documented domain constant, delegation collection, use-case constant, root-epoch increments, delegation lookup bindings, and `abi.encode` leaf field order against `smart-contracts/StreamCuratorsPool.sol`; focused tests now cover command wrapping and Solidity source drift. Focused curator rewards tests/check, release checksum tests/check, release artifact verifier, and `git diff --check` passed. Next action is to push the review-response commit, wait for CI/CodeRabbit/6529bot follow-up, then merge if clean. |
+| 2026-06-17 04:40 | Address PR #487 review nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with doc-maintainability nice-to-haves. Accepted the useful low-risk suggestions by normalizing required command matching and making `scripts/check_curator_rewards_flow.py` cross-check the documented domain constant, delegation collection, use-case constant, root-epoch increments, delegation lookup bindings, and `abi.encode` leaf field order against `smart-contracts/domains/revenue/StreamCuratorsPool.sol`; focused tests now cover command wrapping and Solidity source drift. Focused curator rewards tests/check, release checksum tests/check, release artifact verifier, and `git diff --check` passed. Next action is to push the review-response commit, wait for CI/CodeRabbit/6529bot follow-up, then merge if clean. |
 | 2026-06-17 04:55 | Merge PR #487 and start INT-012 | PR #487 merged as `ce832d8` after CodeRabbit, Foundry smoke, Windows wrapper, 6529bot security, general, and follow-up review were clean; issue #486 closed completed. Issue #488 and branch `codex/withdrawals-credits-flow-spec` now track INT-012. The local draft adds a checked `docs/integrations/withdrawals-and-credits.md` guide plus source-aware checker/tests covering fixed-price, auction, curator, surplus, mobile, Electron, and indexer credit/withdrawal UX. Next action is to finish gate wiring, regenerate release artifacts, run focused/full checks, commit, push, open PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 05:12 | Open PR #489 for INT-012 | PR #489 is open at `https://github.com/6529-Collections/6529Stream/pull/489`, closes issue #488, and packages the withdrawal and credit UX guide, source-aware checker/tests, local/CI/Windows gate wiring, integrations index coverage, tooling docs, generated release artifacts, and backlog/run-state traceability. CodeRabbit review was requested in comment `4726283760`. Local `make check` and Windows `scripts\check.ps1` passed with existing compiler/Foundry warning noise only. Next action is to wait for CI and bot feedback, address anything actionable, then merge only when clean. |
 | 2026-06-17 05:14 | Address PR #489 checker nice-to-haves | 6529bot security reported no findings and general review marked the PR good to merge with low-risk checker hardening suggestions. Accepted the useful source-drift coverage by requiring documented fixed-price total helpers, aggregate poster/protocol/curator reserve helpers, and the curator `Reward` event to exist in Solidity sources. Focused withdrawals/credits tests and checker passed, and release checksums were regenerated. Next action is to run final focused checksum/whitespace checks, commit, push, wait for latest CI/bot status, and merge if clean. |
@@ -16440,7 +16440,7 @@ Outcome:
 | 2026-06-17 19:00 | Address PR #521 checker hardening nice-to-haves | 6529bot security reported no findings and general review marked PR #521 good to merge with low-risk checker hardening suggestions. Accepted the useful items by adding an anchor/query local-link regression, adding `make check` to the canonical workflow validation command block, and requiring exact YAML list-item matches for audit issue-template dropdown options with a prefix-drift regression. Focused audit-finding tests/check, Python compile, release risk/register/blocker/manifest/lockfile/checksum checks, release artifact verification, and diff hygiene passed. Next action is to commit and push the review-response head, wait for CI/CodeRabbit/6529bot latest-head feedback, and merge only when clean. |
 | 2026-06-17 19:31 | Merge AUD-003 and select next substantive item | PR #521 merged as `cfcd7ba9aa0cd41a81ce4bbf9db9b3a037776da7` after CI run #1204, CodeRabbit status, and latest-head 6529bot follow-up were clean. Issue #520 closed completed. Local `main` is fast-forwarded to the merge commit. Next action is to choose and start a substantive local-verifiable backlog item, with CON-003 read-view hardening and ADV adversarial/invariant coverage under review. |
 | 2026-06-17 19:50 | Start CON-003 auction read views | Issue #522 and branch `codex/auction-integration-read-views` now track the next substantive PR. Scope is additive `StreamAuctions` integration reads for `minimumNextBid(tokenId)` and the no-bid claimant alias, focused auction tests/invariants, integration docs, regenerated ABI/release artifacts, CodeRabbit review, CI, and merge before moving to the randomizer request-binding follow-up. |
-| 2026-06-17 20:11 | Validate CON-003 local draft | Added additive `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` integration read views, focused auction payment/custody tests, invariant cross-checks, integration/operator docs, changelog coverage, and regenerated release evidence. Local validation passed: `make release-checksums-check`, `make abi-compatibility-check`, `forge fmt --check smart-contracts\AuctionContract.sol test\StreamAuctionPayments.t.sol test\StreamAuctionCustody.t.sol test\StreamAuctionInvariant.t.sol test\StreamPaymentsInvariant.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `forge test --match-path test\StreamAuctionCustody.t.sol -vvv`, `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv`, `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`, `python scripts\check_changelog.py`, `python scripts\verify_release_artifacts.py`, stale pinned-hash scan, and `codex-diff-check`. `StreamCore` remains 22,184 bytes with 2,392 bytes of EIP-170 margin; `StreamAuctions` is 10,938 bytes with 13,638 bytes margin. Next action is to commit, push, open the PR for issue #522, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-17 20:11 | Validate CON-003 local draft | Added additive `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` integration read views, focused auction payment/custody tests, invariant cross-checks, integration/operator docs, changelog coverage, and regenerated release evidence. Local validation passed: `make release-checksums-check`, `make abi-compatibility-check`, `forge fmt --check smart-contracts\domains\auctions\AuctionContract.sol test\StreamAuctionPayments.t.sol test\StreamAuctionCustody.t.sol test\StreamAuctionInvariant.t.sol test\StreamPaymentsInvariant.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `forge test --match-path test\StreamAuctionCustody.t.sol -vvv`, `forge test --match-path test\StreamAuctionInvariant.t.sol -vvv`, `forge test --match-path test\StreamPaymentsInvariant.t.sol -vvv`, `python scripts\check_changelog.py`, `python scripts\verify_release_artifacts.py`, stale pinned-hash scan, and `codex-diff-check`. `StreamCore` remains 22,184 bytes with 2,392 bytes of EIP-170 margin; `StreamAuctions` is 10,938 bytes with 13,638 bytes margin. Next action is to commit, push, open the PR for issue #522, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-17 20:32 | Open PR #523 for CON-003 | PR #523 is open at `https://github.com/6529-Collections/6529Stream/pull/523`, closes issue #522, and packages additive auction read views, focused tests/invariants, integration/operator docs, changelog coverage, and regenerated release evidence. CodeRabbit was requested in comment `4735054006`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 20:37 | Address PR #523 test-coverage nice-to-haves | 6529bot security reported no findings and general review marked PR #523 good to merge with two useful coverage nice-to-haves. Added explicit `minimumNextBid` coverage for the 1-wei integer-floor outbid case where the increment floors to zero, and expanded fail-closed revert assertions across no auction, ended no bid, ended with bid, settled no bid, settled with bid, and cancelled states. `forge fmt --check test\StreamAuctionPayments.t.sol`, `forge test --match-path test\StreamAuctionPayments.t.sol -vvv`, `make release-checksums-check`, and `codex-diff-check` passed. Next action is to commit/push the review-response head, wait for latest CI/bot feedback, and merge only when clean. |
 | 2026-06-17 20:59 | Fix PR #523 Foundry smoke gas snapshot | GitHub CI failed only on `Foundry smoke` gas snapshot drift: five auction gas baselines shifted after adding the read views, while all gas tests passed. Updated `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and regenerated release checksum/manifest hashes. Local validation passed: `make gas-snapshot-check`, `make release-checksums-check` with UTF-8 output, and `codex-diff-check`. Next action is to commit/push the CI-fix head, wait for latest checks and bot feedback, and merge only when clean. |

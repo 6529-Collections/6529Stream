@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/StreamGovernanceActionPolicy.sol";
+import "../smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol";
 import "./helpers/CharacterizationTestBase.sol";
 
 contract StreamGovernanceActionPolicyTarget {

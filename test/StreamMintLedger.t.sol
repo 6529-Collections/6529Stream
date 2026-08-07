@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamMintLedger.sol";
-import "../smart-contracts/StreamMintLedger.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintLedger.sol";
+import "../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 

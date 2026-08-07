@@ -14,17 +14,17 @@ DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
 EXPECTED_SOLC_WARNINGS = {
     (
         "5667",
-        "smart-contracts/RandomizerNXT.sol",
+        "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
     ),
     (
         "5667",
-        "smart-contracts/RandomizerRNG.sol",
+        "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
     ),
     (
         "5667",
-        "smart-contracts/RandomizerVRF.sol",
+        "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
     ),
     (
@@ -34,17 +34,17 @@ EXPECTED_SOLC_WARNINGS = {
     ),
     (
         "2018",
-        "smart-contracts/RandomizerNXT.sol",
+        "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
         "function isRandomizerContract() external view returns (bool) {",
     ),
     (
         "2018",
-        "smart-contracts/RandomizerRNG.sol",
+        "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
         "function isRandomizerContract() external view returns (bool) {",
     ),
     (
         "2018",
-        "smart-contracts/RandomizerVRF.sol",
+        "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
         "function isRandomizerContract() external view returns (bool) {",
     ),
     (
@@ -54,7 +54,7 @@ EXPECTED_SOLC_WARNINGS = {
     ),
     (
         "2018",
-        "smart-contracts/StreamMinter.sol",
+        "smart-contracts/domains/mint/StreamMinter.sol",
         "function isMinterContract() external view returns (bool) {",
     ),
 }
@@ -141,22 +141,22 @@ REQUIRED_LINK_TARGETS = [
     "ops/EXECUTION_BACKLOG.md",
     "release-artifacts/latest/risk-register.json",
     "release-artifacts/latest/bytecode-release-proof.json",
-    "smart-contracts/AuctionContract.sol",
-    "smart-contracts/DependencyRegistry.sol",
-    "smart-contracts/NFTdelegation.sol",
-    "smart-contracts/RandomizerNXT.sol",
-    "smart-contracts/RandomizerRNG.sol",
-    "smart-contracts/RandomizerVRF.sol",
-    "smart-contracts/StreamAdmins.sol",
-    "smart-contracts/StreamCore.sol",
-    "smart-contracts/StreamCuratorsPool.sol",
-    "smart-contracts/StreamDrops.sol",
-    "smart-contracts/StreamMinter.sol",
-    "smart-contracts/StreamMintManager.sol",
-    "smart-contracts/StreamMetadataRenderer.sol",
-    "smart-contracts/VRFConsumerBaseV2.sol",
-    "smart-contracts/SignedMath.sol",
-    "smart-contracts/Math.sol",
+    "smart-contracts/domains/auctions/AuctionContract.sol",
+    "smart-contracts/domains/dependencies/DependencyRegistry.sol",
+    "smart-contracts/integrations/delegation/NFTdelegation.sol",
+    "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
+    "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+    "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+    "smart-contracts/domains/access/StreamAdmins.sol",
+    "smart-contracts/core/StreamCore.sol",
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
+    "smart-contracts/domains/mint/StreamDrops.sol",
+    "smart-contracts/domains/mint/StreamMinter.sol",
+    "smart-contracts/domains/mint/StreamMintManager.sol",
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+    "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+    "smart-contracts/vendor/openzeppelin/Math.sol",
     "test/StreamAuctionPayments.t.sol",
     "test/StreamCuratorsPool.t.sol",
     "test/StreamEmergencyWithdraw.t.sol",
@@ -176,34 +176,34 @@ INVALID_NATSPEC_TAGS = (
 )
 
 SOURCE_MARKERS = {
-    "smart-contracts/RandomizerNXT.sol": [
+    "smart-contracts/integrations/randomizers/RandomizerNXT.sol": [
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
         "function isRandomizerContract() external view returns (bool)",
     ],
-    "smart-contracts/RandomizerRNG.sol": [
+    "smart-contracts/integrations/randomizers/RandomizerRNG.sol": [
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
         "function isRandomizerContract() external view returns (bool)",
     ],
-    "smart-contracts/RandomizerVRF.sol": [
+    "smart-contracts/integrations/randomizers/RandomizerVRF.sol": [
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
         "function isRandomizerContract() external view returns (bool)",
     ],
-    "smart-contracts/StreamCore.sol": [
+    "smart-contracts/core/StreamCore.sol": [
         "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
     ],
-    "smart-contracts/StreamMinter.sol": [
+    "smart-contracts/domains/mint/StreamMinter.sol": [
         "function isMinterContract() external view returns (bool)",
         "block.timestamp",
     ],
-    "smart-contracts/StreamMintManager.sol": ["block.timestamp"],
-    "smart-contracts/VRFConsumerBaseV2.sol": [
+    "smart-contracts/domains/mint/StreamMintManager.sol": ["block.timestamp"],
+    "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol": [
         "constructor(<other arguments>, address _vrfCoordinator, address _link)",
         "<initialization with other arguments goes here>",
     ],
-    "smart-contracts/SignedMath.sol": ["library SignedMath"],
-    "smart-contracts/Math.sol": ["library Math"],
-    "smart-contracts/AuctionContract.sol": ["block.timestamp"],
-    "smart-contracts/StreamDrops.sol": ["block.timestamp"],
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol": ["library SignedMath"],
+    "smart-contracts/vendor/openzeppelin/Math.sol": ["library Math"],
+    "smart-contracts/domains/auctions/AuctionContract.sol": ["block.timestamp"],
+    "smart-contracts/domains/mint/StreamDrops.sol": ["block.timestamp"],
     "test/helpers/ProtocolStateMachine.sol": ["block.timestamp"],
     "test/StreamAuctionPayments.t.sol": ["selfdestruct(target);"],
     "test/StreamCuratorsPool.t.sol": ["selfdestruct(target);"],

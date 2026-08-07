@@ -122,7 +122,7 @@ REQUIRED_COMMANDS = [
 ]
 
 REQUIRED_LINK_TARGETS = [
-    "smart-contracts/StreamDrops.sol",
+    "smart-contracts/domains/mint/StreamDrops.sol",
     "docs/adr/0001-drop-authorization.md",
     "docs/known-blockers.md",
     "docs/release-readiness.md",
@@ -702,7 +702,7 @@ def validate_fixture(path: Path) -> tuple[str, set[str]]:
 
     require_string(fixture.get("description"), f"{fixture_id}.description")
     source = require_dict(fixture.get("source"), f"{fixture_id}.source")
-    if source.get("contract") != "smart-contracts/StreamDrops.sol":
+    if source.get("contract") != "smart-contracts/domains/mint/StreamDrops.sol":
         raise DropAuthorizationFixtureError(f"{fixture_id}.source.contract mismatch")
     require_list(source.get("tests"), f"{fixture_id}.source.tests")
     validate_no_secret_policy(fixture, fixture_id)

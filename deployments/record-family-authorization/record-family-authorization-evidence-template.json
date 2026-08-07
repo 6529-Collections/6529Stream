@@ -8,7 +8,7 @@
     "status": "planning_bound",
     "path": "release-artifacts/record-family-authorization-inventory.json",
     "schema_version": "6529stream.record-family-authorization-inventory.v1",
-    "sha256": "50d96a4b8356266d04c72847080125a394a0efbed3327b9ddba43409d9e7c170"
+    "sha256": "23aa0deac8b4b2b50c72322eea02bb6aa5026746cea46c8e9e216e5eb1d43aef"
   },
   "candidate_binding": {
     "status": "not_available",

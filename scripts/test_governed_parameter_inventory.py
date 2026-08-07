@@ -22,7 +22,7 @@ SCHEMA_PATH = ROOT / checker.DEFAULT_SCHEMA
 SOURCE_VERIFICATION_PATH = Path(
     "release-artifacts/latest/source-verification-inputs.json"
 )
-FIXTURE_SOURCE_PATH = Path("smart-contracts/StreamCore.sol")
+FIXTURE_SOURCE_PATH = Path("smart-contracts/core/StreamCore.sol")
 SHARED_BUFFER_EVIDENCE_PATH = Path(
     "release-artifacts/evidence/royalty-return-gas-buffer.json"
 )

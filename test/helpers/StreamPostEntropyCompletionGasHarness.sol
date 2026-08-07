@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/ERC721.sol";
-import "../../smart-contracts/IERC721Receiver.sol";
+import "../../smart-contracts/vendor/openzeppelin/ERC721.sol";
+import "../../smart-contracts/vendor/openzeppelin/IERC721Receiver.sol";
 
 interface IStreamPostEntropyMintCoordinator {
     function onTokenMinted(uint256 collectionId, uint256 tokenId, bytes32 mintCommitment)

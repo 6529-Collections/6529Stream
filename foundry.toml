@@ -16,7 +16,8 @@ additional_compiler_profiles = [
     { name = "governance-via-ir", via_ir = true, optimizer = true, optimizer_runs = 200, evm_version = "paris", bytecode_hash = "None" },
 ]
 compilation_restrictions = [
-    { paths = "smart-contracts/{StreamGovernanceExecutor,StreamGovernanceBootstrap,StreamGovernanceEvidence,StreamGovernanceManifest,StreamGovernancePolicy,StreamModuleRegistry,StreamRoleRegistry}.sol", via_ir = true },
+    { paths = "smart-contracts/domains/governance/{StreamGovernanceExecutor,StreamGovernanceBootstrap,StreamGovernanceEvidence,StreamGovernanceManifest,StreamGovernancePolicy,StreamRoleRegistry}.sol", via_ir = true },
+    { paths = "smart-contracts/domains/modules/StreamModuleRegistry.sol", via_ir = true },
     { paths = "test/{StreamGovernanceV2HolderRehearsal.t.sol,helpers/StreamGovernanceV2HolderRehearsalMocks.sol}", via_ir = true },
 ]
 fs_permissions = [

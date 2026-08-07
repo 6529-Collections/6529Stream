@@ -123,7 +123,7 @@ class WithdrawalsCreditsFlowTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_doc()
             text = original.replace(
-                "- [smart-contracts/StreamDrops.sol](../../smart-contracts/StreamDrops.sol)\n",
+                "- [smart-contracts/domains/mint/StreamDrops.sol](../../smart-contracts/domains/mint/StreamDrops.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -137,7 +137,7 @@ class WithdrawalsCreditsFlowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/StreamDrops.sol").unlink()
+            (root / "smart-contracts/domains/mint/StreamDrops.sol").unlink()
             write_text(root / checker.DEFAULT_DOC, minimal_doc())
             with self.assertRaisesRegex(
                 checker.WithdrawalsCreditsFlowError, "linked targets are missing"
@@ -148,7 +148,7 @@ class WithdrawalsCreditsFlowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            source_path = root / "smart-contracts/AuctionContract.sol"
+            source_path = root / "smart-contracts/domains/auctions/AuctionContract.sol"
             source_path.write_text(
                 source_path.read_text(encoding="utf-8").replace("auctionBidderCredits", ""),
                 encoding="utf-8",

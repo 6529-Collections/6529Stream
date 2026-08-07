@@ -74,7 +74,7 @@ def write_tree(
     accepted_reductions: list[dict[str, Any]] | None = None,
     include_policy: bool = True,
 ) -> None:
-    source = "smart-contracts/StreamCore.sol"
+    source = "smart-contracts/core/StreamCore.sol"
     write_source(root, source)
     config: dict[str, Any] = {
         "schema_version": "6529stream.release-artifact-contracts.v1",
@@ -143,7 +143,7 @@ def add_import_and_release_receipt(
     config_path = root / "release-artifacts" / "contracts.json"
     source_records = []
     for source in (
-        "smart-contracts/StreamCore.sol",
+        "smart-contracts/core/StreamCore.sol",
         "smart-contracts/Dependency.sol",
     ):
         raw = (root / source).read_bytes()
@@ -168,7 +168,7 @@ def add_import_and_release_receipt(
             {
                 "kind": "production_contract",
                 "name": "StreamCore",
-                "source": "smart-contracts/StreamCore.sol",
+                "source": "smart-contracts/core/StreamCore.sol",
                 "artifact_relative_path": "StreamCore.sol/StreamCore.json",
                 "artifact_path": checker.check_contract_size_budget.normalize_path(
                     artifact_path,

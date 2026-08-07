@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/Strings.sol";
+import "../../smart-contracts/vendor/openzeppelin/Strings.sol";
 
 abstract contract TestHashingUtils {
     using Strings for uint256;

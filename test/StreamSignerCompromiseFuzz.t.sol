@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/AuctionContract.sol";
-import "../smart-contracts/StreamDrops.sol";
-import "../smart-contracts/StreamPauseDomains.sol";
+import "../smart-contracts/domains/auctions/AuctionContract.sol";
+import "../smart-contracts/domains/mint/StreamDrops.sol";
+import "../smart-contracts/domains/access/StreamPauseDomains.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/ProtocolStateMachine.sol";
 

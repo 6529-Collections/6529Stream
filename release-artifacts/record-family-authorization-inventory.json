@@ -26,22 +26,22 @@
     "contracts": [
       {
         "name": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "mutation_surface_count": 4
       },
       {
         "name": "StreamPreservationRecords",
-        "source_path": "smart-contracts/StreamPreservationRecords.sol",
-        "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+        "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         "mutation_surface_count": 1
       }
     ],
     "mutation_surfaces": [
       {
         "contract": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "function": "setCollectionRecord",
         "canonical_signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
         "selector": "0xcf51f66a",
@@ -61,8 +61,8 @@
       },
       {
         "contract": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "function": "setCollectionRecordWithRevision",
         "canonical_signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
         "selector": "0x0dd00ba6",
@@ -82,8 +82,8 @@
       },
       {
         "contract": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "function": "publishCollectionSnapshot",
         "canonical_signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
         "selector": "0xf2d67fbd",
@@ -103,8 +103,8 @@
       },
       {
         "contract": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "function": "lockCollectionRecord",
         "canonical_signature": "lockCollectionRecord(uint256,bytes32)",
         "selector": "0xe4c05429",
@@ -125,8 +125,8 @@
       },
       {
         "contract": "StreamPreservationRecords",
-        "source_path": "smart-contracts/StreamPreservationRecords.sol",
-        "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+        "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         "function": "recordCollectionRecord",
         "canonical_signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
         "selector": "0xc3434532",
@@ -149,56 +149,56 @@
     "known_fail_open_behaviors": [
       {
         "id": "arbitrary_metadata_record_type",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "source_anchor": "_validateRecord",
         "status": "open_blocker",
         "description": "Any nonzero, nonreserved bytes32 record type passes structural validation without a declared family."
       },
       {
         "id": "arbitrary_preservation_record_type",
-        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
         "source_anchor": "_validateRecord",
         "status": "open_blocker",
         "description": "Any nonzero bytes32 record type passes structural validation without a declared family."
       },
       {
         "id": "opaque_snapshot_family_set",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "source_anchor": "publishCollectionSnapshot",
         "status": "open_blocker",
         "description": "The runtime observes one snapshot.recordType and cannot prove authority over every family represented by opaque manifest bytes."
       },
       {
         "id": "arbitrary_lock_record_type",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "source_anchor": "lockCollectionRecord",
         "status": "open_blocker",
         "description": "A selector or global admin can permanently lock an undeclared record type."
       },
       {
         "id": "record_type_capacity_exhaustion",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "source_anchor": "_rememberRecordType",
         "status": "open_blocker",
         "description": "With MAX_RECORD_TYPES 128 and two reserved locks, 126 arbitrary nonreserved locks can exhaust all future legitimate record-type slots."
       },
       {
         "id": "optional_unverified_preservation_signature",
-        "source_path": "smart-contracts/StreamPreservationRecords.sol",
+        "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
         "source_anchor": "_validateRecord",
         "status": "open_blocker",
         "description": "Signature fields are optional or hash-only and are not verified for signer-verified families."
       },
       {
         "id": "authorization_class_event_absent",
-        "source_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "source_anchor": "CollectionMetadataRecordSet",
         "status": "open_blocker",
         "description": "Current metadata and preservation record events do not persist an authorization class."
       },
       {
         "id": "selector_global_admin_family_authority",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "source_anchor": "FunctionAdminRequired",
         "status": "open_blocker",
         "description": "Current metadata mutation surfaces admit a whole-selector admin or global admin without enforcing record-family-scoped authority."

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/Bytes32Strings.sol";
-import "../smart-contracts/NFTdelegation.sol";
+import "../smart-contracts/libraries/Bytes32Strings.sol";
+import "../smart-contracts/integrations/delegation/NFTdelegation.sol";
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/Strings.sol";
+import "../smart-contracts/vendor/openzeppelin/Strings.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

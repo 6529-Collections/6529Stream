@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamPauseDomains.sol";
+import "../smart-contracts/domains/access/StreamPauseDomains.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

@@ -5,44 +5,44 @@
   "source_commit": "34debc7e5f2de25a6eaf2e8933452b123e5a8220",
   "source_bindings": [
     {
-      "path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+      "path": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
       "sha256": "eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f"
     },
     {
-      "path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
-      "sha256": "82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95"
+      "path": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+      "sha256": "c1cc708b5928e4f0297544ade89dd0404787aca01c3394b7a1ed139aaf856a02"
     },
     {
-      "path": "smart-contracts/StreamRecordFamilyRegistry.sol",
-      "sha256": "9ffb6e90c1905f8eebf91039f4c947b08d07730038b115f9204a348e52c85bb2"
+      "path": "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
+      "sha256": "b34580268ca327e82e3a7bd7768964b11d82ab58662b6b73a3f701400f76d35b"
     },
     {
-      "path": "smart-contracts/IStreamCollectionMetadata.sol",
-      "sha256": "f22398c6650c3de6599c2e6edc48068d251cab782cc2f1f931ea96fdd9877295"
+      "path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+      "sha256": "487ff1e834d7ae696ef0a04c66f0eccfc3789659f96c98f77492b22176aedb04"
     },
     {
-      "path": "smart-contracts/StreamCollectionMetadata.sol",
-      "sha256": "f25195871f147b2ca47ba12b5a6bff434112e86107ce6371564d7760218770ac"
+      "path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "sha256": "fd82d226d688e5296eca3ef05dc24c13ceac370090cf22e5fc9ed08e5f9cdf95"
     },
     {
-      "path": "smart-contracts/IStreamPreservationRecords.sol",
-      "sha256": "bdfbddab0249e6048ab644b7c0f833ca1ed261e706973742b54636089fbdfc54"
+      "path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
+      "sha256": "072f80fa3e9ca50a7045ca85ac440f9464a117032639da8c2571f73eee102fed"
     },
     {
-      "path": "smart-contracts/StreamPreservationRecords.sol",
-      "sha256": "271e622ebffdf852e3bb42faa47d08f2731a0c219dea30fda2e6c8a1530ad9ca"
+      "path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+      "sha256": "606e9d2b98eb91c3a4022b3d60142eef783b6da737edd0fce3c4d4ec7f98e369"
     },
     {
       "path": "script/RehearseDeployment.s.sol",
-      "sha256": "8ada36c26e300a1497cc9ee422a4c34504ae08014dd7c4bdf9f9d505d7e43026"
+      "sha256": "640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1"
     }
   ],
   "classifier": {
     "contract": "StreamCollectionMetadata",
-    "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-    "implementation_source_path": "smart-contracts/StreamRecordFamilyRegistry.sol",
-    "interface_path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
-    "authority_provider_interface_path": "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+    "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+    "implementation_source_path": "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
+    "interface_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+    "authority_provider_interface_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
     "interface_id": "0xb19a79de",
     "marker_selector": "0x20e9f458",
     "schema_version": 1,
@@ -165,16 +165,16 @@
   "host_bindings": [
     {
       "contract": "StreamCollectionMetadata",
-      "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-      "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+      "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
       "interface_id": "0x2c2422f4",
       "registry_binding": "immutable",
       "authorization_class_persisted": true
     },
     {
       "contract": "StreamPreservationRecords",
-      "source_path": "smart-contracts/StreamPreservationRecords.sol",
-      "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+      "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+      "interface_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
       "interface_id": "0x45cc434d",
       "registry_binding": "immutable",
       "authorization_class_persisted": true

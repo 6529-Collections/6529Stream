@@ -13,7 +13,7 @@ Accepted.
 | Blocks | [P0-RAND-001](https://github.com/6529-Collections/6529Stream/issues/37), [P0-RAND-002](https://github.com/6529-Collections/6529Stream/issues/38), [P0-RAND-003](https://github.com/6529-Collections/6529Stream/issues/39), [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40), [P0-RAND-005](https://github.com/6529-Collections/6529Stream/issues/41), [P0-RAND-006](https://github.com/6529-Collections/6529Stream/issues/42), [P0-RAND-007](https://github.com/6529-Collections/6529Stream/issues/43) |
 | Related issues | [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8), [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9), [P0-RAND-008](https://github.com/6529-Collections/6529Stream/issues/73) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0002](0002-auction-custody.md), [ADR 0003](0003-payment-accounting.md), [ADR 0004](0004-admin-governance.md), ADR 0006 |
-| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/RandomizerVRF.sol`, `smart-contracts/RandomizerRNG.sol`, `smart-contracts/RandomizerNXT.sol`, former `smart-contracts/XRandoms.sol`, `smart-contracts/IRandomizer.sol`, `smart-contracts/IArrngController.sol`, `smart-contracts/ArrngConsumer.sol` |
+| Affected contracts | `smart-contracts/core/StreamCore.sol`, `smart-contracts/integrations/randomizers/RandomizerVRF.sol`, `smart-contracts/integrations/randomizers/RandomizerRNG.sol`, `smart-contracts/integrations/randomizers/RandomizerNXT.sol`, former `smart-contracts/XRandoms.sol`, `smart-contracts/interfaces/stream/IRandomizer.sol`, `smart-contracts/integrations/arrng/IArrngController.sol`, `smart-contracts/integrations/arrng/ArrngConsumer.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -39,28 +39,28 @@ Before public beta, the protocol needs to decide:
 
 Current source references:
 
-- `smart-contracts/StreamCore.sol#_mintProcessing` stores `tokenData`, maps the
+- `smart-contracts/core/StreamCore.sol#_mintProcessing` stores `tokenData`, maps the
   token to a collection, mints the token, and calls the configured collection
   randomizer.
 - `_safeMint` runs before `calculateTokenHash`, so receiver callbacks and
   indexers can observe a minted token while the token hash is still zero.
-- `smart-contracts/StreamCore.sol#setTokenHash` allows only the collection's
+- `smart-contracts/core/StreamCore.sol#setTokenHash` allows only the collection's
   current `randomizerContract` to set a token hash, and only when the token hash
   is still zero.
-- `smart-contracts/StreamCore.sol#tokenURI` returns the off-chain `pending`
+- `smart-contracts/core/StreamCore.sol#tokenURI` returns the off-chain `pending`
   URI while `tokenToHash[tokenId]` is zero and the token uses off-chain
   metadata.
 - On-chain metadata does not have an explicit pending state; it embeds the zero
   hash directly in the generated script while randomness is pending.
-- `smart-contracts/RandomizerVRF.sol` stores
+- `smart-contracts/integrations/randomizers/RandomizerVRF.sol` stores
   `tokenToRequest`, `requestToToken`, and `tokenIdToCollection`, then writes a
   token hash from `fulfillRandomWords`.
-- `smart-contracts/RandomizerRNG.sol` has a similar request-to-token mapping
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol` has a similar request-to-token mapping
   and sends ETH to the arRNG controller from the randomizer adapter.
-- `smart-contracts/RandomizerRNG.sol#emergencyWithdraw` sweeps the adapter
+- `smart-contracts/integrations/randomizers/RandomizerRNG.sol#emergencyWithdraw` sweeps the adapter
   balance to `adminsContract.owner()`, which conflicts with ADR 0003 unless
   randomness reserves and refunds are excluded from surplus.
-- `smart-contracts/RandomizerNXT.sol` synchronously derives a hash from
+- `smart-contracts/integrations/randomizers/RandomizerNXT.sol` synchronously derives a hash from
   `blockhash(block.number - 1)` and `XRandoms`.
 - The former `smart-contracts/XRandoms.sol` derived helper values from
   `block.prevrandao`, recent block hash, and timestamp. It was removed from

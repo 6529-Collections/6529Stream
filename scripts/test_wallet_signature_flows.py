@@ -226,7 +226,7 @@ class WalletSignatureFlowsTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_wallet_signature_doc()
             text = original.replace(
-                "- [smart-contracts/StreamDrops.sol](../../smart-contracts/StreamDrops.sol)\n",
+                "- [smart-contracts/domains/mint/StreamDrops.sol](../../smart-contracts/domains/mint/StreamDrops.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -244,7 +244,7 @@ class WalletSignatureFlowsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/StreamDrops.sol").unlink()
+            (root / "smart-contracts/domains/mint/StreamDrops.sol").unlink()
             write_text(
                 root / checker.DEFAULT_WALLET_SIGNATURE_FLOWS,
                 minimal_wallet_signature_doc(),

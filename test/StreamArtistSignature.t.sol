@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/StreamArtistApprovals.sol";
+import "../smart-contracts/compatibility/StreamArtistApprovals.sol";
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";

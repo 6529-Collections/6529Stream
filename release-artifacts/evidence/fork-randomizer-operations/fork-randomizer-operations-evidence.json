@@ -8,7 +8,7 @@
   "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
   "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
   "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-  "sha256": "sha256:a722c1f7723832c9b462fa7554f4393a45f17093c74bc3d1ab0c09ab96147757",
+  "sha256": "sha256:896b29f1e98d178e9af23d6ba8ccf8fb619514804bcaf999de632089d6d972d8",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous implementer",
   "reviewer": "pending permanent-Core PR review; historical Codex autonomous maintainer evidence review for issue #220",

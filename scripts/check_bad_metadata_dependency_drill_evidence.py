@@ -226,7 +226,7 @@ REQUIRED_COMMANDS = [
 SOURCE_REQUIREMENTS = {
     # These intentionally brittle anchors force review if the underlying
     # metadata, dependency, or freeze controls move.
-    Path("smart-contracts/StreamCore.sol"): [
+    Path("smart-contracts/core/StreamCore.sol"): [
         "error CollectionIsFrozen",
         "emit MetadataUpdate",
         "emit BatchMetadataUpdate",
@@ -236,7 +236,7 @@ SOURCE_REQUIREMENTS = {
         "function contractURI",
         "StreamCoreExternalReads.boundedRouterString",
     ],
-    Path("smart-contracts/IStreamCollectionMetadata.sol"): [
+    Path("smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"): [
         "error MetadataMutationPaused",
         "error CollectionMetadataFrozen",
         "event CollectionMetadataSnapshotPublished",
@@ -246,7 +246,7 @@ SOURCE_REQUIREMENTS = {
         "function latestCollectionSnapshotHash",
         "function isLocked",
     ],
-    Path("smart-contracts/StreamCollectionMetadata.sol"): [
+    Path("smart-contracts/domains/metadata/StreamCollectionMetadata.sol"): [
         "MetadataMutationPaused.selector",
         "revert CollectionMetadataFrozen",
         "function publishCollectionSnapshot",
@@ -255,7 +255,7 @@ SOURCE_REQUIREMENTS = {
         "function _requireSnapshotPublicationAllowed",
         "function _requireMetadataMutationNotPaused",
     ],
-    Path("smart-contracts/DependencyRegistry.sol"): [
+    Path("smart-contracts/domains/dependencies/DependencyRegistry.sol"): [
         "event DependencyVersionCreated",
         "event DependencyVersionDeprecated",
         "function addDependency",
@@ -269,7 +269,7 @@ SOURCE_REQUIREMENTS = {
         "DependencyVersionMissing",
         "DependencyKeyReserved",
     ],
-    Path("smart-contracts/StreamMetadataRenderer.sol"): [
+    Path("smart-contracts/domains/metadata/StreamMetadataRenderer.sol"): [
         "error MetadataFieldTooLarge",
         "error MetadataFieldInvalidUTF8",
         "error UnsafeMetadataURI",

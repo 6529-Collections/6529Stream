@@ -16,7 +16,7 @@
   },
   "contracts": {
     "DependencyRegistry": {
-      "source": "smart-contracts/DependencyRegistry.sol",
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
       "artifact_path": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
       "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "abi_entries": 33,
@@ -810,7 +810,7 @@
       }
     },
     "NextGenRandomizerRNG": {
-      "source": "smart-contracts/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
       "artifact_path": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
       "abi_sha256": "sha256:3dcea39be05680867eae1e42a5f57f0c7cffe20ef714f468ad0a5718aad23a4d",
       "abi_entries": 53,
@@ -2149,7 +2149,7 @@
       }
     },
     "NextGenRandomizerVRF": {
-      "source": "smart-contracts/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
       "artifact_path": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
       "abi_sha256": "sha256:636e3f5e843baeb408876e37a2eed422488e7b54eec6dea48bc3088aa60942c1",
       "abi_entries": 50,
@@ -3472,7 +3472,7 @@
       }
     },
     "StreamAdmins": {
-      "source": "smart-contracts/StreamAdmins.sol",
+      "source": "smart-contracts/domains/access/StreamAdmins.sol",
       "artifact_path": "out-release/StreamAdmins.sol/StreamAdmins.json",
       "abi_sha256": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "abi_entries": 45,
@@ -4448,7 +4448,7 @@
       }
     },
     "StreamAssetPolicyRegistry": {
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
       "abi_sha256": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
       "abi_entries": 21,
@@ -4880,7 +4880,7 @@
       }
     },
     "StreamAuctions": {
-      "source": "smart-contracts/AuctionContract.sol",
+      "source": "smart-contracts/domains/auctions/AuctionContract.sol",
       "artifact_path": "out-release/AuctionContract.sol/StreamAuctions.json",
       "abi_sha256": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
       "abi_entries": 80,
@@ -6628,7 +6628,7 @@
       }
     },
     "StreamCollectionMetadata": {
-      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
       "abi_sha256": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
       "abi_entries": 100,
@@ -9061,7 +9061,7 @@
       }
     },
     "StreamContractMetadata": {
-      "source": "smart-contracts/StreamContractMetadata.sol",
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol",
       "artifact_path": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
       "abi_sha256": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
       "abi_entries": 23,
@@ -9405,7 +9405,7 @@
       }
     },
     "StreamCore": {
-      "source": "smart-contracts/StreamCore.sol",
+      "source": "smart-contracts/core/StreamCore.sol",
       "artifact_path": "out-release/StreamCore.sol/StreamCore.json",
       "abi_sha256": "sha256:05703cd2b2f198de9457c8ee41533fe72412f04b7db63e5cb80836c469309650",
       "abi_entries": 106,
@@ -11651,7 +11651,7 @@
       }
     },
     "StreamCuratorsPool": {
-      "source": "smart-contracts/StreamCuratorsPool.sol",
+      "source": "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
       "artifact_path": "out-release/StreamCuratorsPool.sol/StreamCuratorsPool.json",
       "abi_sha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "abi_entries": 29,
@@ -12272,7 +12272,7 @@
       }
     },
     "StreamDrops": {
-      "source": "smart-contracts/StreamDrops.sol",
+      "source": "smart-contracts/domains/mint/StreamDrops.sol",
       "artifact_path": "out-release/StreamDrops.sol/StreamDrops.json",
       "abi_sha256": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
       "abi_entries": 82,
@@ -14182,7 +14182,7 @@
       }
     },
     "StreamMintLedger": {
-      "source": "smart-contracts/StreamMintLedger.sol",
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "artifact_path": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
       "abi_sha256": "sha256:94327f9a2721f154d76a8f1b889b6094c3a08a8c342987a6086b2e1313c75cae",
       "abi_entries": 45,
@@ -15542,7 +15542,7 @@
       }
     },
     "StreamMintManager": {
-      "source": "smart-contracts/StreamMintManager.sol",
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
       "abi_sha256": "sha256:7b3399fede76194f9b11b330dc7127faf34ff591634861a8062416e57d132784",
       "abi_entries": 103,
@@ -18352,7 +18352,7 @@
       }
     },
     "StreamMintModuleRegistry": {
-      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "artifact_path": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
       "abi_sha256": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
       "abi_entries": 15,
@@ -18760,7 +18760,7 @@
       }
     },
     "StreamMinter": {
-      "source": "smart-contracts/StreamMinter.sol",
+      "source": "smart-contracts/domains/mint/StreamMinter.sol",
       "artifact_path": "out-release/StreamMinter.sol/StreamMinter.json",
       "abi_sha256": "sha256:94a10370fb1f1630b651afbbd287fb5df4b43743397aa1bcdc7f2745416405d0",
       "abi_entries": 25,
@@ -19407,7 +19407,7 @@
       }
     },
     "StreamPreservationRecords": {
-      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
       "abi_sha256": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
       "abi_entries": 36,
@@ -20467,7 +20467,7 @@
       }
     },
     "StreamPrimarySaleSettlement": {
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "artifact_path": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
       "abi_sha256": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
       "abi_entries": 42,
@@ -21633,7 +21633,7 @@
       }
     },
     "StreamRevenueResolver": {
-      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
       "artifact_path": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
       "abi_sha256": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
       "abi_entries": 49,
@@ -22855,7 +22855,7 @@
       }
     },
     "StreamSplitFactory": {
-      "source": "smart-contracts/StreamSplitFactory.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
       "artifact_path": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
       "abi_sha256": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
       "abi_entries": 35,
@@ -23646,7 +23646,7 @@
       }
     },
     "StreamSplitWallet": {
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "artifact_path": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
       "abi_sha256": "sha256:fd1b403e564ffff1b74b72cc5ab65a040f0d85be6d2a591543bc1c8a8869d96b",
       "abi_entries": 44,
@@ -24591,7 +24591,7 @@
   },
   "interfaces": {
     "IDependencyRegistry": {
-      "source": "smart-contracts/IDependencyRegistry.sol",
+      "source": "smart-contracts/interfaces/stream/IDependencyRegistry.sol",
       "artifact_path": "out-release/IDependencyRegistry.sol/IDependencyRegistry.json",
       "abi_sha256": "sha256:0a37dc008896b8c45bd91ec3d6475c13312bd94f1f260f2845eeb8c78d9e418f",
       "abi_entries": 15,
@@ -25039,7 +25039,7 @@
       }
     },
     "IERC165": {
-      "source": "smart-contracts/IERC165.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC165.sol",
       "artifact_path": "out-release/IERC165.sol/IERC165.json",
       "abi_sha256": "sha256:fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
       "abi_entries": 1,
@@ -25083,7 +25083,7 @@
       }
     },
     "IERC2981": {
-      "source": "smart-contracts/IERC2981.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC2981.sol",
       "artifact_path": "out-release/IERC2981.sol/IERC2981.json",
       "abi_sha256": "sha256:aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
       "abi_entries": 2,
@@ -25158,7 +25158,7 @@
       }
     },
     "IERC4906": {
-      "source": "smart-contracts/IERC4906.sol",
+      "source": "smart-contracts/interfaces/standards/IERC4906.sol",
       "artifact_path": "out-release/IERC4906.sol/IERC4906.json",
       "abi_sha256": "sha256:1a0ec850075a0dda86b33880a319e649251d516cbfcd35d60675a909eeb10006",
       "abi_entries": 2,
@@ -25217,7 +25217,7 @@
       }
     },
     "IERC721": {
-      "source": "smart-contracts/IERC721.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC721.sol",
       "artifact_path": "out-release/IERC721.sol/IERC721.json",
       "abi_sha256": "sha256:c6cb2310d6dc4368f45ae89b64a55369785d8196967a6146d663964661a97662",
       "abi_entries": 13,
@@ -25552,7 +25552,7 @@
       }
     },
     "IERC721Metadata": {
-      "source": "smart-contracts/IERC721Metadata.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol",
       "artifact_path": "out-release/IERC721Metadata.sol/IERC721Metadata.json",
       "abi_sha256": "sha256:5ed9f3277e136284e3f9e8701131fd0fe76312b0dfa33cdb2664f571498b3f3e",
       "abi_entries": 16,
@@ -25938,7 +25938,7 @@
       }
     },
     "IERC7572": {
-      "source": "smart-contracts/IERC7572.sol",
+      "source": "smart-contracts/interfaces/standards/IERC7572.sol",
       "artifact_path": "out-release/IERC7572.sol/IERC7572.json",
       "abi_sha256": "sha256:fdc27ee0b903d51effbc5868dfe10f7cf9bf0233900772ced428ce4ac5d27ab6",
       "abi_entries": 2,
@@ -25985,7 +25985,7 @@
       }
     },
     "IRandomizer": {
-      "source": "smart-contracts/IRandomizer.sol",
+      "source": "smart-contracts/interfaces/stream/IRandomizer.sol",
       "artifact_path": "out-release/IRandomizer.sol/IRandomizer.json",
       "abi_sha256": "sha256:69476ee0c7139c273afae875e9349fbeb34e9ae9fd314d45c888450b762ab7a4",
       "abi_entries": 2,
@@ -26048,7 +26048,7 @@
       }
     },
     "IRandomizerLifecycle": {
-      "source": "smart-contracts/IRandomizerLifecycle.sol",
+      "source": "smart-contracts/interfaces/stream/IRandomizerLifecycle.sol",
       "artifact_path": "out-release/IRandomizerLifecycle.sol/IRandomizerLifecycle.json",
       "abi_sha256": "sha256:b061cd96b3d60300538484f68c97409c99b953440495001f8d5f142e38e1710a",
       "abi_entries": 10,
@@ -26413,7 +26413,7 @@
       }
     },
     "IStreamAdmins": {
-      "source": "smart-contracts/IStreamAdmins.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamAdmins.sol",
       "artifact_path": "out-release/IStreamAdmins.sol/IStreamAdmins.json",
       "abi_sha256": "sha256:b94c95898b38bda7deaf60046c0261a53659aee577e5bae4046088feeeb873c6",
       "abi_entries": 7,
@@ -26580,7 +26580,7 @@
       }
     },
     "IStreamArtworkFinalityRegistry": {
-      "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
       "artifact_path": "out-release/IStreamArtworkFinalityRegistry.sol/IStreamArtworkFinalityRegistry.json",
       "abi_sha256": "sha256:92a1df8b5622d7985c54d4bf7f6cb590dc34d8148056d3aa908f1d9f8366313a",
       "abi_entries": 88,
@@ -29287,7 +29287,7 @@
       }
     },
     "IStreamAssetPolicyRegistry": {
-      "source": "smart-contracts/IStreamAssetPolicyRegistry.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol",
       "artifact_path": "out-release/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
       "abi_sha256": "sha256:cabf2146b13d8746cb2452a20f347b35ffb6e7215d8e29268de72496328f7679",
       "abi_entries": 17,
@@ -29659,7 +29659,7 @@
       }
     },
     "IStreamAuctions": {
-      "source": "smart-contracts/IStreamAuctions.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamAuctions.sol",
       "artifact_path": "out-release/IStreamAuctions.sol/IStreamAuctions.json",
       "abi_sha256": "sha256:449284cbe3ae9f0744769204c9157e74bf0d9f89868dae34073586a51cf8f400",
       "abi_entries": 2,
@@ -29737,7 +29737,7 @@
       }
     },
     "IStreamCollectionMetadata": {
-      "source": "smart-contracts/IStreamCollectionMetadata.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
       "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
       "abi_sha256": "sha256:6cfc024fdabf15f1576a48ddec800f421356fbc5da17ab4b64e86c7cd15d93d1",
       "abi_entries": 46,
@@ -31070,7 +31070,7 @@
       }
     },
     "IStreamCompatibility": {
-      "source": "smart-contracts/IStreamCompatibility.sol",
+      "source": "smart-contracts/interfaces/compatibility/IStreamCompatibility.sol",
       "artifact_path": "out-release/IStreamCompatibility.sol/IStreamCompatibility.json",
       "abi_sha256": "sha256:6bd73e252a944619732c85628400e6718bf263c6e98effffa45900a6279c636d",
       "abi_entries": 7,
@@ -31204,7 +31204,7 @@
       }
     },
     "IStreamContractMetadata": {
-      "source": "smart-contracts/IStreamContractMetadata.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamContractMetadata.sol",
       "artifact_path": "out-release/IStreamContractMetadata.sol/IStreamContractMetadata.json",
       "abi_sha256": "sha256:ce8a86739d4d47eb40058bd5df61667adf2a97fe77179e6424a552d8264bc797",
       "abi_entries": 8,
@@ -31341,7 +31341,7 @@
       }
     },
     "IStreamCore": {
-      "source": "smart-contracts/IStreamCore.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamCore.sol",
       "artifact_path": "out-release/IStreamCore.sol/IStreamCore.json",
       "abi_sha256": "sha256:204a69835c08afe23ccbeceb1d88b39aa8cd665ac4aa31ca199314e9e6aa2b46",
       "abi_entries": 71,
@@ -33152,7 +33152,7 @@
       }
     },
     "IStreamCoreFinalityAdapter": {
-      "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamCoreFinalityAdapter.sol",
       "artifact_path": "out-release/IStreamCoreFinalityAdapter.sol/IStreamCoreFinalityAdapter.json",
       "abi_sha256": "sha256:1b9e23a6f40bf0e378eac5d10f6bf910416de2df14284803717333a8a0fad562",
       "abi_entries": 5,
@@ -33404,7 +33404,7 @@
       }
     },
     "IStreamDrops": {
-      "source": "smart-contracts/IStreamDrops.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamDrops.sol",
       "artifact_path": "out-release/IStreamDrops.sol/IStreamDrops.json",
       "abi_sha256": "sha256:481ef1bd67f9a47da7c6e71f095991dd74a3b09664bca7dc6e52df5ba988400e",
       "abi_entries": 6,
@@ -33547,7 +33547,7 @@
       }
     },
     "IStreamEntropyCoordinator": {
-      "source": "smart-contracts/IStreamEntropyCoordinator.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol",
       "artifact_path": "out-release/IStreamEntropyCoordinator.sol/IStreamEntropyCoordinator.json",
       "abi_sha256": "sha256:d1e808ce5bf6395630b011586d1a32d557a6e14413c68ce4cc9cd821ed5720a4",
       "abi_entries": 6,
@@ -33735,7 +33735,7 @@
       }
     },
     "IStreamGasParameterHost": {
-      "source": "smart-contracts/IStreamGasParameterHost.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamGasParameterHost.sol",
       "artifact_path": "out-release/IStreamGasParameterHost.sol/IStreamGasParameterHost.json",
       "abi_sha256": "sha256:f0d81e1d437ffb5cd8547b7c1056cd7ae94f1380eb1b911594ee6d8c754980e6",
       "abi_entries": 23,
@@ -34198,7 +34198,7 @@
       }
     },
     "IStreamGovernanceExecutor": {
-      "source": "smart-contracts/IStreamGovernanceExecutor.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol",
       "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
       "abi_sha256": "sha256:af81e2de8cc4012bd74654a873b9b9e3353e282b82da831bee38b4de5c490cea",
       "abi_entries": 175,
@@ -38725,7 +38725,7 @@
       }
     },
     "IStreamGovernedParameterAuthority": {
-      "source": "smart-contracts/IStreamGovernedParameterAuthority.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol",
       "artifact_path": "out-release/IStreamGovernedParameterAuthority.sol/IStreamGovernedParameterAuthority.json",
       "abi_sha256": "sha256:2781c74c319f8cf9256fc141171c74c00f8280fb1be9b23152387144f99b73ab",
       "abi_entries": 2,
@@ -38803,7 +38803,7 @@
       }
     },
     "IStreamMetadataRouter": {
-      "source": "smart-contracts/IStreamMetadataRouter.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol",
       "artifact_path": "out-release/IStreamMetadataRouter.sol/IStreamMetadataRouter.json",
       "abi_sha256": "sha256:4ef1b0a840190aee1aa36dc59bd6294a8e3bb93fff011b6936e95c15e07503a3",
       "abi_entries": 4,
@@ -38920,7 +38920,7 @@
       }
     },
     "IStreamMintGate": {
-      "source": "smart-contracts/IStreamMintGate.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMintGate.sol",
       "artifact_path": "out-release/IStreamMintGate.sol/IStreamMintGate.json",
       "abi_sha256": "sha256:ff831b25a82ff55f070fbf318dfe306b1d5cf2d28c7c187310aad98aa5d7c64e",
       "abi_entries": 2,
@@ -39067,7 +39067,7 @@
       }
     },
     "IStreamMintLedger": {
-      "source": "smart-contracts/IStreamMintLedger.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMintLedger.sol",
       "artifact_path": "out-release/IStreamMintLedger.sol/IStreamMintLedger.json",
       "abi_sha256": "sha256:0b20aeea6d5806c19c11dd50526b40e36e8f3c18fa80f79ffd3d71585060d407",
       "abi_entries": 38,
@@ -40322,7 +40322,7 @@
       }
     },
     "IStreamMintManager": {
-      "source": "smart-contracts/IStreamMintManager.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMintManager.sol",
       "artifact_path": "out-release/IStreamMintManager.sol/IStreamMintManager.json",
       "abi_sha256": "sha256:7fa01d81a22280a768c79ae560902412bb5cfb0d8bd796118d6951365da68db4",
       "abi_entries": 71,
@@ -42651,7 +42651,7 @@
       }
     },
     "IStreamMintModuleRegistry": {
-      "source": "smart-contracts/IStreamMintModuleRegistry.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMintModuleRegistry.sol",
       "artifact_path": "out-release/IStreamMintModuleRegistry.sol/IStreamMintModuleRegistry.json",
       "abi_sha256": "sha256:582538c63865086c0bf211787e97e1d9ec37a472167ff331d3b79f50f9064af4",
       "abi_entries": 11,
@@ -42999,7 +42999,7 @@
       }
     },
     "IStreamMinter": {
-      "source": "smart-contracts/IStreamMinter.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamMinter.sol",
       "artifact_path": "out-release/IStreamMinter.sol/IStreamMinter.json",
       "abi_sha256": "sha256:649d9216a2db37e90086197519c338afd3344a311d86336726fce30694ad851c",
       "abi_entries": 7,
@@ -43202,7 +43202,7 @@
       }
     },
     "IStreamPreservationRecords": {
-      "source": "smart-contracts/IStreamPreservationRecords.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
       "abi_sha256": "sha256:a7633c3559877537dac328bda542b6a73d12c426d990c6b4cb8f96c6134aa9bb",
       "abi_entries": 27,
@@ -44113,7 +44113,7 @@
       }
     },
     "IStreamPrimarySaleSettlement": {
-      "source": "smart-contracts/IStreamPrimarySaleSettlement.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamPrimarySaleSettlement.sol",
       "artifact_path": "out-release/IStreamPrimarySaleSettlement.sol/IStreamPrimarySaleSettlement.json",
       "abi_sha256": "sha256:91cf0d5dc22763347e5d7a6f8c1bab8bb75b17971866ae38a84fff44e831ad1f",
       "abi_entries": 34,
@@ -45168,7 +45168,7 @@
       }
     },
     "IStreamRevenueResolver": {
-      "source": "smart-contracts/IStreamRevenueResolver.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamRevenueResolver.sol",
       "artifact_path": "out-release/IStreamRevenueResolver.sol/IStreamRevenueResolver.json",
       "abi_sha256": "sha256:bac7233f0764d26ab7bd20e5a0c49941b90823658016ebcd434fcb7119b30032",
       "abi_entries": 37,
@@ -46213,7 +46213,7 @@
       }
     },
     "IStreamSplitFactory": {
-      "source": "smart-contracts/IStreamSplitFactory.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamSplitFactory.sol",
       "artifact_path": "out-release/IStreamSplitFactory.sol/IStreamSplitFactory.json",
       "abi_sha256": "sha256:fe3777a5946ead624d24e0cbb88c6da13833f7d987cece7e4889384fb22894c3",
       "abi_entries": 34,
@@ -46990,7 +46990,7 @@
       }
     },
     "IStreamSplitWallet": {
-      "source": "smart-contracts/IStreamSplitWallet.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamSplitWallet.sol",
       "artifact_path": "out-release/IStreamSplitWallet.sol/IStreamSplitWallet.json",
       "abi_sha256": "sha256:b2882c0159e40effbaeb6cadcb3b343b801bc0adde39ce57402bc7673ff3cb4e",
       "abi_entries": 41,
@@ -47912,7 +47912,7 @@
       }
     },
     "IStreamSystemManifest": {
-      "source": "smart-contracts/IStreamSystemManifest.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol",
       "artifact_path": "out-release/IStreamSystemManifest.sol/IStreamSystemManifest.json",
       "abi_sha256": "sha256:207890576cf794e85a334afc009e9da0c041ebed8b0ad9bed4852f3662072005",
       "abi_entries": 7,
@@ -48233,7 +48233,7 @@
       }
     },
     "IStreamTimeParameterHost": {
-      "source": "smart-contracts/IStreamTimeParameterHost.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamTimeParameterHost.sol",
       "artifact_path": "out-release/IStreamTimeParameterHost.sol/IStreamTimeParameterHost.json",
       "abi_sha256": "sha256:dca1fe88797e3c08be08c7eb99dcc42b5b58a08c23626e75c88b764ca515963c",
       "abi_entries": 23,

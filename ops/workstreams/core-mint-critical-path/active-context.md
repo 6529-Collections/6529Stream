@@ -62,7 +62,7 @@
   Focused validation is 10/10 Foundry tests under via IR, 26/26 Python hostile
   tests, direct checker current, and the one-test snapshot current.
 - Exact frozen evidence remains byte-for-byte stable with zero
-  `smart-contracts/StreamCore.sol` diff. The canonical bundle has 260
+  `smart-contracts/core/StreamCore.sol` diff. The canonical bundle has 260
   configured paths and 428 records in each checksum index.
 - Earlier diagnostic authoritative Windows gates exited `0` on
   `29d96466e49f7c72c02234c9b271a1fa2828db88` in 3,237.757 seconds and on

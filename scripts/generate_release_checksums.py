@@ -74,13 +74,13 @@ RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_bytecode_release_proof.py"),
 )
 RELEASE_TOOL_SEMANTIC_SOURCE_PATHS = (
-    Path("smart-contracts/IStreamRecordFamilyAuthorityProvider.sol"),
-    Path("smart-contracts/IStreamRecordFamilyRegistry.sol"),
-    Path("smart-contracts/StreamRecordFamilyRegistry.sol"),
-    Path("smart-contracts/StreamCollectionMetadata.sol"),
-    Path("smart-contracts/IStreamCollectionMetadata.sol"),
-    Path("smart-contracts/StreamPreservationRecords.sol"),
-    Path("smart-contracts/IStreamPreservationRecords.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol"),
+    Path("smart-contracts/domains/records/StreamRecordFamilyRegistry.sol"),
+    Path("smart-contracts/domains/metadata/StreamCollectionMetadata.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"),
+    Path("smart-contracts/domains/preservation/StreamPreservationRecords.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"),
     Path("script/RehearseDeployment.s.sol"),
     Path("test/StreamRecordFamilyAuthorization.t.sol"),
     Path("test/StreamCollectionMetadata.t.sol"),
@@ -416,18 +416,18 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "7fcdf573e3841e539c9bce91b882121a50c941225a1ad292e7df4506bccccae4",
-        100_553,
+        "733d07274aed72c069d08cd16fb6cb1056bb31ffee65814d4e15d4b995eb10eb",
+        104_990,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "8124a7981c2870b6816db733f4c963c8aa573036cb061a35810937560d4b98bc",
-        46_988,
+        "e056d9669cbd646c3a9a650ae6ae3b846eeaa10c7af59c6e2dfa4b6373e5f809",
+        47_073,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "78d5dbf50d395466562ec4c187667fa9e4b178fd1979aa944e6b6fa39ce19274",
-        169_343,
+        "a76060b837285ed0e1ecbfdd5589ee082afca460a15644848681d7dfad417699",
+        169_469,
     ),
 }
 
@@ -440,6 +440,12 @@ DEFAULT_COVERED_PATHS = [
     Path("Makefile"),
     Path("scripts/check.sh"),
     Path("scripts/check.ps1"),
+    Path("smart-contracts/source-layout.json"),
+    Path("scripts/check_solidity_source_layout.py"),
+    Path("scripts/test_solidity_source_layout.py"),
+    Path("scripts/check_solidity_layout_equivalence.py"),
+    Path("scripts/test_solidity_layout_equivalence.py"),
+    Path("docs/solidity-source-map.md"),
     Path("scripts/check_python_toolchain.py"),
     Path("scripts/test_python_toolchain.py"),
     Path("scripts/test_windows_ci_wrapper.py"),
