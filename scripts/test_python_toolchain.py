@@ -47,14 +47,23 @@ steps:
 
 
 def valid_multi_job_ci_workflow() -> str:
-    """Return two isolated pinned toolchain jobs accepted for CI."""
+    """Return three isolated pinned toolchain jobs accepted for CI."""
 
     return f"""\
 jobs:
   windows-wrapper:
     steps:
+      - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
+        with:
+          python-version: "{checker.PYTHON_VERSION}"
+      - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}
+        with:
+          version: {checker.FOUNDRY_VERSION}
       - run: |
-          echo windows-only
+          {checker.LOCK_INSTALL_COMMAND}
+          {checker.PIP_CHECK_COMMAND}
+          {checker.SOLC_SELECT_INSTALL_COMMAND}
+          {checker.SOLC_SELECT_USE_COMMAND}
   slither-baseline:
     steps:
       - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
@@ -167,7 +176,7 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
-    def test_two_isolated_ci_toolchain_jobs_pass(self) -> None:
+    def test_three_isolated_ci_toolchain_jobs_pass(self) -> None:
         """Each CI job independently installs the same pinned environment."""
 
         self.assertEqual(
@@ -178,7 +187,7 @@ class PythonToolchainTests(unittest.TestCase):
             [],
         )
 
-    def test_two_job_ci_rejects_one_unpinned_runtime(self) -> None:
+    def test_three_job_ci_rejects_one_unpinned_runtime(self) -> None:
         """Every isolated toolchain job requires the exact Python setup pin."""
 
         workflow = valid_multi_job_ci_workflow().replace(
@@ -196,23 +205,13 @@ class PythonToolchainTests(unittest.TestCase):
         """Global counts cannot hide a toolchain installed in another CI job."""
 
         workflow = valid_multi_job_ci_workflow().replace(
-            "  windows-wrapper:\n"
-            "    steps:\n"
-            "      - run: |\n"
-            "          echo windows-only\n"
-            "  slither-baseline:\n",
             "  windows-wrapper:\n",
-        ).replace(
-            "  foundry:\n",
-            "  slither-baseline:\n"
-            "    steps:\n"
-            "      - run: |\n"
-            "          echo no toolchain\n"
-            "  foundry:\n",
+            "  unreviewed-wrapper:\n",
+            1,
         )
         errors = checker.check_workflow(checker.CI_WORKFLOW_PATH, workflow)
-        self.assertTrue(any("non-toolchain job 'windows-wrapper'" in error for error in errors))
-        self.assertTrue(any("job 'slither-baseline' must contain" in error for error in errors))
+        self.assertTrue(any("job names must be exactly" in error for error in errors))
+        self.assertTrue(any("non-toolchain job 'unreviewed-wrapper'" in error for error in errors))
 
     def test_descriptive_name_and_literal_content_pass(self) -> None:
         """Names and literal shell content are not parsed as YAML policy keys."""

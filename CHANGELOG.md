@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened the canonical release builder's cross-process evidence authority:
+  authoritative Windows runs now use run-scoped Forge and Solc leases, reject
+  overlapping consumers and stale terminals, remain importable for the pinned
+  Linux CI parity lane, and exercise the complete 121-test builder suite on
+  Windows. The fail-closed toolchain inventory now treats that Windows authority
+  job as the third isolated pinned CI toolchain group, and its scoped wiring
+  policy test is checksum-covered by both the generator and the independent
+  offline-verifier root-set pin. Refreshed the exact non-production
+  deployment-fixture receipt pin and deterministic release tail; no contract,
+  live deployment, audit, or readiness status changed.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
   exact parity with the final `StreamCore` bytecode-proof row and the

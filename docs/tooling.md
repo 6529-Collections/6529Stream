@@ -8,7 +8,7 @@
 | --- | --- |
 | Foundry | `v1.7.1` |
 | Solidity compiler | `0.8.19` |
-| Python (Linux CI/release) | `3.12.13` |
+| Python (CI/release) | `3.12.13` |
 | Slither | `0.11.5` |
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
@@ -21,7 +21,7 @@
 
 [`requirements-tools.txt`](../requirements-tools.txt) is the short,
 human-maintained list of direct tool intent. The generated
-[`requirements-tools.lock`](../requirements-tools.lock) is the complete Linux
+[`requirements-tools.lock`](../requirements-tools.lock) is the complete checked
 CI/release dependency graph. Every direct and transitive package is pinned to
 one version and has one or more reviewed SHA-256 artifact hashes. Ordinary CI
 and manual release mode both select CPython `3.12.13` through the full-SHA
@@ -35,7 +35,7 @@ python -m pip check
 There is no live `pip --upgrade` step. The exact Python tool-cache artifact
 provides pip, and `--require-hashes` fails if an artifact differs or dependency
 resolution needs a package absent from the lock. `--only-binary=:all:` also
-keeps unreviewed source builds out of the Linux evidence path.
+keeps unreviewed source builds out of the checked evidence paths.
 
 `scripts/bootstrap-ec2.sh` and `scripts/bootstrap-windows.ps1` remain
 contributor conveniences for heterogeneous local Python installations. They
@@ -1489,8 +1489,10 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 264 configured roots,
-expanding to exactly 436 covered-file entries in each checksum index. The twelve
+The revised canonical projection contains exactly 265 configured roots,
+expanding to exactly 437 covered-file entries in each checksum index. The Windows
+CI wrapper policy test is an exact covered root so its native builder-authority
+wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
 `smart-contracts/` or `script/`. The #672 planning package adds six exact roots
@@ -1788,10 +1790,12 @@ make windows-check-wrapper-runtime
 ```
 
 CI runs the harness twice: once in the Linux Foundry job under PowerShell Core,
-and once in a lightweight `windows-latest` job under Windows PowerShell so
-native-command exit handling is covered in the environment that motivated the
-wrapper. The workflow wiring is protected by
-`scripts/test_windows_ci_wrapper.py`.
+and once in the `windows-latest` job under Windows PowerShell so native-command
+exit handling is covered in the environment that motivated the wrapper. That
+Windows job independently installs the exact pinned Python, Foundry and Solc
+toolchain and runs the complete release-builder authority suite. The workflow
+wiring and its third isolated CI toolchain group are protected by
+`scripts/test_windows_ci_wrapper.py` and `scripts/check_python_toolchain.py`.
 
 ## Warning Dispositions
 

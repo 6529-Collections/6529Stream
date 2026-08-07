@@ -426,7 +426,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "5c423ad639b37c9812f8cbc73b05d884f1447ea825f8b56aabe8da02911828e7",
+        "78d5dbf50d395466562ec4c187667fa9e4b178fd1979aa944e6b6fa39ce19274",
         169_343,
     ),
 }
@@ -442,6 +442,7 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/check.ps1"),
     Path("scripts/check_python_toolchain.py"),
     Path("scripts/test_python_toolchain.py"),
+    Path("scripts/test_windows_ci_wrapper.py"),
     Path("scripts/build_release_artifacts.py"),
     Path("scripts/test_release_build_artifacts.py"),
     Path("scripts/materialize_canonical_deployment_plan.py"),

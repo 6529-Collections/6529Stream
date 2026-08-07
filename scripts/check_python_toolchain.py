@@ -143,11 +143,11 @@ WORKFLOW_APPROVED_INSTALL_LINES = {
     RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
 }
 WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
-    CI_WORKFLOW_PATH: 2,
+    CI_WORKFLOW_PATH: 3,
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_SOLC_SELECT_COUNTS = {
-    CI_WORKFLOW_PATH: 1,
+    CI_WORKFLOW_PATH: 2,
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_EXPECTED_JOB_NAMES = {
@@ -156,6 +156,7 @@ WORKFLOW_EXPECTED_JOB_NAMES = {
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
     CI_WORKFLOW_PATH: {
+        "windows-wrapper": {"playwright": 0, "solc_select": 1},
         "slither-baseline": {"playwright": 0, "solc_select": 1},
         "foundry": {"playwright": 1, "solc_select": 0},
     },
