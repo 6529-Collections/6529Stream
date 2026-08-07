@@ -1781,7 +1781,10 @@ The Windows script prepends `%USERPROFILE%\.foundry\bin` to the current process
 `forge` and the selected Python interpreter through checked native-command
 wrappers so Windows PowerShell 5.1 fails fast when a tool exits non-zero; this
 behavior is covered by `scripts/test_windows_check_wrapper.py` and the
-executable harness in `scripts/test_windows_check_helpers.ps1`.
+executable harness in `scripts/test_windows_check_helpers.ps1`. The dedicated
+Windows CI release-builder test uses `cmd.exe` only to merge Python's stdout and
+unittest stderr before `Tee-Object`; PowerShell still captures and propagates
+the resulting native exit code.
 
 To run only the executable Windows wrapper harness:
 

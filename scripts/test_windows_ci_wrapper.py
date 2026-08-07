@@ -49,7 +49,7 @@ class WindowsCiWrapperTests(unittest.TestCase):
         )
         self.assertIn("timeout-minutes: 20", self.windows_job)
         self.assertIn(
-            "python scripts/test_release_build_artifacts.py 2>&1 |",
+            'cmd.exe /d /s /c "python scripts/test_release_build_artifacts.py 2>&1" |',
             self.windows_job,
         )
         self.assertIn(

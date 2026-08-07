@@ -82,7 +82,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           New-Item -ItemType Directory -Force ci-logs | Out-Null
-          python scripts/test_release_build_artifacts.py 2>&1 |
+          cmd.exe /d /s /c "python scripts/test_release_build_artifacts.py 2>&1" |
             Tee-Object -FilePath ci-logs\release-build-tests-windows.log
           $testExit = $LASTEXITCODE
           if ($testExit -ne 0) {

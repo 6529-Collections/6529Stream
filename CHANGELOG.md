@@ -18,7 +18,10 @@ the release policy in `docs/release-policy.md`.
   journals now use
   distinct event and terminal schemas, shadowed R4 validators have explicit
   names, and failed evidence flushes remove temporary residue without masking
-  the primary diagnostic. The scoped Windows wiring policy test remains
+  the primary diagnostic. The native builder test routes merged Python output
+  through `cmd.exe` so Windows PowerShell 5.1 cannot promote unittest stderr to
+  a terminating `NativeCommandError`, while preserving the Python exit code.
+  The scoped Windows wiring policy test remains
   checksum-covered by both the generator and the independent offline-verifier
   root-set pin. Refreshed the exact non-production
   deployment-fixture receipt pin and deterministic release tail; no contract,
