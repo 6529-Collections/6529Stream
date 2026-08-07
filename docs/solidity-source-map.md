@@ -102,10 +102,22 @@ Therefore:
 - run `python scripts/test_solidity_source_layout.py`,
   `python scripts/test_solidity_layout_equivalence.py`, and
   `python scripts/check_solidity_source_layout.py` after path changes;
-- validate the retained 120-file semantic receipt with
-  `python scripts/check_solidity_layout_equivalence.py --check-source`; and
+- validate the immutable historical receipt in permanent checks with
+  `python scripts/check_solidity_layout_equivalence.py --check-receipt`;
+- use `python scripts/check_solidity_layout_equivalence.py --check-source` only
+  when explicitly recomputing the completed migration proof against its fixed
+  base, because ordinary later source edits are outside that receipt lifecycle;
+  and
 - update generated artifacts from their generators rather than editing them by
   hand.
+
+The equivalence checker has no implicit mode. Historical receipt generation is
+available only through `--generate`, and that mode requires `--before-out`,
+`--after-out`, `--before-release-out`, and `--after-release-out` together before
+it can write either the default receipt or an explicit `--output`. The output
+must resolve inside the repository checkout; absolute external paths and
+repository-escaping paths are rejected before migration or artifact inputs are
+read. Bare or partial generation invocations fail without writing.
 
 The equivalence receipt at
 `release-artifacts/evidence/solidity-layout-equivalence.json` records both the

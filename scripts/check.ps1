@@ -118,7 +118,7 @@ forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --m
 & $pythonPath @pythonArgs "scripts\test_solidity_source_layout.py"
 & $pythonPath @pythonArgs "scripts\check_solidity_source_layout.py"
 & $pythonPath @pythonArgs "scripts\test_solidity_layout_equivalence.py"
-& $pythonPath @pythonArgs "scripts\check_solidity_layout_equivalence.py" "--check-source"
+& $pythonPath @pythonArgs "scripts\check_solidity_layout_equivalence.py" "--check-receipt"
 & $pythonPath @pythonArgs "scripts\test_windows_check_wrapper.py"
 & $pythonPath @pythonArgs "scripts\test_python_toolchain.py"
 & $pythonPath @pythonArgs "scripts\check_python_toolchain.py"

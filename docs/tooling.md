@@ -132,7 +132,7 @@ python scripts/check_solidity_formatting.py
 python scripts/test_solidity_source_layout.py
 python scripts/check_solidity_source_layout.py
 python scripts/test_solidity_layout_equivalence.py
-python scripts/check_solidity_layout_equivalence.py --check-source
+python scripts/check_solidity_layout_equivalence.py --check-receipt
 python scripts/test_python_toolchain.py
 python scripts/check_python_toolchain.py
 python scripts/test_warning_dispositions.py

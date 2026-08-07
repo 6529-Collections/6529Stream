@@ -1,6 +1,7 @@
 {
   "schema_version": "6529stream.solidity-source-layout.v1",
   "migration_base_commit": "2ef4901609399d2808848b39ed2a3f877e945dba",
+  "equivalence_receipt_canonical_sha256": "c5fb8861b5cf1f327bbf48927426d2260ecc561ba1647debb8e81d3dd27f3502",
   "source_root": "smart-contracts",
   "policy": {
     "allowed_top_level_directories": [

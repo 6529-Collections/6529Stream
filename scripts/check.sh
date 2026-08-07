@@ -68,7 +68,7 @@ forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -
 "$python_bin" scripts/test_solidity_source_layout.py
 "$python_bin" scripts/check_solidity_source_layout.py
 "$python_bin" scripts/test_solidity_layout_equivalence.py
-"$python_bin" scripts/check_solidity_layout_equivalence.py --check-source
+"$python_bin" scripts/check_solidity_layout_equivalence.py --check-receipt
 "$python_bin" scripts/test_windows_check_wrapper.py
 "$python_bin" scripts/test_python_toolchain.py
 "$python_bin" scripts/check_python_toolchain.py

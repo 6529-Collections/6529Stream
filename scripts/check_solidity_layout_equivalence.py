@@ -27,6 +27,9 @@ EXPECTED_COMPILER_IDENTITY_DIFFERENCES = [
     "compiler metadata and source hashes",
 ]
 MATURITY_EFFECT = "none; pre-audit and not production-ready"
+EXPECTED_RECEIPT_CANONICAL_SHA256 = (
+    layout.EXPECTED_EQUIVALENCE_RECEIPT_CANONICAL_SHA256
+)
 SOURCE_RECEIPT_FIELDS = {
     "source_count",
     "exact_semantic_match_count",
@@ -56,6 +59,13 @@ SEMANTIC_SURFACE_FIELDS = {
     "errors",
     "storage_layout",
 }
+COMPILER_INPUT_RECEIPT_FIELDS = {
+    "target_count",
+    "exact_semantic_match_count",
+    "semantic_inputs_sha256",
+    "mismatches",
+    "result",
+}
 LOWER_HEX_64_RE = re.compile(r"^[0-9a-f]{64}$")
 TOP_LEVEL_FIELDS = {
     "schema_version",
@@ -73,6 +83,68 @@ TOP_LEVEL_FIELDS = {
 
 class EquivalenceError(RuntimeError):
     """Raised when equivalence cannot be established."""
+
+
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
+
+
+def reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise EquivalenceError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def parse_ijson_integer(token: str) -> int:
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise EquivalenceError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def reject_json_float(token: str) -> float:
+    raise EquivalenceError(
+        f"floating-point JSON is forbidden in layout-equivalence inputs: {token}"
+    )
+
+
+def reject_json_constant(token: str) -> None:
+    raise EquivalenceError(f"non-I-JSON token is forbidden: {token}")
+
+
+def load_strict_json(path: Path) -> Any:
+    raw = path.read_bytes()
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise EquivalenceError(f"invalid JSON in {path}: {exc}") from exc
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_json_pairs,
+            parse_int=parse_ijson_integer,
+            parse_float=reject_json_float,
+            parse_constant=reject_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise EquivalenceError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def resolve_generation_output(repo_root: Path, output: Path) -> Path:
+    candidate = output if output.is_absolute() else repo_root / output
+    resolved = candidate.resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError as exc:
+        raise EquivalenceError(
+            f"generation output must resolve inside repo_root: {output}"
+        ) from exc
+    _require(resolved != repo_root, "generation output must identify a file inside repo_root")
+    return resolved
 
 
 def canonical_json(value: Any) -> bytes:
@@ -250,6 +322,8 @@ def artifact_receipt(
 ) -> dict[str, Any]:
     before_paths = artifact_paths(before_root, excluded)
     after_paths = artifact_paths(after_root, excluded)
+    _require(bool(before_paths), "pre-migration artifact inventory must not be empty")
+    _require(bool(after_paths), "post-migration artifact inventory must not be empty")
     if before_paths != after_paths:
         raise EquivalenceError("pre/post artifact inventories differ")
     exact_fields = ("abi", "methodIdentifiers")
@@ -268,8 +342,8 @@ def artifact_receipt(
     }
     digests: dict[str, list[Any]] = {key: [] for key in semantic_mismatches}
     for relative in before_paths:
-        before = json.loads((before_root / relative).read_text(encoding="utf-8"))
-        after = json.loads((after_root / relative).read_text(encoding="utf-8"))
+        before = load_strict_json(before_root / relative)
+        after = load_strict_json(after_root / relative)
         comparisons = {
             "abi": (before.get("abi", []), after.get("abi", [])),
             "method_identifiers": (
@@ -357,6 +431,28 @@ def _require(condition: bool, message: str) -> None:
         raise EquivalenceError(message)
 
 
+def validate_source_receipt(value: Any) -> None:
+    _require(isinstance(value, dict), "committed source receipt must be an object")
+    _require(set(value) == SOURCE_RECEIPT_FIELDS, "committed source receipt fields are not exact")
+    source_count = value["source_count"]
+    exact_count = value["exact_semantic_match_count"]
+    _require(
+        isinstance(source_count, int) and source_count > 0,
+        "committed source_count must be a positive integer",
+    )
+    _require(
+        isinstance(exact_count, int) and exact_count == source_count,
+        "committed source exact match count must equal source_count",
+    )
+    _require(
+        isinstance(value["semantic_inventory_sha256"], str)
+        and LOWER_HEX_64_RE.fullmatch(value["semantic_inventory_sha256"]),
+        "committed source semantic digest must be lowercase 64-hex",
+    )
+    _require(value["mismatches"] == [], "committed source pass receipt must have no mismatches")
+    _require(value["result"] == "pass", "committed source receipt result must be pass")
+
+
 def validate_artifact_receipt(value: Any, label: str) -> None:
     _require(isinstance(value, dict), f"{label} must be an object")
     _require(set(value) == ARTIFACT_RECEIPT_FIELDS, f"{label} fields are not exact")
@@ -422,7 +518,35 @@ def validate_artifact_receipt(value: Any, label: str) -> None:
     )
 
 
-def validate_committed_report(report: Any, sources: dict[str, Any]) -> None:
+def validate_compiler_input_receipt(value: Any) -> None:
+    _require(isinstance(value, dict), "release compiler-input receipt must be an object")
+    _require(
+        set(value) == COMPILER_INPUT_RECEIPT_FIELDS,
+        "release compiler-input receipt fields are not exact",
+    )
+    _require(value["result"] == "pass", "release compiler-input receipt result must be pass")
+    target_count = value["target_count"]
+    exact_count = value["exact_semantic_match_count"]
+    _require(
+        isinstance(target_count, int) and target_count > 0,
+        "release compiler-input target_count must be a positive integer",
+    )
+    _require(
+        isinstance(exact_count, int) and exact_count == target_count,
+        "release compiler-input exact match count must equal target_count",
+    )
+    _require(
+        value["mismatches"] == [],
+        "release compiler-input pass receipt must have no mismatches",
+    )
+    compiler_digest = value["semantic_inputs_sha256"]
+    _require(
+        isinstance(compiler_digest, str) and LOWER_HEX_64_RE.fullmatch(compiler_digest),
+        "release compiler-input digest must be lowercase 64-hex",
+    )
+
+
+def validate_committed_report(report: Any, expected_canonical_sha256: str) -> None:
     _require(isinstance(report, dict), "committed equivalence report must be an object")
     _require(set(report) == TOP_LEVEL_FIELDS, "committed equivalence report fields are not exact")
     _require(report["schema_version"] == SCHEMA, "committed equivalence schema is not exact")
@@ -441,60 +565,108 @@ def validate_committed_report(report: Any, sources: dict[str, Any]) -> None:
         "committed expected compiler identity differences are not exact",
     )
     _require(report["maturity_effect"] == MATURITY_EFFECT, "committed maturity boundary is not exact")
-    source_report = report["source_semantics"]
-    _require(isinstance(source_report, dict), "committed source receipt must be an object")
-    _require(set(source_report) == SOURCE_RECEIPT_FIELDS, "committed source receipt fields are not exact")
-    _require(source_report == sources, "committed equivalence source receipt is stale")
+    validate_source_receipt(report["source_semantics"])
     validate_artifact_receipt(report["full_foundry_artifacts"], "full_foundry_artifacts")
     validate_artifact_receipt(
         report["isolated_release_artifacts"], "isolated_release_artifacts"
     )
-    release_inputs_receipt = report["release_compiler_inputs"]
-    _require(isinstance(release_inputs_receipt, dict), "release compiler-input receipt must be an object")
+    validate_compiler_input_receipt(report["release_compiler_inputs"])
     _require(
-        set(release_inputs_receipt)
-        == {
-            "target_count",
-            "exact_semantic_match_count",
-            "semantic_inputs_sha256",
-            "mismatches",
-            "result",
-        },
-        "release compiler-input receipt fields are not exact",
+        expected_canonical_sha256 == EXPECTED_RECEIPT_CANONICAL_SHA256,
+        "source-layout manifest receipt digest is not the exact reviewed digest",
     )
     _require(
-        release_inputs_receipt["result"] == "pass",
-        "release compiler-input receipt result must be pass",
+        sha256(report) == expected_canonical_sha256,
+        "committed equivalence receipt canonical digest drifted",
     )
-    target_count = release_inputs_receipt["target_count"]
-    exact_count = release_inputs_receipt["exact_semantic_match_count"]
+
+
+def validate_source_recomputation(report: dict[str, Any], sources: dict[str, Any]) -> None:
     _require(
-        isinstance(target_count, int) and target_count > 0,
-        "release compiler-input target_count must be a positive integer",
-    )
-    _require(
-        isinstance(exact_count, int) and exact_count == target_count,
-        "release compiler-input exact match count must equal target_count",
-    )
-    _require(
-        release_inputs_receipt["mismatches"] == [],
-        "release compiler-input pass receipt must have no mismatches",
-    )
-    compiler_digest = release_inputs_receipt["semantic_inputs_sha256"]
-    _require(
-        isinstance(compiler_digest, str) and LOWER_HEX_64_RE.fullmatch(compiler_digest),
-        "release compiler-input digest must be lowercase 64-hex",
+        report["source_semantics"] == sources,
+        "committed equivalence source receipt diverges from current sources",
     )
 
 
 def release_inputs(root: Path) -> dict[str, Any]:
-    manifest = json.loads((root / "release-build-manifest.json").read_text(encoding="utf-8"))
-    return {
-        row["name"]: json.loads(
-            (root / row["compiler_input_relative_path"]).read_text(encoding="utf-8")
+    release_root = root.resolve()
+    manifest = load_strict_json(release_root / "release-build-manifest.json")
+    _require(isinstance(manifest, dict), "release build manifest must be an object")
+    targets = manifest.get("targets")
+    _require(isinstance(targets, list), "release build manifest targets must be a list")
+    _require(bool(targets), "release build manifest targets must not be empty")
+
+    inventory: list[tuple[str, Path]] = []
+    target_names: set[str] = set()
+    input_paths: set[str] = set()
+    invariant_input_paths: set[str] = set()
+    resolved_input_identities: set[str] = set()
+    required_fields = {"name", "compiler_input_relative_path"}
+    for index, row in enumerate(targets):
+        label = f"release build manifest targets[{index}]"
+        _require(isinstance(row, dict), f"{label} must be an object")
+        missing = required_fields - set(row)
+        _require(not missing, f"{label} is missing required fields: {sorted(missing)}")
+
+        name = row["name"]
+        _require(
+            isinstance(name, str) and bool(name),
+            f"{label}.name must be a nonempty string",
         )
-        for row in manifest["targets"]
-    }
+        _require(
+            name not in target_names,
+            f"duplicate release compiler-input target name: {name}",
+        )
+        target_names.add(name)
+
+        relative = row["compiler_input_relative_path"]
+        _require(
+            isinstance(relative, str) and bool(relative),
+            f"{label}.compiler_input_relative_path must be a nonempty string",
+        )
+        _require(
+            "\\" not in relative,
+            f"{label}.compiler_input_relative_path must use forward slashes",
+        )
+        _require(
+            not posixpath.isabs(relative) and re.match(r"^[A-Za-z]:", relative) is None,
+            f"{label}.compiler_input_relative_path must be relative",
+        )
+        parts = relative.split("/")
+        _require(
+            all(part not in {"", ".", ".."} for part in parts),
+            f"{label}.compiler_input_relative_path must be normalized without "
+            "empty, dot, or dotdot segments",
+        )
+        _require(
+            relative not in input_paths,
+            f"duplicate release compiler-input relative path: {relative}",
+        )
+        input_paths.add(relative)
+        invariant_relative = "/".join(parts).casefold()
+        _require(
+            invariant_relative not in invariant_input_paths,
+            f"case-aliased release compiler-input relative path: {relative}",
+        )
+        invariant_input_paths.add(invariant_relative)
+
+        resolved = (release_root / Path(*parts)).resolve()
+        try:
+            resolved.relative_to(release_root)
+        except ValueError as exc:
+            raise EquivalenceError(
+                f"{label}.compiler_input_relative_path resolves outside the release root"
+            ) from exc
+        _require(resolved.is_file(), f"release compiler input does not exist: {relative}")
+        resolved_identity = resolved.as_posix().casefold()
+        _require(
+            resolved_identity not in resolved_input_identities,
+            f"release compiler-input paths resolve to the same file: {relative}",
+        )
+        resolved_input_identities.add(resolved_identity)
+        inventory.append((name, resolved))
+
+    return {name: load_strict_json(path) for name, path in inventory}
 
 
 def normalized_compiler_input(value: dict[str, Any], new_to_old: dict[str, str]) -> Any:
@@ -539,27 +711,68 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("--before-release-out", type=Path)
     parser.add_argument("--after-release-out", type=Path)
     parser.add_argument("--output", type=Path, default=DEFAULT_REPORT)
-    parser.add_argument("--check-source", action="store_true")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument(
+        "--generate",
+        action="store_true",
+        help="generate a complete historical receipt from both artifact families",
+    )
+    mode.add_argument(
+        "--check-receipt",
+        action="store_true",
+        help="validate the immutable historical receipt structure and canonical digest",
+    )
+    mode.add_argument(
+        "--check-source",
+        action="store_true",
+        help="explicitly recompute current sources against the historical migration base",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(sys.argv[1:] if argv is None else argv)
     repo_root = args.repo_root.resolve()
+    generation_output: Path | None = None
+    if args.generate:
+        generation_output = resolve_generation_output(repo_root, args.output)
+    artifact_directories = (
+        args.before_out,
+        args.after_out,
+        args.before_release_out,
+        args.after_release_out,
+    )
+    if args.generate:
+        _require(
+            all(value is not None for value in artifact_directories),
+            "--generate requires all four before/after full and release artifact directories",
+        )
+    else:
+        _require(
+            all(value is None for value in artifact_directories),
+            "receipt check modes do not accept artifact directory arguments",
+        )
     manifest = layout.load_manifest(repo_root)
     new_to_old = {move["new_path"]: move["old_path"] for move in manifest["moves"]}
-    sources = source_receipt(repo_root, manifest)
-    if args.check_source:
-        report = json.loads((repo_root / args.output).read_text(encoding="utf-8"))
-        validate_committed_report(report, sources)
-        print("Solidity layout source-equivalence receipt is current (120/120).")
+    if args.check_receipt or args.check_source:
+        report = load_strict_json(repo_root / args.output)
+        validate_committed_report(
+            report, manifest["equivalence_receipt_canonical_sha256"]
+        )
+        if args.check_source:
+            sources = source_receipt(repo_root, manifest)
+            validate_source_recomputation(report, sources)
+            print(
+                "Solidity layout source-equivalence recomputation is current "
+                f"({sources['exact_semantic_match_count']}/{sources['source_count']})."
+            )
+        else:
+            print(
+                "Solidity layout historical equivalence receipt is valid "
+                f"(canonical sha256:{EXPECTED_RECEIPT_CANONICAL_SHA256})."
+            )
         return 0
-    pairs = (
-        (args.before_out, args.after_out),
-        (args.before_release_out, args.after_release_out),
-    )
-    if any((left is None) != (right is None) for left, right in pairs):
-        raise EquivalenceError("each before/after artifact directory must be supplied as a pair")
+    sources = source_receipt(repo_root, manifest)
     report: dict[str, Any] = {
         "schema_version": SCHEMA,
         "migration_base_commit": layout.EXPECTED_MIGRATION_BASE_COMMIT,
@@ -569,29 +782,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         "maturity_effect": MATURITY_EFFECT,
     }
     results = [sources["result"]]
-    if args.before_out is not None:
-        report["full_foundry_artifacts"] = artifact_receipt(
-            args.before_out.resolve(), args.after_out.resolve(), new_to_old, excluded={"build-info"}
-        )
-        results.append(report["full_foundry_artifacts"]["result"])
-    if args.before_release_out is not None:
-        report["release_compiler_inputs"] = compiler_input_receipt(
-            args.before_release_out.resolve(), args.after_release_out.resolve(), new_to_old
-        )
-        report["isolated_release_artifacts"] = artifact_receipt(
-            args.before_release_out.resolve(),
-            args.after_release_out.resolve(),
-            new_to_old,
-            excluded={"compiler-inputs"},
-        )
-        results.extend(
-            [
-                report["release_compiler_inputs"]["result"],
-                report["isolated_release_artifacts"]["result"],
-            ]
-        )
+    report["full_foundry_artifacts"] = artifact_receipt(
+        args.before_out.resolve(),
+        args.after_out.resolve(),
+        new_to_old,
+        excluded={"build-info"},
+    )
+    results.append(report["full_foundry_artifacts"]["result"])
+    report["release_compiler_inputs"] = compiler_input_receipt(
+        args.before_release_out.resolve(),
+        args.after_release_out.resolve(),
+        new_to_old,
+    )
+    report["isolated_release_artifacts"] = artifact_receipt(
+        args.before_release_out.resolve(),
+        args.after_release_out.resolve(),
+        new_to_old,
+        excluded={"compiler-inputs"},
+    )
+    results.extend(
+        [
+            report["release_compiler_inputs"]["result"],
+            report["isolated_release_artifacts"]["result"],
+        ]
+    )
     report["result"] = "pass" if all(result == "pass" for result in results) else "fail"
-    output = repo_root / args.output
+    _require(generation_output is not None, "generation output preflight was not completed")
+    output = generation_output
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(report, indent=2) + "\n",

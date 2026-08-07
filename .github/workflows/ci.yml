@@ -419,7 +419,7 @@ jobs:
           python3 scripts/test_solidity_source_layout.py
           python3 scripts/check_solidity_source_layout.py
           python3 scripts/test_solidity_layout_equivalence.py
-          python3 scripts/check_solidity_layout_equivalence.py --check-source
+          python3 scripts/check_solidity_layout_equivalence.py --check-receipt
 
       - name: Install browser test tooling
         shell: bash

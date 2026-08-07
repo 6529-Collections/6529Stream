@@ -17,6 +17,9 @@ MANIFEST_PATH = Path("smart-contracts/source-layout.json")
 EXPECTED_SCHEMA = "6529stream.solidity-source-layout.v1"
 EXPECTED_SOURCE_ROOT = "smart-contracts"
 EXPECTED_MIGRATION_BASE_COMMIT = "2ef4901609399d2808848b39ed2a3f877e945dba"
+EXPECTED_EQUIVALENCE_RECEIPT_CANONICAL_SHA256 = (
+    "c5fb8861b5cf1f327bbf48927426d2260ecc561ba1647debb8e81d3dd27f3502"
+)
 EXPECTED_MIGRATION_SOURCE_COUNT = 120
 EXPECTED_MOVES_SHA256 = "9698c02514a3831f4c858a2087e20644f2c16ddea05e38f23ea4a07819db56ef"
 EXPECTED_POLICY = {
@@ -81,11 +84,52 @@ class SourceLayoutError(RuntimeError):
     """Raised when the reviewed source-layout manifest is malformed."""
 
 
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
+
+
+def _reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise SourceLayoutError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def _parse_ijson_integer(token: str) -> int:
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise SourceLayoutError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def _reject_json_float(token: str) -> float:
+    raise SourceLayoutError(f"floating-point JSON is forbidden in source-layout inputs: {token}")
+
+
+def _reject_json_constant(token: str) -> None:
+    raise SourceLayoutError(f"non-I-JSON token is forbidden: {token}")
+
+
 def _read_json(path: Path) -> Any:
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        raw = path.read_bytes()
     except FileNotFoundError as exc:
         raise SourceLayoutError(f"missing source-layout manifest: {path}") from exc
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise SourceLayoutError(f"invalid JSON in {path}: {exc}") from exc
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=_reject_duplicate_json_pairs,
+            parse_int=_parse_ijson_integer,
+            parse_float=_reject_json_float,
+            parse_constant=_reject_json_constant,
+        )
     except json.JSONDecodeError as exc:
         raise SourceLayoutError(f"invalid JSON in {path}: {exc}") from exc
 
@@ -111,6 +155,7 @@ def load_manifest(repo_root: Path) -> dict[str, Any]:
     if set(payload) != {
         "schema_version",
         "migration_base_commit",
+        "equivalence_receipt_canonical_sha256",
         "source_root",
         "policy",
         "moves",
@@ -130,6 +175,14 @@ def load_manifest(repo_root: Path) -> dict[str, Any]:
         raise SourceLayoutError(
             "migration_base_commit must remain the exact reviewed migration base "
             f"{EXPECTED_MIGRATION_BASE_COMMIT}"
+        )
+    if (
+        payload.get("equivalence_receipt_canonical_sha256")
+        != EXPECTED_EQUIVALENCE_RECEIPT_CANONICAL_SHA256
+    ):
+        raise SourceLayoutError(
+            "equivalence_receipt_canonical_sha256 must remain the exact reviewed "
+            "historical receipt digest"
         )
 
     policy = payload.get("policy")

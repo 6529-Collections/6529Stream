@@ -56,6 +56,31 @@ class SoliditySourceLayoutTests(unittest.TestCase):
             path.write_text(json.dumps(payload), encoding="utf-8")
             self.assertTrue(any("exact reviewed migration base" in error for error in self.errors(root)))
 
+    def test_equivalence_receipt_digest_tamper_fails(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            path = root / checker.MANIFEST_PATH
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload["equivalence_receipt_canonical_sha256"] = "0" * 64
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            self.assertTrue(
+                any("exact reviewed historical receipt digest" in error for error in self.errors(root))
+            )
+
+    def test_duplicate_manifest_member_fails(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            path = root / checker.MANIFEST_PATH
+            text = path.read_text(encoding="utf-8").replace(
+                '  "migration_base_commit":',
+                '  "migration_base_commit": "0",\n  "migration_base_commit":',
+                1,
+            )
+            path.write_text(text, encoding="utf-8")
+            self.assertTrue(
+                any("duplicate JSON member: migration_base_commit" in error for error in self.errors(root))
+            )
+
     def test_policy_tamper_fails(self) -> None:
         with self.fixture() as temp:
             root = Path(temp)

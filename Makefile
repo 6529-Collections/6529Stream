@@ -141,7 +141,7 @@ solidity-source-layout-check:
 	$(PYTHON) scripts/test_solidity_source_layout.py
 	$(PYTHON) scripts/check_solidity_source_layout.py
 	$(PYTHON) scripts/test_solidity_layout_equivalence.py
-	$(PYTHON) scripts/check_solidity_layout_equivalence.py --check-source
+	$(PYTHON) scripts/check_solidity_layout_equivalence.py --check-receipt
 
 drop-authorization-fixtures-check:
 	$(PYTHON) scripts/test_drop_authorization_payload_generator.py
