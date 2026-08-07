@@ -17,7 +17,7 @@ jobs:
   windows-wrapper:
     name: Windows PowerShell wrapper
     runs-on: windows-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -25,6 +25,31 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Initialize Windows release-builder log
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force ci-logs | Out-Null
+          "Release-builder authority did not start." |
+            Set-Content -Encoding utf8 ci-logs\release-build-tests-windows.log
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.10"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        with:
+          version: v1.7.1
+
+      - name: Install pinned Solc toolchain
+        shell: powershell
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+          solc-select install 0.8.19
+          solc-select use 0.8.19
 
       - name: PowerShell syntax and wrapper runtime
         shell: powershell
@@ -49,6 +74,29 @@ jobs:
             }
           }
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
+
+      - name: Full release-builder test authority
+        shell: powershell
+        timeout-minutes: 20
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          New-Item -ItemType Directory -Force ci-logs | Out-Null
+          cmd.exe /d /s /c "python scripts/test_release_build_artifacts.py 2>&1" |
+            Tee-Object -FilePath ci-logs\release-build-tests-windows.log
+          $testExit = $LASTEXITCODE
+          if ($testExit -ne 0) {
+            exit $testExit
+          }
+
+      - name: Upload Windows release-builder log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-build-tests-windows
+          path: ci-logs/release-build-tests-windows.log
+          if-no-files-found: error
+          retention-days: 14
 
   slither-baseline:
     name: Slither first-party baseline
@@ -445,7 +493,8 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs
-          python3 scripts/test_release_build_artifacts.py 2>&1 | tee ci-logs/release-build-tests.log
+          python3 -c "import runpy; runpy.run_path('scripts/build_release_artifacts.py', run_name='release_builder_import')"
+          python3 scripts/test_release_build_artifacts.py ReleaseBuildArtifactTests 2>&1 | tee ci-logs/release-build-legacy-tests.log
           python3 scripts/build_release_artifacts.py 2>&1 | tee ci-logs/release-build.log
           python3 scripts/build_release_artifacts.py --check 2>&1 | tee ci-logs/release-build-check.log
 

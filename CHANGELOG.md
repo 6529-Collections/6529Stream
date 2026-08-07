@@ -7,6 +7,25 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened the canonical release builder's cross-process evidence authority:
+  authoritative Windows runs now use run-scoped Forge and Solc leases, reject
+  overlapping consumers and stale terminals, remain importable for the pinned
+  Linux CI parity lane, and exercise the complete 121-test builder suite on
+  Windows. The native job pins the final setup-python Windows 3.12 build
+  (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed
+  inventory verifies those per-platform pins, and the common hashed lock now
+  includes Web3's exact Windows-only `pywin32==312` closure. Historical R4
+  journals now use
+  distinct event and terminal schemas, shadowed R4 validators have explicit
+  names, and failed evidence flushes remove temporary residue without masking
+  the primary diagnostic. The native builder test routes merged Python output
+  through `cmd.exe` so Windows PowerShell 5.1 cannot promote unittest stderr to
+  a terminating `NativeCommandError`, while preserving the Python exit code.
+  The scoped Windows wiring policy test remains
+  checksum-covered by both the generator and the independent offline-verifier
+  root-set pin. Refreshed the exact non-production
+  deployment-fixture receipt pin and deterministic release tail; no contract,
+  live deployment, audit, or readiness status changed.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
   exact parity with the final `StreamCore` bytecode-proof row and the

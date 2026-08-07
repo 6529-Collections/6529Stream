@@ -154,7 +154,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 264)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 265)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3149,11 +3149,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 264)
-        self.assertEqual(len(manifest["files"]), 436)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 265)
+        self.assertEqual(len(manifest["files"]), 437)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            436,
+            437,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3239,6 +3239,7 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("scripts/verify_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/build_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_release_build_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/test_windows_ci_wrapper.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("docs/first-30-minutes.md"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/check_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)
@@ -3470,7 +3471,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 436)
+        self.assertEqual(len(classifications), 437)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")
