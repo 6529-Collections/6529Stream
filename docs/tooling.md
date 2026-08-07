@@ -66,7 +66,10 @@ python scripts/check_python_toolchain.py
 ```
 
 Review the full package/version change and every added or removed hash, not
-only the seven direct pins. The generated lock must not contain index URLs,
+only the eight direct pins. `pywin32==312` is intentionally direct and guarded
+by the exact `sys_platform == "win32"` marker so the common lock closes Web3's
+Windows dependency without making Linux resolve a Windows-only wheel. The
+generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
 remediate vulnerability findings before acceptance. Update the deliberately
 maintained `EXPECTED_LOCKED_NAMES` closure in

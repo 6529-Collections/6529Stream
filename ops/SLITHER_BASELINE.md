@@ -19,7 +19,7 @@ public beta or production. All 32 current rows remain `Open` under issue #658.
 | Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:9b75a59e5b9d138a407fa59c455df6bb015574fe04a159d38ccefa2a6adb796c` |
 | Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
 | Foundry config | `sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313` |
-| Current gate tool requirements | `sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771` |
+| Current gate tool requirements | `sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2` |
 | Capture command | `python -m slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
 | Gate command | `python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
 | Capture process | Native exit `255`; JSON `success=true`; `338394717` bytes |

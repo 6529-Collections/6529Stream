@@ -106,6 +106,32 @@ class PythonToolchainTests(unittest.TestCase):
         )
         self.assertEqual(direct["eth-abi"], "5.2.0")
         self.assertEqual(direct["jsonschema"], "4.25.1")
+        self.assertEqual(direct["pywin32"], "312")
+
+    def test_windows_transitive_pin_requires_exact_marker(self) -> None:
+        """The Windows-only closure cannot become unconditional or cross-platform."""
+
+        direct_text = (
+            SCRIPT_PATH.parent.parent / checker.DIRECT_REQUIREMENTS_PATH
+        ).read_text(encoding="utf-8")
+        with self.assertRaisesRegex(checker.ToolchainError, "marker for pywin32"):
+            checker.parse_direct_requirements(
+                direct_text.replace(
+                    'pywin32==312 ; sys_platform == "win32"',
+                    "pywin32==312",
+                )
+            )
+
+        valid_lock_entry = (
+            'pywin32==312 ; sys_platform == "win32" \\\n'
+            f'    --hash=sha256:{"a" * 64}\n'
+        )
+        self.assertEqual(
+            checker.parse_lock(valid_lock_entry)["pywin32"][0],
+            "312",
+        )
+        with self.assertRaisesRegex(checker.ToolchainError, "marker for pywin32"):
+            checker.parse_lock(valid_lock_entry.replace(' ; sys_platform == "win32"', ""))
 
     def test_direct_requirements_require_exact_expected_pins(self) -> None:
         """Range-based direct requirements fail closed."""

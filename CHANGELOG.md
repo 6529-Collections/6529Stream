@@ -13,7 +13,9 @@ the release policy in `docs/release-policy.md`.
   Linux CI parity lane, and exercise the complete 121-test builder suite on
   Windows. The native job pins the final setup-python Windows 3.12 build
   (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed
-  inventory verifies those per-platform pins. Historical R4 journals now use
+  inventory verifies those per-platform pins, and the common hashed lock now
+  includes Web3's exact Windows-only `pywin32==312` closure. Historical R4
+  journals now use
   distinct event and terminal schemas, shadowed R4 validators have explicit
   names, and failed evidence flushes remove temporary residue without masking
   the primary diagnostic. The scoped Windows wiring policy test remains

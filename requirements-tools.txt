@@ -3,5 +3,6 @@ eth-abi==5.2.0
 eth-hash==0.8.0
 jsonschema==4.25.1
 playwright==1.60.0
+pywin32==312 ; sys_platform == "win32"
 slither-analyzer==0.11.5
 solc-select==1.2.0

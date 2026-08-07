@@ -45,6 +45,7 @@ EXPECTED_DIRECT_NAMES = {
     "eth-hash",
     "jsonschema",
     "playwright",
+    "pywin32",
     "slither-analyzer",
     "solc-select",
 }
@@ -85,6 +86,7 @@ EXPECTED_LOCKED_NAMES = {
     "pydantic",
     "pydantic-core",
     "pyee",
+    "pywin32",
     "pyunormalize",
     "referencing",
     "regex",
@@ -106,9 +108,14 @@ EXPECTED_LOCKED_NAMES = {
 
 NAME_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._-]*"
 VERSION_PATTERN = r"[^\s\\;]+"
-DIRECT_RE = re.compile(rf"^({NAME_PATTERN})==({VERSION_PATTERN})$")
+WINDOWS_MARKER = 'sys_platform == "win32"'
+EXPECTED_REQUIREMENT_MARKERS = {"pywin32": WINDOWS_MARKER}
+DIRECT_RE = re.compile(
+    rf"^({NAME_PATTERN})==({VERSION_PATTERN})(?: ; ({re.escape(WINDOWS_MARKER)}))?$"
+)
 LOCK_REQUIREMENT_RE = re.compile(
-    rf"^({NAME_PATTERN})==({VERSION_PATTERN})\s+\\$"
+    rf"^({NAME_PATTERN})==({VERSION_PATTERN})"
+    rf"(?: ; ({re.escape(WINDOWS_MARKER)}))?\s+\\$"
 )
 HASH_RE = re.compile(r"^--hash=sha256:([0-9a-f]{64})(?:\s+\\)?$")
 STRICT_ACTION_RE = re.compile(
@@ -238,6 +245,13 @@ def parse_direct_requirements(text: str) -> dict[str, str]:
                 f"{DIRECT_REQUIREMENTS_PATH}:{line_number} must be an exact name==version pin"
             )
         name = canonicalize_name(match.group(1))
+        marker = match.group(3)
+        expected_marker = EXPECTED_REQUIREMENT_MARKERS.get(name)
+        if marker != expected_marker:
+            raise ToolchainError(
+                f"{DIRECT_REQUIREMENTS_PATH}:{line_number} marker for {name} "
+                f"must be {expected_marker!r}, got {marker!r}"
+            )
         if name in requirements:
             raise ToolchainError(
                 f"{DIRECT_REQUIREMENTS_PATH}:{line_number} duplicates {name}"
@@ -297,6 +311,13 @@ def parse_lock(text: str) -> dict[str, tuple[str, frozenset[str]]]:
             finish_current()
             current_name = canonicalize_name(requirement_match.group(1))
             current_version = requirement_match.group(2)
+            marker = requirement_match.group(3)
+            expected_marker = EXPECTED_REQUIREMENT_MARKERS.get(current_name)
+            if marker != expected_marker:
+                raise ToolchainError(
+                    f"{LOCK_PATH}:{line_number} marker for {current_name} "
+                    f"must be {expected_marker!r}, got {marker!r}"
+                )
             continue
 
         hash_match = HASH_RE.fullmatch(stripped)
