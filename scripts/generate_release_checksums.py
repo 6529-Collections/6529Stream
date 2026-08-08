@@ -416,17 +416,17 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "733d07274aed72c069d08cd16fb6cb1056bb31ffee65814d4e15d4b995eb10eb",
-        104_990,
+        "cdbc0029bf9177035d1be48fa8e6a15e7abd36bfc2085828f13c3b4df3a1739f",
+        128_014,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "e056d9669cbd646c3a9a650ae6ae3b846eeaa10c7af59c6e2dfa4b6373e5f809",
-        47_073,
+        "7c3e7823fc7a58262881d7df59bdafd995895b87e9dea08a625d7538608f0b13",
+        47_072,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "e0dd870ded5731eda99eff37e318424558011ec3d551566f66ec02b636aabbcd",
+        "3439182d94af4ed357558103258e0176120091d525035e03738e65d49ab3e537",
         169_469,
     ),
 }

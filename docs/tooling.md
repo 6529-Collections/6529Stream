@@ -2218,10 +2218,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `6931aaa6db64e288ee2d67b6b0566ad986d2c856` on
-`2026-07-28T13:20:58Z` records 3,213 findings: 49 High, 825 Medium, 1,265 Low,
+at source commit `7f7d2af516b80931d8ef936ecfa23b0a8fa044b2` on
+`2026-08-08T16:36:06Z` records 3,218 findings: 49 High, 830 Medium, 1,265 Low,
 1,032 Informational, and 42 Optimization. Its High/Medium scope totals are
-first-party production `2/30/32`, vendored `1/9/10`, test `46/779/825`, script
+first-party production `2/30/32`, vendored `1/9/10`, test `46/784/830`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

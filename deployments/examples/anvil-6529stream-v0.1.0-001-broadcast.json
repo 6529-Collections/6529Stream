@@ -71,8 +71,8 @@
         "0x1000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000000"
       ],
-      "abi_hash": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
-      "bytecode_hash": "sha256:7c45aac586976667f8630253008cab5bfb2b043025bfdca6dd7a960a4422c567",
+      "abi_hash": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "bytecode_hash": "sha256:7b902e9b1478d7292fe91b5d29c46ffc12c0e7f40ca842197f3f7140f1a09404",
       "verification_status": "not_applicable"
     },
     "StreamPreservationRecords": {
@@ -83,8 +83,8 @@
         "0x1000000000000000000000000000000000000011",
         "0x0000000000000000000000000000000000000000"
       ],
-      "abi_hash": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
-      "bytecode_hash": "sha256:7837f942f8a9c38d32b0e5720f629fcec3ac7941c430d50908f99793f57dd521",
+      "abi_hash": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
+      "bytecode_hash": "sha256:3b16acb80dfd545c9cf14762c988f8a40fc00fc69d9ec6f7d5a02b99d913c5de",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -283,14 +283,14 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:aecc36df7bc9de35c28a8a8cd602fb1e5ec08c54864b07d7b412a3a2f8f2c215",
+    "manifest_sha256": "sha256:e8e124abae2ce633304450dfa7eff0e97708a4f23529de8fd15628b6a3d94b85",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "StreamCore": "sha256:05703cd2b2f198de9457c8ee41533fe72412f04b7db63e5cb80836c469309650",
       "StreamContractMetadata": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
-      "StreamCollectionMetadata": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
-      "StreamPreservationRecords": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
+      "StreamCollectionMetadata": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "StreamPreservationRecords": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
       "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "StreamMinter": "sha256:94a10370fb1f1630b651afbbd287fb5df4b43743397aa1bcdc7f2745416405d0",
       "StreamDrops": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",

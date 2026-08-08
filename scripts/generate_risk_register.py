@@ -305,28 +305,35 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "id": "RISK-GOV-002",
-        "title": "Metadata satellite writer grants are whole-module",
+        "title": "Record-family authorization candidate binding remains incomplete",
         "area": "governance",
         "severity": "high",
         "status": "open_blocker",
         "owner": "protocol",
         "target_gate": "Gate E",
-        "source": "CON-015 launch metadata and preservation authorization model",
+        "source": (
+            "Issue #690 source implementation and candidate-bound record-family "
+            "authorization evidence"
+        ),
         "mitigation": (
-            "Implement a fail-closed record-family classifier and exact family-to-"
-            "authority mapping, reject undeclared families, enforce every-family "
-            "snapshot authority, persist the authorization class, and retain "
-            "independently reviewed candidate-bound grant, lifecycle, runtime, and "
-            "deployment evidence."
+            "Retain the fail-closed source implementation and complete the exact "
+            "candidate-bound admission/provider/grant map, shared host-registry "
+            "address, finalized current/pending configuration-authority observation, "
+            "deployed runtime/codehash bindings, reconciled propose/accept/cancel "
+            "lifecycle evidence, phase evidence, and independent review before release."
         ),
         "residual_risk": (
-            "A compromised or over-broad metadata/preservation writer can publish "
-            "records for every record family accepted by the target launch module."
+            "Source-level family isolation does not prove the selected candidate's "
+            "deployed registry, provider/grant configuration, configuration-authority "
+            "state, runtime, or lifecycle; an unbound or drifted candidate could "
+            "therefore admit or authorize the wrong record writers."
         ),
         "evidence_paths": [
             "docs/collection-metadata-contract.md",
             "release-artifacts/record-family-authorization-inventory.json",
             "release-artifacts/schema/record-family-authorization-inventory.v1.schema.json",
+            "release-artifacts/record-family-authorization-source-catalog.json",
+            "release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json",
             "deployments/schema/record-family-authorization-evidence.v1.schema.json",
             "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
             "deployments/record-family-authorization/record-family-authorization-evidence-template.json",

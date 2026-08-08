@@ -19,7 +19,7 @@
     "IStreamArtworkFinalityRegistry": "0x47291ea1",
     "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
-    "IStreamCollectionMetadata": "0x2ddbeb53",
+    "IStreamCollectionMetadata": "0x2c2422f4",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0x93740d3a",
@@ -35,8 +35,10 @@
     "IStreamMintManager": "0xb4074ed7",
     "IStreamMintModuleRegistry": "0x4eb81941",
     "IStreamMinter": "0x0f48ec25",
-    "IStreamPreservationRecords": "0x44338aea",
+    "IStreamPreservationRecords": "0xa30cfc7c",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
+    "IStreamRecordFamilyAuthorityProvider": "0xb5d5c966",
+    "IStreamRecordFamilyRegistry": "0x679dcd40",
     "IStreamRevenueResolver": "0x3503c22e",
     "IStreamSplitFactory": "0x1748deee",
     "IStreamSplitWallet": "0x0ea5f02c",
@@ -592,9 +594,9 @@
     "IStreamCollectionMetadata": {
       "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
       "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
-      "abi_sha256": "sha256:6cfc024fdabf15f1576a48ddec800f421356fbc5da17ab4b64e86c7cd15d93d1",
-      "interface_id": "0x2ddbeb53",
-      "interface_id_source": "selector_xor",
+      "abi_sha256": "sha256:c80fe840f1b7cc2800aa2c7871fb3c7249fd9b45365a426a518c275fdf02240f",
+      "interface_id": "0x2c2422f4",
+      "interface_id_source": "configured",
       "computed_selector_xor": "0x2ddbeb53",
       "function_selectors": [
         {
@@ -1624,10 +1626,10 @@
     "IStreamPreservationRecords": {
       "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
-      "abi_sha256": "sha256:a7633c3559877537dac328bda542b6a73d12c426d990c6b4cb8f96c6134aa9bb",
-      "interface_id": "0x44338aea",
-      "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x44338aea",
+      "abi_sha256": "sha256:5d267295a2b851f878060875fa2ce090dc4aaccf3d986344f836b761f6bc5580",
+      "interface_id": "0xa30cfc7c",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xa2f335db",
       "function_selectors": [
         {
           "signature": "adminsContract()",
@@ -1646,12 +1648,20 @@
           "selector": "0x18cd4aad"
         },
         {
+          "signature": "deriveCollectionRecordHashFor(address,uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "selector": "0x241bbb2b"
+        },
+        {
           "signature": "isStreamPreservationRecords()",
           "selector": "0x3efe1a5d"
         },
         {
           "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
           "selector": "0x8b1d1ed9"
+        },
+        {
+          "signature": "latestCollectionRecordHashFor(uint256,bytes32,bytes32,address)",
+          "selector": "0xc2db041a"
         },
         {
           "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
@@ -1754,6 +1764,122 @@
         {
           "signature": "totalOfficialSettled(address)",
           "selector": "0x7fe3b24d"
+        }
+      ]
+    },
+    "IStreamRecordFamilyAuthorityProvider": {
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
+      "artifact_path": "out-release/IStreamRecordFamilyAuthorityProvider.sol/IStreamRecordFamilyAuthorityProvider.json",
+      "abi_sha256": "sha256:893b8482686c5e8428985404f88a46a8a173b19f9fad28baf6f95e522514636f",
+      "interface_id": "0xb5d5c966",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xb5d5c966",
+      "function_selectors": [
+        {
+          "signature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "selector": "0xd0cab440"
+        },
+        {
+          "signature": "isStreamRecordFamilyAuthorityProvider()",
+          "selector": "0x651f7d26"
+        }
+      ]
+    },
+    "IStreamRecordFamilyRegistry": {
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+      "artifact_path": "out-release/IStreamRecordFamilyRegistry.sol/IStreamRecordFamilyRegistry.json",
+      "abi_sha256": "sha256:899156ae091030e14083b1bde08db14ec2eca75e68e53bb90aabcb350e7ad1c7",
+      "interface_id": "0x679dcd40",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x666204e7",
+      "function_selectors": [
+        {
+          "signature": "acceptConfigurationAuthority()",
+          "selector": "0x1c8aaf29"
+        },
+        {
+          "signature": "adminsContract()",
+          "selector": "0x7e3c9be7"
+        },
+        {
+          "signature": "admitRecordType(bytes32,bytes32,uint16)",
+          "selector": "0xe96cc920"
+        },
+        {
+          "signature": "authorityProvider(uint8)",
+          "selector": "0x95b71c66"
+        },
+        {
+          "signature": "cancelConfigurationAuthorityProposal()",
+          "selector": "0xa5ff3699"
+        },
+        {
+          "signature": "configurationAuthority()",
+          "selector": "0xac2308f4"
+        },
+        {
+          "signature": "configurationHash()",
+          "selector": "0x183ccffa"
+        },
+        {
+          "signature": "configurationRevision()",
+          "selector": "0xf6d22b75"
+        },
+        {
+          "signature": "familyAllowedAuthorizationClassMask(bytes32)",
+          "selector": "0x54b63fc2"
+        },
+        {
+          "signature": "familyRejectsAdminAuthority(bytes32)",
+          "selector": "0xe69e4156"
+        },
+        {
+          "signature": "isStreamRecordFamilyRegistry()",
+          "selector": "0x20e9f458"
+        },
+        {
+          "signature": "pendingConfigurationAuthority()",
+          "selector": "0x57c7f975"
+        },
+        {
+          "signature": "proposeConfigurationAuthority(address)",
+          "selector": "0x5b075e14"
+        },
+        {
+          "signature": "recordFamilyGrant(bytes32,uint8,address)",
+          "selector": "0x1118ed2f"
+        },
+        {
+          "signature": "recordTypeCount()",
+          "selector": "0x217f6634"
+        },
+        {
+          "signature": "recordTypePolicy(bytes32)",
+          "selector": "0xcd2369a6"
+        },
+        {
+          "signature": "recordTypeRejectsAdminAuthority(bytes32)",
+          "selector": "0x9ecd97c6"
+        },
+        {
+          "signature": "recordTypeRevision(bytes32)",
+          "selector": "0x9f175161"
+        },
+        {
+          "signature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+          "selector": "0xb3fcab16"
+        },
+        {
+          "signature": "setAuthorityProvider(uint8,address)",
+          "selector": "0x0f4f2a68"
+        },
+        {
+          "signature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+          "selector": "0x40ee7ee3"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
         }
       ]
     },

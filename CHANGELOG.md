@@ -100,7 +100,18 @@ the release policy in `docs/release-policy.md`.
   review. Candidate/profile binding, the production admission/provider/grant
   set, deployed runtime evidence, lifecycle exercise, and retained
   candidate-bound independent review remain unavailable; `RISK-GOV-002` and
-  both release-mode stops remain unchanged.
+  both release-mode stops remain unchanged. The canonical release target
+  configuration now publishes `IStreamRecordFamilyAuthorityProvider` and
+  `IStreamRecordFamilyRegistry`, and explicitly pins the Solidity interface IDs
+  for the Registry, Collection Metadata, and Preservation interfaces so
+  inherited ERC-165 selectors cannot distort the generated catalog. The
+  expanded interface surface adds 24 explicit NatSpec-baseline exclusions
+  (912 total), retaining that documentation debt rather than implying it is
+  complete. A fresh
+  pinned Slither `0.11.5` capture at the rebased source commit retains the exact
+  32 Open first-party production High/Medium fingerprints (2 High, 30 Medium);
+  four additional Medium rows are test-only. Baseline parity is inventory
+  consistency, not finding acceptance, audit completion, or readiness.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
   exact parity with the final `StreamCore` bytecode-proof row and the

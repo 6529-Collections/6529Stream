@@ -30,8 +30,8 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = "24173efe3f4722b6d50085effae489927cbcb712"
-EXPECTED_CAPTURED_AT_UTC = "2026-07-28T18:48:50Z"
+EXPECTED_ANALYZED_COMMIT = "7f7d2af516b80931d8ef936ecfa23b0a8fa044b2"
+EXPECTED_CAPTURED_AT_UTC = "2026-08-08T16:36:06Z"
 EXPECTED_CAPTURE_COMMAND = (
     "python -m slither . --config-file slither.config.json --foundry-compile-all "
     "--json <temp-file>"
@@ -41,26 +41,26 @@ EXPECTED_GATE_COMMAND = (
     "--exclude-low --exclude-informational --exclude-optimization "
     "--json-types detectors --json <temp-file> --fail-none"
 )
-EXPECTED_CAPTURE_NATIVE_EXIT_CODE = 255
-EXPECTED_RAW_JSON_SIZE_BYTES = 338_394_717
+EXPECTED_CAPTURE_NATIVE_EXIT_CODE = -1
+EXPECTED_RAW_JSON_SIZE_BYTES = 338_692_259
 EXPECTED_RAW_JSON_SHA256 = (
-    "sha256:b502fe72ff0463485646d5b30fcad5535728683b562e3e00cacb7d915694d917"
+    "sha256:785979fd1f55b694ea7bedae8a779d2c65c07f2dbccf3b10c5f17ff6847d51a6"
 )
 
 IMPACTS = ("High", "Medium")
 EXPECTED_COUNTS = {"High": 2, "Medium": 30, "total": 32}
 EXPECTED_CAPTURE_COUNTS = {
     "High": 49,
-    "Medium": 826,
+    "Medium": 830,
     "Low": 1265,
     "Informational": 1032,
     "Optimization": 42,
-    "total": 3214,
+    "total": 3218,
 }
 EXPECTED_SCOPE_COUNTS = {
     "first_party_production": {"High": 2, "Medium": 30, "total": 32},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
-    "test": {"High": 46, "Medium": 780, "total": 826},
+    "test": {"High": 46, "Medium": 784, "total": 830},
     "script": {"High": 0, "Medium": 7, "total": 7},
     "other": {"High": 0, "Medium": 0, "total": 0},
 }

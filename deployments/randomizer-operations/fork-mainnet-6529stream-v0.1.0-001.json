@@ -18,15 +18,15 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
+      "sha256": "sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f"
     },
     "address_book": {
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:c5c7d94da0b12acb5719092453dd77c05ae614c6d71a80a782b9ea9d89f85893"
+      "sha256": "sha256:f18b1b4cf58f6e67786b2080a25e55a0f25d4227d914914d5d76b4ec262ecd44"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:00c3f9a693c5743fd4f035f651aa7445bd0815d3b1aeeb20c6cbddbaf93a884c"
+      "sha256": "sha256:c6a771212d5f23dae2feff8a9afae78a326bbc9fc45730fc26ae3eccb08b367a"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -46,7 +46,7 @@
       "evidence": [
         {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
+          "sha256": "sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md",
@@ -70,7 +70,7 @@
       "evidence": [
         {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
+          "sha256": "sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md",
@@ -217,12 +217,12 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
+      "sha256": "sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:c5c7d94da0b12acb5719092453dd77c05ae614c6d71a80a782b9ea9d89f85893"
+      "sha256": "sha256:f18b1b4cf58f6e67786b2080a25e55a0f25d4227d914914d5d76b4ec262ecd44"
     },
     {
       "category": "provider_export",

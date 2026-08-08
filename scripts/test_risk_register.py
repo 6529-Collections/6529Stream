@@ -1002,8 +1002,35 @@ class RiskRegisterTests(unittest.TestCase):
             if risk["id"] == checker.RECORD_FAMILY_AUTHORIZATION_RISK_ID
         )
 
+        self.assertEqual(
+            risk["title"],
+            "Record-family authorization candidate binding remains incomplete",
+        )
+        self.assertEqual(
+            risk["source"],
+            "Issue #690 source implementation and candidate-bound record-family "
+            "authorization evidence",
+        )
         self.assertEqual(risk["severity"], "high")
         self.assertEqual(risk["status"], "open_blocker")
+        self.assertEqual(risk["owner"], "protocol")
+        self.assertEqual(risk["target_gate"], "Gate E")
+        self.assertEqual(
+            risk["mitigation"],
+            "Retain the fail-closed source implementation and complete the exact "
+            "candidate-bound admission/provider/grant map, shared host-registry "
+            "address, finalized current/pending configuration-authority observation, "
+            "deployed runtime/codehash bindings, reconciled propose/accept/cancel "
+            "lifecycle evidence, phase evidence, and independent review before release.",
+        )
+        self.assertNotIn("Implement a fail-closed", risk["mitigation"])
+        self.assertEqual(
+            risk["residual_risk"],
+            "Source-level family isolation does not prove the selected candidate's "
+            "deployed registry, provider/grant configuration, configuration-authority "
+            "state, runtime, or lifecycle; an unbound or drifted candidate could "
+            "therefore admit or authorize the wrong record writers.",
+        )
         self.assertEqual(
             risk["tracking"],
             ["https://github.com/6529-Collections/6529Stream/issues/690"],
@@ -1013,12 +1040,24 @@ class RiskRegisterTests(unittest.TestCase):
             risk["evidence_paths"],
         )
         self.assertIn(
-            "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+            "release-artifacts/record-family-authorization-source-catalog.json",
             risk["evidence_paths"],
         )
         self.assertIn(
-            "python scripts/check_record_family_authorization.py",
+            "release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json",
+            risk["evidence_paths"],
+        )
+        self.assertIn(
+            "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+            risk["evidence_paths"],
+        )
+        self.assertEqual(
             risk["checks"],
+            [
+                "python scripts/test_record_family_authorization.py",
+                "python scripts/check_record_family_authorization.py",
+                "python scripts/check_risk_register.py",
+            ],
         )
 
     def test_rejects_missing_governed_parameter_completeness_risk(self) -> None:

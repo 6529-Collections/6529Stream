@@ -6,14 +6,14 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 231,
+    "custom_error_count": 240,
     "contract_count": 18,
     "category_counts": {
-      "access_control": 16,
+      "access_control": 18,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 35,
-      "metadata_integrity": 28,
+      "configuration": 39,
+      "metadata_integrity": 31,
       "mint_ledger_accounting": 16,
       "mint_manager_policy": 43,
       "pause_emergency": 3,
@@ -24,9 +24,9 @@
       "supply_minting": 7
     },
     "severity_counts": {
-      "critical": 16,
-      "high": 173,
-      "medium": 42
+      "critical": 18,
+      "high": 176,
+      "medium": 46
     },
     "duplicate_selectors": {
       "0x1372e27c": [
@@ -1743,6 +1743,33 @@
       }
     },
     {
+      "id": "StreamCollectionMetadata:InvalidRecordFamilyConfigurationAuthority(address)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "InvalidRecordFamilyConfigurationAuthority",
+      "signature": "InvalidRecordFamilyConfigurationAuthority(address)",
+      "selector": "0xfa9f01ef",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamCollectionMetadata:InvalidRecordFamilyRegistry()",
       "contract": "StreamCollectionMetadata",
       "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
@@ -2014,6 +2041,146 @@
       }
     },
     {
+      "id": "StreamCollectionMetadata:RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyConfigurationAuthorityAcceptanceRequired",
+      "signature": "RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+      "selector": "0xead85cdc",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "pendingAuthority",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyConfigurationAuthorityProposalMissing()",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyConfigurationAuthorityProposalMissing",
+      "signature": "RecordFamilyConfigurationAuthorityProposalMissing()",
+      "selector": "0x1814ec58",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyConfigurationAuthorityProposalNoOp",
+      "signature": "RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+      "selector": "0x7eee4104",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyConfigurationAuthorityProposalPending(address)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyConfigurationAuthorityProposalPending",
+      "signature": "RecordFamilyConfigurationAuthorityProposalPending(address)",
+      "selector": "0x5c0af5f4",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "pendingAuthority",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyConfigurationAuthorityRequired(address,address)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyConfigurationAuthorityRequired",
+      "signature": "RecordFamilyConfigurationAuthorityRequired(address,address)",
+      "selector": "0x16416d87",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamCollectionMetadata:RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
       "contract": "StreamCollectionMetadata",
       "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
@@ -2093,6 +2260,74 @@
         "tests": [
           "test/StreamCustomErrorNegative.t.sol",
           "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyHostNotAllowed(bytes32,bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyHostNotAllowed",
+      "signature": "RecordFamilyHostNotAllowed(bytes32,bytes32)",
+      "selector": "0x6c48573c",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "familyId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:RecordFamilyLockNotAllowed(bytes32,bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+      "name": "RecordFamilyLockNotAllowed",
+      "signature": "RecordFamilyLockNotAllowed(bytes32,bytes32)",
+      "selector": "0xdf204773",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "familyId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5266,6 +5501,34 @@
           "test/StreamMetadataUtf8.t.sol",
           "test/StreamCustomErrorNegative.t.sol",
           "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:InvalidCollectionRecordRecorder(address)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+      "name": "InvalidCollectionRecordRecorder",
+      "signature": "InvalidCollectionRecordRecorder(address)",
+      "selector": "0x2bbbe0e4",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "recorder",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

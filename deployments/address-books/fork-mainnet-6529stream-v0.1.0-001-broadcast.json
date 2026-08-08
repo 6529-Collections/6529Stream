@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3",
+    "deployment_manifest_sha256": "sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -73,8 +73,8 @@
       "address": "0x2000000000000000000000000000000000000011",
       "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
-      "abi_hash": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
-      "runtime_bytecode_hash": "sha256:7c45aac586976667f8630253008cab5bfb2b043025bfdca6dd7a960a4422c567",
+      "abi_hash": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "runtime_bytecode_hash": "sha256:7b902e9b1478d7292fe91b5d29c46ffc12c0e7f40ca842197f3f7140f1a09404",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -145,8 +145,8 @@
       "address": "0x2000000000000000000000000000000000000012",
       "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
-      "abi_hash": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
-      "runtime_bytecode_hash": "sha256:7837f942f8a9c38d32b0e5720f629fcec3ac7941c430d50908f99793f57dd521",
+      "abi_hash": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
+      "runtime_bytecode_hash": "sha256:3b16acb80dfd545c9cf14762c988f8a40fc00fc69d9ec6f7d5a02b99d913c5de",
       "verification_status": "not_applicable"
     },
     "StreamPrimarySaleSettlement": {

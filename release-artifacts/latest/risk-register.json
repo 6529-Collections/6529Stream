@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:db1a1565a6741813005de6339e6654641970887d9a6d15cbf0e502b1030d8f39"
+      "sha256": "sha256:b6495c15a7cce7c4f39380ba54ea313e5cba434218e893967c6cbc46ed83920d"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:219078dc148cb817615bb2e6066a85c78c40cd9807474ce1eb46efc56e1d12a6"
+      "sha256": "sha256:e91d189b67b14d6c9dde3ac91ebad164507913584f72324b5144abd465fb339b"
     },
     {
       "path": "docs/audit-package.md",
@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:00e190ab955644a38be000d19ad244a2bfc7fc414d423789432b18caf32681fd"
+      "sha256": "sha256:526853d296a9fd03516c0dd792197c9800a4978c6293a32537f17113c4b4dc06"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
+      "sha256": "sha256:7496623072c8190ccbfcc74d5dfd23a8c2c9bf4b71a8a95a132ebd5f1c2dc9e8"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -46,15 +46,15 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:d94175133887055dfb20f1928cb6400d2394e752b5d8f8c6105d64d301f910c5"
+      "sha256": "sha256:16ecd5cc39275d4c0b53d7de29012493f7909212be1de3a160a173fbf9f9d5ea"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:132b469dcb6572aa24c6a82daf7ae1f5a8476201e81eec41e6ef32c90a946d69"
+      "sha256": "sha256:37bb533064169002eee300f4f66dadc49a2c7f437396d7851ab4748b467b3304"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:8e852f848b0e624e3f35df97e119a0afdf06950d541979f8ff701a925f4a3a9e"
+      "sha256": "sha256:d9d999817583a16a8fccb220ea094ca8c561b91a7660f84bd171ddabd403b2b8"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -150,7 +150,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:219078dc148cb817615bb2e6066a85c78c40cd9807474ce1eb46efc56e1d12a6"
+          "sha256": "sha256:e91d189b67b14d6c9dde3ac91ebad164507913584f72324b5144abd465fb339b"
         }
       ],
       "risk_acceptance": null
@@ -183,11 +183,11 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:00e190ab955644a38be000d19ad244a2bfc7fc414d423789432b18caf32681fd"
+          "sha256": "sha256:526853d296a9fd03516c0dd792197c9800a4978c6293a32537f17113c4b4dc06"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:8e852f848b0e624e3f35df97e119a0afdf06950d541979f8ff701a925f4a3a9e"
+          "sha256": "sha256:d9d999817583a16a8fccb220ea094ca8c561b91a7660f84bd171ddabd403b2b8"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -235,15 +235,15 @@
     },
     {
       "id": "RISK-GOV-002",
-      "title": "Metadata satellite writer grants are whole-module",
+      "title": "Record-family authorization candidate binding remains incomplete",
       "area": "governance",
       "severity": "high",
       "status": "open_blocker",
       "owner": "protocol",
       "target_gate": "Gate E",
-      "source": "CON-015 launch metadata and preservation authorization model",
-      "mitigation": "Implement a fail-closed record-family classifier and exact family-to-authority mapping, reject undeclared families, enforce every-family snapshot authority, persist the authorization class, and retain independently reviewed candidate-bound grant, lifecycle, runtime, and deployment evidence.",
-      "residual_risk": "A compromised or over-broad metadata/preservation writer can publish records for every record family accepted by the target launch module.",
+      "source": "Issue #690 source implementation and candidate-bound record-family authorization evidence",
+      "mitigation": "Retain the fail-closed source implementation and complete the exact candidate-bound admission/provider/grant map, shared host-registry address, finalized current/pending configuration-authority observation, deployed runtime/codehash bindings, reconciled propose/accept/cancel lifecycle evidence, phase evidence, and independent review before release.",
+      "residual_risk": "Source-level family isolation does not prove the selected candidate's deployed registry, provider/grant configuration, configuration-authority state, runtime, or lifecycle; an unbound or drifted candidate could therefore admit or authorize the wrong record writers.",
       "checks": [
         "python scripts/test_record_family_authorization.py",
         "python scripts/check_record_family_authorization.py",
@@ -266,16 +266,24 @@
           "sha256": "sha256:ff3d4709c42d76c6485083957cdb2b18f8c0d269cc317552691e93fde0d39efb"
         },
         {
+          "path": "release-artifacts/record-family-authorization-source-catalog.json",
+          "sha256": "sha256:990c78482da30474c3c08302e1fe62dfd95ce50e4ba6666b200dd16dc00ddf02"
+        },
+        {
+          "path": "release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json",
+          "sha256": "sha256:93df026fe4570df84701fd8d2e2525c993901c1aed50851cc178cee1da6dcf9f"
+        },
+        {
           "path": "deployments/schema/record-family-authorization-evidence.v1.schema.json",
-          "sha256": "sha256:1ff4e29d52a3cadda116ac903983fbd274d7988e543fa98d5cec3f5d6f16d163"
+          "sha256": "sha256:26012bfe6956f3b72c3e911bcb6731e33b38e68b312784acedf2b1533baf909a"
         },
         {
           "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
-          "sha256": "sha256:9ec9d4b9e0620ef12c1d29f8331ee0f1fd76413a9e9a0757643d7e9ac1d78fd4"
+          "sha256": "sha256:bf466bc4011bccc76f23accc8a33cdf80ac59e88135f375dae21a181ec9cacd9"
         },
         {
           "path": "deployments/record-family-authorization/record-family-authorization-evidence-template.json",
-          "sha256": "sha256:230454dc21b04951be185c5d22e60f8c35f991888e3fe66eaf848371d6bd71ad"
+          "sha256": "sha256:595373f470d175bbfa06fd8f908a09086cc9af73091b59074e212953fb59f025"
         }
       ],
       "risk_acceptance": null
@@ -313,7 +321,7 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
+          "sha256": "sha256:7496623072c8190ccbfcc74d5dfd23a8c2c9bf4b71a8a95a132ebd5f1c2dc9e8"
         },
         {
           "path": "test/StreamGovernanceExecutor.t.sol",
@@ -359,11 +367,11 @@
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
+          "sha256": "sha256:7496623072c8190ccbfcc74d5dfd23a8c2c9bf4b71a8a95a132ebd5f1c2dc9e8"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
-          "sha256": "sha256:d91eee4402be6d131e28ddfb0dc6c80e090978db888e8a4cb7e5bedcac7339a9"
+          "sha256": "sha256:387cf9a4a52bd72a84e62210c498c7d41e57f38eb2169bb1b07617e72c405e43"
         },
         {
           "path": "release-artifacts/schema/governed-parameter-inventory.v1.schema.json",
@@ -418,7 +426,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:00e190ab955644a38be000d19ad244a2bfc7fc414d423789432b18caf32681fd"
+          "sha256": "sha256:526853d296a9fd03516c0dd792197c9800a4978c6293a32537f17113c4b4dc06"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -461,11 +469,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:db1a1565a6741813005de6339e6654641970887d9a6d15cbf0e502b1030d8f39"
+          "sha256": "sha256:b6495c15a7cce7c4f39380ba54ea313e5cba434218e893967c6cbc46ed83920d"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:219078dc148cb817615bb2e6066a85c78c40cd9807474ce1eb46efc56e1d12a6"
+          "sha256": "sha256:e91d189b67b14d6c9dde3ac91ebad164507913584f72324b5144abd465fb339b"
         },
         {
           "path": "docs/metadata.md",
@@ -509,7 +517,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:2aed9083aac7474e039ca31f4731cb47c64ac9b05c94a64a433f27d64708c9bc"
+          "sha256": "sha256:fe0f0419b0a2b8eee74a6bc26c4b8074d0ebb07bdff382480f3365034a24d696"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -550,7 +558,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:f880bd1f5186231887cbda8c0e0b40d38360b95111a6ecf1c4a92499ea688d13"
+          "sha256": "sha256:a84071f72c131621cc938e1a42794bb20fb8c704c3238177fd5a62a0bf9a5783"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -585,11 +593,11 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:bde7eff43a09e728557bd78295137c2deaacb6263059b0c39debd81052c975bc"
+          "sha256": "sha256:7496623072c8190ccbfcc74d5dfd23a8c2c9bf4b71a8a95a132ebd5f1c2dc9e8"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:db1a1565a6741813005de6339e6654641970887d9a6d15cbf0e502b1030d8f39"
+          "sha256": "sha256:b6495c15a7cce7c4f39380ba54ea313e5cba434218e893967c6cbc46ed83920d"
         },
         {
           "path": "docs/status.md",
@@ -597,7 +605,7 @@
         },
         {
           "path": "release-artifacts/latest/abi-checksums.json",
-          "sha256": "sha256:00c3f9a693c5743fd4f035f651aa7445bd0815d3b1aeeb20c6cbddbaf93a884c"
+          "sha256": "sha256:c6a771212d5f23dae2feff8a9afae78a326bbc9fc45730fc26ae3eccb08b367a"
         }
       ],
       "risk_acceptance": null
@@ -627,19 +635,19 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:d94175133887055dfb20f1928cb6400d2394e752b5d8f8c6105d64d301f910c5"
+          "sha256": "sha256:16ecd5cc39275d4c0b53d7de29012493f7909212be1de3a160a173fbf9f9d5ea"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:132b469dcb6572aa24c6a82daf7ae1f5a8476201e81eec41e6ef32c90a946d69"
+          "sha256": "sha256:37bb533064169002eee300f4f66dadc49a2c7f437396d7851ab4748b467b3304"
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:53f7425639faa1fbcd60e95d1b65a42a84cde833371c25944bc9103a691caef4"
+          "sha256": "sha256:526a835b979823378c36d06c2d247b4363ee1217f44f5f5852f8804caa23fb30"
         },
         {
           "path": "scripts/check_slither_baseline.py",
-          "sha256": "sha256:e056d9669cbd646c3a9a650ae6ae3b846eeaa10c7af59c6e2dfa4b6373e5f809"
+          "sha256": "sha256:7c3e7823fc7a58262881d7df59bdafd995895b87e9dea08a625d7538608f0b13"
         }
       ],
       "risk_acceptance": null
@@ -668,15 +676,15 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:db1a1565a6741813005de6339e6654641970887d9a6d15cbf0e502b1030d8f39"
+          "sha256": "sha256:b6495c15a7cce7c4f39380ba54ea313e5cba434218e893967c6cbc46ed83920d"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:219078dc148cb817615bb2e6066a85c78c40cd9807474ce1eb46efc56e1d12a6"
+          "sha256": "sha256:e91d189b67b14d6c9dde3ac91ebad164507913584f72324b5144abd465fb339b"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:294f8e5da597fe3ead69dc598e0e097f1ffa01ae67d046f1a35015825c22ca67"
+          "sha256": "sha256:4bbc7b262e1c8143c3f4d6e8dc0c4bafb0f50c4ac9dd11060381760ad6f1e6f1"
         },
         {
           "path": "docs/warning-dispositions.md",

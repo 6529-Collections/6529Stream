@@ -45,8 +45,8 @@
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:dc6aad65df6dd02a7b683ad0d995ab4aaa16b2439bbfcd3e0695fe0c33c730bd",
-      "size_bytes": 34264
+      "sha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec",
+      "size_bytes": 34850
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
