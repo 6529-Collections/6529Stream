@@ -407,7 +407,7 @@ Post-registration completion reserve [EC-REGGAS-COMPLETION]:
    The current checksum-bound planning measurement is 128,886 gas, so
    `R = 162,000`.
 3. The as-built permanent-Core boundary test
-   `testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold`
+   `testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend`
    executes the real low-level call just below, exactly at, and above the
    threshold. It proves rejection below the boundary, exact governed-stipend
    forwarding at the boundary, and preservation of the first-mint,

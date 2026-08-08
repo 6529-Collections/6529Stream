@@ -35,13 +35,13 @@
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:dc6aad65df6dd02a7b683ad0d995ab4aaa16b2439bbfcd3e0695fe0c33c730bd",
-      "size_bytes": 34264
+      "sha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec",
+      "size_bytes": 34850
     },
     {
       "path": "docs/stream-entropy-coordinator.md",
-      "sha256": "sha256:bac56a39f1a8b7f02c76b45a8f3b1dd24d7edddb65f38a480524b694b508a596",
-      "size_bytes": 168207
+      "sha256": "sha256:50a46c7801a676becf4455f14cbc27dbfc6f5b7d7d0aa38e1d1a9cf22684296e",
+      "size_bytes": 168198
     },
     {
       "path": "docs/launch-conformance-matrix.md",
@@ -94,7 +94,7 @@
       "source-level work between the admission check and CALL opcode"
     ],
     "call_upfront_reserve_gas": 3300,
-    "actual_boundary_test": "StreamCorePermanentTargetTest:testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold()",
+    "actual_boundary_test": "StreamCorePermanentTargetTest:testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()",
     "rollback_tests": [
       "StreamCorePermanentTargetTest:testEntropyFailureRollsBackAllCoreState()",
       "StreamCorePermanentTargetTest:testEntropyReturnDataFailsClosedAndRollsBack()"

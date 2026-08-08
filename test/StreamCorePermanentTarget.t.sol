@@ -503,7 +503,7 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         require(_core.totalSupply() == 0, "supply changed");
     }
 
-    function testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold() public {
+    function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend() public {
         bytes memory tokenData_ = bytes("exact admission");
         bytes32 mintCommitment = keccak256("exact admission");
         uint256 low = 250_000;
@@ -526,6 +526,19 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
             _core, exactThreshold - 1, 1, address(0xBEEF), tokenData_, mintCommitment
         );
         require(!belowSuccess, "below exact boundary admitted");
+
+        uint256 aboveSnapshotId = vm.snapshotState();
+        bool aboveSuccess = _manager.tryMintWithCoreGas(
+            _core, exactThreshold + 1, 1, address(0xBEEF), tokenData_, mintCommitment
+        );
+        require(aboveSuccess, "just-above exact boundary rejected");
+        require(_core.ownerOf(1) == address(0xBEEF), "just-above mint incomplete");
+        require(
+            _entropy.entryGas() <= 120_000 && _entropy.entryGas() > 118_000,
+            "just-above boundary capped stipend"
+        );
+        require(vm.revertToState(aboveSnapshotId), "above snapshot restore");
+
         bool atSuccess = _manager.tryMintWithCoreGas(
             _core, exactThreshold, 1, address(0xBEEF), tokenData_, mintCommitment
         );

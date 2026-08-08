@@ -16,6 +16,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVIDENCE = (
     REPO_ROOT / "release-artifacts/post-entropy-mint-completion-gas.json"
 )
+CORE_TEST_PATH = REPO_ROOT / "test/StreamCorePermanentTarget.t.sol"
 EXPECTED_SCHEMA_VERSION = "6529stream.post-entropy-mint-completion-gas.v2"
 EXPECTED_STATUS = "as_built_permanent_core_source"
 EXPECTED_SNAPSHOT_TEST = (
@@ -60,7 +61,7 @@ EXPECTED_INCLUDED_CALL_BOUNDARY_COSTS = [
 ]
 EXPECTED_ACTUAL_BOUNDARY_TEST = (
     "StreamCorePermanentTargetTest:"
-    "testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold()"
+    "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()"
 )
 EXPECTED_ROLLBACK_TESTS = [
     "StreamCorePermanentTargetTest:testEntropyFailureRollsBackAllCoreState()",
@@ -88,7 +89,7 @@ REQUIRED_SPEC_FRAGMENTS = {
         "Contract-recipient callback gas is outside this fixed EOA guarantee",
         "encodes the coordinator calldata before the admission check",
         "3,300-gas cold `CALL` upfront reserve",
-        "testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold",
+        "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend",
     ],
     "docs/launch-conformance-matrix.md": [
         "as-built permanent-Core below/at/above call-boundary test",
@@ -112,6 +113,214 @@ FORBIDDEN_SPEC_FRAGMENTS = [
 
 class CompletionGasCheckError(ValueError):
     """Raised when completion-gas evidence is malformed or stale."""
+
+
+def _mask_solidity_comments_and_strings(source: str) -> str:
+    masked = list(source)
+    index = 0
+    state = "code"
+    quote = ""
+    while index < len(source):
+        current = source[index]
+        following = source[index + 1] if index + 1 < len(source) else ""
+        if state == "code":
+            if current == "/" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "line-comment"
+                index += 2
+                continue
+            if current == "/" and following == "*":
+                masked[index] = masked[index + 1] = " "
+                state = "block-comment"
+                index += 2
+                continue
+            if current in {'"', "'"}:
+                quote = current
+                masked[index] = " "
+                state = "string"
+            index += 1
+            continue
+        if state == "line-comment":
+            if current == "\n":
+                state = "code"
+            else:
+                masked[index] = " "
+            index += 1
+            continue
+        if state == "block-comment":
+            if current == "*" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "code"
+                index += 2
+            else:
+                if current not in "\r\n":
+                    masked[index] = " "
+                index += 1
+            continue
+        if current == "\\":
+            masked[index] = " "
+            if index + 1 < len(source):
+                if source[index + 1] not in "\r\n":
+                    masked[index + 1] = " "
+                index += 2
+            else:
+                index += 1
+            continue
+        masked[index] = " " if current not in "\r\n" else current
+        if current == quote:
+            state = "code"
+        index += 1
+    return "".join(masked)
+
+
+def _solidity_function_header_and_body(
+    source: str, function_name: str
+) -> tuple[str, str]:
+    source = _mask_solidity_comments_and_strings(source)
+    matches = list(
+        re.finditer(rf"\bfunction\s+{re.escape(function_name)}\s*\(", source)
+    )
+    if len(matches) != 1:
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression: "
+            f"expected exactly one {function_name} function"
+        )
+    function_start = matches[0].start()
+    body_start = source.find("{", function_start)
+    if body_start == -1 or ";" in source[matches[0].end() : body_start]:
+        raise CompletionGasCheckError(
+            f"malformed as-built entropy regression test: {function_name}"
+        )
+    depth = 0
+    for index in range(body_start, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return (
+                    source[function_start:body_start],
+                    source[body_start + 1 : index],
+                )
+    raise CompletionGasCheckError(
+        f"malformed as-built entropy regression test: {function_name}"
+    )
+
+
+def _solidity_contract_header_and_body(
+    source: str, contract_name: str
+) -> tuple[str, str]:
+    source = _mask_solidity_comments_and_strings(source)
+    matches = list(
+        re.finditer(
+            rf"\b(?P<abstract>abstract\s+)?contract\s+{re.escape(contract_name)}\b",
+            source,
+        )
+    )
+    if len(matches) != 1 or matches[0].group("abstract") is not None:
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression: "
+            f"expected exactly one concrete {contract_name} contract"
+        )
+    contract_start = matches[0].start()
+    body_start = source.find("{", matches[0].end())
+    if body_start == -1 or ";" in source[matches[0].end() : body_start]:
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression: "
+            f"malformed {contract_name} contract"
+        )
+    depth = 0
+    for index in range(body_start, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return (
+                    source[contract_start:body_start],
+                    source[body_start + 1 : index],
+                )
+    raise CompletionGasCheckError(
+        "incomplete below/at/above Core boundary regression: "
+        f"malformed {contract_name} contract"
+    )
+
+
+def _validate_actual_boundary_test(source: str) -> None:
+    contract_name = "StreamCorePermanentTargetTest"
+    function_name = "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend"
+    masked_source = _mask_solidity_comments_and_strings(source)
+    function_matches = list(
+        re.finditer(rf"\bfunction\s+{re.escape(function_name)}\s*\(", masked_source)
+    )
+    if len(function_matches) != 1:
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression: "
+            f"expected exactly one {function_name} function"
+        )
+    contract_header, contract_body = _solidity_contract_header_and_body(
+        masked_source, contract_name
+    )
+    if (
+        re.sub(r"\s+", "", contract_header)
+        != f"contract{contract_name}isCharacterizationTestBase"
+    ):
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression: "
+            f"unexpected {contract_name} declaration"
+        )
+    header, raw_body = _solidity_function_header_and_body(contract_body, function_name)
+    if re.sub(r"\s+", "", header) != f"function{function_name}()public":
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression"
+        )
+    body = re.sub(r"\s+", "", raw_body)
+    if any(
+        token in body
+        for token in ("return;", "assembly", "vm.skip(", "vm.assume(")
+    ):
+        raise CompletionGasCheckError(
+            "incomplete below/at/above Core boundary regression"
+        )
+    mint_arguments = "1,address(0xBEEF),tokenData_,mintCommitment"
+    owner_assertion = "require(_core.ownerOf(1)==address(0xBEEF),);"
+    stipend_assertion = (
+        "require(_entropy.entryGas()<=120_000&&_entropy.entryGas()>118_000,);"
+    )
+    required_blocks = (
+        (
+            "boolbelowSuccess=_manager.tryMintWithCoreGas("
+            f"_core,exactThreshold-1,{mint_arguments});"
+            "require(!belowSuccess,);"
+        ),
+        (
+            "uint256aboveSnapshotId=vm.snapshotState();"
+            "boolaboveSuccess=_manager.tryMintWithCoreGas("
+            f"_core,exactThreshold+1,{mint_arguments});"
+            "require(aboveSuccess,);"
+            f"{owner_assertion}{stipend_assertion}"
+            "require(vm.revertToState(aboveSnapshotId),);"
+        ),
+        (
+            "boolatSuccess=_manager.tryMintWithCoreGas("
+            f"_core,exactThreshold,{mint_arguments});"
+            "require(atSuccess,);"
+            f"{owner_assertion}{stipend_assertion}"
+        ),
+    )
+    previous_end = 0
+    for block in required_blocks:
+        start = body.find(block, previous_end)
+        if start == -1:
+            raise CompletionGasCheckError(
+                "incomplete below/at/above Core boundary regression"
+            )
+        depth = body.count("{", 0, start) - body.count("}", 0, start)
+        if depth != 0:
+            raise CompletionGasCheckError(
+                "incomplete below/at/above Core boundary regression"
+            )
+        previous_end = start + len(block)
 
 
 def _sha256(path: Path) -> str:
@@ -294,7 +503,7 @@ def _validate_core_boundary(evidence: dict[str, Any], repo_root: Path) -> None:
         raise CompletionGasCheckError("StreamCore source size mismatch")
 
     core = core_path.read_text(encoding="utf-8")
-    core_test = (repo_root / "test/StreamCorePermanentTarget.t.sol").read_text(
+    core_test = (repo_root / CORE_TEST_PATH.relative_to(REPO_ROOT)).read_text(
         encoding="utf-8"
     )
     required_core_fragments = (
@@ -309,8 +518,8 @@ def _validate_core_boundary(evidence: dict[str, Any], repo_root: Path) -> None:
             raise CompletionGasCheckError(
                 f"missing as-built entropy boundary fragment: {fragment}"
             )
+    _validate_actual_boundary_test(core_test)
     for test_name in (
-        "testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold",
         "testEntropyFailureRollsBackAllCoreState",
         "testEntropyReturnDataFailsClosedAndRollsBack",
     ):

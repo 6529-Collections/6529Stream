@@ -270,7 +270,7 @@ class CompletionGasEvidenceTests(unittest.TestCase):
             path = root / "docs/stream-entropy-coordinator.md"
             original = path.read_text(encoding="utf-8")
             target = (
-                "`testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold`"
+                "`testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend`"
             )
             mutated = original.replace(
                 target,
@@ -320,6 +320,230 @@ class CompletionGasEvidenceTests(unittest.TestCase):
                 "forbidden #672 spec claim present",
             ):
                 checker._validate_spec_fragments(root)
+
+
+class CompletionGasSourcePolicyTests(unittest.TestCase):
+    def test_accepts_complete_actual_boundary_case(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        checker._validate_actual_boundary_test(source)
+
+    def _assert_source_rejected(self, mutated: str) -> None:
+        with self.assertRaisesRegex(
+            checker.CompletionGasCheckError,
+            "incomplete below/at/above Core boundary regression",
+        ):
+            checker._validate_actual_boundary_test(mutated)
+
+    def _assert_boundary_mutation_rejected(self, old: str, new: str) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        mutated = source.replace(old, new, 1)
+        self.assertNotEqual(source, mutated, "stale boundary mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    @staticmethod
+    def _canonical_boundary_function(source: str) -> str:
+        start_marker = (
+            "    function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()"
+        )
+        end_marker = (
+            "\n    function testPreparedMintAbortByReplacementManagerRestoresDenseAllocation"
+        )
+        start = source.index(start_marker)
+        end = source.index(end_marker, start)
+        return source[start:end]
+
+    def test_rejects_decoupled_actual_boundary_cases(self) -> None:
+        cases = {
+            "below": (
+                (
+                    "bool belowSuccess = _manager.tryMintWithCoreGas(\n"
+                    "            _core, exactThreshold - 1, 1, address(0xBEEF), "
+                    "tokenData_, mintCommitment\n"
+                    "        );"
+                ),
+                (
+                    "exactThreshold - 1;\n"
+                    "        bool belowSuccess = false;\n"
+                    "        // _manager.tryMintWithCoreGas(_core, exactThreshold - 1);"
+                ),
+            ),
+            "above": ("exactThreshold + 1", "exactThreshold + 2"),
+            "exact": (
+                "_core, exactThreshold, 1, address(0xBEEF)",
+                "_core, exactThreshold + 0, 1, address(0xBEEF)",
+            ),
+            "stipend": (
+                (
+                    "_entropy.entryGas() <= 120_000 && _entropy.entryGas() > 118_000,\n"
+                    '            "just-above boundary capped stipend"'
+                ),
+                'true,\n            "just-above boundary capped stipend"',
+            ),
+            "isolation": (
+                "vm.revertToState(aboveSnapshotId)",
+                "vm.revertToState(aboveSnapshotId + 1)",
+            ),
+        }
+        for label, (old, new) in cases.items():
+            with self.subTest(case=label):
+                self._assert_boundary_mutation_rejected(old, new)
+
+    def test_comments_cannot_spoof_just_above_case(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        call = (
+            "_core, exactThreshold + 1, 1, address(0xBEEF), "
+            "tokenData_, mintCommitment"
+        )
+        mutated = source.replace(call, call.replace("+ 1", "+ 2"), 1)
+        mutated = mutated.replace(
+            "uint256 aboveSnapshotId",
+            f"// _manager.tryMintWithCoreGas({call});\n        uint256 aboveSnapshotId",
+            1,
+        )
+        self.assertNotEqual(source, mutated, "stale comment-spoof mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    def test_rejects_early_exit_before_boundary_cases(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        marker = (
+            "function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend() "
+            "public {"
+        )
+        mutated = source.replace(marker, f"{marker}\n        return;", 1)
+        self.assertNotEqual(source, mutated, "stale early-exit mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    def test_rejects_inline_assembly_termination_before_boundary_cases(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        marker = (
+            "function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend() "
+            "public {"
+        )
+        cases = (
+            "assembly { return(0, 0) }",
+            "assembly { stop() }",
+            'assembly ("memory-safe") { stop() }',
+        )
+        for assembly_block in cases:
+            with self.subTest(assembly_block=assembly_block):
+                mutated = source.replace(
+                    marker,
+                    f"{marker}\n        {assembly_block}",
+                    1,
+                )
+                self.assertNotEqual(
+                    source, mutated, "stale assembly-termination mutation anchor"
+                )
+                self._assert_source_rejected(mutated)
+
+    def test_rejects_body_suppressing_modifier(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        marker = (
+            "function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend() "
+            "public {"
+        )
+        replacement = (
+            "modifier suppressBoundaryBody() {}\n\n    "
+            "function testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend() "
+            "public suppressBoundaryBody {"
+        )
+        mutated = source.replace(marker, replacement, 1)
+        self.assertNotEqual(source, mutated, "stale modifier mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    def test_rejects_boundary_function_moved_to_foreign_abstract_contract(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        function_source = self._canonical_boundary_function(source)
+        renamed_source = function_source.replace(
+            "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend",
+            "removedCanonicalBoundaryTest",
+            1,
+        )
+        mutated = source.replace(function_source, renamed_source, 1)
+        mutated += (
+            "\nabstract contract ForeignNonExecutedBoundaryProof {\n"
+            f"{function_source}\n"
+            "}\n"
+        )
+        self.assertNotEqual(source, mutated, "stale foreign-contract mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    def test_rejects_missing_renamed_or_abstract_canonical_contract(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        declaration = "contract StreamCorePermanentTargetTest is CharacterizationTestBase"
+        cases = (
+            declaration.replace(
+                "StreamCorePermanentTargetTest", "RenamedPermanentTargetTest", 1
+            ),
+            f"abstract {declaration}",
+        )
+        for replacement in cases:
+            with self.subTest(replacement=replacement):
+                mutated = source.replace(declaration, replacement, 1)
+                self.assertNotEqual(
+                    source, mutated, "stale canonical-contract mutation anchor"
+                )
+                self._assert_source_rejected(mutated)
+
+    def test_rejects_duplicate_canonical_contract_or_function(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        function_name = (
+            "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend"
+        )
+        cases = (
+            (
+                "\ncontract StreamCorePermanentTargetTest is "
+                "CharacterizationTestBase {}\n"
+            ),
+            (
+                "\ncontract ForeignBoundaryDuplicate {\n"
+                f"    function {function_name}() public {{}}\n"
+                "}\n"
+            ),
+        )
+        for suffix in cases:
+            with self.subTest(suffix=suffix):
+                self._assert_source_rejected(source + suffix)
+
+    def test_comments_and_strings_cannot_spoof_canonical_contract(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        declaration = "contract StreamCorePermanentTargetTest is CharacterizationTestBase"
+        renamed = declaration.replace(
+            "StreamCorePermanentTargetTest", "RenamedPermanentTargetTest", 1
+        )
+        mutated = source.replace(declaration, renamed, 1)
+        mutated += (
+            "\n/* contract StreamCorePermanentTargetTest is CharacterizationTestBase "
+            "{ function spoof() public {} } */\n"
+            'contract StringSpoof { string constant VALUE = "contract '
+            'StreamCorePermanentTargetTest is CharacterizationTestBase {"; }\n'
+        )
+        self.assertNotEqual(source, mutated, "stale lexical-spoof mutation anchor")
+        self._assert_source_rejected(mutated)
+
+    def test_rejects_unbalanced_canonical_contract_body(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        prefix, separator, suffix = source.rpartition("\n}")
+        self.assertEqual(separator, "\n}", "stale canonical-contract closing anchor")
+        self.assertTrue(suffix.strip() == "", "canonical contract must remain last")
+        self._assert_source_rejected(prefix + "\n")
+
+    def test_rejects_unreachable_boundary_case_wrapper(self) -> None:
+        source = checker.CORE_TEST_PATH.read_text(encoding="utf-8")
+        mutated = source.replace(
+            "        bool belowSuccess = _manager.tryMintWithCoreGas(",
+            "        if (false) {\n            bool belowSuccess = "
+            "_manager.tryMintWithCoreGas(",
+            1,
+        )
+        next_test = "\n    function testPreparedMintAbortByReplacementManagerRestoresDenseAllocation"
+        mutated = mutated.replace(
+            next_test,
+            "        }\n" + next_test,
+            1,
+        )
+        self.assertNotEqual(source, mutated, "stale unreachable-wrapper mutation anchor")
+        self._assert_source_rejected(mutated)
 
 
 if __name__ == "__main__":

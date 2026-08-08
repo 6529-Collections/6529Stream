@@ -285,7 +285,7 @@ def build_evidence() -> dict[str, Any]:
             "call_upfront_reserve_gas": ENTROPY_CALL_UPFRONT_GAS,
             "actual_boundary_test": (
                 "StreamCorePermanentTargetTest:"
-                "testActualCoreCallBoundaryRejectsBelowAndForwardsFullStipendAtThreshold()"
+                "testActualCoreCallBoundaryCoversBelowAtAndAboveWithFullStipend()"
             ),
             "rollback_tests": [
                 "StreamCorePermanentTargetTest:testEntropyFailureRollsBackAllCoreState()",

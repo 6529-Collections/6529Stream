@@ -282,7 +282,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:0ac61c35493c8b28752ca24d241866058fa56dd7a7eb29ad09e5314ab1e8b615"
+    "sha256": "sha256:1918161f7e7b528c7aaf50e9b8eae1381fb846ad9799231bef6234c4622c8975"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -341,8 +341,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:36939eba29bff5a3856b664ddf88c7cd14c8c36e6c07992b6df64b2d28f17ea5",
-      "size_bytes": 144843
+      "sha256": "sha256:e0bed5d47aaad63198440d51e0ac59d56fa59d873544f7d164a92974f3924133",
+      "size_bytes": 145074
     },
     {
       "path": "Makefile",
@@ -841,8 +841,8 @@
     },
     {
       "path": "docs/stream-entropy-coordinator.md",
-      "sha256": "sha256:bac56a39f1a8b7f02c76b45a8f3b1dd24d7edddb65f38a480524b694b508a596",
-      "size_bytes": 168207
+      "sha256": "sha256:50a46c7801a676becf4455f14cbc27dbfc6f5b7d7d0aa38e1d1a9cf22684296e",
+      "size_bytes": 168198
     },
     {
       "path": "docs/stream-entropy-providers.md",
@@ -1461,7 +1461,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:b3f68859cfa246ac733249c1ef3faf6c1919afd8f6c9f0f1825564796595aae5",
+      "sha256": "sha256:57904475e73aaf2881fb4b969a60a5f49a8684d6cd8f7cdbb47b88cfb399db63",
       "size_bytes": 151614
     },
     {
@@ -1526,7 +1526,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:a48f6407f852728f348d6a2b5a34caaf96c504496c151164b6090858db4fcd14",
+      "sha256": "sha256:da05d1160b320ea598b42986c4f464255033410b09a8d4fb6c316f782dceb2f9",
       "size_bytes": 13603
     },
     {
@@ -1576,18 +1576,18 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:47ddb321ea282d48eb0a08c0218a18e0a802aaf5f2911f86748d1d3f1046888f",
+      "sha256": "sha256:7ad1d7790e37048157cb581e451dfd26c70946ad170f4dd461e4a11ab2263185",
       "size_bytes": 146884
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:00bbcc110e1a031b443e37325c3bfb2afa16dacb0b4dae826e37d04eb0cbaf72",
-      "size_bytes": 145867
+      "sha256": "sha256:d43999ae89aab8635571a4b629e385491c8621c1488bf35cfdeb55e3c7fbd6c1",
+      "size_bytes": 146092
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:942334dab87dbc0cbbf298f50c9bf9310e842abe5f77d53327eda8fae2204125",
-      "size_bytes": 142359
+      "sha256": "sha256:551661904ef1d90ae6c99f3ab3cf06354dcd737bf5a2f028e6577e595930d239",
+      "size_bytes": 142584
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
@@ -1611,8 +1611,8 @@
     },
     {
       "path": "release-artifacts/post-entropy-mint-completion-gas.json",
-      "sha256": "sha256:cb8d0573d03a516966144f33c63d9a6718d8235d1d1c98c0dedc73852292e741",
-      "size_bytes": 5951
+      "sha256": "sha256:927b7916d9d36545a523f9629f0d319da745eeddf6313f23b1a5551618210513",
+      "size_bytes": 5942
     },
     {
       "path": "release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md",
@@ -1896,8 +1896,8 @@
     },
     {
       "path": "scripts/check_post_entropy_completion_gas.py",
-      "sha256": "sha256:5afca1aeb68ee8ba6a74ab655fda94c0af6796d7ed4422ee306514b2143b173e",
-      "size_bytes": 19321
+      "sha256": "sha256:829fba9c701276a618caba9ce3337ac02b97c6a3f8bec6cdac8f9720acb060f8",
+      "size_bytes": 26922
     },
     {
       "path": "scripts/check_pr_template.py",
@@ -2046,8 +2046,8 @@
     },
     {
       "path": "scripts/generate_post_entropy_completion_gas.py",
-      "sha256": "sha256:9ade75ed962029208fad16cf7f48108ee3f5535535fab937a3deb6f4cece5b91",
-      "size_bytes": 14420
+      "sha256": "sha256:c9bec747b2a1b3c34a70a8c3c048ed19799e8ed8827db34ae6d084237ad3920d",
+      "size_bytes": 14411
     },
     {
       "path": "scripts/generate_release_candidate_lockfile.py",
@@ -2226,8 +2226,8 @@
     },
     {
       "path": "scripts/test_post_entropy_completion_gas.py",
-      "sha256": "sha256:bfe8346dc12c5df8b30e0d908a23dc3ff48ee0562f1ffacad93b7a7118010609",
-      "size_bytes": 12491
+      "sha256": "sha256:e068306e478d0aa3ed01da533cc18369ff8b1e250272d39222deaecdcd2e67fd",
+      "size_bytes": 22342
     },
     {
       "path": "scripts/test_pr_template.py",
