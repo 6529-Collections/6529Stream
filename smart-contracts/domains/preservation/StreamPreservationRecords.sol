@@ -26,6 +26,8 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         keccak256("6529stream.preservation-records.schema.v2");
     bytes32 private constant _RECORD_HASH_DOMAIN = keccak256("6529stream.preservation-record.v2");
     bytes32 private constant _FIELD_RECORD_URI = "recordURI";
+    bytes32 private constant _FAMILY_INDEPENDENT =
+        keccak256("6529STREAM_RECORD_FAMILY_INDEPENDENT_V1");
 
     address public immutable override streamCore;
     address public immutable override recordFamilyRegistry;
@@ -35,7 +37,8 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
 
     mapping(bytes32 => CollectionRecordSummary) private _records;
     mapping(bytes32 => CollectionRecord) private _recordPayloads;
-    mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32))) private _latestRecordHash;
+    mapping(uint256 => mapping(bytes32 => mapping(bytes32 => mapping(address => bytes32)))) private
+        _latestRecordHash;
 
     modifier FunctionAdminRequired(bytes4 selector) {
         if (
@@ -101,13 +104,13 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         override
         returns (bytes32 recordHash)
     {
-        _requireMetadataMutationNotPaused();
-        _requireKnownCollection(collectionId);
         _validateRecord(record);
+        _requireRecordMutationNotPaused(record.recordType);
+        _requireKnownCollection(collectionId);
         uint8 authorizationClass = _recordFamilyRegistry.requireRecordWriter(
             collectionId, record.subjectId, record.recordType, msg.sender, bytes("")
         );
-        recordHash = _deriveCollectionRecordHash(collectionId, record);
+        recordHash = _deriveCollectionRecordHash(msg.sender, collectionId, record);
         if (_records[recordHash].collectionId != 0) {
             revert CollectionRecordAlreadyExists(recordHash);
         }
@@ -134,7 +137,8 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         });
         _records[recordHash] = summary;
         _recordPayloads[recordHash] = record;
-        _latestRecordHash[collectionId][record.recordType][record.subjectId] = recordHash;
+        _latestRecordHash[collectionId][record.recordType][record.subjectId][msg.sender] =
+        recordHash;
         emit CollectionRecordRecorded(
             collectionId,
             record.recordType,
@@ -152,7 +156,19 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         override
         returns (bytes32)
     {
-        return _latestRecordHash[collectionId][recordType][subjectId];
+        return _latestRecordHash[collectionId][recordType][subjectId][msg.sender];
+    }
+
+    function latestCollectionRecordHashFor(
+        uint256 collectionId,
+        bytes32 recordType,
+        bytes32 subjectId,
+        address recorder
+    ) external view override returns (bytes32) {
+        if (recorder == address(0)) {
+            revert InvalidCollectionRecordRecorder(recorder);
+        }
+        return _latestRecordHash[collectionId][recordType][subjectId][recorder];
     }
 
     function collectionRecordSummary(bytes32 recordHash)
@@ -180,7 +196,19 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         returns (bytes32)
     {
         _validateRecord(record);
-        return _deriveCollectionRecordHash(collectionId, record);
+        return _deriveCollectionRecordHash(msg.sender, collectionId, record);
+    }
+
+    function deriveCollectionRecordHashFor(
+        address recorder,
+        uint256 collectionId,
+        CollectionRecord calldata record
+    ) external view override returns (bytes32) {
+        if (recorder == address(0)) {
+            revert InvalidCollectionRecordRecorder(recorder);
+        }
+        _validateRecord(record);
+        return _deriveCollectionRecordHash(recorder, collectionId, record);
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -207,17 +235,18 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         }
     }
 
-    function _deriveCollectionRecordHash(uint256 collectionId, CollectionRecord calldata record)
-        private
-        view
-        returns (bytes32)
-    {
+    function _deriveCollectionRecordHash(
+        address recorder,
+        uint256 collectionId,
+        CollectionRecord calldata record
+    ) private view returns (bytes32) {
         return keccak256(
             abi.encode(
                 _RECORD_HASH_DOMAIN,
                 block.chainid,
                 address(this),
                 streamCore,
+                recorder,
                 collectionId,
                 record.recordType,
                 record.subjectId,
@@ -296,5 +325,12 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
             StreamPauseDomains.METADATA_MUTATION,
             MetadataMutationPaused.selector
         );
+    }
+
+    function _requireRecordMutationNotPaused(bytes32 recordType) private view {
+        IStreamRecordFamilyRegistry.RecordTypePolicy memory policy =
+            _recordFamilyRegistry.recordTypePolicy(recordType);
+        if (policy.admitted && policy.familyId == _FAMILY_INDEPENDENT) return;
+        _requireMetadataMutationNotPaused();
     }
 }

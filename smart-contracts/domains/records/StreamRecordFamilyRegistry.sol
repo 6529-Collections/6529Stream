@@ -8,9 +8,9 @@ import "../../interfaces/stream/IStreamRecordFamilyRegistry.sol";
 import "../metadata/StreamMetadataRenderer.sol";
 
 /// @notice Closed-world record-type classifier and live family-authority resolver.
-/// @dev Exact record types are append-only. Authority providers and grants are mutable only by
-///      the StreamAdmins root, allowing Governance V2 ownership to rotate/revoke authority without
-///      making a function admin or global admin a record writer.
+/// @dev Exact record types are append-only. One Registry-stored configuration authority controls
+///      admissions, providers, and grants through an explicit two-step replacement lifecycle.
+///      Operational StreamAdmins ownership and dependency changes do not rotate that authority.
 abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegistry {
     uint16 public constant SCHEMA_VERSION = 1;
 
@@ -22,6 +22,21 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
     uint8 public constant AUTHORIZATION_CLASS_PRESERVATION_ADMIN = 6;
     uint8 public constant AUTHORIZATION_CLASS_METADATA_ADMIN = 7;
     uint8 public constant AUTHORIZATION_CLASS_GLOBAL_ADMIN = 8;
+
+    bytes32 private constant _CONFIGURATION_DOMAIN =
+        keccak256("6529STREAM_RECORD_FAMILY_CONFIGURATION_V1");
+    bytes32 private constant _MUTATION_RECORD_TYPE_ADMITTED = keccak256("RECORD_TYPE_ADMITTED");
+    bytes32 private constant _MUTATION_FAMILY_GRANT_UPDATED = keccak256("FAMILY_GRANT_UPDATED");
+    bytes32 private constant _MUTATION_AUTHORITY_PROVIDER_UPDATED =
+        keccak256("AUTHORITY_PROVIDER_UPDATED");
+    bytes32 private constant _MUTATION_CONFIGURATION_AUTHORITY_INITIALIZED =
+        keccak256("CONFIGURATION_AUTHORITY_INITIALIZED");
+    bytes32 private constant _MUTATION_CONFIGURATION_AUTHORITY_PROPOSED =
+        keccak256("CONFIGURATION_AUTHORITY_PROPOSED");
+    bytes32 private constant _MUTATION_CONFIGURATION_AUTHORITY_ACCEPTED =
+        keccak256("CONFIGURATION_AUTHORITY_ACCEPTED");
+    bytes32 private constant _MUTATION_CONFIGURATION_AUTHORITY_PROPOSAL_CANCELED =
+        keccak256("CONFIGURATION_AUTHORITY_PROPOSAL_CANCELED");
 
     bytes32 public constant FAMILY_ARTIST = keccak256("6529STREAM_RECORD_FAMILY_ARTIST_V1");
     bytes32 public constant FAMILY_OWNER = keccak256("6529STREAM_RECORD_FAMILY_OWNER_V1");
@@ -44,6 +59,12 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
 
     IStreamAdmins private _admins;
 
+    uint64 public override configurationRevision;
+    bytes32 public override configurationHash;
+    address public override configurationAuthority;
+    address public override pendingConfigurationAuthority;
+    uint64 public override recordTypeCount;
+
     mapping(bytes32 => RecordTypePolicy) private _recordTypePolicies;
     mapping(bytes32 => uint64) private _recordTypeRevisions;
     mapping(bytes32 => mapping(uint8 => mapping(address => bool))) private _familyGrants;
@@ -56,8 +77,10 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
         _admins = IStreamAdmins(admins);
     }
 
-    modifier onlyRoot() {
-        if (msg.sender != _admins.owner()) revert RecordFamilyRegistryOwnerRequired(msg.sender);
+    modifier onlyConfigurationAuthority() {
+        if (msg.sender != configurationAuthority) {
+            revert RecordFamilyConfigurationAuthorityRequired(msg.sender, configurationAuthority);
+        }
         _;
     }
 
@@ -181,7 +204,7 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
     function admitRecordType(bytes32 recordType, bytes32 familyId, uint16 authorizationClassMask)
         external
         override
-        onlyRoot
+        onlyConfigurationAuthority
     {
         if (recordType == bytes32(0)) revert InvalidRecordType(recordType);
         if (_recordTypePolicies[recordType].admitted) revert RecordTypeAlreadyAdmitted(recordType);
@@ -194,6 +217,13 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
             familyId: familyId, authorizationClassMask: authorizationClassMask, admitted: true
         });
         _recordTypeRevisions[recordType] = 1;
+        recordTypeCount = _nextRevision(recordTypeCount);
+        _recordConfigurationMutation(
+            _MUTATION_RECORD_TYPE_ADMITTED,
+            keccak256(
+                abi.encode(recordType, familyId, authorizationClassMask, uint64(1), recordTypeCount)
+            )
+        );
         emit RecordTypeAdmitted(
             SCHEMA_VERSION, recordType, familyId, authorizationClassMask, 1, msg.sender
         );
@@ -204,7 +234,7 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
         uint8 authorizationClass,
         address account,
         bool enabled
-    ) external override onlyRoot {
+    ) external override onlyConfigurationAuthority {
         uint16 allowed = familyAllowedAuthorizationClassMask(familyId);
         if (allowed == 0) revert UnknownRecordFamily(familyId);
         _requireClass(authorizationClass);
@@ -222,6 +252,10 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
             _nextRevision(_familyGrantRevisions[familyId][authorizationClass][account]);
         _familyGrants[familyId][authorizationClass][account] = enabled;
         _familyGrantRevisions[familyId][authorizationClass][account] = revision;
+        _recordConfigurationMutation(
+            _MUTATION_FAMILY_GRANT_UPDATED,
+            keccak256(abi.encode(familyId, authorizationClass, account, enabled, revision))
+        );
         emit RecordFamilyGrantUpdated(
             SCHEMA_VERSION, familyId, authorizationClass, account, enabled, revision, msg.sender
         );
@@ -230,7 +264,7 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
     function setAuthorityProvider(uint8 authorizationClass, address provider)
         external
         override
-        onlyRoot
+        onlyConfigurationAuthority
     {
         _requireProviderClass(authorizationClass);
         if (
@@ -250,6 +284,10 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
         _authorityProviders[authorizationClass] = provider;
         _authorityProviderCodeHashes[authorizationClass] = providerCodeHash;
         _authorityProviderRevisions[authorizationClass] = revision;
+        _recordConfigurationMutation(
+            _MUTATION_AUTHORITY_PROVIDER_UPDATED,
+            keccak256(abi.encode(authorizationClass, provider, providerCodeHash, revision))
+        );
         emit RecordFamilyAuthorityProviderUpdated(
             SCHEMA_VERSION,
             authorizationClass,
@@ -258,6 +296,67 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
             providerCodeHash,
             revision,
             msg.sender
+        );
+    }
+
+    function proposeConfigurationAuthority(address proposedAuthority)
+        external
+        override
+        onlyConfigurationAuthority
+    {
+        if (proposedAuthority == address(0)) {
+            revert InvalidRecordFamilyConfigurationAuthority(proposedAuthority);
+        }
+        if (
+            proposedAuthority == configurationAuthority
+                || proposedAuthority == pendingConfigurationAuthority
+        ) {
+            revert RecordFamilyConfigurationAuthorityProposalNoOp(proposedAuthority);
+        }
+        if (pendingConfigurationAuthority != address(0)) {
+            revert RecordFamilyConfigurationAuthorityProposalPending(pendingConfigurationAuthority);
+        }
+        pendingConfigurationAuthority = proposedAuthority;
+        (uint64 revision, bytes32 nextHash) = _recordConfigurationMutation(
+            _MUTATION_CONFIGURATION_AUTHORITY_PROPOSED,
+            keccak256(abi.encode(configurationAuthority, proposedAuthority))
+        );
+        emit RecordFamilyConfigurationAuthorityProposed(
+            SCHEMA_VERSION, configurationAuthority, proposedAuthority, revision, nextHash
+        );
+    }
+
+    function acceptConfigurationAuthority() external override {
+        address pendingAuthority = pendingConfigurationAuthority;
+        if (msg.sender != pendingAuthority || pendingAuthority == address(0)) {
+            revert RecordFamilyConfigurationAuthorityAcceptanceRequired(
+                msg.sender, pendingAuthority
+            );
+        }
+        address oldAuthority = configurationAuthority;
+        configurationAuthority = pendingAuthority;
+        pendingConfigurationAuthority = address(0);
+        (uint64 revision, bytes32 nextHash) = _recordConfigurationMutation(
+            _MUTATION_CONFIGURATION_AUTHORITY_ACCEPTED,
+            keccak256(abi.encode(oldAuthority, pendingAuthority))
+        );
+        emit RecordFamilyConfigurationAuthorityAccepted(
+            SCHEMA_VERSION, oldAuthority, pendingAuthority, revision, nextHash
+        );
+    }
+
+    function cancelConfigurationAuthorityProposal() external override onlyConfigurationAuthority {
+        address canceledPendingAuthority = pendingConfigurationAuthority;
+        if (canceledPendingAuthority == address(0)) {
+            revert RecordFamilyConfigurationAuthorityProposalMissing();
+        }
+        pendingConfigurationAuthority = address(0);
+        (uint64 revision, bytes32 nextHash) = _recordConfigurationMutation(
+            _MUTATION_CONFIGURATION_AUTHORITY_PROPOSAL_CANCELED,
+            keccak256(abi.encode(configurationAuthority, canceledPendingAuthority))
+        );
+        emit RecordFamilyConfigurationAuthorityProposalCanceled(
+            SCHEMA_VERSION, configurationAuthority, canceledPendingAuthority, revision, nextHash
         );
     }
 
@@ -348,7 +447,42 @@ abstract contract StreamRecordFamilyRegistry is ERC165, IStreamRecordFamilyRegis
         }
     }
 
+    function _recordConfigurationMutation(bytes32 mutationType, bytes32 mutationHash)
+        private
+        returns (uint64 revision, bytes32 nextHash)
+    {
+        revision = _nextRevision(configurationRevision);
+        nextHash = keccak256(
+            abi.encode(
+                _CONFIGURATION_DOMAIN,
+                block.chainid,
+                address(this),
+                configurationHash,
+                revision,
+                mutationType,
+                mutationHash
+            )
+        );
+        configurationRevision = revision;
+        configurationHash = nextHash;
+        emit RecordFamilyConfigurationUpdated(
+            SCHEMA_VERSION, revision, nextHash, mutationType, msg.sender
+        );
+    }
+
     function _setRecordFamilyAdminContract(address admins) internal {
         _admins = IStreamAdmins(admins);
+        if (configurationAuthority != address(0)) return;
+        address initialAuthority = _admins.owner();
+        if (initialAuthority == address(0)) {
+            revert InvalidRecordFamilyConfigurationAuthority(initialAuthority);
+        }
+        configurationAuthority = initialAuthority;
+        (uint64 revision, bytes32 nextHash) = _recordConfigurationMutation(
+            _MUTATION_CONFIGURATION_AUTHORITY_INITIALIZED, keccak256(abi.encode(initialAuthority))
+        );
+        emit RecordFamilyConfigurationAuthorityInitialized(
+            SCHEMA_VERSION, initialAuthority, revision, nextHash
+        );
     }
 }

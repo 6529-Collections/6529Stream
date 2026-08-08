@@ -24,6 +24,8 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
         keccak256("6529stream.collection-metadata-snapshot.v2");
     bytes32 private constant _LOCK_METADATA_ALL = keccak256("METADATA_ALL");
     bytes32 private constant _LOCK_SNAPSHOTS = keccak256("SNAPSHOTS");
+    bytes32 private constant _FAMILY_INDEPENDENT =
+        keccak256("6529STREAM_RECORD_FAMILY_INDEPENDENT_V1");
     bytes32 private constant _FAMILY_SNAPSHOT = keccak256("6529STREAM_RECORD_FAMILY_SNAPSHOT_V1");
     bytes32 private constant _FIELD_METADATA_URI = "metadataURI";
 
@@ -181,9 +183,17 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
         if (recordType == bytes32(0)) {
             revert InvalidMetadataRecord(recordType, bytes32(0), bytes32(0));
         }
-        uint8 authorizationClass = _isReservedLock(recordType)
-            ? _requireFunctionAdmin(this.lockCollectionRecord.selector)
-            : _requireRecordWriter(collectionId, bytes32(collectionId), recordType);
+        uint8 authorizationClass;
+        if (_isReservedLock(recordType)) {
+            authorizationClass = _requireFunctionAdmin(this.lockCollectionRecord.selector);
+        } else {
+            authorizationClass =
+                _requireRecordWriter(collectionId, bytes32(collectionId), recordType);
+            bytes32 familyId = _recordFamilyRegistry.recordTypePolicy(recordType).familyId;
+            if (familyId == _FAMILY_INDEPENDENT) {
+                revert RecordFamilyLockNotAllowed(recordType, familyId);
+            }
+        }
         _requireLockMutationAllowed(collectionId, recordType);
         _rememberRecordType(collectionId, recordType);
         CollectionMetadataRecordView storage current = _records[collectionId][recordType];
@@ -319,6 +329,10 @@ contract StreamCollectionMetadata is StreamRecordFamilyRegistry, IStreamCollecti
         _validateRecord(record);
         uint8 authorizationClass =
             _requireRecordWriter(collectionId, bytes32(collectionId), record.recordType);
+        bytes32 familyId = _recordFamilyRegistry.recordTypePolicy(record.recordType).familyId;
+        if (familyId == _FAMILY_INDEPENDENT) {
+            revert RecordFamilyHostNotAllowed(record.recordType, familyId);
+        }
         _requireMutableCollection(collectionId, record.recordType);
 
         CollectionMetadataRecordView storage current = _records[collectionId][record.recordType];

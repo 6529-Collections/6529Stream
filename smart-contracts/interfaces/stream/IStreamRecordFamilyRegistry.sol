@@ -12,6 +12,14 @@ interface IStreamRecordFamilyRegistry is IERC165 {
     }
 
     error RecordFamilyRegistryOwnerRequired(address caller);
+    error InvalidRecordFamilyConfigurationAuthority(address authority);
+    error RecordFamilyConfigurationAuthorityRequired(address caller, address authority);
+    error RecordFamilyConfigurationAuthorityProposalNoOp(address authority);
+    error RecordFamilyConfigurationAuthorityProposalPending(address pendingAuthority);
+    error RecordFamilyConfigurationAuthorityProposalMissing();
+    error RecordFamilyConfigurationAuthorityAcceptanceRequired(
+        address caller, address pendingAuthority
+    );
     error UnknownRecordFamily(bytes32 familyId);
     error UnknownAuthorizationClass(uint8 authorizationClass);
     error InvalidAuthorizationClassMask(bytes32 familyId, uint16 supplied, uint16 allowed);
@@ -55,9 +63,48 @@ interface IStreamRecordFamilyRegistry is IERC165 {
         uint64 revision,
         address authority
     );
+    event RecordFamilyConfigurationUpdated(
+        uint16 schemaVersion,
+        uint64 indexed configurationRevision,
+        bytes32 indexed configurationHash,
+        bytes32 indexed mutationType,
+        address authority
+    );
+    event RecordFamilyConfigurationAuthorityInitialized(
+        uint16 schemaVersion,
+        address indexed authority,
+        uint64 configurationRevision,
+        bytes32 configurationHash
+    );
+    event RecordFamilyConfigurationAuthorityProposed(
+        uint16 schemaVersion,
+        address indexed authority,
+        address indexed pendingAuthority,
+        uint64 configurationRevision,
+        bytes32 configurationHash
+    );
+    event RecordFamilyConfigurationAuthorityAccepted(
+        uint16 schemaVersion,
+        address indexed oldAuthority,
+        address indexed newAuthority,
+        uint64 configurationRevision,
+        bytes32 configurationHash
+    );
+    event RecordFamilyConfigurationAuthorityProposalCanceled(
+        uint16 schemaVersion,
+        address indexed authority,
+        address indexed canceledPendingAuthority,
+        uint64 configurationRevision,
+        bytes32 configurationHash
+    );
 
     function isStreamRecordFamilyRegistry() external pure returns (bool);
     function adminsContract() external view returns (address);
+    function configurationRevision() external view returns (uint64);
+    function configurationHash() external view returns (bytes32);
+    function configurationAuthority() external view returns (address);
+    function pendingConfigurationAuthority() external view returns (address);
+    function recordTypeCount() external view returns (uint64);
     function recordTypePolicy(bytes32 recordType) external view returns (RecordTypePolicy memory);
     function recordTypeRevision(bytes32 recordType) external view returns (uint64);
     function familyAllowedAuthorizationClassMask(bytes32 familyId) external pure returns (uint16);
@@ -80,6 +127,9 @@ interface IStreamRecordFamilyRegistry is IERC165 {
         bool enabled
     ) external;
     function setAuthorityProvider(uint8 authorizationClass, address provider) external;
+    function proposeConfigurationAuthority(address proposedAuthority) external;
+    function acceptConfigurationAuthority() external;
+    function cancelConfigurationAuthorityProposal() external;
     function requireRecordWriter(
         uint256 collectionId,
         bytes32 subjectId,
