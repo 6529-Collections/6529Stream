@@ -1557,7 +1557,7 @@ checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
 The revised canonical projection contains exactly 272 configured roots,
-expanding to exactly 446 covered-file entries in each checksum index. The Windows
+expanding to exactly 448 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and

@@ -3150,10 +3150,10 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
         self.assertEqual(len(manifest["source"]["covered_paths"]), 272)
-        self.assertEqual(len(manifest["files"]), 446)
+        self.assertEqual(len(manifest["files"]), 448)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            446,
+            448,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3472,7 +3472,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 446)
+        self.assertEqual(len(classifications), 448)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

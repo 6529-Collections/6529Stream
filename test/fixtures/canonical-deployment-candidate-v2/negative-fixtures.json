@@ -1,0 +1,238 @@
+{
+  "schema_version": "6529stream.canonical-deployment-candidate-v2-negative-fixtures.v1",
+  "cases": [
+    {
+      "name": "missing-profile-instance",
+      "target": "candidate",
+      "operations": [
+        {"op": "remove", "path": "/instances/36"}
+      ],
+      "expected": "profile entry 37 (STREAM_CORE_FINALITY_ADAPTER) is missing"
+    },
+    {
+      "name": "duplicate-profile-instance",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/36/profile_entry_id", "value": 36}
+      ],
+      "expected": "duplicate profile entry id 36"
+    },
+    {
+      "name": "extra-profile-instance",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/36/profile_entry_id", "value": 38}
+      ],
+      "expected_error": "greater than the maximum of 37"
+    },
+    {
+      "name": "profile-key-drift",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/profile_entry_key", "value": "GOVERNANCE_LAYER"}
+      ],
+      "expected": "profile entry 1 (STREAM_CORE) profile_entry_key mismatch"
+    },
+    {
+      "name": "wrong-deployment-scope",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/deployment_scope", "value": "implementation"}
+      ],
+      "expected": "profile entry 1 (STREAM_CORE) deployment_scope mismatch"
+    },
+    {
+      "name": "unapproved-implementation-alias",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/implementation_match", "value": "approved_alias"}
+      ],
+      "expected": "profile entry 1 (STREAM_CORE) uses an unapproved implementation alias"
+    },
+    {
+      "name": "wrong-interface-set",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/verified_interfaces", "value": []}
+      ],
+      "expected": "profile entry 1 (STREAM_CORE) verified interface set mismatch"
+    },
+    {
+      "name": "wrong-marker-set",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/verified_markers", "value": []}
+      ],
+      "expected": "profile entry 1 (STREAM_CORE) verified marker set mismatch"
+    },
+    {
+      "name": "fallback-address-alias",
+      "target": "candidate",
+      "operations": [
+        {"op": "copy", "from": "/instances/29/address", "path": "/instances/33/address"}
+      ],
+      "expected": "profile entry 34 (ENTROPY_COORDINATOR_FALLBACK) aliases distinct profile entry 30"
+    },
+    {
+      "name": "duplicate-instance-address",
+      "target": "candidate",
+      "operations": [
+        {"op": "copy", "from": "/instances/0/address", "path": "/instances/1/address"}
+      ],
+      "expected": "candidate instance addresses are duplicated"
+    },
+    {
+      "name": "constructor-cardinality-drift",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/constructor/types", "value": ["address"]}
+      ],
+      "expected": "candidate instance stream-core constructor type/argument cardinality mismatch"
+    },
+    {
+      "name": "dependency-order-drift",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/depends_on", "value": ["governance-layer"]}
+      ],
+      "expected": "candidate instance stream-core dependency governance-layer is missing or not earlier"
+    },
+    {
+      "name": "unreviewed-instance",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/review_status", "value": "unreviewed"}
+      ],
+      "expected": "candidate instance stream-core is not reviewed"
+    },
+    {
+      "name": "observed-initcode-drift",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/on_chain/initcode_keccak256", "value": "0x9999999999999999999999999999999999999999999999999999999999999999"}
+      ],
+      "expected": "candidate instance stream-core initcode hash mismatch"
+    },
+    {
+      "name": "observed-runtime-drift",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/instances/0/on_chain/runtime_code_keccak256", "value": "0x9999999999999999999999999999999999999999999999999999999999999999"}
+      ],
+      "expected": "candidate instance stream-core runtime hash mismatch"
+    },
+    {
+      "name": "unclosed-linked-library-reference",
+      "target": "candidate",
+      "operations": [
+        {
+          "op": "set",
+          "path": "/instances/0/linked_libraries",
+          "value": [
+            {
+              "library_id": "missing-library",
+              "source": "smart-contracts/domains/metadata/MissingLibrary.sol",
+              "name": "MissingLibrary",
+              "address": "0x0000000000000000000000000000000000001000"
+            }
+          ]
+        }
+      ],
+      "expected": "stream-core references missing linked library missing-library"
+    },
+    {
+      "name": "linked-library-binding-drift",
+      "target": "candidate",
+      "operations": [
+        {
+          "op": "set",
+          "path": "/linked_libraries",
+          "value": [
+            {
+              "order": 1,
+              "library_id": "stream-metadata-renderer",
+              "target": {
+                "kind": "production_contract",
+                "name": "StreamMetadataRenderer",
+                "source": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+                "artifact_relative_path": "domains/metadata/StreamMetadataRenderer.sol/StreamMetadataRenderer.json",
+                "artifact_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+              },
+              "address": "0x0000000000000000000000000000000000002001",
+              "depends_on": [],
+              "constructor": {
+                "types": [],
+                "arguments": [],
+                "encoded_args_keccak256": "0x2222222222222222222222222222222222222222222222222222222222222222"
+              },
+              "linked_libraries": [],
+              "runtime": {
+                "immutable_values": {},
+                "expected_keccak256": "0x3333333333333333333333333333333333333333333333333333333333333333"
+              },
+              "expected_linked_creation_keccak256": "0x4444444444444444444444444444444444444444444444444444444444444444",
+              "expected_initcode_keccak256": "0x5555555555555555555555555555555555555555555555555555555555555555",
+              "on_chain": {
+                "status": "observed",
+                "deployment_transaction": "0x6666666666666666666666666666666666666666666666666666666666666666",
+                "block_number": 1000,
+                "block_hash": "0x7777777777777777777777777777777777777777777777777777777777777777",
+                "initcode_keccak256": "0x5555555555555555555555555555555555555555555555555555555555555555",
+                "runtime_code_keccak256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+                "source_verification_status": "verified"
+              },
+              "review_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "op": "set",
+          "path": "/instances/0/linked_libraries",
+          "value": [
+            {
+              "library_id": "stream-metadata-renderer",
+              "source": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+              "name": "StreamMetadataRenderer",
+              "address": "0x0000000000000000000000000000000000002999"
+            }
+          ]
+        }
+      ],
+      "expected": "stream-core linked-library reference stream-metadata-renderer does not match the closed inventory"
+    },
+    {
+      "name": "source-layout-reopened",
+      "target": "candidate",
+      "operations": [
+        {"op": "set", "path": "/source_layout/status", "value": "pending_issue_716"},
+        {"op": "set", "path": "/source_layout/manifest_path", "value": null},
+        {"op": "set", "path": "/source_layout/manifest_sha256", "value": null}
+      ],
+      "expected": "source layout remains pending issue #716"
+    },
+    {
+      "name": "retained-identity-drift",
+      "target": "evidence",
+      "operations": [
+        {"op": "set", "path": "/candidate_identity/candidate_identity_sha256", "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+      ],
+      "expected_error": "retained evidence candidate_identity does not match candidate"
+    },
+    {
+      "name": "retained-release-build-drift",
+      "target": "evidence",
+      "operations": [
+        {"op": "set", "path": "/candidate_identity/release_build/receipt_sha256", "value": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}
+      ],
+      "expected_error": "retained evidence candidate_identity does not match candidate"
+    },
+    {
+      "name": "raw-candidate-digest-cycle",
+      "target": "evidence",
+      "operations": [
+        {"op": "set", "path": "/raw_candidate_sha256", "value": "$RAW_CANDIDATE_SHA256"}
+      ],
+      "expected_error": "forbidden raw-candidate digest field"
+    }
+  ]
+}

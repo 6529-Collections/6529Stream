@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e1de1b0d9726199961ddac47dbee66e79d8d376bc1a3ef5dc4613dff8a65929d",
-      "size_bytes": 146382
+      "sha256": "sha256:a13904b4f46ec6074b0b217de5e90c9ca5820abc9e0dee13f17dce8e8396a595",
+      "size_bytes": 147050
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:60534b3ee2e3e46c8e6291bf39153c2c4161c39882ebbad87b2399c6157c9a35",
+      "sha256": "sha256:6093ddc0d583c2ed03ff4287daa807d95c6019a510f00e1389dd23a429dd56d0",
       "size_bytes": 33344
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added the isolated issue #656A canonical deployment candidate-v2 planning scaffold: a strict schema, an intentionally incomplete 37-row profile, and a fail-closed structural checker with hostile fixtures. The ordinary checker authenticates the zero-instance planning document, while `--require-complete` rejects its 46 explicit blockers until source, profile, dependency, canonical-build, concrete-instance, library, and retained evidence identities are available. This slice is not wired into shared deployment execution or release gates and does not authorize deployment, freeze a candidate, or advance audit, public-beta, or production readiness.",
       "Added the generic non-production issue #677A canonical-initcode executor foundation. The checked Python runner re-materializes an exact isolated-build plan, compiles a production-import-free raw-initcode broadcaster in dedicated output/cache/broadcast directories, and fail-closes on plan, network, signer, nonce, strict JSON-RPC, transaction, canonical-block, portable-path, or deployed-runtime drift. Live Sepolia pins an all-public normalized DNS set and requires it unchanged before each executor request and Forge invocation, without claiming actual-peer verification; JSON-RPC IDs require exact non-boolean safe integers and success envelopes allow no mixed or extra members. A separate repository-local chain/sender lock serializes different plans using the same signer, while latest/pending nonce checks fail closed on external interleaving. Successful external journals are terminal, and nominally preflight journals are retry-safe only when their complete identity and empty pre-broadcast state remain coherent. An executor-owned ephemeral retry becomes safe only after its Anvil process is proved stopped. Production mode remains unavailable pending the issue #656 candidate and retained evidence binding; this does not authorize deployment or promote readiness.",
       "Reorganized all 120 Solidity sources from the former flat directory into a reviewed domain-first hierarchy, preserving contract behavior while updating imports, source-bound deployment/release evidence, baselines, and operator documentation. The exact old-to-new map is retained in `smart-contracts/source-layout.json`; a fail-closed checker now rejects unreviewed placement, stale flat paths, unresolved relative imports, and interface/concrete compatibility-boundary violations. This mechanical migration does not change ABI, storage layout, events, errors, deployment, audit, or readiness status.",
       "Hardened the canonical release builder's cross-process evidence authority: authoritative Windows runs now use run-scoped Forge and Solc leases, reject overlapping consumers and stale terminals, remain importable for the pinned Linux CI parity lane, and exercise the complete 121-test builder suite on Windows. The native job pins the final setup-python Windows 3.12 build (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed inventory verifies those per-platform pins, and the common hashed lock now includes Web3's exact Windows-only `pywin32==312` closure. Historical R4 journals now use distinct event and terminal schemas, shadowed R4 validators have explicit names, and failed evidence flushes remove temporary residue without masking the primary diagnostic. The native builder test routes merged Python output through `cmd.exe` so Windows PowerShell 5.1 cannot promote unittest stderr to a terminating `NativeCommandError`, while preserving the Python exit code. The scoped Windows wiring policy test remains checksum-covered by both the generator and the independent offline-verifier root-set pin. Refreshed the exact non-production deployment-fixture receipt pin and deterministic release tail; no contract, live deployment, audit, or readiness status changed.",

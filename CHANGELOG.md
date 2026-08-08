@@ -7,6 +7,15 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the isolated issue #656A canonical deployment candidate-v2 planning
+  scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
+  fail-closed structural checker with hostile fixtures. The ordinary checker
+  authenticates the zero-instance planning document, while
+  `--require-complete` rejects its 46 explicit blockers until source, profile,
+  dependency, canonical-build, concrete-instance, library, and retained
+  evidence identities are available. This slice is not wired into shared
+  deployment execution or release gates and does not authorize deployment,
+  freeze a candidate, or advance audit, public-beta, or production readiness.
 - Added the generic non-production issue #677A canonical-initcode executor
   foundation. The checked Python runner re-materializes an exact isolated-build
   plan, compiles a production-import-free raw-initcode broadcaster in dedicated
