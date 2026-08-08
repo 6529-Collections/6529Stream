@@ -1,0 +1,18 @@
+[profile.default]
+src = "."
+test = "."
+script = "."
+out = "tmp/canonical-deployment-run/out"
+cache_path = "tmp/canonical-deployment-run/cache"
+libs = []
+solc_version = "0.8.19"
+auto_detect_solc = false
+evm_version = "paris"
+optimizer = true
+optimizer_runs = 200
+bytecode_hash = "none"
+cbor_metadata = false
+fs_permissions = [{ access = "read", path = "../deployments" }]
+
+[rpc_endpoints]
+canonical_executor = "${CANONICAL_DEPLOYMENT_RPC_URL}"

@@ -133,12 +133,14 @@ secrets. This is a local Anvil release gate; fork, testnet, and production
 broadcasts should still retain their own manifest and browser evidence during
 the release ceremony.
 
-## Canonical Initcode Materialization (Non-Production Only)
+## Canonical Initcode Materialization and Execution (Non-Production Only)
 
-The current issue #677 tooling foundation can deterministically materialize
+The issue #677 tooling foundation can deterministically materialize
 constructor arguments, linked creation bytecode, full initcode, and expected
 linked/immutable runtime bytecode from the issue #674 canonical isolated
-release build. It does not broadcast.
+release build. The materializer does not broadcast. The separate issue #677A
+executor can consume only that exact plan through a generic broadcaster that
+imports no production contract.
 
 First produce `out-release/` with the canonical builder described in
 [`docs/tooling.md`](tooling.md). Then run:
@@ -152,6 +154,13 @@ python scripts/materialize_canonical_deployment_plan.py \
   --candidate deployments/config/canonical-deployment-candidate-non-production.json \
   --output tmp/canonical-deployment-plan.json \
   --check
+python scripts/test_execute_canonical_deployment_plan.py
+python scripts/execute_canonical_deployment_plan.py \
+  --mode anvil \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --plan tmp/canonical-deployment-plan.json \
+  --ephemeral-output \
+  --local-anvil
 ```
 
 The committed candidate is a deliberately narrow Anvil fixture. It binds one
@@ -187,9 +196,11 @@ and segments ending in a dot or space.
 Supplied immutable values are candidate assertions. The materializer checks
 their artifact-declared byte widths and positions and the resulting expected
 runtime hash; it does not derive the intended values from constructor
-semantics, execute creation code, or prove that constructor execution returns
-that runtime. Those semantic and deployed-runtime proofs remain required for a
-production candidate.
+semantics. The executor closes the executed-plan runtime gap by requiring the
+actual transaction input, CREATE address, canonical receipt block, and deployed
+runtime to match the plan before it can publish an ephemeral success receipt.
+This does not prove the missing production candidate identity or retained
+evidence binding.
 
 The ordinary `make check`, `scripts/check.sh`, `scripts/check.ps1`, and Linux
 CI paths run the focused unit suite, materialize this exact committed fixture,
@@ -197,15 +208,42 @@ and reparse/check the ephemeral output immediately after the canonical release
 build. This is regression coverage for the tooling foundation, not deployment
 or readiness evidence.
 
-The output is ephemeral operator input, not a deployment manifest or release
-artifact. The v1 candidate schema refuses production candidates. The
-materializer does not derive deployment addresses or salts, prove constructor
-semantics, execute creation code, or compare deployed runtime, and it has no
-broadcaster. The strict instance-aware issue #656 candidate, the reusable
-broadcaster, retained receipts, and constructor/deployed-runtime comparison
-remain outstanding. Nothing in this workflow closes issue #656 or #677,
-authorizes a testnet or mainnet broadcast, or establishes public-beta or
-production readiness.
+The plan and execution receipt are ephemeral operator inputs, not deployment
+manifests or release artifacts. The executor re-materializes the plan, probes
+block-by-number, block-by-hash, and exact EIP-1898 runtime reads before
+broadcast, strictly decodes every JSON-RPC response with the trusted-file
+duplicate-free UTF-8/I-JSON policy, binds the response to an exact non-boolean
+safe-integer request ID, accepts only the exact `{jsonrpc,id,result}` success
+envelope, serializes all plans for one chain/sender under a repository-local
+exclusive lock, and refuses any terminal or ambiguous external-chain journal
+retry. A
+preflight or failed-preflight journal permits retry only when its exact
+schema, network, execution identity, false success flag, null active deployment,
+and empty verified set remain coherent. An executor-owned ephemeral retry
+becomes eligible only after the owning Anvil process has stopped and the journal
+is marked with that fact.
+The lock cannot serialize another clone, worktree, machine, or external wallet.
+Repeated latest/pending nonce equality checks remain the fail-closed control for
+those external interleavings; a detected interleaving stops retention but cannot
+undo a transaction already submitted.
+Every final runtime read uses one captured EIP-1898 tip selector; receipt
+publication also requires a fresh `eth_blockNumber` and tip-hash read proving
+that the tip neither advanced nor reorganized during the sweep. Its dedicated
+Foundry profile isolates output, cache, and broadcast state below
+`tmp/canonical-deployment-run/`. Receipt repository paths use the same portable
+policy as candidate and plan paths. `--output` and `--ephemeral-output` are
+mutually exclusive. Local and fork modes are chain-31337 loopback-only; Sepolia
+requires explicit live authorization, a reviewed signer transport, and a
+non-loopback RPC endpoint. The live path resolves and pins the exact normalized
+all-public IPv4/IPv6 address set, then requires an unchanged all-public set
+immediately before each executor-owned JSON-RPC request and each Forge
+invocation. This detects alias drift and rebinding before connection attempts;
+it does not bind or attest the peer that urllib or Forge ultimately reaches, and
+the receipt records `actual_peer_verified: false`. There is no rehearsal
+execution-mode alias in this slice. Production mode remains fail-closed until
+issue #656 versions the strict candidate and retained evidence family. Nothing
+in this workflow authorizes a testnet or mainnet broadcast or establishes
+public-beta or production readiness.
 
 ## Sepolia Deployment Rehearsal Runbook
 

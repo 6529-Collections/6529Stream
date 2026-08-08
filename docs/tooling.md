@@ -554,13 +554,69 @@ missing/extra/unresolved/wrong/overlapping links, missing, wrong-width, or
 overlapping immutables, EIP-3860 overflow, runtime-hash drift, target
 mismatches, forward dependencies, and non-ephemeral output paths fail closed.
 
-This materializer does not derive salts or deployment addresses, prove
-constructor semantics, execute creation code, broadcast transactions, inspect
-deployed code, retain ceremony evidence, or modify the existing Forge scripts.
-A broadcaster and the issue #656 strict instance-aware production candidate
-are still required before issue #677 can supply production broadcast-bytecode
-parity. This slice therefore does not close issue #656 or #677 and does not
-change release maturity.
+The issue #677A generic executor is
+`scripts/execute_canonical_deployment_plan.py`. It re-materializes the supplied
+plan and requires byte-for-byte equality before execution. The
+production-import-free `deployment-script/DeployCanonicalInitcode.s.sol` reads
+only that plan, checks the plan and entry hashes, and deploys its raw initcode.
+The dedicated `deployment-script/foundry.toml` isolates the broadcaster output,
+cache, and broadcast directories; the executor rejects a compiler build-info
+closure containing any second source.
+
+Before submitting a transaction, the executor simulates the complete ordered
+plan, probes block-by-number, block-by-hash, and exact EIP-1898 runtime reads,
+strictly decodes every JSON-RPC byte response with the same duplicate-free
+UTF-8/I-JSON, safe-integer, and Unicode-scalar policy as trusted files, requires
+an exact non-boolean safe-integer response ID, accepts only the exact
+`{jsonrpc,id,result}` success envelope, uses a separate repository-local
+chain/sender lock across all plans, and requires a contiguous uncontended nonce
+range. The lock cannot serialize another clone, worktree, machine, or external
+wallet; repeated latest/pending nonce checks fail closed on those external
+interleavings, but cannot undo an already submitted transaction.
+Verified successful external journals are terminal, as are unresolved journals.
+Only a preflight or failed-preflight journal with an exact matching schema,
+network, execution identity, false success flag, null active deployment, empty
+verified set, and coherent optional preflight evidence is immediately
+retry-safe. An executor-owned ephemeral journal becomes retry-safe only after
+its Anvil process has stopped and the executor records that destruction.
+Postflight independently
+checks the actual transaction input, sender/nonce-derived CREATE address,
+receipt and canonical block, and expected runtime. Every final-sweep runtime
+read uses the captured final-tip EIP-1898 block-hash selector. Before publishing
+the schema-validated ephemeral receipt, the executor rereads both
+`eth_blockNumber` and that height's hash and rejects tip advancement, regression,
+or reorganization.
+
+Run the bounded offline unit suite and local proof with:
+
+```bash
+python scripts/test_execute_canonical_deployment_plan.py
+python scripts/execute_canonical_deployment_plan.py \
+  --mode anvil \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --plan tmp/canonical-deployment-plan.json \
+  --ephemeral-output \
+  --local-anvil
+```
+
+Execution-receipt paths reuse the candidate/plan schema's exact portable
+repository-path policy, including device-name and trailing-dot/space rejection.
+`--output` and `--ephemeral-output` are mutually exclusive. External local and
+fork modes require a chain-31337 plan and a loopback RPC. Sepolia mode requires
+chain 11155111, `--authorize-live-broadcast`, and an endpoint whose exact
+normalized IPv4/IPv6 resolution set is entirely globally routable. That set is
+pinned into the execution context and must re-resolve unchanged immediately
+before every executor-owned JSON-RPC request and Forge invocation. This is a DNS
+alias/rebinding drift check, not actual-peer binding; retained evidence states
+`actual_peer_verified: false`. This slice has no rehearsal mode alias. External
+execution requires an explicit reviewed `unlocked`, `ledger`, `trezor`, or
+`keystore` signer transport; raw
+private-key CLI input is unsupported and the Forge child environment is
+sanitized.
+Production mode remains fail-closed until issue #656 supplies the strict
+instance-aware candidate and retained evidence binding. The executor does not
+retain ceremony evidence, close issue #656, authorize deployment, or change
+release maturity.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface
