@@ -426,7 +426,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "a76060b837285ed0e1ecbfdd5589ee082afca460a15644848681d7dfad417699",
+        "e0dd870ded5731eda99eff37e318424558011ec3d551566f66ec02b636aabbcd",
         169_469,
     ),
 }
@@ -484,6 +484,7 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/generate_post_entropy_completion_gas.py"),
     Path("scripts/check_post_entropy_completion_gas.py"),
     Path("scripts/test_post_entropy_completion_gas.py"),
+    Path("test/StreamCorePermanentTarget.t.sol"),
     *RELEASE_TOOL_SEMANTIC_SOURCE_PATHS,
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/test_release_evidence_issue_links.py"),

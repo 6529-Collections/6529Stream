@@ -121,8 +121,8 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:30c96a6f13fe526fb73adc45959c4cf3a4b9ab87d11d5de7e43c91adaa17bf33",
-        "size_bytes": 2283050,
+        "sha256": "sha256:7c85cd8fe0987033ba8ad2c02b2b4d7470f950ec19a80588de2f6697a29e0c1f",
+        "size_bytes": 2283275,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
       "schema": {
@@ -185,14 +185,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:00bbcc110e1a031b443e37325c3bfb2afa16dacb0b4dae826e37d04eb0cbaf72",
-        "size_bytes": 145867,
+        "sha256": "sha256:55f2a301adfdbc3ca289a7fa7a987ee8466342a7b96ee0500cf4830de178f372",
+        "size_bytes": 146092,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:942334dab87dbc0cbbf298f50c9bf9310e842abe5f77d53327eda8fae2204125",
-        "size_bytes": 142359
+        "sha256": "sha256:551661904ef1d90ae6c99f3ab3cf06354dcd737bf5a2f028e6577e595930d239",
+        "size_bytes": 142584
       }
     },
     "release_candidate_lockfile": {
@@ -269,7 +269,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:e7c49de15b53f72c3cb91cb1e6781ba9de2ee9539b5f813470b1ddb71aaf85a3",
+      "sha256": "sha256:7e303b2a44377329d243b207b116fd5f3e8cfbd3b3b5a44f4cc7f35f64ce7d11",
       "size_bytes": 33344,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2467,8 +2467,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:36939eba29bff5a3856b664ddf88c7cd14c8c36e6c07992b6df64b2d28f17ea5",
-      "size_bytes": 144843
+      "sha256": "sha256:e0bed5d47aaad63198440d51e0ac59d56fa59d873544f7d164a92974f3924133",
+      "size_bytes": 145074
     },
     "governance_docs": [
       {
@@ -2663,8 +2663,8 @@
       },
       {
         "path": "docs/stream-entropy-coordinator.md",
-        "sha256": "sha256:bac56a39f1a8b7f02c76b45a8f3b1dd24d7edddb65f38a480524b694b508a596",
-        "size_bytes": 168207
+        "sha256": "sha256:50a46c7801a676becf4455f14cbc27dbfc6f5b7d7d0aa38e1d1a9cf22684296e",
+        "size_bytes": 168198
       },
       {
         "path": "docs/stream-entropy-providers.md",
@@ -2869,8 +2869,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:1a64d863735d341cc90aedf33b1797f8222ed2ab2799dda47943a6981b7c7fd4",
-        "size_bytes": 126592
+        "sha256": "sha256:b4fd8c62c6c03e9a473e57006516350ff312164668de44583593328727ebdd0c",
+        "size_bytes": 126586
       },
       {
         "path": "docs/status.md",

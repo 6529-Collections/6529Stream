@@ -86,9 +86,12 @@ the release policy in `docs/release-policy.md`.
 - Completed issue #672's as-built permanent-Core post-entropy boundary: Core
   encodes coordinator calldata before admission, reserves the EIP-150 ceiling,
   3,300-gas cold-call cost, and measured 162,000-gas EOA completion tail,
-  forwards the exact governed stipend, rejects nonempty returndata, and rolls
-  back all mint state and events on failure. Contract-receiver callback gas
-  remains caller supplied and candidate-instance binding remains incomplete.
+  forwards the exact governed stipend, and now executes the real Core at the
+  just-below, exact, and just-above admission boundary. The evidence checker
+  fails closed if any of those three cases disappears. Core runtime is
+  unchanged by this acceptance closure. Nonempty returndata and coordinator
+  failure still roll back all mint state and events; contract-receiver callback
+  gas remains caller supplied and candidate-instance binding remains incomplete.
 - Implemented accepted ADR 0018's pre-genesis atomic operation-identity
   cutover: the manager derives and reserves one batch root plus one operation
   ID per token before ledger consumption; the ledger owns manager-scoped root,

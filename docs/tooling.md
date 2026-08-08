@@ -1500,15 +1500,15 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 271 configured roots,
-expanding to exactly 444 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 272 configured roots,
+expanding to exactly 445 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
 twelve exact entries; they do not imply coverage of any other file under
-`smart-contracts/` or `script/`. The #672 planning package adds six exact roots
-for its artifact, generator/checker/tests, and two Solidity target-fixture
-sources; its dedicated via-IR snapshot is the seventh new record under the
+`smart-contracts/` or `script/`. The #672 package adds seven exact roots
+for its artifact, generator/checker/tests, and three Solidity target-fixture
+sources; its dedicated via-IR snapshot is the eighth new record under the
 already covered baseline directory. The Governance V2 policy artifact, checker,
 and tests add three exact roots; those files plus the policy schema under the
 already covered schema directory add four exact entries. The additional exact
