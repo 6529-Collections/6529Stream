@@ -1146,6 +1146,62 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_lock_fragment_drift_fails_with_typed_checker_error(self) -> None:
+        source = (
+            ROOT / "smart-contracts/domains/metadata/StreamCollectionMetadata.sol"
+        ).read_text(encoding="utf-8")
+        lock_start = source.index("function lockCollectionRecord")
+        lock_end = source.index("function collectionRecord(", lock_start)
+        lock_fragment = source[lock_start:lock_end]
+
+        def replace_in_lock(old: str, new: str) -> str:
+            self.assertIn(old, lock_fragment)
+            return source[:lock_start] + lock_fragment.replace(old, new, 1) + source[lock_end:]
+
+        reversed_fragment = lock_fragment.replace(
+            "_requireRecordWriter", "__WRITER_ANCHOR__", 1
+        ).replace("_rememberRecordType", "_requireRecordWriter", 1).replace(
+            "__WRITER_ANCHOR__", "_rememberRecordType", 1
+        )
+        cases = (
+            (
+                source.replace(
+                    "function lockCollectionRecord",
+                    "function driftedLockCollectionRecord",
+                    1,
+                ),
+                "metadata host lock-function boundaries are missing or reordered",
+            ),
+            (
+                source[:lock_end]
+                + source[lock_end:].replace(
+                    "function collectionRecord(",
+                    "function driftedCollectionRecord(",
+                    1,
+                ),
+                "metadata host lock-function boundaries are missing or reordered",
+            ),
+            (
+                replace_in_lock("_requireRecordWriter", "_driftedRecordWriter"),
+                "metadata host lock authorization/capacity anchors are missing",
+            ),
+            (
+                replace_in_lock("_rememberRecordType", "_driftedRememberRecordType"),
+                "metadata host lock authorization/capacity anchors are missing",
+            ),
+            (
+                source[:lock_start] + reversed_fragment + source[lock_end:],
+                "lock family authorization must precede record-type capacity consumption",
+            ),
+        )
+        for drifted_source, pattern in cases:
+            with self.subTest(pattern=pattern):
+                with self.assertRaisesRegex(
+                    checker.RecordFamilyAuthorizationError,
+                    pattern,
+                ):
+                    checker._validate_metadata_lock_fragment(drifted_source)
+
     def test_as_built_contract_and_interface_hashes_are_checked_without_git(
         self,
     ) -> None:
@@ -2451,6 +2507,23 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         self._mutate_complete(
             stage_reviewed_pending_authority,
             "candidate_identity_dependency_unavailable",
+            rebind_grant=True,
+        )
+
+        def stage_invalid_pending_review_timestamp(
+            root: Path,
+            evidence: dict[str, Any],
+            path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            stage_reviewed_pending_authority(root, evidence, path, state)
+            evidence["classifier_binding"][
+                "pending_configuration_authority_disposition"
+            ]["reviewed_at"] = "2026-07-24T00:00:00+00:00"
+
+        self._mutate_complete(
+            stage_invalid_pending_review_timestamp,
+            r"pending_configuration_authority_disposition.*reviewed_at.*not valid",
             rebind_grant=True,
         )
 

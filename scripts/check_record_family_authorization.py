@@ -1073,6 +1073,26 @@ def _assert_candidate_source_at_commit(
     return path
 
 
+def _validate_metadata_lock_fragment(metadata_source: str) -> None:
+    lock_start = metadata_source.find("function lockCollectionRecord")
+    lock_end = metadata_source.find("function collectionRecord(", lock_start + 1)
+    _expect(
+        lock_start != -1 and lock_end != -1 and lock_start < lock_end,
+        "metadata host lock-function boundaries are missing or reordered",
+    )
+    lock_fragment = metadata_source[lock_start:lock_end]
+    writer_index = lock_fragment.find("_requireRecordWriter")
+    remember_index = lock_fragment.find("_rememberRecordType")
+    _expect(
+        writer_index != -1 and remember_index != -1,
+        "metadata host lock authorization/capacity anchors are missing",
+    )
+    _expect(
+        writer_index < remember_index,
+        "lock family authorization must precede record-type capacity consumption",
+    )
+
+
 def _validate_source_catalog_semantics(
     catalog: dict[str, Any],
     repo_root: Path,
@@ -1380,15 +1400,7 @@ def _validate_source_catalog_semantics(
         "error RecordFamilyHostNotAllowed" in metadata_interface,
         "independent-family host-routing error missing from metadata interface",
     )
-    lock_fragment = metadata_source[
-        metadata_source.index("function lockCollectionRecord"):
-        metadata_source.index("function collectionRecord(")
-    ]
-    _expect(
-        lock_fragment.index("_requireRecordWriter")
-        < lock_fragment.index("_rememberRecordType"),
-        "lock family authorization must precede record-type capacity consumption",
-    )
+    _validate_metadata_lock_fragment(metadata_source)
     for anchor in (
         "_recordFamilyRegistry.requireRecordWriter",
         "authorizationClass: authorizationClass",

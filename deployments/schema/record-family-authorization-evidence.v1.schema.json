@@ -1037,7 +1037,11 @@
       "properties": {
         "status": {"const": "reviewed"},
         "reviewer": {"type": "string", "pattern": ".*\\S.*"},
-        "reviewed_at": {"type": "string", "format": "date-time"},
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+        },
         "reference": {"type": "string", "pattern": ".*\\S.*"},
         "rationale": {"type": "string", "pattern": ".*\\S.*"}
       }

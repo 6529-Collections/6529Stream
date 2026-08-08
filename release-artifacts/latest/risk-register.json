@@ -255,7 +255,7 @@
       "evidence": [
         {
           "path": "docs/collection-metadata-contract.md",
-          "sha256": "sha256:596ef0ef8e816a6fc3fe780b13765dfbd63bcd8204bcf66172b8b73bc5194140"
+          "sha256": "sha256:93d08104be5c056925cc61f0e1d78acc77d9b8806114137031ac775ef3292993"
         },
         {
           "path": "release-artifacts/record-family-authorization-inventory.json",
@@ -275,7 +275,7 @@
         },
         {
           "path": "deployments/schema/record-family-authorization-evidence.v1.schema.json",
-          "sha256": "sha256:26012bfe6956f3b72c3e911bcb6731e33b38e68b312784acedf2b1533baf909a"
+          "sha256": "sha256:e8bdc36780856e5349f0af5337d8ec4449a348db8fa4e8c0c330f75347039c31"
         },
         {
           "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",

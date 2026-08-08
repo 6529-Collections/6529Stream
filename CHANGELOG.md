@@ -111,7 +111,11 @@ the release policy in `docs/release-policy.md`.
   pinned Slither `0.11.5` capture at the rebased source commit retains the exact
   32 Open first-party production High/Medium fingerprints (2 High, 30 Medium);
   four additional Medium rows are test-only. Baseline parity is inventory
-  consistency, not finding acceptance, audit completion, or readiness.
+  consistency, not finding acceptance, audit completion, or readiness. Review
+  remediation also canonicalizes pending-authority review timestamps, converts
+  missing/reordered source anchors into typed fail-closed checker errors, and
+  documents explicit-recorder dossier reads; it does not change Solidity,
+  candidate evidence availability, risk disposition, or readiness.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
   exact parity with the final `StreamCore` bytecode-proof row and the
