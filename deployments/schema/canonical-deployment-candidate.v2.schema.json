@@ -1,0 +1,675 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/canonical-deployment-candidate.v2.schema.json",
+  "title": "6529Stream Canonical Deployment Candidate v2",
+  "description": "Version 2 prepares the instance-aware production candidate while retaining the canonical deployment family introduced by issue #677. Candidate identity excludes only retained_evidence; a planning candidate cannot satisfy production release mode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "candidate_id",
+    "candidate_kind",
+    "status",
+    "production_candidate",
+    "readiness_evidence",
+    "network",
+    "source_commit",
+    "source_layout",
+    "genesis_profile",
+    "governed_parameter_inventory",
+    "record_family_authorization",
+    "release_build",
+    "retained_evidence",
+    "linked_libraries",
+    "instances",
+    "factory_spawned_exclusions",
+    "out_of_inventory"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.canonical-deployment-candidate.v2"
+    },
+    "candidate_id": {
+      "$ref": "#/$defs/identifier"
+    },
+    "candidate_kind": {
+      "const": "genesis_release_candidate"
+    },
+    "status": {
+      "enum": ["planning", "complete"]
+    },
+    "production_candidate": {
+      "type": "boolean"
+    },
+    "readiness_evidence": {
+      "const": false
+    },
+    "network": {
+      "$ref": "#/$defs/network"
+    },
+    "source_commit": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/commit"}
+      ]
+    },
+    "source_layout": {
+      "$ref": "#/$defs/sourceLayout"
+    },
+    "genesis_profile": {
+      "$ref": "#/$defs/genesisProfile"
+    },
+    "governed_parameter_inventory": {
+      "$ref": "#/$defs/dependencyIdentity"
+    },
+    "record_family_authorization": {
+      "$ref": "#/$defs/dependencyIdentity"
+    },
+    "release_build": {
+      "$ref": "#/$defs/releaseBuild"
+    },
+    "retained_evidence": {
+      "$ref": "#/$defs/retainedEvidence"
+    },
+    "linked_libraries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/linkedLibrary"
+      }
+    },
+    "instances": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/instance"
+      }
+    },
+    "factory_spawned_exclusions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/factoryExclusion"
+      }
+    },
+    "out_of_inventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/outOfInventory"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "profileKey": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_]+$"
+    },
+    "solidityName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*[\\u0000-\\u001F\\u007F<>:\"\\\\|?*])(?!.*//)(?!.*\\/$)(?!\\.\\.?(?:/|$))(?!.*\\/\\.\\.?(?:/|$))(?![^/]*[. ](?:/|$))(?!.*\\/[^/]*[. ](?:/|$))(?!(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$))(?!.*\\/(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$)).+$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$",
+      "not": {
+        "const": "0000000000000000000000000000000000000000"
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "keccak256": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "transactionHash": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$",
+      "not": {
+        "const": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    "hexBytes": {
+      "type": "string",
+      "pattern": "^0x(?:[0-9a-f]{2})+$"
+    },
+    "nullableSha256": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/sha256"}
+      ]
+    },
+    "nullableRepoPath": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/repoPath"}
+      ]
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "name", "chain_id"],
+      "properties": {
+        "environment": {
+          "enum": ["local", "fork", "testnet", "production"]
+        },
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "sourceLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "migration_issue",
+        "manifest_path",
+        "manifest_sha256"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["pending_issue_716", "complete"]
+        },
+        "migration_issue": {
+          "const": "https://github.com/6529-Collections/6529Stream/issues/716"
+        },
+        "manifest_path": {
+          "$ref": "#/$defs/nullableRepoPath"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "genesisProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "schema_version", "sha256", "entry_count"],
+      "properties": {
+        "status": {
+          "enum": ["planning", "complete"]
+        },
+        "path": {
+          "const": "release-artifacts/genesis-deployment-profile.json"
+        },
+        "schema_version": {
+          "const": "6529stream.genesis-deployment-profile.v2"
+        },
+        "sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "entry_count": {
+          "const": 37
+        }
+      }
+    },
+    "dependencyIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "schema_version", "identity_sha256"],
+      "properties": {
+        "status": {
+          "enum": ["pending_dependency", "complete"]
+        },
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "releaseBuild": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "receipt_path",
+        "receipt_sha256",
+        "target_catalog_sha256",
+        "config_path",
+        "config_sha256",
+        "foundry_config_path",
+        "foundry_config_sha256"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_available", "complete"]
+        },
+        "receipt_path": {
+          "const": "out-release/release-build-manifest.json"
+        },
+        "receipt_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "target_catalog_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "config_path": {
+          "const": "release-artifacts/contracts.json"
+        },
+        "config_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        },
+        "foundry_config_path": {
+          "const": "foundry.toml"
+        },
+        "foundry_config_sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "retainedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "schema_version", "path", "sha256"],
+      "properties": {
+        "status": {
+          "enum": ["not_available", "bound"]
+        },
+        "schema_version": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "minLength": 1}
+          ]
+        },
+        "path": {
+          "$ref": "#/$defs/nullableRepoPath"
+        },
+        "sha256": {
+          "$ref": "#/$defs/nullableSha256"
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "source",
+        "artifact_relative_path",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "kind": {
+          "const": "production_contract"
+        },
+        "name": {
+          "$ref": "#/$defs/solidityName"
+        },
+        "source": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "artifact_relative_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "constructor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["types", "arguments", "encoded_args_keccak256"],
+      "properties": {
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "arguments": {
+          "type": "array",
+          "items": {}
+        },
+        "encoded_args_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    },
+    "linkedLibraryReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["library_id", "source", "name", "address"],
+      "properties": {
+        "library_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "source": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "name": {
+          "$ref": "#/$defs/solidityName"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["immutable_values", "expected_keccak256"],
+      "properties": {
+        "immutable_values": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(?:0|[1-9][0-9]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/hexBytes"
+          }
+        },
+        "expected_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    },
+    "onChain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "deployment_transaction",
+        "block_number",
+        "block_hash",
+        "initcode_keccak256",
+        "runtime_code_keccak256",
+        "source_verification_status"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["not_available", "observed"]
+        },
+        "deployment_transaction": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/transactionHash"}
+          ]
+        },
+        "block_number": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "block_hash": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/keccak256"}
+          ]
+        },
+        "initcode_keccak256": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/keccak256"}
+          ]
+        },
+        "runtime_code_keccak256": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/keccak256"}
+          ]
+        },
+        "source_verification_status": {
+          "enum": ["not_available", "verified"]
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "target_kind", "target_id", "address"],
+      "properties": {
+        "kind": {
+          "enum": ["authority", "dependency", "external", "registry", "host"]
+        },
+        "name": {
+          "$ref": "#/$defs/profileKey"
+        },
+        "target_kind": {
+          "enum": ["candidate_instance", "linked_library", "external"]
+        },
+        "target_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        }
+      }
+    },
+    "linkedLibrary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "library_id",
+        "target",
+        "address",
+        "depends_on",
+        "constructor",
+        "linked_libraries",
+        "runtime",
+        "expected_linked_creation_keccak256",
+        "expected_initcode_keccak256",
+        "on_chain",
+        "review_status"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "library_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "constructor": {
+          "$ref": "#/$defs/constructor"
+        },
+        "linked_libraries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/linkedLibraryReference"
+          }
+        },
+        "runtime": {
+          "$ref": "#/$defs/runtime"
+        },
+        "expected_linked_creation_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "expected_initcode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "on_chain": {
+          "$ref": "#/$defs/onChain"
+        },
+        "review_status": {
+          "enum": ["unreviewed", "reviewed"]
+        }
+      }
+    },
+    "instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "instance_id",
+        "profile_entry_id",
+        "profile_entry_key",
+        "deployment_scope",
+        "implementation_match",
+        "target",
+        "address",
+        "depends_on",
+        "constructor",
+        "linked_libraries",
+        "authority_dependency_bindings",
+        "verified_interfaces",
+        "verified_markers",
+        "runtime",
+        "expected_linked_creation_keccak256",
+        "expected_initcode_keccak256",
+        "on_chain",
+        "review_status"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "instance_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "profile_entry_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 37
+        },
+        "profile_entry_key": {
+          "$ref": "#/$defs/profileKey"
+        },
+        "deployment_scope": {
+          "enum": ["singleton", "implementation", "fallback_instance"]
+        },
+        "implementation_match": {
+          "enum": ["exact", "one_of", "distinct_instance", "manifest_equivalent", "role_bound", "approved_alias"]
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "constructor": {
+          "$ref": "#/$defs/constructor"
+        },
+        "linked_libraries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/linkedLibraryReference"
+          }
+        },
+        "authority_dependency_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/binding"
+          }
+        },
+        "verified_interfaces": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "verified_markers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "runtime": {
+          "$ref": "#/$defs/runtime"
+        },
+        "expected_linked_creation_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "expected_initcode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "on_chain": {
+          "$ref": "#/$defs/onChain"
+        },
+        "review_status": {
+          "enum": ["unreviewed", "reviewed"]
+        }
+      }
+    },
+    "factoryExclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "factory_entry_id", "implementation_entry_id"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "factory_entry_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 37
+        },
+        "implementation_entry_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 37
+        }
+      }
+    },
+    "outOfInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "reason"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/identifier"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

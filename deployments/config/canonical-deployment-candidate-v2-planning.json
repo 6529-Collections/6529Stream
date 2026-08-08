@@ -1,0 +1,70 @@
+{
+  "schema_version": "6529stream.canonical-deployment-candidate.v2",
+  "candidate_id": "mainnet-genesis-planning-v2",
+  "candidate_kind": "genesis_release_candidate",
+  "status": "planning",
+  "production_candidate": false,
+  "readiness_evidence": false,
+  "network": {
+    "environment": "production",
+    "name": "mainnet",
+    "chain_id": 1
+  },
+  "source_commit": null,
+  "source_layout": {
+    "status": "pending_issue_716",
+    "migration_issue": "https://github.com/6529-Collections/6529Stream/issues/716",
+    "manifest_path": null,
+    "manifest_sha256": null
+  },
+  "genesis_profile": {
+    "status": "planning",
+    "path": "release-artifacts/genesis-deployment-profile.json",
+    "schema_version": "6529stream.genesis-deployment-profile.v2",
+    "sha256": null,
+    "entry_count": 37
+  },
+  "governed_parameter_inventory": {
+    "status": "pending_dependency",
+    "path": "release-artifacts/governed-parameter-inventory.json",
+    "schema_version": "6529stream.governed-parameter-inventory.v1",
+    "identity_sha256": null
+  },
+  "record_family_authorization": {
+    "status": "pending_dependency",
+    "path": "release-artifacts/record-family-authorization-inventory.json",
+    "schema_version": "6529stream.record-family-authorization-inventory.v1",
+    "identity_sha256": null
+  },
+  "release_build": {
+    "status": "not_available",
+    "receipt_path": "out-release/release-build-manifest.json",
+    "receipt_sha256": null,
+    "target_catalog_sha256": null,
+    "config_path": "release-artifacts/contracts.json",
+    "config_sha256": null,
+    "foundry_config_path": "foundry.toml",
+    "foundry_config_sha256": null
+  },
+  "retained_evidence": {
+    "status": "not_available",
+    "schema_version": null,
+    "path": null,
+    "sha256": null
+  },
+  "linked_libraries": [],
+  "instances": [],
+  "factory_spawned_exclusions": [
+    {
+      "name": "StreamSplitWallet instances",
+      "factory_entry_id": 5,
+      "implementation_entry_id": 6
+    }
+  ],
+  "out_of_inventory": [
+    {
+      "name": "deployer_factory",
+      "reason": "No authority, pointer, funds, or identity-dependent production role."
+    }
+  ]
+}
