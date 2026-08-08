@@ -426,7 +426,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "a76060b837285ed0e1ecbfdd5589ee082afca460a15644848681d7dfad417699",
+        "e0dd870ded5731eda99eff37e318424558011ec3d551566f66ec02b636aabbcd",
         169_469,
     ),
 }

@@ -121,7 +121,7 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:e9277c35975a26a9bf2d95496da1ea4a03a4b55407eba0aa16c76047f8af7101",
+        "sha256": "sha256:7c85cd8fe0987033ba8ad2c02b2b4d7470f950ec19a80588de2f6697a29e0c1f",
         "size_bytes": 2283275,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
