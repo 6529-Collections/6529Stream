@@ -121,7 +121,7 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:9ba718d75ee9e8d2a08faf9fd249c2778b9f6b32f62ed69d9b9ce023015b2f07",
+        "sha256": "sha256:16195bf66388f2397f10c3971a3a444e1502e6ebaa4e86ae8b61085c76b0278c",
         "size_bytes": 2326709,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
@@ -185,14 +185,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c8f4271c9de8d2f43468d1c57b9395a39ad548b0af13fa1f623eade439501174",
-        "size_bytes": 152019,
+        "sha256": "sha256:de9b8b9f20f971652724276a5eb6044b12408aa0bd5f4fe581e4ad319e1393ab",
+        "size_bytes": 152172,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:9e774aafcfa9ad6e17fcb52e44a147af68fa404b7327470a75f6bbd4225e17e3",
-        "size_bytes": 148490
+        "sha256": "sha256:ea8d9a23016c3cb49fd6548248c74efb4d52987fe85dd51a125989d4d10e37ca",
+        "size_bytes": 148643
       }
     },
     "release_candidate_lockfile": {
@@ -269,7 +269,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:95b110a2e4411f990c3ec2b85bb9e4854dca9720619b9af3b2c740992020fbce",
+      "sha256": "sha256:afb23127f948aeacd7019081483b2c344ceacba93fe88ae42aaf97e09b0207b7",
       "size_bytes": 33995,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2485,8 +2485,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:078114e23aa8ed990fcecaa371f93963c621bc598e4b76bf2d1e74de483cee3c",
-      "size_bytes": 151136
+      "sha256": "sha256:86272d906a20e157cd154d0a91599e5b84aa4624dd742b0d7303c5cee0143aca",
+      "size_bytes": 151293
     },
     "governance_docs": [
       {
@@ -2676,8 +2676,8 @@
       },
       {
         "path": "docs/collection-metadata-contract.md",
-        "sha256": "sha256:93d08104be5c056925cc61f0e1d78acc77d9b8806114137031ac775ef3292993",
-        "size_bytes": 308636
+        "sha256": "sha256:250d1ac810d79f7f8dba3901690365b2f95d388f44f8c5de56bbdd6ec896acf9",
+        "size_bytes": 308928
       },
       {
         "path": "docs/stream-entropy-coordinator.md",

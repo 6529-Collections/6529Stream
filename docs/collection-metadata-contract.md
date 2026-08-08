@@ -4542,10 +4542,19 @@ function latestAttestationHash(
     address attester
 ) external view returns (bytes32);
 
+// Caller-scoped convenience: reads the msg.sender recorder lane.
 function latestCollectionRecordHash(
     uint256 collectionId,
     bytes32 recordType,
     bytes32 subjectId
+) external view returns (bytes32);
+
+// Use this form when querying another recorder's lane.
+function latestCollectionRecordHashFor(
+    uint256 collectionId,
+    bytes32 recordType,
+    bytes32 subjectId,
+    address recorder
 ) external view returns (bytes32);
 
 function latestSnapshotHash(uint256 collectionId)

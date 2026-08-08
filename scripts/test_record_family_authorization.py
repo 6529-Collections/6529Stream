@@ -1653,6 +1653,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             "observed_configuration_hash",
             "commitment_linkage_status",
             "commitment_linkage_reference",
+            "observed_at_commit",
         ):
             with self.subTest(field=field):
                 self._mutate_evidence(
@@ -1669,6 +1670,8 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                             if field == "commitment_linkage_status"
                             else "https://review.example/commitment-linkage"
                             if field == "commitment_linkage_reference"
+                            else "a" * 40
+                            if field == "observed_at_commit"
                             else 1
                         ),
                     ),

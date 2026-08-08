@@ -114,7 +114,9 @@ the release policy in `docs/release-policy.md`.
   consistency, not finding acceptance, audit completion, or readiness. Review
   remediation also canonicalizes pending-authority review timestamps, converts
   missing/reordered source anchors into typed fail-closed checker errors, and
-  documents explicit-recorder dossier reads; it does not change Solidity,
+  documents explicit-recorder dossier and stewardship reads. Template hostile
+  coverage now also proves the lifecycle source-commit observation remains
+  absent until retained evidence exists; these changes do not alter Solidity,
   candidate evidence availability, risk disposition, or readiness.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring

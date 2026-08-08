@@ -255,7 +255,7 @@
       "evidence": [
         {
           "path": "docs/collection-metadata-contract.md",
-          "sha256": "sha256:93d08104be5c056925cc61f0e1d78acc77d9b8806114137031ac775ef3292993"
+          "sha256": "sha256:250d1ac810d79f7f8dba3901690365b2f95d388f44f8c5de56bbdd6ec896acf9"
         },
         {
           "path": "release-artifacts/record-family-authorization-inventory.json",
