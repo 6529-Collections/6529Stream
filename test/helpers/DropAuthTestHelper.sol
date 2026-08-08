@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/StreamDrops.sol";
+import "../../smart-contracts/domains/mint/StreamDrops.sol";
 import "./CharacterizationTestBase.sol";
 
 abstract contract DropAuthTestHelper is CharacterizationTestBase {

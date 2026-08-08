@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamCuratorsPool.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
+import "../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 

@@ -13,7 +13,7 @@ Accepted.
 | Blocks | [P0-META-001](https://github.com/6529-Collections/6529Stream/issues/9), [P1-META-001](https://github.com/6529-Collections/6529Stream/issues/46), [P1-META-002](https://github.com/6529-Collections/6529Stream/issues/47), [P1-META-003](https://github.com/6529-Collections/6529Stream/issues/48), [P1-META-004](https://github.com/6529-Collections/6529Stream/issues/49), [P1-META-005](https://github.com/6529-Collections/6529Stream/issues/50), [P1-META-006](https://github.com/6529-Collections/6529Stream/issues/51) |
 | Related issues | [P0-RAND-004](https://github.com/6529-Collections/6529Stream/issues/40), [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35), [P0-INIT-001](https://github.com/6529-Collections/6529Stream/issues/15) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0004](0004-admin-governance.md), [ADR 0005](0005-randomness.md), [ADR 0007](0007-upgrade-redeployment.md) |
-| Affected contracts | `smart-contracts/StreamCore.sol`, `smart-contracts/StreamContractMetadata.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/StreamMinter.sol`, randomizer adapters that finalize token metadata |
+| Affected contracts | `smart-contracts/core/StreamCore.sol`, `smart-contracts/domains/metadata/StreamContractMetadata.sol`, `smart-contracts/domains/dependencies/DependencyRegistry.sol`, `smart-contracts/domains/mint/StreamMinter.sol`, randomizer adapters that finalize token metadata |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -44,10 +44,10 @@ important rendering inputs remain mutable or ambiguous.
 
 Current source references:
 
-- `smart-contracts/StreamCore.sol#createCollection` stores collection name,
+- `smart-contracts/core/StreamCore.sol#createCollection` stores collection name,
   artist, description, website, license, base URI, library URL, dependency key,
   dependency script chunks, and collection script chunks.
-- `smart-contracts/StreamCore.sol#tokenURI` has two off-chain states:
+- `smart-contracts/core/StreamCore.sol#tokenURI` has two off-chain states:
   `baseURI + "pending"` while `tokenToHash[tokenId]` is zero and
   `baseURI + tokenId` after a nonzero token hash is set.
 - On-chain `tokenURI` does not have an explicit pending state. It builds JSON,

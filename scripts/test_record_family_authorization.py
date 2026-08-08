@@ -143,10 +143,10 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             "grant_map_sha256": None,
         }
         classifier_source_path = (
-            root / "smart-contracts/StreamRecordFamilyClassifier.sol"
+            root / "smart-contracts/domains/records/StreamRecordFamilyClassifier.sol"
         )
         classifier_interface_path = (
-            root / "smart-contracts/IStreamRecordFamilyClassifier.sol"
+            root / "smart-contracts/interfaces/stream/IStreamRecordFamilyClassifier.sol"
         )
         _write(
             classifier_source_path,
@@ -165,13 +165,13 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         implementation_rows = [
             {
                 "contract": "StreamCollectionMetadata",
-                "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+                "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
                 "source_sha256": _sha256(
-                    root / "smart-contracts/StreamCollectionMetadata.sol"
+                    root / "smart-contracts/domains/metadata/StreamCollectionMetadata.sol"
                 ),
-                "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+                "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
                 "interface_sha256": _sha256(
-                    root / "smart-contracts/IStreamCollectionMetadata.sol"
+                    root / "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"
                 ),
                 "address": "0x" + "41" * 20,
                 "runtime_sha256": "42" * 32,
@@ -182,13 +182,13 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             },
             {
                 "contract": "StreamPreservationRecords",
-                "source_path": "smart-contracts/StreamPreservationRecords.sol",
+                "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
                 "source_sha256": _sha256(
-                    root / "smart-contracts/StreamPreservationRecords.sol"
+                    root / "smart-contracts/domains/preservation/StreamPreservationRecords.sol"
                 ),
-                "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+                "interface_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
                 "interface_sha256": _sha256(
-                    root / "smart-contracts/IStreamPreservationRecords.sol"
+                    root / "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"
                 ),
                 "address": "0x" + "51" * 20,
                 "runtime_sha256": "52" * 32,
@@ -199,9 +199,9 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             },
             {
                 "contract": "StreamRecordFamilyClassifier",
-                "source_path": "smart-contracts/StreamRecordFamilyClassifier.sol",
+                "source_path": "smart-contracts/domains/records/StreamRecordFamilyClassifier.sol",
                 "source_sha256": _sha256(classifier_source_path),
-                "interface_path": "smart-contracts/IStreamRecordFamilyClassifier.sol",
+                "interface_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyClassifier.sol",
                 "interface_sha256": _sha256(classifier_interface_path),
                 "address": classifier["contract_address"],
                 "runtime_sha256": "62" * 32,
@@ -927,7 +927,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
     def test_source_function_and_authorization_shape_are_observed(self) -> None:
         temporary, root = self._fixture()
         try:
-            target = root / "smart-contracts/StreamCollectionMetadata.sol"
+            target = root / "smart-contracts/domains/metadata/StreamCollectionMetadata.sol"
             text = target.read_text(encoding="utf-8")
             target.write_text(
                 text.replace(
@@ -949,10 +949,10 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         self,
     ) -> None:
         paths = (
-            "smart-contracts/StreamCollectionMetadata.sol",
-            "smart-contracts/IStreamCollectionMetadata.sol",
-            "smart-contracts/StreamPreservationRecords.sol",
-            "smart-contracts/IStreamPreservationRecords.sol",
+            "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+            "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+            "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+            "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         )
         for relative in paths:
             with self.subTest(relative=relative):
@@ -1908,7 +1908,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 evidence,
                 state,
                 2,
-                source_path="smart-contracts/MissingRecordFamilyClassifier.sol",
+                source_path="smart-contracts/domains/records/MissingRecordFamilyClassifier.sol",
                 source_sha256="a1" * 32,
             )
 
@@ -1929,7 +1929,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 evidence,
                 state,
                 2,
-                interface_path="smart-contracts/IMissingRecordFamilyClassifier.sol",
+                interface_path="smart-contracts/interfaces/stream/IMissingRecordFamilyClassifier.sol",
                 interface_sha256="a2" * 32,
             )
 
@@ -1971,7 +1971,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             original = root / evidence["implementation_bindings"]["contracts"][0][
                 "source_path"
             ]
-            alternate = root / "smart-contracts/AlternateCollectionMetadata.sol"
+            alternate = root / "smart-contracts/domains/metadata/AlternateCollectionMetadata.sol"
             shutil.copyfile(original, alternate)
             self._update_implementation_binding(
                 root,

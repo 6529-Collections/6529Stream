@@ -13,8 +13,8 @@
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `e99b87e7f18ae1554b4fffa0bf812ec99df5de2c`
 - Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and release-artifacts/latest/SHA256SUMS are regenerated and checked in this PR; public-beta evidence pins the reviewed envelope hash`
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json sha256:a4455adbb7a605638c44167dc02006703da77deaa616dd7992494eab6484a2e7`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json sha256:7cdd24c3270e13f091b68d731f0bf04fba8cd50dc94c03bf0cb78a6bf996e38e`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json sha256:c5c7d94da0b12acb5719092453dd77c05ae614c6d71a80a782b9ea9d89f85893`
 - Contract addresses: `metadata-browser capture: DependencyRegistry=0x74ff318d8c72a9343d465ef1a8725f4fe20b6015, MetadataRehearsalRandomizer=0x743679aa2bd7a994bb8b4ccb36eb9a28480b66f7, StreamContractMetadata=0x00ea87e5acca4e9921b64bbb488fa5017a986301, StreamCore=0xb428b2fee79734fc66ccffba969e18f8ff7edd7d, StreamDrops=0x9e3b3fd0017753ceb467036cf605a94660aae126; deployment rehearsal manifest: StreamCore=0x74ff318d8c72a9343d465ef1a8725f4fe20b6015, StreamContractMetadata=0x200000000000000000000000000000000000000a, StreamDrops=0xba5a97857d9cbc39fd4c9c4e2420953765903aa0, StreamAuctions=0x0192b664e3c73416451f23c0c361c4ff1dd385fa`
 - Token IDs: `10000000000`
 - Collection IDs: `1`

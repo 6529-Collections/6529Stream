@@ -5,7 +5,7 @@
   "note": "Open rows are exact temporary inventory, not accepted risk or permanent exceptions. Remove or govern them through #669 follow-up slices.",
   "open_call_gas_expressions": [
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "site": "_readExactStatic",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -17,7 +17,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "site": "_readDiscoveryWord",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -29,7 +29,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "site": "_readDiscoveryComponent",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -41,7 +41,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeComponent",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -53,7 +53,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeDiscoveryWord",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -65,7 +65,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeDiscoveryComponent",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -77,7 +77,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintGateValidator.sol",
+      "path": "smart-contracts/domains/mint/StreamMintGateValidator.sol",
       "site": "_gateAdvertisesInterface",
       "kind": "call-option",
       "operation": "external-call",
@@ -89,7 +89,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintGateValidator.sol",
+      "path": "smart-contracts/domains/mint/StreamMintGateValidator.sol",
       "site": "_callGate",
       "kind": "call-option",
       "operation": "external-call",
@@ -101,7 +101,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintModuleRegistry.sol",
+      "path": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "site": "_supportsInterface",
       "kind": "call-option",
       "operation": "external-call",
@@ -113,7 +113,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "site": "_readAssetStatusWord",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -125,7 +125,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamCore.sol",
+      "path": "smart-contracts/core/StreamCore.sol",
       "site": "_completeMint",
       "kind": "yul-call",
       "operation": "call",
@@ -137,7 +137,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamCoreExternalReads.sol",
+      "path": "smart-contracts/core/StreamCoreExternalReads.sol",
       "site": "_boundedStaticReadDetailed",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -149,7 +149,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamCoreExternalReads.sol",
+      "path": "smart-contracts/core/StreamCoreExternalReads.sol",
       "site": "resolveRoyalty",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -161,7 +161,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamSplitWallet.sol",
+      "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "site": "_readAssetStatusWord",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -176,7 +176,7 @@
   "explicit_probe_call_gas_expressions": [],
   "open_literal_gas_declarations": [
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "identifier": "FINALITY_COMPONENT_READ_GAS",
       "value": 30000,
       "expected_count": 1,
@@ -186,7 +186,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "identifier": "FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE",
       "value": 10000,
       "expected_count": 1,
@@ -196,7 +196,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
       "identifier": "FINALITY_STRICT_PARENT_GAS_RESERVE",
       "value": 100000,
       "expected_count": 1,
@@ -206,7 +206,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
       "identifier": "DIAGNOSTIC_READ_PARENT_GAS_RESERVE",
       "value": 10000,
       "expected_count": 1,
@@ -216,7 +216,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
       "identifier": "STRICT_READ_PARENT_GAS_RESERVE",
       "value": 100000,
       "expected_count": 1,
@@ -226,7 +226,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintGateValidator.sol",
+      "path": "smart-contracts/domains/mint/StreamMintGateValidator.sol",
       "identifier": "GATE_ERC165_PROBE_GAS",
       "value": 30000,
       "expected_count": 1,
@@ -236,7 +236,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamMintModuleRegistry.sol",
+      "path": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
       "identifier": "MODULE_ERC165_PROBE_GAS",
       "value": 30000,
       "expected_count": 1,
@@ -246,7 +246,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "identifier": "_ASSET_POLICY_GAS_LIMIT",
       "value": 30000,
       "expected_count": 1,
@@ -256,7 +256,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
       "identifier": "_ASSET_POLICY_PARENT_GAS_MIN",
       "value": 31000,
       "expected_count": 1,
@@ -266,7 +266,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamCore.sol",
+      "path": "smart-contracts/core/StreamCore.sol",
       "identifier": "_ENTROPY_CALL_UPFRONT_GAS",
       "value": 3300,
       "expected_count": 1,
@@ -276,7 +276,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamCore.sol",
+      "path": "smart-contracts/core/StreamCore.sol",
       "identifier": "_ENTROPY_PARENT_GAS_RESERVE",
       "value": 162000,
       "expected_count": 1,
@@ -286,7 +286,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamSplitWallet.sol",
+      "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "identifier": "_ASSET_POLICY_GAS_LIMIT",
       "value": 30000,
       "expected_count": 1,
@@ -296,7 +296,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/StreamSplitWallet.sol",
+      "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "identifier": "_ASSET_POLICY_PARENT_GAS_MIN",
       "value": 31000,
       "expected_count": 1,

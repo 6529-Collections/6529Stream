@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamAssetPolicyRegistry.sol";
-import "../smart-contracts/IStreamSplitFactory.sol";
-import "../smart-contracts/IStreamSplitWallet.sol";
-import "../smart-contracts/StreamAssetPolicyRegistry.sol";
-import "../smart-contracts/StreamSplitFactory.sol";
-import "../smart-contracts/StreamSplitWallet.sol";
+import "../smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol";
+import "../smart-contracts/interfaces/stream/IStreamSplitFactory.sol";
+import "../smart-contracts/interfaces/stream/IStreamSplitWallet.sol";
+import "../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import "../smart-contracts/domains/revenue/StreamSplitFactory.sol";
+import "../smart-contracts/domains/revenue/StreamSplitWallet.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 

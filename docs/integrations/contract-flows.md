@@ -80,7 +80,7 @@ Use these committed sources before wiring an app:
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) |
 | Retained fork address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) |
-| Contract implementation | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) |
+| Contract implementation | [`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol) |
 | Fixed-price payment tests | [`test/StreamFixedPricePayments.t.sol`](../../test/StreamFixedPricePayments.t.sol) |
 | EIP-712 tests | [`test/StreamDropsEIP712.t.sol`](../../test/StreamDropsEIP712.t.sol) |
 | ERC-1271 tests | [`test/StreamDropsERC1271.t.sol`](../../test/StreamDropsERC1271.t.sol) |

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/ERC165.sol";
-import "../smart-contracts/IERC165.sol";
-import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/IStreamModuleRegistry.sol";
-import "../smart-contracts/StreamGovernanceExecutor.sol";
-import "../smart-contracts/StreamModuleRegistry.sol";
-import "../smart-contracts/StreamRoleRegistry.sol";
+import "../smart-contracts/vendor/openzeppelin/ERC165.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../smart-contracts/interfaces/stream/IStreamModuleRegistry.sol";
+import "../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
+import "../smart-contracts/domains/modules/StreamModuleRegistry.sol";
+import "../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamGovernanceBootstrapHarness.sol";

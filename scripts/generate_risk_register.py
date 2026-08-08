@@ -369,7 +369,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "value, balance source, or downstream call semantics."
         ),
         "evidence_paths": [
-            "smart-contracts/StreamGovernanceExecutor.sol",
+            "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
             "docs/adr/0004-admin-governance.md",
             "docs/known-blockers.md",
             "test/StreamGovernanceExecutor.t.sol",

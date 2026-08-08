@@ -1,0 +1,160 @@
+{
+  "schema_version": "6529stream.solidity-layout-equivalence.v1",
+  "migration_base_commit": "2ef4901609399d2808848b39ed2a3f877e945dba",
+  "source_semantics": {
+    "source_count": 120,
+    "exact_semantic_match_count": 120,
+    "semantic_inventory_sha256": "6198fdf4aa3fbe8afa0bbf2f549faefc0bde7ec3cd479c6c8bcd247d84f3aa3d",
+    "mismatches": [],
+    "result": "pass"
+  },
+  "expected_compiler_identity_differences": [
+    "source paths and compiler source IDs",
+    "source maps and AST IDs",
+    "path-derived library placeholder hashes and positions",
+    "via-IR internal function ordering and jump destinations",
+    "compiler metadata and source hashes"
+  ],
+  "raw_bytecode_identity_claimed": false,
+  "maturity_effect": "none; pre-audit and not production-ready",
+  "full_foundry_artifacts": {
+    "artifact_count": 202,
+    "semantic_surface_sha256": {
+      "abi": "b79c300782d4e20ba8c042cd1850fd642e6e5a7ab9a429c945ac4c8b950901f5",
+      "method_identifiers": "26a901230d910c56cc3b098e4d0cc3cd86b618ef654333c23447b63ccc943d5e",
+      "events": "bcfcf9a2857705c2b3c2643339a46e557aafc83a5d965d757af8cb29b02cadb3",
+      "errors": "d9f7dcfefe96673bc5ab94f7303815116ccd0f6a3583b6bdacba2f5a6daf3862",
+      "storage_layout": "e24fd41ef743e80e74fd4404e00201db39775539710043bb65ce1e38d3cca5cd"
+    },
+    "semantic_mismatches": {
+      "abi": [],
+      "method_identifiers": [],
+      "events": [],
+      "errors": [],
+      "storage_layout": []
+    },
+    "raw_compiler_output_mismatches": {
+      "initcode": [
+        "DependencyRegistry.sol/DependencyRegistry.json",
+        "LegacyStreamCore.sol/LegacyStreamCore.json",
+        "StreamArtworkFinalityPreview.sol/StreamArtworkFinalityPreview.json",
+        "StreamArtworkFinalityRegistry.sol/StreamArtworkFinalityRegistry.json",
+        "StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "StreamContractMetadata.sol/StreamContractMetadata.json",
+        "StreamCore.sol/StreamCore.json",
+        "StreamGovernanceExecutor.sol/StreamGovernanceExecutor.json",
+        "StreamGovernanceManifest.sol/StreamGovernanceManifest.json",
+        "StreamMintManager.sol/StreamMintManager.json",
+        "StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "StreamRoleRegistry.sol/StreamRoleRegistry.json"
+      ],
+      "runtime": [
+        "DependencyRegistry.sol/DependencyRegistry.json",
+        "LegacyStreamCore.sol/LegacyStreamCore.json",
+        "StreamArtworkFinalityPreview.sol/StreamArtworkFinalityPreview.json",
+        "StreamArtworkFinalityRegistry.sol/StreamArtworkFinalityRegistry.json",
+        "StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "StreamContractMetadata.sol/StreamContractMetadata.json",
+        "StreamCore.sol/StreamCore.json",
+        "StreamGovernanceExecutor.sol/StreamGovernanceExecutor.json",
+        "StreamGovernanceManifest.sol/StreamGovernanceManifest.json",
+        "StreamMintManager.sol/StreamMintManager.json",
+        "StreamPreservationRecords.sol/StreamPreservationRecords.json"
+      ],
+      "link_references": [
+        "StreamGovernanceExecutor.sol/StreamGovernanceExecutor.json",
+        "StreamGovernanceManifest.sol/StreamGovernanceManifest.json"
+      ],
+      "immutable_references": [
+        "StreamGovernanceExecutor.sol/StreamGovernanceExecutor.json"
+      ]
+    },
+    "raw_compiler_output_mismatch_counts": {
+      "initcode": 12,
+      "runtime": 11,
+      "link_references": 2,
+      "immutable_references": 1
+    },
+    "raw_bytecode_equal": false,
+    "result": "pass"
+  },
+  "release_compiler_inputs": {
+    "target_count": 56,
+    "exact_semantic_match_count": 56,
+    "semantic_inputs_sha256": "a48bc2f06c79b8f09c450308fac707d8e1097a5420502750f6a06c72c6d4cf04",
+    "mismatches": [],
+    "result": "pass"
+  },
+  "isolated_release_artifacts": {
+    "artifact_count": 56,
+    "semantic_surface_sha256": {
+      "abi": "65cd31f1e21b5d2f057a2a79a40a78bc94798243f9b986cd977e7842995a999d",
+      "method_identifiers": "233433ff82dde4acc6f4c7ceb0c352043f7ac7336359dc86c4eec491930e19a3",
+      "events": "3c1ee620098c69a14013842d45db86402897a82cea6ba1db8572158b5ed69523",
+      "errors": "dc6fc6c86b0e41e3ea9ef550eeda3a5343494baccd6ffc6d0ad538de49c5b5bf",
+      "storage_layout": "e4df631eeb4cf38b0b6c222979a833012459cb6323518e960b7dc8bafa5a4575"
+    },
+    "semantic_mismatches": {
+      "abi": [],
+      "method_identifiers": [],
+      "events": [],
+      "errors": [],
+      "storage_layout": []
+    },
+    "raw_compiler_output_mismatches": {
+      "initcode": [
+        "DependencyRegistry.sol/DependencyRegistry.json",
+        "StreamAdmins.sol/StreamAdmins.json",
+        "StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "StreamContractMetadata.sol/StreamContractMetadata.json",
+        "StreamCore.sol/StreamCore.json",
+        "StreamCuratorsPool.sol/StreamCuratorsPool.json",
+        "StreamDrops.sol/StreamDrops.json",
+        "StreamMintLedger.sol/StreamMintLedger.json",
+        "StreamMintManager.sol/StreamMintManager.json",
+        "StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+        "StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "StreamSplitFactory.sol/StreamSplitFactory.json",
+        "StreamSplitWallet.sol/StreamSplitWallet.json"
+      ],
+      "runtime": [
+        "DependencyRegistry.sol/DependencyRegistry.json",
+        "StreamAdmins.sol/StreamAdmins.json",
+        "StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "StreamContractMetadata.sol/StreamContractMetadata.json",
+        "StreamCore.sol/StreamCore.json",
+        "StreamCuratorsPool.sol/StreamCuratorsPool.json",
+        "StreamDrops.sol/StreamDrops.json",
+        "StreamMintLedger.sol/StreamMintLedger.json",
+        "StreamMintManager.sol/StreamMintManager.json",
+        "StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+        "StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "StreamSplitFactory.sol/StreamSplitFactory.json",
+        "StreamSplitWallet.sol/StreamSplitWallet.json"
+      ],
+      "link_references": [
+        "StreamCore.sol/StreamCore.json",
+        "StreamMintManager.sol/StreamMintManager.json"
+      ],
+      "immutable_references": [
+        "StreamCore.sol/StreamCore.json",
+        "StreamMintManager.sol/StreamMintManager.json",
+        "StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "StreamRevenueResolver.sol/StreamRevenueResolver.json"
+      ]
+    },
+    "raw_compiler_output_mismatch_counts": {
+      "initcode": 15,
+      "runtime": 15,
+      "link_references": 2,
+      "immutable_references": 4
+    },
+    "raw_bytecode_equal": false,
+    "result": "pass"
+  },
+  "result": "pass"
+}

@@ -3,7 +3,7 @@
   "fixture_id": "auction-eoa",
   "description": "No-secret local auction EOA signing vector for StreamDrops.mintDrop. It uses a placeholder Anvil domain and public deterministic test signature output, not a live drop payload.",
   "source": {
-    "contract": "smart-contracts/StreamDrops.sol",
+    "contract": "smart-contracts/domains/mint/StreamDrops.sol",
     "adr": "docs/adr/0001-drop-authorization.md",
     "tests": [
       "test/StreamDropsEIP712.t.sol",

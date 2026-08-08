@@ -42,11 +42,11 @@ class ChangelogGateTests(unittest.TestCase):
 
     def test_release_impacting_path_requires_changelog_file(self) -> None:
         errors, impacted = checker.validate_changelog_state(
-            ["smart-contracts/StreamCore.sol"],
+            ["smart-contracts/core/StreamCore.sol"],
             None,
         )
 
-        self.assertEqual(impacted, [("smart-contracts/StreamCore.sol", "contracts")])
+        self.assertEqual(impacted, [("smart-contracts/core/StreamCore.sol", "contracts")])
         self.assertIn("CHANGELOG.md must be updated", "\n".join(errors))
         self.assertIn("CHANGELOG.md is missing", "\n".join(errors))
 

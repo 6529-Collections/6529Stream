@@ -27,7 +27,7 @@ def seed_required_targets(root: Path) -> None:
     for relative in checker.REQUIRED_LINK_TARGETS:
         write_text(root / relative, f"seed for {relative}\n")
     write_text(
-        root / "smart-contracts/StreamCuratorsPool.sol",
+        root / "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
         """
 contract StreamCuratorsPool {
     address private constant DELEGATION_COLLECTION = 0x8888888888888888888888888888888888888888;
@@ -229,7 +229,7 @@ class CuratorRewardsFlowTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_doc()
             text = original.replace(
-                "- [smart-contracts/StreamCuratorsPool.sol](../../smart-contracts/StreamCuratorsPool.sol)\n",
+                "- [smart-contracts/domains/revenue/StreamCuratorsPool.sol](../../smart-contracts/domains/revenue/StreamCuratorsPool.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -243,7 +243,7 @@ class CuratorRewardsFlowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/StreamCuratorsPool.sol").unlink()
+            (root / "smart-contracts/domains/revenue/StreamCuratorsPool.sol").unlink()
             write_text(root / checker.DEFAULT_DOC, minimal_doc())
             with self.assertRaisesRegex(
                 checker.CuratorRewardsFlowError, "linked targets are missing"
@@ -276,7 +276,7 @@ class CuratorRewardsFlowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            source_path = root / "smart-contracts/StreamCuratorsPool.sol"
+            source_path = root / "smart-contracts/domains/revenue/StreamCuratorsPool.sol"
             source_path.write_text(
                 source_path.read_text(encoding="utf-8").replace(
                     "curatorRewardLeaf.v2", "curatorRewardLeaf.v1"

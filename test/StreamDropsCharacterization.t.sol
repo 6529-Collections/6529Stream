@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/StreamDrops.sol";
-import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/domains/mint/StreamDrops.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./mocks/MockStreamAuctions.sol";

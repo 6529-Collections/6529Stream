@@ -3,7 +3,7 @@
   "fixture_id": "erc1271-contract-signer",
   "description": "No-secret local ERC-1271 contract-signer vector. The signature bytes are the mock value used by test/StreamDropsERC1271.t.sol and are accepted only when the signer contract returns the ERC-1271 magic value for this digest.",
   "source": {
-    "contract": "smart-contracts/StreamDrops.sol",
+    "contract": "smart-contracts/domains/mint/StreamDrops.sol",
     "adr": "docs/adr/0001-drop-authorization.md",
     "tests": [
       "test/StreamDropsERC1271.t.sol",

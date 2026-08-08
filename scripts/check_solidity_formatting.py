@@ -16,22 +16,22 @@ SMART_CONTRACTS_DIR = Path("smart-contracts")
 
 VENDORED_FORMATTING_EXEMPTIONS = frozenset(
     {
-        "smart-contracts/Address.sol",
-        "smart-contracts/Base64.sol",
-        "smart-contracts/Context.sol",
-        "smart-contracts/ERC165.sol",
-        "smart-contracts/ERC2981.sol",
-        "smart-contracts/ERC721.sol",
-        "smart-contracts/IERC165.sol",
-        "smart-contracts/IERC2981.sol",
-        "smart-contracts/IERC721.sol",
-        "smart-contracts/IERC721Metadata.sol",
-        "smart-contracts/IERC721Receiver.sol",
-        "smart-contracts/Math.sol",
-        "smart-contracts/MerkleProof.sol",
-        "smart-contracts/Ownable.sol",
-        "smart-contracts/ReentrancyGuard.sol",
-        "smart-contracts/SignedMath.sol",
+        "smart-contracts/vendor/openzeppelin/Address.sol",
+        "smart-contracts/vendor/openzeppelin/Base64.sol",
+        "smart-contracts/vendor/openzeppelin/Context.sol",
+        "smart-contracts/vendor/openzeppelin/ERC165.sol",
+        "smart-contracts/vendor/openzeppelin/ERC2981.sol",
+        "smart-contracts/vendor/openzeppelin/ERC721.sol",
+        "smart-contracts/vendor/openzeppelin/IERC165.sol",
+        "smart-contracts/vendor/openzeppelin/IERC2981.sol",
+        "smart-contracts/vendor/openzeppelin/IERC721.sol",
+        "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol",
+        "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol",
+        "smart-contracts/vendor/openzeppelin/Math.sol",
+        "smart-contracts/vendor/openzeppelin/MerkleProof.sol",
+        "smart-contracts/vendor/openzeppelin/Ownable.sol",
+        "smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol",
+        "smart-contracts/vendor/openzeppelin/SignedMath.sol",
     }
 )
 

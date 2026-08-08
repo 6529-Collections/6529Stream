@@ -112,10 +112,10 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/interface-ids.json",
     "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
     "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "smart-contracts/StreamCuratorsPool.sol",
-    "smart-contracts/StreamAdmins.sol",
-    "smart-contracts/IDelegationManagementContract.sol",
-    "smart-contracts/StreamPauseDomains.sol",
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
+    "smart-contracts/domains/access/StreamAdmins.sol",
+    "smart-contracts/integrations/delegation/IDelegationManagementContract.sol",
+    "smart-contracts/domains/access/StreamPauseDomains.sol",
     "test/StreamCuratorsPool.t.sol",
     "test/StreamPaymentsInvariant.t.sol",
 ]
@@ -250,9 +250,9 @@ def missing_phrases(text: str, phrases: list[str]) -> list[str]:
 
 
 def validate_solidity_source(repo_root: Path) -> None:
-    source_path = repo_root / "smart-contracts/StreamCuratorsPool.sol"
+    source_path = repo_root / "smart-contracts/domains/revenue/StreamCuratorsPool.sol"
     if not source_path.is_file():
-        raise CuratorRewardsFlowError("missing Solidity source: smart-contracts/StreamCuratorsPool.sol")
+        raise CuratorRewardsFlowError("missing Solidity source: smart-contracts/domains/revenue/StreamCuratorsPool.sol")
 
     source = source_path.read_text(encoding="utf-8")
     missing = [

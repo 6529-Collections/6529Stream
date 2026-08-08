@@ -45,7 +45,7 @@ operator signer-rotation policy.
 - [test/fixtures/drop-authorization/payload-generator/auction-output.json](../../../test/fixtures/drop-authorization/payload-generator/auction-output.json)
 - [scripts/generate_drop_authorization_payload.py](../../../scripts/generate_drop_authorization_payload.py)
 - [scripts/check_drop_authorization_fixtures.py](../../../scripts/check_drop_authorization_fixtures.py)
-- [smart-contracts/StreamDrops.sol](../../../smart-contracts/StreamDrops.sol)
+- [smart-contracts/domains/mint/StreamDrops.sol](../../../smart-contracts/domains/mint/StreamDrops.sol)
 - [test/StreamDropsEIP712.t.sol](../../../test/StreamDropsEIP712.t.sol)
 - [test/StreamDropsERC1271.t.sol](../../../test/StreamDropsERC1271.t.sol)
 - [test/StreamSafeERC1271ForkSmoke.t.sol](../../../test/StreamSafeERC1271ForkSmoke.t.sol)
@@ -186,7 +186,7 @@ function saltFromNullifierHash(nullifierHash: Hex): bigint {
 ```
 
 This exact field order mirrors
-[`StreamDrops.deriveDropId`](../../../smart-contracts/StreamDrops.sol) and the
+[`StreamDrops.deriveDropId`](../../../smart-contracts/domains/mint/StreamDrops.sol) and the
 fixture-backed helper in
 [`test/helpers/DropAuthTestHelper.sol`](../../../test/helpers/DropAuthTestHelper.sol).
 If a client copies the snippet into a real SDK or signing service, compare the

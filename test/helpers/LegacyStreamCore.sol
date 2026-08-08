@@ -10,18 +10,18 @@
 
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/ERC721.sol";
-import "../../smart-contracts/IRandomizer.sol";
-import "../../smart-contracts/IStreamAdmins.sol";
-import "../../smart-contracts/IStreamMinter.sol";
-import "../../smart-contracts/IStreamMintManager.sol";
-import "../../smart-contracts/IERC2981.sol";
-import "../../smart-contracts/Ownable.sol";
-import "../../smart-contracts/IDependencyRegistry.sol";
-import "../../smart-contracts/IERC4906.sol";
-import "../../smart-contracts/StreamArtistApprovals.sol";
-import "../../smart-contracts/StreamMetadataRenderer.sol";
-import "../../smart-contracts/StreamPauseDomains.sol";
+import "../../smart-contracts/vendor/openzeppelin/ERC721.sol";
+import "../../smart-contracts/interfaces/stream/IRandomizer.sol";
+import "../../smart-contracts/interfaces/stream/IStreamAdmins.sol";
+import "../../smart-contracts/interfaces/stream/IStreamMinter.sol";
+import "../../smart-contracts/interfaces/stream/IStreamMintManager.sol";
+import "../../smart-contracts/vendor/openzeppelin/IERC2981.sol";
+import "../../smart-contracts/vendor/openzeppelin/Ownable.sol";
+import "../../smart-contracts/interfaces/stream/IDependencyRegistry.sol";
+import "../../smart-contracts/interfaces/standards/IERC4906.sol";
+import "../../smart-contracts/compatibility/StreamArtistApprovals.sol";
+import "../../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
+import "../../smart-contracts/domains/access/StreamPauseDomains.sol";
 
 /// @notice Pinned token lifecycle vocabulary shared across the protocol ABI.
 /// @dev Numeric values are pinned: UNKNOWN = 0, PREPARED_INCOMPLETE = 1, MINTED = 2, BURNED = 3.

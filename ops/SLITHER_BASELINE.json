@@ -14,9 +14,9 @@
     "capture_json_success": true,
     "raw_json_size_bytes": 338394717,
     "raw_json_sha256": "sha256:b502fe72ff0463485646d5b30fcad5535728683b562e3e00cacb7d915694d917",
-    "solidity_tree_sha256": "sha256:9b75a59e5b9d138a407fa59c455df6bb015574fe04a159d38ccefa2a6adb796c",
+    "solidity_tree_sha256": "sha256:d0fc4bbfee04ad9128f560a00a733d17f44a29cccdc05e703466041ee4470b00",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
-    "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
+    "foundry_config_sha256": "sha256:c0d8c914a3189641807ff1c334941d4758922230a7f963fbb3ad59cc3bc3cc56",
     "requirements_tools_sha256": "sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2"
   },
   "scope": {
@@ -26,10 +26,10 @@
     ],
     "first_party_prefix": "smart-contracts/",
     "vendored_paths": [
-      "smart-contracts/Base64.sol",
-      "smart-contracts/Math.sol",
-      "smart-contracts/SignedMath.sol",
-      "smart-contracts/Strings.sol"
+      "smart-contracts/vendor/openzeppelin/Base64.sol",
+      "smart-contracts/vendor/openzeppelin/Math.sol",
+      "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+      "smart-contracts/vendor/openzeppelin/Strings.sol"
     ],
     "test_prefix": "test/",
     "script_prefix": "script/",
@@ -77,11 +77,12 @@
   },
   "findings": [
     {
+      "fingerprint": "sha256:a59c896abc11cc61ac8816c118dc998260b9125955bf69fd8343093c099d4000",
       "detector": "arbitrary-send-eth",
       "impact": "High",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+        "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
         "start_line": 97,
         "end_line": 122,
         "element_type": "function",
@@ -90,7 +91,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 97,
           "end_line": 122,
           "element_type": "function",
@@ -98,7 +99,7 @@
           "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 116,
           "end_line": 116,
           "element_type": "node",
@@ -106,11 +107,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:77bce4c4046ae81daf80a4d234e0494830405ae8b8546a9f6afa3d2def340dc6",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Design-sensitive primary-sale settlement forwards native value to a resolver-derived recipient. Resolver trust and payment invariants require review; the row is not accepted.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -119,15 +120,15 @@
         "Add adversarial recipient, value, rollback, and double-settlement tests.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:939cd22c2457c677ef4d7e33aa4fae594975fa7ded080d13700fd88d3a21c14f",
       "detector": "uninitialized-state",
       "impact": "High",
       "confidence": "High",
       "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
         "start_line": 76,
         "end_line": 76,
         "element_type": "variable",
@@ -136,7 +137,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
           "start_line": 76,
           "end_line": 76,
           "element_type": "variable",
@@ -144,7 +145,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
           "start_line": 933,
           "end_line": 961,
           "element_type": "function",
@@ -152,7 +153,7 @@
           "signature": "_storedRecordFor(StreamFinalityScope)"
         },
         {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
           "start_line": 1731,
           "end_line": 1798,
           "element_type": "function",
@@ -160,11 +161,11 @@
           "signature": "_storeRecordAndEmit(StreamFinalityScope,StreamArtworkFinalityRegistry.FinalityExecution,StreamFinalityComponentExpectation[],StreamFinalityManifestRef)"
         }
       ],
-      "fingerprint": "sha256:72a1556afb03e730b5aa301499199b27356a55f7ba37edf561c634a5a67a3f8e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
+      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -173,16 +174,15 @@
         "Either add the intended authorized writer with focused tests or prove the state is deliberately immutable/default-only and remove or document it.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:3d09984af13111e85ffc3bb4d781a1f598ccf37bdba1a8ea57a2d12a3b010730",
+      "fingerprint": "sha256:edf827a84d0271101e6dd4b62c43766284e49da1d75a452f7d9f19beffb24c75",
       "detector": "divide-before-multiply",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamCoreExternalReads.sol",
+        "path": "smart-contracts/core/StreamCoreExternalReads.sol",
         "start_line": 449,
         "end_line": 487,
         "element_type": "function",
@@ -191,7 +191,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "path": "smart-contracts/core/StreamCoreExternalReads.sol",
           "start_line": 449,
           "end_line": 487,
           "element_type": "function",
@@ -199,7 +199,7 @@
           "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
         },
         {
-          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "path": "smart-contracts/core/StreamCoreExternalReads.sol",
           "start_line": 484,
           "end_line": 485,
           "element_type": "node",
@@ -211,6 +211,7 @@
       "status": "Open",
       "triage_class": "pending_disposition",
       "rationale": "Slither flags the overflow-safe quotient-and-remainder royalty multiplication decomposition. Exact arithmetic equivalence, overflow bounds, and resolver-output behavior require independent review; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/670",
@@ -221,16 +222,15 @@
         "Prove bps bounds and unchecked intermediate bounds for every accepted resolver response.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:4fb9bd5e82acd402b9d1fc1a0f77a982799e716ce99fd40c44a10c77594c0bae",
+      "fingerprint": "sha256:c24070451c5a5a4c103bf019396b439d3fbe3bb1cd4a304004b3b69c08bafe23",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
-        "path": "smart-contracts/StreamCore.sol",
+        "path": "smart-contracts/core/StreamCore.sol",
         "start_line": 1041,
         "end_line": 1044,
         "element_type": "function",
@@ -239,7 +239,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 1041,
           "end_line": 1044,
           "element_type": "function",
@@ -247,7 +247,7 @@
           "signature": "_blockNumber64()"
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 1042,
           "end_line": 1042,
           "element_type": "node",
@@ -259,6 +259,7 @@
       "status": "Open",
       "triage_class": "pending_disposition",
       "rationale": "The exact-equality branch is the explicit zero-block rejection in the uint64 block-height conversion. Its chain-boundary assumptions require focused proof and review; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/658"
@@ -268,15 +269,15 @@
         "Document whether block zero is intentionally unsupported for every target environment.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:0b04fab8809606f193c03e4b36f6e2637f4bf206e8e0f37cca602bf2b314deb9",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
-        "path": "smart-contracts/StreamSplitWallet.sol",
+        "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
         "start_line": 200,
         "end_line": 251,
         "element_type": "function",
@@ -285,7 +286,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamSplitWallet.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
           "start_line": 200,
           "end_line": 251,
           "element_type": "function",
@@ -293,7 +294,7 @@
           "signature": "release(address,address,address)"
         },
         {
-          "path": "smart-contracts/StreamSplitWallet.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
           "start_line": 216,
           "end_line": 216,
           "element_type": "node",
@@ -301,11 +302,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:90ef539fab80ace49c0a8dca086cfa95aac8f85bf426d8cedec385d83eb963f7",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:200 release. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "rationale": "Slither flags strict equality in smart-contracts/domains/revenue/StreamSplitWallet.sol:200 release. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -314,15 +315,15 @@
         "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
         "Record independent reviewer disposition or a reviewed fix under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:3a8fa406fd87274e4df731130c3099a9c127b9c69ba9c7e5f217c697e5e63fa4",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
-        "path": "smart-contracts/StreamSplitWallet.sol",
+        "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
         "start_line": 253,
         "end_line": 270,
         "element_type": "function",
@@ -331,7 +332,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamSplitWallet.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
           "start_line": 253,
           "end_line": 270,
           "element_type": "function",
@@ -339,7 +340,7 @@
           "signature": "_recordObservation(address,uint256)"
         },
         {
-          "path": "smart-contracts/StreamSplitWallet.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
           "start_line": 265,
           "end_line": 265,
           "element_type": "node",
@@ -347,11 +348,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:ead8503a828dfb6d9804aef0e48de4ac7f475a1cb08b0e1f2706fc2bf98ead38",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:253 _recordObservation. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "rationale": "Slither flags strict equality in smart-contracts/domains/revenue/StreamSplitWallet.sol:253 _recordObservation. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -360,16 +361,15 @@
         "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
         "Record independent reviewer disposition or a reviewed fix under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:90b373dcccf3c48614d86ea6322ce40a9d59e18a550db4d6c24bf0b439fe5b2e",
+      "fingerprint": "sha256:afd0bbb880a69cee91f1fd900bcd36694464b780f0f7e7c92971ee3a0546a629",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamCore.sol",
+        "path": "smart-contracts/core/StreamCore.sol",
         "start_line": 521,
         "end_line": 536,
         "element_type": "function",
@@ -378,15 +378,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/ERC721.sol",
-          "start_line": 407,
-          "end_line": 418,
-          "element_type": "node",
-          "name": "retval = IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data)",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 521,
           "end_line": 536,
           "element_type": "function",
@@ -394,7 +386,7 @@
           "signature": "mintFromManager(uint256,address,bytes,bytes32,bytes32)"
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 534,
           "end_line": 534,
           "element_type": "node",
@@ -402,11 +394,19 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 535,
           "end_line": 535,
           "element_type": "node",
           "name": "_completionTokenId = 0",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/vendor/openzeppelin/ERC721.sol",
+          "start_line": 407,
+          "end_line": 418,
+          "element_type": "node",
+          "name": "retval = IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data)",
           "signature": ""
         }
       ],
@@ -414,6 +414,7 @@
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Manager mint completion calls the entropy coordinator and ERC-721 receiver before clearing the completion guard. The guard and manager authority are explicit, but the complete callback and rollback ordering remains review-sensitive; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/658"
@@ -423,16 +424,15 @@
         "Retain adversarial callback reentry, duplicate completion, and atomic rollback tests for the direct mint path.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:678e3d8465a078d6f69fd1592452717c7e2624f1ff0d4942f4529bbc5b67d9fc",
+      "fingerprint": "sha256:5fd90b161a2bc44edd49f1adcd7b7cf9e6aeef8617717c02d742a9bf108348f2",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamCore.sol",
+        "path": "smart-contracts/core/StreamCore.sol",
         "start_line": 555,
         "end_line": 579,
         "element_type": "function",
@@ -441,15 +441,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/ERC721.sol",
-          "start_line": 407,
-          "end_line": 418,
-          "element_type": "node",
-          "name": "retval = IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data)",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 555,
           "end_line": 579,
           "element_type": "function",
@@ -457,7 +449,7 @@
           "signature": "completePreparedMintFromManager(uint256,address,bytes32,bytes32)"
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 577,
           "end_line": 577,
           "element_type": "node",
@@ -465,11 +457,19 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 578,
           "end_line": 578,
           "element_type": "node",
           "name": "_completionTokenId = 0",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/vendor/openzeppelin/ERC721.sol",
+          "start_line": 407,
+          "end_line": 418,
+          "element_type": "node",
+          "name": "retval = IERC721Receiver(to).onERC721Received(_msgSender(),from,tokenId,data)",
           "signature": ""
         }
       ],
@@ -477,6 +477,7 @@
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Prepared-mint completion calls the entropy coordinator and ERC-721 receiver before clearing the completion guard. Pending identity is cleared first and rollback is atomic, but the complete callback ordering remains review-sensitive; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/658"
@@ -486,15 +487,15 @@
         "Retain adversarial callback reentry, replacement-manager abort, duplicate completion, and atomic rollback tests.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:55075801b158706a68351cda5af9e8c828d6f7ac82f59b4eced311f3f4d7bfbd",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+        "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
         "start_line": 97,
         "end_line": 122,
         "element_type": "function",
@@ -503,7 +504,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 97,
           "end_line": 122,
           "element_type": "function",
@@ -511,7 +512,7 @@
           "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 111,
           "end_line": 111,
           "element_type": "node",
@@ -519,7 +520,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 112,
           "end_line": 112,
           "element_type": "node",
@@ -527,7 +528,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 206,
           "end_line": 206,
           "element_type": "node",
@@ -535,7 +536,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 228,
           "end_line": 229,
           "element_type": "node",
@@ -543,11 +544,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:0b3edb3481ac751e4cc796bb3f5c71f0c7757f5e38d28b6661294cc469f26bd8",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Design-sensitive external-call ordering in native primary-sale resolver/payment interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -556,15 +557,15 @@
         "Add adversarial tests for hostile resolver/recipient reentry, double settlement, and rollback.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:4e6df200e41e14434d823cfb14152a35cbe01093dd354cce9885eed7ce0980cf",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+        "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
         "start_line": 125,
         "end_line": 145,
         "element_type": "function",
@@ -573,7 +574,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 125,
           "end_line": 145,
           "element_type": "function",
@@ -581,7 +582,7 @@
           "signature": "settleERC20PrimarySale(IStreamPrimarySaleSettlement.PrimarySale,address)"
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 136,
           "end_line": 136,
           "element_type": "node",
@@ -589,7 +590,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 137,
           "end_line": 137,
           "element_type": "node",
@@ -597,7 +598,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 206,
           "end_line": 206,
           "element_type": "node",
@@ -605,7 +606,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 228,
           "end_line": 229,
           "element_type": "node",
@@ -613,11 +614,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:efed4f345f401c104a046975dc440f9aff430bb4e267467a9978cba77eff04d8",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Design-sensitive external-call ordering in ERC-20 primary-sale resolver/token interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -626,15 +627,15 @@
         "Add adversarial tests for hostile resolver/token reentry, non-standard token behavior, double settlement, and rollback.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:d5d986854faa79962646b165329cf6d1fc0676e5af610750333435a60cc1b555",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamSplitFactory.sol",
+        "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
         "start_line": 213,
         "end_line": 252,
         "element_type": "function",
@@ -643,7 +644,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamSplitFactory.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
           "start_line": 213,
           "end_line": 252,
           "element_type": "function",
@@ -651,7 +652,7 @@
           "signature": "_deployWallet(bytes32)"
         },
         {
-          "path": "smart-contracts/StreamSplitFactory.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
           "start_line": 236,
           "end_line": 243,
           "element_type": "node",
@@ -659,7 +660,7 @@
           "signature": ""
         },
         {
-          "path": "smart-contracts/StreamSplitFactory.sol",
+          "path": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
           "start_line": 244,
           "end_line": 244,
           "element_type": "node",
@@ -667,11 +668,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:c8488d708079e4133b931bf4d5531f3f3ed38af63a2f126313943293b7b7892a",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "design_review",
       "rationale": "Design-sensitive external-call ordering in split-wallet deployment and initialization ordering requires a complete effects/callback review. The row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -680,15 +681,15 @@
         "Add adversarial tests for partial initialization, callback reentry, duplicate deployment, and rollback.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:93f367e6b7e0199550024fb13abea6d47a4ae37b703d53fadc8e099aa1f4603e",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
         "start_line": 160,
         "end_line": 160,
         "element_type": "variable",
@@ -697,7 +698,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
           "start_line": 160,
           "end_line": 160,
           "element_type": "variable",
@@ -705,11 +706,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:0faf29efae55392f92126216ce5aa5148dbba6b74e8071b64923baf19b797111",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local expectedLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:160 expectedLeafCount. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local expectedLeafCount as relying on a Solidity default in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:160 expectedLeafCount. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -718,15 +719,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:9212387f37be6454f8bc7fbd7d1b5450d3e3fb819903d74d2b507219c4d6d4ad",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
         "start_line": 161,
         "end_line": 161,
         "element_type": "variable",
@@ -735,7 +736,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
           "start_line": 161,
           "end_line": 161,
           "element_type": "variable",
@@ -743,11 +744,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:478b6e2607bb3dde4fb75e2a1f4e6e6aa2995134eada7b592cc25433ed3f878e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local exactLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:161 exactLeafCount. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local exactLeafCount as relying on a Solidity default in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:161 exactLeafCount. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -756,15 +757,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:5e8b1ba7bb17986299c409df732e0e362d836a0dbde645ee5b3f84a86c5a849f",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
         "start_line": 545,
         "end_line": 545,
         "element_type": "variable",
@@ -773,7 +774,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
           "start_line": 545,
           "end_line": 545,
           "element_type": "variable",
@@ -781,11 +782,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:5872c6f6debf48238728556af23ad8d2c235022c9ee503f1a59fe14c25955010",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamArtworkFinalityRegistry.sol:545 ctx. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local ctx as relying on a Solidity default in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:545 ctx. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -794,15 +795,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:0f7f7f6bfba1373b71601bd9a79e4bdf23fcba14c05ee7ddc16e0e476bf5323d",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamRevenueResolver.sol",
+        "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
         "start_line": 87,
         "end_line": 87,
         "element_type": "variable",
@@ -811,7 +812,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamRevenueResolver.sol",
+          "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
           "start_line": 87,
           "end_line": 87,
           "element_type": "variable",
@@ -819,11 +820,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:40a4d88b08f046effa32b687f28adb5e0c87a44db96384306959c362942c4f2b",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local registry as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:87 registry. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local registry as relying on a Solidity default in smart-contracts/domains/revenue/StreamRevenueResolver.sol:87 registry. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -832,15 +833,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:22f5f277daeee3bb0ecd6d414167d4ca569581d6507e75b0e3845b52b7c815f7",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamRevenueResolver.sol",
+        "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
         "start_line": 96,
         "end_line": 96,
         "element_type": "variable",
@@ -849,7 +850,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamRevenueResolver.sol",
+          "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
           "start_line": 96,
           "end_line": 96,
           "element_type": "variable",
@@ -857,11 +858,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:d7c336114270c20134b15f498f7cf47c8665b56bb372231d4582b0cff3976882",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local runtimeCodeHash as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:96 runtimeCodeHash. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local runtimeCodeHash as relying on a Solidity default in smart-contracts/domains/revenue/StreamRevenueResolver.sol:96 runtimeCodeHash. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -870,15 +871,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:c55cdab3ff851e9ce5afa4e16a0422dab371775858b384d9ba210f01d717ebf8",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamRevenueResolver.sol",
+        "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
         "start_line": 469,
         "end_line": 469,
         "element_type": "variable",
@@ -887,7 +888,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamRevenueResolver.sol",
+          "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
           "start_line": 469,
           "end_line": 469,
           "element_type": "variable",
@@ -895,11 +896,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:ae4dde072ed8a2d9e7cad7aa36f6803e8de60405d91676f7d2924af054ae6811",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local input as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:469 input. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local input as relying on a Solidity default in smart-contracts/domains/revenue/StreamRevenueResolver.sol:469 input. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -908,15 +909,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:01d2d99ad3f4ce69cdb963990a844f787e91477e311a02218834c27624f1d46e",
       "detector": "uninitialized-local",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamRevenueResolver.sol",
+        "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
         "start_line": 655,
         "end_line": 655,
         "element_type": "variable",
@@ -925,7 +926,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamRevenueResolver.sol",
+          "path": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
           "start_line": 655,
           "end_line": 655,
           "element_type": "variable",
@@ -933,11 +934,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:95a19f179acce854e637d2ecd1fd825c04b2decff5c381e76d6b017c088bcd2d",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local dynamicSources as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:655 dynamicSources. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local dynamicSources as relying on a Solidity default in smart-contracts/domains/revenue/StreamRevenueResolver.sol:655 dynamicSources. All control-flow paths and downstream consumers still need review.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -946,476 +947,15 @@
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:96b2fc5e39111caabbb92fc50055ad92c86dcc04abee7ca5d4024bb7c7244679",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 118,
-        "end_line": 142,
-        "element_type": "function",
-        "name": "_stagedFreezeReady",
-        "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 118,
-          "end_line": 142,
-          "element_type": "function",
-          "name": "_stagedFreezeReady",
-          "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 140,
-          "end_line": 140,
-          "element_type": "node",
-          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:b9472a454949542a17882589878bda6341427820d8ec4744e5546fe3f8f4b1dd",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:118 _stagedFreezeReady. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 199,
-        "end_line": 211,
-        "element_type": "function",
-        "name": "_contentRootSatisfied",
-        "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 199,
-          "end_line": 211,
-          "element_type": "function",
-          "name": "_contentRootSatisfied",
-          "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 204,
-          "end_line": 206,
-          "element_type": "node",
-          "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,registry.contentRootScopeSubject(scope))",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:3f1de1fc638a9c6355e0aadfa07638f7e1a73af8f9fd750edf5328140ac1d1ba",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:199 _contentRootSatisfied. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 261,
-        "end_line": 273,
-        "element_type": "function",
-        "name": "_sanctionVerification",
-        "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 261,
-          "end_line": 273,
-          "element_type": "function",
-          "name": "_sanctionVerification",
-          "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 266,
-          "end_line": 272,
-          "element_type": "node",
-          "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:4737c59293f6fa6525cde942e97caec733e0b107b35f834197864db2336e5737",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:261 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 320,
-        "end_line": 328,
-        "element_type": "function",
-        "name": "_componentsMatchLive",
-        "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 320,
-          "end_line": 328,
-          "element_type": "function",
-          "name": "_componentsMatchLive",
-          "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 324,
-          "end_line": 326,
-          "element_type": "node",
-          "name": "(failCode,None) = StreamFinalityComponentSet.verifyComponentsStrict(components,_componentCallData(scope))",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:7856903d41fbe26a7ed0873e8a8719bd1e4b4e91f76d141be0b87b75b5fe3440",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:320 _componentsMatchLive. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 297,
-        "end_line": 359,
-        "element_type": "function",
-        "name": "scheduleArtworkTerminalFreeze",
-        "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 297,
-          "end_line": 359,
-          "element_type": "function",
-          "name": "scheduleArtworkTerminalFreeze",
-          "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 332,
-          "end_line": 332,
-          "element_type": "node",
-          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:d84ef82304be917350ebfc99a6458e0c5c5ef09ce570aca74ab86525aac384ef",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:297 scheduleArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 364,
-        "end_line": 388,
-        "element_type": "function",
-        "name": "vetoArtworkTerminalFreeze",
-        "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 364,
-          "end_line": 388,
-          "element_type": "function",
-          "name": "vetoArtworkTerminalFreeze",
-          "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 376,
-          "end_line": 376,
-          "element_type": "node",
-          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:133f13ed015f00fcd2f32cc22a573530ce987d43c1b31af586563767de112167",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:364 vetoArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 838,
-        "end_line": 861,
-        "element_type": "function",
-        "name": "_requireExecutableFreeze",
-        "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 838,
-          "end_line": 861,
-          "element_type": "function",
-          "name": "_requireExecutableFreeze",
-          "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 857,
-          "end_line": 857,
-          "element_type": "node",
-          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:20c847b19bb1a3e30753293ccc7e9fc4cd9df70890c1f908839c3ebe85418437",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:838 _requireExecutableFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 1103,
-        "end_line": 1121,
-        "element_type": "function",
-        "name": "_verifyContentRoot",
-        "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1103,
-          "end_line": 1121,
-          "element_type": "function",
-          "name": "_verifyContentRoot",
-          "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1109,
-          "end_line": 1110,
-          "element_type": "node",
-          "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,scopeSubject)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:c9383189f234121652de5663c950ceeef9ad5b6e9565c9c23d800c1f5e259d4e",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1103 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 1207,
-        "end_line": 1219,
-        "element_type": "function",
-        "name": "_sanctionVerification",
-        "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1207,
-          "end_line": 1219,
-          "element_type": "function",
-          "name": "_sanctionVerification",
-          "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1212,
-          "end_line": 1218,
-          "element_type": "node",
-          "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:b8e979c7150059d1866d77ad4c168cd3ceaa4a830637bed3988d79508dbe5ff2",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1207 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 1861,
-        "end_line": 1871,
-        "element_type": "function",
-        "name": "_diagnoseSlice",
-        "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1861,
-          "end_line": 1871,
-          "element_type": "function",
-          "name": "_diagnoseSlice",
-          "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
-        },
-        {
-          "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1865,
-          "end_line": 1870,
-          "element_type": "node",
-          "name": "StreamFinalityComponentSet.diagnoseRange(slice,_componentCallData(scope),FINALITY_COMPONENT_READ_GAS,StreamFinalityDomains.STREAM_FINALITY_COMPONENTS_V1)",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:1ca830dd89894b54610f262cf8452e7a5fb4dc4ce1f20c940cced8397172774e",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1861 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
-        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
-        "Record independent reviewer disposition under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "fingerprint": "sha256:57e768ce4a554b85bf8fa3b73ae4d6971a3eafc44f99d69457095d49a327513d",
-      "detector": "unused-return",
-      "impact": "Medium",
-      "confidence": "Medium",
-      "source": {
-        "path": "smart-contracts/StreamCore.sol",
+        "path": "smart-contracts/core/StreamCore.sol",
         "start_line": 803,
         "end_line": 826,
         "element_type": "function",
@@ -1424,7 +964,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 803,
           "end_line": 826,
           "element_type": "function",
@@ -1432,7 +972,7 @@
           "signature": "royaltyInfo(uint256,uint256)"
         },
         {
-          "path": "smart-contracts/StreamCore.sol",
+          "path": "smart-contracts/core/StreamCore.sol",
           "start_line": 812,
           "end_line": 825,
           "element_type": "node",
@@ -1444,6 +984,7 @@
       "status": "Open",
       "triage_class": "pending_disposition",
       "rationale": "Slither reports the tail-returned royalty resolver tuple as an unused return. The ABI-level receiver/amount propagation and fail-soft behavior require explicit proof and review; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/670",
@@ -1454,16 +995,15 @@
         "Verify the compiled ABI and caller-observed tuple match the resolver result on every accepted path.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:4666ec4f0e0c5f30166e09005cef90b29d29741e62227417b5432e76ca752923",
+      "fingerprint": "sha256:11c37b46f20a622512e1e094b420316f8b26c8800b404ab6066eabb70929fa9b",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamCoreExternalReads.sol",
+        "path": "smart-contracts/core/StreamCoreExternalReads.sol",
         "start_line": 431,
         "end_line": 445,
         "element_type": "function",
@@ -1472,7 +1012,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "path": "smart-contracts/core/StreamCoreExternalReads.sol",
           "start_line": 431,
           "end_line": 445,
           "element_type": "function",
@@ -1480,7 +1020,7 @@
           "signature": "boundedRouterString(address,bytes,uint256,uint256)"
         },
         {
-          "path": "smart-contracts/StreamCoreExternalReads.sol",
+          "path": "smart-contracts/core/StreamCoreExternalReads.sol",
           "start_line": 444,
           "end_line": 444,
           "element_type": "node",
@@ -1492,6 +1032,7 @@
       "status": "Open",
       "triage_class": "pending_disposition",
       "rationale": "Slither reports the tail-returned bounded router decode tuple as an unused return. Exact status/string propagation and fail-safe behavior require explicit proof and review; the row is not accepted or suppressed.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
         "https://github.com/6529-Collections/6529Stream/issues/671",
@@ -1502,15 +1043,475 @@
         "Verify the compiled ABI and Core-observed status/string tuple match the decoder result.",
         "Record independent reviewer disposition before changing this row."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:a1a9f449cdd9636793e4ac68aeddb420a869497194d1f6cd72c5734e14a9105a",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamMinter.sol",
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+        "start_line": 118,
+        "end_line": 142,
+        "element_type": "function",
+        "name": "_stagedFreezeReady",
+        "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 118,
+          "end_line": 142,
+          "element_type": "function",
+          "name": "_stagedFreezeReady",
+          "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 140,
+          "end_line": 140,
+          "element_type": "node",
+          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:118 _stagedFreezeReady. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:7f4322c7277f5a7ade8a0360a7c154832b018659e30ba55b4553fb0de9bd3202",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+        "start_line": 199,
+        "end_line": 211,
+        "element_type": "function",
+        "name": "_contentRootSatisfied",
+        "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 199,
+          "end_line": 211,
+          "element_type": "function",
+          "name": "_contentRootSatisfied",
+          "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 204,
+          "end_line": 206,
+          "element_type": "node",
+          "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,registry.contentRootScopeSubject(scope))",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:199 _contentRootSatisfied. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:cc9029486e29c967712455171c65b934c2e4a15bac0474e038d48e3c318a7769",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+        "start_line": 261,
+        "end_line": 273,
+        "element_type": "function",
+        "name": "_sanctionVerification",
+        "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 261,
+          "end_line": 273,
+          "element_type": "function",
+          "name": "_sanctionVerification",
+          "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 266,
+          "end_line": 272,
+          "element_type": "node",
+          "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:261 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:f827e5c880ac28869bcfa725847b7279de90b851307caa471e46603a314af5b1",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+        "start_line": 320,
+        "end_line": 328,
+        "element_type": "function",
+        "name": "_componentsMatchLive",
+        "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 320,
+          "end_line": 328,
+          "element_type": "function",
+          "name": "_componentsMatchLive",
+          "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+          "start_line": 324,
+          "end_line": 326,
+          "element_type": "node",
+          "name": "(failCode,None) = StreamFinalityComponentSet.verifyComponentsStrict(components,_componentCallData(scope))",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol:320 _componentsMatchLive. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:f504c417dff47878ad012bc1a9c414f3c08b63127ed5c369da02738aad04cc66",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 297,
+        "end_line": 359,
+        "element_type": "function",
+        "name": "scheduleArtworkTerminalFreeze",
+        "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 297,
+          "end_line": 359,
+          "element_type": "function",
+          "name": "scheduleArtworkTerminalFreeze",
+          "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 332,
+          "end_line": 332,
+          "element_type": "node",
+          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:297 scheduleArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:3b959936baa3b35ee556fce2813f7dbe713374dc859b3d76597fb4ef08b3077d",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 364,
+        "end_line": 388,
+        "element_type": "function",
+        "name": "vetoArtworkTerminalFreeze",
+        "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 364,
+          "end_line": 388,
+          "element_type": "function",
+          "name": "vetoArtworkTerminalFreeze",
+          "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 376,
+          "end_line": 376,
+          "element_type": "node",
+          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:364 vetoArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:9d987d58f28f5c400b62074a18d70af85ff7f3d8d827bf10c2c2a1865cd54496",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 838,
+        "end_line": 861,
+        "element_type": "function",
+        "name": "_requireExecutableFreeze",
+        "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 838,
+          "end_line": 861,
+          "element_type": "function",
+          "name": "_requireExecutableFreeze",
+          "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 857,
+          "end_line": 857,
+          "element_type": "node",
+          "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:838 _requireExecutableFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:d064f8a068d20cb136fc385b8f3ebf64ed83cd0be78759a9dd47e9d8f0a30ac9",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 1103,
+        "end_line": 1121,
+        "element_type": "function",
+        "name": "_verifyContentRoot",
+        "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1103,
+          "end_line": 1121,
+          "element_type": "function",
+          "name": "_verifyContentRoot",
+          "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1109,
+          "end_line": 1110,
+          "element_type": "node",
+          "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,scopeSubject)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1103 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:d67d7ccb83bc61dfb42ddeb5ec375990301936f80774e26c50ee82d60e40baab",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 1207,
+        "end_line": 1219,
+        "element_type": "function",
+        "name": "_sanctionVerification",
+        "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1207,
+          "end_line": 1219,
+          "element_type": "function",
+          "name": "_sanctionVerification",
+          "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1212,
+          "end_line": 1218,
+          "element_type": "node",
+          "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1207 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:e7b1700546d8fd3bc27ce9cb11e465bca65d1b724da7a5ea1591ad3f59341bb3",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+        "start_line": 1861,
+        "end_line": 1871,
+        "element_type": "function",
+        "name": "_diagnoseSlice",
+        "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1861,
+          "end_line": 1871,
+          "element_type": "function",
+          "name": "_diagnoseSlice",
+          "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
+        },
+        {
+          "path": "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+          "start_line": 1865,
+          "end_line": 1870,
+          "element_type": "node",
+          "name": "StreamFinalityComponentSet.diagnoseRange(slice,_componentCallData(scope),FINALITY_COMPONENT_READ_GAS,StreamFinalityDomains.STREAM_FINALITY_COMPONENTS_V1)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "Open",
+      "triage_class": "pending_disposition",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1861 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.",
+        "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
+        "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:4e93c7924294a5649f312cbc43df80a8ccd720ec0ebbedbe9bed8e8ebdfd4fc0",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/mint/StreamMinter.sol",
         "start_line": 177,
         "end_line": 180,
         "element_type": "function",
@@ -1519,7 +1520,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamMinter.sol",
+          "path": "smart-contracts/domains/mint/StreamMinter.sol",
           "start_line": 177,
           "end_line": 180,
           "element_type": "function",
@@ -1527,7 +1528,7 @@
           "signature": "_collectionTotalSupply(uint256)"
         },
         {
-          "path": "smart-contracts/StreamMinter.sol",
+          "path": "smart-contracts/domains/mint/StreamMinter.sol",
           "start_line": 178,
           "end_line": 178,
           "element_type": "node",
@@ -1535,11 +1536,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:1fd2fe29656df6147000214112ad9e22b1abc567c8c21e722e1efaf0da09da65",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/mint/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1548,15 +1549,15 @@
         "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:a64ee063fd3336720eb905ef89c2b90a30039ce06904366b625b8b157b52f9b6",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+        "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
         "start_line": 209,
         "end_line": 259,
         "element_type": "function",
@@ -1565,7 +1566,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 209,
           "end_line": 259,
           "element_type": "function",
@@ -1573,7 +1574,7 @@
           "signature": "_resolveSale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
-          "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+          "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
           "start_line": 228,
           "end_line": 229,
           "element_type": "node",
@@ -1581,11 +1582,11 @@
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:d4a04b60480543f4134e3c4fb4415f0d20fecfb3a44d1579208bdb7ecca7304d",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamPrimarySaleSettlement.sol:209 _resolveSale. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:209 _resolveSale. Its authority and error-signaling role have not yet been proven non-essential.",
+      "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1594,7 +1595,6 @@
         "Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.",
         "Record independent reviewer disposition under issue #658."
       ],
-      "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"
     }
   ]

@@ -252,7 +252,7 @@ class WarningDispositionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            source = root / "smart-contracts" / "StreamCore.sol"
+            source = root / "smart-contracts" / "core" / "StreamCore.sol"
             source.write_text(
                 source.read_text(encoding="utf-8") + "\n/// @title: Bad\n",
                 encoding="utf-8",
@@ -272,7 +272,13 @@ class WarningDispositionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            source = root / "smart-contracts" / "RandomizerNXT.sol"
+            source = (
+                root
+                / "smart-contracts"
+                / "integrations"
+                / "randomizers"
+                / "RandomizerNXT.sol"
+            )
             source.write_text(
                 source.read_text(encoding="utf-8").replace("_saltfun_o", ""),
                 encoding="utf-8",
@@ -306,7 +312,7 @@ class WarningDispositionTests(unittest.TestCase):
         log_text = "\n".join(
             [
                 "Warning (2018): Function state mutability can be restricted to pure",
-                "   --> C:\\repo\\6529Stream\\smart-contracts\\StreamMinter.sol:298:5:",
+                "   --> C:\\repo\\6529Stream\\smart-contracts\\domains\\mint\\StreamMinter.sol:298:5:",
                 "    |",
                 "298 |     function isMinterContract() external view returns (bool) {",
                 "    |     ^ (Relevant source part starts here and spans across multiple lines).",
@@ -318,7 +324,7 @@ class WarningDispositionTests(unittest.TestCase):
             {
                 (
                     "2018",
-                    "C:/repo/6529Stream/smart-contracts/StreamMinter.sol",
+                    "C:/repo/6529Stream/smart-contracts/domains/mint/StreamMinter.sol",
                     "function isMinterContract() external view returns (bool) {",
                 )
             },
@@ -362,7 +368,7 @@ class WarningDispositionTests(unittest.TestCase):
             warnings.remove(
                 (
                     "2018",
-                    "smart-contracts/StreamMinter.sol",
+                    "smart-contracts/domains/mint/StreamMinter.sol",
                     "function isMinterContract() external view returns (bool) {",
                 )
             )

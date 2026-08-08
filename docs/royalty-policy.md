@@ -40,8 +40,8 @@ Use the following tracked sources before making any royalty claim:
 
 | Need | Source of truth | Notes |
 | --- | --- | --- |
-| Permanent royalty implementation | [`smart-contracts/StreamCore.sol`](../smart-contracts/StreamCore.sol), [`smart-contracts/StreamCoreExternalReads.sol`](../smart-contracts/StreamCoreExternalReads.sol) | Exposes ERC-2981-compatible `royaltyInfo()` through an authenticated, gas-bounded resolver read with a zero-royalty failure tuple |
-| Royalty interface | [`smart-contracts/IERC2981.sol`](../smart-contracts/IERC2981.sol), [`smart-contracts/ERC2981.sol`](../smart-contracts/ERC2981.sol) | `IERC2981` is used by `StreamCore`; the full vendored helper remains review material |
+| Permanent royalty implementation | [`smart-contracts/core/StreamCore.sol`](../smart-contracts/core/StreamCore.sol), [`smart-contracts/core/StreamCoreExternalReads.sol`](../smart-contracts/core/StreamCoreExternalReads.sol) | Exposes ERC-2981-compatible `royaltyInfo()` through an authenticated, gas-bounded resolver read with a zero-royalty failure tuple |
+| Royalty interface | [`smart-contracts/vendor/openzeppelin/IERC2981.sol`](../smart-contracts/vendor/openzeppelin/IERC2981.sol), [`smart-contracts/vendor/openzeppelin/ERC2981.sol`](../smart-contracts/vendor/openzeppelin/ERC2981.sol) | `IERC2981` is used by `StreamCore`; the full vendored helper remains review material |
 | Royalty tests | [`test/StreamCorePermanentTarget.t.sol`](../test/StreamCorePermanentTarget.t.sol), [`test/StreamRoyalty.t.sol`](../test/StreamRoyalty.t.sol) | The permanent-target test rejects installation while #670's concrete interface row is unresolved; the retained legacy characterization covers the historical fixed receiver and 690-bps math |
 | Metadata boundary | [`docs/metadata.md`](metadata.md), [`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md) | Metadata and marketplace display evidence are separate from royalty enforcement |
 | Integration entrypoint | [`docs/integrations/README.md`](integrations/README.md) | Routes frontend, mobile, Electron, indexer, operator UI, and backend signing-service teams |
@@ -235,8 +235,8 @@ Royalty coverage should stay split across layers:
   pointer, governed gas rows, selector preimage, bounded response validation,
   `10_000` denominator, ERC-2981 interface support, unresolved-pointer
   regression, and retained `690`-bps legacy characterization against
-  `smart-contracts/StreamCore.sol`,
-  `smart-contracts/StreamCoreExternalReads.sol`,
+  `smart-contracts/core/StreamCore.sol`,
+  `smart-contracts/core/StreamCoreExternalReads.sol`,
   `test/StreamCorePermanentTarget.t.sol`, and `test/StreamRoyalty.t.sol`.
 - Integration tests that use marketplaces, wallet flows, or indexers belong in
   retained non-local evidence before public beta or production claims.

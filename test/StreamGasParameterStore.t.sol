@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamGasParameterHost.sol";
-import "../smart-contracts/StreamGasParameterStore.sol";
+import "../smart-contracts/interfaces/stream/IStreamGasParameterHost.sol";
+import "../smart-contracts/domains/parameters/StreamGasParameterStore.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/GovernedParameterTestMocks.sol";

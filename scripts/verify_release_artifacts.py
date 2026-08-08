@@ -98,13 +98,13 @@ RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH = (
     "record-family-authorization-grant-map.v1.schema.json"
 )
 RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS = (
-    "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
-    "smart-contracts/IStreamRecordFamilyRegistry.sol",
-    "smart-contracts/StreamRecordFamilyRegistry.sol",
-    "smart-contracts/StreamCollectionMetadata.sol",
-    "smart-contracts/IStreamCollectionMetadata.sol",
-    "smart-contracts/StreamPreservationRecords.sol",
-    "smart-contracts/IStreamPreservationRecords.sol",
+    "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
+    "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+    "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
+    "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+    "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+    "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+    "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
     "script/RehearseDeployment.s.sol",
     "test/StreamRecordFamilyAuthorization.t.sol",
     "test/StreamCollectionMetadata.t.sol",
@@ -482,19 +482,19 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "7fcdf573e3841e539c9bce91b882121a50c941225a1ad292e7df4506bccccae4",
-        100_553,
+        "733d07274aed72c069d08cd16fb6cb1056bb31ffee65814d4e15d4b995eb10eb",
+        104_990,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "8124a7981c2870b6816db733f4c963c8aa573036cb061a35810937560d4b98bc",
-        46_988,
+        "e056d9669cbd646c3a9a650ae6ae3b846eeaa10c7af59c6e2dfa4b6373e5f809",
+        47_073,
     ),
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 265
+CANONICAL_COVERED_PATH_COUNT = 271
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "8a9e563eec6f30c36d31d3b2c00e13848a872ce992123a23cd031de77b9d5ca5"
+    "6e27e09176744d22f82a22a9f2ca32408feac07fda545fe9bf75bbd07478fb61"
 )
 RISK_SIZE_CHECKER_PATH = Path("scripts/check_contract_size_budget.py")
 

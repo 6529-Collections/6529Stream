@@ -227,13 +227,13 @@ def contract_records(*, address: str = "0x11111111111111111111111111111111111111
     return {
         "StreamCore": {
             "address": address,
-            "source": "smart-contracts/StreamCore.sol",
+            "source": "smart-contracts/core/StreamCore.sol",
             "runtime_bytecode_hash": "sha256:abc",
             "verification_status": "verified",
         },
         "StreamDrops": {
             "address": "0x2222222222222222222222222222222222222222",
-            "source": "smart-contracts/StreamDrops.sol",
+            "source": "smart-contracts/domains/mint/StreamDrops.sol",
             "runtime_bytecode_hash": "sha256:def",
             "verification_status": "verified",
         },

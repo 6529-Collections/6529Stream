@@ -23,8 +23,8 @@ from typing import Callable, Iterable
 
 
 DOC_PATH = Path("docs/launch-v1-target-architecture.md")
-SOURCE_PATH = Path("smart-contracts/StreamMintManager.sol")
-IDENTITY_SOURCE_PATH = Path("smart-contracts/StreamMintOperationIdentity.sol")
+SOURCE_PATH = Path("smart-contracts/domains/mint/StreamMintManager.sol")
+IDENTITY_SOURCE_PATH = Path("smart-contracts/domains/mint/StreamMintOperationIdentity.sol")
 TABLE_HEADING = "### StreamMintManager Domain Constants"
 SCHEMA_VERSION_CONSTANT = "SCHEMA_VERSION"
 SCHEMA_VERSION = "1"

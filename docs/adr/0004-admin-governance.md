@@ -41,7 +41,7 @@ collection-admin role model.
 | Blocks | [P0-ADMIN-001](https://github.com/6529-Collections/6529Stream/issues/34), [P0-ADMIN-002](https://github.com/6529-Collections/6529Stream/issues/35), [P0-ADMIN-003](https://github.com/6529-Collections/6529Stream/issues/79) |
 | Related issues | [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0002](0002-auction-custody.md), [ADR 0003](0003-payment-accounting.md) |
-| Affected contracts | `smart-contracts/StreamAdmins.sol`, `smart-contracts/StreamCore.sol`, `smart-contracts/StreamMinter.sol`, `smart-contracts/StreamDrops.sol`, `smart-contracts/AuctionContract.sol`, `smart-contracts/StreamCuratorsPool.sol`, `smart-contracts/DependencyRegistry.sol`, `smart-contracts/RandomizerRNG.sol`, `smart-contracts/RandomizerVRF.sol`, `smart-contracts/RandomizerNXT.sol` |
+| Affected contracts | `smart-contracts/domains/access/StreamAdmins.sol`, `smart-contracts/core/StreamCore.sol`, `smart-contracts/domains/mint/StreamMinter.sol`, `smart-contracts/domains/mint/StreamDrops.sol`, `smart-contracts/domains/auctions/AuctionContract.sol`, `smart-contracts/domains/revenue/StreamCuratorsPool.sol`, `smart-contracts/domains/dependencies/DependencyRegistry.sol`, `smart-contracts/integrations/randomizers/RandomizerRNG.sol`, `smart-contracts/integrations/randomizers/RandomizerVRF.sol`, `smart-contracts/integrations/randomizers/RandomizerNXT.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -66,7 +66,7 @@ Before public beta, the protocol needs to decide:
 
 Current source references, including the historical pre-P0-ADMIN-001 baseline:
 
-- `smart-contracts/StreamAdmins.sol`: `owner()` manages global admins,
+- `smart-contracts/domains/access/StreamAdmins.sol`: `owner()` manages global admins,
   function admins, pause guardians, unpause admins, emergency recipients, and
   signer managers as the root recovery path without making `owner()` an
   implicit operational admin on protected protocol contracts.
@@ -74,14 +74,14 @@ Current source references, including the historical pre-P0-ADMIN-001 baseline:
   default. Root-managed signer managers can grant only the exact
   `StreamDrops` signer-lifecycle selectors on owner-approved signer-lifecycle
   targets: `updateTDHsigner`, `incrementSignerEpoch`, and `cancelDrop`.
-- `smart-contracts/IStreamAdmins.sol`: exposes
+- `smart-contracts/interfaces/stream/IStreamAdmins.sol`: exposes
   `retrieveCollectionAdmin(address,uint256)`. P0-ADMIN-001 implements the
   deferred path as an explicit `false` result; collection-admin mutation powers
   remain future work.
-- `smart-contracts/StreamCore.sol`,
-  `smart-contracts/StreamMinter.sol`, `smart-contracts/StreamDrops.sol`,
-  `smart-contracts/AuctionContract.sol`, `smart-contracts/StreamCuratorsPool.sol`,
-  `smart-contracts/DependencyRegistry.sol`, and randomizer contracts use
+- `smart-contracts/core/StreamCore.sol`,
+  `smart-contracts/domains/mint/StreamMinter.sol`, `smart-contracts/domains/mint/StreamDrops.sol`,
+  `smart-contracts/domains/auctions/AuctionContract.sol`, `smart-contracts/domains/revenue/StreamCuratorsPool.sol`,
+  `smart-contracts/domains/dependencies/DependencyRegistry.sol`, and randomizer contracts use
   `FunctionAdminRequired(bytes4)` with target-scoped function-admin checks and
   explicit global-admin bypass.
 - Before P0-ADMIN-001, `StreamCore.setCollectionData` was guarded by
@@ -97,11 +97,11 @@ Current source references, including the historical pre-P0-ADMIN-001 baseline:
   first-party emergency-withdrawal surface and send withdrawable surplus to the
   explicit `StreamAdmins.emergencyRecipient()` instead of implicitly using
   `owner()`.
-- `smart-contracts/StreamDrops.sol#updateTDHsigner` can replace the drop signer
+- `smart-contracts/domains/mint/StreamDrops.sol#updateTDHsigner` can replace the drop signer
   and increments `signerEpoch`, while `incrementSignerEpoch` and `cancelDrop`
   support signer compromise response. P0-ADMIN-003 covers these paths through
   explicit signer-manager grants on approved signer-lifecycle targets.
-- `smart-contracts/StreamAdmins.sol#tdhSigner` remains a readable constructor
+- `smart-contracts/domains/access/StreamAdmins.sol#tdhSigner` remains a readable constructor
   signer reference for compatibility, but it is not a role-management authority.
 - `StreamAdmins` exposes readable domain pause state for drop execution,
   minting, bidding, settlement, metadata mutation, and randomness requests.

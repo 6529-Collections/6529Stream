@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IERC165.sol";
-import "../smart-contracts/IStreamModule.sol";
-import "../smart-contracts/StreamModuleBase.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../smart-contracts/interfaces/stream/IStreamModule.sol";
+import "../smart-contracts/domains/modules/StreamModuleBase.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 

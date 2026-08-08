@@ -3,83 +3,83 @@
   "production_contracts": [
     {
       "name": "DependencyRegistry",
-      "source": "smart-contracts/DependencyRegistry.sol"
+      "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol"
     },
     {
       "name": "NextGenRandomizerRNG",
-      "source": "smart-contracts/RandomizerRNG.sol"
+      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol"
     },
     {
       "name": "NextGenRandomizerVRF",
-      "source": "smart-contracts/RandomizerVRF.sol"
+      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol"
     },
     {
       "name": "StreamAdmins",
-      "source": "smart-contracts/StreamAdmins.sol"
+      "source": "smart-contracts/domains/access/StreamAdmins.sol"
     },
     {
       "name": "StreamAssetPolicyRegistry",
-      "source": "smart-contracts/StreamAssetPolicyRegistry.sol"
+      "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol"
     },
     {
       "name": "StreamAuctions",
-      "source": "smart-contracts/AuctionContract.sol"
+      "source": "smart-contracts/domains/auctions/AuctionContract.sol"
     },
     {
       "name": "StreamContractMetadata",
-      "source": "smart-contracts/StreamContractMetadata.sol"
+      "source": "smart-contracts/domains/metadata/StreamContractMetadata.sol"
     },
     {
       "name": "StreamCollectionMetadata",
-      "source": "smart-contracts/StreamCollectionMetadata.sol"
+      "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol"
     },
     {
       "name": "StreamCore",
-      "source": "smart-contracts/StreamCore.sol"
+      "source": "smart-contracts/core/StreamCore.sol"
     },
     {
       "name": "StreamCuratorsPool",
-      "source": "smart-contracts/StreamCuratorsPool.sol"
+      "source": "smart-contracts/domains/revenue/StreamCuratorsPool.sol"
     },
     {
       "name": "StreamDrops",
-      "source": "smart-contracts/StreamDrops.sol"
+      "source": "smart-contracts/domains/mint/StreamDrops.sol"
     },
     {
       "name": "StreamMinter",
-      "source": "smart-contracts/StreamMinter.sol"
+      "source": "smart-contracts/domains/mint/StreamMinter.sol"
     },
     {
       "name": "StreamMintLedger",
-      "source": "smart-contracts/StreamMintLedger.sol"
+      "source": "smart-contracts/domains/mint/StreamMintLedger.sol"
     },
     {
       "name": "StreamMintModuleRegistry",
-      "source": "smart-contracts/StreamMintModuleRegistry.sol"
+      "source": "smart-contracts/domains/mint/StreamMintModuleRegistry.sol"
     },
     {
       "name": "StreamMintManager",
-      "source": "smart-contracts/StreamMintManager.sol"
+      "source": "smart-contracts/domains/mint/StreamMintManager.sol"
     },
     {
       "name": "StreamPrimarySaleSettlement",
-      "source": "smart-contracts/StreamPrimarySaleSettlement.sol"
+      "source": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol"
     },
     {
       "name": "StreamPreservationRecords",
-      "source": "smart-contracts/StreamPreservationRecords.sol"
+      "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol"
     },
     {
       "name": "StreamRevenueResolver",
-      "source": "smart-contracts/StreamRevenueResolver.sol"
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol"
     },
     {
       "name": "StreamSplitFactory",
-      "source": "smart-contracts/StreamSplitFactory.sol"
+      "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol"
     },
     {
       "name": "StreamSplitWallet",
-      "source": "smart-contracts/StreamSplitWallet.sol",
+      "source": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
       "deployment_scope": "factory_spawned"
     }
   ],
@@ -88,7 +88,7 @@
     "eip_170_runtime_limit_bytes": 24576,
     "contracts": {
       "StreamCore": {
-        "source": "smart-contracts/StreamCore.sol",
+        "source": "smart-contracts/core/StreamCore.sol",
         "minimum_runtime_margin_bytes": 384,
         "warning_runtime_margin_bytes": 512,
         "tracking": "https://github.com/6529-Collections/6529Stream/issues/414",
@@ -164,154 +164,154 @@
   "interfaces": [
     {
       "name": "IDependencyRegistry",
-      "source": "smart-contracts/IDependencyRegistry.sol"
+      "source": "smart-contracts/interfaces/stream/IDependencyRegistry.sol"
     },
     {
       "name": "IERC165",
-      "source": "smart-contracts/IERC165.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC165.sol",
       "interface_id": "0x01ffc9a7"
     },
     {
       "name": "IERC2981",
-      "source": "smart-contracts/IERC2981.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC2981.sol",
       "interface_id": "0x2a55205a"
     },
     {
       "name": "IERC4906",
-      "source": "smart-contracts/IERC4906.sol",
+      "source": "smart-contracts/interfaces/standards/IERC4906.sol",
       "interface_id": "0x49064906"
     },
     {
       "name": "IERC7572",
-      "source": "smart-contracts/IERC7572.sol"
+      "source": "smart-contracts/interfaces/standards/IERC7572.sol"
     },
     {
       "name": "IERC721",
-      "source": "smart-contracts/IERC721.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC721.sol",
       "interface_id": "0x80ac58cd"
     },
     {
       "name": "IERC721Metadata",
-      "source": "smart-contracts/IERC721Metadata.sol",
+      "source": "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol",
       "interface_id": "0x5b5e139f"
     },
     {
       "name": "IRandomizer",
-      "source": "smart-contracts/IRandomizer.sol"
+      "source": "smart-contracts/interfaces/stream/IRandomizer.sol"
     },
     {
       "name": "IRandomizerLifecycle",
-      "source": "smart-contracts/IRandomizerLifecycle.sol"
+      "source": "smart-contracts/interfaces/stream/IRandomizerLifecycle.sol"
     },
     {
       "name": "IStreamAdmins",
-      "source": "smart-contracts/IStreamAdmins.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamAdmins.sol"
     },
     {
       "name": "IStreamArtworkFinalityRegistry",
-      "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol"
     },
     {
       "name": "IStreamAssetPolicyRegistry",
-      "source": "smart-contracts/IStreamAssetPolicyRegistry.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol"
     },
     {
       "name": "IStreamAuctions",
-      "source": "smart-contracts/IStreamAuctions.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamAuctions.sol"
     },
     {
       "name": "IStreamCompatibility",
-      "source": "smart-contracts/IStreamCompatibility.sol"
+      "source": "smart-contracts/interfaces/compatibility/IStreamCompatibility.sol"
     },
     {
       "name": "IStreamContractMetadata",
-      "source": "smart-contracts/IStreamContractMetadata.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamContractMetadata.sol"
     },
     {
       "name": "IStreamCollectionMetadata",
-      "source": "smart-contracts/IStreamCollectionMetadata.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"
     },
     {
       "name": "IStreamCore",
-      "source": "smart-contracts/IStreamCore.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamCore.sol"
     },
     {
       "name": "IStreamCoreFinalityAdapter",
-      "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamCoreFinalityAdapter.sol",
       "interface_id": "0xebf35615"
     },
     {
       "name": "IStreamDrops",
-      "source": "smart-contracts/IStreamDrops.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamDrops.sol"
     },
     {
       "name": "IStreamEntropyCoordinator",
-      "source": "smart-contracts/IStreamEntropyCoordinator.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol"
     },
     {
       "name": "IStreamGasParameterHost",
-      "source": "smart-contracts/IStreamGasParameterHost.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamGasParameterHost.sol",
       "interface_id": "0xc5eef2ab"
     },
     {
       "name": "IStreamGovernanceExecutor",
-      "source": "smart-contracts/IStreamGovernanceExecutor.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol"
     },
     {
       "name": "IStreamGovernedParameterAuthority",
-      "source": "smart-contracts/IStreamGovernedParameterAuthority.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol"
     },
     {
       "name": "IStreamMetadataRouter",
-      "source": "smart-contracts/IStreamMetadataRouter.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol"
     },
     {
       "name": "IStreamMinter",
-      "source": "smart-contracts/IStreamMinter.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMinter.sol"
     },
     {
       "name": "IStreamMintGate",
-      "source": "smart-contracts/IStreamMintGate.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMintGate.sol"
     },
     {
       "name": "IStreamMintManager",
-      "source": "smart-contracts/IStreamMintManager.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMintManager.sol"
     },
     {
       "name": "IStreamMintLedger",
-      "source": "smart-contracts/IStreamMintLedger.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMintLedger.sol"
     },
     {
       "name": "IStreamMintModuleRegistry",
-      "source": "smart-contracts/IStreamMintModuleRegistry.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamMintModuleRegistry.sol"
     },
     {
       "name": "IStreamPrimarySaleSettlement",
-      "source": "smart-contracts/IStreamPrimarySaleSettlement.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamPrimarySaleSettlement.sol"
     },
     {
       "name": "IStreamPreservationRecords",
-      "source": "smart-contracts/IStreamPreservationRecords.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"
     },
     {
       "name": "IStreamRevenueResolver",
-      "source": "smart-contracts/IStreamRevenueResolver.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamRevenueResolver.sol"
     },
     {
       "name": "IStreamSystemManifest",
-      "source": "smart-contracts/IStreamSystemManifest.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol"
     },
     {
       "name": "IStreamSplitFactory",
-      "source": "smart-contracts/IStreamSplitFactory.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamSplitFactory.sol"
     },
     {
       "name": "IStreamSplitWallet",
-      "source": "smart-contracts/IStreamSplitWallet.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamSplitWallet.sol"
     },
     {
       "name": "IStreamTimeParameterHost",
-      "source": "smart-contracts/IStreamTimeParameterHost.sol",
+      "source": "smart-contracts/interfaces/stream/IStreamTimeParameterHost.sol",
       "interface_id": "0xc185242a"
     }
   ]

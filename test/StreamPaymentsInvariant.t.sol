@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/AuctionContract.sol";
-import "../smart-contracts/RandomizerRNG.sol";
-import "../smart-contracts/StreamCuratorsPool.sol";
-import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/domains/auctions/AuctionContract.sol";
+import "../smart-contracts/integrations/randomizers/RandomizerRNG.sol";
+import "../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
+import "../smart-contracts/domains/mint/StreamMinter.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";

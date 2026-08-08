@@ -10,12 +10,12 @@
   },
   "release_build": {
     "receipt_path": "out-release/release-build-manifest.json",
-    "receipt_sha256": "sha256:940de2d4da56848536188d0b23b0b315a66dcd40d7be60999d4e990a05416374",
-    "target_catalog_sha256": "sha256:70f6fa8a37ed9611f8c99ff468820d41053552035cb2e548b4968df477264e3d",
+    "receipt_sha256": "sha256:4cebf28b108ae06db26b9bbd26e60e8bf5be0feceb798ab9abce131d6e6a50e1",
+    "target_catalog_sha256": "sha256:7a3f810b2b21c76f1a5baab1c4a353896e807fa80ed4e9b9b6a61a77e726793c",
     "config_path": "release-artifacts/contracts.json",
-    "config_sha256": "sha256:26b0fa377cb7cc83d51af65838a6f6d4919e0753e81c5f5a14ed05c6e3ea0292",
+    "config_sha256": "sha256:901c52cb874ef9336ce9320a14f788fc4e58e8b38ef655b0f400033f42e6b728",
     "foundry_config_path": "foundry.toml",
-    "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313"
+    "foundry_config_sha256": "sha256:c0d8c914a3189641807ff1c334941d4758922230a7f963fbb3ad59cc3bc3cc56"
   },
   "instances": [
     {
@@ -25,9 +25,9 @@
       "target": {
         "kind": "production_contract",
         "name": "DependencyRegistry",
-        "source": "smart-contracts/DependencyRegistry.sol",
+        "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
         "artifact_relative_path": "DependencyRegistry.sol/DependencyRegistry.json",
-        "artifact_sha256": "sha256:bed52c47b12c36d75c3212bdc782f41889ac8ba7a2a1a08f9a88db224ec6b596"
+        "artifact_sha256": "sha256:5d56e4323cef9c094409a9c0798ec6064dbf8c6c95bdebb4f9add6f0610822e2"
       },
       "depends_on": [],
       "constructor": {
@@ -41,7 +41,7 @@
       },
       "libraries": [
         {
-          "source": "smart-contracts/StreamMetadataRenderer.sol",
+          "source": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
           "name": "StreamMetadataRenderer",
           "address": "0x0000000000000000000000000000000000002001"
         }

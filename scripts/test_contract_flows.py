@@ -209,7 +209,7 @@ class ContractFlowsTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_contract_flows_doc()
             text = original.replace(
-                "- [smart-contracts/StreamDrops.sol](../../smart-contracts/StreamDrops.sol)\n",
+                "- [smart-contracts/domains/mint/StreamDrops.sol](../../smart-contracts/domains/mint/StreamDrops.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -223,7 +223,7 @@ class ContractFlowsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/StreamDrops.sol").unlink()
+            (root / "smart-contracts/domains/mint/StreamDrops.sol").unlink()
             write_text(root / checker.DEFAULT_CONTRACT_FLOWS, minimal_contract_flows_doc())
 
             with self.assertRaisesRegex(checker.ContractFlowsError, "linked targets are missing"):

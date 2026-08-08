@@ -974,7 +974,7 @@ Acceptance criteria:
 - Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
 - Status: EOA and EIP-2098 typed authorization implemented in
-  `smart-contracts/StreamDrops.sol`; ERC-1271 contract signer support is
+  `smart-contracts/domains/mint/StreamDrops.sol`; ERC-1271 contract signer support is
   implemented separately by `P0-AUTH-003`.
 
 Problem:
@@ -1074,7 +1074,7 @@ Acceptance criteria:
 - Priority/severity/type: `P0 / High / CODE+TEST+DOCS`.
 - Blocks: Gate C.
 - Dependencies: `P0-AUTH-ADR`.
-- Status: Implemented in `smart-contracts/StreamDrops.sol` with target-state
+- Status: Implemented in `smart-contracts/domains/mint/StreamDrops.sol` with target-state
   tests in `test/StreamDropsERC1271.t.sol`.
 
 Problem:

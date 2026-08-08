@@ -50,22 +50,22 @@ Current source references:
 
 - The repository has no proxy, beacon, UUPS, diamond, or delegatecall-based
   upgrade system in first-party contracts.
-- `smart-contracts/StreamCore.sol`,
-  `smart-contracts/StreamDrops.sol`,
-  `smart-contracts/StreamMinter.sol`,
-  `smart-contracts/AuctionContract.sol`,
-  `smart-contracts/StreamAdmins.sol`,
-  `smart-contracts/StreamCuratorsPool.sol`, and randomizer contracts use
+- `smart-contracts/core/StreamCore.sol`,
+  `smart-contracts/domains/mint/StreamDrops.sol`,
+  `smart-contracts/domains/mint/StreamMinter.sol`,
+  `smart-contracts/domains/auctions/AuctionContract.sol`,
+  `smart-contracts/domains/access/StreamAdmins.sol`,
+  `smart-contracts/domains/revenue/StreamCuratorsPool.sol`, and randomizer contracts use
   constructors and ordinary contract addresses.
-- `smart-contracts/StreamCore.sol#updateContracts` can change several
+- `smart-contracts/core/StreamCore.sol#updateContracts` can change several
   downstream contract references, including minter, randomizer, dependency
   registry, and curators-pool references.
-- `smart-contracts/StreamMinter.sol#updateContracts` can change the core,
+- `smart-contracts/domains/mint/StreamMinter.sol#updateContracts` can change the core,
   drops, and admins references.
-- `smart-contracts/StreamDrops.sol#updateTDHsigner` can change the drop signer,
+- `smart-contracts/domains/mint/StreamDrops.sol#updateTDHsigner` can change the drop signer,
   but ADR 0001 and ADR 0004 require a fuller signer lifecycle before public
   beta.
-- `smart-contracts/StreamAdmins.sol` inherits `Ownable`; ADR 0004 requires the
+- `smart-contracts/domains/access/StreamAdmins.sol` inherits `Ownable`; ADR 0004 requires the
   production root authority to become Safe-rooted and role-scoped.
 - Emergency withdrawals currently exist in multiple contracts and sweep full
   balances; ADR 0003 rejects that model for public beta.

@@ -401,6 +401,10 @@ jobs:
             scripts/test_verify_release_artifacts.py \
             scripts/check_solidity_formatting.py \
             scripts/test_solidity_formatting.py \
+            scripts/check_solidity_source_layout.py \
+            scripts/test_solidity_source_layout.py \
+            scripts/check_solidity_layout_equivalence.py \
+            scripts/test_solidity_layout_equivalence.py \
             scripts/test_windows_check_wrapper.py \
             scripts/test_windows_ci_wrapper.py \
             scripts/check_deployment_rehearsal_gate.py \
@@ -412,6 +416,10 @@ jobs:
 
           python3 scripts/test_windows_check_wrapper.py
           python3 scripts/test_windows_ci_wrapper.py
+          python3 scripts/test_solidity_source_layout.py
+          python3 scripts/check_solidity_source_layout.py
+          python3 scripts/test_solidity_layout_equivalence.py
+          python3 scripts/check_solidity_layout_equivalence.py --check-receipt
 
       - name: Install browser test tooling
         shell: bash

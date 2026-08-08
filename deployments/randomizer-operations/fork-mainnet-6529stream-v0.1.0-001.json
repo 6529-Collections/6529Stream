@@ -18,15 +18,15 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8"
+      "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
     },
     "address_book": {
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:a0dda5a0d342fbe5d3abf95bdc883020aa5f06696f18ddb48243fb8103b9301a"
+      "sha256": "sha256:c5c7d94da0b12acb5719092453dd77c05ae614c6d71a80a782b9ea9d89f85893"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:ecd9488d74083dffc2a298badf351fbb83b393f4d0dc14c56349c3239773fbdf"
+      "sha256": "sha256:00c3f9a693c5743fd4f035f651aa7445bd0815d3b1aeeb20c6cbddbaf93a884c"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -46,7 +46,7 @@
       "evidence": [
         {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8"
+          "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md",
@@ -70,7 +70,7 @@
       "evidence": [
         {
           "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-          "sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8"
+          "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md",
@@ -90,7 +90,7 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md",
@@ -104,11 +104,11 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         },
         {
           "path": "test/StreamRandomizerAdversarial.t.sol",
-          "sha256": "sha256:25c1e3e9a9163f1ecd72f071acc565a32682981a6e7dd803b4ee2202a827c3c1"
+          "sha256": "sha256:a2131f389b8e205835265be81db458c60ac1595e2bc94057d9d6ff957cf99e93"
         }
       ]
     },
@@ -118,7 +118,7 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         },
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md",
@@ -132,7 +132,7 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         }
       ]
     },
@@ -142,11 +142,11 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         },
         {
           "path": "test/StreamRandomizerAdversarial.t.sol",
-          "sha256": "sha256:25c1e3e9a9163f1ecd72f071acc565a32682981a6e7dd803b4ee2202a827c3c1"
+          "sha256": "sha256:a2131f389b8e205835265be81db458c60ac1595e2bc94057d9d6ff957cf99e93"
         }
       ]
     },
@@ -156,7 +156,7 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerLifecycle.t.sol",
-          "sha256": "sha256:50abb5f391be10ac0bd2be7731330655d12f94999d54b1345b214b63f69a3a2a"
+          "sha256": "sha256:726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb"
         }
       ]
     },
@@ -166,11 +166,11 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerRetry.t.sol",
-          "sha256": "sha256:5bf93d012570d62b7a1b1131ce4f708b424f5ca2d3834bd9e6a33b30dfdc027c"
+          "sha256": "sha256:30cb423465fa36784d3e488cc29b33f5e8a863842aa0f3d79fc7f5a0da029ef6"
         },
         {
           "path": "test/StreamRandomizerAdversarial.t.sol",
-          "sha256": "sha256:25c1e3e9a9163f1ecd72f071acc565a32682981a6e7dd803b4ee2202a827c3c1"
+          "sha256": "sha256:a2131f389b8e205835265be81db458c60ac1595e2bc94057d9d6ff957cf99e93"
         }
       ]
     },
@@ -180,11 +180,11 @@
       "evidence": [
         {
           "path": "test/StreamRandomizerPayments.t.sol",
-          "sha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          "sha256": "sha256:89a30d666b42a9daf8b8ee34d09e0d53e96c5992e41500e1285ec84f568515ff"
         },
         {
           "path": "test/StreamPaymentsInvariant.t.sol",
-          "sha256": "sha256:5d98b9adfd5444f5188b7ed3c4e67153f8fba9f4db059c31768809edf681175c"
+          "sha256": "sha256:5aa9eddf5ab621dc762f8dd4264fed0fb19af22bbc67a21d026f775a67a57df7"
         }
       ]
     },
@@ -194,7 +194,7 @@
       "evidence": [
         {
           "path": "test/StreamPauseControls.t.sol",
-          "sha256": "sha256:34d659df48aebc8ede4b9717eb0af178300ec191e2d401f814ce332b84a7e24c"
+          "sha256": "sha256:ec43e124c338ede354bd5925786de915d9ebf5afa9fbf325adde9abb7a27e1f6"
         }
       ]
     },
@@ -204,11 +204,11 @@
       "evidence": [
         {
           "path": "test/StreamEmergencyWithdraw.t.sol",
-          "sha256": "sha256:2b7be886d8d09e80c36e5a5ff8eb80d0d03b587adb3d336166a5b75a88ae5d4f"
+          "sha256": "sha256:3a9a0ed60df626cd1a1bb53a9da12352ae085ce41e43ac0553b74cd5d07955bd"
         },
         {
           "path": "test/StreamRandomizerPayments.t.sol",
-          "sha256": "sha256:c30349ecdd62a847471a92bfef6a9e02ed20b20e7b65c44f5204883e1d1ba797"
+          "sha256": "sha256:89a30d666b42a9daf8b8ee34d09e0d53e96c5992e41500e1285ec84f568515ff"
         }
       ]
     }
@@ -217,12 +217,12 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:f0f961cabb60073008556ff8c415f4454ac5cf839ec51b17d4f1b76bbbde1cc8"
+      "sha256": "sha256:c6ba73493133cd7c6dce976646e8d5489eacc27fd2ea1dc6be2c946b803262c3"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-      "sha256": "sha256:a0dda5a0d342fbe5d3abf95bdc883020aa5f06696f18ddb48243fb8103b9301a"
+      "sha256": "sha256:c5c7d94da0b12acb5719092453dd77c05ae614c6d71a80a782b9ea9d89f85893"
     },
     {
       "category": "provider_export",
@@ -242,7 +242,7 @@
     {
       "category": "randomizer_adr",
       "path": "docs/adr/0005-randomness.md",
-      "sha256": "sha256:0ca68ea34404ce5e41b9e1633492d5826b05947161dc16c3cd704ec10e7cfb6e"
+      "sha256": "sha256:7f9950298c705b49524f683b2572e0f7b300df3aa84ea75c63ed5eefe9bf5b65"
     }
   ],
   "redaction_policy": {

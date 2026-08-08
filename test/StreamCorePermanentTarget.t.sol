@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IStreamEntropyCoordinator.sol";
-import "../smart-contracts/IStreamMetadataRouter.sol";
-import "../smart-contracts/IStreamMintManager.sol";
-import "../smart-contracts/IStreamModuleRegistry.sol";
-import "../smart-contracts/StreamCore.sol";
-import "../smart-contracts/StreamCoreExternalReads.sol";
+import "../smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol";
+import "../smart-contracts/interfaces/stream/IStreamMetadataRouter.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintManager.sol";
+import "../smart-contracts/interfaces/stream/IStreamModuleRegistry.sol";
+import "../smart-contracts/core/StreamCore.sol";
+import "../smart-contracts/core/StreamCoreExternalReads.sol";
 import "./helpers/CharacterizationTestBase.sol";
 
 contract PermanentTargetGovernanceExecutor {

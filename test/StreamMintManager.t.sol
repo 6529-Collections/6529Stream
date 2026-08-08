@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/ERC165.sol";
-import "../smart-contracts/IERC165.sol";
-import "../smart-contracts/IERC721Receiver.sol";
-import "../smart-contracts/IStreamCore.sol";
-import "../smart-contracts/IStreamMintGate.sol";
-import "../smart-contracts/IStreamMintLedger.sol";
-import "../smart-contracts/IStreamMintManager.sol";
-import "../smart-contracts/IStreamMintModuleRegistry.sol";
+import "../smart-contracts/vendor/openzeppelin/ERC165.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC721Receiver.sol";
+import "../smart-contracts/interfaces/stream/IStreamCore.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintGate.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintLedger.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintManager.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintModuleRegistry.sol";
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamMetadataRenderer.sol";
-import "../smart-contracts/StreamMintLedger.sol";
-import "../smart-contracts/StreamMintManager.sol";
-import "../smart-contracts/StreamMintModuleRegistry.sol";
+import "../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
+import "../smart-contracts/domains/mint/StreamMintLedger.sol";
+import "../smart-contracts/domains/mint/StreamMintManager.sol";
+import "../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

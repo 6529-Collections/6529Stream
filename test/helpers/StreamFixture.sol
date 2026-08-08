@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/DependencyRegistry.sol";
-import "../../smart-contracts/StreamAdmins.sol";
+import "../../smart-contracts/domains/dependencies/DependencyRegistry.sol";
+import "../../smart-contracts/domains/access/StreamAdmins.sol";
 import {LegacyStreamCore as StreamCore} from "./LegacyStreamCore.sol";
-import "../../smart-contracts/StreamDrops.sol";
-import "../../smart-contracts/StreamMinter.sol";
+import "../../smart-contracts/domains/mint/StreamDrops.sol";
+import "../../smart-contracts/domains/mint/StreamMinter.sol";
 import "../mocks/MockRandomizer.sol";
 
 abstract contract StreamFixture {

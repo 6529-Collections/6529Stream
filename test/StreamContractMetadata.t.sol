@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IERC7572.sol";
-import "../smart-contracts/IERC2981.sol";
-import "../smart-contracts/IERC721.sol";
-import "../smart-contracts/IStreamCompatibility.sol";
-import "../smart-contracts/IStreamContractMetadata.sol";
-import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamContractMetadata.sol";
-import "../smart-contracts/StreamMetadataRenderer.sol";
+import "../smart-contracts/interfaces/standards/IERC7572.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC2981.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC721.sol";
+import "../smart-contracts/interfaces/compatibility/IStreamCompatibility.sol";
+import "../smart-contracts/interfaces/stream/IStreamContractMetadata.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
+import "../smart-contracts/domains/metadata/StreamContractMetadata.sol";
+import "../smart-contracts/domains/metadata/StreamMetadataRenderer.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";

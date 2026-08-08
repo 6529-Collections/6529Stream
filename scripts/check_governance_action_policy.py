@@ -19,9 +19,19 @@ SCHEMA_PATH = (
     / "schema"
     / "governance-action-policy.v1.schema.json"
 )
-EXECUTOR_PATH = ROOT / "smart-contracts" / "StreamGovernanceExecutor.sol"
-POLICY_LIBRARY_PATH = ROOT / "smart-contracts" / "StreamGovernanceActionPolicy.sol"
-MANIFEST_PATH = ROOT / "smart-contracts" / "StreamGovernanceManifest.sol"
+EXECUTOR_PATH = (
+    ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceExecutor.sol"
+)
+POLICY_LIBRARY_PATH = (
+    ROOT
+    / "smart-contracts"
+    / "domains"
+    / "governance"
+    / "StreamGovernanceActionPolicy.sol"
+)
+MANIFEST_PATH = (
+    ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceManifest.sol"
+)
 
 EXPECTED_ACTION_CLASSES = {
     0: "IMMEDIATE_TIGHTENING",

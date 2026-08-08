@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/AuctionContract.sol";
-import "../smart-contracts/DependencyRegistry.sol";
-import "../smart-contracts/IStreamCore.sol";
-import "../smart-contracts/RandomizerRNG.sol";
-import "../smart-contracts/RandomizerVRF.sol";
-import "../smart-contracts/StreamAssetPolicyRegistry.sol";
-import "../smart-contracts/StreamAdmins.sol";
-import "../smart-contracts/StreamContractMetadata.sol";
-import "../smart-contracts/StreamCollectionMetadata.sol";
+import "../smart-contracts/domains/auctions/AuctionContract.sol";
+import "../smart-contracts/domains/dependencies/DependencyRegistry.sol";
+import "../smart-contracts/interfaces/stream/IStreamCore.sol";
+import "../smart-contracts/integrations/randomizers/RandomizerRNG.sol";
+import "../smart-contracts/integrations/randomizers/RandomizerVRF.sol";
+import "../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
+import "../smart-contracts/domains/metadata/StreamContractMetadata.sol";
+import "../smart-contracts/domains/metadata/StreamCollectionMetadata.sol";
 import {LegacyStreamCore as StreamCore} from "../test/helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamCuratorsPool.sol";
-import "../smart-contracts/StreamDrops.sol";
-import "../smart-contracts/StreamMinter.sol";
-import "../smart-contracts/StreamMintLedger.sol";
-import "../smart-contracts/StreamMintManager.sol";
-import "../smart-contracts/StreamMintModuleRegistry.sol";
-import "../smart-contracts/StreamPrimarySaleSettlement.sol";
-import "../smart-contracts/StreamPreservationRecords.sol";
-import "../smart-contracts/StreamRecordFamilyRegistry.sol";
-import "../smart-contracts/StreamRevenueResolver.sol";
-import "../smart-contracts/StreamSplitFactory.sol";
+import "../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
+import "../smart-contracts/domains/mint/StreamDrops.sol";
+import "../smart-contracts/domains/mint/StreamMinter.sol";
+import "../smart-contracts/domains/mint/StreamMintLedger.sol";
+import "../smart-contracts/domains/mint/StreamMintManager.sol";
+import "../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
+import "../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import "../smart-contracts/domains/preservation/StreamPreservationRecords.sol";
+import "../smart-contracts/domains/records/StreamRecordFamilyRegistry.sol";
+import "../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+import "../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 
 interface ScriptVm {
     function startBroadcast(address broadcaster) external;

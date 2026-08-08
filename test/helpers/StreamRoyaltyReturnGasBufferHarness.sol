@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/Base64.sol";
-import "../../smart-contracts/IStreamGasParameterHost.sol";
-import "../../smart-contracts/Math.sol";
-import "../../smart-contracts/StreamCoreReadBuffer.sol";
-import "../../smart-contracts/StreamGasParameterHost.sol";
-import "../../smart-contracts/Strings.sol";
+import "../../smart-contracts/vendor/openzeppelin/Base64.sol";
+import "../../smart-contracts/interfaces/stream/IStreamGasParameterHost.sol";
+import "../../smart-contracts/vendor/openzeppelin/Math.sol";
+import "../../smart-contracts/core/StreamCoreReadBuffer.sol";
+import "../../smart-contracts/domains/parameters/StreamGasParameterHost.sol";
+import "../../smart-contracts/vendor/openzeppelin/Strings.sol";
 
 /// @dev Target fixture for issue #671. It models the three future Core consumers without
 ///      changing transitional StreamCore bytecode. Issue #654 owns final Core integration.

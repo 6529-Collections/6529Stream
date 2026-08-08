@@ -7,6 +7,15 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Reorganized all 120 Solidity sources from the former flat directory into a
+  reviewed domain-first hierarchy, preserving contract behavior while updating
+  imports, source-bound deployment/release evidence, baselines, and operator
+  documentation. The exact old-to-new map is retained in
+  `smart-contracts/source-layout.json`; a fail-closed checker now rejects
+  unreviewed placement, stale flat paths, unresolved relative imports, and
+  interface/concrete compatibility-boundary violations. This mechanical
+  migration does not change ABI, storage layout, events, errors, deployment,
+  audit, or readiness status.
 - Hardened the canonical release builder's cross-process evidence authority:
   authoritative Windows runs now use run-scoped Forge and Solc leases, reject
   overlapping consumers and stale terminals, remain importable for the pinned

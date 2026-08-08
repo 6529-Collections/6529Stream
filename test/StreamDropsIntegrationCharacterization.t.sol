@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/AuctionContract.sol";
+import "../smart-contracts/domains/auctions/AuctionContract.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";

@@ -3,7 +3,7 @@
   "fixture_id": "fixed-price-eoa",
   "description": "No-secret local fixed-price EOA signing vector for StreamDrops.mintDrop. The signer is the public deterministic Foundry test signer used by test/helpers/DropAuthTestHelper.sol; key material is intentionally omitted.",
   "source": {
-    "contract": "smart-contracts/StreamDrops.sol",
+    "contract": "smart-contracts/domains/mint/StreamDrops.sol",
     "adr": "docs/adr/0001-drop-authorization.md",
     "tests": [
       "test/StreamDropsEIP712.t.sol",

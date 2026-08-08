@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/StreamArtworkFinalityPreview.sol";
-import "../../smart-contracts/StreamArtworkFinalityRegistry.sol";
-import "../../smart-contracts/StreamArtworkFinalityTypes.sol";
-import "../../smart-contracts/StreamCoreFinalityAdapter.sol";
+import "../../smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol";
+import "../../smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol";
+import "../../smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol";
+import "../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
 import "./Assertions.sol";
 import "./CharacterizationTestBase.sol";
 import "./FinalityMocks.sol";

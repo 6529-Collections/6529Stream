@@ -25,10 +25,10 @@ SNAPSHOT_PATH = (
 )
 RELEASE_BUILD_MANIFEST_PATH = REPO_ROOT / "out-release/release-build-manifest.json"
 FOUNDRY_CONFIG_PATH = REPO_ROOT / "foundry.toml"
-LIBRARY_PATH = REPO_ROOT / "smart-contracts/StreamCoreReadBuffer.sol"
-EXTERNAL_READS_PATH = REPO_ROOT / "smart-contracts/StreamCoreExternalReads.sol"
-CORE_PATH = REPO_ROOT / "smart-contracts/StreamCore.sol"
-HOST_PATH = REPO_ROOT / "smart-contracts/StreamGasParameterHost.sol"
+LIBRARY_PATH = REPO_ROOT / "smart-contracts/core/StreamCoreReadBuffer.sol"
+EXTERNAL_READS_PATH = REPO_ROOT / "smart-contracts/core/StreamCoreExternalReads.sol"
+CORE_PATH = REPO_ROOT / "smart-contracts/core/StreamCore.sol"
+HOST_PATH = REPO_ROOT / "smart-contracts/domains/parameters/StreamGasParameterHost.sol"
 HARNESS_PATH = REPO_ROOT / "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol"
 TEST_PATH = REPO_ROOT / "test/StreamRoyaltyReturnGasBuffer.t.sol"
 CORE_TEST_PATH = REPO_ROOT / "test/StreamCorePermanentTarget.t.sol"
@@ -225,7 +225,7 @@ def _stream_core_boundary() -> dict[str, Any]:
         for row in manifest.get("targets", [])
         if row.get("kind") == "production_contract"
         and row.get("name") == "StreamCore"
-        and row.get("source") == "smart-contracts/StreamCore.sol"
+        and row.get("source") == "smart-contracts/core/StreamCore.sol"
     ]
     if len(rows) != 1:
         raise SharedBufferGenerationError(
@@ -235,7 +235,7 @@ def _stream_core_boundary() -> dict[str, Any]:
     source_rows = [
         source
         for source in row.get("metadata_sources", [])
-        if source.get("path") == "smart-contracts/StreamCore.sol"
+        if source.get("path") == "smart-contracts/core/StreamCore.sol"
     ]
     if len(source_rows) != 1:
         raise SharedBufferGenerationError(

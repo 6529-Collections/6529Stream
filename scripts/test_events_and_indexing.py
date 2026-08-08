@@ -274,7 +274,7 @@ class EventsAndIndexingTests(unittest.TestCase):
             seed_required_targets(root)
             original = minimal_events_and_indexing_doc()
             text = original.replace(
-                "- [smart-contracts/StreamCore.sol](../../smart-contracts/StreamCore.sol)\n",
+                "- [smart-contracts/core/StreamCore.sol](../../smart-contracts/core/StreamCore.sol)\n",
                 "",
             )
             self.assertNotEqual(text, original, "replacement had no effect")
@@ -292,7 +292,7 @@ class EventsAndIndexingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            (root / "smart-contracts/StreamCore.sol").unlink()
+            (root / "smart-contracts/core/StreamCore.sol").unlink()
             write_text(
                 root / checker.DEFAULT_EVENTS_AND_INDEXING,
                 minimal_events_and_indexing_doc(),
@@ -311,10 +311,10 @@ class EventsAndIndexingTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_required_targets(root)
             text = minimal_events_and_indexing_doc().replace(
-                "- [smart-contracts/StreamCore.sol](../../smart-contracts/StreamCore.sol)\n",
+                "- [smart-contracts/core/StreamCore.sol](../../smart-contracts/core/StreamCore.sol)\n",
                 (
-                    "- [smart-contracts/StreamCore.sol]"
-                    "(../../smart-contracts/StreamDrops.sol)\n"
+                    "- [smart-contracts/core/StreamCore.sol]"
+                    "(../../smart-contracts/domains/mint/StreamDrops.sol)\n"
                 ),
             )
             write_text(root / checker.DEFAULT_EVENTS_AND_INDEXING, text)

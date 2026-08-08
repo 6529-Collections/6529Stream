@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/IStreamGovernedParameterAuthority.sol";
+import "../../smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol";
 
 /// @notice Governance-V2 context stand-in with adversarial ABI modes.
 contract MockGovernedParameterAuthority is IStreamGovernedParameterAuthority {

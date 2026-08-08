@@ -86,7 +86,7 @@ EVIDENCE_EVENT_SCHEMA = "6529stream.release-builder-event.v1"
 R4_EVIDENCE_TERMINAL_SCHEMA = "6529stream.release-builder-terminal.r4.v1"
 EVIDENCE_TERMINAL_SCHEMA = "6529stream.release-builder-terminal.v1"
 R4_SOURCE_AGGREGATE_SHA256 = (
-    "1EB0A58B8A1DCA624493839D41FA5267078E7FBA67B4AE6DF9205DD003659857"
+    "B00472815605535937747AC1BEC7CAD7E9B0BB13478571CE7F31B23E264F545C"
 )
 R4_FOUNDRY_CONFIG_SHA256 = (
     "C356A459BC9919AE14225E59979601C8EAB26133B19C146E5928D28A7DAFBD61"
@@ -95,7 +95,7 @@ R4_TARGET_CONFIG_SHA256 = (
     "84B3A32B16B8C171130D0D5F5192F06B2D199D17EF25862FF04B433FD8C3B9F9"
 )
 R4_GROUP_MAP_SHA256 = (
-    "5630717FF8C470F250780937C7333062D7CA84DCE87A0CB1510901E5FA18B913"
+    "074B5F6508A83770FF8F68B4B115BC1C32D34ADA0FE181DF0E6D873705712DFB"
 )
 R4_CONSTRUCTOR_MAP_SHA256 = (
     "0A48FF8AEB3F4358D0AE8889693CCF136B33E1E1982E9497E6F1BB2429BDD06F"
@@ -115,14 +115,14 @@ def _r4_source(name: str) -> str:
 
 _COMMON_SIX = (
     _r4_source("IStreamArtistFoundationOwnershipV1.sol"),
-    "smart-contracts/IERC165.sol",
+    "smart-contracts/vendor/openzeppelin/IERC165.sol",
     "smart-contracts/IStreamArtistArchiveV2.sol",
     "smart-contracts/IStreamArtistRegistryValidationCommon.sol",
-    "smart-contracts/IStreamGovernanceExecutor.sol",
+    "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol",
 )
 _LIFECYCLE_COMMON = _COMMON_SIX + (
     _r4_source("StreamArtistLifecycleSkeletonBase.sol"),
-    "smart-contracts/IStreamGasParameterHost.sol",
+    "smart-contracts/interfaces/stream/IStreamGasParameterHost.sol",
 )
 _WRITE_INTERFACES = (
     "smart-contracts/IStreamArtistRegistryWritesA.sol",
@@ -148,23 +148,23 @@ def _r4_group(
 
 
 R4_GROUPS = (
-    _r4_group(0, "StreamArtistArchiveCompatibilityStateV3Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveCompatibilityStateV3Skeleton.sol"),), "C9BDE11D3DBD78A20D0CC63628ADBDB885F21CBDFBFA73022979AFA8161ECFBD"),
-    _r4_group(1, "StreamArtistArchiveEvidenceAdmissionV3Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceAdmissionV3Skeleton.sol"),), "FA33DD799CBA9CA213571D63D22AD2079A75254671F8535164B84EA35D95F036"),
-    _r4_group(2, "StreamArtistArchiveEvidenceCoordinatorV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceCoordinatorV1Skeleton.sol"),), "E509564C803BB073421C0ABC1AE75A16D6121E8B40983858E1801F2BE26ABF40"),
-    _r4_group(3, "StreamArtistArchiveEvidenceDirectoryV1Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistArchiveEvidenceDirectoryV1Skeleton.sol"),), "E23BC0FBDF44281A9BB5E2A1941B31316A44B233147D4D93C9E83DA22642C99D"),
-    _r4_group(4, "StreamArtistArchiveEvidenceMaterializerV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceMaterializerV1Skeleton.sol"),), "255995D205A2D619F3FBA02E98B85C1E4EEE0C71DA84A2344407B712C51B2732"),
-    _r4_group(5, "StreamArtistArchiveEvidenceStoreV2Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceStoreV2Skeleton.sol"),), "7149D57E5E3C3F905063EE7ED152401DF8799E1CD77FCC888FEFB92681537D76"),
-    _r4_group(6, "StreamArtistArchiveReadProjectionV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveReadProjectionV1Skeleton.sol"),), "8BE52656CC872C5718FAAE66642BCCDB1EC0C8DFC8059727826A50B8D06CA247"),
-    _r4_group(7, "StreamArtistArchiveV2Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistArchiveV2Skeleton.sol"),), "A15BD83F911CE89308B16EFF506A9BA53E2DC463A6FD131A0D3FBDAC7BC49EC5"),
-    _r4_group(8, "StreamArtistBindingLifecycleV1Skeleton.sol", _LIFECYCLE_COMMON + _WRITE_INTERFACES + (_r4_source("StreamArtistBindingLifecycleV1Skeleton.sol"),), "4348C8AC10AA9F1E7A94F8538C36EE532B58F90E41D2EBBC8EB76F9D82AEE17B"),
-    _r4_group(9, "StreamArtistBindingProposalArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistBindingProposalArchiveVerifierV1Skeleton.sol"),), "CC3AE2FA3DA87E956A1FBA87231F0400AB1A5DE2E8A46F8CC529D9A1A7E07F3F"),
-    _r4_group(10, "StreamArtistBindingTransitionArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistBindingTransitionArchiveVerifierV1Skeleton.sol"),), "C23DEE9FDD1A9CD14AFD515C54D10C6A99EA4355A4A8082D138AA974291CB94F"),
-    _r4_group(11, "StreamArtistCollaboratorArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistCollaboratorArchiveVerifierV1Skeleton.sol"),), "DBB22F56049D9097D1AAD9C9BAD1ADF3442A8EC8489D30FD74800991C25A933D"),
-    _r4_group(12, "StreamArtistCollaboratorIdentityLifecycleV1Skeleton.sol", _LIFECYCLE_COMMON + _WRITE_INTERFACES + (_r4_source("StreamArtistCollaboratorIdentityLifecycleV1Skeleton.sol"),), "DBC0ADC083758109CED4DBBABC95C2C757412B33A0F21C966E885E68A287D3EE"),
-    _r4_group(13, "StreamArtistDirectoryV1Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistDirectoryV1Skeleton.sol"),), "574C3F466321A8F6661DF0930DC57F9D715618E17877C14B1AFF2D7CA30502A2"),
-    _r4_group(14, "StreamArtistFoundationControllerV2Skeleton.sol", _COMMON_SIX + ("smart-contracts/IStreamArtistRegistryWritesA.sol", _r4_source("StreamArtistFoundationControllerV2Skeleton.sol")), "537E6C21E7EC01BB8BD54DD820A2E0446A54520C39E97AF449F63BE4EE2F5D45"),
-    _r4_group(15, "StreamArtistFoundationReadFacadeV1Skeleton.sol", _LIFECYCLE_COMMON + ("smart-contracts/IStreamArtistConsent.sol", "smart-contracts/IStreamArtistRead.sol", "smart-contracts/IStreamArtistRecoveryEvidence.sol", "smart-contracts/IStreamArtistRegistry.sol", _r4_source("StreamArtistFoundationReadFacadeV1Skeleton.sol")), "0F0025EF311EC0A085B1A8DA449B97C201E6D8AED8D1A2A4D31836E50B2D77BF"),
-    _r4_group(16, "StreamArtistFutureControllerCompatibilitySkeletons.sol", _LIFECYCLE_COMMON + ("smart-contracts/IStreamArtistRegistryWritesB.sol", "smart-contracts/IStreamArtistRegistryWritesC.sol", _r4_source("StreamArtistFutureControllerCompatibilitySkeletons.sol")), "A4C7F9C082A29DF3D451C34A4DD6CD83377B8B3D4BD495BDB429A08787E0E8B3"),
+    _r4_group(0, "StreamArtistArchiveCompatibilityStateV3Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveCompatibilityStateV3Skeleton.sol"),), "C5973217C8BC065A9AA62749B49BA2DC60CD4413171B351EAC27F1D3F553EB47"),
+    _r4_group(1, "StreamArtistArchiveEvidenceAdmissionV3Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceAdmissionV3Skeleton.sol"),), "EF4AD5C5AD7E6FEF2E7E97A18C1E770E91973660353949E65F6ABA89C5562A37"),
+    _r4_group(2, "StreamArtistArchiveEvidenceCoordinatorV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceCoordinatorV1Skeleton.sol"),), "DE5BFD5A90254337252B1CC9C635540ABF34503CA80D0F90B98769E7690F5122"),
+    _r4_group(3, "StreamArtistArchiveEvidenceDirectoryV1Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistArchiveEvidenceDirectoryV1Skeleton.sol"),), "2BABC81D06371109AAA3629C5A8C360BB83F2DE07B57DA827825FF64D9345A40"),
+    _r4_group(4, "StreamArtistArchiveEvidenceMaterializerV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceMaterializerV1Skeleton.sol"),), "1472E7C355D26C186986AA51094567A98AC1AA73AB8E53CE6E4C3306266A4AB8"),
+    _r4_group(5, "StreamArtistArchiveEvidenceStoreV2Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveEvidenceStoreV2Skeleton.sol"),), "F2081762D871B79936E486D1C3CC3F3AAB21AD31109C5154AD115F20244B4E08"),
+    _r4_group(6, "StreamArtistArchiveReadProjectionV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistArchiveReadProjectionV1Skeleton.sol"),), "7D80045743314F147467CF26FFF1312D5E8E627E50DF93EE7A2C129C7BA41893"),
+    _r4_group(7, "StreamArtistArchiveV2Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistArchiveV2Skeleton.sol"),), "221DB95609AC25836F97790B2EA95D596919D5643CB1A4BA57F6700DB972ED67"),
+    _r4_group(8, "StreamArtistBindingLifecycleV1Skeleton.sol", _LIFECYCLE_COMMON + _WRITE_INTERFACES + (_r4_source("StreamArtistBindingLifecycleV1Skeleton.sol"),), "BC1388641C45E6716D96535B78A8AF48E2E06C6EB962B7A248F64D02D55E030D"),
+    _r4_group(9, "StreamArtistBindingProposalArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistBindingProposalArchiveVerifierV1Skeleton.sol"),), "75924BF26EE9FA67900DC8BA851EDBEEB0C3F0DCD7C01844A6655C6B16186B3C"),
+    _r4_group(10, "StreamArtistBindingTransitionArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistBindingTransitionArchiveVerifierV1Skeleton.sol"),), "0A66C3ACFD1DC857CB71440B07883F072418DF3C91B59C28804E1416D2F849D3"),
+    _r4_group(11, "StreamArtistCollaboratorArchiveVerifierV1Skeleton.sol", _COMMON_SIX + (_r4_source("StreamArtistCollaboratorArchiveVerifierV1Skeleton.sol"),), "B58A172ED12AB669092E97F3D612AB6348759425E0D89DB2EE1F8DDB77DF058C"),
+    _r4_group(12, "StreamArtistCollaboratorIdentityLifecycleV1Skeleton.sol", _LIFECYCLE_COMMON + _WRITE_INTERFACES + (_r4_source("StreamArtistCollaboratorIdentityLifecycleV1Skeleton.sol"),), "EBBF8A1ECA35C904433072BD53817569EFDC1498BF0B2267F6A669AA5B9073D0"),
+    _r4_group(13, "StreamArtistDirectoryV1Skeleton.sol", _LIFECYCLE_COMMON + (_r4_source("StreamArtistDirectoryV1Skeleton.sol"),), "CF9CA5622E13EA5E119DE1E13D6E91FABFB4B7E0589F586D6622693FF3D8CFA3"),
+    _r4_group(14, "StreamArtistFoundationControllerV2Skeleton.sol", _COMMON_SIX + ("smart-contracts/IStreamArtistRegistryWritesA.sol", _r4_source("StreamArtistFoundationControllerV2Skeleton.sol")), "A140531519F8D6B2DFDC56EF360388D59C293D7AE8345D70455B352F1114391F"),
+    _r4_group(15, "StreamArtistFoundationReadFacadeV1Skeleton.sol", _LIFECYCLE_COMMON + ("smart-contracts/IStreamArtistConsent.sol", "smart-contracts/IStreamArtistRead.sol", "smart-contracts/IStreamArtistRecoveryEvidence.sol", "smart-contracts/IStreamArtistRegistry.sol", _r4_source("StreamArtistFoundationReadFacadeV1Skeleton.sol")), "EA1BFD7BFFD8E26436A76BE8CE328289683073E1372F3D987F542FB1390A28BC"),
+    _r4_group(16, "StreamArtistFutureControllerCompatibilitySkeletons.sol", _LIFECYCLE_COMMON + ("smart-contracts/IStreamArtistRegistryWritesB.sol", "smart-contracts/IStreamArtistRegistryWritesC.sol", _r4_source("StreamArtistFutureControllerCompatibilitySkeletons.sol")), "14B2D090770EA277F76A6571F55E86C29172CC04DDCB59FC6643662CA7DD6D90"),
 )
 
 

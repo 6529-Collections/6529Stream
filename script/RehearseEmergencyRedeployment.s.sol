@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IStreamLegacyCore.sol";
-import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/interfaces/stream/IRandomizer.sol";
+import "../smart-contracts/interfaces/compatibility/IStreamLegacyCore.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
 import {LegacyStreamCore as StreamCore} from "../test/helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamDrops.sol";
+import "../smart-contracts/domains/mint/StreamDrops.sol";
 import "./RehearseDeployment.s.sol";
 
 interface EmergencyRedeploymentVm {

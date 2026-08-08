@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/AuctionContract.sol";
-import "../smart-contracts/IStreamCore.sol";
-import "../smart-contracts/IStreamMintLedger.sol";
-import "../smart-contracts/IStreamMintManager.sol";
-import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/domains/auctions/AuctionContract.sol";
+import "../smart-contracts/interfaces/stream/IStreamCore.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintLedger.sol";
+import "../smart-contracts/interfaces/stream/IStreamMintManager.sol";
+import "../smart-contracts/domains/access/StreamAdmins.sol";
 import {LegacyStreamCore as StreamCore} from "./helpers/LegacyStreamCore.sol";
-import "../smart-contracts/StreamCuratorsPool.sol";
-import "../smart-contracts/StreamDrops.sol";
-import "../smart-contracts/StreamMintLedger.sol";
-import "../smart-contracts/StreamMintManager.sol";
-import "../smart-contracts/StreamMintModuleRegistry.sol";
+import "../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
+import "../smart-contracts/domains/mint/StreamDrops.sol";
+import "../smart-contracts/domains/mint/StreamMintLedger.sol";
+import "../smart-contracts/domains/mint/StreamMintManager.sol";
+import "../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
 

@@ -84,10 +84,10 @@ Use tracked generated artifacts and checked docs, not hand-maintained copies.
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Interface lookup source |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) | Local development addresses |
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
-| Curator pool contract | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Reward root, claim, credit, withdrawal, and emergency logic |
-| Admin contract | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Function admin and emergency recipient source |
-| Delegation interface | [`smart-contracts/IDelegationManagementContract.sol`](../../smart-contracts/IDelegationManagementContract.sol) | Delegated claim lookup surface |
-| Pause domains | [`smart-contracts/StreamPauseDomains.sol`](../../smart-contracts/StreamPauseDomains.sol) | Emergency domain naming |
+| Curator pool contract | [`smart-contracts/domains/revenue/StreamCuratorsPool.sol`](../../smart-contracts/domains/revenue/StreamCuratorsPool.sol) | Reward root, claim, credit, withdrawal, and emergency logic |
+| Admin contract | [`smart-contracts/domains/access/StreamAdmins.sol`](../../smart-contracts/domains/access/StreamAdmins.sol) | Function admin and emergency recipient source |
+| Delegation interface | [`smart-contracts/integrations/delegation/IDelegationManagementContract.sol`](../../smart-contracts/integrations/delegation/IDelegationManagementContract.sol) | Delegated claim lookup surface |
+| Pause domains | [`smart-contracts/domains/access/StreamPauseDomains.sol`](../../smart-contracts/domains/access/StreamPauseDomains.sol) | Emergency domain naming |
 | Curator pool tests | [`test/StreamCuratorsPool.t.sol`](../../test/StreamCuratorsPool.t.sol) | Claim, delegated claim, failed withdrawal, leaf hash, root epoch, and emergency surplus behavior |
 | Payment invariant tests | [`test/StreamPaymentsInvariant.t.sol`](../../test/StreamPaymentsInvariant.t.sol) | Cross-payment owed/surplus invariant baseline |
 

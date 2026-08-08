@@ -1801,7 +1801,7 @@
     }
   ],
   "libraries": [
-    "smart-contracts/StreamMetadataRenderer.sol:StreamMetadataRenderer:0x148448eC657bf0380128601B9612E7e89FBD67FB"
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer:0x148448eC657bf0380128601B9612E7e89FBD67FB"
   ],
   "pending": [],
   "returns": {

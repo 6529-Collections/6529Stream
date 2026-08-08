@@ -27,7 +27,7 @@ def write_text(path: Path, value: str) -> None:
 def seed_required_targets(root: Path) -> None:
     """Create placeholder files for every required policy link target."""
     for relative in checker.REQUIRED_LINK_TARGETS:
-        if relative == "smart-contracts/StreamCore.sol":
+        if relative == "smart-contracts/core/StreamCore.sol":
             write_text(
                 root / relative,
                 """
@@ -48,7 +48,7 @@ contract StreamCore is IERC2981 {
 }
 """,
             )
-        elif relative == "smart-contracts/StreamCoreExternalReads.sol":
+        elif relative == "smart-contracts/core/StreamCoreExternalReads.sol":
             write_text(
                 root / relative,
                 """
@@ -394,7 +394,7 @@ class RoyaltyPolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_required_targets(root)
-            source = root / "smart-contracts" / "StreamCore.sol"
+            source = root / "smart-contracts" / "core" / "StreamCore.sol"
             source.write_text(
                 source.read_text(encoding="utf-8").replace(
                     "royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)",

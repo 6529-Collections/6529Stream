@@ -89,12 +89,12 @@ Use tracked generated artifacts and checked docs, not hand-maintained copies.
 | Event/indexer model | [`docs/integrations/events-and-indexing.md`](events-and-indexing.md) | Event subscriptions, read-after-event calls, reorg handling, and reconstruction guidance |
 | Mobile wallet guide | [`docs/integrations/mobile-walletconnect.md`](mobile-walletconnect.md) | Mobile foreground wallet action and stale-credit constraints |
 | Electron security guide | [`docs/integrations/electron-security-wallets.md`](electron-security-wallets.md) | Renderer/process isolation and no-secret wallet boundaries |
-| Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Fixed-price credits, owed totals, surplus, and withdrawal functions |
-| Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Bidder credits, proceeds credits, owed totals, surplus, and withdrawal functions |
-| Curator pool contract | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Curator reward credits, owed totals, surplus, and withdrawal functions |
-| Minter bridge | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | Emergency-surplus boundary for minter-held ETH |
-| Randomizer adapter | [`smart-contracts/RandomizerRNG.sol`](../../smart-contracts/RandomizerRNG.sol) | Randomizer reserved-balance boundary |
-| Pause domains | [`smart-contracts/StreamPauseDomains.sol`](../../smart-contracts/StreamPauseDomains.sol) | Pause and emergency domain naming |
+| Drops contract | [`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol) | Fixed-price credits, owed totals, surplus, and withdrawal functions |
+| Auction contract | [`smart-contracts/domains/auctions/AuctionContract.sol`](../../smart-contracts/domains/auctions/AuctionContract.sol) | Bidder credits, proceeds credits, owed totals, surplus, and withdrawal functions |
+| Curator pool contract | [`smart-contracts/domains/revenue/StreamCuratorsPool.sol`](../../smart-contracts/domains/revenue/StreamCuratorsPool.sol) | Curator reward credits, owed totals, surplus, and withdrawal functions |
+| Minter bridge | [`smart-contracts/domains/mint/StreamMinter.sol`](../../smart-contracts/domains/mint/StreamMinter.sol) | Emergency-surplus boundary for minter-held ETH |
+| Randomizer adapter | [`smart-contracts/integrations/randomizers/RandomizerRNG.sol`](../../smart-contracts/integrations/randomizers/RandomizerRNG.sol) | Randomizer reserved-balance boundary |
+| Pause domains | [`smart-contracts/domains/access/StreamPauseDomains.sol`](../../smart-contracts/domains/access/StreamPauseDomains.sol) | Pause and emergency domain naming |
 | Fixed-price payment tests | [`test/StreamFixedPricePayments.t.sol`](../../test/StreamFixedPricePayments.t.sol) | Fixed-price credit split, failed withdrawal, and surplus behavior |
 | Auction payment tests | [`test/StreamAuctionPayments.t.sol`](../../test/StreamAuctionPayments.t.sol) | Outbid credit, proceeds credit, failed withdrawal, and surplus behavior |
 | Curator pool tests | [`test/StreamCuratorsPool.t.sol`](../../test/StreamCuratorsPool.t.sol) | Curator credit, delegated claim, failed withdrawal, and surplus behavior |

@@ -1377,10 +1377,10 @@ views needed by later resolver and asset-policy work.
 
 Files likely touched:
 
-- `smart-contracts/StreamSplitFactory.sol`
-- `smart-contracts/StreamSplitWallet.sol`
-- `smart-contracts/IStreamSplitFactory.sol`
-- `smart-contracts/IStreamSplitWallet.sol`
+- `smart-contracts/domains/revenue/StreamSplitFactory.sol`
+- `smart-contracts/domains/revenue/StreamSplitWallet.sol`
+- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/IStreamSplitWallet.sol`
 - `test/StreamSplitWallet.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
@@ -1451,12 +1451,12 @@ semantics.
 
 Files likely touched:
 
-- `smart-contracts/StreamAssetPolicyRegistry.sol`
-- `smart-contracts/IStreamAssetPolicyRegistry.sol`
-- `smart-contracts/StreamSplitFactory.sol`
-- `smart-contracts/StreamSplitWallet.sol`
-- `smart-contracts/IStreamSplitFactory.sol`
-- `smart-contracts/IStreamSplitWallet.sol`
+- `smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol`
+- `smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol`
+- `smart-contracts/domains/revenue/StreamSplitFactory.sol`
+- `smart-contracts/domains/revenue/StreamSplitWallet.sol`
+- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/IStreamSplitWallet.sol`
 - `test/StreamSplitWallet.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
@@ -1528,12 +1528,12 @@ fail-closed ERC-20 policy reads, official settlement events, and no
 
 Files likely touched:
 
-- `smart-contracts/IStreamRevenueResolver.sol`
-- `smart-contracts/StreamRevenueResolver.sol`
-- `smart-contracts/IStreamPrimarySaleSettlement.sol`
-- `smart-contracts/StreamPrimarySaleSettlement.sol`
-- `smart-contracts/StreamSplitFactory.sol`
-- `smart-contracts/IStreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/IStreamRevenueResolver.sol`
+- `smart-contracts/domains/revenue/StreamRevenueResolver.sol`
+- `smart-contracts/interfaces/stream/IStreamPrimarySaleSettlement.sol`
+- `smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol`
+- `smart-contracts/domains/revenue/StreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
 - `test/StreamPrimarySaleSettlement.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
@@ -1611,9 +1611,9 @@ this PR.
 
 Files likely touched:
 
-- `smart-contracts/StreamCore.sol`
-- `smart-contracts/IStreamCore.sol`
-- optional `smart-contracts/IStreamMintManager.sol`
+- `smart-contracts/core/StreamCore.sol`
+- `smart-contracts/interfaces/stream/IStreamCore.sol`
+- optional `smart-contracts/interfaces/stream/IStreamMintManager.sol`
 - focused Core mint-manager hook tests
 - `docs/mint-policy-and-accounting.md`
 - `docs/launch-v1-target-architecture.md`
@@ -1693,8 +1693,8 @@ flow migration for later PRs.
 
 Files likely touched:
 
-- `smart-contracts/IStreamMintLedger.sol`
-- `smart-contracts/StreamMintLedger.sol`
+- `smart-contracts/interfaces/stream/IStreamMintLedger.sol`
+- `smart-contracts/domains/mint/StreamMintLedger.sol`
 - `test/StreamMintLedger.t.sol`
 - release artifacts generated from `release-artifacts/contracts.json`
 - mint/accounting, launch, roadmap, backlog, and run-state docs
@@ -2021,7 +2021,7 @@ read-after-event calls.
 
 Files likely touched:
 
-- `smart-contracts/StreamMinter.sol`
+- `smart-contracts/domains/mint/StreamMinter.sol`
 - `test/StreamMinterEvents.t.sol`
 - `release-artifacts/latest/event-topic-catalog.json`
 - generated release/deployment artifacts that pin ABI, runtime, topics, source
@@ -3391,9 +3391,9 @@ Files touched:
 - `docs/integrations/metadata-rendering.md`
 - `docs/integrations/events-and-indexing.md`
 - `docs/integrations/README.md`
-- `smart-contracts/StreamContractMetadata.sol`
-- `smart-contracts/IERC7572.sol`
-- `smart-contracts/IStreamContractMetadata.sol`
+- `smart-contracts/domains/metadata/StreamContractMetadata.sol`
+- `smart-contracts/interfaces/standards/IERC7572.sol`
+- `smart-contracts/interfaces/stream/IStreamContractMetadata.sol`
 - `test/StreamContractMetadata.t.sol`
 - `script/RehearseDeployment.s.sol`
 - `deployments/` config, manifest, address-book, broadcast, and local evidence

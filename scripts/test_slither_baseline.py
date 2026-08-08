@@ -284,7 +284,7 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_primary_source_classification_is_fail_closed(self) -> None:
         self.assertEqual(
-            checker.classify_source("smart-contracts/Math.sol"), "vendored"
+            checker.classify_source("smart-contracts/vendor/openzeppelin/Math.sol"), "vendored"
         )
         self.assertEqual(
             checker.classify_source("smart-contracts/NewModule.sol"),

@@ -25,7 +25,7 @@ index. Use the linked canonical surfaces instead.
 | --- | --- |
 | What must the permanent protocol do? | The specification inventory and precedence rules in [`spec-policy.md`](spec-policy.md) |
 | Why was a protocol decision made? | Accepted decisions in [`adr/README.md`](adr/README.md) |
-| How is the flat Solidity source tree organized? | [`solidity-source-map.md`](solidity-source-map.md) and its generated authoritative inventories |
+| How is the Solidity source tree organized? | [`solidity-source-map.md`](solidity-source-map.md), the reviewed source-layout manifest, and the generated authoritative inventories |
 | What does the current implementation and local evidence prove? | [`status.md`](status.md), [`architecture.md`](architecture.md), and [`audit-package.md`](audit-package.md) |
 | What is still blocked? | [`known-blockers.md`](known-blockers.md), [`release-readiness.md`](release-readiness.md), and generated blocker reports under [`../release-artifacts/latest/`](../release-artifacts/latest/) |
 | What work is ordered next? | [`../ops/ROADMAP.md`](../ops/ROADMAP.md) and [`../ops/EXECUTION_BACKLOG.md`](../ops/EXECUTION_BACKLOG.md) |
@@ -43,8 +43,8 @@ protocol specification.
   [`spec-policy.md`](spec-policy.md), then use its specification inventory and
   the [`launch-conformance-matrix.md`](launch-conformance-matrix.md).
 - **Solidity implementation:** use
-  [`solidity-source-map.md`](solidity-source-map.md) to navigate the flat source
-  tree and locate the generated contract and protocol-surface inventories.
+  [`solidity-source-map.md`](solidity-source-map.md) to navigate the domain
+  hierarchy and locate the reviewed and generated source inventories.
 - **Architecture and security:** [`architecture.md`](architecture.md),
   [`threat-model.md`](threat-model.md), [`audit-package.md`](audit-package.md),
   [`slither.md`](slither.md), and [`warning-dispositions.md`](warning-dispositions.md).

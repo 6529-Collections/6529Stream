@@ -132,7 +132,7 @@ REQUIRED_COMMANDS = [
 ]
 
 SOURCE_REQUIREMENTS = {
-    Path("smart-contracts/StreamDrops.sol"): [
+    Path("smart-contracts/domains/mint/StreamDrops.sol"): [
         "function updateTDHsigner",
         "function incrementSignerEpoch",
         "function cancelDrop",
@@ -142,7 +142,7 @@ SOURCE_REQUIREMENTS = {
         "isDropCancelled",
         "isDropConsumed",
     ],
-    Path("smart-contracts/StreamPauseDomains.sol"): [
+    Path("smart-contracts/domains/access/StreamPauseDomains.sol"): [
         "DROP_EXECUTION",
         "6529stream.pause.DropExecution",
     ],

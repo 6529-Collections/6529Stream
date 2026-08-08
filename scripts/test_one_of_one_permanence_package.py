@@ -106,7 +106,7 @@ def valid_package(root: Path, *, review_status: str = "reviewed") -> dict[str, o
     )
     renderer_source_ref = file_ref(
         root,
-        "smart-contracts/StreamMetadataRenderer.sol",
+        "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
         "library StreamMetadataRenderer {}\n",
         category="renderer_source",
     )

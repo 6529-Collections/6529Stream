@@ -33,6 +33,7 @@ DEFAULT_INVENTORY_SCHEMA: Final = Path(
 DEFAULT_SOURCE_CATALOG: Final = Path(
     "release-artifacts/record-family-authorization-source-catalog.json"
 )
+SOURCE_LAYOUT_MANIFEST: Final = Path("smart-contracts/source-layout.json")
 DEFAULT_SOURCE_CATALOG_SCHEMA: Final = Path(
     "release-artifacts/schema/"
     "record-family-authorization-source-catalog.v1.schema.json"
@@ -100,16 +101,16 @@ TRACKING_ISSUE: Final = (
 )
 AS_BUILT_SOURCE_COMMIT: Final = "063605ea4fe906b229fd6ae51294fe96f384e698"
 AS_BUILT_SOURCE_SHA256: Final = {
-    "smart-contracts/StreamCollectionMetadata.sol": (
+    "smart-contracts/domains/metadata/StreamCollectionMetadata.sol": (
         "c8eda0b8fd126962a4cbd1b3923b315aa26f1a3edd81422217e6fec194d188b4"
     ),
-    "smart-contracts/IStreamCollectionMetadata.sol": (
+    "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol": (
         "9ee2f79bff66060846d64dbb2d61f30c5febbd28580565989fef8109f518eef6"
     ),
-    "smart-contracts/StreamPreservationRecords.sol": (
+    "smart-contracts/domains/preservation/StreamPreservationRecords.sol": (
         "47125f41f62754f0cd563468f6db91d547a9c7d42a0783711eebf71b3431f6c6"
     ),
-    "smart-contracts/IStreamPreservationRecords.sol": (
+    "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol": (
         "e6a9f6e60167ea7f9b9dfcc4492d5d7eec3e4647426693a4a23b6d7b3030606a"
     ),
 }
@@ -129,36 +130,36 @@ SOURCE_IMPLEMENTATION_COMMIT: Final = (
 )
 EXPECTED_SOURCE_BINDINGS: Final = (
     (
-        "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol",
+        "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
         "eb381ae81e56bfa27495c5c20de82843a642995b50d5c07de102e4e20399cb2f",
     ),
     (
-        "smart-contracts/IStreamRecordFamilyRegistry.sol",
-        "82f39b0c7157c7ae94d4a8e7b3a6aa3c6a9281c471c98af6f3e87cbb8d1aaa95",
+        "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+        "c1cc708b5928e4f0297544ade89dd0404787aca01c3394b7a1ed139aaf856a02",
     ),
     (
-        "smart-contracts/StreamRecordFamilyRegistry.sol",
-        "9ffb6e90c1905f8eebf91039f4c947b08d07730038b115f9204a348e52c85bb2",
+        "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
+        "b34580268ca327e82e3a7bd7768964b11d82ab58662b6b73a3f701400f76d35b",
     ),
     (
-        "smart-contracts/IStreamCollectionMetadata.sol",
-        "f22398c6650c3de6599c2e6edc48068d251cab782cc2f1f931ea96fdd9877295",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+        "487ff1e834d7ae696ef0a04c66f0eccfc3789659f96c98f77492b22176aedb04",
     ),
     (
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "f25195871f147b2ca47ba12b5a6bff434112e86107ce6371564d7760218770ac",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "fd82d226d688e5296eca3ef05dc24c13ceac370090cf22e5fc9ed08e5f9cdf95",
     ),
     (
-        "smart-contracts/IStreamPreservationRecords.sol",
-        "bdfbddab0249e6048ab644b7c0f833ca1ed261e706973742b54636089fbdfc54",
+        "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
+        "072f80fa3e9ca50a7045ca85ac440f9464a117032639da8c2571f73eee102fed",
     ),
     (
-        "smart-contracts/StreamPreservationRecords.sol",
-        "271e622ebffdf852e3bb42faa47d08f2731a0c219dea30fda2e6c8a1530ad9ca",
+        "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "606e9d2b98eb91c3a4022b3d60142eef783b6da737edd0fce3c4d4ec7f98e369",
     ),
     (
         "script/RehearseDeployment.s.sol",
-        "8ada36c26e300a1497cc9ee422a4c34504ae08014dd7c4bdf9f9d505d7e43026",
+        "640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1",
     ),
 )
 
@@ -218,14 +219,14 @@ EXPECTED_NORMATIVE_SOURCES: Final = (
 EXPECTED_CONTRACTS: Final = (
     {
         "name": "StreamCollectionMetadata",
-        "source_path": "smart-contracts/StreamCollectionMetadata.sol",
-        "interface_path": "smart-contracts/IStreamCollectionMetadata.sol",
+        "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "mutation_surface_count": 4,
     },
     {
         "name": "StreamPreservationRecords",
-        "source_path": "smart-contracts/StreamPreservationRecords.sol",
-        "interface_path": "smart-contracts/IStreamPreservationRecords.sol",
+        "source_path": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "interface_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         "mutation_surface_count": 1,
     },
 )
@@ -233,8 +234,8 @@ EXPECTED_CONTRACTS: Final = (
 EXPECTED_SURFACES: Final = (
     (
         "StreamCollectionMetadata",
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "smart-contracts/IStreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "setCollectionRecord",
         "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
         "0xcf51f66a",
@@ -242,8 +243,8 @@ EXPECTED_SURFACES: Final = (
     ),
     (
         "StreamCollectionMetadata",
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "smart-contracts/IStreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "setCollectionRecordWithRevision",
         "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
         "0x0dd00ba6",
@@ -251,8 +252,8 @@ EXPECTED_SURFACES: Final = (
     ),
     (
         "StreamCollectionMetadata",
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "smart-contracts/IStreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "publishCollectionSnapshot",
         "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
         "0xf2d67fbd",
@@ -260,8 +261,8 @@ EXPECTED_SURFACES: Final = (
     ),
     (
         "StreamCollectionMetadata",
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "smart-contracts/IStreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "lockCollectionRecord",
         "lockCollectionRecord(uint256,bytes32)",
         "0xe4c05429",
@@ -269,8 +270,8 @@ EXPECTED_SURFACES: Final = (
     ),
     (
         "StreamPreservationRecords",
-        "smart-contracts/StreamPreservationRecords.sol",
-        "smart-contracts/IStreamPreservationRecords.sol",
+        "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         "recordCollectionRecord",
         "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
         "0xc3434532",
@@ -401,16 +402,16 @@ EXPECTED_SOURCE_FAMILY_GROUPS: Final = (
 EXPECTED_SOURCE_HOST_BINDINGS: Final = (
     (
         "StreamCollectionMetadata",
-        "smart-contracts/StreamCollectionMetadata.sol",
-        "smart-contracts/IStreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "0x2c2422f4",
         "immutable",
         True,
     ),
     (
         "StreamPreservationRecords",
-        "smart-contracts/StreamPreservationRecords.sol",
-        "smart-contracts/IStreamPreservationRecords.sol",
+        "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+        "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         "0x45cc434d",
         "immutable",
         True,
@@ -510,14 +511,14 @@ LCM_OWNER_RECORD_ROW_SHA256: Final = (
     "27ea13beb309392873b20c5344f28764eb22fdcf4e325d4b2ccaa70304858780"
 )
 EXPECTED_FAIL_OPEN: Final = (
-    ("arbitrary_metadata_record_type", "smart-contracts/StreamCollectionMetadata.sol", "_validateRecord"),
-    ("arbitrary_preservation_record_type", "smart-contracts/StreamPreservationRecords.sol", "_validateRecord"),
-    ("opaque_snapshot_family_set", "smart-contracts/StreamCollectionMetadata.sol", "publishCollectionSnapshot"),
-    ("arbitrary_lock_record_type", "smart-contracts/StreamCollectionMetadata.sol", "lockCollectionRecord"),
-    ("record_type_capacity_exhaustion", "smart-contracts/StreamCollectionMetadata.sol", "_rememberRecordType"),
-    ("optional_unverified_preservation_signature", "smart-contracts/StreamPreservationRecords.sol", "_validateRecord"),
-    ("authorization_class_event_absent", "smart-contracts/IStreamCollectionMetadata.sol", "CollectionMetadataRecordSet"),
-    ("selector_global_admin_family_authority", "smart-contracts/StreamCollectionMetadata.sol", "FunctionAdminRequired"),
+    ("arbitrary_metadata_record_type", "smart-contracts/domains/metadata/StreamCollectionMetadata.sol", "_validateRecord"),
+    ("arbitrary_preservation_record_type", "smart-contracts/domains/preservation/StreamPreservationRecords.sol", "_validateRecord"),
+    ("opaque_snapshot_family_set", "smart-contracts/domains/metadata/StreamCollectionMetadata.sol", "publishCollectionSnapshot"),
+    ("arbitrary_lock_record_type", "smart-contracts/domains/metadata/StreamCollectionMetadata.sol", "lockCollectionRecord"),
+    ("record_type_capacity_exhaustion", "smart-contracts/domains/metadata/StreamCollectionMetadata.sol", "_rememberRecordType"),
+    ("optional_unverified_preservation_signature", "smart-contracts/domains/preservation/StreamPreservationRecords.sol", "_validateRecord"),
+    ("authorization_class_event_absent", "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol", "CollectionMetadataRecordSet"),
+    ("selector_global_admin_family_authority", "smart-contracts/domains/metadata/StreamCollectionMetadata.sol", "FunctionAdminRequired"),
 )
 EXPECTED_BLOCKERS: Final = (
     "implementation_not_supported_in_this_slice",
@@ -867,6 +868,91 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+_SOLIDITY_IMPORT_RE: Final = re.compile(
+    r'''(import\s+(?:[^"']*?\sfrom\s+)?["'])([^"']+)(["'])'''
+)
+
+
+def _source_layout_aliases(repo_root: Path) -> tuple[dict[str, str], dict[str, str]]:
+    manifest = load_json(repo_root / SOURCE_LAYOUT_MANIFEST, "Solidity source layout")
+    moves = manifest.get("moves")
+    _expect(isinstance(moves, list), "Solidity source layout moves must be a list")
+    old_to_new: dict[str, str] = {}
+    new_to_old: dict[str, str] = {}
+    for index, move in enumerate(moves):
+        _expect(isinstance(move, dict), f"Solidity source layout moves[{index}] must be an object")
+        old_path = move.get("old_path")
+        new_path = move.get("new_path")
+        _expect(
+            isinstance(old_path, str) and isinstance(new_path, str),
+            f"Solidity source layout moves[{index}] paths must be strings",
+        )
+        _expect(old_path not in old_to_new, f"duplicate Solidity source layout old path: {old_path}")
+        _expect(new_path not in new_to_old, f"duplicate Solidity source layout new path: {new_path}")
+        old_to_new[old_path] = new_path
+        new_to_old[new_path] = old_path
+    return old_to_new, new_to_old
+
+
+def _canonicalize_layout_imports(
+    content: bytes,
+    source_path: str,
+    new_to_old: dict[str, str],
+) -> bytes:
+    text = content.decode("utf-8").replace("\r\n", "\n")
+
+    def normalize_relative_import(import_path: str) -> str:
+        source_directory = source_path.rsplit("/", 1)[0]
+        segments: list[str] = []
+        for segment in f"{source_directory}/{import_path}".split("/"):
+            if segment in ("", "."):
+                continue
+            if segment == "..":
+                _expect(bool(segments), "layout import must not escape repository root")
+                segments.pop()
+                continue
+            segments.append(segment)
+        return "/".join(segments)
+
+    def replace_import(match: re.Match[str]) -> str:
+        import_path = match.group(2)
+        if not import_path.startswith("."):
+            return match.group(0)
+        resolved = normalize_relative_import(import_path)
+        canonical = new_to_old.get(resolved, resolved)
+        return f"{match.group(1)}{canonical}{match.group(3)}"
+
+    return _SOLIDITY_IMPORT_RE.sub(replace_import, text).encode("utf-8")
+
+
+def _git_show_source_with_layout_alias(
+    repo_root: Path,
+    commit: str,
+    relative: str,
+) -> tuple[Any, str, bool]:
+    completed = subprocess.run(
+        ["git", "show", f"{commit}:{relative}"],
+        cwd=repo_root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode == 0:
+        return completed, relative, False
+    _, new_to_old = _source_layout_aliases(repo_root)
+    historical = new_to_old.get(relative)
+    if historical is None:
+        return completed, relative, False
+    aliased = subprocess.run(
+        ["git", "show", f"{commit}:{historical}"],
+        cwd=repo_root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    return aliased, historical, True
+
+
 def _extract_owned_fragment(
     text: str,
     start: str,
@@ -933,16 +1019,13 @@ def _assert_source_unchanged_from_commit(
         # the live source catalog instead.
         return
     for relative in sorted(relative_set):
-        completed = subprocess.run(
-            ["git", "show", f"{commit}:{relative}"],
-            cwd=repo_root,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            check=False,
+        completed, historical_path, _ = _git_show_source_with_layout_alias(
+            repo_root, commit, relative
         )
         _expect(
             completed.returncode == 0,
-            f"cannot read {relative} at current_implementation.source_commit",
+            f"cannot read {relative} (historical alias {historical_path}) at "
+            "current_implementation.source_commit",
         )
         _expect(
             hashlib.sha256(completed.stdout).hexdigest()
@@ -963,20 +1046,27 @@ def _assert_candidate_source_at_commit(
     _expect(_sha256(path) == expected_sha256, f"{label} file digest mismatch")
     if not (repo_root / ".git").exists():
         return path
-    completed = subprocess.run(
-        ["git", "show", f"{commit}:{relative}"],
-        cwd=repo_root,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
+    completed, historical_path, used_alias = _git_show_source_with_layout_alias(
+        repo_root, commit, relative
     )
     _expect(
         completed.returncode == 0,
-        f"{label} is not present at candidate source_commit {commit}",
+        f"{label} is not present at candidate source_commit {commit} "
+        f"under {relative} or historical alias {historical_path}",
+    )
+    if not used_alias and hashlib.sha256(completed.stdout).hexdigest() == expected_sha256:
+        return path
+    _, new_to_old = _source_layout_aliases(repo_root)
+    historical_semantics = _canonicalize_layout_imports(
+        completed.stdout, historical_path, new_to_old
+    )
+    current_semantics = _canonicalize_layout_imports(
+        path.read_bytes(), relative, new_to_old
     )
     _expect(
-        hashlib.sha256(completed.stdout).hexdigest() == expected_sha256,
-        f"{label} digest does not match candidate source_commit {commit}",
+        historical_semantics == current_semantics,
+        f"{label} semantics differ from candidate source_commit {commit} "
+        "after the reviewed Solidity source-layout migration",
     )
     return path
 
@@ -1042,13 +1132,13 @@ def _validate_source_catalog_semantics(
         classifier
         == {
             "contract": "StreamCollectionMetadata",
-            "source_path": "smart-contracts/StreamCollectionMetadata.sol",
+            "source_path": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
             "implementation_source_path": (
-                "smart-contracts/StreamRecordFamilyRegistry.sol"
+                "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol"
             ),
-            "interface_path": "smart-contracts/IStreamRecordFamilyRegistry.sol",
+            "interface_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
             "authority_provider_interface_path": (
-                "smart-contracts/IStreamRecordFamilyAuthorityProvider.sol"
+                "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol"
             ),
             "interface_id": "0xb19a79de",
             "marker_selector": "0x20e9f458",
@@ -1181,12 +1271,12 @@ def _validate_source_catalog_semantics(
 
     metadata_source = resolve_repo_file(
         repo_root,
-        "smart-contracts/StreamCollectionMetadata.sol",
+        "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "metadata host source",
     ).read_text(encoding="utf-8")
     preservation_source = resolve_repo_file(
         repo_root,
-        "smart-contracts/StreamPreservationRecords.sol",
+        "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
         "preservation host source",
     ).read_text(encoding="utf-8")
     for anchor in (
@@ -2087,12 +2177,12 @@ def _validate_complete_evidence_semantics(
     )
     expected_source_paths = {
         "StreamCollectionMetadata": (
-            "smart-contracts/StreamCollectionMetadata.sol",
-            "smart-contracts/IStreamCollectionMetadata.sol",
+            "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+            "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         ),
         "StreamPreservationRecords": (
-            "smart-contracts/StreamPreservationRecords.sol",
-            "smart-contracts/IStreamPreservationRecords.sol",
+            "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+            "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
         ),
     }
     for index, (grant_row, evidence_row) in enumerate(
@@ -2127,7 +2217,7 @@ def _validate_complete_evidence_semantics(
         for field in ("source_path", "interface_path"):
             _expect(
                 re.fullmatch(
-                    r"smart-contracts/[A-Za-z0-9_.-]+\.sol",
+                    r"smart-contracts/(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+\.sol",
                     grant_row[field],
                 )
                 is not None,

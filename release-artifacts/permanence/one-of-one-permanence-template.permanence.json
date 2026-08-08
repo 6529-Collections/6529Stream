@@ -30,8 +30,8 @@
     "renderer_contract": "0x000000000000000000000000000000000000000b",
     "renderer_source": {
       "category": "renderer_source",
-      "path": "smart-contracts/StreamMetadataRenderer.sol",
-      "sha256": "sha256:82f2820e8217fff405505624d1adc67231d1f1b6e4644fe2868846451a7906f4"
+      "path": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+      "sha256": "sha256:3dafabf0509b0bc0d014c1f8eeba32e2f5a0b13d466e702d62e1c9af27016f1f"
     },
     "rendering_mode": "animation_html",
     "runtime_assumptions": {
@@ -146,7 +146,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:e938513c396b0263196a4972c2d20b8012475c2bfb770db453c9ac6202eec54a",
+      "sha256": "sha256:02381aeab52e8e8c6a24ae739e4009f24fee766b5e47b19efdb26911144a0a68",
       "status": "template"
     }
   },
@@ -187,7 +187,7 @@
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:e938513c396b0263196a4972c2d20b8012475c2bfb770db453c9ac6202eec54a"
+      "sha256": "sha256:02381aeab52e8e8c6a24ae739e4009f24fee766b5e47b19efdb26911144a0a68"
     }
   ],
   "redaction_policy": {

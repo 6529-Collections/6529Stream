@@ -129,6 +129,10 @@ python scripts/test_contract_size_budget.py
 python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
+python scripts/test_solidity_source_layout.py
+python scripts/check_solidity_source_layout.py
+python scripts/test_solidity_layout_equivalence.py
+python scripts/check_solidity_layout_equivalence.py --check-receipt
 python scripts/test_python_toolchain.py
 python scripts/check_python_toolchain.py
 python scripts/test_warning_dispositions.py
@@ -728,13 +732,13 @@ Canonical checksum generation covers the package plus its checker, hostile
 tests, and exactly twelve source-semantic
 inputs:
 
-- `smart-contracts/IStreamRecordFamilyAuthorityProvider.sol`
-- `smart-contracts/IStreamRecordFamilyRegistry.sol`
-- `smart-contracts/StreamRecordFamilyRegistry.sol`
-- `smart-contracts/StreamCollectionMetadata.sol`
-- `smart-contracts/IStreamCollectionMetadata.sol`
-- `smart-contracts/StreamPreservationRecords.sol`
-- `smart-contracts/IStreamPreservationRecords.sol`
+- `smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol`
+- `smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol`
+- `smart-contracts/domains/records/StreamRecordFamilyRegistry.sol`
+- `smart-contracts/domains/metadata/StreamCollectionMetadata.sol`
+- `smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol`
+- `smart-contracts/domains/preservation/StreamPreservationRecords.sol`
+- `smart-contracts/interfaces/stream/IStreamPreservationRecords.sol`
 - `script/RehearseDeployment.s.sol`
 - `test/StreamRecordFamilyAuthorization.t.sol`
 - `test/StreamCollectionMetadata.t.sol`
@@ -1496,8 +1500,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 265 configured roots,
-expanding to exactly 437 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 271 configured roots,
+expanding to exactly 444 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and

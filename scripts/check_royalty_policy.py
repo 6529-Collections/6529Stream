@@ -155,23 +155,23 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/interface-ids.json",
     "release-artifacts/latest/event-topic-catalog.json",
     "release-artifacts/latest/risk-register.json",
-    "smart-contracts/StreamCore.sol",
-    "smart-contracts/StreamCoreExternalReads.sol",
-    "smart-contracts/IERC2981.sol",
-    "smart-contracts/ERC2981.sol",
+    "smart-contracts/core/StreamCore.sol",
+    "smart-contracts/core/StreamCoreExternalReads.sol",
+    "smart-contracts/vendor/openzeppelin/IERC2981.sol",
+    "smart-contracts/vendor/openzeppelin/ERC2981.sol",
     "test/StreamRoyalty.t.sol",
     "test/StreamCorePermanentTarget.t.sol",
 ]
 
 SOURCE_CONSTANT_ASSERTIONS = {
-    "smart-contracts/StreamCore.sol": [
+    "smart-contracts/core/StreamCore.sol": [
         "_POINTER_ROYALTY_RESOLVER",
         "_GGP_ROYALTY_RESOLVER_GAS_LIMIT",
         "_GGP_ROYALTY_RETURN_GAS_BUFFER",
         "StreamCoreExternalReads.resolveRoyalty",
         'royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)',
     ],
-    "smart-contracts/StreamCoreExternalReads.sol": [
+    "smart-contracts/core/StreamCoreExternalReads.sol": [
         "_MAX_ROYALTY_BPS = 1_000",
         "_ROYALTY_DENOMINATOR = 10_000",
         "function resolveRoyalty(",
@@ -191,7 +191,7 @@ SOURCE_CONSTANT_ASSERTIONS = {
 }
 
 SOURCE_ALTERNATIVE_ASSERTIONS = {
-    "smart-contracts/StreamCore.sol": [
+    "smart-contracts/core/StreamCore.sol": [
         (
             "ERC-2981 interface support",
             [
@@ -200,7 +200,7 @@ SOURCE_ALTERNATIVE_ASSERTIONS = {
             ],
         ),
     ],
-    "smart-contracts/StreamCoreExternalReads.sol": [
+    "smart-contracts/core/StreamCoreExternalReads.sol": [
         (
             "bounded resolver royalty math",
             [

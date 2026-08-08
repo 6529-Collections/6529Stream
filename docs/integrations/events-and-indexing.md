@@ -95,22 +95,22 @@ copies.
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
 | Local deployment manifest | [`deployments/examples/anvil-6529stream-v0.1.0-001.json`](../../deployments/examples/anvil-6529stream-v0.1.0-001.json) | Local deployment instance |
 | Fork deployment manifest | [`deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork deployment instance |
-| Core NFT contract | [`smart-contracts/StreamCore.sol`](../../smart-contracts/StreamCore.sol) | ERC-721, collection, metadata, dependency, burn, freeze, and randomizer events |
-| Contract metadata adapter | [`smart-contracts/StreamContractMetadata.sol`](../../smart-contracts/StreamContractMetadata.sol) | ERC-7572-style `contractURI()`, `ContractURIUpdated`, URI hash, core binding, and admin binding |
-| Drops contract | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Drop authorization, signer, auction contract, and fixed-price credit events |
-| Auction contract | [`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol) | Auction lifecycle, bid, settlement, and proceeds events |
-| Admin contract | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Role, pause, emergency recipient, and signer-lifecycle target events |
-| Minter bridge | [`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol) | Phase, fixed-price batch mint, auction mint, auction end-time, contract-reference events, and bridge reads such as original auction end-time values |
-| Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Request, fulfillment, stale, failure, retry, and burned-token randomness events |
-| Curator pool | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
-| Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Dependency version creation/deprecation events |
-| Revenue resolver | [`smart-contracts/StreamRevenueResolver.sol`](../../smart-contracts/StreamRevenueResolver.sol) | Primary assignment and template events for outside-Core sale settlement |
-| Primary-sale settlement | [`smart-contracts/StreamPrimarySaleSettlement.sol`](../../smart-contracts/StreamPrimarySaleSettlement.sol) | Official native ETH and approved-standard ERC-20 primary revenue settlement events |
-| Split factory | [`smart-contracts/StreamSplitFactory.sol`](../../smart-contracts/StreamSplitFactory.sol) | Immutable split profile, deterministic wallet, and asset-policy-registry pin events |
-| Split wallet | [`smart-contracts/StreamSplitWallet.sol`](../../smart-contracts/StreamSplitWallet.sol) | Native and approved ERC-20 receipt observation and pull-release events |
-| Asset policy registry | [`smart-contracts/StreamAssetPolicyRegistry.sol`](../../smart-contracts/StreamAssetPolicyRegistry.sol) | Deployment-wide approved ERC-20 policy status and evidence hashes |
-| ERC-4906 interface | [`smart-contracts/IERC4906.sol`](../../smart-contracts/IERC4906.sol) | Metadata update event interface |
-| ERC-7572-style interface | [`smart-contracts/IERC7572.sol`](../../smart-contracts/IERC7572.sol) | Contract-level metadata interface used by the release-tracked adapter |
+| Core NFT contract | [`smart-contracts/core/StreamCore.sol`](../../smart-contracts/core/StreamCore.sol) | ERC-721, collection, metadata, dependency, burn, freeze, and randomizer events |
+| Contract metadata adapter | [`smart-contracts/domains/metadata/StreamContractMetadata.sol`](../../smart-contracts/domains/metadata/StreamContractMetadata.sol) | ERC-7572-style `contractURI()`, `ContractURIUpdated`, URI hash, core binding, and admin binding |
+| Drops contract | [`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol) | Drop authorization, signer, auction contract, and fixed-price credit events |
+| Auction contract | [`smart-contracts/domains/auctions/AuctionContract.sol`](../../smart-contracts/domains/auctions/AuctionContract.sol) | Auction lifecycle, bid, settlement, and proceeds events |
+| Admin contract | [`smart-contracts/domains/access/StreamAdmins.sol`](../../smart-contracts/domains/access/StreamAdmins.sol) | Role, pause, emergency recipient, and signer-lifecycle target events |
+| Minter bridge | [`smart-contracts/domains/mint/StreamMinter.sol`](../../smart-contracts/domains/mint/StreamMinter.sol) | Phase, fixed-price batch mint, auction mint, auction end-time, contract-reference events, and bridge reads such as original auction end-time values |
+| Randomizer lifecycle | [`smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol`](../../smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol) | Request, fulfillment, stale, failure, retry, and burned-token randomness events |
+| Curator pool | [`smart-contracts/domains/revenue/StreamCuratorsPool.sol`](../../smart-contracts/domains/revenue/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
+| Dependency registry | [`smart-contracts/domains/dependencies/DependencyRegistry.sol`](../../smart-contracts/domains/dependencies/DependencyRegistry.sol) | Dependency version creation/deprecation events |
+| Revenue resolver | [`smart-contracts/domains/revenue/StreamRevenueResolver.sol`](../../smart-contracts/domains/revenue/StreamRevenueResolver.sol) | Primary assignment and template events for outside-Core sale settlement |
+| Primary-sale settlement | [`smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol`](../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol) | Official native ETH and approved-standard ERC-20 primary revenue settlement events |
+| Split factory | [`smart-contracts/domains/revenue/StreamSplitFactory.sol`](../../smart-contracts/domains/revenue/StreamSplitFactory.sol) | Immutable split profile, deterministic wallet, and asset-policy-registry pin events |
+| Split wallet | [`smart-contracts/domains/revenue/StreamSplitWallet.sol`](../../smart-contracts/domains/revenue/StreamSplitWallet.sol) | Native and approved ERC-20 receipt observation and pull-release events |
+| Asset policy registry | [`smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol`](../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol) | Deployment-wide approved ERC-20 policy status and evidence hashes |
+| ERC-4906 interface | [`smart-contracts/interfaces/standards/IERC4906.sol`](../../smart-contracts/interfaces/standards/IERC4906.sol) | Metadata update event interface |
+| ERC-7572-style interface | [`smart-contracts/interfaces/standards/IERC7572.sol`](../../smart-contracts/interfaces/standards/IERC7572.sol) | Contract-level metadata interface used by the release-tracked adapter |
 | Metadata event tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol) | Current metadata event behavior |
 | Contract metadata tests | [`test/StreamContractMetadata.t.sol`](../../test/StreamContractMetadata.t.sol) | Contract URI, URI hash, pause, event, and admin behavior |
 | EIP-712 tests | [`test/StreamDropsEIP712.t.sol`](../../test/StreamDropsEIP712.t.sol) | Drop consumed/cancelled/signer event behavior |
@@ -339,9 +339,9 @@ at mint. `MinterAuctionEndTimeUpdated` records minter-side end-time edits.
 original or manually edited minter bridge value and can be stale after auction
 contract extensions.
 For source-file lookup, the deployed auction implementation is
-[`smart-contracts/AuctionContract.sol`](../../smart-contracts/AuctionContract.sol)
+[`smart-contracts/domains/auctions/AuctionContract.sol`](../../smart-contracts/domains/auctions/AuctionContract.sol)
 and the minter bridge is
-[`smart-contracts/StreamMinter.sol`](../../smart-contracts/StreamMinter.sol).
+[`smart-contracts/domains/mint/StreamMinter.sol`](../../smart-contracts/domains/mint/StreamMinter.sol).
 
 Outbid refunds become bidder credits through `OutbidCreditCreated`. Settlement
 credits are emitted through `AuctionProceedsCreditCreated`. Withdrawals are

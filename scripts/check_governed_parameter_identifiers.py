@@ -11,8 +11,8 @@ from typing import Final
 
 TARGET_ARCHITECTURE: Final = Path("docs/launch-v1-target-architecture.md")
 LONG_TERM_ARCHITECTURE: Final = Path("docs/stream-long-term-architecture.md")
-GAS_HOST: Final = Path("smart-contracts/StreamGasParameterHost.sol")
-TIME_HOST: Final = Path("smart-contracts/StreamTimeParameterHost.sol")
+GAS_HOST: Final = Path("smart-contracts/domains/parameters/StreamGasParameterHost.sol")
+TIME_HOST: Final = Path("smart-contracts/domains/parameters/StreamTimeParameterHost.sol")
 
 GGP_NAMES: Final = (
     "ROYALTY_RESOLVER_GAS_LIMIT",

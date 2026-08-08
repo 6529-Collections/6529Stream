@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../smart-contracts/IERC165.sol";
-import "../smart-contracts/IStreamCoreFinalityAdapter.sol";
-import "../smart-contracts/IStreamCoreFinalitySource.sol";
-import "../smart-contracts/StreamArtworkFinalityTypes.sol";
-import "../smart-contracts/StreamCoreFinalityAdapter.sol";
+import "../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../smart-contracts/interfaces/stream/IStreamCoreFinalityAdapter.sol";
+import "../smart-contracts/interfaces/stream/IStreamCoreFinalitySource.sol";
+import "../smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol";
+import "../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 

@@ -67,8 +67,8 @@ Use tracked committed sources before wiring a wallet or signing service.
 | Interface IDs | [`release-artifacts/latest/interface-ids.json`](../../release-artifacts/latest/interface-ids.json) | Interface lookup source |
 | Local address book | [`deployments/address-books/anvil-6529stream-v0.1.0-001.json`](../../deployments/address-books/anvil-6529stream-v0.1.0-001.json) | Local development addresses |
 | Fork-mainnet address book | [`deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`](../../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json) | Retained fork rehearsal addresses |
-| Contract implementation | [`smart-contracts/StreamDrops.sol`](../../smart-contracts/StreamDrops.sol) | Domain separator, digest, signer validation, replay, and sale validation |
-| Admin and signer manager | [`smart-contracts/StreamAdmins.sol`](../../smart-contracts/StreamAdmins.sol) | Signer lifecycle and permission target reference |
+| Contract implementation | [`smart-contracts/domains/mint/StreamDrops.sol`](../../smart-contracts/domains/mint/StreamDrops.sol) | Domain separator, digest, signer validation, replay, and sale validation |
+| Admin and signer manager | [`smart-contracts/domains/access/StreamAdmins.sol`](../../smart-contracts/domains/access/StreamAdmins.sol) | Signer lifecycle and permission target reference |
 | EIP-712 tests | [`test/StreamDropsEIP712.t.sol`](../../test/StreamDropsEIP712.t.sol) | EOA, wrong domain, wrong chain, expiry, replay, cancellation, epoch, malformed, and sale-field tests |
 | ERC-1271 tests | [`test/StreamDropsERC1271.t.sol`](../../test/StreamDropsERC1271.t.sol) | Contract-signer success and fail-closed tests |
 | Fork-aware Safe/ERC-1271 smoke tests | [`test/StreamSafeERC1271ForkSmoke.t.sol`](../../test/StreamSafeERC1271ForkSmoke.t.sol) | Safe-shaped approved-hash threshold, fixed-price, auction, wrong-chain, and wrong-verifying-contract smoke coverage |

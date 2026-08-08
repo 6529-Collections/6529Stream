@@ -141,8 +141,8 @@ def _validate_source_bindings(evidence: dict[str, Any], repo_root: Path) -> None
     expected_paths = [
         "test/StreamPostEntropyCompletionGas.t.sol",
         "test/helpers/StreamPostEntropyCompletionGasHarness.sol",
-        "smart-contracts/StreamCore.sol",
-        "smart-contracts/StreamCoreReadBuffer.sol",
+        "smart-contracts/core/StreamCore.sol",
+        "smart-contracts/core/StreamCoreReadBuffer.sol",
         "test/StreamCorePermanentTarget.t.sol",
         "docs/stream-entropy-coordinator.md",
         "docs/launch-conformance-matrix.md",
@@ -285,8 +285,8 @@ def _validate_core_boundary(evidence: dict[str, Any], repo_root: Path) -> None:
     if boundary.get("candidate_instance_blocked_by") != ["#656", "#670"]:
         raise CompletionGasCheckError("candidate instance blocker set drift")
     source = _require_mapping(boundary.get("stream_core_source"), "StreamCore source")
-    core_path = repo_root / "smart-contracts/StreamCore.sol"
-    if source.get("path") != "smart-contracts/StreamCore.sol":
+    core_path = repo_root / "smart-contracts/core/StreamCore.sol"
+    if source.get("path") != "smart-contracts/core/StreamCore.sol":
         raise CompletionGasCheckError("StreamCore source path mismatch")
     if source.get("sha256") != f"sha256:{_sha256(core_path)}":
         raise CompletionGasCheckError("StreamCore source hash mismatch")
