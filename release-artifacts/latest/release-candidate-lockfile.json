@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:7ad1d7790e37048157cb581e451dfd26c70946ad170f4dd461e4a11ab2263185",
+      "sha256": "sha256:33f3a34ab3fe17bac390687fe90464560bdb81d6779a5510595f5644a8d45a06",
       "size_bytes": 146884,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:57904475e73aaf2881fb4b969a60a5f49a8684d6cd8f7cdbb47b88cfb399db63",
+      "sha256": "sha256:c5337c1d477b6bf4bfb1aa3c268a7e219d85825e4525d7b242c709979d7a3e0f",
       "size_bytes": 151614,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,7 +73,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:e7c49de15b53f72c3cb91cb1e6781ba9de2ee9539b5f813470b1ddb71aaf85a3",
+      "sha256": "sha256:7e303b2a44377329d243b207b116fd5f3e8cfbd3b3b5a44f4cc7f35f64ce7d11",
       "size_bytes": 33344,
       "schema_version": "6529stream.risk-register.v1"
     },
@@ -135,8 +135,8 @@
     },
     "release_tool_call_policy": {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:30c96a6f13fe526fb73adc45959c4cf3a4b9ab87d11d5de7e43c91adaa17bf33",
-      "size_bytes": 2283050,
+      "sha256": "sha256:e9277c35975a26a9bf2d95496da1ea4a03a4b55407eba0aa16c76047f8af7101",
+      "size_bytes": 2283275,
       "schema_version": "6529stream.release-tool-call-policy.v1"
     },
     "release_tool_call_policy_schema": {
@@ -150,7 +150,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:d43999ae89aab8635571a4b629e385491c8621c1488bf35cfdeb55e3c7fbd6c1",
+        "sha256": "sha256:55f2a301adfdbc3ca289a7fa7a987ee8466342a7b96ee0500cf4830de178f372",
         "size_bytes": 146092,
         "schema_version": "6529stream.release-notes.v1"
       },

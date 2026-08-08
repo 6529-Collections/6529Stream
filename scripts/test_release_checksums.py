@@ -154,7 +154,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 271)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 272)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3149,11 +3149,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 271)
-        self.assertEqual(len(manifest["files"]), 444)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 272)
+        self.assertEqual(len(manifest["files"]), 445)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            444,
+            445,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3180,6 +3180,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/generate_post_entropy_completion_gas.py"),
             Path("scripts/check_post_entropy_completion_gas.py"),
             Path("scripts/test_post_entropy_completion_gas.py"),
+            Path("test/StreamCorePermanentTarget.t.sol"),
             Path("test/StreamPostEntropyCompletionGas.t.sol"),
             Path("test/helpers/StreamPostEntropyCompletionGasHarness.sol"),
         }
@@ -3471,7 +3472,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 444)
+        self.assertEqual(len(classifications), 445)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")
