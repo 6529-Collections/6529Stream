@@ -2331,8 +2331,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 446)
-        self.assertEqual(summary.checksum_manifest_records, 446)
+        self.assertEqual(summary.checksum_entries, 448)
+        self.assertEqual(summary.checksum_manifest_records, 448)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2344,8 +2344,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 446)
-        self.assertEqual(data["checksum_manifest_records"], 446)
+        self.assertEqual(data["checksum_entries"], 448)
+        self.assertEqual(data["checksum_manifest_records"], 448)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
