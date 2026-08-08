@@ -66,6 +66,10 @@ interface IStreamCollectionMetadata is IERC165 {
     error InvalidSnapshotFamilySet(uint256 index, bytes32 recordType);
     /// @notice Reverts when the snapshot payload is not an admitted SNAPSHOT-family record.
     error InvalidSnapshotRecordType(bytes32 recordType);
+    /// @notice Reverts when a record family must remain append-only and unblockable.
+    error RecordFamilyLockNotAllowed(bytes32 recordType, bytes32 familyId);
+    /// @notice Reverts when a record family is routed to a different typed host.
+    error RecordFamilyHostNotAllowed(bytes32 recordType, bytes32 familyId);
 
     /// @notice Emitted when the admin dependency changes.
     event CollectionMetadataAdminContractUpdated(

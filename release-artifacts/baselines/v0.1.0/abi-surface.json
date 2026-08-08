@@ -6630,13 +6630,13 @@
     "StreamCollectionMetadata": {
       "source": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
       "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
-      "abi_sha256": "sha256:c4111583a78b770136f0ad00aec805f3d4f614f6d0e3a2a6c4645b595aea3f73",
-      "abi_entries": 100,
+      "abi_sha256": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "abi_entries": 121,
       "entry_counts": {
         "constructors": 1,
-        "functions": 62,
-        "events": 8,
-        "errors": 29,
+        "functions": 70,
+        "events": 13,
+        "errors": 37,
         "fallbacks": 0,
         "receives": 0
       },
@@ -7043,6 +7043,15 @@
             "state_mutability": "view"
           },
           {
+            "key": "acceptConfigurationAuthority()",
+            "kind": "function",
+            "name": "acceptConfigurationAuthority",
+            "signature": "acceptConfigurationAuthority()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "adminsContract()",
             "kind": "function",
             "name": "adminsContract",
@@ -7112,6 +7121,15 @@
               }
             ],
             "state_mutability": "view"
+          },
+          {
+            "key": "cancelConfigurationAuthorityProposal()",
+            "kind": "function",
+            "name": "cancelConfigurationAuthorityProposal",
+            "signature": "cancelConfigurationAuthorityProposal()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
           },
           {
             "key": "collectionRecord(uint256,bytes32)",
@@ -7332,6 +7350,51 @@
                     "internal_type": "uint8"
                   }
                 ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurationAuthority()",
+            "kind": "function",
+            "name": "configurationAuthority",
+            "signature": "configurationAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurationHash()",
+            "kind": "function",
+            "name": "configurationHash",
+            "signature": "configurationHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurationRevision()",
+            "kind": "function",
+            "name": "configurationRevision",
+            "signature": "configurationRevision()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
               }
             ],
             "state_mutability": "view"
@@ -7586,6 +7649,36 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "pendingConfigurationAuthority()",
+            "kind": "function",
+            "name": "pendingConfigurationAuthority",
+            "signature": "pendingConfigurationAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "proposeConfigurationAuthority(address)",
+            "kind": "function",
+            "name": "proposeConfigurationAuthority",
+            "signature": "proposeConfigurationAuthority(address)",
+            "inputs": [
+              {
+                "name": "proposedAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "publishCollectionSnapshot(uint256,bytes32,bytes32[],(bytes32,bytes32,string,bytes32,bytes32,uint64))",
             "kind": "function",
             "name": "publishCollectionSnapshot",
@@ -7700,6 +7793,21 @@
                 "name": "",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeCount()",
+            "kind": "function",
+            "name": "recordTypeCount",
+            "signature": "recordTypeCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
               }
             ],
             "state_mutability": "view"
@@ -8490,6 +8598,195 @@
             ]
           },
           {
+            "key": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityAccepted",
+            "signature": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "oldAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityInitialized",
+            "signature": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityProposalCanceled",
+            "signature": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "canceledPendingAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityProposed",
+            "signature": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationUpdated",
+            "signature": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": true
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "mutationType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
             "key": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
             "kind": "event",
             "name": "RecordFamilyGrantUpdated",
@@ -8782,6 +9079,19 @@
             ]
           },
           {
+            "key": "InvalidRecordFamilyConfigurationAuthority(address)",
+            "kind": "error",
+            "name": "InvalidRecordFamilyConfigurationAuthority",
+            "signature": "InvalidRecordFamilyConfigurationAuthority(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "InvalidRecordFamilyRegistry()",
             "kind": "error",
             "name": "InvalidRecordFamilyRegistry",
@@ -8912,6 +9222,75 @@
             ]
           },
           {
+            "key": "RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityAcceptanceRequired",
+            "signature": "RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalMissing()",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalMissing",
+            "signature": "RecordFamilyConfigurationAuthorityProposalMissing()",
+            "inputs": []
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalNoOp",
+            "signature": "RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalPending(address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalPending",
+            "signature": "RecordFamilyConfigurationAuthorityProposalPending(address)",
+            "inputs": [
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityRequired(address,address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityRequired",
+            "signature": "RecordFamilyConfigurationAuthorityRequired(address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
             "kind": "error",
             "name": "RecordFamilyGrantNoOp",
@@ -8959,6 +9338,42 @@
                 "name": "account",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyHostNotAllowed(bytes32,bytes32)",
+            "kind": "error",
+            "name": "RecordFamilyHostNotAllowed",
+            "signature": "RecordFamilyHostNotAllowed(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyLockNotAllowed(bytes32,bytes32)",
+            "kind": "error",
+            "name": "RecordFamilyLockNotAllowed",
+            "signature": "RecordFamilyLockNotAllowed(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ]
           },
@@ -19409,13 +19824,13 @@
     "StreamPreservationRecords": {
       "source": "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
       "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
-      "abi_sha256": "sha256:7e0ccb80ec1f7bb8c2dd846d73a24759c8d5273c37e432b17d915dcd9c6a8fb5",
-      "abi_entries": 36,
+      "abi_sha256": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
+      "abi_entries": 39,
       "entry_counts": {
         "constructors": 1,
-        "functions": 23,
+        "functions": 25,
         "events": 2,
-        "errors": 10,
+        "errors": 11,
         "fallbacks": 0,
         "receives": 0
       },
@@ -19899,6 +20314,113 @@
             "state_mutability": "view"
           },
           {
+            "key": "deriveCollectionRecordHashFor(address,uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "deriveCollectionRecordHashFor",
+            "signature": "deriveCollectionRecordHashFor(address,uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "isStreamPreservationRecords()",
             "kind": "function",
             "name": "isStreamPreservationRecords",
@@ -19933,6 +20455,42 @@
                 "name": "subjectId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionRecordHashFor(uint256,bytes32,bytes32,address)",
+            "kind": "function",
+            "name": "latestCollectionRecordHashFor",
+            "signature": "latestCollectionRecordHashFor(uint256,bytes32,bytes32,address)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
               }
             ],
             "outputs": [
@@ -20401,6 +20959,19 @@
                 "name": "schemaId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCollectionRecordRecorder(address)",
+            "kind": "error",
+            "name": "InvalidCollectionRecordRecorder",
+            "signature": "InvalidCollectionRecordRecorder(address)",
+            "inputs": [
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
               }
             ]
           },
@@ -29739,13 +30310,13 @@
     "IStreamCollectionMetadata": {
       "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
       "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
-      "abi_sha256": "sha256:6cfc024fdabf15f1576a48ddec800f421356fbc5da17ab4b64e86c7cd15d93d1",
-      "abi_entries": 46,
+      "abi_sha256": "sha256:c80fe840f1b7cc2800aa2c7871fb3c7249fd9b45365a426a518c275fdf02240f",
+      "abi_entries": 48,
       "entry_counts": {
         "constructors": 0,
         "functions": 25,
         "events": 5,
-        "errors": 16,
+        "errors": 18,
         "fallbacks": 0,
         "receives": 0
       },
@@ -31061,6 +31632,42 @@
                 "name": "maximum",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyHostNotAllowed(bytes32,bytes32)",
+            "kind": "error",
+            "name": "RecordFamilyHostNotAllowed",
+            "signature": "RecordFamilyHostNotAllowed(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyLockNotAllowed(bytes32,bytes32)",
+            "kind": "error",
+            "name": "RecordFamilyLockNotAllowed",
+            "signature": "RecordFamilyLockNotAllowed(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ]
           }
@@ -43204,13 +43811,13 @@
     "IStreamPreservationRecords": {
       "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
-      "abi_sha256": "sha256:a7633c3559877537dac328bda542b6a73d12c426d990c6b4cb8f96c6134aa9bb",
-      "abi_entries": 27,
+      "abi_sha256": "sha256:5d267295a2b851f878060875fa2ce090dc4aaccf3d986344f836b761f6bc5580",
+      "abi_entries": 30,
       "entry_counts": {
         "constructors": 0,
-        "functions": 15,
+        "functions": 17,
         "events": 2,
-        "errors": 10,
+        "errors": 11,
         "fallbacks": 0,
         "receives": 0
       },
@@ -43545,6 +44152,113 @@
             "state_mutability": "view"
           },
           {
+            "key": "deriveCollectionRecordHashFor(address,uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "deriveCollectionRecordHashFor",
+            "signature": "deriveCollectionRecordHashFor(address,uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "isStreamPreservationRecords()",
             "kind": "function",
             "name": "isStreamPreservationRecords",
@@ -43579,6 +44293,42 @@
                 "name": "subjectId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionRecordHashFor(uint256,bytes32,bytes32,address)",
+            "kind": "function",
+            "name": "latestCollectionRecordHashFor",
+            "signature": "latestCollectionRecordHashFor(uint256,bytes32,bytes32,address)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
               }
             ],
             "outputs": [
@@ -44047,6 +44797,19 @@
                 "name": "schemaId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCollectionRecordRecorder(address)",
+            "kind": "error",
+            "name": "InvalidCollectionRecordRecorder",
+            "signature": "InvalidCollectionRecordRecorder(address)",
+            "inputs": [
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address"
               }
             ]
           },
@@ -45159,6 +45922,1226 @@
                 "name": "wallet",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamRecordFamilyAuthorityProvider": {
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
+      "artifact_path": "out-release/IStreamRecordFamilyAuthorityProvider.sol/IStreamRecordFamilyAuthorityProvider.json",
+      "abi_sha256": "sha256:893b8482686c5e8428985404f88a46a8a173b19f9fad28baf6f95e522514636f",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "kind": "function",
+            "name": "isAuthorizedRecordWriter",
+            "signature": "isAuthorizedRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizationData",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamRecordFamilyAuthorityProvider()",
+            "kind": "function",
+            "name": "isStreamRecordFamilyAuthorityProvider",
+            "signature": "isStreamRecordFamilyAuthorityProvider()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamRecordFamilyRegistry": {
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+      "artifact_path": "out-release/IStreamRecordFamilyRegistry.sol/IStreamRecordFamilyRegistry.json",
+      "abi_sha256": "sha256:899156ae091030e14083b1bde08db14ec2eca75e68e53bb90aabcb350e7ad1c7",
+      "abi_entries": 49,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 22,
+        "events": 8,
+        "errors": 19,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "acceptConfigurationAuthority()",
+            "kind": "function",
+            "name": "acceptConfigurationAuthority",
+            "signature": "acceptConfigurationAuthority()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "admitRecordType(bytes32,bytes32,uint16)",
+            "kind": "function",
+            "name": "admitRecordType",
+            "signature": "admitRecordType(bytes32,bytes32,uint16)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "authorityProvider(uint8)",
+            "kind": "function",
+            "name": "authorityProvider",
+            "signature": "authorityProvider(uint8)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "providerCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "cancelConfigurationAuthorityProposal()",
+            "kind": "function",
+            "name": "cancelConfigurationAuthorityProposal",
+            "signature": "cancelConfigurationAuthorityProposal()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "configurationAuthority()",
+            "kind": "function",
+            "name": "configurationAuthority",
+            "signature": "configurationAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurationHash()",
+            "kind": "function",
+            "name": "configurationHash",
+            "signature": "configurationHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurationRevision()",
+            "kind": "function",
+            "name": "configurationRevision",
+            "signature": "configurationRevision()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "familyAllowedAuthorizationClassMask(bytes32)",
+            "kind": "function",
+            "name": "familyAllowedAuthorizationClassMask",
+            "signature": "familyAllowedAuthorizationClassMask(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "familyRejectsAdminAuthority(bytes32)",
+            "kind": "function",
+            "name": "familyRejectsAdminAuthority",
+            "signature": "familyRejectsAdminAuthority(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isStreamRecordFamilyRegistry()",
+            "kind": "function",
+            "name": "isStreamRecordFamilyRegistry",
+            "signature": "isStreamRecordFamilyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "pendingConfigurationAuthority()",
+            "kind": "function",
+            "name": "pendingConfigurationAuthority",
+            "signature": "pendingConfigurationAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "proposeConfigurationAuthority(address)",
+            "kind": "function",
+            "name": "proposeConfigurationAuthority",
+            "signature": "proposeConfigurationAuthority(address)",
+            "inputs": [
+              {
+                "name": "proposedAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "recordFamilyGrant(bytes32,uint8,address)",
+            "kind": "function",
+            "name": "recordFamilyGrant",
+            "signature": "recordFamilyGrant(bytes32,uint8,address)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeCount()",
+            "kind": "function",
+            "name": "recordTypeCount",
+            "signature": "recordTypeCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypePolicy(bytes32)",
+            "kind": "function",
+            "name": "recordTypePolicy",
+            "signature": "recordTypePolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,uint16,bool)",
+                "internal_type": "struct IStreamRecordFamilyRegistry.RecordTypePolicy",
+                "components": [
+                  {
+                    "name": "familyId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "authorizationClassMask",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "admitted",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeRejectsAdminAuthority(bytes32)",
+            "kind": "function",
+            "name": "recordTypeRejectsAdminAuthority",
+            "signature": "recordTypeRejectsAdminAuthority(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordTypeRevision(bytes32)",
+            "kind": "function",
+            "name": "recordTypeRevision",
+            "signature": "recordTypeRevision(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "kind": "function",
+            "name": "requireRecordWriter",
+            "signature": "requireRecordWriter(uint256,bytes32,bytes32,address,bytes)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizationData",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setAuthorityProvider(uint8,address)",
+            "kind": "function",
+            "name": "setAuthorityProvider",
+            "signature": "setAuthorityProvider(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+            "kind": "function",
+            "name": "setRecordFamilyGrant",
+            "signature": "setRecordFamilyGrant(bytes32,uint8,address,bool)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+            "kind": "event",
+            "name": "RecordFamilyAuthorityProviderUpdated",
+            "signature": "RecordFamilyAuthorityProviderUpdated(uint16,uint8,address,address,bytes32,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "oldProvider",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newProvider",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newProviderCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityAccepted",
+            "signature": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "oldAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityInitialized",
+            "signature": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityProposalCanceled",
+            "signature": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "canceledPendingAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationAuthorityProposed",
+            "signature": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "RecordFamilyConfigurationUpdated",
+            "signature": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "configurationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": true
+              },
+              {
+                "name": "configurationHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "mutationType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+            "kind": "event",
+            "name": "RecordFamilyGrantUpdated",
+            "signature": "RecordFamilyGrantUpdated(uint16,bytes32,uint8,address,bool,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+            "kind": "event",
+            "name": "RecordTypeAdmitted",
+            "signature": "RecordTypeAdmitted(uint16,bytes32,bytes32,uint16,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AuthorityProviderCallFailed(uint8,address)",
+            "kind": "error",
+            "name": "AuthorityProviderCallFailed",
+            "signature": "AuthorityProviderCallFailed(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "AuthorityProviderNoOp(uint8,address)",
+            "kind": "error",
+            "name": "AuthorityProviderNoOp",
+            "signature": "AuthorityProviderNoOp(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAuthorityProvider(uint8,address)",
+            "kind": "error",
+            "name": "InvalidAuthorityProvider",
+            "signature": "InvalidAuthorityProvider(uint8,address)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "provider",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+            "kind": "error",
+            "name": "InvalidAuthorizationClassMask",
+            "signature": "InvalidAuthorizationClassMask(bytes32,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "allowed",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRecordFamilyConfigurationAuthority(address)",
+            "kind": "error",
+            "name": "InvalidRecordFamilyConfigurationAuthority",
+            "signature": "InvalidRecordFamilyConfigurationAuthority(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRecordType(bytes32)",
+            "kind": "error",
+            "name": "InvalidRecordType",
+            "signature": "InvalidRecordType(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityAcceptanceRequired",
+            "signature": "RecordFamilyConfigurationAuthorityAcceptanceRequired(address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalMissing()",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalMissing",
+            "signature": "RecordFamilyConfigurationAuthorityProposalMissing()",
+            "inputs": []
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalNoOp",
+            "signature": "RecordFamilyConfigurationAuthorityProposalNoOp(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityProposalPending(address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityProposalPending",
+            "signature": "RecordFamilyConfigurationAuthorityProposalPending(address)",
+            "inputs": [
+              {
+                "name": "pendingAuthority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyConfigurationAuthorityRequired(address,address)",
+            "kind": "error",
+            "name": "RecordFamilyConfigurationAuthorityRequired",
+            "signature": "RecordFamilyConfigurationAuthorityRequired(address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+            "kind": "error",
+            "name": "RecordFamilyGrantNoOp",
+            "signature": "RecordFamilyGrantNoOp(bytes32,uint8,address,bool)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+            "kind": "error",
+            "name": "RecordFamilyGrantNotAllowed",
+            "signature": "RecordFamilyGrantNotAllowed(bytes32,uint8,address)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyRegistryOwnerRequired(address)",
+            "kind": "error",
+            "name": "RecordFamilyRegistryOwnerRequired",
+            "signature": "RecordFamilyRegistryOwnerRequired(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+            "kind": "error",
+            "name": "RecordFamilyUnauthorized",
+            "signature": "RecordFamilyUnauthorized(address,bytes32,bytes32,uint16)",
+            "inputs": [
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "authorizationClassMask",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeAlreadyAdmitted(bytes32)",
+            "kind": "error",
+            "name": "RecordTypeAlreadyAdmitted",
+            "signature": "RecordTypeAlreadyAdmitted(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RecordTypeNotAdmitted(bytes32)",
+            "kind": "error",
+            "name": "RecordTypeNotAdmitted",
+            "signature": "RecordTypeNotAdmitted(bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnknownAuthorizationClass(uint8)",
+            "kind": "error",
+            "name": "UnknownAuthorizationClass",
+            "signature": "UnknownAuthorizationClass(uint8)",
+            "inputs": [
+              {
+                "name": "authorizationClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "UnknownRecordFamily(bytes32)",
+            "kind": "error",
+            "name": "UnknownRecordFamily",
+            "signature": "UnknownRecordFamily(bytes32)",
+            "inputs": [
+              {
+                "name": "familyId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ]
           }

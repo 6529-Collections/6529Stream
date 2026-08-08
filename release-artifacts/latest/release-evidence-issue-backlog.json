@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:a8c72d41c84d941d17bb68c237be4fd840d9e450c8f23778eff3afb020a53306",
+      "sha256": "sha256:7344145a6c72c973cfdcad73a349a4b4c7324558b3050c1c66f932945e782a68",
       "size_bytes": 74215
     }
   },
@@ -149,7 +149,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:d71af0792fd5d5782eb3dc8b030ddd5006c9b3245aad2d89ac87d9b4c32b9ef0",
+        "sha256": "sha256:939c91baec5d3e7ba9a52db73ba47fc96a2c890cd7fb8a372cc3ca2b9a7386ea",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -320,7 +320,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:896b29f1e98d178e9af23d6ba8ccf8fb619514804bcaf999de632089d6d972d8",
+        "sha256": "sha256:9d4eca04ee17ea063d15a124f760767655a58c8afd6b96e3f06a8c1d3650f0f2",
         "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
         "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."

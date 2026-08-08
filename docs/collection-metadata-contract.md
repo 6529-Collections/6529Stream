@@ -2395,9 +2395,10 @@ Subject rules:
    the referenced object; `scopeId` matches the scoped-finality model in
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md).
 3. The per-object dossier query path is
-   `latestCollectionRecordHash(collectionId, recordType, subjectId)` plus
-   event replay filtered by the indexed `subjectId`, both keyed by these
-   pinned derivations.
+   `latestCollectionRecordHashFor(collectionId, recordType, subjectId, recorder)`
+   plus event replay filtered by the indexed `subjectId`, both keyed by these
+   pinned derivations. The caller-scoped convenience read is appropriate only
+   when the reader is also the recorder.
 
 #### Record Chain Accumulator [CMC-RECORD-CHAIN]
 
@@ -4541,10 +4542,19 @@ function latestAttestationHash(
     address attester
 ) external view returns (bytes32);
 
+// Caller-scoped convenience: reads the msg.sender recorder lane.
 function latestCollectionRecordHash(
     uint256 collectionId,
     bytes32 recordType,
     bytes32 subjectId
+) external view returns (bytes32);
+
+// Use this form when querying another recorder's lane.
+function latestCollectionRecordHashFor(
+    uint256 collectionId,
+    bytes32 recordType,
+    bytes32 subjectId,
+    address recorder
 ) external view returns (bytes32);
 
 function latestSnapshotHash(uint256 collectionId)

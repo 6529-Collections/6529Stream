@@ -769,9 +769,39 @@ against
 future candidate-specific grant map is separately validated against
 `deployments/schema/record-family-authorization-grant-map.v1.schema.json`. The
 source catalog pins the implementation commit/digests, exact fourteen family
-IDs, eight authorization classes, immutable host bindings, and strict snapshot
-intersection. The inventory preserves the five pre-remediation mutation
-selectors and eight historical fail-open behaviors. A future complete
+IDs, eight authorization classes, immutable host bindings, strict snapshot
+intersection, family-authorized record locking, independent-family routing to
+the append-only Preservation host without pause/freeze blocking, and
+undeclared-type rejection before capacity consumption. Preservation hashes and
+latest pointers are recorder-scoped: the convenience derive/latest methods use
+the caller, while the explicit `For` methods require a nonzero recorder. The
+catalog also pins the additive pre-genesis interface IDs: registry
+`0x679dcd40`, collection metadata `0x2c2422f4`, and Preservation
+`0xa30cfc7c`. The inventory
+preserves the five pre-remediation mutation selectors and eight historical
+fail-open behaviors. A future complete grant map must hash-bind that exact
+source catalog and enumerate the numeric class/mode catalog, live-provider
+address/codehash/revision rows, exact family IDs, each admitted record type's
+ordered class mask and lock policy, the active family grants, exactly the
+metadata and preservation hosts, and both hosts' shared record-family registry
+address. The classifier, grant map, and both host-support records must agree on
+the registry-wide configuration revision, commitment hash, record-type count,
+stored current and pending configuration authorities, chain ID, and finalized
+observation block number/hash. The current authority must be nonzero. The
+stored current value is initialized once from the `StreamAdmins` owner and is
+thereafter changed only by the two-step propose/accept flow; it is not a live
+owner alias. Release evidence normally requires a zero pending value. A
+nonzero pending value is accepted only with an explicit reviewed disposition.
+Lifecycle support separately binds proposed, accepted, and cancelled address
+transitions and each event's configuration revision/hash. It also names the
+same registry and finalized chain/block identity, repeats the observed
+current/pending authority and configuration revision/hash, and carries a
+reviewed terminal-to-observation commitment-linkage reference. The checker
+requires the observation to be at or after the terminal lifecycle revision
+and the observed current authority to equal the accepted/cancellation
+authority. Any later admission,
+provider change, or family-grant change advances that commitment and invalidates
+the retained map until it is regenerated and re-reviewed. A future complete
 evidence envelope must use its schema-governed `grant_map.path` to bind the
 separate phase- and candidate-specific
 `deployments/record-family-authorization/public-beta-record-family-authorization-grant-map.json`
@@ -2188,10 +2218,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `6931aaa6db64e288ee2d67b6b0566ad986d2c856` on
-`2026-07-28T13:20:58Z` records 3,213 findings: 49 High, 825 Medium, 1,265 Low,
+at source commit `7f7d2af516b80931d8ef936ecfa23b0a8fa044b2` on
+`2026-08-08T16:36:06Z` records 3,218 findings: 49 High, 830 Medium, 1,265 Low,
 1,032 Informational, and 42 Optimization. Its High/Medium scope totals are
-first-party production `2/30/32`, vendored `1/9/10`, test `46/779/825`, script
+first-party production `2/30/32`, vendored `1/9/10`, test `46/784/830`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

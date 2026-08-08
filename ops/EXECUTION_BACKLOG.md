@@ -1792,9 +1792,35 @@ registry pins fourteen family IDs and eight authority classes, admits only
 exact record types, resolves live signer providers or family-specific grants,
 and is immutably enforced by both generic record hosts. Snapshot publication
 requires a `SNAPSHOT`-family payload plus authority over every declared exact
-record type. The schema-validated source catalog binds the semantic commit,
-source digests, interfaces, hosts, and tests; the earlier inventory remains a
-historical pre-remediation baseline. Exact candidate/profile binding,
+record type. Collection-record locks use the same family authority;
+independent-attestation types cannot be locked or written through mutable
+metadata and instead use append-only Preservation without pause/freeze
+blocking; Preservation hashes and latest pointers are scoped by recorder, with
+caller-scoped convenience reads and explicit nonzero-recorder `For` reads; and
+undeclared types fail before consuming collection record capacity. The additive
+pre-genesis ABI changes are explicit: registry configuration-authority lifecycle
+ID `0x679dcd40`, unchanged collection metadata ID `0x2c2422f4`, and
+explicit-recorder Preservation ID `0xa30cfc7c`. The schema-validated source
+catalog binds the semantic commit, source
+digests, interfaces, hosts, lock and
+capacity policy, and tests; the exact grant-map schema separately requires its
+catalog digest, numeric class/family maps, live providers, per-type masks and
+locks, active grants, both hosts, and their exact shared registry
+address. The registry-wide revision/hash/count commitment covers every
+admission, provider, and grant mutation; a retained map must bind it at an exact
+chain/block observation. That observation also binds the stored nonzero current
+configuration authority and stored pending authority across the classifier,
+grant map, and both host rows. The current authority is initialized from the
+`StreamAdmins` owner but is thereafter independent two-step state; a nonzero
+pending value requires reviewed disposition. Lifecycle evidence must bind the
+exact propose/accept/cancel old/proposed/accepted/cancelled addresses and their
+configuration revisions/hashes. The lifecycle support must bind the same
+registry and finalized chain/block identity, reconcile accepted/cancellation
+authority to the observed current authority, prove the observation is not
+earlier than the terminal lifecycle revision, and retain a reviewed
+terminal-to-observation commitment-linkage reference. Any later mutation requires regeneration and
+review. The earlier inventory remains a historical pre-remediation baseline.
+Exact candidate/profile binding,
 production admission/provider/grant configuration, deployed runtime/codehash
 evidence, non-local lifecycle exercise, and independent review remain missing.
 `RISK-GOV-002` remains `open_blocker`; both public-beta and production release

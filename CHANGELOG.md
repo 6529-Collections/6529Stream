@@ -61,6 +61,63 @@ the release policy in `docs/release-policy.md`.
   root-set pin. Refreshed the exact non-production
   deployment-fixture receipt pin and deterministic release tail; no contract,
   live deployment, audit, or readiness status changed.
+- Hardened issue #690's source implementation and future candidate evidence.
+  Non-reserved record locks now require the admitted record family's authority,
+  independent-attestation record types cannot be permanently locked or written
+  through the mutable metadata host, and their append-only Preservation path
+  remains available through metadata pauses and Core freeze. Preservation
+  record hashes and latest pointers are recorder-scoped: the convenience
+  derive/latest reads use `msg.sender`, while explicit-recorder reads require a
+  nonzero recorder, so two authorized writers cannot collide or overwrite each
+  other's latest pointer. Undeclared record types fail before consuming
+  metadata record capacity. The immutable source commit changes the published
+  ABI: `IStreamRecordFamilyRegistry` adds configuration-authority reads and a
+  two-step propose/accept/cancel lifecycle (`0x679dcd40`), while
+  `IStreamPreservationRecords` adds explicit-recorder derive/latest reads and
+  the zero-recorder error (`0xa30cfc7c`); `IStreamCollectionMetadata` remains
+  `0x2c2422f4` because its added host/lock errors do not change ERC-165. The
+  candidate grant-map schema and checker now bind the exact source catalog,
+  numeric authorization classes and modes, live-provider codehash/revision
+  rows, family IDs, per-record-type class masks and lock policy, active family
+  grants, both hosts' exact shared registry address, and the two real host
+  implementations. The registry stores a current configuration authority,
+  initialized once from the `StreamAdmins` owner, plus a separate pending
+  authority used by that two-step lifecycle; the catalog no longer describes
+  the mutable `StreamAdmins` owner as the continuing authority. Candidate
+  evidence must bind both values at the same finalized observation in the
+  classifier, grant map, and both host-support rows. The current value must be
+  nonzero, while a nonzero pending value requires an explicit reviewed
+  disposition. Lifecycle evidence also binds the exact proposed, accepted,
+  and cancelled address transitions with their emitted configuration
+  revisions and hashes, the registry address, and the same finalized
+  chain/block observation. The terminal accepted/cancellation authority must
+  equal the observed current authority, and a reviewed commitment-linkage
+  reference binds the terminal revision/hash to an observation at or after
+  that state. A chain- and registry-domain-separated configuration
+  commitment advances on every admission, provider, and family-grant mutation;
+  retained maps bind its revision, hash, record-type count, chain, and finalized
+  observation block, so later configuration changes require regeneration and
+  review. Candidate/profile binding, the production admission/provider/grant
+  set, deployed runtime evidence, lifecycle exercise, and retained
+  candidate-bound independent review remain unavailable; `RISK-GOV-002` and
+  both release-mode stops remain unchanged. The canonical release target
+  configuration now publishes `IStreamRecordFamilyAuthorityProvider` and
+  `IStreamRecordFamilyRegistry`, and explicitly pins the Solidity interface IDs
+  for the Registry, Collection Metadata, and Preservation interfaces so
+  inherited ERC-165 selectors cannot distort the generated catalog. The
+  expanded interface surface adds 24 explicit NatSpec-baseline exclusions
+  (912 total), retaining that documentation debt rather than implying it is
+  complete. A fresh
+  pinned Slither `0.11.5` capture at the rebased source commit retains the exact
+  32 Open first-party production High/Medium fingerprints (2 High, 30 Medium);
+  four additional Medium rows are test-only. Baseline parity is inventory
+  consistency, not finding acceptance, audit completion, or readiness. Review
+  remediation also canonicalizes pending-authority review timestamps, converts
+  missing/reordered source anchors into typed fail-closed checker errors, and
+  documents explicit-recorder dossier and stewardship reads. Template hostile
+  coverage now also proves the lifecycle source-commit observation remains
+  absent until retained evidence exists; these changes do not alter Solidity,
+  candidate evidence availability, risk disposition, or readiness.
 - Closed the local Core headroom obligation under issue #654 by deriving
   `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring
   exact parity with the final `StreamCore` bytecode-proof row and the

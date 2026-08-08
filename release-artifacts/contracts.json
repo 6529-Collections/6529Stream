@@ -229,7 +229,8 @@
     },
     {
       "name": "IStreamCollectionMetadata",
-      "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+      "interface_id": "0x2c2422f4"
     },
     {
       "name": "IStreamCore",
@@ -291,7 +292,17 @@
     },
     {
       "name": "IStreamPreservationRecords",
-      "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"
+      "source": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
+      "interface_id": "0xa30cfc7c"
+    },
+    {
+      "name": "IStreamRecordFamilyAuthorityProvider",
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol"
+    },
+    {
+      "name": "IStreamRecordFamilyRegistry",
+      "source": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+      "interface_id": "0x679dcd40"
     },
     {
       "name": "IStreamRevenueResolver",

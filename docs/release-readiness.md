@@ -247,14 +247,35 @@ non-local rehearsal, monitoring, and independent-review evidence is complete.
 The Governance V2 foundation is pre-audit and not production-ready.
 
 Both release phases also run the record-family authorization checker and
-consume its code-owned hard completion blocker. The current metadata and
-preservation writer model is `as_built_fail_open`: its five mutation selectors
-accept selector/global-admin grants without enforcing the exact record-family
-  authority required by `[CMC-AUTHZ]`. The planning inventory, its schema, the
-  retained-evidence and grant-map schemas, and the template make the missing
-  implementation and evidence explicit, but no JSON edit, environment
-  variable, accepted risk, template, or admin ceremony can waive the stop. Issue
-[#690](https://github.com/6529-Collections/6529Stream/issues/690) and
+consume its code-owned hard completion blocker. The retained historical
+inventory records the former `as_built_fail_open` five-selector writer model;
+the current source instead enforces a closed-world record-family registry,
+typed writer authority, all-family snapshot intersection, family-authorized
+locks, independent-family routing to an append-only Preservation path that
+bypasses metadata pause and Core freeze, recorder-scoped hashes/latest pointers
+with caller-scoped convenience reads and explicit nonzero-recorder reads, and
+undeclared-type rejection before capacity consumption. The source ABI now adds
+the registry configuration-authority lifecycle (`0x679dcd40`) and
+Preservation's explicit-recorder reads (`0xa30cfc7c`), while collection metadata
+remains `0x2c2422f4`; these pre-genesis additions do not prove a candidate or
+deployment. The source catalog, planning inventory,
+retained-evidence and exact grant-map schemas, and template make the still
+missing candidate-bound evidence explicit, and no JSON edit, environment
+variable, accepted risk, template, or admin ceremony can waive the stop.
+
+The registry's stored current configuration authority is initialized from the
+`StreamAdmins` owner but does not track later owner changes; a separate stored
+pending authority mediates propose/accept/cancel. Candidate evidence must bind
+both values at the same finalized observation across the classifier, grant
+map, and both host rows. The current value must be nonzero. A pending value
+must be zero unless its takeover state has an explicit reviewed disposition,
+and lifecycle evidence must bind the exact address transition plus emitted
+revision/hash for propose, accept, and cancel. That support must name the same
+registry and finalized chain/block observation, reconcile the terminal
+accepted/cancellation authority to the observed current authority, and bind
+the terminal commitment to the observed revision/hash through a reviewed
+linkage reference.
+[Issue #690](https://github.com/6529-Collections/6529Stream/issues/690) and
 `RISK-GOV-002` therefore block both public beta and production.
 
 Strict release mode now proves whether the implementation catalog satisfies the
@@ -288,7 +309,7 @@ that stricter decision, so #684 and `RISK-GOV-004` remain open.
 | StreamCore deployment headroom | The canonical bytecode proof passes the 2,000-byte production margin and approved 22,184-byte objective without an exception; this does not clear candidate, audit, or live evidence rows | No | No |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
 | Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, and the shared Core completion buffer. Issue #671 binds the as-built permanent Core, actual royalty/metadata boundaries, independent raise-chain tests, six via-IR measurements, and inventory-bound 1,460,000 floor / 2,910,000 genesis planning values without adding a 23rd GGP. Candidate bindings remain honestly `not_available`; concrete #670 artist/revenue rows, exhaustive consumer review, candidate-bound sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are incomplete. #656/#684 and `RISK-GOV-004` keep this non-waivable production gate red | No | Yes |
-| Record-family authorization | The checked planning inventory pins five selector/global-admin mutation surfaces, eight authorization classes, fourteen family groups, and eight fail-open behaviors. The retained-evidence and strict grant-map schemas plus the template require candidate, classifier, grant-map, snapshot-intersection, lifecycle, phase, runtime, and independent-review bindings, but current contracts enforce none of that family-scoped policy; issue #690 and `RISK-GOV-002` remain open | Yes | Yes |
+| Record-family authorization | The checked source catalog pins closed-world record-type admission, fourteen family IDs, eight typed authority classes, family-scoped writes and locks, independent-family routing to append-only Preservation without pause/freeze blocking, a registry-wide configuration commitment, stored current/pending two-step configuration authority, snapshot intersection, and undeclared-type capacity protection. The historical inventory retains the former five selector/global-admin surfaces and eight fail-open behaviors. The exact candidate admission/provider/grant map, shared host-registry address, same-block finalized current/pending authority observation, deployed runtime, lifecycle event tuples, phase, and independent-review evidence remain unavailable; issue #690 and `RISK-GOV-002` stay open | Yes | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
@@ -408,6 +429,19 @@ The current local baseline includes:
   `production-release-record-family-authorization-grant-map.json` artifact in
   `deployments/record-family-authorization/`; production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
+  Each grant map must also hash-bind the source catalog and enumerate its exact
+  numeric class/mode and family-ID maps, live providers, per-type class masks
+  and lock policy, active family grants, the two runtime hosts, and
+  both hosts' exact shared record-family registry address. The classifier and
+  both host-support rows must agree on configuration revision/hash,
+  record-type count, chain ID, and finalized observation block; any later
+  admission/provider/grant mutation invalidates the map and requires a new
+  retained observation and review.
+  Preservation record hashes and latest pointers include recorder identity.
+  `deriveCollectionRecordHash` and `latestCollectionRecordHash` use the caller,
+  while their `For` variants accept an explicit nonzero recorder; evidence and
+  indexers must not interpret the convenience latest read as a global
+  collection/type/subject pointer.
   Record-family semantic revalidation binds exactly twelve source inputs:
   `smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol`,
   `smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol`,

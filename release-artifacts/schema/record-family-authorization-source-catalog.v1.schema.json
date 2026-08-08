@@ -15,6 +15,10 @@
     "family_groups",
     "host_bindings",
     "snapshot_policy",
+    "lock_policy",
+    "capacity_policy",
+    "configuration_policy",
+    "independent_policy",
     "source_tests",
     "remaining_blockers"
   ],
@@ -69,6 +73,18 @@
     "snapshot_policy": {
       "$ref": "#/$defs/snapshotPolicy"
     },
+    "lock_policy": {
+      "$ref": "#/$defs/lockPolicy"
+    },
+    "capacity_policy": {
+      "$ref": "#/$defs/capacityPolicy"
+    },
+    "configuration_policy": {
+      "$ref": "#/$defs/configurationPolicy"
+    },
+    "independent_policy": {
+      "$ref": "#/$defs/independentPolicy"
+    },
     "source_tests": {
       "type": "array",
       "minItems": 4,
@@ -80,8 +96,8 @@
     },
     "remaining_blockers": {
       "type": "array",
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "uniqueItems": true,
       "items": {
         "type": "string",
@@ -138,6 +154,7 @@
         "record_type_admission",
         "wildcard_admission",
         "configuration_authority",
+        "pending_configuration_authority",
         "deployment_model",
         "candidate_binding_status"
       ],
@@ -173,7 +190,10 @@
           "const": false
         },
         "configuration_authority": {
-          "const": "stream_admins_owner"
+          "const": "stored_configurationAuthority_initialized_from_stream_admins_owner"
+        },
+        "pending_configuration_authority": {
+          "const": "stored_pendingConfigurationAuthority_zero_without_proposal"
         },
         "deployment_model": {
           "const": "embedded_in_collection_metadata_host"
@@ -270,7 +290,10 @@
           "$ref": "#/$defs/selector"
         },
         "registry_binding": {
-          "const": "immutable"
+          "enum": [
+            "embedded_self",
+            "external_classifier_host"
+          ]
         },
         "authorization_class_persisted": {
           "const": true
@@ -307,6 +330,106 @@
         },
         "per_record_type_authorization_event": {
           "const": true
+        }
+      }
+    },
+    "lockPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reserved_lock_authority",
+        "declared_record_type_authority",
+        "independent_family_lock_allowed",
+        "authorization_class_persisted"
+      ],
+      "properties": {
+        "reserved_lock_authority": {
+          "const": "function_or_global_admin"
+        },
+        "declared_record_type_authority": {
+          "const": "record_family"
+        },
+        "independent_family_lock_allowed": {
+          "const": false
+        },
+        "authorization_class_persisted": {
+          "const": true
+        }
+      }
+    },
+    "capacityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_record_types_per_collection",
+        "reserved_lock_slots",
+        "undeclared_record_types_rejected_before_slot_consumption"
+      ],
+      "properties": {
+        "maximum_record_types_per_collection": {
+          "const": 128
+        },
+        "reserved_lock_slots": {
+          "const": 2
+        },
+        "undeclared_record_types_rejected_before_slot_consumption": {
+          "const": true
+        }
+      }
+    },
+    "configurationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision_scope",
+        "commitment",
+        "record_type_count",
+        "candidate_observation"
+      ],
+      "properties": {
+        "revision_scope": {
+          "const": "all_admission_provider_and_grant_mutations"
+        },
+        "commitment": {
+          "const": "chain_and_registry_domain_separated_hash_chain"
+        },
+        "record_type_count": {
+          "const": "global_append_only"
+        },
+        "candidate_observation": {
+          "const": "finalized_chain_id_block_number_and_block_hash"
+        }
+      }
+    },
+    "independentPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mutable_metadata_host_allowed",
+        "append_only_host",
+        "metadata_mutation_pause_applies",
+        "collection_freeze_applies",
+        "record_hash_recorder_scope",
+        "latest_pointer_scope"
+      ],
+      "properties": {
+        "mutable_metadata_host_allowed": {
+          "const": false
+        },
+        "append_only_host": {
+          "const": "StreamPreservationRecords"
+        },
+        "metadata_mutation_pause_applies": {
+          "const": false
+        },
+        "collection_freeze_applies": {
+          "const": false
+        },
+        "record_hash_recorder_scope": {
+          "const": "caller_or_explicit_nonzero_recorder"
+        },
+        "latest_pointer_scope": {
+          "const": "collection_record_type_subject_recorder"
         }
       }
     }

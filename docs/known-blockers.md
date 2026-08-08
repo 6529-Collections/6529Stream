@@ -71,13 +71,34 @@ contributors who start from the README.
   remains the provenance-bound pre-remediation baseline, while the
   [`record-family-authorization-source-catalog.json`](../release-artifacts/record-family-authorization-source-catalog.json)
   pins the implementation commit, exact source digests, fourteen family IDs,
-  eight authority classes, host bindings, and snapshot-intersection behavior
-  under [issue #690](https://github.com/6529-Collections/6529Stream/issues/690).
-  The exact candidate/profile, production record-type admission set, live
-  signer providers, candidate grant map, deployed runtime/codehash bindings,
-  non-local rotation/revocation evidence, and independent review remain
-  unavailable. Neither source tests, a populated template, nor an admin
-  ceremony can substitute for that candidate-bound retained evidence.
+  eight authority classes, host bindings, snapshot-intersection behavior,
+  family-authorized locks, independent-family routing to append-only
+  Preservation without pause/freeze blocking, exact host-registry topology,
+  caller- or explicit-recorder-scoped Preservation hashes and latest pointers,
+  a registry-wide configuration commitment for drift detection, and
+  undeclared-type capacity protection. The immutable source ABI adds the
+  registry configuration-authority lifecycle (`0x679dcd40`) and Preservation's
+  explicit-recorder reads (`0xa30cfc7c`); collection metadata remains
+  `0x2c2422f4`. These are additive pre-genesis source changes, not evidence that
+  any candidate implements the bound addresses or configuration required under
+  [issue #690](https://github.com/6529-Collections/6529Stream/issues/690). The
+  exact candidate/profile, production record-type admission set, live signer
+  providers, finalized configuration observation (including the stored current
+  and pending configuration authorities), candidate grant map, deployed
+  runtime/codehash bindings, non-local rotation/revocation evidence, and
+  independent review remain unavailable. The current authority is initialized
+  once from the `StreamAdmins` owner and then governed by stored two-step
+  propose/accept/cancel state; it is not a live alias of the owner. Retained
+  evidence must show a nonzero current value and normally a zero pending value
+  at one finalized block across the classifier, grant map, and both hosts. Any
+  nonzero pending value requires a reviewed disposition, and lifecycle support
+  must bind the exact emitted old/proposed/accepted/cancelled addresses,
+  revisions, and hashes to the same registry and finalized chain/block
+  observation. The observation cannot precede the terminal lifecycle revision;
+  its current authority must equal the accepted/cancellation authority, and its
+  final revision/hash requires an explicit reviewed commitment-linkage record.
+  Neither source tests, a populated template, nor an admin ceremony can
+  substitute for that candidate-bound retained evidence.
   `RISK-GOV-002` remains `open_blocker`; both public-beta and production
   release mode continue to fail closed.
 - VRF and arRNG randomizer adapters now record request lifecycle state, expose

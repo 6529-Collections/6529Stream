@@ -378,6 +378,52 @@
       ]
     },
     {
+      "topic0": "0x0ffc73febb5a21a1e28f1783f868dfc953ae7091241b36d463bad28363657e2e",
+      "signature": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+      "name": "RecordFamilyConfigurationAuthorityAccepted",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "oldAuthority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "newAuthority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "configurationRevision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 4,
+          "name": "configurationHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x10ac9f0bb365b5d22d7bec500408692f23fdf83eadfec71615ef88b4c1134f0e",
       "signature": "AuctionCancelled(uint256,address)",
       "name": "AuctionCancelled",
@@ -701,6 +747,45 @@
       ],
       "emitted_by": [
         "StreamMintManager"
+      ]
+    },
+    {
+      "topic0": "0x1ae11b76a12ae719270b0a85a7b46d5f865ab3a4302d3a436830e6de184e7edd",
+      "signature": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+      "name": "RecordFamilyConfigurationAuthorityInitialized",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "authority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "configurationRevision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 3,
+          "name": "configurationHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -2816,6 +2901,52 @@
       ]
     },
     {
+      "topic0": "0x7724e27b2d5e560167e61fc1996f81ee9771d0cf27bf3cd9cbb3428f789a61df",
+      "signature": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+      "name": "RecordFamilyConfigurationUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "configurationRevision",
+          "type": "uint64",
+          "indexed": true,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 2,
+          "name": "configurationHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "mutationType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "authority",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717",
       "signature": "PauseUpdated(bytes32,bool,address,bytes32)",
       "name": "PauseUpdated",
@@ -3312,6 +3443,52 @@
       ],
       "emitted_by": [
         "StreamRevenueResolver"
+      ]
+    },
+    {
+      "topic0": "0x8b33aca3e70efcb4931506302c7592caca7eb5d69c8a9b2c279f24a07244ab72",
+      "signature": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+      "name": "RecordFamilyConfigurationAuthorityProposed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "authority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "pendingAuthority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "configurationRevision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 4,
+          "name": "configurationHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -5394,6 +5571,52 @@
       ],
       "emitted_by": [
         "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xf6c096dd53413780b66f71e2b2c0fe1fb68880db547e8743d12e181103d817b2",
+      "signature": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+      "name": "RecordFamilyConfigurationAuthorityProposalCanceled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "authority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "canceledPendingAuthority",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "configurationRevision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 4,
+          "name": "configurationHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -7800,6 +8023,214 @@
             },
             {
               "index": 6,
+              "name": "authority",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyConfigurationAuthorityAccepted",
+          "signature": "RecordFamilyConfigurationAuthorityAccepted(uint16,address,address,uint64,bytes32)",
+          "topic0": "0x0ffc73febb5a21a1e28f1783f868dfc953ae7091241b36d463bad28363657e2e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "oldAuthority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "newAuthority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "configurationRevision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "configurationHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyConfigurationAuthorityInitialized",
+          "signature": "RecordFamilyConfigurationAuthorityInitialized(uint16,address,uint64,bytes32)",
+          "topic0": "0x1ae11b76a12ae719270b0a85a7b46d5f865ab3a4302d3a436830e6de184e7edd",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "authority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "configurationRevision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 3,
+              "name": "configurationHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyConfigurationAuthorityProposalCanceled",
+          "signature": "RecordFamilyConfigurationAuthorityProposalCanceled(uint16,address,address,uint64,bytes32)",
+          "topic0": "0xf6c096dd53413780b66f71e2b2c0fe1fb68880db547e8743d12e181103d817b2",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "authority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "canceledPendingAuthority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "configurationRevision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "configurationHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyConfigurationAuthorityProposed",
+          "signature": "RecordFamilyConfigurationAuthorityProposed(uint16,address,address,uint64,bytes32)",
+          "topic0": "0x8b33aca3e70efcb4931506302c7592caca7eb5d69c8a9b2c279f24a07244ab72",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "authority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "pendingAuthority",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "configurationRevision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 4,
+              "name": "configurationHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "RecordFamilyConfigurationUpdated",
+          "signature": "RecordFamilyConfigurationUpdated(uint16,uint64,bytes32,bytes32,address)",
+          "topic0": "0x7724e27b2d5e560167e61fc1996f81ee9771d0cf27bf3cd9cbb3428f789a61df",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "configurationRevision",
+              "type": "uint64",
+              "indexed": true,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "configurationHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "mutationType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
               "name": "authority",
               "type": "address",
               "indexed": false,

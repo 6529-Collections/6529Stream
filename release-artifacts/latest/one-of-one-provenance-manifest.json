@@ -10,7 +10,7 @@
     {
       "descriptor": {
         "path": "release-artifacts/provenance/one-of-one-provenance-template.provenance.json",
-        "sha256": "sha256:6f78f83982edfa808f2f514b88f36d0e064acdfd3cfa7bac21c10841122faa24",
+        "sha256": "sha256:c1f6fd5422a85e51a5c4bc85eb8c289551b56d9b9c449d56736345d59b458ce9",
         "size_bytes": 6227,
         "schema_version": "6529stream.one-of-one-provenance-manifest.v1"
       },

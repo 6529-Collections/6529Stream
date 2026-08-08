@@ -69,6 +69,8 @@ interface IStreamPreservationRecords is IERC165 {
     error PreservationURITooLarge(uint256 actual, uint256 maximum);
     /// @notice Reverts when the same record hash has already been stored.
     error CollectionRecordAlreadyExists(bytes32 recordHash);
+    /// @notice Reverts when an explicit recorder identity is zero.
+    error InvalidCollectionRecordRecorder(address recorder);
 
     /// @notice Emitted when the admin dependency changes.
     event PreservationAdminContractUpdated(
@@ -110,12 +112,20 @@ interface IStreamPreservationRecords is IERC165 {
     function recordCollectionRecord(uint256 collectionId, CollectionRecord calldata record)
         external
         returns (bytes32 recordHash);
-    /// @notice Returns the latest recorded hash for one collection/type/subject key.
-    /// @dev Latest is last-write-wins by record time, not max `effectiveAt`.
+    /// @notice Returns the caller's latest recorded hash for one collection/type/subject key.
+    /// @dev Latest is last-write-wins by record time within the caller's recorder scope, not max
+    /// `effectiveAt`.
     function latestCollectionRecordHash(uint256 collectionId, bytes32 recordType, bytes32 subjectId)
         external
         view
         returns (bytes32);
+    /// @notice Returns one recorder's latest hash for a collection/type/subject key.
+    function latestCollectionRecordHashFor(
+        uint256 collectionId,
+        bytes32 recordType,
+        bytes32 subjectId,
+        address recorder
+    ) external view returns (bytes32);
     /// @notice Returns the stored summary for a record hash.
     function collectionRecordSummary(bytes32 recordHash)
         external
@@ -124,9 +134,15 @@ interface IStreamPreservationRecords is IERC165 {
     /// @notice Returns the full stored payload for a record hash.
     /// @dev Signature fields are hash commitments only; this contract does not verify signatures.
     function collectionRecord(bytes32 recordHash) external view returns (CollectionRecord memory);
-    /// @notice Computes the domain-separated record hash without writing.
+    /// @notice Computes the caller-scoped domain-separated record hash without writing.
     function deriveCollectionRecordHash(uint256 collectionId, CollectionRecord calldata record)
         external
         view
         returns (bytes32);
+    /// @notice Computes the domain-separated record hash for an explicit recorder without writing.
+    function deriveCollectionRecordHashFor(
+        address recorder,
+        uint256 collectionId,
+        CollectionRecord calldata record
+    ) external view returns (bytes32);
 }

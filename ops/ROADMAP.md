@@ -2847,15 +2847,15 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `24173efe3f4722b6d50085effae489927cbcb712`.
-- Captured at: `2026-07-28T18:48:50Z`.
+- Source commit: `7f7d2af516b80931d8ef936ecfa23b0a8fa044b2`.
+- Captured at: `2026-08-08T16:36:06Z`.
 - Live gate: `python scripts/check_slither_baseline.py --run-slither`.
 - Status: exact normalized drift is gated; all 32 first-party production rows
   remain Open under issue #658.
-- Raw analyzed run: 3,214 findings across all impacts/scopes: 49 High, 826
+- Raw analyzed run: 3,218 findings across all impacts/scopes: 49 High, 830
   Medium, 1,265 Low, 1,032 Informational, and 42 Optimization. High/Medium scope
   totals are first-party production `2/30/32`, vendored `1/9/10`, test
-  `46/780/826`, script `0/7/7`, and other `0/0/0`.
+  `46/784/830`, script `0/7/7`, and other `0/0/0`.
 - Bounded assembly makes the Governance Executor's proposal-selected
   native-value call invisible to Slither's `arbitrary-send-eth` detector
   without removing the authority. The issue #685 slice adds the closed-world
