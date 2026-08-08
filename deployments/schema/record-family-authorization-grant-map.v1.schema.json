@@ -7,9 +7,11 @@
   "required": [
     "schema_version",
     "target_phase",
+    "source_catalog_binding",
     "candidate_binding",
     "classifier_binding",
     "authorization_classes",
+    "authority_providers",
     "family_groups",
     "implementation_bindings",
     "independent_review"
@@ -23,6 +25,9 @@
         "public_beta",
         "production_release"
       ]
+    },
+    "source_catalog_binding": {
+      "$ref": "#/$defs/sourceCatalogBinding"
     },
     "candidate_binding": {
       "$ref": "#/$defs/candidateBinding"
@@ -150,6 +155,15 @@
         }
       ],
       "items": false
+    },
+    "authority_providers": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/authorityProvider"
+      }
     },
     "family_groups": {
       "type": "array",
@@ -429,7 +443,8 @@
     },
     "implementation_bindings": {
       "type": "array",
-      "minItems": 3,
+      "minItems": 2,
+      "maxItems": 2,
       "uniqueItems": true,
       "prefixItems": [
         {
@@ -473,15 +488,33 @@
           ]
         }
       ],
-      "items": {
-        "$ref": "#/$defs/implementationBinding"
-      }
+      "items": false
     },
     "independent_review": {
       "$ref": "#/$defs/independentReview"
     }
   },
   "$defs": {
+    "sourceCatalogBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "schema_version",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "const": "release-artifacts/record-family-authorization-source-catalog.json"
+        },
+        "schema_version": {
+          "const": "6529stream.record-family-authorization-source-catalog.v1"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
     "candidateBinding": {
       "type": "object",
       "additionalProperties": false,
@@ -526,6 +559,16 @@
         "marker",
         "schema",
         "revision",
+        "configuration_revision",
+        "configuration_hash",
+        "configuration_authority",
+        "pending_configuration_authority",
+        "pending_configuration_authority_disposition",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
         "runtime_codehash"
       ],
       "properties": {
@@ -550,17 +593,86 @@
         "revision": {
           "$ref": "#/$defs/safePositiveInteger"
         },
+        "configuration_revision": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "configuration_hash": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "configuration_authority": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "pending_configuration_authority": {
+          "$ref": "#/$defs/address"
+        },
+        "pending_configuration_authority_disposition": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/pendingAuthorityDisposition"}
+          ]
+        },
+        "record_type_count": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_chain_id": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_block_number": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_block_hash": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "observed_block_finalized": {
+          "const": true
+        },
         "runtime_codehash": {
           "$ref": "#/$defs/nonzeroBytes32"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "pending_configuration_authority": {
+                "const": "0x0000000000000000000000000000000000000000"
+              }
+            },
+            "required": ["pending_configuration_authority"]
+          },
+          "then": {
+            "properties": {
+              "pending_configuration_authority_disposition": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "pending_configuration_authority": {
+                "type": "string",
+                "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+              }
+            },
+            "required": ["pending_configuration_authority"]
+          },
+          "then": {
+            "properties": {
+              "pending_configuration_authority_disposition": {
+                "$ref": "#/$defs/pendingAuthorityDisposition"
+              }
+            }
+          }
+        }
+      ]
     },
     "authorizationClass": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "name",
-        "authorization_class_id"
+        "authorization_class_id",
+        "mode"
       ],
       "properties": {
         "name": {
@@ -568,7 +680,42 @@
           "pattern": "^[A-Z][A-Z0-9_]*$"
         },
         "authorization_class_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "mode": {
+          "enum": [
+            "live_provider",
+            "family_grant",
+            "direct_self_attributed"
+          ]
+        }
+      }
+    },
+    "authorityProvider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorization_class_id",
+        "provider",
+        "runtime_codehash",
+        "revision"
+      ],
+      "properties": {
+        "authorization_class_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "provider": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "runtime_codehash": {
           "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "revision": {
+          "$ref": "#/$defs/safePositiveInteger"
         }
       }
     },
@@ -578,9 +725,10 @@
       "required": [
         "name",
         "normative_patterns",
-        "declared_record_type_ids",
-        "authorization_class_ids",
-        "grant_subjects"
+        "family_id",
+        "allowed_authorization_class_ids",
+        "record_type_admissions",
+        "grants"
       ],
       "properties": {
         "name": {
@@ -597,29 +745,82 @@
             "pattern": "^[A-Z][A-Z0-9_]*_\\*$"
           }
         },
-        "declared_record_type_ids": {
+        "family_id": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "allowed_authorization_class_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "$ref": "#/$defs/nonzeroBytes32"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
           }
+        },
+        "record_type_admissions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/recordTypeAdmission"
+          }
+        },
+        "grants": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/familyGrant"
+          }
+        }
+      }
+    },
+    "recordTypeAdmission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_type_id",
+        "authorization_class_ids",
+        "lock_allowed"
+      ],
+      "properties": {
+        "record_type_id": {
+          "$ref": "#/$defs/nonzeroBytes32"
         },
         "authorization_class_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
           "items": {
-            "$ref": "#/$defs/nonzeroBytes32"
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
           }
         },
-        "grant_subjects": {
-          "type": "array",
-          "minItems": 1,
-          "uniqueItems": true,
-          "items": {
-            "$ref": "#/$defs/nonzeroAddress"
-          }
+        "lock_allowed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "familyGrant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorization_class_id",
+        "account",
+        "revision"
+      ],
+      "properties": {
+        "authorization_class_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "account": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "revision": {
+          "$ref": "#/$defs/safePositiveInteger"
         }
       }
     },
@@ -633,6 +834,16 @@
         "interface_path",
         "interface_sha256",
         "address",
+        "record_family_registry",
+        "configuration_authority",
+        "pending_configuration_authority",
+        "configuration_revision",
+        "configuration_hash",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
         "runtime_sha256",
         "runtime_keccak256",
         "interface_ids",
@@ -658,6 +869,36 @@
         },
         "address": {
           "$ref": "#/$defs/nonzeroAddress"
+        },
+        "record_family_registry": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "configuration_authority": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "pending_configuration_authority": {
+          "$ref": "#/$defs/address"
+        },
+        "configuration_revision": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "configuration_hash": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "record_type_count": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_chain_id": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_block_number": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "observed_block_hash": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "observed_block_finalized": {
+          "const": true
         },
         "runtime_sha256": {
           "$ref": "#/$defs/sha256"
@@ -706,6 +947,26 @@
           "$ref": "#/$defs/nonEmptyText"
         }
       }
+    },
+    "pendingAuthorityDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewer", "reviewed_at", "reference", "rationale"],
+      "properties": {
+        "status": {"const": "reviewed"},
+        "reviewer": {"$ref": "#/$defs/nonEmptyText"},
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+        },
+        "reference": {"$ref": "#/$defs/nonEmptyText"},
+        "rationale": {"$ref": "#/$defs/nonEmptyText"}
+      }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
     },
     "safePositiveInteger": {
       "type": "integer",

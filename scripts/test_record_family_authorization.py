@@ -86,6 +86,10 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         temporary, root = self._fixture()
         inventory_path = root / checker.DEFAULT_INVENTORY
         inventory = _read(inventory_path)
+        source_catalog_path = (
+            root / "release-artifacts/record-family-authorization-source-catalog.json"
+        )
+        source_catalog = _read(source_catalog_path)
         evidence = _read(root / checker.DEFAULT_EVIDENCE_TEMPLATE)
         evidence_relative = next(
             Path(row["path"])
@@ -133,35 +137,25 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         classifier = {
             "status": "complete",
             "host_address": "0x" + "31" * 20,
-            "contract_address": "0x" + "61" * 20,
+            "contract_address": "0x" + "31" * 20,
             "module_type": "0x" + "33" * 32,
-            "interface_id": "0x64646464",
-            "marker": "0x65656565",
+            "interface_id": source_catalog["classifier"]["interface_id"],
+            "marker": source_catalog["classifier"]["marker_selector"],
             "schema": "0x" + "36" * 32,
-            "revision": 2,
-            "runtime_codehash": "0x" + "63" * 32,
+            "revision": source_catalog["classifier"]["schema_version"],
+            "configuration_revision": 13,
+            "configuration_hash": "0x" + "63" * 32,
+            "configuration_authority": "0x" + "45" * 20,
+            "pending_configuration_authority": "0x" + "00" * 20,
+            "pending_configuration_authority_disposition": None,
+            "record_type_count": 14,
+            "observed_chain_id": 1,
+            "observed_block_number": 19_000_000,
+            "observed_block_hash": "0x" + "42" * 32,
+            "observed_block_finalized": True,
+            "runtime_codehash": "0x" + "43" * 32,
             "grant_map_sha256": None,
         }
-        classifier_source_path = (
-            root / "smart-contracts/domains/records/StreamRecordFamilyClassifier.sol"
-        )
-        classifier_interface_path = (
-            root / "smart-contracts/interfaces/stream/IStreamRecordFamilyClassifier.sol"
-        )
-        _write(
-            classifier_source_path,
-            {
-                "fixture": "contract StreamRecordFamilyClassifier",
-                "candidate_source_commit": candidate["source_commit"],
-            },
-        )
-        _write(
-            classifier_interface_path,
-            {
-                "fixture": "interface IStreamRecordFamilyClassifier",
-                "candidate_source_commit": candidate["source_commit"],
-            },
-        )
         implementation_rows = [
             {
                 "contract": "StreamCollectionMetadata",
@@ -173,12 +167,29 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 "interface_sha256": _sha256(
                     root / "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"
                 ),
-                "address": "0x" + "41" * 20,
+                "address": classifier["host_address"],
+                "record_family_registry": classifier["host_address"],
+                "configuration_authority": classifier["configuration_authority"],
+                "pending_configuration_authority": classifier[
+                    "pending_configuration_authority"
+                ],
+                "configuration_revision": classifier["configuration_revision"],
+                "configuration_hash": classifier["configuration_hash"],
+                "record_type_count": classifier["record_type_count"],
+                "observed_chain_id": classifier["observed_chain_id"],
+                "observed_block_number": classifier["observed_block_number"],
+                "observed_block_hash": classifier["observed_block_hash"],
+                "observed_block_finalized": classifier[
+                    "observed_block_finalized"
+                ],
                 "runtime_sha256": "42" * 32,
-                "runtime_keccak256": "0x" + "43" * 32,
-                "interface_ids": ["0x44444444"],
+                "runtime_keccak256": classifier["runtime_codehash"],
+                "interface_ids": [
+                    source_catalog["host_bindings"][0]["interface_id"],
+                    source_catalog["classifier"]["interface_id"],
+                ],
                 "marker": "STREAM_COLLECTION_METADATA",
-                "revision": 1,
+                "revision": classifier["revision"],
             },
             {
                 "contract": "StreamPreservationRecords",
@@ -191,48 +202,86 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     root / "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"
                 ),
                 "address": "0x" + "51" * 20,
+                "record_family_registry": classifier["host_address"],
+                "configuration_authority": classifier["configuration_authority"],
+                "pending_configuration_authority": classifier[
+                    "pending_configuration_authority"
+                ],
+                "configuration_revision": classifier["configuration_revision"],
+                "configuration_hash": classifier["configuration_hash"],
+                "record_type_count": classifier["record_type_count"],
+                "observed_chain_id": classifier["observed_chain_id"],
+                "observed_block_number": classifier["observed_block_number"],
+                "observed_block_hash": classifier["observed_block_hash"],
+                "observed_block_finalized": classifier[
+                    "observed_block_finalized"
+                ],
                 "runtime_sha256": "52" * 32,
                 "runtime_keccak256": "0x" + "53" * 32,
-                "interface_ids": ["0x54545454"],
+                "interface_ids": [source_catalog["host_bindings"][1]["interface_id"]],
                 "marker": "STREAM_PRESERVATION_RECORDS",
                 "revision": 1,
             },
-            {
-                "contract": "StreamRecordFamilyClassifier",
-                "source_path": "smart-contracts/domains/records/StreamRecordFamilyClassifier.sol",
-                "source_sha256": _sha256(classifier_source_path),
-                "interface_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyClassifier.sol",
-                "interface_sha256": _sha256(classifier_interface_path),
-                "address": classifier["contract_address"],
-                "runtime_sha256": "62" * 32,
-                "runtime_keccak256": classifier["runtime_codehash"],
-                "interface_ids": [classifier["interface_id"]],
-                "marker": classifier["marker"],
-                "revision": classifier["revision"],
-            },
         ]
-        class_rows = [
+        class_rows = []
+        for index, name in enumerate(checker.EXPECTED_AUTHORIZATION_CLASSES):
+            catalog_row = source_catalog["authorization_classes"][index]
+            class_rows.append(
+                {
+                    "name": name,
+                    "authorization_class_id": catalog_row["id"],
+                    "mode": catalog_row["mode"],
+                }
+            )
+        authority_provider_rows = [
             {
-                "name": name,
-                "authorization_class_id": f"0x{index + 1:064x}",
+                "authorization_class_id": row["id"],
+                "provider": f"0x{row['id'] + 301:040x}",
+                "runtime_codehash": f"0x{row['id'] + 401:064x}",
+                "revision": 1,
             }
-            for index, name in enumerate(checker.EXPECTED_AUTHORIZATION_CLASSES)
+            for row in source_catalog["authorization_classes"]
+            if row["mode"] == "live_provider"
         ]
-        family_rows = [
-            {
-                "name": name,
-                "normative_patterns": list(patterns),
-                "declared_record_type_ids": [f"0x{index + 101:064x}"],
-                "authorization_class_ids": [
-                    class_rows[index % len(class_rows)]["authorization_class_id"]
-                ],
-                "grant_subjects": [f"0x{index + 201:040x}"],
-            }
-            for index, (name, patterns) in enumerate(checker.EXPECTED_FAMILY_GROUPS)
-        ]
+        class_modes = {row["id"]: row["mode"] for row in source_catalog["authorization_classes"]}
+        family_rows = []
+        for index, (name, patterns) in enumerate(checker.EXPECTED_FAMILY_GROUPS):
+            catalog_row = source_catalog["family_groups"][index]
+            admission_class_ids = list(
+                catalog_row["allowed_authorization_class_ids"]
+            )
+            family_rows.append(
+                {
+                    "name": name,
+                    "normative_patterns": list(patterns),
+                    "family_id": catalog_row["id"],
+                    "allowed_authorization_class_ids": list(admission_class_ids),
+                    "record_type_admissions": [
+                        {
+                            "record_type_id": f"0x{index + 101:064x}",
+                            "authorization_class_ids": list(admission_class_ids),
+                            "lock_allowed": name != "INDEPENDENT",
+                        }
+                    ],
+                    "grants": [
+                        {
+                            "authorization_class_id": class_id,
+                            "account": f"0x{index * 10 + class_id + 501:040x}",
+                            "revision": 1,
+                        }
+                        for class_id in admission_class_ids
+                        if class_modes[class_id] == "family_grant"
+                    ],
+                }
+            )
         grant_document = {
             "schema_version": checker.GRANT_MAP_SCHEMA_VERSION,
             "target_phase": target_phase,
+            "source_catalog_binding": {
+                "path": source_catalog_path.relative_to(root).as_posix(),
+                "schema_version": source_catalog["schema_version"],
+                "sha256": _sha256(source_catalog_path),
+            },
             "candidate_binding": {
                 key: candidate[key]
                 for key in (
@@ -254,10 +303,21 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     "marker",
                     "schema",
                     "revision",
+                    "configuration_revision",
+                    "configuration_hash",
+                    "configuration_authority",
+                    "pending_configuration_authority",
+                    "pending_configuration_authority_disposition",
+                    "record_type_count",
+                    "observed_chain_id",
+                    "observed_block_number",
+                    "observed_block_hash",
+                    "observed_block_finalized",
                     "runtime_codehash",
                 )
             },
             "authorization_classes": class_rows,
+            "authority_providers": authority_provider_rows,
             "family_groups": family_rows,
             "implementation_bindings": implementation_rows,
             "independent_review": {"status": "reviewed", **review},
@@ -290,6 +350,16 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                         "interface_path",
                         "interface_sha256",
                         "address",
+                        "record_family_registry",
+                        "configuration_authority",
+                        "pending_configuration_authority",
+                        "configuration_revision",
+                        "configuration_hash",
+                        "record_type_count",
+                        "observed_chain_id",
+                        "observed_block_number",
+                        "observed_block_hash",
+                        "observed_block_finalized",
                         "runtime_sha256",
                         "runtime_keccak256",
                         "interface_ids",
@@ -310,6 +380,16 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                             "interface_path",
                             "interface_sha256",
                             "address",
+                            "record_family_registry",
+                            "configuration_authority",
+                            "pending_configuration_authority",
+                            "configuration_revision",
+                            "configuration_hash",
+                            "record_type_count",
+                            "observed_chain_id",
+                            "observed_block_number",
+                            "observed_block_hash",
+                            "observed_block_finalized",
                             "runtime_sha256",
                             "runtime_keccak256",
                             "interface_ids",
@@ -354,6 +434,37 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 "grant_map_sha256": grant_sha,
                 "rotation_revision": 1,
                 "revocation_revision": 1,
+                "proposal_old_authority": "0x" + "44" * 20,
+                "proposed_authority": "0x" + "45" * 20,
+                "proposal_configuration_revision": 10,
+                "proposal_configuration_hash": "0x" + "61" * 32,
+                "acceptance_old_authority": "0x" + "44" * 20,
+                "accepted_authority": "0x" + "45" * 20,
+                "acceptance_configuration_revision": 11,
+                "acceptance_configuration_hash": "0x" + "62" * 32,
+                "cancellation_authority": "0x" + "45" * 20,
+                "cancelled_pending_authority": "0x" + "46" * 20,
+                "cancellation_configuration_revision": 13,
+                "cancellation_configuration_hash": "0x" + "63" * 32,
+                "record_family_registry": classifier["host_address"],
+                "observed_chain_id": classifier["observed_chain_id"],
+                "observed_block_number": classifier["observed_block_number"],
+                "observed_block_hash": classifier["observed_block_hash"],
+                "observed_block_finalized": classifier["observed_block_finalized"],
+                "observed_configuration_authority": classifier[
+                    "configuration_authority"
+                ],
+                "observed_pending_configuration_authority": classifier[
+                    "pending_configuration_authority"
+                ],
+                "observed_configuration_revision": classifier[
+                    "configuration_revision"
+                ],
+                "observed_configuration_hash": classifier["configuration_hash"],
+                "commitment_linkage_status": "reviewed",
+                "commitment_linkage_reference": (
+                    "https://review.example/authority-commitment-linkage-v1"
+                ),
                 "observed_at_commit": candidate["source_commit"],
             },
         )
@@ -450,6 +561,41 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     "review_status": "reviewed",
                     "rotation_revision": 1,
                     "revocation_revision": 1,
+                    "proposal_old_authority": "0x" + "44" * 20,
+                    "proposed_authority": "0x" + "45" * 20,
+                    "proposal_configuration_revision": 10,
+                    "proposal_configuration_hash": "0x" + "61" * 32,
+                    "acceptance_old_authority": "0x" + "44" * 20,
+                    "accepted_authority": "0x" + "45" * 20,
+                    "acceptance_configuration_revision": 11,
+                    "acceptance_configuration_hash": "0x" + "62" * 32,
+                    "cancellation_authority": "0x" + "45" * 20,
+                    "cancelled_pending_authority": "0x" + "46" * 20,
+                    "cancellation_configuration_revision": 13,
+                    "cancellation_configuration_hash": "0x" + "63" * 32,
+                    "record_family_registry": classifier["host_address"],
+                    "observed_chain_id": classifier["observed_chain_id"],
+                    "observed_block_number": classifier["observed_block_number"],
+                    "observed_block_hash": classifier["observed_block_hash"],
+                    "observed_block_finalized": classifier[
+                        "observed_block_finalized"
+                    ],
+                    "observed_configuration_authority": classifier[
+                        "configuration_authority"
+                    ],
+                    "observed_pending_configuration_authority": classifier[
+                        "pending_configuration_authority"
+                    ],
+                    "observed_configuration_revision": classifier[
+                        "configuration_revision"
+                    ],
+                    "observed_configuration_hash": classifier[
+                        "configuration_hash"
+                    ],
+                    "commitment_linkage_status": "reviewed",
+                    "commitment_linkage_reference": (
+                        "https://review.example/authority-commitment-linkage-v1"
+                    ),
                     "observed_at_commit": candidate["source_commit"],
                     "evidence_path": lifecycle_path.relative_to(root).as_posix(),
                     "evidence_sha256": _sha256(lifecycle_path),
@@ -518,6 +664,16 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                             "interface_path",
                             "interface_sha256",
                             "address",
+                            "record_family_registry",
+                            "configuration_authority",
+                            "pending_configuration_authority",
+                            "configuration_revision",
+                            "configuration_hash",
+                            "record_type_count",
+                            "observed_chain_id",
+                            "observed_block_number",
+                            "observed_block_hash",
+                            "observed_block_finalized",
                             "runtime_sha256",
                             "runtime_keccak256",
                             "interface_ids",
@@ -538,6 +694,16 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                                 "interface_path",
                                 "interface_sha256",
                                 "address",
+                                "record_family_registry",
+                                "configuration_authority",
+                                "pending_configuration_authority",
+                                "configuration_revision",
+                                "configuration_hash",
+                                "record_type_count",
+                                "observed_chain_id",
+                                "observed_block_number",
+                                "observed_block_hash",
+                                "observed_block_finalized",
                                 "runtime_sha256",
                                 "runtime_keccak256",
                                 "interface_ids",
@@ -593,6 +759,41 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     "grant_map_sha256": predecessor_grant_sha,
                     "rotation_revision": 1,
                     "revocation_revision": 1,
+                    "proposal_old_authority": "0x" + "44" * 20,
+                    "proposed_authority": "0x" + "45" * 20,
+                    "proposal_configuration_revision": 10,
+                    "proposal_configuration_hash": "0x" + "61" * 32,
+                    "acceptance_old_authority": "0x" + "44" * 20,
+                    "accepted_authority": "0x" + "45" * 20,
+                    "acceptance_configuration_revision": 11,
+                    "acceptance_configuration_hash": "0x" + "62" * 32,
+                    "cancellation_authority": "0x" + "45" * 20,
+                    "cancelled_pending_authority": "0x" + "46" * 20,
+                    "cancellation_configuration_revision": 13,
+                    "cancellation_configuration_hash": "0x" + "63" * 32,
+                    "record_family_registry": classifier["host_address"],
+                    "observed_chain_id": classifier["observed_chain_id"],
+                    "observed_block_number": classifier["observed_block_number"],
+                    "observed_block_hash": classifier["observed_block_hash"],
+                    "observed_block_finalized": classifier[
+                        "observed_block_finalized"
+                    ],
+                    "observed_configuration_authority": classifier[
+                        "configuration_authority"
+                    ],
+                    "observed_pending_configuration_authority": classifier[
+                        "pending_configuration_authority"
+                    ],
+                    "observed_configuration_revision": classifier[
+                        "configuration_revision"
+                    ],
+                    "observed_configuration_hash": classifier[
+                        "configuration_hash"
+                    ],
+                    "commitment_linkage_status": "reviewed",
+                    "commitment_linkage_reference": (
+                        "https://review.example/authority-commitment-linkage-v1"
+                    ),
                     "observed_at_commit": candidate["source_commit"],
                 },
             )
@@ -1369,12 +1570,51 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             "no_secrets",
         )
 
-    def test_template_rotation_and_revocation_evidence_remain_absent(self) -> None:
-        for field in ("rotation_revision", "revocation_revision"):
+    def test_template_authority_lifecycle_evidence_remains_absent(self) -> None:
+        for field in (
+            "rotation_revision",
+            "revocation_revision",
+            "proposal_old_authority",
+            "proposed_authority",
+            "proposal_configuration_revision",
+            "proposal_configuration_hash",
+            "acceptance_old_authority",
+            "accepted_authority",
+            "acceptance_configuration_revision",
+            "acceptance_configuration_hash",
+            "cancellation_authority",
+            "cancelled_pending_authority",
+            "cancellation_configuration_revision",
+            "cancellation_configuration_hash",
+            "record_family_registry",
+            "observed_chain_id",
+            "observed_block_number",
+            "observed_block_hash",
+            "observed_block_finalized",
+            "observed_configuration_authority",
+            "observed_pending_configuration_authority",
+            "observed_configuration_revision",
+            "observed_configuration_hash",
+            "commitment_linkage_status",
+            "commitment_linkage_reference",
+        ):
             with self.subTest(field=field):
                 self._mutate_evidence(
                     lambda value, field=field: value["authority_lifecycle"].__setitem__(
-                        field, 1
+                        field,
+                        (
+                            "0x" + "77" * 20
+                            if "authority" in field or field == "record_family_registry"
+                            else "0x" + "78" * 32
+                            if field.endswith("_hash")
+                            else True
+                            if field == "observed_block_finalized"
+                            else "reviewed"
+                            if field == "commitment_linkage_status"
+                            else "https://review.example/commitment-linkage"
+                            if field == "commitment_linkage_reference"
+                            else 1
+                        ),
                     ),
                     rf"authority_lifecycle\.{field} must remain null",
                 )
@@ -1701,10 +1941,8 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
     def test_grant_map_empty_foreign_count_and_reorder_are_rejected(self) -> None:
         cases = (
             (
-                lambda grant: grant["family_groups"][0].__setitem__(
-                    "grant_subjects", []
-                ),
-                r"grant map artifact.*grant_subjects.*should be non-empty",
+                lambda grant: grant["family_groups"][5].__setitem__("grants", []),
+                "active grants do not exactly cover admitted family-grant classes",
             ),
             (
                 lambda grant: grant["authorization_classes"][0].__setitem__(
@@ -1742,22 +1980,24 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     "authorization_class_id",
                     grant["authorization_classes"][0]["authorization_class_id"],
                 ),
-                "grant-map authorization class IDs must be unique",
+                "grant-map authorization classes do not exactly match the source catalog",
             ),
             (
-                lambda grant: grant["family_groups"][1][
-                    "declared_record_type_ids"
+                lambda grant: grant["family_groups"][1]["record_type_admissions"][
+                    0
                 ].__setitem__(
-                    0,
-                    grant["family_groups"][0]["declared_record_type_ids"][0],
+                    "record_type_id",
+                    grant["family_groups"][0]["record_type_admissions"][0][
+                        "record_type_id"
+                    ],
                 ),
                 "grant-map declared record-type IDs must be globally unique",
             ),
             (
-                lambda grant: grant["family_groups"][0].__setitem__(
-                    "authorization_class_ids", ["0x" + "fe" * 32]
-                ),
-                r"family_groups\[0\] references an unknown authorization class",
+                lambda grant: grant["family_groups"][0]["record_type_admissions"][
+                    0
+                ].__setitem__("authorization_class_ids", [8]),
+                "references a class outside the source catalog family mask",
             ),
         )
         for mutation, pattern in cases:
@@ -1769,6 +2009,193 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     pattern,
                     rebind_grant=True,
                 )
+
+    def test_grant_map_catalog_classes_and_providers_are_exact(self) -> None:
+        cases = (
+            (
+                lambda grant: grant["source_catalog_binding"].__setitem__(
+                    "sha256", "91" * 32
+                ),
+                "grant-map source catalog binding mismatch",
+            ),
+            (
+                lambda grant: grant["authorization_classes"][0].__setitem__(
+                    "mode", "family_grant"
+                ),
+                "grant-map authorization classes do not exactly match the source catalog",
+            ),
+            (
+                lambda grant: grant["authority_providers"][0].__setitem__(
+                    "authorization_class_id", 8
+                ),
+                "grant-map authority providers must exactly cover live-provider classes",
+            ),
+        )
+        for mutation, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self._mutate_complete(
+                    lambda _root, _evidence, _path, state, mutation=mutation: mutation(
+                        state["grant_document"]
+                    ),
+                    pattern,
+                    rebind_grant=True,
+                )
+
+    def test_classifier_configuration_observation_is_exact_and_cross_bound(self) -> None:
+        self._mutate_complete(
+            lambda _root, _evidence, _path, state: state["grant_document"][
+                "classifier_binding"
+            ].__setitem__("configuration_hash", "0x" + "93" * 32),
+            "grant-map classifier binding mismatch",
+            rebind_grant=True,
+        )
+
+        def wrong_admission_count(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            evidence["classifier_binding"]["record_type_count"] = 13
+            state["grant_document"]["classifier_binding"]["record_type_count"] = 13
+            for index in range(2):
+                self._update_implementation_binding(
+                    root,
+                    evidence,
+                    state,
+                    index,
+                    record_type_count=13,
+                )
+
+        self._mutate_complete(
+            wrong_admission_count,
+            "classifier record-type count does not match exact grant-map admissions",
+            rebind_grant=True,
+        )
+
+        def split_block_observation(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            self._update_implementation_binding(
+                root,
+                evidence,
+                state,
+                1,
+                observed_block_hash="0x" + "94" * 32,
+            )
+
+        self._mutate_complete(
+            split_block_observation,
+            "implementation configuration observations must exactly match the classifier",
+            rebind_grant=True,
+        )
+
+        def unfinalized_support_observation(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            _state: dict[str, Any],
+        ) -> None:
+            row = evidence["implementation_bindings"]["contracts"][1]
+            support_path = root / row["evidence_path"]
+            support = _read(support_path)
+            support["observed_block_finalized"] = False
+            _write(support_path, support)
+            row["evidence_sha256"] = _sha256(support_path)
+
+        self._mutate_complete(
+            unfinalized_support_observation,
+            (
+                "implementation support StreamPreservationRecords "
+                "observed_block_finalized mismatch"
+            ),
+        )
+
+    def test_family_masks_locks_and_active_grants_are_exact(self) -> None:
+        cases = (
+            (
+                lambda grant: grant["family_groups"][0].__setitem__(
+                    "family_id", "0x" + "91" * 32
+                ),
+                r"family_groups\[0\] family ID does not match the source catalog",
+            ),
+            (
+                lambda grant: grant["family_groups"][0].__setitem__(
+                    "allowed_authorization_class_ids", [8]
+                ),
+                r"family_groups\[0\] allowed classes do not match the source catalog",
+            ),
+            (
+                lambda grant: grant["family_groups"][0]["record_type_admissions"][
+                    0
+                ].__setitem__("authorization_class_ids", [8]),
+                "references a class outside the source catalog family mask",
+            ),
+            (
+                lambda grant: grant["family_groups"][3]["record_type_admissions"][
+                    0
+                ]["authorization_class_ids"].reverse(),
+                "authorization classes must be strictly ordered",
+            ),
+            (
+                lambda grant: grant["family_groups"][2]["record_type_admissions"][
+                    0
+                ].__setitem__("lock_allowed", True),
+                "lock policy mismatch",
+            ),
+            (
+                lambda grant: grant["family_groups"][5].__setitem__("grants", []),
+                "active grants do not exactly cover admitted family-grant classes",
+            ),
+            (
+                lambda grant: grant["family_groups"][0]["grants"].append(
+                    {
+                        "authorization_class_id": 1,
+                        "account": "0x" + "92" * 20,
+                        "revision": 1,
+                    }
+                ),
+                "is not an exact active family-grant class",
+            ),
+            (
+                lambda grant: grant["family_groups"][5]["grants"].reverse(),
+                "grants must be strictly ordered",
+            ),
+        )
+        for mutation, pattern in cases:
+            with self.subTest(pattern=pattern):
+                self._mutate_complete(
+                    lambda _root, _evidence, _path, state, mutation=mutation: mutation(
+                        state["grant_document"]
+                    ),
+                    pattern,
+                    rebind_grant=True,
+                )
+
+        def append_out_of_order_admission(
+            _root: Path,
+            _evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            admission = copy.deepcopy(
+                state["grant_document"]["family_groups"][0][
+                    "record_type_admissions"
+                ][0]
+            )
+            admission["record_type_id"] = "0x" + "00" * 31 + "01"
+            state["grant_document"]["family_groups"][0][
+                "record_type_admissions"
+            ].append(admission)
+
+        self._mutate_complete(
+            append_out_of_order_admission,
+            "record-type admissions must be strictly ordered",
+            rebind_grant=True,
+        )
 
     def test_classifier_and_grant_bindings_cannot_be_fabricated(self) -> None:
         self._mutate_complete(
@@ -1868,6 +2295,33 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             "implementation addresses must be unique",
         )
 
+        def wrong_preservation_registry(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            self._update_implementation_binding(
+                root,
+                evidence,
+                state,
+                1,
+                record_family_registry="0x" + "f2" * 20,
+            )
+
+        self._mutate_complete(
+            wrong_preservation_registry,
+            "implementation registry bindings must exactly match the classifier host",
+            rebind_grant=True,
+        )
+        self._mutate_complete(
+            lambda _root, _evidence, _path, state: state["grant_document"][
+                "implementation_bindings"
+            ][1].__setitem__("record_family_registry", "0x" + "f3" * 20),
+            r"grant-map implementation_bindings\[1\]\.record_family_registry mismatch",
+            rebind_grant=True,
+        )
+
         def fabricate_bound_runtime(
             root: Path,
             evidence: dict[str, Any],
@@ -1887,6 +2341,293 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             r"grant-map implementation_bindings\[0\]\.runtime_sha256 mismatch",
         )
 
+    def test_current_and_pending_configuration_authority_observation_is_exact(self) -> None:
+        def drift_current_authority(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            self._update_implementation_binding(
+                root,
+                evidence,
+                state,
+                1,
+                configuration_authority="0x" + "f4" * 20,
+            )
+
+        self._mutate_complete(
+            drift_current_authority,
+            "implementation configuration observations must exactly match the classifier",
+            rebind_grant=True,
+        )
+
+        def stage_unreviewed_pending_takeover(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            pending = "0x" + "f5" * 20
+            evidence["classifier_binding"]["pending_configuration_authority"] = pending
+            state["grant_document"]["classifier_binding"][
+                "pending_configuration_authority"
+            ] = pending
+            for index in range(2):
+                self._update_implementation_binding(
+                    root,
+                    evidence,
+                    state,
+                    index,
+                    pending_configuration_authority=pending,
+                )
+
+        self._mutate_complete(
+            stage_unreviewed_pending_takeover,
+            "pending_configuration_authority_disposition",
+            rebind_grant=True,
+        )
+
+        def stage_reviewed_pending_authority(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            pending = "0x" + "f7" * 20
+            disposition = {
+                "status": "reviewed",
+                "reviewer": "independent-reviewer",
+                "reviewed_at": "2026-07-24T00:00:00Z",
+                "reference": "https://review.example/pending-authority-v1",
+                "rationale": "Reviewed in-flight transfer retained at the finalized observation.",
+            }
+            evidence["classifier_binding"].update(
+                {
+                    "pending_configuration_authority": pending,
+                    "pending_configuration_authority_disposition": disposition,
+                    "configuration_revision": 14,
+                    "configuration_hash": "0x" + "64" * 32,
+                }
+            )
+            state["grant_document"]["classifier_binding"].update(
+                {
+                    "pending_configuration_authority": pending,
+                    "pending_configuration_authority_disposition": disposition,
+                    "configuration_revision": 14,
+                    "configuration_hash": "0x" + "64" * 32,
+                }
+            )
+            for index in range(2):
+                self._update_implementation_binding(
+                    root,
+                    evidence,
+                    state,
+                    index,
+                    pending_configuration_authority=pending,
+                    configuration_revision=14,
+                    configuration_hash="0x" + "64" * 32,
+                )
+            lifecycle = evidence["authority_lifecycle"]
+            lifecycle.update(
+                {
+                    "observed_pending_configuration_authority": pending,
+                    "observed_configuration_revision": 14,
+                    "observed_configuration_hash": "0x" + "64" * 32,
+                }
+            )
+            lifecycle_support_path = root / lifecycle["evidence_path"]
+            lifecycle_support = _read(lifecycle_support_path)
+            lifecycle_support.update(
+                {
+                    "observed_pending_configuration_authority": pending,
+                    "observed_configuration_revision": 14,
+                    "observed_configuration_hash": "0x" + "64" * 32,
+                }
+            )
+            _write(lifecycle_support_path, lifecycle_support)
+            lifecycle["evidence_sha256"] = _sha256(lifecycle_support_path)
+
+        self._mutate_complete(
+            stage_reviewed_pending_authority,
+            "candidate_identity_dependency_unavailable",
+            rebind_grant=True,
+        )
+
+    def test_authority_lifecycle_event_tuple_support_cannot_drift(self) -> None:
+        cases = (
+            ("accepted_authority", "0x" + "f6" * 20),
+            ("acceptance_configuration_revision", 99),
+            ("acceptance_configuration_hash", "0x" + "f8" * 32),
+        )
+        for field, replacement in cases:
+            with self.subTest(field=field):
+                def drift_lifecycle_support(
+                    root: Path,
+                    evidence: dict[str, Any],
+                    _path: Path,
+                    _state: dict[str, Any],
+                    field: str = field,
+                    replacement: Any = replacement,
+                ) -> None:
+                    lifecycle = evidence["authority_lifecycle"]
+                    support_path = root / lifecycle["evidence_path"]
+                    support = _read(support_path)
+                    support[field] = replacement
+                    _write(support_path, support)
+                    lifecycle["evidence_sha256"] = _sha256(support_path)
+
+                self._mutate_complete(
+                    drift_lifecycle_support,
+                    rf"authority-lifecycle support {field} mismatch",
+                )
+
+    def test_authority_lifecycle_reconciles_to_same_finalized_observation(self) -> None:
+        def update_lifecycle_binding(
+            root: Path,
+            evidence: dict[str, Any],
+            **changes: Any,
+        ) -> None:
+            lifecycle = evidence["authority_lifecycle"]
+            lifecycle.update(changes)
+            support_path = root / lifecycle["evidence_path"]
+            support = _read(support_path)
+            support.update(changes)
+            _write(support_path, support)
+            lifecycle["evidence_sha256"] = _sha256(support_path)
+
+        def observation_before_terminal(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            evidence["classifier_binding"].update(
+                {
+                    "configuration_revision": 12,
+                    "configuration_hash": "0x" + "62" * 32,
+                }
+            )
+            state["grant_document"]["classifier_binding"].update(
+                {
+                    "configuration_revision": 12,
+                    "configuration_hash": "0x" + "62" * 32,
+                }
+            )
+            for index in range(2):
+                self._update_implementation_binding(
+                    root,
+                    evidence,
+                    state,
+                    index,
+                    configuration_revision=12,
+                    configuration_hash="0x" + "62" * 32,
+                )
+            update_lifecycle_binding(
+                root,
+                evidence,
+                observed_configuration_revision=12,
+                observed_configuration_hash="0x" + "62" * 32,
+            )
+
+        self._mutate_complete(
+            observation_before_terminal,
+            "authority lifecycle revision cannot exceed the finalized classifier observation",
+            rebind_grant=True,
+        )
+
+        def terminal_authority_mismatch(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            authority = "0x" + "f9" * 20
+            evidence["classifier_binding"]["configuration_authority"] = authority
+            state["grant_document"]["classifier_binding"][
+                "configuration_authority"
+            ] = authority
+            for index in range(2):
+                self._update_implementation_binding(
+                    root,
+                    evidence,
+                    state,
+                    index,
+                    configuration_authority=authority,
+                )
+            update_lifecycle_binding(
+                root,
+                evidence,
+                observed_configuration_authority=authority,
+            )
+
+        self._mutate_complete(
+            terminal_authority_mismatch,
+            "authority lifecycle terminal authority does not match the finalized classifier observation",
+            rebind_grant=True,
+        )
+
+        lifecycle_identity_cases = (
+            (
+                "record_family_registry",
+                "0x" + "fa" * 20,
+                "authority lifecycle registry address does not match the classifier host",
+            ),
+            (
+                "observed_chain_id",
+                2,
+                "authority lifecycle chain/block observation does not match the finalized classifier observation",
+            ),
+            (
+                "observed_block_number",
+                19_000_001,
+                "authority lifecycle chain/block observation does not match the finalized classifier observation",
+            ),
+            (
+                "observed_block_hash",
+                "0x" + "fb" * 32,
+                "authority lifecycle chain/block observation does not match the finalized classifier observation",
+            ),
+            (
+                "observed_configuration_revision",
+                14,
+                "authority lifecycle final revision/hash does not match the finalized classifier observation",
+            ),
+            (
+                "observed_configuration_hash",
+                "0x" + "fc" * 32,
+                "authority lifecycle final revision/hash does not match the finalized classifier observation",
+            ),
+        )
+        for field, replacement, pattern in lifecycle_identity_cases:
+            with self.subTest(field=field):
+                self._mutate_complete(
+                    lambda root, evidence, _path, _state,
+                    field=field, replacement=replacement: update_lifecycle_binding(
+                        root,
+                        evidence,
+                        **{field: replacement},
+                    ),
+                    pattern,
+                )
+
+    def test_source_catalog_registry_topology_is_exact(self) -> None:
+        temporary, root = self._fixture()
+        try:
+            catalog_path = (
+                root / "release-artifacts/record-family-authorization-source-catalog.json"
+            )
+            catalog = _read(catalog_path)
+            catalog["host_bindings"][1]["registry_binding"] = "embedded_self"
+            _write(catalog_path, catalog)
+            with self.assertRaisesRegex(
+                checker.RecordFamilyAuthorizationError,
+                "source host bindings mismatch",
+            ):
+                checker.validate_package(root)
+        finally:
+            temporary.cleanup()
+
     def test_source_provenance_fields_are_required_resolved_and_digest_bound(
         self,
     ) -> None:
@@ -1897,7 +2638,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             r"implementation_bindings.*interface_sha256.*required",
         )
 
-        def nonexistent_classifier_source(
+        def nonexistent_metadata_source(
             root: Path,
             evidence: dict[str, Any],
             _path: Path,
@@ -1907,18 +2648,21 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 state,
-                2,
-                source_path="smart-contracts/domains/records/MissingRecordFamilyClassifier.sol",
+                0,
+                source_path=(
+                    "smart-contracts/domains/metadata/"
+                    "MissingCollectionMetadata.sol"
+                ),
                 source_sha256="a1" * 32,
             )
 
         self._mutate_complete(
-            nonexistent_classifier_source,
-            r"grant-map implementation_bindings\[2\]\.source\.path does not exist",
+            nonexistent_metadata_source,
+            r"implementation_bindings.*source_path.*StreamCollectionMetadata\.sol.*was expected",
             rebind_grant=True,
         )
 
-        def nonexistent_classifier_interface(
+        def nonexistent_metadata_interface(
             root: Path,
             evidence: dict[str, Any],
             _path: Path,
@@ -1928,18 +2672,21 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 state,
-                2,
-                interface_path="smart-contracts/interfaces/stream/IMissingRecordFamilyClassifier.sol",
+                0,
+                interface_path=(
+                    "smart-contracts/interfaces/stream/"
+                    "IMissingCollectionMetadata.sol"
+                ),
                 interface_sha256="a2" * 32,
             )
 
         self._mutate_complete(
-            nonexistent_classifier_interface,
-            r"grant-map implementation_bindings\[2\]\.interface\.path does not exist",
+            nonexistent_metadata_interface,
+            r"implementation_bindings.*interface_path.*IStreamCollectionMetadata\.sol.*was expected",
             rebind_grant=True,
         )
 
-        def wrong_classifier_source_hash(
+        def wrong_metadata_source_hash(
             root: Path,
             evidence: dict[str, Any],
             _path: Path,
@@ -1949,17 +2696,17 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 state,
-                2,
+                0,
                 source_sha256="a3" * 32,
             )
 
         self._mutate_complete(
-            wrong_classifier_source_hash,
-            r"grant-map implementation_bindings\[2\]\.source file digest mismatch",
+            wrong_metadata_source_hash,
+            r"grant-map implementation_bindings\[0\]\.source file digest mismatch",
             rebind_grant=True,
         )
 
-    def test_source_provenance_rejects_alternate_paths_and_classifier_transplant(
+    def test_source_provenance_rejects_alternate_paths_and_host_transplant(
         self,
     ) -> None:
         def alternate_collection_source(
@@ -1991,7 +2738,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             rebind_grant=True,
         )
 
-        def transplant_classifier_sources(
+        def transplant_preservation_sources(
             root: Path,
             evidence: dict[str, Any],
             _path: Path,
@@ -2002,7 +2749,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 state,
-                2,
+                1,
                 source_path=donor["source_path"],
                 source_sha256=donor["source_sha256"],
                 interface_path=donor["interface_path"],
@@ -2010,15 +2757,12 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             )
 
         self._mutate_complete(
-            transplant_classifier_sources,
-            (
-                "implementation source StreamRecordFamilyClassifier must be a "
-                "distinct file from implementation source StreamCollectionMetadata"
-            ),
+            transplant_preservation_sources,
+            r"implementation_bindings.*interface_path.*IStreamPreservationRecords\.sol.*was expected",
             rebind_grant=True,
         )
 
-    def test_classifier_source_symlink_and_hardlink_aliases_are_rejected(
+    def test_embedded_classifier_source_symlink_and_hardlink_aliases_are_rejected(
         self,
     ) -> None:
         temporary, root, evidence, evidence_path, _state = (
@@ -2027,9 +2771,9 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         try:
             source_path = (
                 root
-                / evidence["implementation_bindings"]["contracts"][2]["source_path"]
+                / evidence["implementation_bindings"]["contracts"][0]["source_path"]
             )
-            outside = root.parent / f"{root.name}-outside-classifier.sol"
+            outside = root.parent / f"{root.name}-outside-metadata.sol"
             shutil.copyfile(source_path, outside)
             source_path.unlink()
             try:
@@ -2053,7 +2797,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             self._complete_evidence_fixture()
         )
         try:
-            row = evidence["implementation_bindings"]["contracts"][2]
+            row = evidence["implementation_bindings"]["contracts"][0]
             source_path = root / row["source_path"]
             interface_path = root / row["interface_path"]
             source_path.unlink()
@@ -2065,7 +2809,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 state,
-                2,
+                0,
                 source_sha256=_sha256(source_path),
             )
             self._rebind_grant_map(root, evidence, state)
@@ -2073,11 +2817,7 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                 root,
                 evidence,
                 evidence_path,
-                (
-                    "implementation interface StreamRecordFamilyClassifier must "
-                    "be a distinct file from implementation source "
-                    "StreamRecordFamilyClassifier"
-                ),
+                r"source_bindings\[4\] file digest mismatch",
             )
         finally:
             temporary.cleanup()

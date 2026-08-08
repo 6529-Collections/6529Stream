@@ -219,6 +219,15 @@
               "marker": {"$ref": "#/$defs/validInterfaceId"},
               "schema": {"$ref": "#/$defs/nonzeroKeccak"},
               "revision": {"type": "integer", "minimum": 1},
+              "configuration_revision": {"type": "integer", "minimum": 1},
+              "configuration_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "configuration_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "pending_configuration_authority": {"$ref": "#/$defs/address"},
+              "record_type_count": {"type": "integer", "minimum": 1},
+              "observed_chain_id": {"type": "integer", "minimum": 1},
+              "observed_block_number": {"type": "integer", "minimum": 1},
+              "observed_block_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "observed_block_finalized": {"const": true},
               "runtime_codehash": {"$ref": "#/$defs/nonzeroKeccak"},
               "grant_map_sha256": {"$ref": "#/$defs/nonzeroSha256"}
             }
@@ -227,7 +236,7 @@
             "properties": {
               "status": {"const": "complete"},
               "review_status": {"const": "reviewed"},
-              "contracts": {"minItems": 3}
+              "contracts": {"minItems": 2, "maxItems": 2}
             }
           },
           "grant_map": {
@@ -276,6 +285,29 @@
               "review_status": {"const": "reviewed"},
               "rotation_revision": {"type": "integer", "minimum": 1},
               "revocation_revision": {"type": "integer", "minimum": 1},
+              "proposal_old_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "proposed_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "proposal_configuration_revision": {"type": "integer", "minimum": 1},
+              "proposal_configuration_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "acceptance_old_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "accepted_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "acceptance_configuration_revision": {"type": "integer", "minimum": 1},
+              "acceptance_configuration_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "cancellation_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "cancelled_pending_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "cancellation_configuration_revision": {"type": "integer", "minimum": 1},
+              "cancellation_configuration_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "record_family_registry": {"$ref": "#/$defs/nonzeroAddress"},
+              "observed_chain_id": {"type": "integer", "minimum": 1},
+              "observed_block_number": {"type": "integer", "minimum": 1},
+              "observed_block_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "observed_block_finalized": {"const": true},
+              "observed_configuration_authority": {"$ref": "#/$defs/nonzeroAddress"},
+              "observed_pending_configuration_authority": {"$ref": "#/$defs/address"},
+              "observed_configuration_revision": {"type": "integer", "minimum": 1},
+              "observed_configuration_hash": {"$ref": "#/$defs/nonzeroKeccak"},
+              "commitment_linkage_status": {"const": "reviewed"},
+              "commitment_linkage_reference": {"type": "string", "pattern": ".*\\S.*"},
               "observed_at_commit": {"$ref": "#/$defs/nonzeroCommit"},
               "evidence_path": {"$ref": "#/$defs/repoPath"},
               "evidence_sha256": {"$ref": "#/$defs/nonzeroSha256"}
@@ -471,6 +503,16 @@
         "marker",
         "schema",
         "revision",
+        "configuration_revision",
+        "configuration_hash",
+        "configuration_authority",
+        "pending_configuration_authority",
+        "pending_configuration_authority_disposition",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
         "runtime_codehash",
         "grant_map_sha256"
       ],
@@ -499,13 +541,84 @@
         "revision": {
           "$ref": "#/$defs/nullablePositiveInteger"
         },
+        "configuration_revision": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "configuration_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "configuration_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "pending_configuration_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "pending_configuration_authority_disposition": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/pendingAuthorityDisposition"}
+          ]
+        },
+        "record_type_count": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_chain_id": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_block_number": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_block_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "observed_block_finalized": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "boolean"}
+          ]
+        },
         "runtime_codehash": {
           "$ref": "#/$defs/nullableKeccak"
         },
         "grant_map_sha256": {
           "$ref": "#/$defs/nullableSha256"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "pending_configuration_authority": {
+                "const": "0x0000000000000000000000000000000000000000"
+              }
+            },
+            "required": ["pending_configuration_authority"]
+          },
+          "then": {
+            "properties": {
+              "pending_configuration_authority_disposition": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "pending_configuration_authority": {
+                "type": "string",
+                "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+              }
+            },
+            "required": ["pending_configuration_authority"]
+          },
+          "then": {
+            "properties": {
+              "pending_configuration_authority_disposition": {
+                "$ref": "#/$defs/pendingAuthorityDisposition"
+              }
+            }
+          }
+        }
+      ]
     },
     "implementationBinding": {
       "type": "object",
@@ -517,6 +630,16 @@
         "interface_path",
         "interface_sha256",
         "address",
+        "record_family_registry",
+        "configuration_authority",
+        "pending_configuration_authority",
+        "configuration_revision",
+        "configuration_hash",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
         "runtime_sha256",
         "runtime_keccak256",
         "interface_ids",
@@ -544,6 +667,40 @@
         },
         "address": {
           "$ref": "#/$defs/nonzeroAddress"
+        },
+        "record_family_registry": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "configuration_authority": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "pending_configuration_authority": {
+          "$ref": "#/$defs/address"
+        },
+        "configuration_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "configuration_hash": {
+          "$ref": "#/$defs/nonzeroKeccak"
+        },
+        "record_type_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "observed_chain_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "observed_block_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "observed_block_hash": {
+          "$ref": "#/$defs/nonzeroKeccak"
+        },
+        "observed_block_finalized": {
+          "const": true
         },
         "runtime_sha256": {
           "$ref": "#/$defs/nonzeroSha256"
@@ -679,6 +836,29 @@
         "review_status",
         "rotation_revision",
         "revocation_revision",
+        "proposal_old_authority",
+        "proposed_authority",
+        "proposal_configuration_revision",
+        "proposal_configuration_hash",
+        "acceptance_old_authority",
+        "accepted_authority",
+        "acceptance_configuration_revision",
+        "acceptance_configuration_hash",
+        "cancellation_authority",
+        "cancelled_pending_authority",
+        "cancellation_configuration_revision",
+        "cancellation_configuration_hash",
+        "record_family_registry",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
+        "observed_configuration_authority",
+        "observed_pending_configuration_authority",
+        "observed_configuration_revision",
+        "observed_configuration_hash",
+        "commitment_linkage_status",
+        "commitment_linkage_reference",
         "observed_at_commit",
         "evidence_path",
         "evidence_sha256"
@@ -695,6 +875,81 @@
         },
         "revocation_revision": {
           "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "proposal_old_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "proposed_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "proposal_configuration_revision": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "proposal_configuration_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "acceptance_old_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "accepted_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "acceptance_configuration_revision": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "acceptance_configuration_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "cancellation_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "cancelled_pending_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "cancellation_configuration_revision": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "cancellation_configuration_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "record_family_registry": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "observed_chain_id": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_block_number": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_block_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "observed_block_finalized": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "boolean"}
+          ]
+        },
+        "observed_configuration_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "observed_pending_configuration_authority": {
+          "$ref": "#/$defs/nullableAddress"
+        },
+        "observed_configuration_revision": {
+          "$ref": "#/$defs/nullablePositiveInteger"
+        },
+        "observed_configuration_hash": {
+          "$ref": "#/$defs/nullableKeccak"
+        },
+        "commitment_linkage_status": {
+          "oneOf": [
+            {"type": "null"},
+            {"const": "reviewed"}
+          ]
+        },
+        "commitment_linkage_reference": {
+          "$ref": "#/$defs/nullableString"
         },
         "observed_at_commit": {
           "$ref": "#/$defs/nullableCommit"
@@ -774,6 +1029,22 @@
       "type": "string",
       "minLength": 1,
       "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)[^\\u0000-\\u001f\\u007f<>:\"|?*]+$"
+    },
+    "pendingAuthorityDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewer", "reviewed_at", "reference", "rationale"],
+      "properties": {
+        "status": {"const": "reviewed"},
+        "reviewer": {"type": "string", "pattern": ".*\\S.*"},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "reference": {"type": "string", "pattern": ".*\\S.*"},
+        "rationale": {"type": "string", "pattern": ".*\\S.*"}
+      }
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
     },
     "nullableRepoPath": {
       "oneOf": [

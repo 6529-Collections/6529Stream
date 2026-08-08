@@ -121,12 +121,13 @@ IMPLEMENTATION_COMPLETION_SUPPORTED: Final = False
 COMPLETION_BLOCKER: Final = (
     "candidate_bound_record_family_evidence_not_available: issue #690 remains "
     "an open public-beta and production blocker until the exact candidate, "
-    "admitted record-type set, live providers and grants, deployed runtime "
-    "codehashes, lifecycle exercise, and independent review are retained"
+    "admitted record-type set, shared registry topology, live providers and "
+    "grants, finalized configuration observation, deployed runtime codehashes, "
+    "lifecycle exercise, and independent review are retained"
 )
 
 SOURCE_IMPLEMENTATION_COMMIT: Final = (
-    "34debc7e5f2de25a6eaf2e8933452b123e5a8220"
+    "4dea1008be18c36fc0d1223676da38412249ac06"
 )
 EXPECTED_SOURCE_BINDINGS: Final = (
     (
@@ -135,27 +136,27 @@ EXPECTED_SOURCE_BINDINGS: Final = (
     ),
     (
         "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
-        "c1cc708b5928e4f0297544ade89dd0404787aca01c3394b7a1ed139aaf856a02",
+        "adc7ad699f1a7b2fb321ac520240b25301299a277356989f0769bc76c05bad70",
     ),
     (
         "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
-        "b34580268ca327e82e3a7bd7768964b11d82ab58662b6b73a3f701400f76d35b",
+        "de19fe5c99103836eab9e08908ff0f93ffce7bf2361f5ba22e79a1d6a5d10d91",
     ),
     (
         "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
-        "487ff1e834d7ae696ef0a04c66f0eccfc3789659f96c98f77492b22176aedb04",
+        "4af9b5aab6233fe2d03ea611de2a23358b4da3f2de84d3bcbbe9a6d2e6bd5bc4",
     ),
     (
         "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
-        "fd82d226d688e5296eca3ef05dc24c13ceac370090cf22e5fc9ed08e5f9cdf95",
+        "7ae684ce7dff99f50abc594a834fc12d521a42734f1126aff05a111fe23fc6b8",
     ),
     (
         "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
-        "072f80fa3e9ca50a7045ca85ac440f9464a117032639da8c2571f73eee102fed",
+        "9a7244a5ca3d3ebf00ac507d8d4ffd83922d94b4e5b4de6803d089ae4f4ce2bf",
     ),
     (
         "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
-        "606e9d2b98eb91c3a4022b3d60142eef783b6da737edd0fce3c4d4ec7f98e369",
+        "78c3edf478057a799e83487b6895522adc76c4b6575150bd9b11f1bcae12718d",
     ),
     (
         "script/RehearseDeployment.s.sol",
@@ -405,15 +406,15 @@ EXPECTED_SOURCE_HOST_BINDINGS: Final = (
         "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
         "0x2c2422f4",
-        "immutable",
+        "embedded_self",
         True,
     ),
     (
         "StreamPreservationRecords",
         "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
         "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
-        "0x45cc434d",
-        "immutable",
+        "0xa30cfc7c",
+        "external_classifier_host",
         True,
     ),
 )
@@ -429,6 +430,7 @@ EXPECTED_SOURCE_BLOCKERS: Final = (
     "production_record_type_admission_set_not_available",
     "artist_owner_institution_provider_bindings_not_available",
     "candidate_grant_map_not_available",
+    "finalized_configuration_observation_not_available",
     "deployed_runtime_codehash_evidence_not_available",
     "non_local_rotation_revocation_evidence_not_available",
     "independent_security_review_not_available",
@@ -1088,6 +1090,10 @@ def _validate_source_catalog_semantics(
             "family_groups",
             "host_bindings",
             "snapshot_policy",
+            "lock_policy",
+            "capacity_policy",
+            "configuration_policy",
+            "independent_policy",
             "source_tests",
             "remaining_blockers",
         ),
@@ -1140,12 +1146,13 @@ def _validate_source_catalog_semantics(
             "authority_provider_interface_path": (
                 "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol"
             ),
-            "interface_id": "0xb19a79de",
+            "interface_id": "0x679dcd40",
             "marker_selector": "0x20e9f458",
             "schema_version": 1,
             "record_type_admission": "append_only_exact_bytes32",
             "wildcard_admission": False,
-            "configuration_authority": "stream_admins_owner",
+            "configuration_authority": "stored_configurationAuthority_initialized_from_stream_admins_owner",
+            "pending_configuration_authority": "stored_pendingConfigurationAuthority_zero_without_proposal",
             "deployment_model": "embedded_in_collection_metadata_host",
             "candidate_binding_status": "not_available",
         },
@@ -1205,6 +1212,47 @@ def _validate_source_catalog_semantics(
         "snapshot source policy mismatch",
     )
     _expect(
+        catalog["lock_policy"]
+        == {
+            "reserved_lock_authority": "function_or_global_admin",
+            "declared_record_type_authority": "record_family",
+            "independent_family_lock_allowed": False,
+            "authorization_class_persisted": True,
+        },
+        "record lock source policy mismatch",
+    )
+    _expect(
+        catalog["capacity_policy"]
+        == {
+            "maximum_record_types_per_collection": 128,
+            "reserved_lock_slots": 2,
+            "undeclared_record_types_rejected_before_slot_consumption": True,
+        },
+        "record capacity source policy mismatch",
+    )
+    _expect(
+        catalog["configuration_policy"]
+        == {
+            "revision_scope": "all_admission_provider_and_grant_mutations",
+            "commitment": "chain_and_registry_domain_separated_hash_chain",
+            "record_type_count": "global_append_only",
+            "candidate_observation": "finalized_chain_id_block_number_and_block_hash",
+        },
+        "record-family configuration source policy mismatch",
+    )
+    _expect(
+        catalog["independent_policy"]
+        == {
+            "mutable_metadata_host_allowed": False,
+            "append_only_host": "StreamPreservationRecords",
+            "metadata_mutation_pause_applies": False,
+            "collection_freeze_applies": False,
+            "record_hash_recorder_scope": "caller_or_explicit_nonzero_recorder",
+            "latest_pointer_scope": "collection_record_type_subject_recorder",
+        },
+        "independent record source policy mismatch",
+    )
+    _expect(
         tuple(catalog["source_tests"]) == EXPECTED_SOURCE_TESTS,
         "source test set/order mismatch",
     )
@@ -1253,6 +1301,18 @@ def _validate_source_catalog_semantics(
         "provider.codehash != expectedCodeHash",
         "provider.staticcall(",
         "revert RecordTypeNotAdmitted(recordType)",
+        "configurationRevision",
+        "configurationHash",
+        "recordTypeCount",
+        "_recordConfigurationMutation",
+        "block.chainid",
+        "address initialAuthority = _admins.owner()",
+        "configurationAuthority = initialAuthority",
+        "pendingConfigurationAuthority = proposedAuthority",
+        "pendingConfigurationAuthority = address(0)",
+        "RecordFamilyConfigurationAuthorityProposed",
+        "RecordFamilyConfigurationAuthorityAccepted",
+        "RecordFamilyConfigurationAuthorityProposalCanceled",
     ):
         _expect(anchor in registry_source, f"classifier source anchor missing: {anchor}")
     _expect(
@@ -1268,16 +1328,37 @@ def _validate_source_catalog_semantics(
         "function recordTypePolicy" in registry_interface,
         "exact record-type policy read missing",
     )
+    for anchor in (
+        "function configurationAuthority",
+        "function pendingConfigurationAuthority",
+        "function proposeConfigurationAuthority",
+        "function acceptConfigurationAuthority",
+        "function cancelConfigurationAuthorityProposal",
+    ):
+        _expect(
+            anchor in registry_interface,
+            f"configuration authority ABI anchor missing: {anchor}",
+        )
 
     metadata_source = resolve_repo_file(
         repo_root,
         "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
         "metadata host source",
     ).read_text(encoding="utf-8")
+    metadata_interface = resolve_repo_file(
+        repo_root,
+        "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+        "metadata host interface",
+    ).read_text(encoding="utf-8")
     preservation_source = resolve_repo_file(
         repo_root,
         "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
         "preservation host source",
+    ).read_text(encoding="utf-8")
+    preservation_interface = resolve_repo_file(
+        repo_root,
+        "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
+        "preservation host interface",
     ).read_text(encoding="utf-8")
     for anchor in (
         "_recordFamilyRegistry.requireRecordWriter",
@@ -1285,15 +1366,52 @@ def _validate_source_catalog_semantics(
         "InvalidSnapshotRecordType",
         "_snapshotCoveredRecordTypesHashes",
         "authorizationClass: authorizationClass",
+        "_FAMILY_INDEPENDENT",
+        "revert RecordFamilyLockNotAllowed(recordType, familyId)",
+        "recordFamilyRegistry = address(this)",
+        "revert RecordFamilyHostNotAllowed(record.recordType, familyId)",
     ):
         _expect(anchor in metadata_source, f"metadata host anchor missing: {anchor}")
+    _expect(
+        "error RecordFamilyLockNotAllowed" in metadata_interface,
+        "independent-family lock error missing from metadata interface",
+    )
+    _expect(
+        "error RecordFamilyHostNotAllowed" in metadata_interface,
+        "independent-family host-routing error missing from metadata interface",
+    )
+    lock_fragment = metadata_source[
+        metadata_source.index("function lockCollectionRecord"):
+        metadata_source.index("function collectionRecord(")
+    ]
+    _expect(
+        lock_fragment.index("_requireRecordWriter")
+        < lock_fragment.index("_rememberRecordType"),
+        "lock family authorization must precede record-type capacity consumption",
+    )
     for anchor in (
         "_recordFamilyRegistry.requireRecordWriter",
         "authorizationClass: authorizationClass",
+        "recordFamilyRegistry = familyRegistry",
+        "_requireRecordMutationNotPaused(record.recordType)",
+        "policy.familyId == _FAMILY_INDEPENDENT",
+        "_deriveCollectionRecordHash(msg.sender",
+        "[record.subjectId][msg.sender]",
+        "block.chainid",
+        "recorder",
     ):
         _expect(
             anchor in preservation_source,
             f"preservation host anchor missing: {anchor}",
+        )
+    for anchor in (
+        "error InvalidCollectionRecordRecorder",
+        "function latestCollectionRecordHashFor",
+        "function deriveCollectionRecordHashFor",
+    ):
+        _expect(
+            anchor in preservation_interface,
+            f"caller-scoped preservation ABI anchor missing: {anchor}",
         )
 
 
@@ -1596,7 +1714,7 @@ def _validate_template_semantics(
 
     classifier = evidence["classifier_binding"]
     _expect(classifier["status"] == "missing", "template classifier binding must remain missing")
-    for key in ("host_address", "contract_address", "module_type", "interface_id", "marker", "schema", "revision", "runtime_codehash", "grant_map_sha256"):
+    for key in ("host_address", "contract_address", "module_type", "interface_id", "marker", "schema", "revision", "configuration_revision", "configuration_hash", "configuration_authority", "pending_configuration_authority", "pending_configuration_authority_disposition", "record_type_count", "observed_chain_id", "observed_block_number", "observed_block_hash", "observed_block_finalized", "runtime_codehash", "grant_map_sha256"):
         _expect(classifier[key] is None, f"evidence classifier_binding.{key} must remain null")
 
     implementations = evidence["implementation_bindings"]
@@ -1614,7 +1732,7 @@ def _validate_template_semantics(
     _expect(snapshot == {"status": "missing", "review_status": "unreviewed", "covered_family_groups": [], "evidence_path": None, "evidence_sha256": None}, "template snapshot intersection must remain missing/unreviewed")
     lifecycle = evidence["authority_lifecycle"]
     _expect(lifecycle["status"] == "missing" and lifecycle["review_status"] == "unreviewed", "template authority lifecycle must remain missing/unreviewed")
-    for key in ("rotation_revision", "revocation_revision", "observed_at_commit", "evidence_path", "evidence_sha256"):
+    for key in ("rotation_revision", "revocation_revision", "proposal_old_authority", "proposed_authority", "proposal_configuration_revision", "proposal_configuration_hash", "acceptance_old_authority", "accepted_authority", "acceptance_configuration_revision", "acceptance_configuration_hash", "cancellation_authority", "cancelled_pending_authority", "cancellation_configuration_revision", "cancellation_configuration_hash", "record_family_registry", "observed_chain_id", "observed_block_number", "observed_block_hash", "observed_block_finalized", "observed_configuration_authority", "observed_pending_configuration_authority", "observed_configuration_revision", "observed_configuration_hash", "commitment_linkage_status", "commitment_linkage_reference", "observed_at_commit", "evidence_path", "evidence_sha256"):
         _expect(lifecycle[key] is None, f"template authority_lifecycle.{key} must remain null")
 
     phases = evidence["phases"]
@@ -1834,6 +1952,7 @@ def _expect_support_header(
 def _validate_complete_evidence_semantics(
     evidence: dict[str, Any],
     inventory: dict[str, Any],
+    source_catalog: dict[str, Any],
     inventory_path: Path,
     evidence_path: Path,
     repo_root: Path,
@@ -2030,6 +2149,36 @@ def _validate_complete_evidence_semantics(
         label="grant map artifact",
     )
     _expect(grant_document["target_phase"] == target_phase, "grant-map target_phase mismatch")
+    source_catalog_binding = grant_document["source_catalog_binding"]
+    source_catalog_path = resolve_repo_file(
+        repo_root,
+        source_catalog_binding["path"],
+        "grant-map source_catalog_binding.path",
+    )
+    _expect(
+        source_catalog_binding
+        == {
+            "path": DEFAULT_SOURCE_CATALOG.as_posix(),
+            "schema_version": SOURCE_CATALOG_SCHEMA_VERSION,
+            "sha256": _sha256(source_catalog_path),
+        },
+        "grant-map source catalog binding mismatch",
+    )
+    _expect(
+        source_catalog_path
+        == resolve_repo_file(
+            repo_root,
+            DEFAULT_SOURCE_CATALOG.as_posix(),
+            "canonical source catalog",
+        ),
+        "grant-map source catalog path mismatch",
+    )
+    _register_distinct_file(
+        registered_files,
+        "record-family source catalog",
+        source_catalog_path,
+        repo_root=repo_root,
+    )
     grant_candidate = grant_document["candidate_binding"]
     for key in (
         "candidate_id",
@@ -2042,11 +2191,33 @@ def _validate_complete_evidence_semantics(
         _expect(grant_candidate[key] == candidate[key], f"grant-map candidate {key} mismatch")
     class_rows = grant_document["authorization_classes"]
     _expect(
-        [row["name"] for row in class_rows] == list(EXPECTED_AUTHORIZATION_CLASSES),
-        "grant-map authorization classes mismatch",
+        class_rows
+        == [
+            {
+                "name": row["name"],
+                "authorization_class_id": row["id"],
+                "mode": row["mode"],
+            }
+            for row in source_catalog["authorization_classes"]
+        ],
+        "grant-map authorization classes do not exactly match the source catalog",
     )
     class_ids = [row["authorization_class_id"] for row in class_rows]
     _expect(len(class_ids) == len(set(class_ids)), "grant-map authorization class IDs must be unique")
+    class_modes = {
+        row["authorization_class_id"]: row["mode"] for row in class_rows
+    }
+    provider_rows = grant_document["authority_providers"]
+    live_provider_class_ids = [
+        row["authorization_class_id"]
+        for row in class_rows
+        if row["mode"] == "live_provider"
+    ]
+    _expect(
+        [row["authorization_class_id"] for row in provider_rows]
+        == live_provider_class_ids,
+        "grant-map authority providers must exactly cover live-provider classes",
+    )
     family_rows = grant_document["family_groups"]
     _expect(
         [
@@ -2057,12 +2228,78 @@ def _validate_complete_evidence_semantics(
         "grant-map family rows/patterns mismatch",
     )
     all_record_type_ids: list[str] = []
-    for index, row in enumerate(family_rows):
+    for index, (row, catalog_row) in enumerate(
+        zip(family_rows, source_catalog["family_groups"], strict=True)
+    ):
         _expect(
-            set(row["authorization_class_ids"]).issubset(class_ids),
-            f"grant-map family_groups[{index}] references an unknown authorization class",
+            row["family_id"] == catalog_row["id"],
+            f"grant-map family_groups[{index}] family ID does not match the source catalog",
         )
-        all_record_type_ids.extend(row["declared_record_type_ids"])
+        _expect(
+            row["allowed_authorization_class_ids"]
+            == catalog_row["allowed_authorization_class_ids"],
+            f"grant-map family_groups[{index}] allowed classes do not match the source catalog",
+        )
+        allowed_class_ids = set(catalog_row["allowed_authorization_class_ids"])
+        referenced_class_ids: set[int] = set()
+        admissions = row["record_type_admissions"]
+        admission_ids = [admission["record_type_id"] for admission in admissions]
+        _expect(
+            admission_ids == sorted(admission_ids),
+            f"grant-map family_groups[{index}] record-type admissions must be strictly ordered",
+        )
+        for admission_index, admission in enumerate(admissions):
+            admission_class_ids = admission["authorization_class_ids"]
+            _expect(
+                admission_class_ids == sorted(admission_class_ids),
+                f"grant-map family_groups[{index}].record_type_admissions[{admission_index}] "
+                "authorization classes must be strictly ordered",
+            )
+            _expect(
+                set(admission_class_ids).issubset(allowed_class_ids),
+                f"grant-map family_groups[{index}].record_type_admissions[{admission_index}] "
+                "references a class outside the source catalog family mask",
+            )
+            _expect(
+                admission["lock_allowed"] == (catalog_row["name"] != "INDEPENDENT"),
+                f"grant-map family_groups[{index}].record_type_admissions[{admission_index}] "
+                "lock policy mismatch",
+            )
+            referenced_class_ids.update(admission_class_ids)
+            all_record_type_ids.append(admission["record_type_id"])
+
+        grants = row["grants"]
+        grant_keys = [
+            (grant_row["authorization_class_id"], grant_row["account"])
+            for grant_row in grants
+        ]
+        _expect(
+            grant_keys == sorted(grant_keys),
+            f"grant-map family_groups[{index}] grants must be strictly ordered",
+        )
+        _expect(
+            len(grant_keys) == len(set(grant_keys)),
+            f"grant-map family_groups[{index}] contains duplicate family grants",
+        )
+        granted_class_ids = {grant_row["authorization_class_id"] for grant_row in grants}
+        for grant_index, grant_row in enumerate(grants):
+            grant_class_id = grant_row["authorization_class_id"]
+            _expect(
+                grant_class_id in referenced_class_ids
+                and class_modes.get(grant_class_id) == "family_grant",
+                f"grant-map family_groups[{index}].grants[{grant_index}] is not an exact "
+                "active family-grant class",
+            )
+        required_grant_class_ids = {
+            class_id
+            for class_id in referenced_class_ids
+            if class_modes[class_id] == "family_grant"
+        }
+        _expect(
+            granted_class_ids == required_grant_class_ids,
+            f"grant-map family_groups[{index}] active grants do not exactly cover admitted "
+            "family-grant classes",
+        )
     _expect(
         len(all_record_type_ids) == len(set(all_record_type_ids)),
         "grant-map declared record-type IDs must be globally unique",
@@ -2077,6 +2314,67 @@ def _validate_complete_evidence_semantics(
     _expect(INTERFACE_ID_RE.fullmatch(classifier["marker"]) is not None, "classifier marker is malformed")
     _expect(KECCAK_RE.fullmatch(classifier["schema"]) is not None, "classifier schema is malformed")
     _expect(isinstance(classifier["revision"], int) and not isinstance(classifier["revision"], bool) and classifier["revision"] > 0, "classifier revision is malformed")
+    for key in (
+        "configuration_revision",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+    ):
+        _expect(
+            isinstance(classifier[key], int)
+            and not isinstance(classifier[key], bool)
+            and classifier[key] > 0,
+            f"classifier {key} is malformed",
+        )
+    _expect(
+        KECCAK_RE.fullmatch(classifier["configuration_hash"]) is not None
+        and classifier["configuration_hash"] != ZERO_KECCAK,
+        "classifier configuration hash is malformed",
+    )
+    _expect(
+        ADDRESS_RE.fullmatch(classifier["configuration_authority"]) is not None
+        and classifier["configuration_authority"] != ZERO_ADDRESS,
+        "classifier current configuration authority must be a nonzero address",
+    )
+    _expect(
+        ADDRESS_RE.fullmatch(classifier["pending_configuration_authority"]) is not None,
+        "classifier pending configuration authority is malformed",
+    )
+    pending_authority = classifier["pending_configuration_authority"]
+    pending_disposition = classifier["pending_configuration_authority_disposition"]
+    if pending_authority == ZERO_ADDRESS:
+        _expect(
+            pending_disposition is None,
+            "zero pending configuration authority must not carry a reviewed disposition",
+        )
+    else:
+        _expect(
+            pending_authority != classifier["configuration_authority"],
+            "pending configuration authority must differ from current authority",
+        )
+        _expect(
+            isinstance(pending_disposition, dict)
+            and pending_disposition.get("status") == "reviewed"
+            and all(
+                isinstance(pending_disposition.get(key), str)
+                and bool(pending_disposition[key].strip())
+                for key in ("reviewer", "reviewed_at", "reference", "rationale")
+            ),
+            "nonzero pending configuration authority requires an explicit reviewed disposition",
+        )
+    _expect(
+        KECCAK_RE.fullmatch(classifier["observed_block_hash"]) is not None
+        and classifier["observed_block_hash"] != ZERO_KECCAK,
+        "classifier observed block hash is malformed",
+    )
+    _expect(
+        classifier["observed_block_finalized"] is True,
+        "classifier observation must be finalized",
+    )
+    _expect(
+        classifier["record_type_count"] == len(all_record_type_ids),
+        "classifier record-type count does not match exact grant-map admissions",
+    )
     _expect(KECCAK_RE.fullmatch(classifier["runtime_codehash"]) is not None, "classifier runtime codehash is malformed")
     _expect(classifier["host_address"] != ZERO_ADDRESS, "classifier host address must be nonzero")
     _expect(classifier["contract_address"] != ZERO_ADDRESS, "classifier contract address must be nonzero")
@@ -2096,6 +2394,16 @@ def _validate_complete_evidence_semantics(
             "marker",
             "schema",
             "revision",
+            "configuration_revision",
+            "configuration_hash",
+            "configuration_authority",
+            "pending_configuration_authority",
+            "pending_configuration_authority_disposition",
+            "record_type_count",
+            "observed_chain_id",
+            "observed_block_number",
+            "observed_block_hash",
+            "observed_block_finalized",
             "runtime_codehash",
         )
     }
@@ -2107,11 +2415,42 @@ def _validate_complete_evidence_semantics(
     implementations = evidence["implementation_bindings"]
     _expect(implementations["status"] == "complete" and implementations["review_status"] == "reviewed", "implementation bindings must be complete and reviewed")
     contracts = implementations["contracts"]
-    _expect(isinstance(contracts, list) and len(contracts) >= 3, "at least three implementation bindings are required")
+    _expect(
+        isinstance(contracts, list) and len(contracts) == 2,
+        "exactly two record-family host implementation bindings are required",
+    )
     names = [row["contract"] for row in contracts]
     _expect(len(names) == len(set(names)), "implementation contract bindings must be unique")
     addresses = [row["address"] for row in contracts]
     _expect(len(addresses) == len(set(addresses)), "implementation addresses must be unique")
+    registry_addresses = [row["record_family_registry"] for row in contracts]
+    _expect(
+        registry_addresses == [classifier["host_address"], classifier["host_address"]],
+        "implementation registry bindings must exactly match the classifier host",
+    )
+    _expect(
+        contracts[0]["address"] == contracts[0]["record_family_registry"],
+        "metadata host must embed its record-family registry at self",
+    )
+    observation_keys = (
+        "configuration_revision",
+        "configuration_hash",
+        "configuration_authority",
+        "pending_configuration_authority",
+        "record_type_count",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
+    )
+    expected_observation = {key: classifier[key] for key in observation_keys}
+    _expect(
+        all(
+            {key: row[key] for key in observation_keys} == expected_observation
+            for row in contracts
+        ),
+        "implementation configuration observations must exactly match the classifier",
+    )
     for index, row in enumerate(contracts):
         _expect(row["address"] != ZERO_ADDRESS, f"implementation_bindings.contracts[{index}] address must be nonzero")
         _expect(row["runtime_sha256"] != "0" * 64, f"implementation_bindings.contracts[{index}] runtime SHA-256 must be nonzero")
@@ -2142,6 +2481,16 @@ def _validate_complete_evidence_semantics(
                 "interface_path",
                 "interface_sha256",
                 "address",
+                "record_family_registry",
+                "configuration_authority",
+                "pending_configuration_authority",
+                "configuration_revision",
+                "configuration_hash",
+                "record_type_count",
+                "observed_chain_id",
+                "observed_block_number",
+                "observed_block_hash",
+                "observed_block_finalized",
                 "runtime_sha256",
                 "runtime_keccak256",
                 "interface_ids",
@@ -2157,6 +2506,16 @@ def _validate_complete_evidence_semantics(
             "interface_path",
             "interface_sha256",
             "address",
+            "record_family_registry",
+            "configuration_authority",
+            "pending_configuration_authority",
+            "configuration_revision",
+            "configuration_hash",
+            "record_type_count",
+            "observed_chain_id",
+            "observed_block_number",
+            "observed_block_hash",
+            "observed_block_finalized",
             "runtime_sha256",
             "runtime_keccak256",
             "interface_ids",
@@ -2167,24 +2526,16 @@ def _validate_complete_evidence_semantics(
                 support[key] == row[key],
                 f"implementation support {row['contract']} {key} mismatch",
             )
-    for required_name in ("StreamCollectionMetadata", "StreamPreservationRecords"):
-        _expect(required_name in names, f"implementation binding missing {required_name}")
+    _expect(
+        names == [row["contract"] for row in source_catalog["host_bindings"]],
+        "implementation bindings do not exactly match source catalog hosts",
+    )
 
     grant_implementations = grant_document["implementation_bindings"]
     _expect(
         len(grant_implementations) == len(contracts),
         "grant-map implementation binding count mismatch",
     )
-    expected_source_paths = {
-        "StreamCollectionMetadata": (
-            "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
-            "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
-        ),
-        "StreamPreservationRecords": (
-            "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
-            "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
-        ),
-    }
     for index, (grant_row, evidence_row) in enumerate(
         zip(grant_implementations, contracts, strict=True)
     ):
@@ -2195,6 +2546,16 @@ def _validate_complete_evidence_semantics(
             "interface_path",
             "interface_sha256",
             "address",
+            "record_family_registry",
+            "configuration_authority",
+            "pending_configuration_authority",
+            "configuration_revision",
+            "configuration_hash",
+            "record_type_count",
+            "observed_chain_id",
+            "observed_block_number",
+            "observed_block_hash",
+            "observed_block_finalized",
             "runtime_sha256",
             "runtime_keccak256",
             "interface_ids",
@@ -2205,15 +2566,24 @@ def _validate_complete_evidence_semantics(
                 grant_row[key] == evidence_row[key],
                 f"grant-map implementation_bindings[{index}].{key} mismatch",
             )
-        if evidence_row["contract"] in expected_source_paths:
-            _expect(
-                (
-                    grant_row["source_path"],
-                    grant_row["interface_path"],
-                )
-                == expected_source_paths[evidence_row["contract"]],
-                f"grant-map implementation_bindings[{index}] source/interface mismatch",
+        source_host = source_catalog["host_bindings"][index]
+        _expect(
+            (
+                grant_row["contract"],
+                grant_row["source_path"],
+                grant_row["interface_path"],
             )
+            == (
+                source_host["contract"],
+                source_host["source_path"],
+                source_host["interface_path"],
+            ),
+            f"grant-map implementation_bindings[{index}] source-catalog host mismatch",
+        )
+        _expect(
+            source_host["interface_id"] in grant_row["interface_ids"],
+            f"grant-map implementation_bindings[{index}] omits the source-catalog host interface",
+        )
         for field in ("source_path", "interface_path"):
             _expect(
                 re.fullmatch(
@@ -2251,13 +2621,21 @@ def _validate_complete_evidence_semantics(
             repo_root=repo_root,
         )
 
+    source_classifier = source_catalog["classifier"]
+    _expect(
+        classifier["interface_id"] == source_classifier["interface_id"]
+        and classifier["marker"] == source_classifier["marker_selector"]
+        and classifier["revision"] == source_classifier["schema_version"],
+        "classifier interface/marker/schema-version does not match the source catalog",
+    )
     classifier_implementation_rows = [
         row
         for row in contracts
-        if row["address"] == classifier["contract_address"]
+        if row["contract"] == source_classifier["contract"]
+        and row["address"] == classifier["host_address"]
+        and row["address"] == classifier["contract_address"]
         and row["runtime_keccak256"] == classifier["runtime_codehash"]
         and classifier["interface_id"] in row["interface_ids"]
-        and row["marker"] == classifier["marker"]
         and row["revision"] == classifier["revision"]
     ]
     _expect(
@@ -2294,6 +2672,118 @@ def _validate_complete_evidence_semantics(
     _expect(lifecycle["status"] == "complete" and lifecycle["review_status"] == "reviewed", "authority lifecycle must be complete and reviewed")
     _expect(lifecycle["observed_at_commit"] == candidate["source_commit"], "candidate/lifecycle source commit mismatch")
     _expect(lifecycle["rotation_revision"] > 0 and lifecycle["revocation_revision"] > 0, "rotation and revocation revisions must be positive")
+    lifecycle_address_keys = (
+        "proposal_old_authority",
+        "proposed_authority",
+        "acceptance_old_authority",
+        "accepted_authority",
+        "cancellation_authority",
+        "cancelled_pending_authority",
+    )
+    for key in lifecycle_address_keys:
+        _expect(
+            ADDRESS_RE.fullmatch(lifecycle[key]) is not None
+            and lifecycle[key] != ZERO_ADDRESS,
+            f"authority lifecycle {key} must be a nonzero address",
+        )
+    _expect(
+        lifecycle["proposal_old_authority"] == lifecycle["acceptance_old_authority"]
+        and lifecycle["proposed_authority"] == lifecycle["accepted_authority"],
+        "authority lifecycle proposal/acceptance address transition mismatch",
+    )
+    _expect(
+        lifecycle["cancellation_authority"] == lifecycle["accepted_authority"]
+        and lifecycle["cancelled_pending_authority"]
+        != lifecycle["cancellation_authority"],
+        "authority lifecycle cancellation address transition mismatch",
+    )
+    lifecycle_revision_keys = (
+        "proposal_configuration_revision",
+        "acceptance_configuration_revision",
+        "cancellation_configuration_revision",
+    )
+    lifecycle_revisions = [lifecycle[key] for key in lifecycle_revision_keys]
+    _expect(
+        all(isinstance(value, int) and not isinstance(value, bool) and value > 0 for value in lifecycle_revisions)
+        and lifecycle_revisions == sorted(lifecycle_revisions)
+        and len(set(lifecycle_revisions)) == len(lifecycle_revisions),
+        "authority lifecycle configuration revisions must be positive and strictly increasing",
+    )
+    _expect(
+        lifecycle_revisions[-1] <= classifier["configuration_revision"],
+        "authority lifecycle revision cannot exceed the finalized classifier observation",
+    )
+    lifecycle_hash_keys = (
+        "proposal_configuration_hash",
+        "acceptance_configuration_hash",
+        "cancellation_configuration_hash",
+    )
+    lifecycle_hashes = [lifecycle[key] for key in lifecycle_hash_keys]
+    _expect(
+        all(KECCAK_RE.fullmatch(value) is not None and value != ZERO_KECCAK for value in lifecycle_hashes)
+        and len(set(lifecycle_hashes)) == len(lifecycle_hashes),
+        "authority lifecycle configuration hashes must be nonzero and distinct",
+    )
+    _expect(
+        lifecycle["record_family_registry"] == classifier["host_address"],
+        "authority lifecycle registry address does not match the classifier host",
+    )
+    lifecycle_observation_keys = (
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
+    )
+    classifier_observation_keys = (
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
+    )
+    _expect(
+        {key: lifecycle[key] for key in lifecycle_observation_keys}
+        == {key: classifier[key] for key in classifier_observation_keys},
+        "authority lifecycle chain/block observation does not match the finalized classifier observation",
+    )
+    _expect(
+        lifecycle["observed_configuration_authority"]
+        == classifier["configuration_authority"]
+        == lifecycle["accepted_authority"]
+        == lifecycle["cancellation_authority"],
+        "authority lifecycle terminal authority does not match the finalized classifier observation",
+    )
+    _expect(
+        lifecycle["observed_pending_configuration_authority"]
+        == classifier["pending_configuration_authority"],
+        "authority lifecycle pending authority does not match the finalized classifier observation",
+    )
+    _expect(
+        lifecycle["observed_configuration_revision"]
+        == classifier["configuration_revision"]
+        and lifecycle["observed_configuration_hash"]
+        == classifier["configuration_hash"],
+        "authority lifecycle final revision/hash does not match the finalized classifier observation",
+    )
+    _expect(
+        lifecycle["observed_configuration_revision"]
+        >= lifecycle["cancellation_configuration_revision"],
+        "authority lifecycle observation precedes the terminal lifecycle state",
+    )
+    _expect(
+        lifecycle["commitment_linkage_status"] == "reviewed"
+        and isinstance(lifecycle["commitment_linkage_reference"], str)
+        and bool(lifecycle["commitment_linkage_reference"].strip()),
+        "authority lifecycle terminal-to-observation commitment linkage must be reviewed",
+    )
+    if (
+        lifecycle["observed_configuration_revision"]
+        == lifecycle["cancellation_configuration_revision"]
+    ):
+        _expect(
+            lifecycle["observed_configuration_hash"]
+            == lifecycle["cancellation_configuration_hash"],
+            "authority lifecycle terminal revision must bind the terminal commitment hash",
+        )
     _lifecycle_path, lifecycle_support = _load_bound_support(
         repo_root,
         lifecycle["evidence_path"],
@@ -2310,11 +2800,61 @@ def _validate_complete_evidence_semantics(
         extra_keys=(
             "rotation_revision",
             "revocation_revision",
+            "proposal_old_authority",
+            "proposed_authority",
+            "proposal_configuration_revision",
+            "proposal_configuration_hash",
+            "acceptance_old_authority",
+            "accepted_authority",
+            "acceptance_configuration_revision",
+            "acceptance_configuration_hash",
+            "cancellation_authority",
+            "cancelled_pending_authority",
+            "cancellation_configuration_revision",
+            "cancellation_configuration_hash",
+            "record_family_registry",
+            "observed_chain_id",
+            "observed_block_number",
+            "observed_block_hash",
+            "observed_block_finalized",
+            "observed_configuration_authority",
+            "observed_pending_configuration_authority",
+            "observed_configuration_revision",
+            "observed_configuration_hash",
+            "commitment_linkage_status",
+            "commitment_linkage_reference",
             "observed_at_commit",
         ),
         label="authority-lifecycle support",
     )
-    for key in ("rotation_revision", "revocation_revision", "observed_at_commit"):
+    for key in (
+        "rotation_revision",
+        "revocation_revision",
+        "proposal_old_authority",
+        "proposed_authority",
+        "proposal_configuration_revision",
+        "proposal_configuration_hash",
+        "acceptance_old_authority",
+        "accepted_authority",
+        "acceptance_configuration_revision",
+        "acceptance_configuration_hash",
+        "cancellation_authority",
+        "cancelled_pending_authority",
+        "cancellation_configuration_revision",
+        "cancellation_configuration_hash",
+        "record_family_registry",
+        "observed_chain_id",
+        "observed_block_number",
+        "observed_block_hash",
+        "observed_block_finalized",
+        "observed_configuration_authority",
+        "observed_pending_configuration_authority",
+        "observed_configuration_revision",
+        "observed_configuration_hash",
+        "commitment_linkage_status",
+        "commitment_linkage_reference",
+        "observed_at_commit",
+    ):
         _expect(
             lifecycle_support[key] == lifecycle[key],
             f"authority-lifecycle support {key} mismatch",
@@ -2372,6 +2912,7 @@ def _validate_complete_evidence_semantics(
             _validate_complete_evidence_semantics(
                 predecessor,
                 inventory,
+                source_catalog,
                 inventory_path,
                 predecessor_path,
                 repo_root,
@@ -2519,6 +3060,7 @@ def validate_package(
         _validate_complete_evidence_semantics(
             evidence,
             inventory,
+            source_catalog,
             inventory_file,
             evidence_file,
             root,
