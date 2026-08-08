@@ -14,6 +14,9 @@ cache/
 broadcast/
 .release-build-*/
 tmp/canonical-deployment-plan.json
+tmp/canonical-deployment-run/
+tmp/canonical-deployment-execution-receipt.json
+deployments/.canonical-deployment-run/
 __pycache__/
 *.pyc
 

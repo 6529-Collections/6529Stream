@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e0bed5d47aaad63198440d51e0ac59d56fa59d873544f7d164a92974f3924133",
-      "size_bytes": 145074
+      "sha256": "sha256:e1de1b0d9726199961ddac47dbee66e79d8d376bc1a3ef5dc4613dff8a65929d",
+      "size_bytes": 146382
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:7e303b2a44377329d243b207b116fd5f3e8cfbd3b3b5a44f4cc7f35f64ce7d11",
+      "sha256": "sha256:60534b3ee2e3e46c8e6291bf39153c2c4161c39882ebbad87b2399c6157c9a35",
       "size_bytes": 33344
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added the generic non-production issue #677A canonical-initcode executor foundation. The checked Python runner re-materializes an exact isolated-build plan, compiles a production-import-free raw-initcode broadcaster in dedicated output/cache/broadcast directories, and fail-closes on plan, network, signer, nonce, strict JSON-RPC, transaction, canonical-block, portable-path, or deployed-runtime drift. Live Sepolia pins an all-public normalized DNS set and requires it unchanged before each executor request and Forge invocation, without claiming actual-peer verification; JSON-RPC IDs require exact non-boolean safe integers and success envelopes allow no mixed or extra members. A separate repository-local chain/sender lock serializes different plans using the same signer, while latest/pending nonce checks fail closed on external interleaving. Successful external journals are terminal, and nominally preflight journals are retry-safe only when their complete identity and empty pre-broadcast state remain coherent. An executor-owned ephemeral retry becomes safe only after its Anvil process is proved stopped. Production mode remains unavailable pending the issue #656 candidate and retained evidence binding; this does not authorize deployment or promote readiness.",
       "Reorganized all 120 Solidity sources from the former flat directory into a reviewed domain-first hierarchy, preserving contract behavior while updating imports, source-bound deployment/release evidence, baselines, and operator documentation. The exact old-to-new map is retained in `smart-contracts/source-layout.json`; a fail-closed checker now rejects unreviewed placement, stale flat paths, unresolved relative imports, and interface/concrete compatibility-boundary violations. This mechanical migration does not change ABI, storage layout, events, errors, deployment, audit, or readiness status.",
       "Hardened the canonical release builder's cross-process evidence authority: authoritative Windows runs now use run-scoped Forge and Solc leases, reject overlapping consumers and stale terminals, remain importable for the pinned Linux CI parity lane, and exercise the complete 121-test builder suite on Windows. The native job pins the final setup-python Windows 3.12 build (`3.12.10`) while Linux CI and release mode retain `3.12.13`; the fail-closed inventory verifies those per-platform pins, and the common hashed lock now includes Web3's exact Windows-only `pywin32==312` closure. Historical R4 journals now use distinct event and terminal schemas, shadowed R4 validators have explicit names, and failed evidence flushes remove temporary residue without masking the primary diagnostic. The native builder test routes merged Python output through `cmd.exe` so Windows PowerShell 5.1 cannot promote unittest stderr to a terminating `NativeCommandError`, while preserving the Python exit code. The scoped Windows wiring policy test remains checksum-covered by both the generator and the independent offline-verifier root-set pin. Refreshed the exact non-production deployment-fixture receipt pin and deterministic release tail; no contract, live deployment, audit, or readiness status changed.",
       "Closed the local Core headroom obligation under issue #654 by deriving `RISK-SIZE-001` from the cycle-free canonical ABI measurement and requiring exact parity with the final `StreamCore` bytecode-proof row and the non-waivable 2,000-byte production floor. Missing, malformed, inconsistent, stale-bound, or sub-threshold proof evidence now fails closed; live normative/tooling mirrors point to the proof instead of owning mutable size strings, and the exact `check_contract_size_budget.py` command is bound in both release checksum indexes. The permanent target's local size result does not implement or accept the concrete #670 satellites: ADR 0021's revenue architecture is Accepted but source-blocked, while ADR 0022's artist architecture remains Proposed. It does not advance the pre-audit maturity, candidate, audit, deployment, or retained-live-evidence gates.",

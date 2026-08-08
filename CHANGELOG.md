@@ -7,6 +7,23 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the generic non-production issue #677A canonical-initcode executor
+  foundation. The checked Python runner re-materializes an exact isolated-build
+  plan, compiles a production-import-free raw-initcode broadcaster in dedicated
+  output/cache/broadcast directories, and fail-closes on plan, network, signer,
+  nonce, strict JSON-RPC, transaction, canonical-block, portable-path, or
+  deployed-runtime drift. Live Sepolia pins an all-public normalized DNS set and
+  requires it unchanged before each executor request and Forge invocation,
+  without claiming actual-peer verification; JSON-RPC IDs require exact
+  non-boolean safe integers and success envelopes allow no mixed or extra
+  members. A separate repository-local chain/sender lock serializes different
+  plans using the same signer, while latest/pending nonce checks fail closed on
+  external interleaving. Successful external journals are terminal, and
+  nominally preflight journals are retry-safe only when their complete identity
+  and empty pre-broadcast state remain coherent. An executor-owned ephemeral
+  retry becomes safe only after its Anvil process is proved stopped. Production
+  mode remains unavailable pending the issue #656 candidate and retained
+  evidence binding; this does not authorize deployment or promote readiness.
 - Reorganized all 120 Solidity sources from the former flat directory into a
   reviewed domain-first hierarchy, preserving contract behavior while updating
   imports, source-bound deployment/release evidence, baselines, and operator

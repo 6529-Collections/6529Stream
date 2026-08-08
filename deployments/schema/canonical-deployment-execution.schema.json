@@ -1,0 +1,417 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/canonical-deployment-execution.schema.json",
+  "title": "6529Stream Canonical Deployment Execution Receipt",
+  "description": "Fail-closed non-production execution receipt for canonical target-isolated initcode after strict JSON-RPC, pinned all-public DNS-set checks, and stable canonical-tip verification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_by",
+    "release_posture",
+    "plan",
+    "network",
+    "finalization",
+    "executor",
+    "deployments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.canonical-deployment-execution.v1"
+    },
+    "generated_by": {
+      "const": "scripts/execute_canonical_deployment_plan.py:1"
+    },
+    "release_posture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "production_candidate",
+        "readiness_evidence",
+        "status",
+        "note"
+      ],
+      "properties": {
+        "production_candidate": {
+          "const": false
+        },
+        "readiness_evidence": {
+          "const": false
+        },
+        "status": {
+          "const": "non_production_execution_only"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "candidate_id",
+        "release_receipt_sha256",
+        "target_catalog_sha256",
+        "release_config_sha256",
+        "release_foundry_config_sha256"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "candidate_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "release_receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "target_catalog_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "release_config_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "release_foundry_config_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "chain_id", "execution_mode", "rpc_scope"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "execution_mode": {
+                "const": "sepolia"
+              }
+            },
+            "required": ["execution_mode"]
+          },
+          "then": {
+            "required": ["rpc_resolution"]
+          },
+          "else": {
+            "not": {
+              "required": ["rpc_resolution"]
+            }
+          }
+        }
+      ],
+      "properties": {
+        "environment": {
+          "enum": ["anvil", "local", "fork", "testnet"]
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "execution_mode": {
+          "enum": ["anvil", "local", "fork", "sepolia"]
+        },
+        "rpc_scope": {
+          "enum": [
+            "ephemeral_loopback_anvil",
+            "operator_loopback_local",
+            "operator_loopback_fork",
+            "authorized_live_sepolia"
+          ]
+        },
+        "rpc_resolution": {
+          "type": "object",
+          "description": "Non-secret live-RPC DNS evidence. It proves only that the normalized all-public resolution set was pinned and rechecked; it does not attest the connected peer.",
+          "additionalProperties": false,
+          "required": ["policy", "resolved_addresses", "actual_peer_verified"],
+          "properties": {
+            "policy": {
+              "const": "all_public_unchanged_before_request_v1"
+            },
+            "resolved_addresses": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 45,
+                "pattern": "^[0-9a-f:.]+$"
+              }
+            },
+            "actual_peer_verified": {
+              "description": "Always false because this executor slice does not bind or attest the peer selected by urllib or Forge.",
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "finalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tip_block_number",
+        "tip_block_hash",
+        "confirmations_required",
+        "deployments_reverified",
+        "tip_unchanged_during_final_sweep"
+      ],
+      "properties": {
+        "tip_block_number": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "tip_block_hash": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "confirmations_required": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "deployments_reverified": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "tip_unchanged_during_final_sweep": {
+          "const": true,
+          "description": "True only after rereading eth_blockNumber and the captured tip hash and proving no advancement, regression, or reorganization during final EIP-1898 runtime verification."
+        }
+      }
+    },
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "script_path",
+        "script_sha256",
+        "foundry_config_path",
+        "foundry_config_sha256",
+        "driver_path",
+        "driver_sha256",
+        "receipt_schema_path",
+        "receipt_schema_sha256",
+        "output_root",
+        "compiler_output_isolated_from"
+      ],
+      "properties": {
+        "script_path": {
+          "const": "deployment-script/DeployCanonicalInitcode.s.sol"
+        },
+        "script_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "foundry_config_path": {
+          "const": "deployment-script/foundry.toml"
+        },
+        "foundry_config_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "driver_path": {
+          "const": "scripts/execute_canonical_deployment_plan.py"
+        },
+        "driver_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "receipt_schema_path": {
+          "const": "deployments/schema/canonical-deployment-execution.schema.json"
+        },
+        "receipt_schema_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "output_root": {
+          "type": "string",
+          "pattern": "^tmp/canonical-deployment-run/[0-9a-f]{32}$"
+        },
+        "compiler_output_isolated_from": {
+          "const": "out-release"
+        }
+      }
+    },
+    "deployments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/deployment"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Portable repository-relative path using the exact candidate/plan policy, including Windows device-name and trailing-dot/space rejection.",
+      "pattern": "^(?!/)(?!.*[\\u0000-\\u001F\\u007F<>:\"\\\\|?*])(?!.*//)(?!.*\\/$)(?!\\.\\.?(?:/|$))(?!.*\\/\\.\\.?(?:/|$))(?![^/]*[. ](?:/|$))(?!.*\\/[^/]*[. ](?:/|$))(?!(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$))(?!.*\\/(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$)).+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "keccak256": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_name",
+        "target_source",
+        "artifact_path",
+        "artifact_sha256",
+        "constructor_sha256",
+        "libraries_sha256",
+        "immutables_sha256",
+        "linked_creation_bytecode_keccak256",
+        "initcode_keccak256",
+        "expected_runtime_keccak256"
+      ],
+      "properties": {
+        "target_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "target_source": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "artifact_path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "constructor_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "libraries_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "immutables_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "linked_creation_bytecode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "initcode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "expected_runtime_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "instance_id",
+        "expected_contract_address",
+        "initcode_length_bytes",
+        "initcode_keccak256",
+        "expected_runtime_length_bytes",
+        "expected_runtime_keccak256",
+        "authority",
+        "transaction_hash",
+        "transaction_input_keccak256",
+        "sender",
+        "contract_address",
+        "block_number",
+        "block_hash",
+        "nonce",
+        "confirmations_verified",
+        "actual_runtime_length_bytes",
+        "actual_runtime_keccak256"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "instance_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_contract_address": {
+          "$ref": "#/$defs/address"
+        },
+        "initcode_length_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 49152
+        },
+        "initcode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "expected_runtime_length_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expected_runtime_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "authority": {
+          "$ref": "#/$defs/authority"
+        },
+        "transaction_hash": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "transaction_input_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "sender": {
+          "$ref": "#/$defs/address"
+        },
+        "contract_address": {
+          "$ref": "#/$defs/address"
+        },
+        "block_number": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "block_hash": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "nonce": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "confirmations_verified": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "actual_runtime_length_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "actual_runtime_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    }
+  }
+}
