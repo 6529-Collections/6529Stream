@@ -267,7 +267,7 @@
         },
         {
           "path": "release-artifacts/record-family-authorization-source-catalog.json",
-          "sha256": "sha256:990c78482da30474c3c08302e1fe62dfd95ce50e4ba6666b200dd16dc00ddf02"
+          "sha256": "sha256:ffafa7c4f543b6f0e3497709aa0462d408e81f254cdef25d630ffc847a66dc39"
         },
         {
           "path": "release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json",

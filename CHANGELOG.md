@@ -213,12 +213,13 @@ the release policy in `docs/release-policy.md`.
   Separate measurement references must describe the same candidate and
   complete proposed tuple; actual candidate-bound measurements remain blocked
   on issues #684 and #656, so maturity and release readiness are unchanged.
-- Rebound the issue #690 record-family source catalog and checker to the
-  actual #709 squash commit after the reviewed PR-only source commit became
-  unreachable from `main`. Candidate-source replay again verifies the complete
-  interface, registry, metadata, preservation, and rehearsal binding set;
-  candidate-bound deployment evidence remains unavailable and both release
-  modes remain fail-closed.
+- Rebound the issue #690 record-family source catalog and checker to the exact
+  accessible #722 squash commit
+  `f5c7164f37399ef758dbed2bb2e67fb73ee4fe75` after the reviewed PR-only source
+  commit became unreachable from `main`. Candidate-source replay again verifies
+  the unchanged interface, registry, metadata, preservation, and rehearsal
+  binding set; candidate-bound deployment and live evidence remain unavailable,
+  both release modes remain fail-closed, and readiness is unchanged.
 - Added a fail-closed field-policy matrix for issue #669's `artist-authority`
   call lane. Its initial `StreamArtistRegistry._verifySignature` Yul
   reservation is superseded by the controlling successor-architecture
