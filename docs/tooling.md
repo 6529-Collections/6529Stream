@@ -765,13 +765,13 @@ python scripts/test_artist_semantic_owner_matrix.py
 python scripts/check_artist_semantic_owner_matrix.py
 ```
 
-The strict checker binds the ADR, matrix, schema, frozen 57-operation source,
-seven sole semantic owners, five immutable external providers, and the
-pre-audit implementation stops. The release manifest independently validates
-and binds the matrix and schema, while the checksum bundle covers the ADR,
-matrix, schema, checker, and hostile tests as exact roots. These bindings do
-not authorize Solidity implementation, a deployment candidate, audit credit,
-or any readiness advance.
+The strict checker binds the matrix, schema, frozen 57-operation source, seven
+sole semantic owners, five immutable external providers, and the pre-audit
+implementation stops. The release manifest independently validates and binds
+the matrix and schema, while the checksum bundle binds the ADR, matrix, schema,
+checker, and hostile tests as exact roots. These bindings do not authorize
+Solidity implementation, a deployment candidate, audit credit, or any
+readiness advance.
 
 The checker reads
 `release-artifacts/record-family-authorization-source-catalog.json` against
