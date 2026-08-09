@@ -156,12 +156,12 @@ def load_release_contract_metadata(release_artifacts_dir: Path) -> dict[str, Any
     for name, contract in contracts.items():
         contract_data = require_dict(contract, f"abi-checksums.contracts.{name}")
         deployment_scope = contract_data.get("deployment_scope", "singleton")
-        if deployment_scope == "factory_spawned":
+        if deployment_scope in {"factory_spawned", "unbound_singleton"}:
             continue
         if deployment_scope != "singleton":
             raise AddressBookError(
                 f"abi-checksums.contracts.{name}.deployment_scope must be singleton "
-                "or factory_spawned"
+                "or an explicitly excluded factory_spawned/unbound_singleton scope"
             )
         metadata[str(name)] = {
             "source": require_string(

@@ -10,6 +10,7 @@
     "NextGenRandomizerRNG": "sha256:3dcea39be05680867eae1e42a5f57f0c7cffe20ef714f468ad0a5718aad23a4d",
     "NextGenRandomizerVRF": "sha256:636e3f5e843baeb408876e37a2eed422488e7b54eec6dea48bc3088aa60942c1",
     "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+    "StreamArtistArchiveV2": "sha256:a33994a9cb80e4216e190efeeb6d33693674e151e2e8e35e2d42f18979b47a84",
     "StreamAssetPolicyRegistry": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
     "StreamAuctions": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
     "StreamCollectionMetadata": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
@@ -82,6 +83,20 @@
         "linked": true,
         "hash_mode": "bytes",
         "size_bytes": 4559
+      }
+    },
+    "StreamArtistArchiveV2": {
+      "creation": {
+        "sha256": "sha256:e0ce1ac26a7319b2e84fff6947245b90770b66109affab208be5873a0b5e471f",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 2603
+      },
+      "runtime": {
+        "sha256": "sha256:59307ac79c068716176bfe967575d8061739283ab9b9373bf2a0e5562058276c",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 2191
       }
     },
     "StreamAssetPolicyRegistry": {
@@ -388,6 +403,26 @@
       "abi_entries": 45,
       "function_count": 35,
       "event_count": 9,
+      "constructor_count": 1
+    },
+    "StreamArtistArchiveV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "deployment_scope": "unbound_singleton",
+      "artifact_path": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+      "abi_sha256": "sha256:a33994a9cb80e4216e190efeeb6d33693674e151e2e8e35e2d42f18979b47a84",
+      "bytecode_sha256": "sha256:e0ce1ac26a7319b2e84fff6947245b90770b66109affab208be5873a0b5e471f",
+      "bytecode_linked": true,
+      "bytecode_hash_mode": "bytes",
+      "bytecode_size_bytes": 2603,
+      "deployed_bytecode_sha256": "sha256:59307ac79c068716176bfe967575d8061739283ab9b9373bf2a0e5562058276c",
+      "deployed_bytecode_linked": true,
+      "deployed_bytecode_hash_mode": "bytes",
+      "deployed_bytecode_size_bytes": 2191,
+      "eip170_runtime_limit_bytes": 24576,
+      "deployed_runtime_margin_bytes": 22385,
+      "abi_entries": 24,
+      "function_count": 10,
+      "event_count": 1,
       "constructor_count": 1
     },
     "StreamAssetPolicyRegistry": {

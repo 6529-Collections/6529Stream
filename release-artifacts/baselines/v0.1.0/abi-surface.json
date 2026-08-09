@@ -4447,6 +4447,513 @@
         "receives": []
       }
     },
+    "StreamArtistArchiveV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "artifact_path": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+      "abi_sha256": "sha256:a33994a9cb80e4216e190efeeb6d33693674e151e2e8e35e2d42f18979b47a84",
+      "abi_entries": 24,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 10,
+        "events": 1,
+        "errors": 12,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address,address)",
+            "kind": "constructor",
+            "signature": "constructor(address,address)",
+            "inputs": [
+              {
+                "name": "artistRegistry_",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operationCoordinator_",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+            "kind": "function",
+            "name": "appendArtistEvidenceV2",
+            "signature": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "evidence",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "appended",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "artistArchiveBindingHashV2()",
+            "kind": "function",
+            "name": "artistArchiveBindingHashV2",
+            "signature": "artistArchiveBindingHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistArchiveMarkerV2()",
+            "kind": "function",
+            "name": "artistArchiveMarkerV2",
+            "signature": "artistArchiveMarkerV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistArchiveMaxEvidenceBytesV2()",
+            "kind": "function",
+            "name": "artistArchiveMaxEvidenceBytesV2",
+            "signature": "artistArchiveMaxEvidenceBytesV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistArchiveSchemaV2()",
+            "kind": "function",
+            "name": "artistArchiveSchemaV2",
+            "signature": "artistArchiveSchemaV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistEvidenceBytesV2(bytes32,uint64)",
+            "kind": "function",
+            "name": "artistEvidenceBytesV2",
+            "signature": "artistEvidenceBytesV2(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "evidence",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistEvidenceMetadataV2(bytes32,uint64)",
+            "kind": "function",
+            "name": "artistEvidenceMetadataV2",
+            "signature": "artistEvidenceMetadataV2(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "payloadSize",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "appendedAtBlock",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistry()",
+            "kind": "function",
+            "name": "artistRegistry",
+            "signature": "artistRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "operationCoordinator()",
+            "kind": "function",
+            "name": "operationCoordinator",
+            "signature": "operationCoordinator()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          }
+        ],
+        "events": [
+          {
+            "key": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+            "kind": "event",
+            "name": "ArtistArchiveEvidenceAppendedV2",
+            "signature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": true
+              },
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payloadSize",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "ArtistArchiveBlockNumberOverflow(uint256)",
+            "kind": "error",
+            "name": "ArtistArchiveBlockNumberOverflow",
+            "signature": "ArtistArchiveBlockNumberOverflow(uint256)",
+            "inputs": [
+              {
+                "name": "blockNumber",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveEmptyEvidence",
+            "signature": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceConflict",
+            "signature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "storedContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "suppliedContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceCorrupted",
+            "signature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "observedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceTooLarge",
+            "signature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "observedBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximumBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceUnavailable",
+            "signature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveInvalidBinding(address,address)",
+            "kind": "error",
+            "name": "ArtistArchiveInvalidBinding",
+            "signature": "ArtistArchiveInvalidBinding(address,address)",
+            "inputs": [
+              {
+                "name": "artistRegistry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operationCoordinator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveInvalidEvidenceKey",
+            "signature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveUnauthorizedWriter(address)",
+            "kind": "error",
+            "name": "ArtistArchiveUnauthorizedWriter",
+            "signature": "ArtistArchiveUnauthorizedWriter(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "SSTORE2DataTooLarge(uint256)",
+            "kind": "error",
+            "name": "SSTORE2DataTooLarge",
+            "signature": "SSTORE2DataTooLarge(uint256)",
+            "inputs": [
+              {
+                "name": "length",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "SSTORE2InvalidPointer(address)",
+            "kind": "error",
+            "name": "SSTORE2InvalidPointer",
+            "signature": "SSTORE2InvalidPointer(address)",
+            "inputs": [
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "SSTORE2WriteFailed()",
+            "kind": "error",
+            "name": "SSTORE2WriteFailed",
+            "signature": "SSTORE2WriteFailed()",
+            "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamAssetPolicyRegistry": {
       "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
@@ -27146,6 +27653,461 @@
         ],
         "events": [],
         "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamArtistArchiveV2": {
+      "source": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "artifact_path": "out-release/IStreamArtistArchiveV2.sol/IStreamArtistArchiveV2.json",
+      "abi_sha256": "sha256:42980fb15ed6fbc27163e076cb362948be2a8420677b70743e5399f1eebc5465",
+      "abi_entries": 20,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 10,
+        "events": 1,
+        "errors": 9,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+            "kind": "function",
+            "name": "appendArtistEvidenceV2",
+            "signature": "appendArtistEvidenceV2(bytes32,uint64,bytes)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "evidence",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "appended",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "artistArchiveBindingHashV2()",
+            "kind": "function",
+            "name": "artistArchiveBindingHashV2",
+            "signature": "artistArchiveBindingHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistArchiveMarkerV2()",
+            "kind": "function",
+            "name": "artistArchiveMarkerV2",
+            "signature": "artistArchiveMarkerV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistArchiveMaxEvidenceBytesV2()",
+            "kind": "function",
+            "name": "artistArchiveMaxEvidenceBytesV2",
+            "signature": "artistArchiveMaxEvidenceBytesV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistArchiveSchemaV2()",
+            "kind": "function",
+            "name": "artistArchiveSchemaV2",
+            "signature": "artistArchiveSchemaV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistEvidenceBytesV2(bytes32,uint64)",
+            "kind": "function",
+            "name": "artistEvidenceBytesV2",
+            "signature": "artistEvidenceBytesV2(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "evidence",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistEvidenceMetadataV2(bytes32,uint64)",
+            "kind": "function",
+            "name": "artistEvidenceMetadataV2",
+            "signature": "artistEvidenceMetadataV2(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "payloadSize",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "appendedAtBlock",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistry()",
+            "kind": "function",
+            "name": "artistRegistry",
+            "signature": "artistRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "operationCoordinator()",
+            "kind": "function",
+            "name": "operationCoordinator",
+            "signature": "operationCoordinator()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+            "kind": "event",
+            "name": "ArtistArchiveEvidenceAppendedV2",
+            "signature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": true
+              },
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payloadSize",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "ArtistArchiveBlockNumberOverflow(uint256)",
+            "kind": "error",
+            "name": "ArtistArchiveBlockNumberOverflow",
+            "signature": "ArtistArchiveBlockNumberOverflow(uint256)",
+            "inputs": [
+              {
+                "name": "blockNumber",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveEmptyEvidence",
+            "signature": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceConflict",
+            "signature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "storedContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "suppliedContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceCorrupted",
+            "signature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "observedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceTooLarge",
+            "signature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "observedBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximumBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveEvidenceUnavailable",
+            "signature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveInvalidBinding(address,address)",
+            "kind": "error",
+            "name": "ArtistArchiveInvalidBinding",
+            "signature": "ArtistArchiveInvalidBinding(address,address)",
+            "inputs": [
+              {
+                "name": "artistRegistry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operationCoordinator",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+            "kind": "error",
+            "name": "ArtistArchiveInvalidEvidenceKey",
+            "signature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "evidenceId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "evidenceVersion",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ArtistArchiveUnauthorizedWriter(address)",
+            "kind": "error",
+            "name": "ArtistArchiveUnauthorizedWriter",
+            "signature": "ArtistArchiveUnauthorizedWriter(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
         "fallbacks": [],
         "receives": []
       }

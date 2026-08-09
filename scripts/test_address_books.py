@@ -272,6 +272,22 @@ class AddressBookTests(unittest.TestCase):
             with self.assertRaisesRegex(generator.AddressBookError, "omits release contracts"):
                 generator.build_address_book(manifest_path, release_dir, root)
 
+    def test_generator_excludes_unbound_singleton_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            manifest_path = deployment_manifest(root)
+            checksums = generator.load_json(release_dir / "abi-checksums.json")
+            checksums["contracts"]["Alpha"]["deployment_scope"] = "unbound_singleton"
+            write_json(release_dir / "abi-checksums.json", checksums)
+            manifest = generator.load_json(manifest_path)
+            del manifest["contracts"]["Alpha"]
+            write_json(manifest_path, manifest)
+
+            address_book = generator.build_address_book(manifest_path, release_dir, root)
+
+            self.assertEqual(set(address_book["contracts"]), {"Beta"})
+
     def test_generator_rejects_unknown_contract(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

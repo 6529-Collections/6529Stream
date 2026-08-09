@@ -18,6 +18,11 @@
       "source": "smart-contracts/domains/access/StreamAdmins.sol"
     },
     {
+      "name": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "deployment_scope": "unbound_singleton"
+    },
+    {
       "name": "StreamAssetPolicyRegistry",
       "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol"
     },
@@ -206,6 +211,11 @@
     {
       "name": "IStreamAdmins",
       "source": "smart-contracts/interfaces/stream/IStreamAdmins.sol"
+    },
+    {
+      "name": "IStreamArtistArchiveV2",
+      "source": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "interface_id": "0x2dc66e2e"
     },
     {
       "name": "IStreamArtworkFinalityRegistry",

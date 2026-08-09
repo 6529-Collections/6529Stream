@@ -10,10 +10,10 @@
   },
   "release_build": {
     "receipt_path": "out-release/release-build-manifest.json",
-    "receipt_sha256": "sha256:7db1c00799501a5dc5a328f52a2a047a12f4ea8886d2be7b443e08dcf7354138",
-    "target_catalog_sha256": "sha256:52604576e1c6433a9b31734f36d7878538f800e86f6813091b175442a73b944d",
+    "receipt_sha256": "sha256:d62bd6f6f2588f5256ae8c7c37d94f22e75019d5280130842bb41af675e5c56e",
+    "target_catalog_sha256": "sha256:a2298b4b32637f7d54a326592f8365f54d1709abb9cb24da0feb0ace53b138fb",
     "config_path": "release-artifacts/contracts.json",
-    "config_sha256": "sha256:709d51c70021fc87c2598c011b1216680f449b2dfb64a38972a468988df515d1",
+    "config_sha256": "sha256:410ccfd9fdfc53453837a1978239c4be58429f6bb4db1d95ef9969feb7783d2d",
     "foundry_config_path": "foundry.toml",
     "foundry_config_sha256": "sha256:c0d8c914a3189641807ff1c334941d4758922230a7f963fbb3ad59cc3bc3cc56"
   },

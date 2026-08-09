@@ -271,6 +271,18 @@ CATEGORY_BY_ERROR_NAME = {
 }
 
 CATEGORY_BY_ERROR_ID = {
+    "StreamArtistArchiveV2:ArtistArchiveBlockNumberOverflow(uint256)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveEmptyEvidence(bytes32,uint64)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceTooLarge(uint256,uint256)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceUnavailable(bytes32,uint64)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveInvalidBinding(address,address)": "configuration",
+    "StreamArtistArchiveV2:ArtistArchiveInvalidEvidenceKey(bytes32,uint64)": "metadata_integrity",
+    "StreamArtistArchiveV2:ArtistArchiveUnauthorizedWriter(address)": "access_control",
+    "StreamArtistArchiveV2:SSTORE2DataTooLarge(uint256)": "metadata_integrity",
+    "StreamArtistArchiveV2:SSTORE2InvalidPointer(address)": "metadata_integrity",
+    "StreamArtistArchiveV2:SSTORE2WriteFailed()": "metadata_integrity",
     "StreamMintManager:ReentrancyGuardReentrantCall()": "mint_manager_policy",
     "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)": "primary_settlement_safety",
     "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)": "primary_settlement_safety",
@@ -438,6 +450,42 @@ TRACEABILITY_BY_ERROR_NAME = {
 }
 
 TRACEABILITY_BY_ERROR_ID = {
+    "StreamArtistArchiveV2:ArtistArchiveBlockNumberOverflow(uint256)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveEmptyEvidence(bytes32,uint64)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceTooLarge(uint256,uint256)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveEvidenceUnavailable(bytes32,uint64)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveInvalidBinding(address,address)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveInvalidEvidenceKey(bytes32,uint64)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:ArtistArchiveUnauthorizedWriter(address)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:SSTORE2DataTooLarge(uint256)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:SSTORE2InvalidPointer(address)": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistArchiveV2:SSTORE2WriteFailed()": [
+        "test/StreamArtistArchiveV2.t.sol",
+    ],
     "StreamCollectionMetadata:CollectionDoesNotExist(uint256)": [
         "test/StreamCollectionMetadata.t.sol",
     ],

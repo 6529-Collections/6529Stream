@@ -23,16 +23,16 @@ hash-locked for the Linux CI/release boundary through
 ## Current Capture
 
 The canonical unfiltered capture was produced from the exact source bytes
-frozen at commit `7f7d2af516b80931d8ef936ecfa23b0a8fa044b2` on
-`2026-08-08T16:36:06Z`. It contains 3,218 findings across all impacts and
-scopes: 49 High, 830 Medium, 1,265 Low, 1,032 Informational, and 42
+frozen at commit `4d732c583f063bd83364eb42b4d255b433cf8bab` on
+`2026-08-09T11:38:52Z`. It contains 3,237 findings across all impacts and
+scopes: 49 High, 847 Medium, 1,266 Low, 1,033 Informational, and 42
 Optimization. The High/Medium scope split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
 | First-party production | 2 | 30 | 32 |
 | Vendored | 1 | 9 | 10 |
-| Test | 46 | 784 | 830 |
+| Test | 46 | 801 | 847 |
 | Script | 0 | 7 | 7 |
 | Other | 0 | 0 | 0 |
 
