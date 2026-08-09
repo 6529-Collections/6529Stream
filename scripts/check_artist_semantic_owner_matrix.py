@@ -19,15 +19,16 @@ SOURCE_PATH = Path(
     "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json"
 )
 ARCHIVE_SOURCE_PATH = Path("smart-contracts/domains/artist/StreamArtistArchiveV2.sol")
+REGISTRY_SOURCE_PATH = Path("smart-contracts/domains/artist/StreamArtistRegistryV2.sol")
 MATRIX_SCHEMA = "6529stream.artist-semantic-owner-matrix.v2"
 MATRIX_STATUS = "PROPOSED_ARCHITECTURE_ONLY"
 MATRIX_MATURITY = "pre_audit_implementation_blocked"
 JSON_SCHEMA_ID = "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json"
 SOURCE_SHA256 = "34e768291af8fd0327cbd6d99177d4a829fa8d8076fdc18da58bf74912efa8df"
-SCHEMA_SHA256 = "ae3810abfabbe9f737d7f7d4553b3d4ad93cf1fee4664638dcd3186ad171f2f3"
-ARCHITECTURE_SHA256 = "6f79bdad52d6ce49cf8f45014325223f084ec5557d5a773eafea0ae63b5b824c"
+SCHEMA_SHA256 = "b242c5480ecdf8e4aa57dc02d76fd8cd81631298eeda0b96cbba9b036d72b473"
+ARCHITECTURE_SHA256 = "95687736fbb74c68b067b798b0d70abd0ca9a056101da67f9fb8b2ea025a0731"
 OWNERSHIP_SHA256 = "c0cf8f4018bd8c6233a39bbbfc8147e043323a5ef487ea1bbb79a94e50b11749"
-RECIPES_SHA256 = "f1111e5012dff870f416b3ca197aed1223671a6cf85919dae37322ba9def5a81"
+RECIPES_SHA256 = "d001253e42aba19d08be2411baa97e2ecea2cc048dfb6fe2fcdd7b26caa52223"
 PROVIDERS_SHA256 = "2708f48bafc5aa170471862078dace4a643382ba4b1b49eeb4cc6b75d777d190"
 TOP_LEVEL_FIELDS = frozenset(
     {
@@ -301,8 +302,8 @@ def _check_source_requirements(root: Path, matrix: dict[str, Any]) -> None:
     expected_components = [
         (
             "registry_directory",
-            "smart-contracts/domains/artist/StreamArtistRegistry.sol",
-            False,
+            REGISTRY_SOURCE_PATH.as_posix(),
+            True,
         ),
         (
             "operation_coordinator",
@@ -358,7 +359,9 @@ def _check_source_requirements(root: Path, matrix: dict[str, Any]) -> None:
     if actual_components != expected_components:
         raise MatrixError("source component presence/order drifted")
     if requirements["all_source_absent"]:
-        raise MatrixError("source requirements must acknowledge the isolated Archive source")
+        raise MatrixError(
+            "source requirements must acknowledge the isolated Registry and Archive sources"
+        )
     if requirements["interface_and_storage_freeze_complete"]:
         raise MatrixError("complete artist topology interface/storage freeze is overclaimed")
     if requirements["implementation_authorized"]:
@@ -375,7 +378,9 @@ def _check_source_requirements(root: Path, matrix: dict[str, Any]) -> None:
     observed_artist_sources = sorted(
         path.relative_to(root).as_posix() for path in artist_root.rglob("*.sol")
     )
-    expected_artist_sources = [ARCHIVE_SOURCE_PATH.as_posix()]
+    expected_artist_sources = sorted(
+        (ARCHIVE_SOURCE_PATH.as_posix(), REGISTRY_SOURCE_PATH.as_posix())
+    )
     if observed_artist_sources != expected_artist_sources:
         raise MatrixError(
             "canonical artist source set drifted: "
@@ -714,7 +719,7 @@ def _check_operation(
         raise MatrixError(f"operation {operation_id} uses an unbound provider snapshot")
     required_paths = requirements["required_source_paths"]
     for baseline in (
-        "smart-contracts/domains/artist/StreamArtistRegistry.sol",
+        REGISTRY_SOURCE_PATH.as_posix(),
         "smart-contracts/domains/artist/StreamArtistOperationCoordinator.sol",
         "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
     ):
@@ -727,10 +732,13 @@ def _check_operation(
         if validator not in required_paths:
             raise MatrixError(f"operation {operation_id} omitted validator requirement")
     for relative in required_paths:
-        if relative == ARCHIVE_SOURCE_PATH.as_posix():
+        if relative in (
+            ARCHIVE_SOURCE_PATH.as_posix(),
+            REGISTRY_SOURCE_PATH.as_posix(),
+        ):
             if not (root / relative).is_file():
                 raise MatrixError(
-                    f"operation {operation_id} required Archive source is missing: {relative}"
+                    f"operation {operation_id} required present source is missing: {relative}"
                 )
         elif (root / relative).exists():
             raise MatrixError(
