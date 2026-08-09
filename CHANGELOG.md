@@ -339,19 +339,6 @@ the release policy in `docs/release-policy.md`.
   unavailable until issue #656 supplies exact addresses and code hashes, so
   `RISK-GOV-003` remains High and open pending deployment, non-local rehearsal,
   monitoring, and independent review; this is not a readiness claim.
-- Added a fail-closed field-policy matrix for issue #669's `artist-authority`
-  call lane. Its initial `StreamArtistRegistry._verifySignature` Yul
-  reservation is superseded by the controlling successor-architecture
-  validator-row taxonomy described above; ADR 0022 and its interface packet
-  remain Proposed and do not authorize implementation. The matrix covers
-  path, site, kind, operation, expression, count, path class, lane, issue,
-  disposition, missing rows, and
-  duplicate calls/rows. Literal declarations cannot use the reserved lane,
-  while the exact Yul `gas()` exemption and generic unexpected-call rejection
-  remain unchanged. This issue #669 checker-support slice adds neither the
-  artist registry source nor its inventory row and does not claim GGP
-  provenance, candidate binding, ERC-1271 gas-safety evidence, maturity, or
-  release readiness.
 - Centralized recursive JSON no-secret scanning for public-beta evidence,
   non-local release evidence, drop-authorization signing evidence, and signer
   custody readiness. The shared scanner preserves checker-specific exception
