@@ -1765,7 +1765,7 @@
       {
         "component": "archive",
         "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
-        "source_present": false
+        "source_present": true
       },
       {
         "component": "binding_lifecycle",
@@ -1808,7 +1808,7 @@
         "source_present": false
       }
     ],
-    "all_source_absent": true,
+    "all_source_absent": false,
     "interface_and_storage_freeze_complete": false,
     "implementation_authorized": false
   },

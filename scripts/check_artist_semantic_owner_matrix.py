@@ -18,13 +18,14 @@ SCHEMA_PATH = Path("docs/architecture/artist-semantic-owner-matrix-v2.schema.jso
 SOURCE_PATH = Path(
     "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json"
 )
+ARCHIVE_SOURCE_PATH = Path("smart-contracts/domains/artist/StreamArtistArchiveV2.sol")
 MATRIX_SCHEMA = "6529stream.artist-semantic-owner-matrix.v2"
 MATRIX_STATUS = "PROPOSED_ARCHITECTURE_ONLY"
 MATRIX_MATURITY = "pre_audit_implementation_blocked"
 JSON_SCHEMA_ID = "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json"
 SOURCE_SHA256 = "34e768291af8fd0327cbd6d99177d4a829fa8d8076fdc18da58bf74912efa8df"
-SCHEMA_SHA256 = "dc59eaefe4a48b7a6d3b73977d3b07800e97d4066940e82f8b6e99c347a121e8"
-ARCHITECTURE_SHA256 = "2fd08fb4be84ef7e76acb652d8dcac7cff08a7f21eae6d96881710b926d46b6f"
+SCHEMA_SHA256 = "ae3810abfabbe9f737d7f7d4553b3d4ad93cf1fee4664638dcd3186ad171f2f3"
+ARCHITECTURE_SHA256 = "6f79bdad52d6ce49cf8f45014325223f084ec5557d5a773eafea0ae63b5b824c"
 OWNERSHIP_SHA256 = "c0cf8f4018bd8c6233a39bbbfc8147e043323a5ef487ea1bbb79a94e50b11749"
 RECIPES_SHA256 = "f1111e5012dff870f416b3ca197aed1223671a6cf85919dae37322ba9def5a81"
 PROVIDERS_SHA256 = "2708f48bafc5aa170471862078dace4a643382ba4b1b49eeb4cc6b75d777d190"
@@ -293,6 +294,93 @@ def _check_source_freeze(
     if [row["id"] for row in source_rows] != list(range(1, 58)):
         raise MatrixError("source operation ids must remain ordered 1..57")
     return columns, source_rows
+
+
+def _check_source_requirements(root: Path, matrix: dict[str, Any]) -> None:
+    requirements = matrix["source_requirements"]
+    expected_components = [
+        (
+            "registry_directory",
+            "smart-contracts/domains/artist/StreamArtistRegistry.sol",
+            False,
+        ),
+        (
+            "operation_coordinator",
+            "smart-contracts/domains/artist/StreamArtistOperationCoordinator.sol",
+            False,
+        ),
+        ("archive", ARCHIVE_SOURCE_PATH.as_posix(), True),
+        (
+            "binding_lifecycle",
+            "smart-contracts/domains/artist/StreamArtistBindingLifecycle.sol",
+            False,
+        ),
+        (
+            "collaborator_lifecycle",
+            "smart-contracts/domains/artist/StreamArtistCollaboratorLifecycle.sol",
+            False,
+        ),
+        (
+            "identity_authority",
+            "smart-contracts/domains/artist/StreamArtistIdentityAuthority.sol",
+            False,
+        ),
+        (
+            "acceptance_lifecycle",
+            "smart-contracts/domains/artist/StreamArtistAcceptanceLifecycle.sol",
+            False,
+        ),
+        (
+            "attribution_lifecycle",
+            "smart-contracts/domains/artist/StreamArtistAttributionLifecycle.sol",
+            False,
+        ),
+        (
+            "payout_lifecycle",
+            "smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol",
+            False,
+        ),
+        (
+            "consent_finality",
+            "smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol",
+            False,
+        ),
+        (
+            "stateless_validator",
+            "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol",
+            False,
+        ),
+    ]
+    actual_components = [
+        (row["component"], row["path"], row["source_present"])
+        for row in requirements["components"]
+    ]
+    if actual_components != expected_components:
+        raise MatrixError("source component presence/order drifted")
+    if requirements["all_source_absent"]:
+        raise MatrixError("source requirements must acknowledge the isolated Archive source")
+    if requirements["interface_and_storage_freeze_complete"]:
+        raise MatrixError("complete artist topology interface/storage freeze is overclaimed")
+    if requirements["implementation_authorized"]:
+        raise MatrixError("complete artist topology implementation is overclaimed")
+    for component, relative, source_present in expected_components:
+        observed = (root / relative).is_file()
+        if observed != source_present:
+            state = "present" if observed else "absent"
+            expected = "present" if source_present else "absent"
+            raise MatrixError(
+                f"{component} source is {state}; exact source requirement is {expected}: {relative}"
+            )
+    artist_root = root / requirements["canonical_root"]
+    observed_artist_sources = sorted(
+        path.relative_to(root).as_posix() for path in artist_root.rglob("*.sol")
+    )
+    expected_artist_sources = [ARCHIVE_SOURCE_PATH.as_posix()]
+    if observed_artist_sources != expected_artist_sources:
+        raise MatrixError(
+            "canonical artist source set drifted: "
+            f"observed={observed_artist_sources}, expected={expected_artist_sources}"
+        )
 
 
 def _check_global_ownership(matrix: dict[str, Any]) -> tuple[dict[str, Any], ...]:
@@ -639,7 +727,12 @@ def _check_operation(
         if validator not in required_paths:
             raise MatrixError(f"operation {operation_id} omitted validator requirement")
     for relative in required_paths:
-        if (root / relative).exists():
+        if relative == ARCHIVE_SOURCE_PATH.as_posix():
+            if not (root / relative).is_file():
+                raise MatrixError(
+                    f"operation {operation_id} required Archive source is missing: {relative}"
+                )
+        elif (root / relative).exists():
             raise MatrixError(
                 f"operation {operation_id} source requirement is no longer absent: {relative}"
             )
@@ -764,6 +857,7 @@ def check(root: Path) -> dict[str, int]:
     _check_meta(matrix, schema, schema_path)
     _validate_schema(matrix, schema)
     _, source_rows = _check_source_freeze(root, matrix, source, source_path)
+    _check_source_requirements(root, matrix)
     domain_map, current, records, events, replay = _check_global_ownership(matrix)
     provider_snapshots = _check_external_providers(root, matrix)
 

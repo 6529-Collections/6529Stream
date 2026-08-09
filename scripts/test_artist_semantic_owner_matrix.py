@@ -42,6 +42,7 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
             CHECKER.MATRIX_PATH,
             CHECKER.SCHEMA_PATH,
             CHECKER.SOURCE_PATH,
+            CHECKER.ARCHIVE_SOURCE_PATH,
             *PROVIDER_INTERFACE_PATHS,
         ):
             destination = self.root / relative
@@ -481,6 +482,37 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         self._assert_rejected(
             "source_requirements.*(source_present|implementation_authorized)"
         )
+
+    def test_archive_source_is_the_only_present_component(self) -> None:
+        matrix = self._matrix()
+        components = {
+            row["component"]: row for row in matrix["source_requirements"]["components"]
+        }
+        self.assertIs(components["archive"]["source_present"], True)
+        self.assertTrue((self.root / CHECKER.ARCHIVE_SOURCE_PATH).is_file())
+        self.assertTrue(
+            all(
+                not row["source_present"]
+                for name, row in components.items()
+                if name != "archive"
+            )
+        )
+
+    def test_missing_archive_source_fails_closed(self) -> None:
+        (self.root / CHECKER.ARCHIVE_SOURCE_PATH).unlink()
+        self._assert_rejected("archive source is absent.*exact source requirement is present")
+
+    def test_unexpected_owner_source_fails_closed(self) -> None:
+        path = self.root / "smart-contracts/domains/artist/StreamArtistRegistry.sol"
+        path.write_text("pragma solidity 0.8.19; contract StreamArtistRegistry {}\n")
+        self._assert_rejected(
+            "registry_directory source is present.*exact source requirement is absent"
+        )
+
+    def test_unmodeled_artist_source_fails_closed(self) -> None:
+        path = self.root / "smart-contracts/domains/artist/StreamArtistRegistryV2.sol"
+        path.write_text("pragma solidity 0.8.19; contract StreamArtistRegistryV2 {}\n")
+        self._assert_rejected("canonical artist source set drifted")
 
     def test_base_and_effective_implementation_stops_are_bound(self) -> None:
         matrix = self._matrix()
