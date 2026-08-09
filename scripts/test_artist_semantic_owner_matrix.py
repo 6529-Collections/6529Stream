@@ -504,7 +504,6 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
     def test_validator_call_row_requires_exact_staticcall_syntax(self) -> None:
         matrix = self._matrix()
         row = matrix["external_dependencies"]["issue_669"]["reserved_call_row"]
-        row["operation"] = "external-call"
         row["call_syntax"] = "signer.staticcall(context.erc1271GasCap)"
         self._write_matrix(matrix)
         self._assert_rejected("staticcall reservation|schema violation")

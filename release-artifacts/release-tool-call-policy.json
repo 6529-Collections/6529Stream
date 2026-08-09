@@ -48513,8 +48513,8 @@
     {
       "path": "scripts/test_artist_semantic_owner_matrix.py",
       "role": "focused-test",
-      "source_sha256": "717e3f58c661df46b0b36bbdbfe69c406259cccecc83e1dfa8e67d4a52cf4649",
-      "size_bytes": 23601,
+      "source_sha256": "f5e073c8a78d67b970f9fffdc424664d82512f971fc019b59627500b846ee65f",
+      "size_bytes": 23558,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
