@@ -71,6 +71,24 @@ the release policy in `docs/release-policy.md`.
   fixtures refresh only their deterministic ABI-checksum references; this does
   not recapture, promote, or add ceremony, deployment, candidate, or readiness
   evidence.
+- Implemented the next Proposed artist-successor source slice as the slim
+  immutable `StreamArtistRegistryV2` directory plus
+  `IStreamArtistRegistryV2`. Its constructor freezes typed address,
+  runtime-codehash, interface, marker, schema, recipe-set, and binding
+  commitments for the Coordinator, ArchiveV2, seven semantic owners, and five
+  external providers without calling absent dependencies. The read-only
+  interface id is `0x56c1a7f2`; there is no semantic truth, operation routing,
+  authorization, replay or lifecycle decision, generic calldata/selector path,
+  delegatecall, proxy, upgrade, or rebind surface. The implementation and
+  release artifacts remain Proposed, pre-audit, candidate-unbound and
+  undeployed under the explicit `unbound_singleton` scope. All 57 operation
+  recipes remain implementation-unauthorized, the Coordinator and seven owner
+  modules remain absent, and historical deployment manifests, address books,
+  candidates, profiles, blocker status, and readiness evidence gain no Registry
+  instance or credit. A fresh Slither `0.11.5` capture bound to the immutable
+  semantic commit retains the exact 32 open first-party High/Medium rows; the
+  unfiltered inventory adds only three Low and two Informational diagnostics
+  from the new source/test closure and grants no audit or readiness credit.
 - Added the isolated issue #656A canonical deployment candidate-v2 planning
   scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
   fail-closed structural checker with hostile fixtures. The ordinary checker

@@ -94,7 +94,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:031f2e16f537ec47e0f4d133325fe0a4b586e3fd9926da3846cee59e8dd57f92"
+          "sha256": "sha256:1550d215e316d172e368d836652ae1401943fd6f7cc92832431e09600f622b95"
         }
       ],
       "risk_acceptance": null,

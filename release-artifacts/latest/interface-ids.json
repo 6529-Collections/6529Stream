@@ -17,6 +17,7 @@
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
     "IStreamArtistArchiveV2": "0x2dc66e2e",
+    "IStreamArtistRegistryV2": "0x56c1a7f2",
     "IStreamArtworkFinalityRegistry": "0x47291ea1",
     "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
@@ -433,6 +434,56 @@
         {
           "signature": "operationCoordinator()",
           "selector": "0x4c683143"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        }
+      ]
+    },
+    "IStreamArtistRegistryV2": {
+      "source": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "artifact_path": "out-release/IStreamArtistRegistryV2.sol/IStreamArtistRegistryV2.json",
+      "abi_sha256": "sha256:f82b7c7ff620f951859308a954b046749df58288e0ef22d641a60a20a15d2276",
+      "interface_id": "0x56c1a7f2",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x573e6e55",
+      "function_selectors": [
+        {
+          "signature": "artistArchivePinV2()",
+          "selector": "0x7309443f"
+        },
+        {
+          "signature": "artistCoordinatorPinV2()",
+          "selector": "0xa8e9a0c4"
+        },
+        {
+          "signature": "artistExternalProviderPinV2(uint8)",
+          "selector": "0xb3ee9a4f"
+        },
+        {
+          "signature": "artistRecipeSetHashV2()",
+          "selector": "0x624085e5"
+        },
+        {
+          "signature": "artistRegistryBindingHashV2()",
+          "selector": "0x0b9a2e95"
+        },
+        {
+          "signature": "artistRegistryMarkerV2()",
+          "selector": "0xef830742"
+        },
+        {
+          "signature": "artistRegistrySchemaHashV2()",
+          "selector": "0x7f86b1a4"
+        },
+        {
+          "signature": "artistRegistrySchemaV2()",
+          "selector": "0xbc02750a"
+        },
+        {
+          "signature": "artistSemanticOwnerPinV2(uint8)",
+          "selector": "0x7b12b1da"
         },
         {
           "signature": "supportsInterface(bytes4)",

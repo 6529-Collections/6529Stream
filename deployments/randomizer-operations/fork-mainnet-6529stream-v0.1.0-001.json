@@ -26,7 +26,7 @@
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:c7ff62f8c23ef6dc058b2ec37f173144de52b1d968573169962ce6cc6f3dce13"
+      "sha256": "sha256:431652f2ba947aeece60a15d470ba69123a4d8691e76c54d73c5c7d2f792744f"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",

@@ -4954,6 +4954,562 @@
         "receives": []
       }
     },
+    "StreamArtistRegistryV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "artifact_path": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+      "abi_sha256": "sha256:71b4c0a4d63ccb53a79a687080b2b04664dad4915ed4c4c411ca7e40f8967a5d",
+      "abi_entries": 15,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 10,
+        "events": 0,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(((address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32)[7],(address,bytes32,bytes4,bytes32,bytes32,bytes32)[5],bytes32))",
+            "kind": "constructor",
+            "signature": "constructor(((address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32)[7],(address,bytes32,bytes4,bytes32,bytes32,bytes32)[5],bytes32))",
+            "inputs": [
+              {
+                "name": "configuration",
+                "type": "((address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32),(address,bytes32,bytes4,bytes32,bytes32,bytes32)[7],(address,bytes32,bytes4,bytes32,bytes32,bytes32)[5],bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistRegistryConfigurationV2",
+                "components": [
+                  {
+                    "name": "operationCoordinator",
+                    "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                    "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                    "components": [
+                      {
+                        "name": "expectedAddress",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "expectedRuntimeCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedInterfaceId",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "expectedMarkerHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedSchemaHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedBindingHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "archive",
+                    "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                    "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                    "components": [
+                      {
+                        "name": "expectedAddress",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "expectedRuntimeCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedInterfaceId",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "expectedMarkerHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedSchemaHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedBindingHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "semanticOwners",
+                    "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)[7]",
+                    "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[7]",
+                    "components": [
+                      {
+                        "name": "expectedAddress",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "expectedRuntimeCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedInterfaceId",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "expectedMarkerHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedSchemaHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedBindingHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "externalProviders",
+                    "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)[5]",
+                    "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2[5]",
+                    "components": [
+                      {
+                        "name": "expectedAddress",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "expectedRuntimeCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedInterfaceId",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "expectedMarkerHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedSchemaHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "expectedBindingHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "recipeSetHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "artistArchivePinV2()",
+            "kind": "function",
+            "name": "artistArchivePinV2",
+            "signature": "artistArchivePinV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistCoordinatorPinV2()",
+            "kind": "function",
+            "name": "artistCoordinatorPinV2",
+            "signature": "artistCoordinatorPinV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistExternalProviderPinV2(uint8)",
+            "kind": "function",
+            "name": "artistExternalProviderPinV2",
+            "signature": "artistExternalProviderPinV2(uint8)",
+            "inputs": [
+              {
+                "name": "provider",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRecipeSetHashV2()",
+            "kind": "function",
+            "name": "artistRecipeSetHashV2",
+            "signature": "artistRecipeSetHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistryBindingHashV2()",
+            "kind": "function",
+            "name": "artistRegistryBindingHashV2",
+            "signature": "artistRegistryBindingHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistryMarkerV2()",
+            "kind": "function",
+            "name": "artistRegistryMarkerV2",
+            "signature": "artistRegistryMarkerV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistRegistrySchemaHashV2()",
+            "kind": "function",
+            "name": "artistRegistrySchemaHashV2",
+            "signature": "artistRegistrySchemaHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistRegistrySchemaV2()",
+            "kind": "function",
+            "name": "artistRegistrySchemaV2",
+            "signature": "artistRegistrySchemaV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistSemanticOwnerPinV2(uint8)",
+            "kind": "function",
+            "name": "artistSemanticOwnerPinV2",
+            "signature": "artistSemanticOwnerPinV2(uint8)",
+            "inputs": [
+              {
+                "name": "domain",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistSemanticDomainV2"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          }
+        ],
+        "events": [],
+        "errors": [
+          {
+            "key": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistRegistryExternalProviderBindingMismatch",
+            "signature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "provider",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2"
+              },
+              {
+                "name": "expectedBindingHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "suppliedBindingHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryInvalidPin(uint8,uint8)",
+            "kind": "error",
+            "name": "ArtistRegistryInvalidPin",
+            "signature": "ArtistRegistryInvalidPin(uint8,uint8)",
+            "inputs": [
+              {
+                "name": "pinClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "pinIndex",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+            "kind": "error",
+            "name": "ArtistRegistryInvalidRecipeSetHash",
+            "signature": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+            "inputs": [
+              {
+                "name": "recipeSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryPinAddressAlias(address)",
+            "kind": "error",
+            "name": "ArtistRegistryPinAddressAlias",
+            "signature": "ArtistRegistryPinAddressAlias(address)",
+            "inputs": [
+              {
+                "name": "expectedAddress",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamAssetPolicyRegistry": {
       "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
@@ -28102,6 +28658,393 @@
             "inputs": [
               {
                 "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamArtistRegistryV2": {
+      "source": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "artifact_path": "out-release/IStreamArtistRegistryV2.sol/IStreamArtistRegistryV2.json",
+      "abi_sha256": "sha256:f82b7c7ff620f951859308a954b046749df58288e0ef22d641a60a20a15d2276",
+      "abi_entries": 14,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 10,
+        "events": 0,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "artistArchivePinV2()",
+            "kind": "function",
+            "name": "artistArchivePinV2",
+            "signature": "artistArchivePinV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistCoordinatorPinV2()",
+            "kind": "function",
+            "name": "artistCoordinatorPinV2",
+            "signature": "artistCoordinatorPinV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistExternalProviderPinV2(uint8)",
+            "kind": "function",
+            "name": "artistExternalProviderPinV2",
+            "signature": "artistExternalProviderPinV2(uint8)",
+            "inputs": [
+              {
+                "name": "provider",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRecipeSetHashV2()",
+            "kind": "function",
+            "name": "artistRecipeSetHashV2",
+            "signature": "artistRecipeSetHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistryBindingHashV2()",
+            "kind": "function",
+            "name": "artistRegistryBindingHashV2",
+            "signature": "artistRegistryBindingHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artistRegistryMarkerV2()",
+            "kind": "function",
+            "name": "artistRegistryMarkerV2",
+            "signature": "artistRegistryMarkerV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistRegistrySchemaHashV2()",
+            "kind": "function",
+            "name": "artistRegistrySchemaHashV2",
+            "signature": "artistRegistrySchemaHashV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistRegistrySchemaV2()",
+            "kind": "function",
+            "name": "artistRegistrySchemaV2",
+            "signature": "artistRegistrySchemaV2()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "artistSemanticOwnerPinV2(uint8)",
+            "kind": "function",
+            "name": "artistSemanticOwnerPinV2",
+            "signature": "artistSemanticOwnerPinV2(uint8)",
+            "inputs": [
+              {
+                "name": "domain",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistSemanticDomainV2"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes4,bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamArtistRegistryV2.ArtistDirectoryPinV2",
+                "components": [
+                  {
+                    "name": "expectedAddress",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedRuntimeCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInterfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "expectedMarkerHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedSchemaHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedBindingHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [
+          {
+            "key": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+            "kind": "error",
+            "name": "ArtistRegistryExternalProviderBindingMismatch",
+            "signature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "provider",
+                "type": "uint8",
+                "internal_type": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2"
+              },
+              {
+                "name": "expectedBindingHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "suppliedBindingHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryInvalidPin(uint8,uint8)",
+            "kind": "error",
+            "name": "ArtistRegistryInvalidPin",
+            "signature": "ArtistRegistryInvalidPin(uint8,uint8)",
+            "inputs": [
+              {
+                "name": "pinClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "pinIndex",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+            "kind": "error",
+            "name": "ArtistRegistryInvalidRecipeSetHash",
+            "signature": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+            "inputs": [
+              {
+                "name": "recipeSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ArtistRegistryPinAddressAlias(address)",
+            "kind": "error",
+            "name": "ArtistRegistryPinAddressAlias",
+            "signature": "ArtistRegistryPinAddressAlias(address)",
+            "inputs": [
+              {
+                "name": "expectedAddress",
                 "type": "address",
                 "internal_type": "address"
               }
