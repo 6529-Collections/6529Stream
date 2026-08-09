@@ -107,6 +107,8 @@ forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --m
 & $pythonPath @pythonArgs "scripts\check_governance_action_policy.py"
 & $pythonPath @pythonArgs "scripts\test_record_family_authorization.py"
 & $pythonPath @pythonArgs "scripts\check_record_family_authorization.py"
+& $pythonPath @pythonArgs "scripts\test_artist_semantic_owner_matrix.py"
+& $pythonPath @pythonArgs "scripts\check_artist_semantic_owner_matrix.py"
 & $pythonPath @pythonArgs "scripts\test_system_manifest_payload_vector.py"
 & $pythonPath @pythonArgs "scripts\check_system_manifest_payload_vector.py"
 & $pythonPath @pythonArgs "scripts\test_system_manifest_payload_vector_reference.py"

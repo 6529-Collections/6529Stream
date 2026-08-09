@@ -57,6 +57,8 @@ forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -
 "$python_bin" scripts/check_governance_action_policy.py
 "$python_bin" scripts/test_record_family_authorization.py
 "$python_bin" scripts/check_record_family_authorization.py
+"$python_bin" scripts/test_artist_semantic_owner_matrix.py
+"$python_bin" scripts/check_artist_semantic_owner_matrix.py
 "$python_bin" scripts/test_system_manifest_payload_vector.py
 "$python_bin" scripts/check_system_manifest_payload_vector.py
 "$python_bin" scripts/test_system_manifest_payload_vector_reference.py

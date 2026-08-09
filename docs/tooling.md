@@ -217,6 +217,8 @@ python scripts/test_release_evidence_issue_closure.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_artist_semantic_owner_matrix.py
+python scripts/check_artist_semantic_owner_matrix.py
 python scripts/test_mint_manager_domain_constants.py
 python scripts/check_mint_manager_domain_constants.py
 python scripts/test_audit_package.py
@@ -755,6 +757,21 @@ The record-family authorization source and evidence package validates:
 python scripts/test_record_family_authorization.py
 python scripts/check_record_family_authorization.py
 ```
+
+The Proposed artist semantic-domain ownership packet validates with:
+
+```sh
+python scripts/test_artist_semantic_owner_matrix.py
+python scripts/check_artist_semantic_owner_matrix.py
+```
+
+The strict checker binds the matrix, schema, frozen 57-operation source, seven
+sole semantic owners, five immutable external providers, and the pre-audit
+implementation stops. The release manifest independently validates and binds
+the matrix and schema, while the checksum bundle binds the ADR, matrix, schema,
+checker, and hostile tests as exact roots. These bindings do not authorize
+Solidity implementation, a deployment candidate, audit credit, or any
+readiness advance.
 
 The checker reads
 `release-artifacts/record-family-authorization-source-catalog.json` against
@@ -1573,10 +1590,10 @@ would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
 
 Canonical checksum generation uses the exact reviewed covered-path inventory
-and independently pins the seven release-tool roots, 23-module runtime closure,
-and nine focused trust-policy tests as ordinary, in-repository files. The
+and independently pins the seven release-tool roots, 24-file runtime closure,
+and ten focused trust-policy tests as ordinary, in-repository files. The
 canonical, manually reviewed
-`release-artifacts/release-tool-call-policy.json` records exactly those 32
+`release-artifacts/release-tool-call-policy.json` records exactly those 34
 runtime and focused-test paths, including each source SHA-256 and byte size plus
 its import, member, and call multisets. Its schema is
 `release-artifacts/schema/release-tool-call-policy.v1.schema.json`. The
@@ -1586,8 +1603,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 272 configured roots,
-expanding to exactly 448 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 282 configured roots,
+expanding to exactly 458 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
@@ -1599,7 +1616,9 @@ already covered baseline directory. The Governance V2 policy artifact, checker,
 and tests add three exact roots; those files plus the policy schema under the
 already covered schema directory add four exact entries. The additional exact
 root binds `scripts/check_contract_size_budget.py`, which is executed directly
-by `RISK-SIZE-001`.
+by `RISK-SIZE-001`. The #670 publication adds ten exact roots for its Proposed
+ADR, strict matrix, schema, checker, hostile tests, frozen operation source,
+and four existing immutable-provider interfaces read by the checker.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
@@ -1968,7 +1987,7 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline.
 
 The release-tool call policy and its schema are reviewed inputs, not generated
-outputs. Any change to one of the 32 reviewed tool/test sources or to an allowed
+outputs. Any change to one of the 34 reviewed tool/test sources or to an allowed
 dangerous exception must update and review the policy before the generated
 tail with:
 
@@ -2028,6 +2047,8 @@ python scripts/generate_release_evidence_issue_body_sync.py
 python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_artist_semantic_owner_matrix.py
+python scripts/check_artist_semantic_owner_matrix.py
 python scripts/check_mint_manager_domain_constants.py
 python scripts/check_audit_package.py
 python scripts/test_natspec_coverage.py
@@ -2124,6 +2145,8 @@ python scripts/check_release_evidence_issue_bodies.py
 python scripts/test_release_evidence_issue_closure.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_artist_semantic_owner_matrix.py
+python scripts/check_artist_semantic_owner_matrix.py
 python scripts/check_mint_manager_domain_constants.py
 python scripts/check_audit_package.py
 python scripts/test_natspec_coverage.py

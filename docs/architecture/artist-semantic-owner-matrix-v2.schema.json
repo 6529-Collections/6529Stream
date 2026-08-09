@@ -1,0 +1,1785 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json",
+  "title": "6529Stream global artist semantic-owner matrix v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "maturity",
+    "source_freeze",
+    "proposed_supersession",
+    "directory",
+    "operation_coordinator",
+    "archive",
+    "semantic_domains",
+    "current_state_surfaces",
+    "record_surfaces",
+    "event_surfaces",
+    "replay_surfaces",
+    "cross_domain_protocol",
+    "constructor_dag",
+    "sole_authorities",
+    "immutable_external_providers",
+    "authority_surfaces",
+    "external_dependencies",
+    "source_requirements",
+    "operations",
+    "implementation_stops"
+  ],
+  "properties": {
+    "schema": {
+      "const": "6529stream.artist-semantic-owner-matrix.v2"
+    },
+    "status": {
+      "const": "PROPOSED_ARCHITECTURE_ONLY"
+    },
+    "maturity": {
+      "const": "pre_audit_implementation_blocked"
+    },
+    "source_freeze": {
+      "$ref": "#/$defs/sourceFreeze"
+    },
+    "proposed_supersession": {
+      "$ref": "#/$defs/proposedSupersession"
+    },
+    "directory": {
+      "$ref": "#/$defs/directory"
+    },
+    "operation_coordinator": {
+      "$ref": "#/$defs/coordinator"
+    },
+    "archive": {
+      "$ref": "#/$defs/archive"
+    },
+    "semantic_domains": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "$ref": "#/$defs/semanticDomain"
+      }
+    },
+    "current_state_surfaces": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {
+        "$ref": "#/$defs/currentStateSurface"
+      }
+    },
+    "record_surfaces": {
+      "type": "array",
+      "minItems": 37,
+      "maxItems": 37,
+      "items": {
+        "$ref": "#/$defs/recordSurface"
+      }
+    },
+    "event_surfaces": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "items": {
+        "$ref": "#/$defs/eventSurface"
+      }
+    },
+    "replay_surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/replaySurface"
+      }
+    },
+    "cross_domain_protocol": {
+      "$ref": "#/$defs/crossDomainProtocol"
+    },
+    "constructor_dag": {
+      "$ref": "#/$defs/constructorDag"
+    },
+    "sole_authorities": {
+      "$ref": "#/$defs/soleAuthorities"
+    },
+    "immutable_external_providers": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/externalProvider"
+      }
+    },
+    "authority_surfaces": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/authoritySurface"
+      }
+    },
+    "external_dependencies": {
+      "$ref": "#/$defs/externalDependencies"
+    },
+    "source_requirements": {
+      "$ref": "#/$defs/sourceRequirements"
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 57,
+      "maxItems": 57,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "implementation_stops": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "domainId": {
+      "enum": [
+        "binding_lifecycle",
+        "collaborator_lifecycle",
+        "identity_authority",
+        "acceptance_lifecycle",
+        "attribution_lifecycle",
+        "payout_lifecycle",
+        "consent_finality"
+      ]
+    },
+    "owner": {
+      "enum": [
+        "StreamArtistBindingLifecycle",
+        "StreamArtistCollaboratorLifecycle",
+        "StreamArtistIdentityAuthority",
+        "StreamArtistAcceptanceLifecycle",
+        "StreamArtistAttributionLifecycle",
+        "StreamArtistPayoutLifecycle",
+        "StreamArtistConsentFinalityLifecycle"
+      ]
+    },
+    "sourceFreeze": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "schema",
+        "sha256",
+        "source_commit",
+        "operation_count",
+        "operation_columns",
+        "authority",
+        "implementation_stop_overlays",
+        "effective_implementation_stops",
+        "dependency_profiles"
+      ],
+      "properties": {
+        "path": {
+          "const": "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json"
+        },
+        "schema": {
+          "const": "6529stream.artist-validation-operation-matrix.v1"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_count": {
+          "const": 57
+        },
+        "operation_columns": {
+          "type": "array",
+          "minItems": 18,
+          "maxItems": 18,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "authority": {
+          "type": "object"
+        },
+        "implementation_stop_overlays": {
+          "type": "array"
+        },
+        "effective_implementation_stops": {
+          "type": "object"
+        },
+        "dependency_profiles": {
+          "type": "object"
+        }
+      }
+    },
+    "proposedSupersession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "on_acceptance",
+        "preserves"
+      ],
+      "properties": {
+        "on_acceptance": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "preserves": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "directory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "role",
+        "owns_semantic_authority",
+        "semantic_storage",
+        "owns_semantic_truth",
+        "owns_records",
+        "owns_replay_state",
+        "owns_current_or_latest_state",
+        "generic_routing",
+        "arbitrary_selector_or_calldata",
+        "delegatecall",
+        "upgrade_path",
+        "mutable_rebinding",
+        "routes_only_to",
+        "immutable_pins",
+        "original_caller_protocol"
+      ],
+      "properties": {
+        "name": {
+          "const": "StreamArtistRegistry"
+        },
+        "role": {
+          "const": "slim_immutable_typed_directory_and_facade"
+        },
+        "owns_semantic_authority": {
+          "const": false
+        },
+        "semantic_storage": {
+          "const": false
+        },
+        "owns_semantic_truth": {
+          "const": false
+        },
+        "owns_records": {
+          "const": false
+        },
+        "owns_replay_state": {
+          "const": false
+        },
+        "owns_current_or_latest_state": {
+          "const": false
+        },
+        "generic_routing": {
+          "const": false
+        },
+        "arbitrary_selector_or_calldata": {
+          "const": false
+        },
+        "delegatecall": {
+          "const": false
+        },
+        "upgrade_path": {
+          "const": false
+        },
+        "mutable_rebinding": {
+          "const": false
+        },
+        "routes_only_to": {
+          "const": "StreamArtistOperationCoordinator"
+        },
+        "immutable_pins": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "original_caller_protocol": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "coordinator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "role",
+        "owns_semantic_authority",
+        "semantic_storage",
+        "record_storage",
+        "replay_storage",
+        "normative_event_emitter",
+        "generic_selector_route",
+        "generic_calldata_route",
+        "delegatecall",
+        "upgrade_path",
+        "mutable_recipe",
+        "enumerated_recipe_count",
+        "transient_state",
+        "snapshot_protocol",
+        "owner_call_protocol",
+        "atomicity"
+      ],
+      "properties": {
+        "name": {
+          "const": "StreamArtistOperationCoordinator"
+        },
+        "role": {
+          "const": "immutable_typed_stateless_atomic_recipe_coordinator"
+        },
+        "owns_semantic_authority": {
+          "const": false
+        },
+        "semantic_storage": {
+          "const": false
+        },
+        "record_storage": {
+          "const": false
+        },
+        "replay_storage": {
+          "const": false
+        },
+        "normative_event_emitter": {
+          "const": false
+        },
+        "generic_selector_route": {
+          "const": false
+        },
+        "generic_calldata_route": {
+          "const": false
+        },
+        "delegatecall": {
+          "const": false
+        },
+        "upgrade_path": {
+          "const": false
+        },
+        "mutable_recipe": {
+          "const": false
+        },
+        "enumerated_recipe_count": {
+          "const": 57
+        },
+        "transient_state": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "snapshot_protocol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_call_protocol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "atomicity": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "deployment_position",
+        "role",
+        "owns_semantic_authority",
+        "semantic_storage",
+        "owns_authorization",
+        "owns_records",
+        "owns_replay_state",
+        "owns_current_or_latest_state",
+        "usable_for_authentication",
+        "usable_for_replay_decisions",
+        "usable_for_current_state_decisions",
+        "usable_for_latest_state_decisions",
+        "generic_routing",
+        "delegatecall",
+        "upgrade_path",
+        "event_semantics",
+        "atomicity"
+      ],
+      "properties": {
+        "name": {
+          "const": "StreamArtistArchiveV2"
+        },
+        "deployment_position": {
+          "const": "former StreamArtistPayloadStore slot"
+        },
+        "role": {
+          "const": "append_only_evidence_only"
+        },
+        "owns_semantic_authority": {
+          "const": false
+        },
+        "semantic_storage": {
+          "const": false
+        },
+        "owns_authorization": {
+          "const": false
+        },
+        "owns_records": {
+          "const": false
+        },
+        "owns_replay_state": {
+          "const": false
+        },
+        "owns_current_or_latest_state": {
+          "const": false
+        },
+        "usable_for_authentication": {
+          "const": false
+        },
+        "usable_for_replay_decisions": {
+          "const": false
+        },
+        "usable_for_current_state_decisions": {
+          "const": false
+        },
+        "usable_for_latest_state_decisions": {
+          "const": false
+        },
+        "generic_routing": {
+          "const": false
+        },
+        "delegatecall": {
+          "const": false
+        },
+        "upgrade_path": {
+          "const": false
+        },
+        "event_semantics": {
+          "type": "string",
+          "minLength": 1
+        },
+        "atomicity": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "semanticDomain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain_id",
+        "owner",
+        "canonical_source_path",
+        "storage_namespace",
+        "revision_namespace",
+        "event_namespace",
+        "rollback_owner",
+        "module_reads_other_domains",
+        "coordinator_snapshot_order",
+        "participating_operation_ids"
+      ],
+      "properties": {
+        "domain_id": {
+          "$ref": "#/$defs/domainId"
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "canonical_source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "storage_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "revision_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rollback_owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "module_reads_other_domains": {
+          "const": false
+        },
+        "coordinator_snapshot_order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        },
+        "participating_operation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 57
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "recordSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "record_domain",
+        "owner_domain",
+        "owner_contract"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^record:"
+        },
+        "record_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_domain": {
+          "$ref": "#/$defs/domainId"
+        },
+        "owner_contract": {
+          "$ref": "#/$defs/owner"
+        }
+      }
+    },
+    "currentStateSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "owner_kind",
+        "owner_domain",
+        "owner"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_kind": {
+          "enum": [
+            "artist_semantic_domain",
+            "external_read_only"
+          ]
+        },
+        "owner_domain": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/domainId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_id": {
+          "type": "string",
+          "pattern": "^provider:"
+        }
+      }
+    },
+    "eventSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "event",
+        "emitter_domain",
+        "emitter_contract"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^event:"
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "emitter_domain": {
+          "$ref": "#/$defs/domainId"
+        },
+        "emitter_contract": {
+          "$ref": "#/$defs/owner"
+        }
+      }
+    },
+    "replaySurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "owner_domain",
+        "owner_contract"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_domain": {
+          "$ref": "#/$defs/domainId"
+        },
+        "owner_contract": {
+          "$ref": "#/$defs/owner"
+        }
+      }
+    },
+    "crossDomainProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_modules_read_each_other",
+        "persistent_cross_domain_writes",
+        "typed_revision_commitment_snapshots",
+        "snapshot_order",
+        "payout_before_consent_finality",
+        "economics_consent_payout_snapshot",
+        "rollback_policy",
+        "export_policy",
+        "import_policy",
+        "composite_manifest_fields"
+      ],
+      "properties": {
+        "owner_modules_read_each_other": {
+          "const": false
+        },
+        "persistent_cross_domain_writes": {
+          "const": false
+        },
+        "typed_revision_commitment_snapshots": {
+          "const": true
+        },
+        "snapshot_order": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "$ref": "#/$defs/domainId"
+          },
+          "uniqueItems": true
+        },
+        "payout_before_consent_finality": {
+          "const": true
+        },
+        "economics_consent_payout_snapshot": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "operation_id",
+            "write",
+            "snapshot_id",
+            "must_precede"
+          ],
+          "properties": {
+            "operation_id": {
+              "const": 15
+            },
+            "write": {
+              "const": "recordEconomicsConsent"
+            },
+            "snapshot_id": {
+              "const": "domain:payout_lifecycle"
+            },
+            "must_precede": {
+              "const": "domain:consent_finality"
+            }
+          }
+        },
+        "rollback_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "export_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "import_policy": {
+          "type": "string",
+          "minLength": 1
+        },
+        "composite_manifest_fields": {
+          "type": "array",
+          "minItems": 20,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "constructorDag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acyclic",
+        "mutable_initializers",
+        "mutable_rebinding",
+        "steps"
+      ],
+      "properties": {
+        "acyclic": {
+          "const": true
+        },
+        "mutable_initializers": {
+          "const": false
+        },
+        "mutable_rebinding": {
+          "const": false
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "soleAuthorities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_family_authority_provider",
+        "artist_erc1271"
+      ],
+      "properties": {
+        "record_family_authority_provider": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "interface",
+            "owner_domain",
+            "owner",
+            "owner_count"
+          ],
+          "properties": {
+            "interface": {
+              "const": "IStreamRecordFamilyAuthorityProvider"
+            },
+            "owner_domain": {
+              "const": "identity_authority"
+            },
+            "owner": {
+              "const": "StreamArtistIdentityAuthority"
+            },
+            "owner_count": {
+              "const": 1
+            }
+          }
+        },
+        "artist_erc1271": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ggp_key",
+            "owner_domain",
+            "owner",
+            "owner_count",
+            "scope",
+            "stateless_validation_boundary",
+            "boundary_authoritative",
+            "boundary_relationship",
+            "frozen_source_ggp_host",
+            "interface_reconciliation_required",
+            "selected_reconciliation"
+          ],
+          "properties": {
+            "ggp_key": {
+              "const": "ARTIST_ERC1271_VERIFY_GAS"
+            },
+            "owner_domain": {
+              "const": "identity_authority"
+            },
+            "owner": {
+              "const": "StreamArtistIdentityAuthority"
+            },
+            "owner_count": {
+              "const": 1
+            },
+            "scope": {
+              "type": "string",
+              "minLength": 1
+            },
+            "stateless_validation_boundary": {
+              "const": "StreamArtistRegistryValidatorBase._validateSignerProof"
+            },
+            "boundary_authoritative": {
+              "const": false
+            },
+            "boundary_relationship": {
+              "type": "string",
+              "minLength": 1
+            },
+            "frozen_source_ggp_host": {
+              "const": "StreamArtistRegistry"
+            },
+            "interface_reconciliation_required": {
+              "const": true
+            },
+            "selected_reconciliation": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "candidatePin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "manifest_field",
+        "value",
+        "status"
+      ],
+      "properties": {
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "null"
+        },
+        "status": {
+          "const": "required_candidate_value_absent"
+        }
+      }
+    },
+    "interfacePin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "interface_id",
+        "source_path",
+        "source_sha256",
+        "status"
+      ],
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "interface_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "markerPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marker",
+        "authority_path",
+        "status"
+      ],
+      "properties": {
+        "marker": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authority_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "schemaPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "schema_id",
+        "authority_path",
+        "status"
+      ],
+      "properties": {
+        "schema": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authority_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "bindingPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "ordered_fields",
+        "value",
+        "status"
+      ],
+      "properties": {
+        "domain": {
+          "const": "6529STREAM_ARTIST_EXTERNAL_PROVIDER_BINDING_V2"
+        },
+        "ordered_fields": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "value": {
+          "type": "null"
+        },
+        "status": {
+          "const": "required_candidate_value_absent"
+        }
+      }
+    },
+    "externalProvider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_id",
+        "provider_contract",
+        "provider_role",
+        "snapshot_ids",
+        "address_pin",
+        "runtime_codehash_pin",
+        "interface_pin",
+        "marker_pin",
+        "schema_pin",
+        "binding_pin",
+        "immutable",
+        "candidate_values_present",
+        "implementable",
+        "reconciliation_stop"
+      ],
+      "properties": {
+        "provider_id": {
+          "type": "string",
+          "pattern": "^provider:"
+        },
+        "provider_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_role": {
+          "enum": [
+            "platform_role_authority",
+            "external_current_state"
+          ]
+        },
+        "snapshot_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "address_pin": {
+          "$ref": "#/$defs/candidatePin"
+        },
+        "runtime_codehash_pin": {
+          "$ref": "#/$defs/candidatePin"
+        },
+        "interface_pin": {
+          "$ref": "#/$defs/interfacePin"
+        },
+        "marker_pin": {
+          "$ref": "#/$defs/markerPin"
+        },
+        "schema_pin": {
+          "$ref": "#/$defs/schemaPin"
+        },
+        "binding_pin": {
+          "$ref": "#/$defs/bindingPin"
+        },
+        "immutable": {
+          "const": true
+        },
+        "candidate_values_present": {
+          "const": false
+        },
+        "implementable": {
+          "const": false
+        },
+        "reconciliation_stop": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "authoritySurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "provider_id",
+        "role_literal",
+        "role_id",
+        "membership_call",
+        "revision_call",
+        "original_caller_subject",
+        "original_caller_required"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^authority:role_registry:ROLE_"
+        },
+        "provider_id": {
+          "const": "provider:role_registry"
+        },
+        "role_literal": {
+          "enum": [
+            "ROLE_ARTIST_REGISTRY_ADMIN",
+            "ROLE_ATTRIBUTION_ARBITER",
+            "ROLE_ARTIST_DORMANCY_ADMIN"
+          ]
+        },
+        "role_id": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "membership_call": {
+          "const": "hasRole(bytes32,address)"
+        },
+        "revision_call": {
+          "const": "roleMutationState(bytes32)"
+        },
+        "original_caller_subject": {
+          "const": "authenticated_original_caller"
+        },
+        "original_caller_required": {
+          "const": true
+        }
+      }
+    },
+    "reservedCallRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "site",
+        "kind",
+        "operation",
+        "expression",
+        "call_syntax",
+        "expected_count",
+        "path_class",
+        "lane",
+        "issue",
+        "disposition"
+      ],
+      "properties": {
+        "path": {
+          "const": "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol"
+        },
+        "site": {
+          "const": "_validateSignerProof"
+        },
+        "kind": {
+          "const": "call-option"
+        },
+        "operation": {
+          "const": "staticcall"
+        },
+        "expression": {
+          "const": "context.erc1271GasCap"
+        },
+        "call_syntax": {
+          "const": "address(<signer>).staticcall{gas: context.erc1271GasCap}"
+        },
+        "expected_count": {
+          "const": 1
+        },
+        "path_class": {
+          "const": "user-path"
+        },
+        "lane": {
+          "const": "artist-authority"
+        },
+        "issue": {
+          "const": "#669"
+        },
+        "disposition": {
+          "const": "open-remediation-required"
+        }
+      }
+    },
+    "externalDependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issue_669"
+      ],
+      "properties": {
+        "issue_669": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "issue",
+            "status",
+            "reserved_call_row",
+            "validation_primitive",
+            "source_present",
+            "inventory_row_present",
+            "semantic_owner",
+            "validation_boundary_authoritative",
+            "relationship",
+            "owned_files_not_modified"
+          ],
+          "properties": {
+            "issue": {
+              "const": "https://github.com/6529-Collections/6529Stream/issues/669"
+            },
+            "status": {
+              "const": "canonical_validator_boundary_reserved_source_and_inventory_row_absent"
+            },
+            "reserved_call_row": {
+              "$ref": "#/$defs/reservedCallRow"
+            },
+            "validation_primitive": {
+              "const": "staticcall"
+            },
+            "source_present": {
+              "const": false
+            },
+            "inventory_row_present": {
+              "const": false
+            },
+            "semantic_owner": {
+              "const": "StreamArtistIdentityAuthority"
+            },
+            "validation_boundary_authoritative": {
+              "const": false
+            },
+            "relationship": {
+              "type": "string",
+              "minLength": 1
+            },
+            "owned_files_not_modified": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "sourceComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "path",
+        "source_present"
+      ],
+      "properties": {
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^smart-contracts/domains/artist/"
+        },
+        "source_present": {
+          "const": false
+        }
+      }
+    },
+    "sourceRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_root",
+        "components",
+        "all_source_absent",
+        "interface_and_storage_freeze_complete",
+        "implementation_authorized"
+      ],
+      "properties": {
+        "canonical_root": {
+          "const": "smart-contracts/domains/artist"
+        },
+        "components": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "$ref": "#/$defs/sourceComponent"
+          }
+        },
+        "all_source_absent": {
+          "const": true
+        },
+        "interface_and_storage_freeze_complete": {
+          "const": false
+        },
+        "implementation_authorized": {
+          "const": false
+        }
+      }
+    },
+    "sourceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "write",
+        "family",
+        "validation_selector",
+        "write_selector",
+        "write_selector_preimage",
+        "authority",
+        "signature_rule",
+        "typehash",
+        "field_mask",
+        "fields",
+        "current_state_facts",
+        "replay_facts",
+        "primary_record",
+        "secondary_record",
+        "dependencies",
+        "events",
+        "implementation_stop"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 57
+        },
+        "write": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_selector": {
+          "type": "string",
+          "minLength": 1
+        },
+        "write_selector": {
+          "type": "string",
+          "minLength": 1
+        },
+        "write_selector_preimage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "typehash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field_mask": {
+          "type": "string",
+          "minLength": 1
+        },
+        "fields": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_state_facts": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replay_facts": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "secondary_record": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dependencies": {
+          "type": "string",
+          "minLength": 1
+        },
+        "events": {
+          "type": "string",
+          "minLength": 1
+        },
+        "implementation_stop": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "currentFactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_index",
+        "source_fact",
+        "surface_ids"
+      ],
+      "properties": {
+        "source_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_fact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "replayFactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_index",
+        "source_fact",
+        "surface_ids"
+      ],
+      "properties": {
+        "source_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_fact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "recordBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "mode",
+        "source",
+        "surface_id",
+        "owner_domain"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "primary",
+            "secondary"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "none",
+            "create",
+            "existing"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "owner_domain": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/domainId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "eventBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_index",
+        "event",
+        "surface_id",
+        "emitter_domain"
+      ],
+      "properties": {
+        "source_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface_id": {
+          "type": "string",
+          "pattern": "^event:"
+        },
+        "emitter_domain": {
+          "$ref": "#/$defs/domainId"
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step",
+        "action_id",
+        "owner_domain",
+        "owner_contract",
+        "validates_coordinator",
+        "validates_original_caller",
+        "validates_revision_snapshot",
+        "write_surfaces",
+        "emits"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "action_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_domain": {
+          "$ref": "#/$defs/domainId"
+        },
+        "owner_contract": {
+          "$ref": "#/$defs/owner"
+        },
+        "validates_coordinator": {
+          "const": "StreamArtistOperationCoordinator"
+        },
+        "validates_original_caller": {
+          "const": true
+        },
+        "validates_revision_snapshot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "write_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "emits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recipe_id",
+        "facade_entrypoint",
+        "generic_dispatch",
+        "original_caller_authenticated",
+        "snapshot_ids",
+        "actions",
+        "atomicity"
+      ],
+      "properties": {
+        "recipe_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "facade_entrypoint": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generic_dispatch": {
+          "const": false
+        },
+        "original_caller_authenticated": {
+          "const": true
+        },
+        "snapshot_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "atomicity": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "operationSourceRequirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency_tokens",
+        "required_source_paths",
+        "source_present",
+        "effective_implementation_stops",
+        "implementation_authorized"
+      ],
+      "properties": {
+        "dependency_tokens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "required_source_paths": {
+          "type": "array",
+          "minItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "source_present": {
+          "const": false
+        },
+        "effective_implementation_stops": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "implementation_authorized": {
+          "const": false
+        }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "write",
+        "source_row",
+        "current_state_fact_bindings",
+        "replay_fact_bindings",
+        "record_bindings",
+        "event_bindings",
+        "coordinator_recipe",
+        "source_requirements"
+      ],
+      "properties": {
+        "operation_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 57
+        },
+        "write": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_row": {
+          "$ref": "#/$defs/sourceRow"
+        },
+        "current_state_fact_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/currentFactBinding"
+          }
+        },
+        "replay_fact_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/replayFactBinding"
+          }
+        },
+        "record_bindings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/recordBinding"
+          }
+        },
+        "event_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/eventBinding"
+          }
+        },
+        "coordinator_recipe": {
+          "$ref": "#/$defs/recipe"
+        },
+        "source_requirements": {
+          "$ref": "#/$defs/operationSourceRequirements"
+        }
+      }
+    }
+  }
+}

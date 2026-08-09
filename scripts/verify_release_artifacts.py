@@ -111,6 +111,20 @@ RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS = (
     "test/StreamPreservationRecords.t.sol",
     "test/StreamDeploymentManifest.t.sol",
 )
+ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA = (
+    "6529stream.artist-semantic-owner-matrix.v2"
+)
+ARTIST_SEMANTIC_OWNER_MATRIX_STATUS = "PROPOSED_ARCHITECTURE_ONLY"
+ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY = "pre_audit_implementation_blocked"
+ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID = (
+    "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json"
+)
+ARTIST_SEMANTIC_OWNER_MATRIX_PATH = (
+    "docs/architecture/artist-semantic-owner-matrix-v2.json"
+)
+ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_PATH = (
+    "docs/architecture/artist-semantic-owner-matrix-v2.schema.json"
+)
 RELEASE_TOOL_CALL_POLICY_PATH = (
     "release-artifacts/release-tool-call-policy.json"
 )
@@ -136,6 +150,7 @@ ALLOWED_UNCHECKSUMMED_RELEASE_FILES = {
 }
 REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_artist_semantic_owner_matrix.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
     Path("scripts/check_governance_action_policy.py"),
@@ -177,12 +192,16 @@ REVIEWED_RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_artist_semantic_owner_matrix.py"),
     Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
     Path("scripts/test_bytecode_release_proof.py"),
 )
 SNAPSHOT_CHECKER_MODULE_PATHS = {
+    "check_artist_semantic_owner_matrix": Path(
+        "scripts/check_artist_semantic_owner_matrix.py"
+    ),
     "check_governed_parameter_inventory": Path(
         "scripts/check_governed_parameter_inventory.py"
     ),
@@ -191,6 +210,7 @@ SNAPSHOT_CHECKER_MODULE_PATHS = {
     ),
 }
 SNAPSHOT_CHECKER_DEPENDENCY_PATHS = {
+    "check_artist_semantic_owner_matrix": {},
     "check_governed_parameter_inventory": {
         "check_governed_parameter_identifiers": Path(
             "scripts/check_governed_parameter_identifiers.py"
@@ -217,6 +237,7 @@ RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES = frozenset(
         "json",
         "jsonschema",
         "jsonschema.exceptions",
+        "math",
         "os",
         "pathlib",
         "re",
@@ -226,18 +247,21 @@ RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES = frozenset(
         "subprocess",
         "sys",
         "tempfile",
+        "types",
         "typing",
         "unicodedata",
         "unittest",
     }
 )
 REVIEWED_RELEASE_TOOL_EXTERNAL_MODULES_SHA256 = (
-    "7a475d5ccb8e51ca912bfe8f62c66f6c2987bc121a7eddc709eb2e10a402dfc4"
+    "e8e4ef81278dcbfb1e00abaa1634f539810b93002d15c814e5ad4801089362ae"
 )
 RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST = frozenset(
     tuple(line.split("|"))
     for line in """
 scripts/check_admin_ceremony_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
+scripts/check_artist_semantic_owner_matrix.py|pathlib.Path|local:parser.add_argument|keyword:type
+scripts/check_artist_semantic_owner_matrix.py|sys.stderr|local:print|keyword:file
 scripts/check_admin_ceremony_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_admin_ceremony_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_admin_ceremony_evidence.py|sys.stderr|local:print|keyword:file
@@ -492,9 +516,9 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 272
+CANONICAL_COVERED_PATH_COUNT = 282
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "80918709671432234f19c3ed2f301687120aeb9ee8cb417e1b04431843c0ebac"
+    "9cf2a2d08c6ce7b69ed33f4076be231566e304b132b0865e4902d893f8693e0a"
 )
 RISK_SIZE_CHECKER_PATH = Path("scripts/check_contract_size_budget.py")
 
@@ -2451,8 +2475,8 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
             },
             "external_modules": {
                 "type": "array",
-                "minItems": 29,
-                "maxItems": 29,
+                "minItems": 31,
+                "maxItems": 31,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
@@ -2466,8 +2490,8 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 32,
-                "maxItems": 32,
+                "minItems": 34,
+                "maxItems": 34,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
@@ -2713,7 +2737,7 @@ def verify_release_tool_call_policy(
         ("\n".join(expected_external_modules) + "\n").encode("utf-8")
     ).hexdigest()
     if (
-        len(expected_external_modules) != 29
+        len(expected_external_modules) != 31
         or external_modules_digest
         != REVIEWED_RELEASE_TOOL_EXTERNAL_MODULES_SHA256
     ):
@@ -2771,7 +2795,7 @@ def verify_release_tool_call_policy(
     if actual.get("external_modules") != expected_external_modules:
         raise ReleaseArtifactVerificationError(
             "release-tool call policy external modules differ from the "
-            "independent exact 29-module literal"
+            "independent exact 31-module literal"
         )
     roles = {
         **{
@@ -2783,9 +2807,9 @@ def verify_release_tool_call_policy(
             for path in REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
         },
     }
-    if len(roles) != 32:
+    if len(roles) != 34:
         raise ReleaseArtifactVerificationError(
-            "release-tool call policy requires exactly 23 runtime and 9 "
+            "release-tool call policy requires exactly 24 runtime and 10 "
             "focused-test paths"
         )
     if (
@@ -3431,6 +3455,19 @@ def validate_record_family_authorization_semantics(
         ) from exc
 
 
+def validate_artist_semantic_owner_matrix_semantics(
+    repo_root: Path,
+    checker: Any,
+) -> None:
+    """Run the Proposed artist-owner validator for offline consumers."""
+    try:
+        checker.check(repo_root)
+    except Exception as exc:
+        raise ReleaseArtifactVerificationError(
+            f"artist semantic-owner matrix validation failed: {exc}"
+        ) from exc
+
+
 def _load_snapshot_checker(
     snapshot_root: Path,
     module_name: str,
@@ -3562,6 +3599,10 @@ def validate_bound_snapshot_semantics(
             snapshot_root,
             "check_record_family_authorization",
         )
+        artist_semantic_owner_checker = _load_snapshot_checker(
+            snapshot_root,
+            "check_artist_semantic_owner_matrix",
+        )
         governed_parameter_inventory = (
             validate_governed_parameter_inventory_semantics(
                 snapshot_root,
@@ -3571,6 +3612,10 @@ def validate_bound_snapshot_semantics(
         validate_record_family_authorization_semantics(
             snapshot_root,
             record_family_checker,
+        )
+        validate_artist_semantic_owner_matrix_semantics(
+            snapshot_root,
+            artist_semantic_owner_checker,
         )
     return governed_parameter_inventory
 
@@ -3614,6 +3659,51 @@ def _require_exact_file_record(
             raise ReleaseArtifactVerificationError(
                 f"{source}.{field} must be {expected_value}"
             )
+
+
+def verify_artist_semantic_owner_matrix_bindings(
+    release_manifest: dict[str, Any],
+) -> None:
+    """Require the manifest to bind the exact Proposed #670 packet."""
+    release_artifacts = require_dict(
+        release_manifest.get("release_artifacts"),
+        "release-manifest.release_artifacts",
+    )
+    package = require_dict(
+        release_artifacts.get("artist_semantic_owner_matrix"),
+        "release-manifest.release_artifacts.artist_semantic_owner_matrix",
+    )
+    if set(package) != {"matrix", "schema"}:
+        raise ReleaseArtifactVerificationError(
+            "release-manifest artist semantic-owner package keys must be "
+            "exactly matrix, schema"
+        )
+    _require_exact_file_record(
+        require_dict(
+            package.get("matrix"),
+            "release-manifest artist semantic-owner matrix",
+        ),
+        source="release-manifest artist semantic-owner matrix",
+        expected_path=ARTIST_SEMANTIC_OWNER_MATRIX_PATH,
+        expected_schema=ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+        expected_fields={
+            "status": ARTIST_SEMANTIC_OWNER_MATRIX_STATUS,
+            "maturity": ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY,
+        },
+    )
+    _require_exact_file_record(
+        require_dict(
+            package.get("schema"),
+            "release-manifest artist semantic-owner schema",
+        ),
+        source="release-manifest artist semantic-owner schema",
+        expected_path=ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_PATH,
+        expected_schema=JSON_SCHEMA_DRAFT,
+        expected_fields={
+            "schema_id": ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID,
+            "document_schema_version": ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+        },
+    )
 
 
 def verify_release_tool_call_policy_bindings(
@@ -4116,6 +4206,7 @@ def verify_release_artifacts(
         release_manifest,
         release_candidate_lockfile,
     )
+    verify_artist_semantic_owner_matrix_bindings(release_manifest)
 
     release_manifest_records = verify_nested_file_records(
         repo_root,

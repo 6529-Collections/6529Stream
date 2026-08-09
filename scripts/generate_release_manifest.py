@@ -14,6 +14,7 @@ from typing import Any
 
 import check_drop_authorization_signing_evidence as drop_signing_evidence_checker
 import check_admin_ceremony_evidence as admin_ceremony_checker
+import check_artist_semantic_owner_matrix as artist_semantic_owner_checker
 import check_governance_action_policy as governance_action_policy_checker
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
 import check_non_local_release_evidence as non_local_evidence_checker
@@ -58,6 +59,14 @@ RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID = (
     record_family_authorization_checker.GRANT_MAP_SCHEMA_ID
 )
 JSON_SCHEMA_DRAFT = record_family_authorization_checker.JSON_SCHEMA_DRAFT
+ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA = (
+    "6529stream.artist-semantic-owner-matrix.v2"
+)
+ARTIST_SEMANTIC_OWNER_MATRIX_STATUS = "PROPOSED_ARCHITECTURE_ONLY"
+ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY = "pre_audit_implementation_blocked"
+ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID = (
+    "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json"
+)
 RELEASE_TOOL_CALL_POLICY_SCHEMA = (
     release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA
 )
@@ -106,6 +115,12 @@ DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE = (
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
     record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA
+)
+DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX = Path(
+    "docs/architecture/artist-semantic-owner-matrix-v2.json"
+)
+DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA = Path(
+    "docs/architecture/artist-semantic-owner-matrix-v2.schema.json"
 )
 DEFAULT_RELEASE_TOOL_CALL_POLICY = (
     release_checksum_policy.RELEASE_TOOL_CALL_POLICY_PATH
@@ -195,6 +210,9 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
     Path("docs/adr/0022-immutable-artist-registry-validation-adapter.md"),
+    Path("docs/adr/0023-modular-artist-authority-domain-ownership.md"),
+    Path("docs/architecture/artist-semantic-owner-matrix-v2.json"),
+    Path("docs/architecture/artist-semantic-owner-matrix-v2.schema.json"),
     Path("docs/revenue-splits-and-royalties.md"),
     Path("docs/mint-policy-and-accounting.md"),
     Path("docs/stream-sales-and-auctions.md"),
@@ -766,6 +784,80 @@ def record_family_authorization_records(
         "evidence_schema": evidence_schema,
         "grant_map_schema": grant_map_schema,
         "evidence_template": evidence_template,
+    }
+
+
+def artist_semantic_owner_matrix_records(
+    repo_root: Path,
+) -> dict[str, dict[str, Any]]:
+    """Validate and bind the Proposed #670 ownership packet."""
+    try:
+        artist_semantic_owner_checker.check(repo_root)
+    except artist_semantic_owner_checker.MatrixError as exc:
+        raise ReleaseManifestError(
+            f"invalid artist semantic-owner matrix package: {exc}"
+        ) from exc
+
+    matrix_path = repo_root / DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX
+    schema_path = repo_root / DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA
+    matrix, _, matrix_record = json_snapshot_record(matrix_path, repo_root)
+    schema, _, schema_record = json_snapshot_record(schema_path, repo_root)
+
+    if matrix.get("schema") != ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix must use schema "
+            f"{ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA}"
+        )
+    if matrix.get("status") != ARTIST_SEMANTIC_OWNER_MATRIX_STATUS:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix must remain Proposed architecture only"
+        )
+    if matrix.get("maturity") != ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix must remain pre-audit and "
+            "implementation-blocked"
+        )
+    matrix_record.update(
+        {
+            "schema_version": ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+            "status": ARTIST_SEMANTIC_OWNER_MATRIX_STATUS,
+            "maturity": ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY,
+        }
+    )
+
+    if schema.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if schema.get("$id") != ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix schema must use schema ID "
+            f"{ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID}"
+        )
+    schema_properties = require_dict(
+        schema.get("properties"),
+        f"{schema_path}.properties",
+    )
+    document_schema = require_dict(
+        schema_properties.get("schema"),
+        f"{schema_path}.properties.schema",
+    )
+    if document_schema.get("const") != ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA:
+        raise ReleaseManifestError(
+            "artist semantic-owner matrix schema must pin document version "
+            f"{ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA}"
+        )
+    schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID,
+            "document_schema_version": ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+        }
+    )
+    return {
+        "matrix": matrix_record,
+        "schema": schema_record,
     }
 
 
@@ -1661,6 +1753,9 @@ def build_manifest(
                 repo_root
             ),
             "record_family_authorization": record_family_authorization_records(
+                repo_root
+            ),
+            "artist_semantic_owner_matrix": artist_semantic_owner_matrix_records(
                 repo_root
             ),
             "release_tool_call_policy": release_tool_call_policy_records(
