@@ -175,6 +175,22 @@ the release policy in `docs/release-policy.md`.
   unchanged by this acceptance closure. Nonempty returndata and coordinator
   failure still roll back all mint state and events; contract-receiver callback
   gas remains caller supplied and candidate-instance binding remains incomplete.
+- Reconciled issue #669's reserved artist-authority external-call taxonomy
+  with the controlling successor-architecture taxonomy decision: only the
+  future `smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol`
+  validation adapter's exact `_validateSignerProof` call option using the
+  registry-authenticated `context.erc1271GasCap` may use the
+  `artist-authority` lane. ADR 0022 and its interface packet remain Proposed
+  and do not authorize implementation. The source and inventory row remain
+  absent; a future successor source slice may add them only after architecture
+  and packet acceptance. Exact host, floor, measurement, reserve, raise-chain,
+  and candidate evidence remain blocked by #684. The artist reservation
+  recognizes `staticcall` only for the explicit built-in address conversion
+  form `address(<signer-expression>).staticcall` with the exact
+  `gas: context.erc1271GasCap` option. Explicit-cast `call` and `delegatecall`
+  variants are distinct, while uncast members and typed interface methods remain
+  `external-call`. The historical `StreamMintGateValidator._callGate` source
+  and inventory row therefore remain exact without a compatibility rebind.
 - Implemented accepted ADR 0018's pre-genesis atomic operation-identity
   cutover: the manager derives and reserves one batch root plus one operation
   ID per token before ledger consumption; the ledger owns manager-scoped root,
@@ -203,11 +219,13 @@ the release policy in `docs/release-policy.md`.
   interface, registry, metadata, preservation, and rehearsal binding set;
   candidate-bound deployment evidence remains unavailable and both release
   modes remain fail-closed.
-- Reserved the external-call gas inventory's `artist-authority` call lane for
-  the exact future issue #670
-  `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
-  fail-closed field-policy matrix covering path, site, kind, operation,
-  expression, count, path class, lane, issue, disposition, missing rows, and
+- Added a fail-closed field-policy matrix for issue #669's `artist-authority`
+  call lane. Its initial `StreamArtistRegistry._verifySignature` Yul
+  reservation is superseded by the controlling successor-architecture
+  validator-row taxonomy described above; ADR 0022 and its interface packet
+  remain Proposed and do not authorize implementation. The matrix covers
+  path, site, kind, operation, expression, count, path class, lane, issue,
+  disposition, missing rows, and
   duplicate calls/rows. Literal declarations cannot use the reserved lane,
   while the exact Yul `gas()` exemption and generic unexpected-call rejection
   remain unchanged. This issue #669 checker-support slice adds neither the
@@ -320,11 +338,13 @@ the release policy in `docs/release-policy.md`.
   unavailable until issue #656 supplies exact addresses and code hashes, so
   `RISK-GOV-003` remains High and open pending deployment, non-local rehearsal,
   monitoring, and independent review; this is not a readiness claim.
-- Reserved the external-call gas inventory's `artist-authority` call lane for
-  the exact future issue #670
-  `StreamArtistRegistry._verifySignature` Yul `staticcall` row and added a
-  fail-closed field-policy matrix covering path, site, kind, operation,
-  expression, count, path class, lane, issue, disposition, missing rows, and
+- Added a fail-closed field-policy matrix for issue #669's `artist-authority`
+  call lane. Its initial `StreamArtistRegistry._verifySignature` Yul
+  reservation is superseded by the controlling successor-architecture
+  validator-row taxonomy described above; ADR 0022 and its interface packet
+  remain Proposed and do not authorize implementation. The matrix covers
+  path, site, kind, operation, expression, count, path class, lane, issue,
+  disposition, missing rows, and
   duplicate calls/rows. Literal declarations cannot use the reserved lane,
   while the exact Yul `gas()` exemption and generic unexpected-call rejection
   remain unchanged. This issue #669 checker-support slice adds neither the

@@ -21,14 +21,16 @@ INVENTORY_NOTE = (
     "Open rows are exact temporary inventory, not accepted risk or permanent "
     "exceptions. Remove or govern them through #669 follow-up slices."
 )
-ARTIST_AUTHORITY_PATH = "smart-contracts/StreamArtistRegistry.sol"
+ARTIST_AUTHORITY_PATH = (
+    "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol"
+)
 ARTIST_AUTHORITY_LANE = "artist-authority"
 ARTIST_AUTHORITY_CALL_ROW = {
     "path": ARTIST_AUTHORITY_PATH,
-    "site": "_verifySignature",
-    "kind": "yul-call",
+    "site": "_validateSignerProof",
+    "kind": "call-option",
     "operation": "staticcall",
-    "expression": "gasCap",
+    "expression": "context.erc1271GasCap",
     "expected_count": 1,
     "path_class": "user-path",
     "lane": ARTIST_AUTHORITY_LANE,
@@ -103,6 +105,10 @@ STATE_MODIFIER = (
     r"override(?:\s*\([^)]*\))?)"
 )
 CALL_OPTION_GAS_RE = re.compile(r"\bgas\s*:")
+CALL_OPTION_MEMBER_HEAD_RE = re.compile(
+    r"\.\s*(?P<operation>call|delegatecall|staticcall)\s*$"
+)
+ADDRESS_CONVERSION_HEAD_RE = re.compile(r"(?<![\w.])address\s*$")
 YUL_CALL_RE = re.compile(
     r"(?<![\w.])(?P<operation>staticcall|delegatecall|callcode|call)\s*\("
 )
@@ -378,6 +384,52 @@ def expression_end(source: str, start: int) -> int:
     return index
 
 
+def enclosing_opening_brace(source: str, offset: int) -> int | None:
+    depth = 0
+    for index in range(offset - 1, -1, -1):
+        if source[index] == "}":
+            depth += 1
+        elif source[index] == "{":
+            if depth == 0:
+                return index
+            depth -= 1
+    return None
+
+
+def matching_opening_parenthesis(source: str, closing: int) -> int | None:
+    depth = 0
+    for index in range(closing, -1, -1):
+        if source[index] == ")":
+            depth += 1
+        elif source[index] == "(":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def call_option_operation(source: str, gas_offset: int) -> str:
+    opening = enclosing_opening_brace(source, gas_offset)
+    if opening is None:
+        return "external-call"
+    member = CALL_OPTION_MEMBER_HEAD_RE.search(source[:opening])
+    if member is None:
+        return "external-call"
+
+    receiver_end = member.start() - 1
+    while receiver_end >= 0 and source[receiver_end].isspace():
+        receiver_end -= 1
+    if receiver_end < 0 or source[receiver_end] != ")":
+        return "external-call"
+
+    conversion_opening = matching_opening_parenthesis(source, receiver_end)
+    if conversion_opening is None:
+        return "external-call"
+    if ADDRESS_CONVERSION_HEAD_RE.search(source[:conversion_opening]) is None:
+        return "external-call"
+    return member.group("operation")
+
+
 def source_line(source: str, offset: int) -> int:
     return source.count("\n", 0, offset) + 1
 
@@ -600,7 +652,7 @@ def scan_source(path: str, source: str) -> ScanResult:
             path,
             enclosing_callable(masked, match.start()),
             "call-option",
-            "external-call",
+            call_option_operation(masked, match.start()),
             expression,
         )
         calls[use] += 1
