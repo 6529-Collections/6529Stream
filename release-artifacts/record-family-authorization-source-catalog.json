@@ -2,7 +2,7 @@
   "schema_version": "6529stream.record-family-authorization-source-catalog.v1",
   "status": "source_implemented_candidate_unbound",
   "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/690",
-  "source_commit": "7f7d2af516b80931d8ef936ecfa23b0a8fa044b2",
+  "source_commit": "f5c7164f37399ef758dbed2bb2e67fb73ee4fe75",
   "source_bindings": [
     {
       "path": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",

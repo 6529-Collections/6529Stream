@@ -16,6 +16,15 @@ SPEC = importlib.util.spec_from_file_location("check_external_call_gas_inventory
 assert SPEC is not None and SPEC.loader is not None
 checker = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
+ARTIST_AUTHORITY_PATH = (
+    "smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol"
+)
+SUPERSEDED_ARTIST_AUTHORITY_PATH = (
+    "smart-contracts/domains/artist/StreamArtistRegistry.sol"
+)
+MINT_GATE_VALIDATOR_PATH = (
+    "smart-contracts/domains/mint/StreamMintGateValidator.sol"
+)
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -90,11 +99,11 @@ def literal_declaration(
 
 def artist_authority_call(**overrides: Any) -> dict[str, Any]:
     row = {
-        "path": "smart-contracts/StreamArtistRegistry.sol",
-        "site": "_verifySignature",
-        "kind": "yul-call",
+        "path": ARTIST_AUTHORITY_PATH,
+        "site": "_validateSignerProof",
+        "kind": "call-option",
         "operation": "staticcall",
-        "expression": "gasCap",
+        "expression": "context.erc1271GasCap",
         "expected_count": 1,
         "path_class": "user-path",
         "lane": "artist-authority",
@@ -105,19 +114,47 @@ def artist_authority_call(**overrides: Any) -> dict[str, Any]:
     return row
 
 
-def artist_authority_source(*, calls: int = 1) -> str:
+def artist_authority_source(*, calls: int = 1, operation: str = "staticcall") -> str:
     call_lines = "\n".join(
-        "pop(staticcall(gasCap, artist, 0, 0, 0, 0))" for _ in range(calls)
+        f'address(signer).{operation}{{ gas: context.erc1271GasCap }}("");'
+        for _ in range(calls)
     )
     return f"""
-        contract StreamArtistRegistry {{
-            function _verifySignature(
-                address artist,
-                uint256 gasCap
+        contract StreamArtistRegistryValidatorBase {{
+            struct ValidationContext {{
+                uint256 erc1271GasCap;
+            }}
+
+            function _validateSignerProof(
+                address signer,
+                ValidationContext memory context
             ) private view {{
-                assembly {{
-                    {call_lines}
-                }}
+                {call_lines}
+            }}
+        }}
+    """
+
+
+def legacy_mint_gate_call(**overrides: Any) -> dict[str, Any]:
+    row = open_call(
+        "gateCall.gasLimit",
+        path=MINT_GATE_VALIDATOR_PATH,
+        site="_callGate",
+    )
+    row.update(overrides)
+    return row
+
+
+def legacy_mint_gate_source(*, operation: str = "staticcall") -> str:
+    return f"""
+        contract StreamMintGateValidator {{
+            struct GateCall {{
+                address gate;
+                uint256 gasLimit;
+            }}
+
+            function _callGate(GateCall memory gateCall) private view {{
+                gateCall.gate.{operation}{{ gas: gateCall.gasLimit }}("");
             }}
         }}
     """
@@ -200,7 +237,9 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                 write_tree(
                     root,
                     source,
-                    base_inventory(calls=[open_call(f"{function_name}()")]),
+                    base_inventory(
+                        calls=[open_call(f"{function_name}()")]
+                    ),
                 )
 
                 checker.check_repository(root, checker.DEFAULT_INVENTORY)
@@ -341,6 +380,86 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
             ):
                 checker.check_repository(root, checker.DEFAULT_INVENTORY)
 
+    def test_legacy_mint_gate_row_passes_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                legacy_mint_gate_source(),
+                base_inventory(calls=[legacy_mint_gate_call()]),
+                source_path=MINT_GATE_VALIDATOR_PATH,
+            )
+
+            checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_legacy_mint_gate_operation_change_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                legacy_mint_gate_source(),
+                base_inventory(
+                    calls=[legacy_mint_gate_call(operation="staticcall")]
+                ),
+                source_path=MINT_GATE_VALIDATOR_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "operation='external-call'",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_legacy_mint_gate_operation_field_removal_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            row = legacy_mint_gate_call()
+            del row["operation"]
+            write_tree(
+                root,
+                legacy_mint_gate_source(),
+                base_inventory(calls=[row]),
+                source_path=MINT_GATE_VALIDATOR_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "fields drifted: missing operation",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_legacy_mint_gate_row_removal_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                legacy_mint_gate_source(),
+                base_inventory(),
+                source_path=MINT_GATE_VALIDATOR_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "unexpected call-gas expression",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_legacy_mint_gate_paired_operation_drift_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                legacy_mint_gate_source(operation="call"),
+                base_inventory(calls=[legacy_mint_gate_call(operation="call")]),
+                source_path=MINT_GATE_VALIDATOR_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "operation='external-call'",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
     def test_uninventoried_yul_literal_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -420,18 +539,97 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                 root,
                 artist_authority_source(),
                 base_inventory(calls=[artist_authority_call()]),
-                source_path="smart-contracts/StreamArtistRegistry.sol",
+                source_path=ARTIST_AUTHORITY_PATH,
             )
 
             checker.check_repository(root, checker.DEFAULT_INVENTORY)
 
+    def test_typed_staticcall_method_cannot_satisfy_artist_reservation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                """
+                import {TypedTarget} from "./TypedTarget.sol";
+
+                contract StreamArtistRegistryValidatorBase {
+                    struct ValidationContext {
+                        uint256 erc1271GasCap;
+                    }
+
+                    function _validateSignerProof(
+                        TypedTarget signer,
+                        ValidationContext memory context
+                    ) private {
+                        signer.staticcall{ gas: context.erc1271GasCap }("");
+                    }
+                }
+                """,
+                base_inventory(calls=[artist_authority_call()]),
+                source_path=ARTIST_AUTHORITY_PATH,
+            )
+            typed_target_path = (
+                root
+                / "smart-contracts"
+                / "domains"
+                / "artist"
+                / "TypedTarget.sol"
+            )
+            typed_target_path.write_text(
+                """
+                interface TypedTarget {
+                    function staticcall(bytes calldata payload) external;
+                }
+                """,
+                encoding="utf-8",
+                newline="\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "operation='external-call'",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_reserved_artist_authority_call_operation_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(operation="call"),
+                base_inventory(calls=[artist_authority_call()]),
+                source_path=ARTIST_AUTHORITY_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "operation='call'",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_reserved_artist_authority_delegatecall_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(operation="delegatecall"),
+                base_inventory(calls=[artist_authority_call()]),
+                source_path=ARTIST_AUTHORITY_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "operation='delegatecall'",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
     def test_reserved_artist_authority_call_fields_are_exact(self) -> None:
         cases = {
-            "path": "smart-contracts/OtherArtistRegistry.sol",
-            "site": "verifySignature",
-            "kind": "call-option",
-            "operation": "call",
-            "expression": "verifyGas",
+            "path": "smart-contracts/domains/artist/OtherArtistRegistry.sol",
+            "site": "validateSignerProof",
+            "kind": "yul-call",
+            "operation": "external-call",
+            "expression": "gasCap",
             "expected_count": 2,
             "path_class": "live-control-plane",
             "lane": "minting",
@@ -450,7 +648,7 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                     base_inventory(
                         calls=[artist_authority_call(**{field: replacement})]
                     ),
-                    source_path="smart-contracts/StreamArtistRegistry.sol",
+                    source_path=ARTIST_AUTHORITY_PATH,
                 )
 
                 with self.assertRaisesRegex(
@@ -459,6 +657,33 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                     rf"drifted fields: {field}",
                 ):
                     checker.check_repository(root, checker.DEFAULT_INVENTORY)
+
+    def test_superseded_artist_registry_row_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                artist_authority_source(),
+                base_inventory(
+                    calls=[
+                        artist_authority_call(
+                            path=SUPERSEDED_ARTIST_AUTHORITY_PATH,
+                            site="_verifySignature",
+                            kind="yul-call",
+                            operation="staticcall",
+                            expression="gasCap",
+                        )
+                    ]
+                ),
+                source_path=ARTIST_AUTHORITY_PATH,
+            )
+
+            with self.assertRaisesRegex(
+                checker.GasInventoryError,
+                "reserved for the exact artist-authority call row; drifted fields: "
+                "path, site, kind, expression",
+            ):
+                checker.check_repository(root, checker.DEFAULT_INVENTORY)
 
     def test_artist_authority_lane_on_another_call_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -544,7 +769,7 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                 root,
                 artist_authority_source(),
                 base_inventory(),
-                source_path="smart-contracts/StreamArtistRegistry.sol",
+                source_path=ARTIST_AUTHORITY_PATH,
             )
 
             with self.assertRaisesRegex(
@@ -560,7 +785,7 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                 root,
                 artist_authority_source(calls=2),
                 base_inventory(calls=[artist_authority_call()]),
-                source_path="smart-contracts/StreamArtistRegistry.sol",
+                source_path=ARTIST_AUTHORITY_PATH,
             )
 
             with self.assertRaisesRegex(
@@ -581,7 +806,7 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
                         artist_authority_call(),
                     ]
                 ),
-                source_path="smart-contracts/StreamArtistRegistry.sol",
+                source_path=ARTIST_AUTHORITY_PATH,
             )
 
             with self.assertRaisesRegex(

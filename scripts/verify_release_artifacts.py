@@ -482,7 +482,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         8_999,
     ),
     Path("scripts/check_record_family_authorization.py"): (
-        "237e1a25be40138b2fa92325ca138103b3c5b957866ce2703cfbf686a0d9e192",
+        "179ef782124caadff4a36dbea3bb163e44e5d105f45685d4828c82010e79a60f",
         128_549,
     ),
     Path("scripts/check_slither_baseline.py"): (

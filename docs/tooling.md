@@ -1811,13 +1811,27 @@ The canonical inventory is
 Its finality, minting, and revenue rows are temporary open remediation work
 tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
-call-row taxonomy also reserves `artist-authority` for one exact future
-`StreamArtistRegistry._verifySignature` Yul `staticcall`: expression `gasCap`,
-count `1`, `user-path`, issue `#669`, and
-`open-remediation-required`. The source and row remain absent until issue #670
-lands them together. Either the reserved path or lane activates exact-field
-validation, while literal-declaration rows cannot use the
-`artist-authority` lane. This reservation does not prove GGP provenance,
+call-row taxonomy reserves `artist-authority` under the controlling
+successor-architecture taxonomy decision for one exact future
+`smart-contracts/domains/artist/StreamArtistRegistryValidatorBase.sol`
+`_validateSignerProof` low-level `staticcall` call option: expression
+`context.erc1271GasCap`, count `1`, `user-path`, issue `#669`, and
+`open-remediation-required`. ADR 0022 and its interface packet remain Proposed
+and do not authorize implementation. The source and row remain absent; a future
+successor source slice may add them only after architecture and packet
+acceptance. Either the reserved path or lane activates exact-field validation,
+while literal-declaration rows cannot use the
+`artist-authority` lane. The scanner assigns a low-level operation only to the
+explicit built-in address conversion forms
+`address(<receiver-expression>).call{gas: ...}`,
+`address(<receiver-expression>).delegatecall{gas: ...}`, and
+`address(<receiver-expression>).staticcall{gas: ...}`. Uncast members and typed
+interface methods, including a method named `staticcall`, remain
+`external-call`. The exact historical `StreamMintGateValidator._callGate`
+source and `external-call` inventory row therefore remain unchanged without a
+compatibility rebind; an inventory operation change, row removal, or paired
+uncast source/row operation drift fails closed. This reservation does not prove
+GGP provenance,
 candidate deployment binding, a safe parent reserve, or ERC-1271
 gas-exhaustion behavior; those remain required #669/#684 remediation and
 evidence. The inventory is strict duplicate-free I-JSON: object keys are
