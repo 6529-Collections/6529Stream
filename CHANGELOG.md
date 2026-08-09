@@ -42,6 +42,10 @@ the release policy in `docs/release-policy.md`.
   from checksum-bound snapshot bytes;
   manifest independently validates and binds the matrix and schema; and the
   release-tool call policy covers the checker and focused tests. This
+  review remediation converts unreadable provider interfaces and unknown typed
+  record/event/replay write IDs into stable `MatrixError` failures, makes every
+  hostile rejection assertion discriminate its intended validation path, and
+  derives the success-banner counts from the validated matrix inventory. This
   publication changes no Solidity, deployment or candidate value, maturity,
   audit credit, external governance, or readiness claim.
 - Added the isolated issue #656A canonical deployment candidate-v2 planning

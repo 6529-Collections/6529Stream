@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:4097f6740e8b8afb632dce82cda0f457d816ed6982ff5ba1044390156e152bad",
+      "sha256": "sha256:dd68a2fcf777c5aacbec453117273a96ad47f2bc29dc2715563e92c8c1998256",
       "size_bytes": 149412,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:c9374ef36080fa7e3a513c4ac0c390488d716e284cb0afcd6ecebe02b09178ea",
+      "sha256": "sha256:4df89eaca860fb68029cf7cdb374c78da618e233d6d91c92d0e888c031fd6f26",
       "size_bytes": 151614,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -135,8 +135,8 @@
     },
     "release_tool_call_policy": {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:f7d7c14423f34f9ebcb86b19f423f13b3605e2d65fb191a00c19d5706c40021a",
-      "size_bytes": 2433641,
+      "sha256": "sha256:d77a5913eada2c7d9d81eab7db2c98193e58b2b68a47c29ab5d407eabd82a95b",
+      "size_bytes": 2440545,
       "schema_version": "6529stream.release-tool-call-policy.v1"
     },
     "release_tool_call_policy_schema": {
@@ -150,14 +150,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:98b5ab5388b1080c543f884a6e20f6430bef094f49f203a9efb86424b41d06ce",
-        "size_bytes": 155451,
+        "sha256": "sha256:bc4e9fea7ac1fdc5b5dbc98f052b15fa9daa3668d4cb815902eba4185e4596ec",
+        "size_bytes": 155757,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:e4eb85516a066ceefe8ade23c8dfb4ba6660b4fcc35b59a2c099d5b20ef16ed7",
-        "size_bytes": 151908
+        "sha256": "sha256:54cbe707832035810c26bcae1aa0932304190819284d7878b8fb93b95af23353",
+        "size_bytes": 152214
       }
     },
     "blocker_reports": {

@@ -294,11 +294,11 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
                 if isinstance(value, int):
                     row[field] = value + 1
                 elif isinstance(value, list):
-                    row[field] = value + ["UNREVIEWED_STOP"]
+                    row[field] = [*value, "UNREVIEWED_STOP"]
                 else:
                     row[field] = value + "_drift"
                 self._write_matrix(matrix)
-                self._assert_rejected()
+                self._assert_rejected("18-column source binding")
                 self._restore_matrix()
 
     def test_current_state_fact_cannot_be_unresolved(self) -> None:
@@ -357,13 +357,27 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         self._write_matrix(matrix)
         self._assert_rejected("writes binding_lifecycle's surface")
 
+    def test_unknown_typed_write_surface_is_matrix_error(self) -> None:
+        for surface_type in ("record", "event", "replay"):
+            with self.subTest(surface_type=surface_type):
+                matrix = self._matrix()
+                surface = f"{surface_type}:UNREVIEWED_SURFACE"
+                matrix["operations"][0]["coordinator_recipe"]["actions"][0][
+                    "write_surfaces"
+                ].append(surface)
+                self._write_matrix(matrix)
+                self._assert_rejected(
+                    f"writes unowned {surface_type} surface {surface}"
+                )
+                self._restore_matrix()
+
     def test_owner_must_validate_exact_coordinator(self) -> None:
         matrix = self._matrix()
         matrix["operations"][0]["coordinator_recipe"]["actions"][0][
             "validates_coordinator"
         ] = "StreamArtistRegistry"
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("validates_coordinator")
 
     def test_owner_must_validate_original_caller(self) -> None:
         matrix = self._matrix()
@@ -371,7 +385,7 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
             "validates_original_caller"
         ] = False
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("validates_original_caller")
 
     def test_owner_must_validate_its_revision_pin(self) -> None:
         matrix = self._matrix()
@@ -385,32 +399,32 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         matrix = self._matrix()
         matrix["operation_coordinator"]["generic_calldata_route"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("generic_calldata_route")
 
     def test_registry_cannot_gain_semantic_storage(self) -> None:
         matrix = self._matrix()
         matrix["directory"]["owns_semantic_authority"] = True
         matrix["directory"]["semantic_storage"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("directory.*(owns_semantic_authority|semantic_storage)")
 
     def test_coordinator_cannot_gain_semantic_authority(self) -> None:
         matrix = self._matrix()
         matrix["operation_coordinator"]["owns_semantic_authority"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("owns_semantic_authority")
 
     def test_coordinator_cannot_gain_delegatecall(self) -> None:
         matrix = self._matrix()
         matrix["operation_coordinator"]["delegatecall"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("delegatecall")
 
     def test_owner_modules_cannot_read_each_other(self) -> None:
         matrix = self._matrix()
         matrix["semantic_domains"][0]["module_reads_other_domains"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("module_reads_other_domains")
 
     def test_op1_identity_registration_recipe_is_required(self) -> None:
         matrix = self._matrix()
@@ -464,7 +478,9 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
             "implementation_authorized"
         ] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected(
+            "source_requirements.*(source_present|implementation_authorized)"
+        )
 
     def test_base_and_effective_implementation_stops_are_bound(self) -> None:
         matrix = self._matrix()
@@ -483,7 +499,7 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         )
         row["expression"] = "gasCap"
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("reserved_call_row.*expression")
 
     def test_validator_call_row_requires_exact_staticcall_syntax(self) -> None:
         matrix = self._matrix()
@@ -515,6 +531,13 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         self._write_matrix(matrix)
         self._assert_rejected("provider identities")
 
+    def test_missing_provider_interface_is_matrix_error(self) -> None:
+        (self.root / PROVIDER_INTERFACE_PATHS[0]).unlink()
+        self._assert_rejected(
+            "provider:role_registry interface source is unreadable: "
+            "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol"
+        )
+
     def test_external_surface_cannot_rebind_provider(self) -> None:
         matrix = self._matrix()
         matrix["current_state_surfaces"][7]["provider_id"] = (
@@ -540,14 +563,18 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
             "validation_boundary_authoritative"
         ] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected(
+            "validation_boundary_authoritative|boundary_authoritative"
+        )
 
     def test_archive_cannot_gain_replay_authority(self) -> None:
         matrix = self._matrix()
         matrix["archive"]["owns_replay_state"] = True
         matrix["archive"]["usable_for_replay_decisions"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected(
+            "archive.*(owns_replay_state|usable_for_replay_decisions)"
+        )
 
     def test_archive_cannot_gain_generic_route_or_upgrade(self) -> None:
         matrix = self._matrix()
@@ -555,7 +582,7 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         matrix["archive"]["delegatecall"] = True
         matrix["archive"]["upgrade_path"] = True
         self._write_matrix(matrix)
-        self._assert_rejected()
+        self._assert_rejected("archive.*(generic_routing|delegatecall|upgrade_path)")
 
     def test_implementation_stop_cannot_become_readiness_claim(self) -> None:
         matrix = self._matrix()

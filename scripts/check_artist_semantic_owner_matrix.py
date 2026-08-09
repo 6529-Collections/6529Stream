@@ -381,7 +381,13 @@ def _check_external_providers(root: Path, matrix: dict[str, Any]) -> set[str]:
         interface_pin = provider["interface_pin"]
         source_path = interface_pin["source_path"]
         if source_path is not None:
-            digest = hashlib.sha256((root / source_path).read_bytes()).hexdigest()
+            try:
+                payload = (root / source_path).read_bytes()
+            except OSError as exc:
+                raise MatrixError(
+                    f"{provider_id} interface source is unreadable: {source_path}"
+                ) from exc
+            digest = hashlib.sha256(payload).hexdigest()
             if digest != interface_pin["source_sha256"]:
                 raise MatrixError(f"{provider_id} interface source sha256 drifted")
         elif provider_id != "provider:import_continuity":
@@ -543,11 +549,23 @@ def _check_operation(
             if surface.startswith("state:"):
                 owner = surface.removeprefix("state:")
             elif surface.startswith("record:"):
+                if surface not in records:
+                    raise MatrixError(
+                        f"operation {operation_id} writes unowned record surface {surface}"
+                    )
                 owner = records[surface]["owner_domain"]
             elif surface.startswith("event:"):
+                if surface not in events:
+                    raise MatrixError(
+                        f"operation {operation_id} writes unowned event surface {surface}"
+                    )
                 owner = events[surface]["emitter_domain"]
             elif surface.startswith("replay:"):
                 replay_id = surface.removeprefix("replay:")
+                if replay_id not in replay:
+                    raise MatrixError(
+                        f"operation {operation_id} writes unowned replay surface {surface}"
+                    )
                 owner = replay[replay_id]["owner_domain"]
             else:
                 raise MatrixError(f"operation {operation_id} has unknown write surface {surface}")
@@ -733,7 +751,7 @@ def _check_frozen_hashes(matrix: dict[str, Any]) -> None:
         raise MatrixError("57 exact coordinator recipes or source bindings drifted")
 
 
-def check(root: Path) -> None:
+def check(root: Path) -> dict[str, int]:
     matrix_path = root / MATRIX_PATH
     schema_path = root / SCHEMA_PATH
     source_path = root / SOURCE_PATH
@@ -799,6 +817,16 @@ def check(root: Path) -> None:
     _check_special_recipes(matrix)
     _check_participation(matrix)
     _check_frozen_hashes(matrix)
+    return {
+        "sole_owners": len(matrix["semantic_domains"]),
+        "immutable_external_providers": len(matrix["immutable_external_providers"]),
+        "current_state_surfaces": len(matrix["current_state_surfaces"]),
+        "platform_role_surfaces": len(matrix["authority_surfaces"]),
+        "records": len(matrix["record_surfaces"]),
+        "events": len(matrix["event_surfaces"]),
+        "replay_surfaces": len(matrix["replay_surfaces"]),
+        "recipes": len(matrix["operations"]),
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -811,15 +839,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     try:
-        check(args.root.resolve())
+        counts = check(args.root.resolve())
     except MatrixError as exc:
         print(f"artist semantic owner matrix check failed: {exc}", file=sys.stderr)
         return 1
     print(
         "artist semantic owner matrix check passed: "
-        "7 sole owners, 5 immutable external providers, 11 current-state surfaces, "
-        "3 platform-role surfaces, 37 records, 54 events, "
-        "64 replay surfaces, 57 recipes; "
+        f"{counts['sole_owners']} sole owners, "
+        f"{counts['immutable_external_providers']} immutable external providers, "
+        f"{counts['current_state_surfaces']} current-state surfaces, "
+        f"{counts['platform_role_surfaces']} platform-role surfaces, "
+        f"{counts['records']} records, {counts['events']} events, "
+        f"{counts['replay_surfaces']} replay surfaces, "
+        f"{counts['recipes']} recipes; "
         "architecture remains Proposed"
     )
     return 0
