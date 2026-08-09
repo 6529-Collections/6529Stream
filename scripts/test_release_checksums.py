@@ -26,6 +26,7 @@ SPEC.loader.exec_module(generator)
 
 EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_artist_semantic_owner_matrix.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
     Path("scripts/check_governance_action_policy.py"),
@@ -55,6 +56,7 @@ EXPECTED_RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_artist_semantic_owner_matrix.py"),
     Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
@@ -154,7 +156,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 272)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 282)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -240,23 +242,23 @@ class ReleaseChecksumTests(unittest.TestCase):
             policy["external_modules"],
             sorted(generator.RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES),
         )
-        self.assertEqual(len(policy["external_modules"]), 29)
-        self.assertEqual(len(rows), 32)
+        self.assertEqual(len(policy["external_modules"]), 31)
+        self.assertEqual(len(rows), 34)
         self.assertEqual(
             [row["path"] for row in rows],
             [path.as_posix() for path in generator.RELEASE_TOOL_CALL_POLICY_PATHS],
         )
         self.assertEqual(
             sum(row["role"] == "runtime" for row in rows),
-            23,
+            24,
         )
         self.assertEqual(
             sum(row["role"] == "focused-test" for row in rows),
-            9,
+            10,
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST),
-            225,
+            227,
         )
         self.assertEqual(
             len(generator.RELEASE_TOOL_CALL_POLICY_IMPORTED_SHADOW_ALLOWLIST),
@@ -485,7 +487,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             ),
         ), self.assertRaisesRegex(
             generator.ChecksumError,
-            "29-module canonical digest",
+            "31-module canonical digest",
         ):
             generator.build_release_tool_call_policy(
                 repo_root,
@@ -862,8 +864,8 @@ class ReleaseChecksumTests(unittest.TestCase):
                 },
                 "reviewed_paths": {
                     "type": "array",
-                    "minItems": 32,
-                    "maxItems": 32,
+                    "minItems": 34,
+                    "maxItems": 34,
                     "items": {},
                 },
             },
@@ -3149,11 +3151,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 272)
-        self.assertEqual(len(manifest["files"]), 448)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 282)
+        self.assertEqual(len(manifest["files"]), 458)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            448,
+            458,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3372,6 +3374,31 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assert_committed_checksums_cover(expected_paths)
 
+    def test_committed_checksums_cover_artist_semantic_owner_packet(self) -> None:
+        expected_paths = {
+            Path("docs/adr/0023-modular-artist-authority-domain-ownership.md"),
+            Path("docs/architecture/artist-semantic-owner-matrix-v2.json"),
+            Path("docs/architecture/artist-semantic-owner-matrix-v2.schema.json"),
+            Path("scripts/check_artist_semantic_owner_matrix.py"),
+            Path("scripts/test_artist_semantic_owner_matrix.py"),
+            Path(
+                "release-artifacts/issue-670-adapter-freeze/"
+                "artist-operation-matrix-v1.json"
+            ),
+            Path("smart-contracts/interfaces/stream/IStreamRoleRegistry.sol"),
+            Path("smart-contracts/interfaces/stream/IStreamCore.sol"),
+            Path(
+                "smart-contracts/interfaces/stream/"
+                "IStreamGovernedParameterAuthority.sol"
+            ),
+            Path(
+                "smart-contracts/interfaces/stream/"
+                "IStreamArtworkFinalityRegistry.sol"
+            ),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        self.assert_committed_checksums_cover(expected_paths)
+
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {
             Path("CHANGELOG.md"),
@@ -3472,7 +3499,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 448)
+        self.assertEqual(len(classifications), 458)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

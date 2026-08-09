@@ -68,6 +68,7 @@ RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_artist_semantic_owner_matrix.py"),
     Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
@@ -89,6 +90,7 @@ RELEASE_TOOL_SEMANTIC_SOURCE_PATHS = (
 )
 REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_artist_semantic_owner_matrix.py"),
     Path("scripts/check_changelog.py"),
     Path("scripts/check_drop_authorization_signing_evidence.py"),
     Path("scripts/check_governance_action_policy.py"),
@@ -145,6 +147,7 @@ RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES = frozenset(
         "json",
         "jsonschema",
         "jsonschema.exceptions",
+        "math",
         "os",
         "pathlib",
         "re",
@@ -154,13 +157,14 @@ RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES = frozenset(
         "subprocess",
         "sys",
         "tempfile",
+        "types",
         "typing",
         "unicodedata",
         "unittest",
     }
 )
 REVIEWED_RELEASE_TOOL_EXTERNAL_MODULES_SHA256 = (
-    "7a475d5ccb8e51ca912bfe8f62c66f6c2987bc121a7eddc709eb2e10a402dfc4"
+    "e8e4ef81278dcbfb1e00abaa1634f539810b93002d15c814e5ad4801089362ae"
 )
 # Imported bindings used as data (rather than as the direct function/member of
 # a call or in an annotation/exception type) are a deliberately tiny,
@@ -172,6 +176,8 @@ RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST = frozenset(
     tuple(line.split("|"))
     for line in """
 scripts/check_admin_ceremony_evidence.py|pathlib.Path|local:parser.add_argument|keyword:type
+scripts/check_artist_semantic_owner_matrix.py|pathlib.Path|local:parser.add_argument|keyword:type
+scripts/check_artist_semantic_owner_matrix.py|sys.stderr|local:print|keyword:file
 scripts/check_admin_ceremony_evidence.py|re.IGNORECASE|re.compile|arg:1
 scripts/check_admin_ceremony_evidence.py|sys.argv|local:parse_args|arg:0
 scripts/check_admin_ceremony_evidence.py|sys.stderr|local:print|keyword:file
@@ -426,8 +432,8 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "a45a3d24f9e97165ab75e480f876b7c5045cc7de561ea9eda5e8b33ef8fbd2f2",
-        169_469,
+        "f2ad4c8a1ade26cf0b3981c6b0d1d2235ef596f3f22134fa348f6517d71699ea",
+        172_989,
     ),
 }
 
@@ -481,6 +487,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_risk_register.py"),
     Path("scripts/check_record_family_authorization.py"),
     Path("scripts/test_record_family_authorization.py"),
+    Path("scripts/check_artist_semantic_owner_matrix.py"),
+    Path("scripts/test_artist_semantic_owner_matrix.py"),
     Path("scripts/generate_post_entropy_completion_gas.py"),
     Path("scripts/check_post_entropy_completion_gas.py"),
     Path("scripts/test_post_entropy_completion_gas.py"),
@@ -496,6 +504,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/governance-action-policy.json"),
     Path("release-artifacts/record-family-authorization-inventory.json"),
     Path("release-artifacts/record-family-authorization-source-catalog.json"),
+    Path("release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json"),
     Path("release-artifacts/post-entropy-mint-completion-gas.json"),
     RELEASE_TOOL_CALL_POLICY_PATH,
     Path("release-artifacts/stream-core-permanent-interface.json"),
@@ -641,6 +650,13 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
     Path("docs/adr/0022-immutable-artist-registry-validation-adapter.md"),
+    Path("docs/adr/0023-modular-artist-authority-domain-ownership.md"),
+    Path("docs/architecture/artist-semantic-owner-matrix-v2.json"),
+    Path("docs/architecture/artist-semantic-owner-matrix-v2.schema.json"),
+    Path("smart-contracts/interfaces/stream/IStreamRoleRegistry.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamCore.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),
@@ -3043,7 +3059,7 @@ def build_release_tool_call_policy(
     *,
     source_snapshots: dict[str, CoveredFileSnapshot] | None = None,
 ) -> dict[str, Any]:
-    """Build the exact bounded static call policy for the reviewed 32 files."""
+    """Build the exact bounded static call policy for the reviewed 34 files."""
 
     runtime_paths = set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
     focused_paths = set(RELEASE_TOOL_FOCUSED_TESTS)
@@ -3053,9 +3069,9 @@ def build_release_tool_call_policy(
             "release-tool call policy role sets overlap: "
             f"{overlap}"
         )
-    if len(runtime_paths) != 23 or len(focused_paths) != 9:
+    if len(runtime_paths) != 24 or len(focused_paths) != 10:
         raise ChecksumError(
-            "release-tool call policy requires exactly 23 runtime and 9 "
+            "release-tool call policy requires exactly 24 runtime and 10 "
             f"focused-test paths, got {len(runtime_paths)} and "
             f"{len(focused_paths)}"
         )
@@ -3158,13 +3174,13 @@ def build_release_tool_call_policy(
         ("\n".join(external_modules) + "\n").encode("utf-8")
     ).hexdigest()
     if (
-        len(external_modules) != 29
+        len(external_modules) != 31
         or external_modules_digest
         != REVIEWED_RELEASE_TOOL_EXTERNAL_MODULES_SHA256
     ):
         raise ChecksumError(
             "release-tool external-module literal differs from the exact "
-            "29-module canonical digest"
+            "31-module canonical digest"
         )
     if observed_imported_values != set(
         RELEASE_TOOL_CALL_POLICY_IMPORTED_VALUE_ALLOWLIST
@@ -3246,8 +3262,8 @@ def _validate_release_tool_call_policy_schema_document(
             },
             "external_modules": {
                 "type": "array",
-                "minItems": 29,
-                "maxItems": 29,
+                "minItems": 31,
+                "maxItems": 31,
                 "uniqueItems": True,
                 "prefixItems": [
                     {
@@ -3261,8 +3277,8 @@ def _validate_release_tool_call_policy_schema_document(
             },
             "reviewed_paths": {
                 "type": "array",
-                "minItems": 32,
-                "maxItems": 32,
+                "minItems": 34,
+                "maxItems": 34,
                 "uniqueItems": True,
                 "prefixItems": [
                     {

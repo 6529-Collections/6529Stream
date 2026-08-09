@@ -909,6 +909,8 @@ def build_lockfile(
                 "python scripts/check_governed_parameter_inventory.py",
                 "python scripts/test_record_family_authorization.py",
                 "python scripts/check_record_family_authorization.py",
+                "python scripts/test_artist_semantic_owner_matrix.py",
+                "python scripts/check_artist_semantic_owner_matrix.py",
                 "python scripts/test_bytecode_release_proof.py",
                 "python scripts/generate_bytecode_release_proof.py --check",
                 "python scripts/test_release_checksums.py",

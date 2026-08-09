@@ -118,17 +118,35 @@
         "schema_version": "6529stream.record-family-authorization-evidence.v1"
       }
     },
+    "artist_semantic_owner_matrix": {
+      "matrix": {
+        "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+        "sha256": "sha256:96dfc645af9feaf6fcbf494857d9989f9823ac3193e06af43ad6338801a4fdba",
+        "size_bytes": 379046,
+        "schema_version": "6529stream.artist-semantic-owner-matrix.v2",
+        "status": "PROPOSED_ARCHITECTURE_ONLY",
+        "maturity": "pre_audit_implementation_blocked"
+      },
+      "schema": {
+        "path": "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+        "sha256": "sha256:dc59eaefe4a48b7a6d3b73977d3b07800e97d4066940e82f8b6e99c347a121e8",
+        "size_bytes": 42056,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema",
+        "schema_id": "https://6529.io/schemas/artist-semantic-owner-matrix-v2.schema.json",
+        "document_schema_version": "6529stream.artist-semantic-owner-matrix.v2"
+      }
+    },
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:bb8800f08ab46b965f185b00a8f51956a592a3a11a34b3d302cba69c2ec42547",
-        "size_bytes": 2326709,
+        "sha256": "sha256:f7d7c14423f34f9ebcb86b19f423f13b3605e2d65fb191a00c19d5706c40021a",
+        "size_bytes": 2433641,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
       "schema": {
         "path": "release-artifacts/schema/release-tool-call-policy.v1.schema.json",
-        "sha256": "sha256:ecb6d74cf45ff0093874065f5dc2fa6d57e67a5dc6cdb13dbdeb1a20885e39cb",
-        "size_bytes": 10690,
+        "sha256": "sha256:7845d1936755fb37ca922f8b6f77982112ebee2543f123debe586a158f31f955",
+        "size_bytes": 11147,
         "schema_version": "https://json-schema.org/draft/2020-12/schema",
         "schema_id": "https://6529.io/schemas/release-tool-call-policy.v1.schema.json",
         "document_schema_version": "6529stream.release-tool-call-policy.v1"
@@ -185,14 +203,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:7325b6d32e2f5a9bdd46163afd56451caea833d3775099d9b0239af77f19be64",
-        "size_bytes": 152858,
+        "sha256": "sha256:625b56f145867ede9f97d1b116d1c0acdf1e6ab8cd77fb9b49daf1cde960eebc",
+        "size_bytes": 155451,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:7a6b295e5070a52ba99aacf768dc8f9bf59a0625a8470ff50b43f0438aa5ff10",
-        "size_bytes": 149329
+        "sha256": "sha256:e4eb85516a066ceefe8ade23c8dfb4ba6660b4fcc35b59a2c099d5b20ef16ed7",
+        "size_bytes": 151908
       }
     },
     "release_candidate_lockfile": {
@@ -269,7 +287,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:28504de7d651fa93a4f0fb92ed3d6711ecb0f62b4855fff3881eaa227fb1a911",
+      "sha256": "sha256:7b90f62129ae3db5904c96afe7c8171d2c2de0a89e3eb320cf1c59bf0ea9a534",
       "size_bytes": 33995,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2485,8 +2503,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:9e6e83ced44bc79c6a473bc2bc3c860a68d951ab87bbb1c0483bbf5a46839fac",
-      "size_bytes": 151995
+      "sha256": "sha256:1fd44466e20304b15a8bc15c13094793665b315383f19e3118c6081e80baf8e8",
+      "size_bytes": 154644
     },
     "governance_docs": [
       {
@@ -2576,13 +2594,13 @@
       },
       {
         "path": "docs/architecture.md",
-        "sha256": "sha256:8cef2b42b19c231826dff174fa8a7ca91c6827acd37fd4f1f97d8f5db3080724",
-        "size_bytes": 20026
+        "sha256": "sha256:defe08649763f30c92685ab1b6d2fca88b2a9484d3b974dba28ed03a7cea51e7",
+        "size_bytes": 22060
       },
       {
         "path": "docs/adr/README.md",
-        "sha256": "sha256:d3f33974c6cb1b00ffcdd7461d158b045cc8ca60b9ecaf481bf7a6a854a59cb7",
-        "size_bytes": 4903
+        "sha256": "sha256:73a58bf47add6b4a89fafee8e8e8c04c55b6e8dc47d8ae98b26d2ae191a9575a",
+        "size_bytes": 5395
       },
       {
         "path": "docs/adr/0004-admin-governance.md",
@@ -2648,6 +2666,22 @@
         "path": "docs/adr/0022-immutable-artist-registry-validation-adapter.md",
         "sha256": "sha256:427b2aa053501b8bc286a9e0d44612f9270e0ea9b8b4381694724ae42c7c6cb0",
         "size_bytes": 24297
+      },
+      {
+        "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
+        "sha256": "sha256:b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113",
+        "size_bytes": 27942
+      },
+      {
+        "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+        "sha256": "sha256:96dfc645af9feaf6fcbf494857d9989f9823ac3193e06af43ad6338801a4fdba",
+        "size_bytes": 379046
+      },
+      {
+        "path": "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+        "sha256": "sha256:dc59eaefe4a48b7a6d3b73977d3b07800e97d4066940e82f8b6e99c347a121e8",
+        "size_bytes": 42056,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema"
       },
       {
         "path": "docs/revenue-splits-and-royalties.md",
@@ -2887,8 +2921,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:9addb81c1d557465f1648cf8da9a7ea205b2feea17c3561dbefb18e3f6bc8fbc",
-        "size_bytes": 132948
+        "sha256": "sha256:d95e84ccf0dcd520590c518cd79b5cf6a317f09d6af95a7d05b6fbe54019e6e6",
+        "size_bytes": 134133
       },
       {
         "path": "docs/status.md",

@@ -39,6 +39,16 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         verifier.RELEASE_TOOL_CALL_POLICY_PATH,
         verifier.RISK_SIZE_CHECKER_PATH,
         verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH,
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md",
+        "docs/architecture/artist-semantic-owner-matrix-v2.json",
+        "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+        "scripts/check_artist_semantic_owner_matrix.py",
+        "scripts/test_artist_semantic_owner_matrix.py",
+        "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json",
+        "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol",
+        "smart-contracts/interfaces/stream/IStreamCore.sol",
+        "smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol",
+        "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
         *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
     )
 )
@@ -51,11 +61,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 272
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 272
+    len(TEST_CANONICAL_COVERED_PATHS) != 282
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 282
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 272 unique coverage roots"
+        "canonical verifier fixtures require exactly 282 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("scripts/generate_risk_register.py"),
@@ -530,6 +540,34 @@ def seed_release_bundle(root: Path) -> None:
                         ),
                     },
                 },
+                "artist_semantic_owner_matrix": {
+                    "matrix": {
+                        **file_record(
+                            root,
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_PATH,
+                        ),
+                        "schema_version": (
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA
+                        ),
+                        "status": verifier.ARTIST_SEMANTIC_OWNER_MATRIX_STATUS,
+                        "maturity": (
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY
+                        ),
+                    },
+                    "schema": {
+                        **file_record(
+                            root,
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_PATH,
+                        ),
+                        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+                        "schema_id": (
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID
+                        ),
+                        "document_schema_version": (
+                            verifier.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA
+                        ),
+                    },
+                },
                 "release_tool_call_policy": {
                     "policy": release_tool_policy_record(root),
                     "schema": release_tool_policy_schema_record(root),
@@ -694,18 +732,18 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_verifier_reviewed_trust_literals_are_exact(
         self,
     ) -> None:
-        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE), 23)
-        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS), 9)
+        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE), 24)
+        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS), 10)
         self.assertFalse(
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 272)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 272)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 272)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 282)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 282)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 282)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "80918709671432234f19c3ed2f301687120aeb9ee8cb417e1b04431843c0ebac",
+            "9cf2a2d08c6ce7b69ed33f4076be231566e304b132b0865e4902d893f8693e0a",
         )
         self.assertIn(
             "scripts/test_windows_ci_wrapper.py",
@@ -724,6 +762,54 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             verifier.RISK_SIZE_CHECKER_PATH,
             TEST_CANONICAL_COVERED_PATHS,
         )
+
+    def test_verifier_requires_exact_artist_semantic_owner_bindings(
+        self,
+    ) -> None:
+        manifest = json.loads(
+            (
+                SOURCE_REPO_ROOT
+                / "release-artifacts/latest/release-manifest.json"
+            ).read_text(encoding="utf-8")
+        )
+        verifier.verify_artist_semantic_owner_matrix_bindings(manifest)
+
+        mutations = (
+            (
+                "package omission",
+                lambda value: value["release_artifacts"].pop(
+                    "artist_semantic_owner_matrix"
+                ),
+                "artist_semantic_owner_matrix",
+            ),
+            (
+                "status drift",
+                lambda value: value["release_artifacts"]
+                ["artist_semantic_owner_matrix"]["matrix"].__setitem__(
+                    "status", "IMPLEMENTED"
+                ),
+                "status must be PROPOSED_ARCHITECTURE_ONLY",
+            ),
+            (
+                "schema identity drift",
+                lambda value: value["release_artifacts"]
+                ["artist_semantic_owner_matrix"]["schema"].__setitem__(
+                    "schema_id", "https://example.invalid/substituted.json"
+                ),
+                "schema_id must be",
+            ),
+        )
+        for label, mutate, expected in mutations:
+            with self.subTest(label=label):
+                changed = json.loads(json.dumps(manifest))
+                mutate(changed)
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    expected,
+                ):
+                    verifier.verify_artist_semantic_owner_matrix_bindings(
+                        changed
+                    )
 
     def test_verifier_bootstrap_imports_are_standard_library_only(self) -> None:
         tree = verifier.ast.parse(SCRIPT_PATH.read_text(encoding="utf-8"))
@@ -1235,8 +1321,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 },
                 "reviewed_paths": {
                     "type": "array",
-                    "minItems": 32,
-                    "maxItems": 32,
+                    "minItems": 34,
+                    "maxItems": 34,
                 },
             },
         }
@@ -2055,6 +2141,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 "trust",
                 "check_governed_parameter_inventory",
                 "check_record_family_authorization",
+                "check_artist_semantic_owner_matrix",
             ],
         )
 
@@ -2080,7 +2167,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             ) as checker_loader:
                 verifier.verify_release_artifacts(repo_root=root)
 
-        self.assertEqual(checker_loader.call_count, 2)
+        self.assertEqual(checker_loader.call_count, 3)
         for validated_root, scripts_present in observed_roots:
             self.assertNotEqual(validated_root, root.resolve())
             self.assertTrue(scripts_present)
@@ -2331,8 +2418,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 448)
-        self.assertEqual(summary.checksum_manifest_records, 448)
+        self.assertEqual(summary.checksum_entries, 458)
+        self.assertEqual(summary.checksum_manifest_records, 458)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2344,8 +2431,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 448)
-        self.assertEqual(data["checksum_manifest_records"], 448)
+        self.assertEqual(data["checksum_entries"], 458)
+        self.assertEqual(data["checksum_manifest_records"], 458)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

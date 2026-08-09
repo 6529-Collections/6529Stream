@@ -34,6 +34,16 @@ the release policy in `docs/release-policy.md`.
   reserved. The ADR stays
   Proposed; this slice adds no Solidity, inventory row, catalog/profile,
   release tail, deployment evidence, audit credit, or readiness claim.
+- Published the Proposed artist semantic-domain ownership packet into the
+  deterministic local validation and release-evidence closure. The checker,
+  hostile tests, ADR, strict matrix, and schema are exact checksum roots; the
+  checker-read frozen operation source and four existing immutable-provider
+  interfaces are exact roots as well; the offline verifier replays the checker
+  from checksum-bound snapshot bytes;
+  manifest independently validates and binds the matrix and schema; and the
+  release-tool call policy covers the checker and focused tests. This
+  publication changes no Solidity, deployment or candidate value, maturity,
+  audit credit, external governance, or readiness claim.
 - Added the isolated issue #656A canonical deployment candidate-v2 planning
   scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
   fail-closed structural checker with hostile fixtures. The ordinary checker

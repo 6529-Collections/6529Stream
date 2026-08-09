@@ -135,6 +135,12 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     record_family_grant_map_schema = (
         root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
     )
+    artist_semantic_owner_matrix = (
+        root / generator.DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX
+    )
+    artist_semantic_owner_matrix_schema = (
+        root / generator.DEFAULT_ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA
+    )
     release_tool_call_policy = (
         root / generator.DEFAULT_RELEASE_TOOL_CALL_POLICY
     )
@@ -1277,6 +1283,26 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         ),
     )
     write_text(changelog, "# Changelog\n\n## Unreleased\n\n- Added release manifest.\n")
+    write_json(
+        artist_semantic_owner_matrix,
+        {
+            "schema": generator.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+            "status": generator.ARTIST_SEMANTIC_OWNER_MATRIX_STATUS,
+            "maturity": generator.ARTIST_SEMANTIC_OWNER_MATRIX_MATURITY,
+        },
+    )
+    write_json(
+        artist_semantic_owner_matrix_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": generator.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID,
+            "properties": {
+                "schema": {
+                    "const": generator.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+                },
+            },
+        },
+    )
     for doc in docs:
         if doc.suffix == ".json":
             write_json(doc, {"schema_version": "test.fixture.v1"})
@@ -1408,6 +1434,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "record_family_evidence_schema": record_family_evidence_schema,
         "record_family_evidence_template": record_family_evidence_template,
         "record_family_grant_map_schema": record_family_grant_map_schema,
+        "artist_semantic_owner_matrix": artist_semantic_owner_matrix,
+        "artist_semantic_owner_matrix_schema": (
+            artist_semantic_owner_matrix_schema
+        ),
         "release_tool_call_policy": release_tool_call_policy,
         "release_tool_call_policy_schema": release_tool_call_policy_schema,
         "system_manifest_payload_vector": system_manifest_payload_vector,
@@ -1468,6 +1498,14 @@ class ReleaseManifestTests(unittest.TestCase):
             return_value=({}, {}),
         )
         self.record_family_validator = self.record_family_validation_patcher.start()
+        self.artist_semantic_owner_validation_patcher = mock.patch.object(
+            generator.artist_semantic_owner_checker,
+            "check",
+            return_value=None,
+        )
+        self.artist_semantic_owner_validator = (
+            self.artist_semantic_owner_validation_patcher.start()
+        )
         self.release_tool_policy_validation_patcher = mock.patch.object(
             generator.release_checksum_policy,
             "validate_release_tool_call_policy",
@@ -1478,10 +1516,76 @@ class ReleaseManifestTests(unittest.TestCase):
         )
 
     def tearDown(self) -> None:
+        self.artist_semantic_owner_validation_patcher.stop()
         self.release_tool_policy_validation_patcher.stop()
         self.record_family_validation_patcher.stop()
         self.governance_action_policy_validation_patcher.stop()
         self.inventory_validation_patcher.stop()
+
+    def test_artist_semantic_owner_matrix_records_run_semantic_validation(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+
+            records = generator.artist_semantic_owner_matrix_records(root)
+
+        self.artist_semantic_owner_validator.assert_called_once_with(root)
+        self.assertEqual(
+            records["matrix"]["schema_version"],
+            generator.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA,
+        )
+        self.assertEqual(
+            records["matrix"]["status"],
+            generator.ARTIST_SEMANTIC_OWNER_MATRIX_STATUS,
+        )
+        self.assertEqual(
+            records["schema"]["schema_id"],
+            generator.ARTIST_SEMANTIC_OWNER_MATRIX_SCHEMA_ID,
+        )
+        self.assertEqual(
+            records["matrix"]["path"],
+            paths["artist_semantic_owner_matrix"].relative_to(root).as_posix(),
+        )
+
+    def test_artist_semantic_owner_matrix_records_reject_semantic_failure(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_tree(root)
+            self.artist_semantic_owner_validator.side_effect = (
+                generator.artist_semantic_owner_checker.MatrixError(
+                    "sole owner drifted"
+                )
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "sole owner drifted",
+            ):
+                generator.artist_semantic_owner_matrix_records(root)
+
+    def test_artist_semantic_owner_matrix_records_reject_schema_identity_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            schema = json.loads(
+                paths["artist_semantic_owner_matrix_schema"].read_text(
+                    encoding="utf-8"
+                )
+            )
+            schema["$id"] = "https://example.invalid/substituted.schema.json"
+            write_json(paths["artist_semantic_owner_matrix_schema"], schema)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "must use schema ID",
+            ):
+                generator.artist_semantic_owner_matrix_records(root)
 
     def test_governed_parameter_inventory_record_runs_semantic_validation(
         self,
@@ -2042,6 +2146,17 @@ class ReleaseManifestTests(unittest.TestCase):
             expected,
         )
 
+    def test_committed_manifest_binds_artist_semantic_owner_matrix(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            manifest["release_artifacts"].get("artist_semantic_owner_matrix"),
+            generator.artist_semantic_owner_matrix_records(repo_root),
+        )
+
     def test_committed_manifest_binds_release_tool_call_policy(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         manifest = json.loads(
@@ -2201,6 +2316,16 @@ class ReleaseManifestTests(unittest.TestCase):
                 }
             ],
         )
+
+    def test_default_governance_docs_cover_artist_semantic_owner_packet(
+        self,
+    ) -> None:
+        expected_paths = {
+            Path("docs/adr/0023-modular-artist-authority-domain-ownership.md"),
+            Path("docs/architecture/artist-semantic-owner-matrix-v2.json"),
+            Path("docs/architecture/artist-semantic-owner-matrix-v2.schema.json"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_GOVERNANCE_DOCS))
 
     def test_default_governance_docs_close_genesis_normative_anchors(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent

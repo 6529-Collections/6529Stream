@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:f0aafe243dbc4e290accd035a3eaddd2b4a8a896f2131e7e2b2f33cd4287dfae",
-      "size_bytes": 147771,
+      "sha256": "sha256:39e6523f56281fae7f236c1eacab00d580dc70261b06d7b4ce5b9ce574366fa3",
+      "size_bytes": 149412,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:60903e222d201e239bfaa450b0b35bf2776a4431cd904a0ff61b148ee0522e51",
+      "sha256": "sha256:8ed6e100c3728dcecab115fd382b85739a7a4c231767a33a156bad01dff0b114",
       "size_bytes": 151614,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,7 +73,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:28504de7d651fa93a4f0fb92ed3d6711ecb0f62b4855fff3881eaa227fb1a911",
+      "sha256": "sha256:7b90f62129ae3db5904c96afe7c8171d2c2de0a89e3eb320cf1c59bf0ea9a534",
       "size_bytes": 33995,
       "schema_version": "6529stream.risk-register.v1"
     },
@@ -135,14 +135,14 @@
     },
     "release_tool_call_policy": {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:bb8800f08ab46b965f185b00a8f51956a592a3a11a34b3d302cba69c2ec42547",
-      "size_bytes": 2326709,
+      "sha256": "sha256:f7d7c14423f34f9ebcb86b19f423f13b3605e2d65fb191a00c19d5706c40021a",
+      "size_bytes": 2433641,
       "schema_version": "6529stream.release-tool-call-policy.v1"
     },
     "release_tool_call_policy_schema": {
       "path": "release-artifacts/schema/release-tool-call-policy.v1.schema.json",
-      "sha256": "sha256:ecb6d74cf45ff0093874065f5dc2fa6d57e67a5dc6cdb13dbdeb1a20885e39cb",
-      "size_bytes": 10690,
+      "sha256": "sha256:7845d1936755fb37ca922f8b6f77982112ebee2543f123debe586a158f31f955",
+      "size_bytes": 11147,
       "schema_version": "https://json-schema.org/draft/2020-12/schema",
       "schema_id": "https://6529.io/schemas/release-tool-call-policy.v1.schema.json",
       "document_schema_version": "6529stream.release-tool-call-policy.v1"
@@ -150,14 +150,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:7325b6d32e2f5a9bdd46163afd56451caea833d3775099d9b0239af77f19be64",
-        "size_bytes": 152858,
+        "sha256": "sha256:625b56f145867ede9f97d1b116d1c0acdf1e6ab8cd77fb9b49daf1cde960eebc",
+        "size_bytes": 155451,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:7a6b295e5070a52ba99aacf768dc8f9bf59a0625a8470ff50b43f0438aa5ff10",
-        "size_bytes": 149329
+        "sha256": "sha256:e4eb85516a066ceefe8ade23c8dfb4ba6660b4fcc35b59a2c099d5b20ef16ed7",
+        "size_bytes": 151908
       }
     },
     "blocker_reports": {
@@ -274,6 +274,8 @@
       "python scripts/check_governed_parameter_inventory.py",
       "python scripts/test_record_family_authorization.py",
       "python scripts/check_record_family_authorization.py",
+      "python scripts/test_artist_semantic_owner_matrix.py",
+      "python scripts/check_artist_semantic_owner_matrix.py",
       "python scripts/test_bytecode_release_proof.py",
       "python scripts/generate_bytecode_release_proof.py --check",
       "python scripts/test_release_checksums.py",

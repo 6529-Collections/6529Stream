@@ -36,8 +36,8 @@
     },
     "external_modules": {
       "type": "array",
-      "minItems": 29,
-      "maxItems": 29,
+      "minItems": 31,
+      "maxItems": 31,
       "uniqueItems": true,
       "prefixItems": [
         {"const": "Crypto.Hash"},
@@ -57,6 +57,7 @@
         {"const": "json"},
         {"const": "jsonschema"},
         {"const": "jsonschema.exceptions"},
+        {"const": "math"},
         {"const": "os"},
         {"const": "pathlib"},
         {"const": "re"},
@@ -66,6 +67,7 @@
         {"const": "subprocess"},
         {"const": "sys"},
         {"const": "tempfile"},
+        {"const": "types"},
         {"const": "typing"},
         {"const": "unicodedata"},
         {"const": "unittest"}
@@ -74,11 +76,12 @@
     },
     "reviewed_paths": {
       "type": "array",
-      "minItems": 32,
-      "maxItems": 32,
+      "minItems": 34,
+      "maxItems": 34,
       "uniqueItems": true,
       "prefixItems": [
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_admin_ceremony_evidence.py"}, "role": {"const": "runtime"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_artist_semantic_owner_matrix.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_changelog.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_drop_authorization_signing_evidence.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governance_action_policy.py"}, "role": {"const": "runtime"}}},
@@ -101,6 +104,7 @@
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/no_secret_scanner.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/release_evidence_paths.py"}, "role": {"const": "runtime"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_admin_ceremony_evidence.py"}, "role": {"const": "focused-test"}}},
+        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_artist_semantic_owner_matrix.py"}, "role": {"const": "focused-test"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_bytecode_release_proof.py"}, "role": {"const": "focused-test"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_changelog_check.py"}, "role": {"const": "focused-test"}}},
         {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_drop_authorization_signing_evidence.py"}, "role": {"const": "focused-test"}}},
