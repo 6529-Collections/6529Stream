@@ -92,7 +92,11 @@ class ReleaseArtifactTests(unittest.TestCase):
                 {
                     "schema_version": "6529stream.release-artifact-contracts.v1",
                     "production_contracts": [
-                        {"name": "Example", "source": "smart-contracts/Example.sol"}
+                        {
+                            "name": "Example",
+                            "source": "smart-contracts/Example.sol",
+                            "deployment_scope": "unbound_singleton",
+                        }
                     ],
                     "interfaces": [
                         {
@@ -135,6 +139,10 @@ class ReleaseArtifactTests(unittest.TestCase):
             )
             self.assertEqual(
                 abi_checksums["contracts"]["Example"]["deployed_runtime_margin_bytes"], 24574
+            )
+            self.assertEqual(
+                abi_checksums["contracts"]["Example"]["deployment_scope"],
+                "unbound_singleton",
             )
 
             events = generator.load_json(output_dir / "event-topic-catalog.json")

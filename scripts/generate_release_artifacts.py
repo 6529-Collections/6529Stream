@@ -61,7 +61,7 @@ DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
-DEPLOYMENT_SCOPES = frozenset({"singleton", "factory_spawned"})
+DEPLOYMENT_SCOPES = frozenset({"singleton", "factory_spawned", "unbound_singleton"})
 
 
 class ArtifactError(RuntimeError):

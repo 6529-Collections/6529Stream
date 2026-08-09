@@ -2190,6 +2190,52 @@
       ]
     },
     {
+      "topic0": "0x5240c686ea6d391abba38d01bf42c2af4b92a159bf40061b4eaba5de398615f8",
+      "signature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+      "name": "ArtistArchiveEvidenceAppendedV2",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "evidenceId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "evidenceVersion",
+          "type": "uint64",
+          "indexed": true,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 2,
+          "name": "contentHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "pointer",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "payloadSize",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamArtistArchiveV2"
+      ]
+    },
+    {
       "topic0": "0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc",
       "signature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
       "name": "GasParameterUpdated",
@@ -7116,6 +7162,55 @@
               "type": "address",
               "indexed": true,
               "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamArtistArchiveV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "artifact_path": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+      "events": [
+        {
+          "name": "ArtistArchiveEvidenceAppendedV2",
+          "signature": "ArtistArchiveEvidenceAppendedV2(bytes32,uint64,bytes32,address,uint256)",
+          "topic0": "0x5240c686ea6d391abba38d01bf42c2af4b92a159bf40061b4eaba5de398615f8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "evidenceId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "evidenceVersion",
+              "type": "uint64",
+              "indexed": true,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 2,
+              "name": "contentHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "pointer",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "payloadSize",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
             }
           ]
         }

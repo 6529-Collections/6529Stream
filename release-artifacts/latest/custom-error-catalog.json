@@ -6,14 +6,14 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 240,
-    "contract_count": 18,
+    "custom_error_count": 252,
+    "contract_count": 19,
     "category_counts": {
-      "access_control": 18,
+      "access_control": 19,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 39,
-      "metadata_integrity": 31,
+      "configuration": 40,
+      "metadata_integrity": 41,
       "mint_ledger_accounting": 16,
       "mint_manager_policy": 43,
       "pause_emergency": 3,
@@ -24,9 +24,9 @@
       "supply_minting": 7
     },
     "severity_counts": {
-      "critical": 18,
-      "high": 176,
-      "medium": 46
+      "critical": 19,
+      "high": 186,
+      "medium": 47
     },
     "duplicate_selectors": {
       "0x1372e27c": [
@@ -1207,6 +1207,411 @@
           "test/StreamRandomizerLifecycle.t.sol",
           "test/StreamRandomizerAdversarial.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveBlockNumberOverflow(uint256)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveBlockNumberOverflow",
+      "signature": "ArtistArchiveBlockNumberOverflow(uint256)",
+      "selector": "0xc0dc11f0",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveEmptyEvidence(bytes32,uint64)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveEmptyEvidence",
+      "signature": "ArtistArchiveEmptyEvidence(bytes32,uint64)",
+      "selector": "0x25cb8a4c",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "evidenceId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "evidenceVersion",
+          "type": "uint64"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveEvidenceConflict",
+      "signature": "ArtistArchiveEvidenceConflict(bytes32,uint64,bytes32,bytes32)",
+      "selector": "0x1970b3ea",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "evidenceId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "evidenceVersion",
+          "type": "uint64"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "storedContentHash",
+          "type": "bytes32"
+        },
+        {
+          "index": 3,
+          "internal_type": "bytes32",
+          "name": "suppliedContentHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveEvidenceCorrupted",
+      "signature": "ArtistArchiveEvidenceCorrupted(bytes32,uint64,bytes32,bytes32)",
+      "selector": "0x59b35098",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "evidenceId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "evidenceVersion",
+          "type": "uint64"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "expectedHash",
+          "type": "bytes32"
+        },
+        {
+          "index": 3,
+          "internal_type": "bytes32",
+          "name": "observedHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveEvidenceTooLarge",
+      "signature": "ArtistArchiveEvidenceTooLarge(uint256,uint256)",
+      "selector": "0xb36bce5b",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "observedBytes",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maximumBytes",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveEvidenceUnavailable",
+      "signature": "ArtistArchiveEvidenceUnavailable(bytes32,uint64)",
+      "selector": "0xfaa9281c",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "evidenceId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "evidenceVersion",
+          "type": "uint64"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveInvalidBinding(address,address)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveInvalidBinding",
+      "signature": "ArtistArchiveInvalidBinding(address,address)",
+      "selector": "0xcd13f3b4",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "artistRegistry",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "operationCoordinator",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveInvalidEvidenceKey",
+      "signature": "ArtistArchiveInvalidEvidenceKey(bytes32,uint64)",
+      "selector": "0x58aea5c3",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "evidenceId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "evidenceVersion",
+          "type": "uint64"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:ArtistArchiveUnauthorizedWriter(address)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "ArtistArchiveUnauthorizedWriter",
+      "signature": "ArtistArchiveUnauthorizedWriter(address)",
+      "selector": "0x73dce5fa",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:SSTORE2DataTooLarge(uint256)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "SSTORE2DataTooLarge",
+      "signature": "SSTORE2DataTooLarge(uint256)",
+      "selector": "0xc5cd3084",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:SSTORE2InvalidPointer(address)",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "SSTORE2InvalidPointer",
+      "signature": "SSTORE2InvalidPointer(address)",
+      "selector": "0xd8415944",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "pointer",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistArchiveV2:SSTORE2WriteFailed()",
+      "contract": "StreamArtistArchiveV2",
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "name": "SSTORE2WriteFailed",
+      "signature": "SSTORE2WriteFailed()",
+      "selector": "0xfbad885d",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

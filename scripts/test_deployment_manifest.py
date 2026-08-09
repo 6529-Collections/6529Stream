@@ -221,6 +221,29 @@ class DeploymentManifestTests(unittest.TestCase):
             with self.assertRaisesRegex(generator.ManifestError, "omits release contracts"):
                 generator.build_manifest(config_path, release_dir)
 
+    def test_generator_excludes_unbound_singleton_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            release_dir = release_artifacts(root)
+            checksums = generator.load_json(release_dir / "abi-checksums.json")
+            checksums["contracts"] = {
+                "Alpha": {"deployment_scope": "unbound_singleton"},
+                "Beta": {"deployment_scope": "singleton"},
+            }
+            write_json(release_dir / "abi-checksums.json", checksums)
+            config_path = manifest_config(root)
+            config = generator.load_json(config_path)
+            config["manifest"]["contracts"] = [
+                contract
+                for contract in config["manifest"]["contracts"]
+                if contract["name"] != "Alpha"
+            ]
+            write_json(config_path, config)
+
+            _, manifest = generator.build_manifest(config_path, release_dir)
+
+            self.assertEqual(set(manifest["contracts"]), {"Beta"})
+
     def test_sepolia_template_is_placeholder_scoped_and_no_secret(self) -> None:
         template_text = SEPOLIA_TEMPLATE.read_text(encoding="utf-8")
         self.assertIsNone(TEMPLATE_FORBIDDEN_SECRET_RE.search(template_text))

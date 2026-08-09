@@ -426,13 +426,13 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         128_549,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "7c3e7823fc7a58262881d7df59bdafd995895b87e9dea08a625d7538608f0b13",
+        "ff569dba2283903c8430f252934b3f4581014e3954afd8c522e2e976af226778",
         47_072,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "f2ad4c8a1ade26cf0b3981c6b0d1d2235ef596f3f22134fa348f6517d71699ea",
+        "9492473e9b17d389a54e11b6f11e574f3a3739f77f28d0415b733ddf16c07bdf",
         172_989,
     ),
 }
@@ -657,6 +657,8 @@ DEFAULT_COVERED_PATHS = [
     Path("smart-contracts/interfaces/stream/IStreamCore.sol"),
     Path("smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol"),
     Path("smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol"),
+    Path("smart-contracts/domains/artist/StreamArtistArchiveV2.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),

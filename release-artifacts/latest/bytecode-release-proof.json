@@ -4,18 +4,18 @@
   "source": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:36b2955b043dcacc630f830ef35cd027f72dcaadbe1c960c1362072cefb76406",
+      "sha256": "sha256:d29cf96450d15d78629c341ed82141cd462af5f8e3d9dd5f405b8d3d157b69af",
       "size_bytes": 149412
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:c6a771212d5f23dae2feff8a9afae78a326bbc9fc45730fc26ae3eccb08b367a",
-      "size_bytes": 30947
+      "sha256": "sha256:c7ff62f8c23ef6dc058b2ec37f173144de52b1d968573169962ce6cc6f3dce13",
+      "size_bytes": 32477
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:a84071f72c131621cc938e1a42794bb20fb8c704c3238177fd5a62a0bf9a5783",
-      "size_bytes": 108234
+      "sha256": "sha256:0f462a08b7c228d0159f9327fcf8c637181afebb7537012c1558546145e618ef",
+      "size_bytes": 112325
     },
     "deployment_manifests": [
       {

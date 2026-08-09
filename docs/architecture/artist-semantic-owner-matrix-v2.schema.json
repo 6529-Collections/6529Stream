@@ -1296,9 +1296,37 @@
           "pattern": "^smart-contracts/domains/artist/"
         },
         "source_present": {
-          "const": false
+          "type": "boolean"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "const": "archive"
+              }
+            },
+            "required": [
+              "component"
+            ]
+          },
+          "then": {
+            "properties": {
+              "source_present": {
+                "const": true
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "source_present": {
+                "const": false
+              }
+            }
+          }
+        }
+      ]
     },
     "sourceRequirements": {
       "type": "object",
@@ -1323,7 +1351,7 @@
           }
         },
         "all_source_absent": {
-          "const": true
+          "const": false
         },
         "interface_and_storage_freeze_complete": {
           "const": false

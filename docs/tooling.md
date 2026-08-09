@@ -1603,8 +1603,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 282 configured roots,
-expanding to exactly 458 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 284 configured roots,
+expanding to exactly 460 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
@@ -1616,9 +1616,10 @@ already covered baseline directory. The Governance V2 policy artifact, checker,
 and tests add three exact roots; those files plus the policy schema under the
 already covered schema directory add four exact entries. The additional exact
 root binds `scripts/check_contract_size_budget.py`, which is executed directly
-by `RISK-SIZE-001`. The #670 publication adds ten exact roots for its Proposed
+by `RISK-SIZE-001`. The #670 publication adds twelve exact roots for its Proposed
 ADR, strict matrix, schema, checker, hostile tests, frozen operation source,
-and four existing immutable-provider interfaces read by the checker.
+four existing immutable-provider interfaces read by the checker, and the
+reviewed ArchiveV2 implementation/interface source pair.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
@@ -2189,6 +2190,11 @@ python scripts/check_changelog.py
 The generator uses `release-artifacts/contracts.json` to define the production
 contract and interface surface. Standard ERC interface IDs are pinned there when
 the advertised ERC ID differs from a raw XOR over the artifact ABI.
+An `unbound_singleton` production-contract scope includes Proposed bytecode,
+ABI, protocol-surface, and source-verification evidence while deliberately
+excluding that contract from deployment manifests and address books until a
+later candidate-bound change supplies a real singleton instance. It must not be
+used to claim a rehearsal, deployment, candidate, or readiness result.
 
 The ABI compatibility baseline uses the production contract and published
 interface sets from the same config file. Refresh it only when maintainers
@@ -2255,10 +2261,10 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `7f7d2af516b80931d8ef936ecfa23b0a8fa044b2` on
-`2026-08-08T16:36:06Z` records 3,218 findings: 49 High, 830 Medium, 1,265 Low,
-1,032 Informational, and 42 Optimization. Its High/Medium scope totals are
-first-party production `2/30/32`, vendored `1/9/10`, test `46/784/830`, script
+at source commit `4d732c583f063bd83364eb42b4d255b433cf8bab` on
+`2026-08-09T11:38:52Z` records 3,237 findings: 49 High, 847 Medium, 1,266 Low,
+1,033 Informational, and 42 Optimization. Its High/Medium scope totals are
+first-party production `2/30/32`, vendored `1/9/10`, test `46/801/847`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.
 After a production-source edit intentionally stales the strict provenance hash,

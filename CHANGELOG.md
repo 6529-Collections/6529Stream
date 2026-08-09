@@ -49,6 +49,28 @@ the release policy in `docs/release-policy.md`.
   the success-banner counts from the validated matrix inventory. This
   publication changes no Solidity, deployment or candidate value, maturity,
   audit credit, external governance, or readiness claim.
+- Implemented the first Proposed artist-successor source slice as
+  `StreamArtistArchiveV2` plus `IStreamArtistArchiveV2`. The contract is an
+  append-only, caller-versioned evidence store in the former PayloadStore
+  deployment position: it accepts writes only from one immutable operation
+  Coordinator, stores immutable SSTORE2 payloads under exact nonzero
+  `(evidenceId, version)` keys, makes identical retries idempotent, rejects
+  conflicts, and exposes exact-key evidence reads. Archive records and events
+  are evidence only and never authorize operations, own current or replay
+  state, decide lifecycle transitions, or provide a latest pointer. The
+  interface id is `0x2dc66e2e`; the implementation has no delegatecall,
+  generic router, mutable upgrade, or rebind surface. This source and its
+  release artifacts remain Proposed, pre-audit, candidate-unbound and
+  undeployed; the Registry/directory and seven semantic-owner modules remain
+  absent, and this change grants no audit, deployment or readiness credit. The
+  exact non-production Anvil deployment-plan fixture is refreshed only to the
+  current canonical build receipt, target catalog and config so required build
+  gates remain reproducible; it still materializes only its historical
+  `DependencyRegistry` fixture and is not candidate, deployment or readiness
+  evidence. Existing local/fork ceremony and randomizer-operation evidence
+  fixtures refresh only their deterministic ABI-checksum references; this does
+  not recapture, promote, or add ceremony, deployment, candidate, or readiness
+  evidence.
 - Added the isolated issue #656A canonical deployment candidate-v2 planning
   scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
   fail-closed structural checker with hostile fixtures. The ordinary checker

@@ -101,6 +101,15 @@
         "StreamPreservationRecords"
       ]
     },
+    "smart-contracts/domains/artist/StreamArtistArchiveV2.sol": {
+      "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "sha256": "sha256:1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778",
+      "solc_keccak256": "0x000a3673565e0365298b4b3b214f6908fd474fd3b0d82272c1d0565342fe70b5",
+      "license": "MIT",
+      "used_by": [
+        "StreamArtistArchiveV2"
+      ]
+    },
     "smart-contracts/domains/auctions/AuctionContract.sol": {
       "path": "smart-contracts/domains/auctions/AuctionContract.sol",
       "sha256": "sha256:8bd82d6bf5b5b08800ce3c44824fd7ca4872c7168f30ab4ac8c19d86f3123293",
@@ -446,6 +455,15 @@
         "StreamPreservationRecords"
       ]
     },
+    "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol": {
+      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "sha256": "sha256:2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e",
+      "solc_keccak256": "0x30b69e8001e15d4f5827717a6d763bb8b14fb9760de9ea3aa94baa5f66b8edb9",
+      "license": "MIT",
+      "used_by": [
+        "StreamArtistArchiveV2"
+      ]
+    },
     "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol": {
       "path": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
       "sha256": "sha256:9dad200d56cd072f126a89925e5e86678e1323e8d0686de2b4df3b1a3de31352",
@@ -674,6 +692,15 @@
         "StreamCore"
       ]
     },
+    "smart-contracts/libraries/SSTORE2.sol": {
+      "path": "smart-contracts/libraries/SSTORE2.sol",
+      "sha256": "sha256:8e27121092abd4153ca9deb7b03dc34a495323b7ee5d9eeaaed184f2b35740bb",
+      "solc_keccak256": "0x041ed894ca9b460472663b618be2643d11ef8c07b5ef38b13ffc6a5992ffba4a",
+      "license": "MIT",
+      "used_by": [
+        "StreamArtistArchiveV2"
+      ]
+    },
     "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol": {
       "path": "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
       "sha256": "sha256:dd96749e1dac5eafda15af9dd009616554683ca955dad8f51fe2e22679878a59",
@@ -759,6 +786,7 @@
       "solc_keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
       "license": "MIT",
       "used_by": [
+        "StreamArtistArchiveV2",
         "StreamAuctions",
         "StreamCollectionMetadata",
         "StreamContractMetadata",
@@ -1192,6 +1220,73 @@
       "verification": {
         "live_status": "not_available_until_broadcast",
         "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/domains/access/StreamAdmins.sol:StreamAdmins --constructor-args <encoded-constructor-args>"
+      }
+    },
+    "StreamArtistArchiveV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "source_sha256": "sha256:1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778",
+      "source_solc_keccak256": "0x000a3673565e0365298b4b3b214f6908fd474fd3b0d82272c1d0565342fe70b5",
+      "artifact_path": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
+      "artifact_sha256": "sha256:06212ddec7b3ab454c2e1b10da671fb171bb6eafdb972a37ecde37b6e0e54aa4",
+      "compilation_target": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2",
+      "compiler_version": "0.8.19+commit.7dd6d404",
+      "language": "Solidity",
+      "settings": {
+        "evm_version": "paris",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "via_ir": true,
+        "metadata_bytecode_hash": "none",
+        "libraries": {}
+      },
+      "abi_sha256": "sha256:a33994a9cb80e4216e190efeeb6d33693674e151e2e8e35e2d42f18979b47a84",
+      "bytecode_hashes": {
+        "creation": {
+          "sha256": "sha256:e0ce1ac26a7319b2e84fff6947245b90770b66109affab208be5873a0b5e471f",
+          "linked": true,
+          "hash_mode": "bytes",
+          "release_artifact_sha256": "sha256:e0ce1ac26a7319b2e84fff6947245b90770b66109affab208be5873a0b5e471f"
+        },
+        "runtime": {
+          "sha256": "sha256:59307ac79c068716176bfe967575d8061739283ab9b9373bf2a0e5562058276c",
+          "linked": true,
+          "hash_mode": "bytes",
+          "release_artifact_sha256": "sha256:59307ac79c068716176bfe967575d8061739283ab9b9373bf2a0e5562058276c"
+        }
+      },
+      "constructor": {
+        "present": true,
+        "state_mutability": "nonpayable",
+        "inputs": [
+          {
+            "index": 0,
+            "name": "artistRegistry_",
+            "type": "address",
+            "internal_type": "address"
+          },
+          {
+            "index": 1,
+            "name": "operationCoordinator_",
+            "type": "address",
+            "internal_type": "address"
+          }
+        ]
+      },
+      "constructor_args": {
+        "status": "retained_per_deployment_manifest",
+        "deployment_manifest_dir": "deployments/examples",
+        "encoded_args": "not_available_until_broadcast"
+      },
+      "library_linking": {
+        "requires_linking": false,
+        "creation_link_references": [],
+        "runtime_link_references": []
+      },
+      "verification": {
+        "live_status": "not_available_until_broadcast",
+        "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2 --constructor-args <encoded-constructor-args>"
       }
     },
     "StreamAssetPolicyRegistry": {
