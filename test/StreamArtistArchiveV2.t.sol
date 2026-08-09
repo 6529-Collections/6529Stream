@@ -299,16 +299,18 @@ contract StreamArtistArchiveV2Test is CharacterizationTestBase {
     }
 
     function testDecisionAndUpgradeShapedSelectorsAreAbsent() public {
-        bytes4[6] memory forbiddenSelectors = [
-            bytes4(keccak256("latestEvidence(bytes32)")),
-            bytes4(keccak256("currentState(bytes32)")),
-            bytes4(keccak256("authorize(bytes32)")),
-            bytes4(keccak256("consumeReplay(bytes32)")),
-            bytes4(keccak256("upgradeTo(address)")),
-            bytes4(keccak256("route(bytes4,bytes)"))
+        bytes[6] memory forbiddenPayloads = [
+            abi.encodeWithSelector(bytes4(keccak256("latestEvidence(bytes32)")), EVIDENCE_ID),
+            abi.encodeWithSelector(bytes4(keccak256("currentState(bytes32)")), EVIDENCE_ID),
+            abi.encodeWithSelector(bytes4(keccak256("authorize(bytes32)")), EVIDENCE_ID),
+            abi.encodeWithSelector(bytes4(keccak256("consumeReplay(bytes32)")), EVIDENCE_ID),
+            abi.encodeWithSelector(bytes4(keccak256("upgradeTo(address)")), address(this)),
+            abi.encodeWithSelector(
+                bytes4(keccak256("route(bytes4,bytes)")), bytes4(0x12345678), bytes("route payload")
+            )
         ];
-        for (uint256 i = 0; i < forbiddenSelectors.length; i++) {
-            (bool ok,) = address(archive).call(abi.encodeWithSelector(forbiddenSelectors[i]));
+        for (uint256 i = 0; i < forbiddenPayloads.length; i++) {
+            (bool ok,) = address(archive).call(forbiddenPayloads[i]);
             ok.assertFalse("forbidden selector absent");
         }
     }
