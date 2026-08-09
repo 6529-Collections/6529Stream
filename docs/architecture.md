@@ -39,7 +39,35 @@ the amendment process are defined in the
 - [Entropy coordinator](stream-entropy-coordinator.md)
 - [Entropy providers](stream-entropy-providers.md)
 - [ADR 0008: revenue splits and royalty resolver](adr/0008-revenue-splits-and-royalty-resolver.md)
+- [ADR 0023: proposed modular artist authority domain ownership](adr/0023-modular-artist-authority-domain-ownership.md)
+- [Proposed artist semantic-owner matrix v2](architecture/artist-semantic-owner-matrix-v2.json)
 - [Open-questions register](spec-open-questions.md)
+
+The artist authority successor is architecture evidence only. ADR 0023 remains
+Proposed and no artist suite is implemented or release-bound. The checked
+57-recipe topology assigns exactly one global owner to every underlying state,
+record, replay, and normative event domain. Seven isolated owners include a
+dedicated `StreamArtistAcceptanceLifecycle` for the shared acceptance-record
+domain. An immutable typed stateless `StreamArtistOperationCoordinator`
+snapshots revisions/commitments and atomically invokes enumerated owner actions;
+owners do not read or write peer modules. Payout precedes consent/finality in
+the snapshot order, including operation 15's exact payout dependency.
+Five immutable typed providers bind role, Core, Governance V2, Finality, and
+import-continuity observations to exact future manifest address/runtime
+codehash/interface/marker/schema/binding pins. Three `StreamRoleRegistry`
+authority surfaces bind each named platform role and authenticated original
+caller per affected recipe. Candidate values remain null, the synthetic
+system-manifest fixture supplies no candidate evidence, and unresolved Core,
+Governance, and continuity interfaces remain implementation stops.
+`StreamArtistRegistry` remains a slim immutable typed directory/facade, and the
+former payload-store position is append-only evidence-only
+`StreamArtistArchiveV2`. Registry, Coordinator, and Archive own no semantic
+truth. Source implementation remains blocked on ADR acceptance, the full
+interface/storage/recipe freeze, and issue #669 retaining the exact canonical
+non-authoritative `StreamArtistRegistryValidatorBase._validateSignerProof`
+`address(<signer>).staticcall{gas: context.erc1271GasCap}` boundary. Identity
+remains the sole signature/GGP semantic owner; validator source and inventory
+row remain absent.
 
 ## Maturity And Scope
 

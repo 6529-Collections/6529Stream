@@ -7,6 +7,33 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the Proposed global artist semantic-domain ownership architecture
+  packet. The strict matrix binds all 57 frozen rows and all 18 columns, 37
+  record domains, 54 events, normalized replay surfaces, effective
+  implementation stops, dependencies, and future source requirements. Seven
+  isolated owners include a dedicated acceptance owner so operations 2 and 7
+  cannot split `ACCEPTANCE_RECORD_DOMAIN`. A typed immutable stateless
+  `StreamArtistOperationCoordinator` snapshots exact revisions/commitments and
+  executes 57 enumerated atomic recipes; no owner reads or writes another
+  owner, payout snapshots before consent/finality for operation 15, and EVM
+  revert supplies all-or-nothing rollback. Registry remains a slim typed
+  directory, ArchiveV2 is append-only evidence only, and both are
+  non-authoritative. The schema and source freeze are independently
+  hash-pinned, and hostile tests cover coupled schema/matrix tampering and
+  composite recipe regressions. Five immutable typed external providers bind
+  role, Core, Governance V2, Finality, and import-continuity snapshots to exact
+  future manifest address/runtime-codehash/interface/marker/schema/binding
+  pins; candidate values remain null, the synthetic manifest fixture is not
+  credited, and missing interface reconciliations remain hard implementation
+  stops. The affected recipes also bind the three named platform roles through
+  exact `StreamRoleRegistry` role/revision snapshots of the authenticated
+  original caller. Identity remains the sole record-family and
+  artist signature/GGP semantic owner while #669's exact absent-source
+  non-authoritative `StreamArtistRegistryValidatorBase._validateSignerProof`
+  `address(<signer>).staticcall{gas: context.erc1271GasCap}` boundary remains
+  reserved. The ADR stays
+  Proposed; this slice adds no Solidity, inventory row, catalog/profile,
+  release tail, deployment evidence, audit credit, or readiness claim.
 - Added the isolated issue #656A canonical deployment candidate-v2 planning
   scaffold: a strict schema, an intentionally incomplete 37-row profile, and a
   fail-closed structural checker with hostile fixtures. The ordinary checker
