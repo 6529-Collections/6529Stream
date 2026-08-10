@@ -298,15 +298,12 @@ def _canonical_digest(value: Any) -> str:
 def _github_heading_slug(heading: str) -> str:
     heading = heading.strip().rstrip("#").strip().lower()
     heading = re.sub(r"<[^>]+>", "", heading)
-    heading = re.sub(r"[^\w\s-]", "", heading, flags=re.UNICODE)
-    heading = re.sub(r"\s+", "-", heading)
-    heading = re.sub(r"-+", "-", heading)
-    return heading.strip("-")
+    heading = re.sub(r"[^\w -]", "", heading, flags=re.UNICODE)
+    return heading.replace(" ", "-")
 
 
 def _markdown_heading_anchors(text: str) -> set[str]:
     anchors: set[str] = set()
-    counts: dict[str, int] = {}
     fence_marker: str | None = None
     fence_length = 0
     in_html_comment = False
@@ -370,9 +367,12 @@ def _markdown_heading_anchors(text: str) -> set[str]:
         slug = _github_heading_slug(match.group(2))
         if not slug:
             continue
-        count = counts.get(slug, 0)
-        anchors.add(slug if count == 0 else f"{slug}-{count}")
-        counts[slug] = count + 1
+        candidate = slug
+        suffix = 0
+        while candidate in anchors:
+            suffix += 1
+            candidate = f"{slug}-{suffix}"
+        anchors.add(candidate)
     return anchors
 
 

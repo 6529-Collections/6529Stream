@@ -86,11 +86,26 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         relative: Path,
         updated_text: str,
         expected_error: str | None,
+        evidence_replacement: tuple[str, str] | None = None,
     ) -> dict[str, int] | None:
         target = self.root / relative
         target.write_text(updated_text, encoding="utf-8")
         rebound_digest = hashlib.sha256(target.read_bytes()).hexdigest()
         packet = self._packet()
+        rebound_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
+        if evidence_replacement is not None:
+            previous_reference, rebound_reference = evidence_replacement
+            evidence = self._native_row(packet)["resolution"]["evidence"]
+            evidence[evidence.index(previous_reference)] = rebound_reference
+            rebound_obligations = {
+                **CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS,
+                "evidence": tuple(
+                    rebound_reference if value == previous_reference else value
+                    for value in CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS[
+                        "evidence"
+                    ]
+                ),
+            }
         binding = next(
             row
             for row in packet["authority_bindings"]
@@ -109,11 +124,13 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         )
         original_authorities = CHECKER.EXPECTED_AUTHORITY_BINDINGS
         original_decision_digest = CHECKER.DECISION_ROWS_SHA256
+        original_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
         try:
             CHECKER.EXPECTED_AUTHORITY_BINDINGS = rebound_authorities
             CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
                 packet["decision_rows"]
             )
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = rebound_obligations
             if expected_error is not None:
                 self._assert_rejected(expected_error)
                 return None
@@ -121,6 +138,7 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         finally:
             CHECKER.EXPECTED_AUTHORITY_BINDINGS = original_authorities
             CHECKER.DECISION_ROWS_SHA256 = original_decision_digest
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = original_obligations
 
     def test_baseline_is_exact(self) -> None:
         counts = CHECKER.check(self.root)
@@ -243,6 +261,34 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             self.root,
             "docs/duplicate-headings.md#repeated-heading-1",
         )
+
+    def test_github_heading_slug_preserves_repeated_and_edge_hyphens(self) -> None:
+        cases = (
+            ("Repeated--Hyphens", "repeated--hyphens"),
+            ("-Leading", "-leading"),
+            ("Trailing-", "trailing-"),
+            ("heading with a - dash", "heading-with-a---dash"),
+            ("A  B", "a--b"),
+            ("A\tB", "ab"),
+        )
+        for heading, expected in cases:
+            with self.subTest(heading=heading):
+                self.assertEqual(CHECKER._github_heading_slug(heading), expected)
+
+    def test_heading_anchor_suffixes_use_one_global_collision_set(self) -> None:
+        relative = Path("docs/heading-collisions.md")
+        target = self.root / relative
+        target.write_text("# Foo\n# Foo-1\n# Foo\n", encoding="utf-8")
+        self.assertEqual(
+            CHECKER._markdown_heading_anchors(target.read_text(encoding="utf-8")),
+            {"foo", "foo-1", "foo-2"},
+        )
+        for anchor in ("foo", "foo-1", "foo-2"):
+            with self.subTest(anchor=anchor):
+                CHECKER._resolve_evidence_reference(
+                    self.root,
+                    f"{relative.as_posix()}#{anchor}",
+                )
 
     def test_markdown_heading_parser_excludes_fences_and_html_comments(self) -> None:
         relative = Path("docs/heading-parser-hostiles.md")
@@ -411,6 +457,77 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
                 self.root,
                 f"{relative.as_posix()}#fenced-info-phantom",
             )
+
+    def test_collapsed_hyphen_anchor_cannot_pass_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## - Frozen--Facts -", 1),
+            expected_error="evidence Markdown heading is missing",
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#frozen-facts",
+            ),
+        )
+
+    def test_repeated_and_edge_hyphen_anchor_resolves_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        counts = self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## - Frozen--Facts -", 1),
+            expected_error=None,
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#--frozen--facts--",
+            ),
+        )
+        self.assertIsNotNone(counts)
+        self.assertEqual(counts["accepted_decisions"], 1)
+
+    def test_collapsed_space_anchor_cannot_pass_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## Frozen  Facts", 1),
+            expected_error="evidence Markdown heading is missing",
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#frozen-facts",
+            ),
+        )
 
     def test_selected_shape_cannot_become_typed_abi_only(self) -> None:
         packet = self._packet()
