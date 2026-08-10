@@ -691,7 +691,7 @@ def _check_vectors(packet: dict[str, Any]) -> None:
     }
     if protocol_domains != EXPECTED_VECTOR_DOMAINS:
         raise FoundationError("protocol domain inventory drifted from vector constants")
-    for vector_id, expected_domain in EXPECTED_VECTOR_DOMAINS.items():
+    for vector_id in EXPECTED_VECTOR_DOMAINS:
         if vectors[vector_id].get("domain") != protocol_domains[vector_id]:
             raise FoundationError(f"{vector_id} vector-to-protocol domain drifted")
     specs = {

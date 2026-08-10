@@ -198,11 +198,39 @@ class ArtistOwnerStateMechanicsFoundationTests(unittest.TestCase):
         target.write_text(target.read_text(encoding="utf-8") + "\n", encoding="utf-8")
         self._assert_rejected("authority adr_0023 sha256 drifted")
 
-    def test_authority_path_cannot_traverse(self) -> None:
+    def test_authority_inventory_precedes_path_validation(self) -> None:
         packet = self._packet()
         packet["authority_bindings"][0]["path"] = "../outside.md"
         self._write_packet(packet)
         self._assert_rejected("authority binding inventory or order drifted")
+
+    def test_safe_path_rejects_lexical_unsafe_inputs(self) -> None:
+        for relative in (
+            "../outside.md",
+            "docs/../../outside.md",
+            "/etc/passwd",
+            "docs\\win.md",
+            "",
+        ):
+            with self.subTest(relative=relative):
+                with self.assertRaisesRegex(
+                    CHECKER.FoundationError,
+                    "unsafe authority path",
+                ):
+                    CHECKER._safe_path(self.root, relative)
+
+    def test_safe_path_rejects_symlink_repository_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as outside_dir:
+            outside = Path(outside_dir) / "outside.md"
+            outside.write_text("outside\n", encoding="utf-8")
+            link = self.root / "docs" / "escape.md"
+            link.symlink_to(outside)
+
+            with self.assertRaisesRegex(
+                CHECKER.FoundationError,
+                "authority path escapes repository",
+            ):
+                CHECKER._safe_path(self.root, "docs/escape.md")
 
     def test_duplicate_json_member_is_rejected(self) -> None:
         path = self.root / CHECKER.PACKET_PATH
