@@ -79,13 +79,14 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             "authority_bindings": 10,
             "phases": 4,
             "decision_rows": 19,
-            "accepted_decisions": 0,
+            "accepted_decisions": 1,
+            "unresolved_decisions": 18,
             "operations": 57,
         })
 
     def test_safety_posture_is_independently_literal(self) -> None:
         packet = self._packet()
-        self.assertEqual(packet["status"], "PROPOSED_DECISION_REGISTER_ONLY")
+        self.assertEqual(packet["status"], "PROPOSED_PARTIAL_DECISION_RESOLUTION")
         self.assertEqual(packet["maturity"], "pre_audit_source_blocked")
         self.assertFalse(packet["selected_shape"]["comprehensive_freeze_complete"])
         self.assertFalse(packet["selected_shape"]["typed_abi_only_authorizes_source"])
@@ -93,8 +94,28 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         self.assertFalse(packet["gate_state"]["coordinator_interface_accepted"])
         self.assertFalse(packet["gate_state"]["coordinator_source_present"])
         self.assertFalse(packet["gate_state"]["implementation_authorized"])
-        self.assertTrue(all(not row["accepted"] for row in packet["decision_rows"]))
-        self.assertTrue(all(row["source_blocking"] for row in packet["decision_rows"]))
+        self.assertEqual(
+            packet["phase_order"][0]["state"], "partial_decision_resolution"
+        )
+        self.assertFalse(packet["operation_projection"]["source_present"])
+        self.assertFalse(packet["operation_projection"]["implementation_authorized"])
+        self.assertEqual(packet["gate_state"]["accepted_decision_count"], 1)
+        self.assertEqual(packet["gate_state"]["unresolved_decision_count"], 18)
+        accepted = [row for row in packet["decision_rows"] if row["accepted"]]
+        self.assertEqual([row["surface_id"] for row in accepted], ["native_value"])
+        self.assertFalse(accepted[0]["source_blocking"])
+        unresolved = [row for row in packet["decision_rows"] if not row["accepted"]]
+        self.assertEqual(len(unresolved), 18)
+        self.assertTrue(all(row["source_blocking"] for row in unresolved))
+        matrix = self._read(CHECKER.MATRIX_PATH)
+        self.assertEqual(len(matrix["operations"]), 57)
+        self.assertTrue(
+            all(
+                not operation["source_requirements"]["source_present"]
+                and not operation["source_requirements"]["implementation_authorized"]
+                for operation in matrix["operations"]
+            )
+        )
 
     def test_duplicate_json_member_is_rejected(self) -> None:
         path = self.root / CHECKER.PACKET_PATH
@@ -125,7 +146,7 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
 
     def test_status_or_maturity_promotion_is_rejected(self) -> None:
         for field, value, expected in (
-            ("status", "ACCEPTED", "Proposed decision register"),
+            ("status", "ACCEPTED", "Proposed partial decision resolution"),
             ("maturity", "production_ready", "pre-audit and source-blocked"),
         ):
             with self.subTest(field=field):
@@ -214,7 +235,126 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             packet["decision_rows"][0],
         )
         self._write_packet(packet)
-        self._assert_rejected("source-blocking decision rows drifted")
+        self._assert_rejected("decision rows drifted")
+
+    def test_native_value_exact_values_reach_independent_guard(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["resolution"]["selected_values"][
+            "registry_entrypoint_mutability"
+        ] = "external_payable"
+        row["resolution"]["selected_values"]["typed_owner_call_value_wei"] = 1
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("native-value exact values drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_native_value_obligation_drift_is_rejected_by_digest(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["resolution"]["test_obligations"].pop()
+        self._write_packet(packet)
+        self._assert_rejected("decision rows drifted")
+
+    def test_native_value_considered_options_reach_independent_guard(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["resolution"]["considered_options"][0]["disposition"] = "accepted"
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("native-value considered options drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_accepted_decision_requires_resolution(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        del row["resolution"]
+        self._write_packet(packet)
+        self._assert_rejected("schema violation.*resolution.*required")
+
+    def test_unresolved_decision_cannot_smuggle_resolution(self) -> None:
+        packet = self._packet()
+        native = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        packet["decision_rows"][0]["resolution"] = native["resolution"]
+        self._write_packet(packet)
+        self._assert_rejected("schema violation.*resolution.*not of type 'null'")
+
+    def test_gate_counts_cannot_overclaim_resolution_or_authorization(self) -> None:
+        packet = self._packet()
+        packet["gate_state"]["accepted_decision_count"] = 19
+        packet["gate_state"]["unresolved_decision_count"] = 0
+        packet["gate_state"]["implementation_authorized"] = True
+        self._write_packet(packet)
+        self._assert_rejected("schema violation|gate state")
+
+    def test_native_value_acceptance_cannot_revert_to_unresolved(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["decision_status"] = "unresolved"
+        row["selected_option"] = None
+        row["accepted"] = False
+        row["source_blocking"] = True
+        row["unresolved_decisions"] = ["native-value semantics reopened"]
+        row["evidence_required"] = ["new acceptance packet"]
+        del row["resolution"]
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("accepted decision identity or count drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_second_decision_cannot_be_smuggled_as_accepted(self) -> None:
+        packet = self._packet()
+        native = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row = packet["decision_rows"][0]
+        row["unresolved_decisions"] = []
+        row["evidence_required"] = []
+        row["decision_status"] = "accepted"
+        row["selected_option"] = native["selected_option"]
+        row["accepted"] = True
+        row["source_blocking"] = False
+        row["resolution"] = native["resolution"]
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("accepted decision identity or count drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
 
     def test_registry_and_archive_roles_cannot_expand(self) -> None:
         packet = self._packet()

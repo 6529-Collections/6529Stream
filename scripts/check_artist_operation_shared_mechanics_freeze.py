@@ -26,20 +26,20 @@ COORDINATOR_INTERFACE_PATH = Path(
 )
 
 PACKET_SCHEMA = "6529stream.artist-operation-shared-mechanics-freeze.v1"
-PACKET_STATUS = "PROPOSED_DECISION_REGISTER_ONLY"
+PACKET_STATUS = "PROPOSED_PARTIAL_DECISION_RESOLUTION"
 PACKET_MATURITY = "pre_audit_source_blocked"
 JSON_SCHEMA_ID = (
     "https://6529.io/schemas/artist-operation-shared-mechanics-freeze-v1.schema.json"
 )
-EVALUATED_COMMIT = "eb274128e0e17f904890294eca9ea99dc23f78e5"
-EVALUATED_TREE = "d03d62b9be2049b1b7f5b736d658f1c38f2e3dae"
-SCHEMA_SHA256 = "d942e551520c75167eb9567ddc2e9d4fe408fa0c0cc11dffd3ba9bdbdb32240a"
+EVALUATED_COMMIT = "eef6a4cc5070186cc6517cca90bd9ffe1f74ea06"
+EVALUATED_TREE = "1a56c7b27ed304f96f551d1bebd0aa93a4ee164e"
+SCHEMA_SHA256 = "094eea2ffd0955f000ca1d97465c0d7f7f1662cfc844481068b4308a79ed5505"
 SELECTED_SHAPE_SHA256 = "9417c5fe3f8187ab75463384b1ef0932233369b097de459df5d10f86e80cc11b"
-PHASE_ORDER_SHA256 = "92defcf4af226a31f4d5a8356c793bf195cb77d39695c4003ed471fdaaa82278"
+PHASE_ORDER_SHA256 = "9faa90a8cd9027448dfdf344f23c9719ad0488e9f79d3a78f4fd40adab7075aa"
 FIXED_INVARIANTS_SHA256 = "5e4ae8a539187ab0c29969f189d956b41c2002ac046e80023644e85c19381543"
 OPERATION_PROJECTION_SHA256 = "baab6362ef92d9b1c27ca4bda2117a8818e66fc4ea2b80d3d090144ce24ed969"
-DECISION_ROWS_SHA256 = "99b57c88db60aec76e88f66a78e7f7601d18787f60b0c1eb732fd519b1858e4e"
-GATE_STATE_SHA256 = "98ea8931126296558e3a6e2c4131817ba2f6dd75d3359db4e28f3fb1c9e7450c"
+DECISION_ROWS_SHA256 = "27031b7092d81767cc5ac9b4573cfcf9f5faee1f53a95d9da9a5542a17a404f2"
+GATE_STATE_SHA256 = "41ef4a06b79f0478a71ad4aadd7230179f6daf3f57cb5207fdf006ce276831fa"
 EXCLUSIONS_SHA256 = "3d917a006edccebf17dd61967de693dd8f75e44273cbd9117419fc14cb8a01bc"
 
 TOP_LEVEL_FIELDS = frozenset(
@@ -133,6 +133,30 @@ EXPECTED_DECISION_PHASES = (
     ("native_value", "shared_mechanics"),
     ("gas_and_call_discipline", "shared_mechanics"),
 )
+
+EXPECTED_ACCEPTED_DECISIONS = ("native_value",)
+EXPECTED_NATIVE_VALUE_OPTION = "nonpayable_zero_value_end_to_end_v1"
+EXPECTED_NATIVE_VALUE_OPTION_DISPOSITIONS = (
+    ("payable_passthrough_or_custody", "rejected"),
+    ("payable_with_in_body_zero_value_check", "rejected"),
+    ("nonpayable_with_explicit_fallback_or_receive_revert", "rejected"),
+    ("nonpayable_with_redundant_zero_value_commitment_fields", "rejected"),
+    ("nonpayable_zero_value_end_to_end_v1", "accepted"),
+)
+EXPECTED_NATIVE_VALUE_VALUES = {
+    "registry_entrypoint_count": 57,
+    "coordinator_entrypoint_count": 57,
+    "registry_entrypoint_mutability": "external_nonpayable",
+    "coordinator_entrypoint_mutability": "external_nonpayable",
+    "fallback_present": False,
+    "receive_present": False,
+    "typed_owner_call_value_wei": 0,
+    "typed_provider_call_value_wei": 0,
+    "typed_validator_call_value_wei": 0,
+    "archive_call_value_wei": 0,
+    "forced_balance_forwarded": False,
+    "forced_balance_recoverable_by_protocol": False,
+}
 
 EXPECTED_PRESENT_ARTIST_SOURCES = (
     "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
@@ -262,7 +286,7 @@ def _check_meta(packet: dict[str, Any], schema: dict[str, Any], schema_path: Pat
     if packet.get("schema") != PACKET_SCHEMA:
         raise FreezeError("packet schema id drifted")
     if packet.get("status") != PACKET_STATUS:
-        raise FreezeError("packet must remain a Proposed decision register only")
+        raise FreezeError("packet must remain a Proposed partial decision resolution")
     if packet.get("maturity") != PACKET_MATURITY:
         raise FreezeError("packet must remain pre-audit and source-blocked")
     if packet.get("evaluated_base") != {
@@ -321,7 +345,7 @@ def _check_register(packet: dict[str, Any]) -> None:
         OPERATION_PROJECTION_SHA256,
     )
     _require_digest(
-        "source-blocking decision rows",
+        "decision rows",
         packet["decision_rows"],
         DECISION_ROWS_SHA256,
     )
@@ -332,12 +356,36 @@ def _check_register(packet: dict[str, Any]) -> None:
     actual = tuple((row["surface_id"], row["phase"]) for row in rows)
     if actual != EXPECTED_DECISION_PHASES:
         raise FreezeError("decision surface identity, phase, or order drifted")
+    accepted = tuple(row["surface_id"] for row in rows if row["accepted"])
+    if accepted != EXPECTED_ACCEPTED_DECISIONS:
+        raise FreezeError("accepted decision identity or count drifted")
     for row in rows:
+        if row["surface_id"] == "native_value":
+            if (
+                row["decision_status"] != "accepted"
+                or row["selected_option"] != EXPECTED_NATIVE_VALUE_OPTION
+                or not row["accepted"]
+                or row["source_blocking"]
+                or row["unresolved_decisions"]
+                or row["evidence_required"]
+            ):
+                raise FreezeError("native-value decision acceptance drifted")
+            resolution = row["resolution"]
+            dispositions = tuple(
+                (option["option_id"], option["disposition"])
+                for option in resolution["considered_options"]
+            )
+            if dispositions != EXPECTED_NATIVE_VALUE_OPTION_DISPOSITIONS:
+                raise FreezeError("native-value considered options drifted")
+            if resolution["selected_values"] != EXPECTED_NATIVE_VALUE_VALUES:
+                raise FreezeError("native-value exact values drifted")
+            continue
         if (
             row["decision_status"] != "unresolved"
             or row["selected_option"] is not None
             or row["accepted"]
             or not row["source_blocking"]
+            or row.get("resolution") is not None
         ):
             raise FreezeError(
                 f"decision {row['surface_id']} overclaims selection or acceptance"
@@ -505,6 +553,9 @@ def check(root: Path) -> dict[str, int]:
         "phases": len(packet["phase_order"]),
         "decision_rows": len(packet["decision_rows"]),
         "accepted_decisions": sum(row["accepted"] for row in packet["decision_rows"]),
+        "unresolved_decisions": sum(
+            row["decision_status"] == "unresolved" for row in packet["decision_rows"]
+        ),
         "operations": len(matrix["operations"]),
     }
 
@@ -527,8 +578,9 @@ def main(argv: list[str] | None = None) -> int:
         "artist shared-mechanics freeze check passed: "
         f"{counts['authority_bindings']} authority bindings, "
         f"{counts['phases']} dependency phases, "
-        f"{counts['decision_rows']} unresolved source-blocking decisions, "
-        f"{counts['accepted_decisions']} accepted decisions, "
+        f"{counts['decision_rows']} decision rows, "
+        f"{counts['accepted_decisions']} accepted and "
+        f"{counts['unresolved_decisions']} unresolved source-blocking decisions, "
         f"{counts['operations']} operations; source remains unauthorized"
     )
     return 0
