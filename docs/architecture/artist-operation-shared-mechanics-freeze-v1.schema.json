@@ -1,0 +1,476 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/artist-operation-shared-mechanics-freeze-v1.schema.json",
+  "title": "6529Stream artist operation shared-mechanics decision register v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "maturity",
+    "evaluated_base",
+    "authority_bindings",
+    "selected_shape",
+    "phase_order",
+    "fixed_invariants",
+    "operation_projection",
+    "decision_rows",
+    "gate_state",
+    "exclusions"
+  ],
+  "properties": {
+    "schema": {
+      "const": "6529stream.artist-operation-shared-mechanics-freeze.v1"
+    },
+    "status": {
+      "const": "PROPOSED_DECISION_REGISTER_ONLY"
+    },
+    "maturity": {
+      "const": "pre_audit_source_blocked"
+    },
+    "evaluated_base": {
+      "$ref": "#/$defs/evaluatedBase"
+    },
+    "authority_bindings": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/authorityBinding"
+      }
+    },
+    "selected_shape": {
+      "$ref": "#/$defs/selectedShape"
+    },
+    "phase_order": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/phase"
+      }
+    },
+    "fixed_invariants": {
+      "$ref": "#/$defs/fixedInvariants"
+    },
+    "operation_projection": {
+      "$ref": "#/$defs/operationProjection"
+    },
+    "decision_rows": {
+      "type": "array",
+      "minItems": 19,
+      "maxItems": 19,
+      "items": {
+        "$ref": "#/$defs/decisionRow"
+      }
+    },
+    "gate_state": {
+      "$ref": "#/$defs/gateState"
+    },
+    "exclusions": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "evaluatedBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "tree"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "tree": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "authorityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "selectedShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "option",
+        "scope",
+        "comprehensive_freeze_complete",
+        "typed_abi_only_authorizes_source",
+        "owner_packets_follow_shared_mechanics",
+        "selection_basis"
+      ],
+      "properties": {
+        "option": {
+          "const": "D"
+        },
+        "scope": {
+          "const": "shared_mechanics_decision_register_before_owner_packets"
+        },
+        "comprehensive_freeze_complete": {
+          "const": false
+        },
+        "typed_abi_only_authorizes_source": {
+          "const": false
+        },
+        "owner_packets_follow_shared_mechanics": {
+          "const": true
+        },
+        "selection_basis": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "phase_id",
+        "state",
+        "source_authorizing"
+      ],
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4
+        },
+        "phase_id": {
+          "enum": [
+            "shared_mechanics",
+            "owner_domain_packets",
+            "comprehensive_cross_surface_closure",
+            "independent_acceptance_before_source_reconsideration"
+          ]
+        },
+        "state": {
+          "enum": [
+            "decision_register_only",
+            "not_started",
+            "blocked_by_prior_phase"
+          ]
+        },
+        "source_authorizing": {
+          "const": false
+        }
+      }
+    },
+    "fixedInvariants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_role",
+        "archive_role",
+        "semantic_owner_count",
+        "one_authoritative_owner_per_domain",
+        "coordinator_role",
+        "coordinator_owns_semantic_authority",
+        "coordinator_owns_persistent_state",
+        "original_caller_required",
+        "snapshots_before_first_mutation",
+        "rollback_policy",
+        "entrypoint_count",
+        "required_entrypoint_mutability",
+        "fallback_present",
+        "receive_present",
+        "nonzero_msg_value_policy",
+        "typed_collaborator_call_value_wei",
+        "forced_balance_policy",
+        "generic_selector_or_calldata_route",
+        "delegatecall",
+        "callcode",
+        "proxy_or_upgrade",
+        "mutable_rebinding",
+        "operation_22_stop"
+      ],
+      "properties": {
+        "registry_role": {
+          "const": "slim_immutable_typed_directory_only"
+        },
+        "archive_role": {
+          "const": "append_only_versioned_evidence_only"
+        },
+        "semantic_owner_count": {
+          "const": 7
+        },
+        "one_authoritative_owner_per_domain": {
+          "const": true
+        },
+        "coordinator_role": {
+          "const": "stateless_non_authoritative_typed_atomic_coordinator"
+        },
+        "coordinator_owns_semantic_authority": {
+          "const": false
+        },
+        "coordinator_owns_persistent_state": {
+          "const": false
+        },
+        "original_caller_required": {
+          "const": true
+        },
+        "snapshots_before_first_mutation": {
+          "const": true
+        },
+        "rollback_policy": {
+          "const": "evm_revert_all_or_nothing"
+        },
+        "entrypoint_count": {
+          "const": 57
+        },
+        "required_entrypoint_mutability": {
+          "const": "external_nonpayable"
+        },
+        "fallback_present": {
+          "const": false
+        },
+        "receive_present": {
+          "const": false
+        },
+        "nonzero_msg_value_policy": {
+          "const": "abi_dispatch_rejects_before_any_effect"
+        },
+        "typed_collaborator_call_value_wei": {
+          "const": 0
+        },
+        "forced_balance_policy": {
+          "const": "ignored_never_forwarded"
+        },
+        "generic_selector_or_calldata_route": {
+          "const": false
+        },
+        "delegatecall": {
+          "const": false
+        },
+        "callcode": {
+          "const": false
+        },
+        "proxy_or_upgrade": {
+          "const": false
+        },
+        "mutable_rebinding": {
+          "const": false
+        },
+        "operation_22_stop": {
+          "const": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+        }
+      }
+    },
+    "operationProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "operation_count",
+        "identity_fields",
+        "registry_signature_status",
+        "coordinator_signature_status",
+        "registry_state_mutability",
+        "coordinator_state_mutability",
+        "typed_collaborator_call_value_wei",
+        "source_present",
+        "implementation_authorized",
+        "operation_22_effective_stop"
+      ],
+      "properties": {
+        "source": {
+          "const": "docs/architecture/artist-semantic-owner-matrix-v2.json#operations"
+        },
+        "operation_count": {
+          "const": 57
+        },
+        "identity_fields": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "enum": [
+              "operation_id",
+              "write",
+              "coordinator_recipe.recipe_id",
+              "coordinator_recipe.facade_entrypoint"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "registry_signature_status": {
+          "const": "unresolved_not_invented"
+        },
+        "coordinator_signature_status": {
+          "const": "unresolved_not_invented"
+        },
+        "registry_state_mutability": {
+          "const": "nonpayable"
+        },
+        "coordinator_state_mutability": {
+          "const": "nonpayable"
+        },
+        "typed_collaborator_call_value_wei": {
+          "const": 0
+        },
+        "source_present": {
+          "const": false
+        },
+        "implementation_authorized": {
+          "const": false
+        },
+        "operation_22_effective_stop": {
+          "const": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+        }
+      }
+    },
+    "decisionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "phase",
+        "fixed_facts",
+        "unresolved_decisions",
+        "evidence_required",
+        "decision_status",
+        "selected_option",
+        "accepted",
+        "source_blocking"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "phase": {
+          "enum": [
+            "shared_mechanics",
+            "owner_domain_packets",
+            "cross_surface_closure"
+          ]
+        },
+        "fixed_facts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "unresolved_decisions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "evidence_required": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "decision_status": {
+          "const": "unresolved"
+        },
+        "selected_option": {
+          "type": "null"
+        },
+        "accepted": {
+          "const": false
+        },
+        "source_blocking": {
+          "const": true
+        }
+      }
+    },
+    "gateState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interface_and_storage_freeze_complete",
+        "coordinator_interface_accepted",
+        "coordinator_source_present",
+        "semantic_owner_sources_present",
+        "stateless_validator_source_present",
+        "implementation_authorized",
+        "operation_count",
+        "accepted_decision_count",
+        "unresolved_decision_count",
+        "operation_22_stop_preserved"
+      ],
+      "properties": {
+        "interface_and_storage_freeze_complete": {
+          "const": false
+        },
+        "coordinator_interface_accepted": {
+          "const": false
+        },
+        "coordinator_source_present": {
+          "const": false
+        },
+        "semantic_owner_sources_present": {
+          "const": false
+        },
+        "stateless_validator_source_present": {
+          "const": false
+        },
+        "implementation_authorized": {
+          "const": false
+        },
+        "operation_count": {
+          "const": 57
+        },
+        "accepted_decision_count": {
+          "const": 0
+        },
+        "unresolved_decision_count": {
+          "const": 19
+        },
+        "operation_22_stop_preserved": {
+          "const": true
+        }
+      }
+    }
+  }
+}
