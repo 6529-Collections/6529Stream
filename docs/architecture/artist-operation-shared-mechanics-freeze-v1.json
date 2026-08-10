@@ -133,6 +133,15 @@
     ],
     "registry_signature_status": "unresolved_not_invented",
     "coordinator_signature_status": "unresolved_not_invented",
+    "ingress_mode": "immutable_registry_only_typed_facade",
+    "registry_original_caller_capture": "immediate_msg_sender",
+    "registry_original_caller_input_present": false,
+    "coordinator_first_common_argument": "address originalCaller",
+    "coordinator_ingress_authority": "immutable_registry",
+    "coordinator_zero_original_caller_policy": "reject_before_effects",
+    "owner_original_caller_forwarding": "same_address_unchanged",
+    "owner_mutation_authority": "immutable_coordinator",
+    "relayer_may_differ_from_signer": true,
     "registry_state_mutability": "nonpayable",
     "coordinator_state_mutability": "nonpayable",
     "typed_collaborator_call_value_wei": 0,
@@ -162,35 +171,183 @@
       "surface_id": "registry_ingress",
       "phase": "shared_mechanics",
       "fixed_facts": [
-        "Registry is a typed immutable directory and facade that forwards an authenticated original caller"
+        "Registry is the only typed nonpayable operation facade and captures the immediate submitter as originalCaller"
       ],
-      "unresolved_decisions": [
-        "direct-caller versus Registry-forwarded ingress and exact Registry-to-Coordinator authentication"
-      ],
-      "evidence_required": [
-        "typed ingress protocol and spoofing tests without generic routing"
-      ],
-      "decision_status": "unresolved",
-      "selected_option": null,
-      "accepted": false,
-      "source_blocking": true
+      "unresolved_decisions": [],
+      "evidence_required": [],
+      "decision_status": "accepted",
+      "selected_option": "immutable_registry_only_typed_facade_v1",
+      "accepted": true,
+      "source_blocking": false,
+      "resolution": {
+        "considered_options": [
+          {
+            "option_id": "direct_coordinator_ingress",
+            "disposition": "rejected",
+            "reason": "direct calls bypass the accepted Registry facade and make Registry authentication unable to distinguish an operation submitter"
+          },
+          {
+            "option_id": "dual_registry_and_direct_ingress",
+            "disposition": "rejected",
+            "reason": "two ingress authorities create unequal caller derivation and permit a direct path around the immutable Registry boundary"
+          },
+          {
+            "option_id": "caller_supplied_original_caller",
+            "disposition": "rejected",
+            "reason": "a facade parameter can be injected independently of the immediate Registry submitter and is not self-authenticating"
+          },
+          {
+            "option_id": "trusted_forwarder_or_meta_transaction_ingress",
+            "disposition": "rejected",
+            "reason": "no trusted-forwarder identity, envelope, replay protocol or authority is frozen in this architecture"
+          },
+          {
+            "option_id": "generic_selector_or_calldata_dispatch",
+            "disposition": "rejected",
+            "reason": "generic routing contradicts the typed facade and fixed 57-recipe architecture"
+          },
+          {
+            "option_id": "immutable_registry_only_typed_facade_v1",
+            "disposition": "accepted",
+            "reason": "one immutable typed Registry ingress gives every operation the same authenticated caller-capture and Coordinator-authority boundary"
+          }
+        ],
+        "selected_values": {
+          "registry_ingress_mode": "immutable_registry_only_typed_facade",
+          "registry_entrypoint_count": 57,
+          "registry_entrypoint_mutability": "external_nonpayable",
+          "registry_captures_immediate_msg_sender": true,
+          "registry_original_caller_input_present": false,
+          "coordinator_entrypoint_count": 57,
+          "coordinator_first_common_argument_type": "address",
+          "coordinator_first_common_argument_name": "originalCaller",
+          "coordinator_requires_immutable_registry_sender": true,
+          "coordinator_requires_nonzero_original_caller": true,
+          "direct_coordinator_ingress": false,
+          "dual_ingress": false,
+          "trusted_forwarder_ingress": false,
+          "generic_dispatch": false
+        },
+        "encoding_obligations": [
+          "each of the 57 Registry facade entries is typed, external and nonpayable and has no caller-supplied originalCaller field",
+          "each of the 57 matching typed Coordinator operation projections has the same first common argument address originalCaller while its selector, remaining parameters and returns remain unresolved",
+          "Registry and Coordinator expose no generic selector, calldata, fallback or receive surface and authorize no direct or alternate ingress path"
+        ],
+        "call_obligations": [
+          "Registry captures its immediate msg.sender and forwards that same address as originalCaller to the one immutably bound Coordinator",
+          "Coordinator accepts every typed operation only from its immutable Registry and rejects address zero originalCaller before snapshots, calls or effects",
+          "direct callers, a fake Registry, a substituted Registry authority and caller injection never reach an owner, provider, validator or Archive call"
+        ],
+        "error_obligations": [
+          "direct or fake-Registry Coordinator ingress rejects before any state, event, evidence or collaborator effect without selecting an exact custom-error ABI in this packet",
+          "zero originalCaller rejects before any state, event, evidence or collaborator effect without selecting an exact custom-error ABI in this packet, while caller-supplied or altered Registry forwarding fails exact source and trace acceptance",
+          "unknown selectors, generic calldata and alternate ingress have no effect and remain rejected by the absent fallback, receive and generic-routing surfaces"
+        ],
+        "test_obligations": [
+          "for every one of 57 operation projections prove Registry-only typed nonpayable ingress, immediate msg.sender capture, no originalCaller input and the same first common Coordinator address originalCaller field",
+          "for every one of 57 operation projections prove direct Coordinator, fake Registry, zero caller and caller-injection attempts reject before any owner, provider, validator, Archive, state, event or evidence effect",
+          "prove caller-supplied, dual, trusted-forwarder, unknown-selector and generic-calldata routes do not exist and have no effect",
+          "prove immutable Registry authority substitution rejects at runtime and any forwarded-caller substitution fails exact source and forwarding-trace acceptance rather than being normalized"
+        ],
+        "evidence": [
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+          "docs/adr/0023-modular-artist-authority-domain-ownership.md#slim-registry",
+          "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+          "docs/architecture/artist-semantic-owner-matrix-v2.json#operations"
+        ]
+      }
     },
     {
       "surface_id": "original_caller",
       "phase": "shared_mechanics",
       "fixed_facts": [
-        "every recipe and every mutating owner authenticates the exact original caller"
+        "originalCaller is the immediate Registry submitter and is passed unchanged through every recipe to every mutating owner"
       ],
-      "unresolved_decisions": [
-        "derivation, forwarding field, anti-spoof rule, and relation to msg.sender"
-      ],
-      "evidence_required": [
-        "canonical caller envelope and direct, relayed, and spoofed-caller hostile cases"
-      ],
-      "decision_status": "unresolved",
-      "selected_option": null,
-      "accepted": false,
-      "source_blocking": true
+      "unresolved_decisions": [],
+      "evidence_required": [],
+      "decision_status": "accepted",
+      "selected_option": "immediate_registry_sender_forwarded_unchanged_v1",
+      "accepted": true,
+      "source_blocking": false,
+      "resolution": {
+        "considered_options": [
+          {
+            "option_id": "tx_origin_derived",
+            "disposition": "rejected",
+            "reason": "tx.origin is not the immediate Registry submitter and would collapse contract-wallet and relay boundaries"
+          },
+          {
+            "option_id": "signer_substitution",
+            "disposition": "rejected",
+            "reason": "signature authority is operation-specific and a valid relayer can differ from the signer"
+          },
+          {
+            "option_id": "role_or_governance_actor_substitution",
+            "disposition": "rejected",
+            "reason": "role and governance authority are separately snapshotted semantics and do not redefine the transaction submitter"
+          },
+          {
+            "option_id": "provider_owner_or_coordinator_substitution",
+            "disposition": "rejected",
+            "reason": "collaborators and internal protocol components cannot replace the authenticated external submitter identity"
+          },
+          {
+            "option_id": "caller_supplied_or_trusted_forwarder_claim",
+            "disposition": "rejected",
+            "reason": "an untrusted field or unfrozen forwarding protocol cannot authenticate an original caller"
+          },
+          {
+            "option_id": "immediate_registry_sender_forwarded_unchanged_v1",
+            "disposition": "accepted",
+            "reason": "capturing Registry msg.sender once and preserving it unchanged separates submitter identity from every other authority surface"
+          }
+        ],
+        "selected_values": {
+          "definition": "immediate_registry_submitter",
+          "registry_capture_expression": "msg.sender",
+          "coordinator_transport_type": "address",
+          "coordinator_transport_position": "first_common_argument",
+          "coordinator_zero_original_caller_allowed": false,
+          "owner_transport": "unchanged",
+          "owner_requires_immutable_coordinator_sender": true,
+          "tx_origin_authoritative": false,
+          "signer_substitutes_original_caller": false,
+          "role_or_governance_actor_substitutes_original_caller": false,
+          "provider_owner_or_coordinator_substitutes_original_caller": false,
+          "relayer_may_differ_from_signer": true
+        },
+        "encoding_obligations": [
+          "originalCaller is one bare address and the first common argument in each of 57 typed Coordinator operation projections",
+          "Registry operation calldata contains no caller-asserted originalCaller and Registry derives it only from the immediate msg.sender",
+          "exact owner mutation parameter order and context packing remain unresolved, but every eventual mutating owner call must carry the same originalCaller address unchanged"
+        ],
+        "call_obligations": [
+          "Coordinator verifies immutable Registry msg.sender and nonzero originalCaller before snapshots and forwards that address unchanged to every mutating owner in the recipe",
+          "each mutating owner verifies its immutable Coordinator msg.sender before authenticating the unchanged originalCaller against its own exact authority rules",
+          "originalCaller is never replaced by tx.origin, a signer, role holder, governance actor, provider, owner, Coordinator or trusted-forwarder claim",
+          "a relayer may be originalCaller while a distinct signer satisfies an independently frozen signature rule"
+        ],
+        "error_obligations": [
+          "zero originalCaller rejects before any state, event, evidence or downstream effect without selecting an exact custom-error ABI in this packet, while altered or injected caller derivation fails exact source, ABI and trace acceptance",
+          "Registry or Coordinator authority substitution rejects before any owner mutation and owner calls from any address other than the immutable Coordinator reject before owner effects",
+          "tx.origin, signer, role, governance, provider, owner or Coordinator identity mismatch is never normalized into originalCaller"
+        ],
+        "test_obligations": [
+          "for every one of 57 operation projections assert Registry msg.sender is the sole derivation and the identical nonzero address reaches every mutating owner",
+          "prove direct and fake-Registry calls, zero caller and immutable-authority substitution reject with no effects and prove caller injection or altered owner forwarding fails exact source, ABI and trace acceptance",
+          "prove tx.origin mismatch does not change originalCaller and prove a valid relayer distinct from the signer remains the authenticated originalCaller",
+          "prove signer, role, governance, provider, owner and Coordinator identities cannot substitute for originalCaller",
+          "prove unknown selectors and generic calldata cannot manufacture or forward an originalCaller and have no effect"
+        ],
+        "evidence": [
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+          "docs/adr/0023-modular-artist-authority-domain-ownership.md#slim-registry",
+          "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+          "docs/architecture/artist-semantic-owner-matrix-v2.json#operations"
+        ]
+      }
     },
     {
       "surface_id": "owner_snapshots",
@@ -539,8 +696,8 @@
     "stateless_validator_source_present": false,
     "implementation_authorized": false,
     "operation_count": 57,
-    "accepted_decision_count": 1,
-    "unresolved_decision_count": 18,
+    "accepted_decision_count": 3,
+    "unresolved_decision_count": 16,
     "operation_22_stop_preserved": true
   },
   "exclusions": [
