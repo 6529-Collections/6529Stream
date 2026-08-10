@@ -315,33 +315,45 @@ class CanonicalSnapshotTests(unittest.TestCase):
                         plan_path,
                     )
 
-    def test_v2_identity_drift_is_rejected_before_execution(self) -> None:
-        expected = plan_document(v2=True)
-        mutated = copy.deepcopy(expected)
-        mutated["candidate"]["candidate_identity_sha256"] = (
-            "sha256:" + ("99" * 32)
+    def test_v2_identity_fields_are_validated_before_execution(self) -> None:
+        cases = (
+            (
+                "candidate_identity_sha256",
+                "sha256:" + ("zz" * 32),
+                "candidate.candidate_identity_sha256 must be a lowercase "
+                "sha256: digest",
+            ),
+            (
+                "candidate_identity_keccak256",
+                "0x" + ("zz" * 32),
+                "candidate.candidate_identity_keccak256 must be a 32-byte "
+                "0x-prefixed hash",
+            ),
         )
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            plan_path = root / "tmp/plan.json"
-            plan_path.parent.mkdir(parents=True)
-            plan_path.write_bytes(
-                executor.materializer.json_text(mutated).encode("utf-8")
-            )
-            with mock.patch.object(
-                executor.materializer,
-                "materialize_deployment_plan",
-                return_value=expected,
-            ):
-                with self.assertRaisesRegex(
-                    executor.CanonicalExecutionError,
-                    "stale or mutated",
+        for field, malformed, expected_error in cases:
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                plan = plan_document(v2=True)
+                plan["candidate"][field] = malformed
+                root = Path(directory)
+                plan_path = root / "tmp/plan.json"
+                plan_path.parent.mkdir(parents=True)
+                plan_path.write_bytes(
+                    executor.materializer.json_text(plan).encode("utf-8")
+                )
+                with mock.patch.object(
+                    executor.materializer,
+                    "materialize_deployment_plan",
+                    return_value=plan,
                 ):
-                    executor.canonical_plan_snapshot(
-                        root,
-                        root / "candidate.json",
-                        plan_path,
-                    )
+                    with self.assertRaises(
+                        executor.CanonicalExecutionError
+                    ) as raised:
+                        executor.canonical_plan_snapshot(
+                            root,
+                            root / "candidate.json",
+                            plan_path,
+                        )
+                self.assertEqual(str(raised.exception), expected_error)
 
 
 class CandidateAddressBindingTests(unittest.TestCase):
