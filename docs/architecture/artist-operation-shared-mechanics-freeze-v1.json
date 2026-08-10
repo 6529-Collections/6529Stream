@@ -1,10 +1,10 @@
 {
   "schema": "6529stream.artist-operation-shared-mechanics-freeze.v1",
-  "status": "PROPOSED_DECISION_REGISTER_ONLY",
+  "status": "PROPOSED_PARTIAL_DECISION_RESOLUTION",
   "maturity": "pre_audit_source_blocked",
   "evaluated_base": {
-    "commit": "eb274128e0e17f904890294eca9ea99dc23f78e5",
-    "tree": "d03d62b9be2049b1b7f5b736d658f1c38f2e3dae"
+    "commit": "eef6a4cc5070186cc6517cca90bd9ffe1f74ea06",
+    "tree": "1a56c7b27ed304f96f551d1bebd0aa93a4ee164e"
   },
   "authority_bindings": [
     {
@@ -75,7 +75,7 @@
     {
       "index": 1,
       "phase_id": "shared_mechanics",
-      "state": "decision_register_only",
+      "state": "partial_decision_resolution",
       "source_authorizing": false
     },
     {
@@ -436,16 +436,82 @@
       "fixed_facts": [
         "all 57 Registry and Coordinator entrypoints are external nonpayable with no fallback or receive and all typed downstream calls carry zero value"
       ],
-      "unresolved_decisions": [
-        "row-by-row ABI realization and hostile proof of rejection, zero forwarding, and forced-balance non-influence"
-      ],
-      "evidence_required": [
-        "ABI mutability projection and payable, fallback, receive, value-forwarding, and forced-balance hostile tests"
-      ],
-      "decision_status": "unresolved",
-      "selected_option": null,
-      "accepted": false,
-      "source_blocking": true
+      "unresolved_decisions": [],
+      "evidence_required": [],
+      "decision_status": "accepted",
+      "selected_option": "nonpayable_zero_value_end_to_end_v1",
+      "accepted": true,
+      "source_blocking": false,
+      "resolution": {
+        "considered_options": [
+          {
+            "option_id": "payable_passthrough_or_custody",
+            "disposition": "rejected",
+            "reason": "no artist recipe requires payment or custody and value forwarding would create an unauthorized asset path"
+          },
+          {
+            "option_id": "payable_with_in_body_zero_value_check",
+            "disposition": "rejected",
+            "reason": "an in-body check does not satisfy the frozen ABI-dispatch rejection before any function-body effect"
+          },
+          {
+            "option_id": "nonpayable_with_explicit_fallback_or_receive_revert",
+            "disposition": "rejected",
+            "reason": "the accepted architecture requires fallback and receive to be absent rather than executable rejection surfaces"
+          },
+          {
+            "option_id": "nonpayable_with_redundant_zero_value_commitment_fields",
+            "disposition": "rejected",
+            "reason": "native value is invariantly zero, so redundant commitment fields add cross-surface encoding ambiguity without authenticating new information"
+          },
+          {
+            "option_id": "nonpayable_zero_value_end_to_end_v1",
+            "disposition": "accepted",
+            "reason": "it exactly realizes the accepted nonpayable, no-fallback, no-receive, zero-forwarding and forced-balance-neutral policy"
+          }
+        ],
+        "selected_values": {
+          "registry_entrypoint_count": 57,
+          "coordinator_entrypoint_count": 57,
+          "registry_entrypoint_mutability": "external_nonpayable",
+          "coordinator_entrypoint_mutability": "external_nonpayable",
+          "fallback_present": false,
+          "receive_present": false,
+          "typed_owner_call_value_wei": 0,
+          "typed_provider_call_value_wei": 0,
+          "typed_validator_call_value_wei": 0,
+          "archive_call_value_wei": 0,
+          "forced_balance_forwarded": false,
+          "forced_balance_recoverable_by_protocol": false
+        },
+        "encoding_obligations": [
+          "each of the 57 Registry facade ABI entries and 57 matching Coordinator ABI entries encodes stateMutability as nonpayable",
+          "native value is transaction-envelope state and is absent from operation calldata, recipe commitments, replay preimages, Archive evidence and the composite manifest",
+          "the Registry and Coordinator ABIs contain neither fallback nor receive entries"
+        ],
+        "call_obligations": [
+          "every typed owner, provider, validator and Archive call executes with exactly zero wei",
+          "forced native balance is never read as operation input and is never forwarded, withdrawn, refunded or incorporated into a protocol decision"
+        ],
+        "error_obligations": [
+          "nonzero value sent to a recognized operation selector reverts in the Solidity nonpayable ABI dispatcher before function-body execution and commits no protocol custom-error selector",
+          "empty calldata or an unknown selector reverts because fallback and receive are absent and commits no protocol custom-error selector",
+          "downstream nonzero-call-value drift is forbidden rather than normalized or refunded"
+        ],
+        "test_obligations": [
+          "for every one of 57 operation pairs assert both Registry and Coordinator ABI stateMutability equals nonpayable",
+          "for every one of 57 operation pairs send nonzero value and prove rejection before any owner, provider, validator, Archive, state, event or evidence effect",
+          "prove empty calldata and unknown selectors reject value because fallback and receive are absent",
+          "instrument each typed collaborator category and prove exact zero call value",
+          "force native balance into Registry and Coordinator and prove representative and maximum-call recipes neither read nor forward nor recover it"
+        ],
+        "evidence": [
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+          "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+          "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+          "docs/architecture/artist-semantic-owner-matrix-v2.json#operations"
+        ]
+      }
     },
     {
       "surface_id": "gas_and_call_discipline",
@@ -473,8 +539,8 @@
     "stateless_validator_source_present": false,
     "implementation_authorized": false,
     "operation_count": 57,
-    "accepted_decision_count": 0,
-    "unresolved_decision_count": 19,
+    "accepted_decision_count": 1,
+    "unresolved_decision_count": 18,
     "operation_22_stop_preserved": true
   },
   "exclusions": [

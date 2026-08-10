@@ -65,6 +65,12 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
     def _write_packet(self, packet: dict[str, Any]) -> None:
         self._write(CHECKER.PACKET_PATH, packet)
 
+    @staticmethod
+    def _native_row(packet: dict[str, Any]) -> dict[str, Any]:
+        return next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+
     def _assert_rejected(self, expected: str | None = None) -> None:
         if expected is None:
             with self.assertRaises(CHECKER.FreezeError):
@@ -73,19 +79,81 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             with self.assertRaisesRegex(CHECKER.FreezeError, expected):
                 CHECKER.check(self.root)
 
+    def _check_with_rebound_authority(
+        self,
+        *,
+        authority_id: str,
+        relative: Path,
+        updated_text: str,
+        expected_error: str | None,
+        evidence_replacement: tuple[str, str] | None = None,
+    ) -> dict[str, int] | None:
+        target = self.root / relative
+        target.write_text(updated_text, encoding="utf-8")
+        rebound_digest = hashlib.sha256(target.read_bytes()).hexdigest()
+        packet = self._packet()
+        rebound_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
+        if evidence_replacement is not None:
+            previous_reference, rebound_reference = evidence_replacement
+            evidence = self._native_row(packet)["resolution"]["evidence"]
+            evidence[evidence.index(previous_reference)] = rebound_reference
+            rebound_obligations = {
+                **CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS,
+                "evidence": tuple(
+                    rebound_reference if value == previous_reference else value
+                    for value in CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS[
+                        "evidence"
+                    ]
+                ),
+            }
+        binding = next(
+            row
+            for row in packet["authority_bindings"]
+            if row["id"] == authority_id
+        )
+        binding["sha256"] = rebound_digest
+        self._write_packet(packet)
+
+        rebound_authorities = tuple(
+            (
+                bound_id,
+                path,
+                rebound_digest if bound_id == authority_id else digest,
+            )
+            for bound_id, path, digest in CHECKER.EXPECTED_AUTHORITY_BINDINGS
+        )
+        original_authorities = CHECKER.EXPECTED_AUTHORITY_BINDINGS
+        original_decision_digest = CHECKER.DECISION_ROWS_SHA256
+        original_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
+        try:
+            CHECKER.EXPECTED_AUTHORITY_BINDINGS = rebound_authorities
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = rebound_obligations
+            if expected_error is not None:
+                self._assert_rejected(expected_error)
+                return None
+            return CHECKER.check(self.root)
+        finally:
+            CHECKER.EXPECTED_AUTHORITY_BINDINGS = original_authorities
+            CHECKER.DECISION_ROWS_SHA256 = original_decision_digest
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = original_obligations
+
     def test_baseline_is_exact(self) -> None:
         counts = CHECKER.check(self.root)
         self.assertEqual(counts, {
             "authority_bindings": 10,
             "phases": 4,
             "decision_rows": 19,
-            "accepted_decisions": 0,
+            "accepted_decisions": 1,
+            "unresolved_decisions": 18,
             "operations": 57,
         })
 
     def test_safety_posture_is_independently_literal(self) -> None:
         packet = self._packet()
-        self.assertEqual(packet["status"], "PROPOSED_DECISION_REGISTER_ONLY")
+        self.assertEqual(packet["status"], "PROPOSED_PARTIAL_DECISION_RESOLUTION")
         self.assertEqual(packet["maturity"], "pre_audit_source_blocked")
         self.assertFalse(packet["selected_shape"]["comprehensive_freeze_complete"])
         self.assertFalse(packet["selected_shape"]["typed_abi_only_authorizes_source"])
@@ -93,8 +161,28 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         self.assertFalse(packet["gate_state"]["coordinator_interface_accepted"])
         self.assertFalse(packet["gate_state"]["coordinator_source_present"])
         self.assertFalse(packet["gate_state"]["implementation_authorized"])
-        self.assertTrue(all(not row["accepted"] for row in packet["decision_rows"]))
-        self.assertTrue(all(row["source_blocking"] for row in packet["decision_rows"]))
+        self.assertEqual(
+            packet["phase_order"][0]["state"], "partial_decision_resolution"
+        )
+        self.assertFalse(packet["operation_projection"]["source_present"])
+        self.assertFalse(packet["operation_projection"]["implementation_authorized"])
+        self.assertEqual(packet["gate_state"]["accepted_decision_count"], 1)
+        self.assertEqual(packet["gate_state"]["unresolved_decision_count"], 18)
+        accepted = [row for row in packet["decision_rows"] if row["accepted"]]
+        self.assertEqual([row["surface_id"] for row in accepted], ["native_value"])
+        self.assertFalse(accepted[0]["source_blocking"])
+        unresolved = [row for row in packet["decision_rows"] if not row["accepted"]]
+        self.assertEqual(len(unresolved), 18)
+        self.assertTrue(all(row["source_blocking"] for row in unresolved))
+        matrix = self._read(CHECKER.MATRIX_PATH)
+        self.assertEqual(len(matrix["operations"]), 57)
+        self.assertTrue(
+            all(
+                not operation["source_requirements"]["source_present"]
+                and not operation["source_requirements"]["implementation_authorized"]
+                for operation in matrix["operations"]
+            )
+        )
 
     def test_duplicate_json_member_is_rejected(self) -> None:
         path = self.root / CHECKER.PACKET_PATH
@@ -125,7 +213,7 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
 
     def test_status_or_maturity_promotion_is_rejected(self) -> None:
         for field, value, expected in (
-            ("status", "ACCEPTED", "Proposed decision register"),
+            ("status", "ACCEPTED", "Proposed partial decision resolution"),
             ("maturity", "production_ready", "pre-audit and source-blocked"),
         ):
             with self.subTest(field=field):
@@ -153,6 +241,293 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         packet["authority_bindings"][0]["sha256"] = "0" * 64
         self._write_packet(packet)
         self._assert_rejected("authority binding identity, order, or digest drifted")
+
+    def test_evidence_references_and_duplicate_heading_slugs_resolve(self) -> None:
+        packet = self._packet()
+        for reference in self._native_row(packet)["resolution"]["evidence"]:
+            with self.subTest(reference=reference):
+                CHECKER._resolve_evidence_reference(self.root, reference)
+
+        duplicate = self.root / "docs/duplicate-headings.md"
+        duplicate.write_text(
+            "# Repeated Heading\n\n## Repeated Heading\n",
+            encoding="utf-8",
+        )
+        CHECKER._resolve_evidence_reference(
+            self.root,
+            "docs/duplicate-headings.md#repeated-heading",
+        )
+        CHECKER._resolve_evidence_reference(
+            self.root,
+            "docs/duplicate-headings.md#repeated-heading-1",
+        )
+
+    def test_github_heading_slug_preserves_repeated_and_edge_hyphens(self) -> None:
+        cases = (
+            ("Repeated--Hyphens", "repeated--hyphens"),
+            ("-Leading", "-leading"),
+            ("Trailing-", "trailing-"),
+            ("heading with a - dash", "heading-with-a---dash"),
+            ("A  B", "a--b"),
+            ("A\tB", "ab"),
+        )
+        for heading, expected in cases:
+            with self.subTest(heading=heading):
+                self.assertEqual(CHECKER._github_heading_slug(heading), expected)
+
+    def test_heading_anchor_suffixes_use_one_global_collision_set(self) -> None:
+        relative = Path("docs/heading-collisions.md")
+        target = self.root / relative
+        target.write_text("# Foo\n# Foo-1\n# Foo\n", encoding="utf-8")
+        self.assertEqual(
+            CHECKER._markdown_heading_anchors(target.read_text(encoding="utf-8")),
+            {"foo", "foo-1", "foo-2"},
+        )
+        for anchor in ("foo", "foo-1", "foo-2"):
+            with self.subTest(anchor=anchor):
+                CHECKER._resolve_evidence_reference(
+                    self.root,
+                    f"{relative.as_posix()}#{anchor}",
+                )
+
+    def test_markdown_heading_parser_excludes_fences_and_html_comments(self) -> None:
+        relative = Path("docs/heading-parser-hostiles.md")
+        target = self.root / relative
+        target.write_text(
+            "\n".join(
+                (
+                    "# Real Before",
+                    "   ````python",
+                    "# Backtick Phantom",
+                    "```",
+                    "## Short Close Phantom",
+                    "   ````",
+                    "~~~ text",
+                    "# Tilde Phantom",
+                    "```",
+                    "## Wrong Marker Phantom",
+                    "~~~~",
+                    "<!-- # Single Comment Phantom -->",
+                    "<!--",
+                    "## Multiline Comment Phantom",
+                    "-->## Close Line Phantom",
+                    "   ### Real After",
+                    "```markdown <!-- comment token",
+                    "# Fence Info Phantom",
+                    "```",
+                    "## Real After Fence Info",
+                    "# Repeated Real",
+                    "# Repeated Real",
+                    "",
+                )
+            ),
+            encoding="utf-8",
+        )
+        for anchor in (
+            "real-before",
+            "real-after",
+            "real-after-fence-info",
+            "repeated-real",
+            "repeated-real-1",
+        ):
+            with self.subTest(anchor=anchor, expected="present"):
+                CHECKER._resolve_evidence_reference(
+                    self.root,
+                    f"{relative.as_posix()}#{anchor}",
+                )
+        for anchor in (
+            "backtick-phantom",
+            "short-close-phantom",
+            "tilde-phantom",
+            "wrong-marker-phantom",
+            "single-comment-phantom",
+            "multiline-comment-phantom",
+            "close-line-phantom",
+            "fence-info-phantom",
+        ):
+            with self.subTest(anchor=anchor, expected="absent"):
+                with self.assertRaisesRegex(
+                    CHECKER.FreezeError,
+                    "evidence Markdown heading is missing",
+                ):
+                    CHECKER._resolve_evidence_reference(
+                        self.root,
+                        f"{relative.as_posix()}#{anchor}",
+                    )
+
+    def test_evidence_reference_shape_and_target_fail_closed(self) -> None:
+        unsupported = self.root / "docs/evidence.txt"
+        unsupported.write_text("unsupported\n", encoding="utf-8")
+        unreadable = self.root / "docs/unreadable.md"
+        unreadable.write_bytes(b"\xff")
+        cases = (
+            ("docs/evidence.md", "malformed evidence reference"),
+            ("docs/evidence.md#heading#extra", "malformed evidence reference"),
+            ("/docs/evidence.md#heading", "repository-relative"),
+            ("C:/docs/evidence.md#heading", "repository-relative"),
+            ("docs/../evidence.md#heading", "repository-relative"),
+            ("docs/missing.md#heading", "evidence target is missing"),
+            ("docs/evidence.txt#heading", "unsupported evidence target type"),
+            ("docs/unreadable.md#heading", "evidence Markdown target is unreadable"),
+        )
+        for reference, expected in cases:
+            with self.subTest(reference=reference):
+                with self.assertRaisesRegex(CHECKER.FreezeError, expected):
+                    CHECKER._resolve_evidence_reference(self.root, reference)
+
+    def test_evidence_json_top_level_key_must_exist(self) -> None:
+        with self.assertRaisesRegex(
+            CHECKER.FreezeError,
+            "evidence JSON top-level key is missing",
+        ):
+            CHECKER._resolve_evidence_reference(
+                self.root,
+                "docs/architecture/artist-semantic-owner-matrix-v2.json#missing_key",
+            )
+
+    def test_evidence_heading_rename_survives_all_digest_rebinding(self) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(
+                "## Frozen Facts That Source Must Preserve",
+                "## Renamed Facts That Source Must Preserve",
+                1,
+            ),
+            expected_error="evidence Markdown heading is missing",
+        )
+
+    def test_fenced_phantom_anchor_survives_all_digest_rebinding(self) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        heading = "## Frozen Facts That Source Must Preserve"
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(heading, f"```markdown\n{heading}\n```", 1),
+            expected_error="evidence Markdown heading is missing",
+        )
+
+    def test_comment_close_line_phantom_survives_all_digest_rebinding(self) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        heading = "## Frozen Facts That Source Must Preserve"
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(heading, f"<!--\n-->{heading}", 1),
+            expected_error="evidence Markdown heading is missing",
+        )
+
+    def test_fence_info_comment_token_preserves_real_rebound_heading(self) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        heading = "## Frozen Facts That Source Must Preserve"
+        counts = self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(
+                heading,
+                f"```markdown <!-- comment token\n# Fenced Info Phantom\n```\n{heading}",
+                1,
+            ),
+            expected_error=None,
+        )
+        self.assertIsNotNone(counts)
+        self.assertEqual(counts["accepted_decisions"], 1)
+        with self.assertRaisesRegex(
+            CHECKER.FreezeError,
+            "evidence Markdown heading is missing",
+        ):
+            CHECKER._resolve_evidence_reference(
+                self.root,
+                f"{relative.as_posix()}#fenced-info-phantom",
+            )
+
+    def test_collapsed_hyphen_anchor_cannot_pass_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## - Frozen--Facts -", 1),
+            expected_error="evidence Markdown heading is missing",
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#frozen-facts",
+            ),
+        )
+
+    def test_repeated_and_edge_hyphen_anchor_resolves_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        counts = self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## - Frozen--Facts -", 1),
+            expected_error=None,
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#--frozen--facts--",
+            ),
+        )
+        self.assertIsNotNone(counts)
+        self.assertEqual(counts["accepted_decisions"], 1)
+
+    def test_collapsed_space_anchor_cannot_pass_after_all_digest_rebinding(
+        self,
+    ) -> None:
+        relative = Path(
+            "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md"
+        )
+        target = self.root / relative
+        text = target.read_text(encoding="utf-8")
+        original_heading = "## Frozen Facts That Source Must Preserve"
+        original_reference = (
+            f"{relative.as_posix()}#frozen-facts-that-source-must-preserve"
+        )
+        self._check_with_rebound_authority(
+            authority_id="coordinator_source_gate",
+            relative=relative,
+            updated_text=text.replace(original_heading, "## Frozen  Facts", 1),
+            expected_error="evidence Markdown heading is missing",
+            evidence_replacement=(
+                original_reference,
+                f"{relative.as_posix()}#frozen-facts",
+            ),
+        )
 
     def test_selected_shape_cannot_become_typed_abi_only(self) -> None:
         packet = self._packet()
@@ -214,7 +589,254 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             packet["decision_rows"][0],
         )
         self._write_packet(packet)
-        self._assert_rejected("source-blocking decision rows drifted")
+        self._assert_rejected("decision rows drifted")
+
+    def test_native_value_exact_values_reach_independent_guard(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["resolution"]["selected_values"][
+            "registry_entrypoint_mutability"
+        ] = "external_payable"
+        row["resolution"]["selected_values"]["typed_owner_call_value_wei"] = 1
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("native-value exact values drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_native_value_obligations_and_evidence_reach_independent_guards(
+        self,
+    ) -> None:
+        for field in CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS:
+            for mutation in ("delete", "replace"):
+                with self.subTest(field=field, mutation=mutation):
+                    packet = self._packet()
+                    values = self._native_row(packet)["resolution"][field]
+                    if mutation == "delete":
+                        values.pop()
+                    else:
+                        values[0] = "same-cardinality hostile replacement"
+                    self._write_packet(packet)
+
+                    original_digest = CHECKER.DECISION_ROWS_SHA256
+                    try:
+                        CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                            packet["decision_rows"]
+                        )
+                        self._assert_rejected(f"native-value {field} drifted")
+                    finally:
+                        CHECKER.DECISION_ROWS_SHA256 = original_digest
+                        shutil.copy2(
+                            REPO_ROOT / CHECKER.PACKET_PATH,
+                            self.root / CHECKER.PACKET_PATH,
+                        )
+
+    def test_native_value_considered_options_reach_independent_guard(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["resolution"]["considered_options"][0][
+            "option_id"
+        ] = "renamed_payable_passthrough_or_custody"
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("native-value considered options drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_accepted_options_cannot_be_zero_or_multiple(self) -> None:
+        for mutation in ("zero", "multiple"):
+            with self.subTest(mutation=mutation):
+                packet = self._packet()
+                options = self._native_row(packet)["resolution"]["considered_options"]
+                if mutation == "zero":
+                    options[-1]["disposition"] = "rejected"
+                else:
+                    options[0]["disposition"] = "accepted"
+                self._write_packet(packet)
+                self._assert_rejected("schema violation")
+
+                schema = self._read(CHECKER.SCHEMA_PATH)
+                considered = schema["$defs"]["decisionResolution"]["properties"][
+                    "considered_options"
+                ]
+                considered["minContains"] = 0 if mutation == "zero" else 1
+                considered["maxContains"] = 1 if mutation == "zero" else 2
+                self._write(CHECKER.SCHEMA_PATH, schema)
+
+                original_schema_digest = CHECKER.SCHEMA_SHA256
+                original_decision_digest = CHECKER.DECISION_ROWS_SHA256
+                try:
+                    CHECKER.SCHEMA_SHA256 = hashlib.sha256(
+                        (self.root / CHECKER.SCHEMA_PATH).read_bytes()
+                    ).hexdigest()
+                    CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                        packet["decision_rows"]
+                    )
+                    self._assert_rejected("must have exactly one accepted option")
+                finally:
+                    CHECKER.SCHEMA_SHA256 = original_schema_digest
+                    CHECKER.DECISION_ROWS_SHA256 = original_decision_digest
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.PACKET_PATH,
+                        self.root / CHECKER.PACKET_PATH,
+                    )
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.SCHEMA_PATH,
+                        self.root / CHECKER.SCHEMA_PATH,
+                    )
+
+    def test_selected_option_must_match_sole_accepted_option(self) -> None:
+        packet = self._packet()
+        row = self._native_row(packet)
+        row["selected_option"] = row["resolution"]["considered_options"][0][
+            "option_id"
+        ]
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("selected option disagrees with disposition")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_accepted_boolean_reaches_independent_status_guard(self) -> None:
+        packet = self._packet()
+        self._native_row(packet)["accepted"] = False
+        self._write_packet(packet)
+
+        schema = self._read(CHECKER.SCHEMA_PATH)
+        schema["$defs"]["decisionRow"]["allOf"][1]["then"]["properties"][
+            "accepted"
+        ]["const"] = False
+        self._write(CHECKER.SCHEMA_PATH, schema)
+
+        original_schema_digest = CHECKER.SCHEMA_SHA256
+        original_decision_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.SCHEMA_SHA256 = hashlib.sha256(
+                (self.root / CHECKER.SCHEMA_PATH).read_bytes()
+            ).hexdigest()
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("accepted boolean disagrees with status")
+        finally:
+            CHECKER.SCHEMA_SHA256 = original_schema_digest
+            CHECKER.DECISION_ROWS_SHA256 = original_decision_digest
+
+    def test_gate_count_drift_reaches_row_derived_guard(self) -> None:
+        packet = self._packet()
+        packet["gate_state"]["accepted_decision_count"] = 2
+        packet["gate_state"]["unresolved_decision_count"] = 17
+        self._write_packet(packet)
+
+        schema = self._read(CHECKER.SCHEMA_PATH)
+        gate_properties = schema["$defs"]["gateState"]["properties"]
+        gate_properties["accepted_decision_count"]["const"] = 2
+        gate_properties["unresolved_decision_count"]["const"] = 17
+        self._write(CHECKER.SCHEMA_PATH, schema)
+
+        original_schema_digest = CHECKER.SCHEMA_SHA256
+        original_gate_digest = CHECKER.GATE_STATE_SHA256
+        try:
+            CHECKER.SCHEMA_SHA256 = hashlib.sha256(
+                (self.root / CHECKER.SCHEMA_PATH).read_bytes()
+            ).hexdigest()
+            CHECKER.GATE_STATE_SHA256 = CHECKER._canonical_digest(packet["gate_state"])
+            self._assert_rejected("gate decision counts disagree with decision rows")
+        finally:
+            CHECKER.SCHEMA_SHA256 = original_schema_digest
+            CHECKER.GATE_STATE_SHA256 = original_gate_digest
+
+    def test_accepted_decision_requires_resolution(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        del row["resolution"]
+        self._write_packet(packet)
+        self._assert_rejected("schema violation.*resolution.*required")
+
+    def test_unresolved_decision_cannot_smuggle_resolution(self) -> None:
+        packet = self._packet()
+        native = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        packet["decision_rows"][0]["resolution"] = native["resolution"]
+        self._write_packet(packet)
+        self._assert_rejected("schema violation.*resolution.*not of type 'null'")
+
+    def test_gate_counts_cannot_overclaim_resolution_or_authorization(self) -> None:
+        packet = self._packet()
+        packet["gate_state"]["accepted_decision_count"] = 19
+        packet["gate_state"]["unresolved_decision_count"] = 0
+        packet["gate_state"]["implementation_authorized"] = True
+        self._write_packet(packet)
+        self._assert_rejected("schema violation|gate state")
+
+    def test_native_value_acceptance_cannot_revert_to_unresolved(self) -> None:
+        packet = self._packet()
+        row = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row["decision_status"] = "unresolved"
+        row["selected_option"] = None
+        row["accepted"] = False
+        row["source_blocking"] = True
+        row["unresolved_decisions"] = ["native-value semantics reopened"]
+        row["evidence_required"] = ["new acceptance packet"]
+        del row["resolution"]
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("accepted decision identity or count drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
+
+    def test_second_decision_cannot_be_smuggled_as_accepted(self) -> None:
+        packet = self._packet()
+        native = next(
+            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+        )
+        row = packet["decision_rows"][0]
+        row["unresolved_decisions"] = []
+        row["evidence_required"] = []
+        row["decision_status"] = "accepted"
+        row["selected_option"] = native["selected_option"]
+        row["accepted"] = True
+        row["source_blocking"] = False
+        row["resolution"] = native["resolution"]
+        self._write_packet(packet)
+
+        original_digest = CHECKER.DECISION_ROWS_SHA256
+        try:
+            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                packet["decision_rows"]
+            )
+            self._assert_rejected("accepted decision identity or count drifted")
+        finally:
+            CHECKER.DECISION_ROWS_SHA256 = original_digest
 
     def test_registry_and_archive_roles_cannot_expand(self) -> None:
         packet = self._packet()
