@@ -138,7 +138,9 @@ the release ceremony.
 The issue #677 tooling foundation can deterministically materialize
 constructor arguments, linked creation bytecode, full initcode, and expected
 linked/immutable runtime bytecode from the issue #674 canonical isolated
-release build. The materializer does not broadcast. The separate issue #677A
+release build. It retains the v1 non-production fixture path and can also
+project a checker-complete v2 candidate into the existing plan and execution
+receipt schemas. The materializer does not broadcast. The separate issue #677A
 executor can consume only that exact plan through a generic broadcaster that
 imports no production contract.
 
@@ -163,7 +165,7 @@ python scripts/execute_canonical_deployment_plan.py \
   --local-anvil
 ```
 
-The committed candidate is a deliberately narrow Anvil fixture. It binds one
+The committed v1 candidate is a deliberately narrow Anvil fixture. It binds one
 canonical `DependencyRegistry` artifact to literal non-secret placeholder
 addresses, has no genesis-profile entry, and sets both production/readiness
 flags to false. The materializer performs actual Draft 2020-12 validation of
@@ -180,12 +182,22 @@ non-floating-point I-JSON policy to its config, receipt, every artifact,
 retained compiler input, and string-form embedded metadata snapshots. A shared
 target artifact is read once and reused across instances, and a post-validation
 filesystem replacement cannot change the validated snapshot used for the plan.
-Generator version 3 retains the canonical build's restricted-source-root and
+Generator version 4 retains the canonical build's restricted-source-root and
 portable compiler-path policies in the validated plan.
 Full creation bytecode plus ABI-encoded constructor arguments must fit the
 49,152-byte EIP-3860 initcode limit. Treat any mismatch or limit breach as a
 stop condition; do not weaken or bypass a binding to make a stale candidate
 pass.
+
+A v2 input must first pass the complete candidate-v2 schema and checker. The
+materializer binds its cycle-free candidate SHA-256 and Keccak-256 identities,
+projects linked libraries before instances, and carries each expected address
+into the existing plan schema. The identity excludes only retained evidence;
+that evidence must bind the projected identity and cannot include the raw
+candidate-artifact SHA-256. The committed v2 planning document has 37 profile
+rows, zero linked libraries, zero instances, and 46 completeness blockers. Its
+ordinary structural check succeeds while `--require-complete` fails, so it
+cannot reach materialization, RPC, Forge, or broadcast.
 
 Every repository-relative path in the candidate and plan uses the same
 runtime/schema portable policy. It rejects controls, Windows-invalid
@@ -193,14 +205,19 @@ characters and device names (including device names with extensions),
 backslashes, drive or alternate-stream syntax, empty or dot-alias segments,
 and segments ending in a dot or space.
 
-Supplied immutable values are candidate assertions. The materializer checks
+Supplied immutable values and v2 expected addresses are candidate assertions.
+The materializer checks
 their artifact-declared byte widths and positions and the resulting expected
 runtime hash; it does not derive the intended values from constructor
-semantics. The executor closes the executed-plan runtime gap by requiring the
-actual transaction input, CREATE address, canonical receipt block, and deployed
-runtime to match the plan before it can publish an ephemeral success receipt.
-This does not prove the missing production candidate identity or retained
-evidence binding.
+semantics. Before constructing Forge or any broadcast submission, executor
+generator 2 derives every v2 CREATE address from the selected sender and
+uncontended starting nonce in exact library-first then instance order and
+requires equality with the candidate-bound address. It rechecks that starting
+nonce after simulation and before submission. The executor closes the
+executed-plan runtime gap by requiring the actual transaction input, CREATE
+address, canonical receipt block, and deployed runtime to match the plan before
+it can publish an ephemeral success receipt. This does not freeze or prove the
+missing concrete production candidate.
 
 The ordinary `make check`, `scripts/check.sh`, `scripts/check.ps1`, and Linux
 CI paths run the focused unit suite, materialize this exact committed fixture,
@@ -240,10 +257,13 @@ immediately before each executor-owned JSON-RPC request and each Forge
 invocation. This detects alias drift and rebinding before connection attempts;
 it does not bind or attest the peer that urllib or Forge ultimately reaches, and
 the receipt records `actual_peer_verified: false`. There is no rehearsal
-execution-mode alias in this slice. Production mode remains fail-closed until
-issue #656 versions the strict candidate and retained evidence family. Nothing
-in this workflow authorizes a testnet or mainnet broadcast or establishes
-public-beta or production readiness.
+execution-mode alias in this slice. Checker-complete v2 candidates remain
+tooling-only, and production execution is explicitly disabled even when the
+candidate, retained evidence, identity, and expected-address checks pass.
+Concrete candidate reconciliation and shared release/deployment wiring remain
+deferred. Nothing in this workflow freezes or deploys a candidate, authorizes a
+testnet or mainnet broadcast, or establishes audit, public-beta, or production
+readiness.
 
 ## Sepolia Deployment Rehearsal Runbook
 

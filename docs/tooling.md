@@ -497,7 +497,8 @@ descriptive references.
 The complete creation bytecode plus encoded constructor arguments fails closed
 above the 49,152-byte EIP-3860 initcode limit.
 
-The v1 candidate schema accepts only
+The materializer dispatches between the retained v1 fixture and a
+checker-complete v2 candidate. The v1 candidate schema accepts only
 `candidate_kind: non_production_fixture` with both `production_candidate` and
 `readiness_evidence` set to `false`. The committed fixture at
 `deployments/config/canonical-deployment-candidate-non-production.json`
@@ -506,12 +507,27 @@ and library addresses. Its `profile_entry_id` is deliberately `null`; it is not
 the strict instance-aware genesis candidate required by issue #656. Candidate
 and output shapes are documented by
 `deployments/schema/canonical-deployment-candidate.schema.json` and
-`deployments/schema/canonical-deployment-plan.schema.json`. The materializer
-checks that both schema documents are valid Draft 2020-12, validates the
-strictly decoded committed candidate, and validates every in-memory generated
-plan before it can be written or compared in `--check` mode. Generator version
-3 also requires the issue #680 restricted-source-root and portable compiler
-path policies in the materialized plan.
+`deployments/schema/canonical-deployment-plan.schema.json`. A v2 input must
+first pass the complete
+`deployments/schema/canonical-deployment-candidate.v2.schema.json` and
+`scripts/check_canonical_deployment_candidate.py` decision. Generator version
+4 then projects linked libraries first and instances second, preserves each
+candidate expected address, and binds the candidate's cycle-free SHA-256 and
+Keccak-256 identities into the existing plan schema. The identity excludes only
+the retained-evidence binding; retained evidence must bind that projected
+identity and cannot contain the raw candidate-artifact SHA-256. The materializer
+checks each applicable schema as valid Draft 2020-12, validates the strictly
+decoded candidate, and validates every in-memory generated plan before it can
+be written or compared in `--check` mode. It also retains the issue #680
+restricted-source-root and portable compiler-path policies in the materialized
+plan.
+
+The committed v2 planning document at
+`deployments/config/canonical-deployment-candidate-v2-planning.json` has 37
+profile rows, zero linked libraries, zero instances, and 46 completeness
+blockers. Its ordinary structural check succeeds; `--require-complete` fails.
+It cannot reach plan materialization, RPC, Forge, or broadcast, and it is not a
+frozen candidate or readiness evidence.
 
 After producing the canonical isolated build, run the focused tool as follows:
 
@@ -565,8 +581,12 @@ The dedicated `deployment-script/foundry.toml` isolates the broadcaster output,
 cache, and broadcast directories; the executor rejects a compiler build-info
 closure containing any second source.
 
-Before submitting a transaction, the executor simulates the complete ordered
-plan, probes block-by-number, block-by-hash, and exact EIP-1898 runtime reads,
+Before constructing Forge or any broadcast submission for a v2 plan, executor
+generator 2 obtains the uncontended starting nonce and derives every CREATE
+address from the selected sender in the plan's exact library-first then
+instance order. Every result must equal the candidate-bound expected address.
+It then simulates the complete ordered plan, probes block-by-number,
+block-by-hash, and exact EIP-1898 runtime reads,
 strictly decodes every JSON-RPC byte response with the same duplicate-free
 UTF-8/I-JSON, safe-integer, and Unicode-scalar policy as trusted files, requires
 an exact non-boolean safe-integer response ID, accepts only the exact
@@ -581,8 +601,9 @@ network, execution identity, false success flag, null active deployment, empty
 verified set, and coherent optional preflight evidence is immediately
 retry-safe. An executor-owned ephemeral journal becomes retry-safe only after
 its Anvil process has stopped and the executor records that destruction.
-Postflight independently
-checks the actual transaction input, sender/nonce-derived CREATE address,
+The executor rechecks the starting nonce after simulation and before
+submission. Postflight independently checks the actual transaction input,
+sender/nonce-derived CREATE address,
 receipt and canonical block, and expected runtime. Every final-sweep runtime
 read uses the captured final-tip EIP-1898 block-hash selector. Before publishing
 the schema-validated ephemeral receipt, the executor rereads both
@@ -615,10 +636,12 @@ execution requires an explicit reviewed `unlocked`, `ledger`, `trezor`, or
 `keystore` signer transport; raw
 private-key CLI input is unsupported and the Forge child environment is
 sanitized.
-Production mode remains fail-closed until issue #656 supplies the strict
-instance-aware candidate and retained evidence binding. The executor does not
-retain ceremony evidence, close issue #656, authorize deployment, or change
-release maturity.
+Checker-complete v2 candidates remain tooling-only: production execution is
+explicitly disabled even when candidate completeness, identity, retained
+evidence, and expected-address checks pass. The executor does not freeze a
+candidate, retain ceremony evidence, close issue #656, authorize deployment,
+or change release maturity. Concrete candidate reconciliation and any shared
+release/deployment wiring remain deferred.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface

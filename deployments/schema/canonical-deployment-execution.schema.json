@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/canonical-deployment-execution.schema.json",
   "title": "6529Stream Canonical Deployment Execution Receipt",
-  "description": "Fail-closed non-production execution receipt for canonical target-isolated initcode after strict JSON-RPC, pinned all-public DNS-set checks, and stable canonical-tip verification.",
+  "description": "Fail-closed non-production execution receipt for canonical target-isolated initcode after strict JSON-RPC, pinned all-public DNS-set checks, stable canonical-tip verification, and canonical candidate identity binding.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -20,7 +20,7 @@
       "const": "6529stream.canonical-deployment-execution.v1"
     },
     "generated_by": {
-      "const": "scripts/execute_canonical_deployment_plan.py:1"
+      "const": "scripts/execute_canonical_deployment_plan.py:2"
     },
     "release_posture": {
       "type": "object",
@@ -33,13 +33,13 @@
       ],
       "properties": {
         "production_candidate": {
-          "const": false
+          "type": "boolean"
         },
         "readiness_evidence": {
           "const": false
         },
         "status": {
-          "const": "non_production_execution_only"
+          "enum": ["non_production_execution_only", "candidate_complete_execution_only"]
         },
         "note": {
           "type": "string",
@@ -54,6 +54,9 @@
         "path",
         "sha256",
         "candidate_id",
+        "candidate_schema_version",
+        "candidate_identity_sha256",
+        "candidate_identity_keccak256",
         "release_receipt_sha256",
         "target_catalog_sha256",
         "release_config_sha256",
@@ -68,6 +71,24 @@
         },
         "candidate_id": {
           "$ref": "#/$defs/identifier"
+        },
+        "candidate_schema_version": {
+          "enum": [
+            "6529stream.canonical-deployment-candidate.v1",
+            "6529stream.canonical-deployment-candidate.v2"
+          ]
+        },
+        "candidate_identity_sha256": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/sha256"}
+          ]
+        },
+        "candidate_identity_keccak256": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/keccak256"}
+          ]
         },
         "release_receipt_sha256": {
           "$ref": "#/$defs/sha256"
@@ -247,6 +268,68 @@
       }
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "plan": {
+            "properties": {
+              "candidate_schema_version": {
+                "const": "6529stream.canonical-deployment-candidate.v1"
+              }
+            },
+            "required": ["candidate_schema_version"]
+          }
+        },
+        "required": ["plan"]
+      },
+      "then": {
+        "properties": {
+          "release_posture": {
+            "properties": {
+              "production_candidate": {"const": false},
+              "status": {"const": "non_production_execution_only"}
+            }
+          },
+          "plan": {
+            "properties": {
+              "candidate_identity_sha256": {"type": "null"},
+              "candidate_identity_keccak256": {"type": "null"}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "release_posture": {
+            "properties": {
+              "production_candidate": {"const": true},
+              "status": {"const": "candidate_complete_execution_only"}
+            }
+          },
+          "plan": {
+            "properties": {
+              "candidate_schema_version": {
+                "const": "6529stream.canonical-deployment-candidate.v2"
+              },
+              "candidate_identity_sha256": {"$ref": "#/$defs/sha256"},
+              "candidate_identity_keccak256": {"$ref": "#/$defs/keccak256"}
+            }
+          },
+          "network": {
+            "properties": {
+              "environment": {
+                "enum": ["local", "fork", "testnet"]
+              },
+              "execution_mode": {
+                "enum": ["local", "fork", "sepolia"]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "identifier": {
       "type": "string",

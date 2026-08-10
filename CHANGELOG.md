@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Connected checker-complete canonical deployment candidate v2 documents to
+  the existing non-production plan materializer and executor without adding a
+  parallel plan or receipt schema. Materializer generator 4 binds the
+  cycle-free candidate SHA-256/Keccak-256 identity, projects linked libraries
+  before instances, and carries every candidate expected address into the
+  plan. Executor generator 2 derives the same ordered CREATE addresses from
+  the selected sender and uncontended starting nonce before Forge or broadcast
+  construction, then rechecks that nonce before submission. Retained evidence
+  binds the projected identity and may not embed the raw candidate-artifact
+  SHA-256, avoiding a candidate/evidence hash cycle. The legacy v1 Anvil
+  fixture remains unchanged. The committed v2 planning document still has 37
+  profile rows, zero linked libraries, zero instances, and 46 completeness
+  blockers; production execution remains explicitly disabled, and this slice
+  adds no concrete candidate, deployment, audit, public-beta, or production
+  readiness credit.
 - Added the Proposed global artist semantic-domain ownership architecture
   packet. The strict matrix binds all 57 frozen rows and all 18 columns, 37
   record domains, 54 events, normalized replay surfaces, effective

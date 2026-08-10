@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Execute canonical target-isolated initcode and verify retained chain state.
 
-The v1 executor is intentionally limited to non-production candidates. It
+The executor is intentionally limited to non-production execution modes. It
 materializes the current plan again, requires the on-disk plan to match byte
 for byte, simulates every entry, broadcasts each entry through a generic
 production-import-free Solidity script, and verifies the actual transaction
-input, receipt, and runtime code through JSON-RPC before writing a receipt.
+input, receipt, and runtime code through JSON-RPC before writing a receipt. A
+checker-complete v2 candidate is identity-bound but does not enable production.
 """
 
 from __future__ import annotations
@@ -33,7 +34,7 @@ import materialize_canonical_deployment_plan as materializer
 
 EXECUTION_SCHEMA = "6529stream.canonical-deployment-execution.v1"
 JOURNAL_SCHEMA = "6529stream.canonical-deployment-execution-journal.v1"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
 DEFAULT_PLAN = Path("tmp/canonical-deployment-plan.json")
 DEFAULT_OUTPUT = Path("tmp/canonical-deployment-execution-receipt.json")
 DEFAULT_SCRIPT = Path("deployment-script/DeployCanonicalInitcode.s.sol")
@@ -44,7 +45,9 @@ EXECUTION_SCHEMA_PATH = Path(
 )
 STAGING_ROOT = Path("deployments/.canonical-deployment-run")
 SESSION_ROOT = Path("tmp/canonical-deployment-run")
-NON_PRODUCTION_STATUSES = frozenset({"non_production_tooling_only"})
+EXECUTABLE_PLAN_STATUSES = frozenset(
+    {"non_production_tooling_only", "candidate_complete_tooling_only"}
+)
 FINAL_JOURNAL_STATUS = "verified"
 EXECUTION_MODES = frozenset({"anvil", "local", "fork", "sepolia", "production"})
 SIGNER_MODES = frozenset({"unlocked", "ledger", "trezor", "keystore"})
@@ -151,6 +154,20 @@ def require_repo_path(value: Any, field: str) -> str:
     """Apply the canonical materializer's exact portable repository-path policy."""
     try:
         return materializer.require_safe_relative_path(value, field)
+    except materializer.DeploymentPlanError as exc:
+        raise CanonicalExecutionError(str(exc)) from exc
+
+
+def require_sha256(value: Any, field: str) -> str:
+    try:
+        return materializer.require_sha256(value, field)
+    except materializer.DeploymentPlanError as exc:
+        raise CanonicalExecutionError(str(exc)) from exc
+
+
+def require_identifier(value: Any, field: str) -> str:
+    try:
+        return materializer.require_identifier(value, field)
     except materializer.DeploymentPlanError as exc:
         raise CanonicalExecutionError(str(exc)) from exc
 
@@ -478,7 +495,7 @@ def execution_network_record(
                 "production mode refuses a non-production candidate"
             )
         raise CanonicalExecutionError(
-            "production execution remains schema-blocked until issue #656 lands"
+            "production execution remains disabled in the bounded v2 consumer slice"
         )
 
     if live_broadcast_authorized and execution_mode != "sepolia":
@@ -557,6 +574,43 @@ def create_address(sender: str, nonce: int) -> str:
         [rlp_encode_bytes(sender_bytes), rlp_encode_bytes(nonce_bytes)]
     )
     return "0x" + materializer.keccak256_hex(encoded)[-40:]
+
+
+def require_v2_expected_create_addresses(
+    plan: Mapping[str, Any],
+    *,
+    sender: str,
+    starting_nonce: int,
+) -> list[str] | None:
+    """Bind every v2 deployment row to its sender/nonce CREATE address."""
+    candidate = require_dict(plan.get("candidate"), "candidate")
+    candidate_schema = require_string(
+        candidate.get("schema_version"),
+        "candidate.schema_version",
+    )
+    if candidate_schema != materializer.CANDIDATE_V2_SCHEMA:
+        return None
+    deployments = require_list(plan.get("deployments"), "deployments")
+    expected_addresses: list[str] = []
+    for index, value in enumerate(deployments):
+        deployment = require_dict(value, f"deployments[{index}]")
+        instance_id = require_string(
+            deployment.get("instance_id"),
+            f"deployments[{index}].instance_id",
+        )
+        expected = require_address(
+            deployment.get("expected_address"),
+            f"deployments[{index}].expected_address",
+        )
+        derived = create_address(sender, starting_nonce + index)
+        if expected != derived:
+            raise CanonicalExecutionError(
+                f"deployment {instance_id} expected address {expected} does not "
+                f"match CREATE address {derived} for sender {sender} at nonce "
+                f"{starting_nonce + index}"
+            )
+        expected_addresses.append(expected)
+    return expected_addresses
 
 
 def execution_key(plan_sha256: str, chain_id: int, sender: str) -> str:
@@ -841,15 +895,87 @@ def canonical_plan_snapshot(
             f"{plan_path} is stale or mutated; rematerialize before execution"
         )
     posture = require_dict(expected.get("release_posture"), "release_posture")
-    if posture.get("production_candidate") is not False:
+    candidate = require_dict(expected.get("candidate"), "candidate")
+    candidate_schema = require_string(
+        candidate.get("schema_version"),
+        "candidate.schema_version",
+    )
+    if posture.get("status") not in EXECUTABLE_PLAN_STATUSES:
         raise CanonicalExecutionError(
-            "v1 executor refuses production candidates until issue #656 lands"
+            "deployment plan does not declare an executable tooling posture"
         )
-    if posture.get("status") not in NON_PRODUCTION_STATUSES:
+    if candidate_schema == materializer.CANDIDATE_SCHEMA:
+        if (
+            posture.get("production_candidate") is not False
+            or candidate.get("candidate_identity_sha256") is not None
+            or candidate.get("candidate_identity_keccak256") is not None
+        ):
+            raise CanonicalExecutionError(
+                "legacy v1 candidate plan has an invalid authority posture"
+            )
+    elif candidate_schema == materializer.CANDIDATE_V2_SCHEMA:
+        if posture.get("production_candidate") is not True:
+            raise CanonicalExecutionError(
+                "complete v2 candidate plan must retain its production-candidate flag"
+            )
+        require_sha256(
+            candidate.get("candidate_identity_sha256"),
+            "candidate.candidate_identity_sha256",
+        )
+        require_hash(
+            candidate.get("candidate_identity_keccak256"),
+            "candidate.candidate_identity_keccak256",
+        )
+    else:
         raise CanonicalExecutionError(
-            "deployment plan does not declare the non-production tooling posture"
+            f"unsupported deployment candidate schema {candidate_schema!r}"
         )
     return expected, expected_raw, prefixed_sha256(expected_raw)
+
+
+def execution_plan_binding(
+    plan: Mapping[str, Any],
+    *,
+    plan_path: str,
+    plan_sha256: str,
+) -> dict[str, Any]:
+    """Bind the plan and its canonical candidate identity into a receipt."""
+    candidate = require_dict(plan.get("candidate"), "candidate")
+    release_build = require_dict(plan.get("release_build"), "release_build")
+    return {
+        "path": require_repo_path(plan_path, "receipt.plan.path"),
+        "sha256": require_sha256(plan_sha256, "receipt.plan.sha256"),
+        "candidate_id": require_identifier(
+            candidate.get("candidate_id"),
+            "receipt.plan.candidate_id",
+        ),
+        "candidate_schema_version": require_string(
+            candidate.get("schema_version"),
+            "receipt.plan.candidate_schema_version",
+        ),
+        "candidate_identity_sha256": candidate.get(
+            "candidate_identity_sha256"
+        ),
+        "candidate_identity_keccak256": candidate.get(
+            "candidate_identity_keccak256"
+        ),
+        "release_receipt_sha256": require_sha256(
+            release_build.get("receipt_sha256"),
+            "receipt.plan.release_receipt_sha256",
+        ),
+        "target_catalog_sha256": require_sha256(
+            release_build.get("target_catalog_sha256"),
+            "receipt.plan.target_catalog_sha256",
+        ),
+        "release_config_sha256": require_sha256(
+            release_build.get("config_sha256"),
+            "receipt.plan.release_config_sha256",
+        ),
+        "release_foundry_config_sha256": require_sha256(
+            release_build.get("foundry_config_sha256"),
+            "receipt.plan.release_foundry_config_sha256",
+        ),
+    }
 
 
 def assert_authority_unchanged(
@@ -2008,6 +2134,26 @@ def execute_plan(
             f"refusing to overwrite existing execution receipt {output_path}"
         )
 
+    initial_nonce: int | None = None
+    expected_create_addresses: list[str] | None = None
+    is_v2_plan = (
+        require_dict(plan.get("candidate"), "candidate").get("schema_version")
+        == materializer.CANDIDATE_V2_SCHEMA
+    )
+    if is_v2_plan:
+        for index, deployment in enumerate(deployments):
+            validate_deployment(deployment, expected_order=index + 1)
+        initial_nonce = require_uncontended_sender_nonce(
+            rpc,
+            sender=sender,
+            expected_nonce=None,
+        )
+        expected_create_addresses = require_v2_expected_create_addresses(
+            plan,
+            sender=sender,
+            starting_nonce=initial_nonce,
+        )
+
     session_id = uuid.uuid4().hex
     staging_parent = materializer.normalize_repo_path(
         repo_root,
@@ -2107,8 +2253,9 @@ def execute_plan(
         raise
     broadcast_attempted = False
     try:
-        for index, deployment in enumerate(deployments):
-            validate_deployment(deployment, expected_order=index + 1)
+        if not is_v2_plan:
+            for index, deployment in enumerate(deployments):
+                validate_deployment(deployment, expected_order=index + 1)
 
         # The complete plan must simulate as one ordered state transition before
         # any transaction is submitted.
@@ -2168,11 +2315,18 @@ def execute_plan(
         rpc_preflight = preflight_rpc_capabilities(rpc, probe_address=sender)
         journal["rpc_preflight"] = rpc_preflight
         write_json_atomic(journal_path, journal)
-        initial_nonce = require_uncontended_sender_nonce(
-            rpc,
-            sender=sender,
-            expected_nonce=None,
-        )
+        if initial_nonce is None:
+            initial_nonce = require_uncontended_sender_nonce(
+                rpc,
+                sender=sender,
+                expected_nonce=None,
+            )
+        else:
+            require_uncontended_sender_nonce(
+                rpc,
+                sender=sender,
+                expected_nonce=initial_nonce,
+            )
         journal["initial_nonce"] = initial_nonce
         journal["status"] = "broadcasting"
         write_json_atomic(journal_path, journal)
@@ -2193,7 +2347,11 @@ def execute_plan(
                 deployment.get("initcode"),
                 "deployment.initcode",
             )
-            expected_contract_address = create_address(sender, expected_nonce)
+            expected_contract_address = (
+                expected_create_addresses[index]
+                if expected_create_addresses is not None
+                else create_address(sender, expected_nonce)
+            )
             journal["active_deployment"] = {
                 "status": "prepared",
                 "order": order,
@@ -2357,36 +2515,44 @@ def execute_plan(
                     )
         assert_canonical_tip_unchanged(rpc, final_tip)
 
+        plan_posture = require_dict(
+            plan.get("release_posture"),
+            "release_posture",
+        )
+        v2_candidate = (
+            plan["candidate"]["schema_version"]
+            == materializer.CANDIDATE_V2_SCHEMA
+        )
         receipt = {
             "schema_version": EXECUTION_SCHEMA,
             "generated_by": (
                 f"scripts/execute_canonical_deployment_plan.py:{GENERATOR_VERSION}"
             ),
             "release_posture": {
-                "production_candidate": False,
+                "production_candidate": plan_posture[
+                    "production_candidate"
+                ],
                 "readiness_evidence": False,
-                "status": "non_production_execution_only",
+                "status": (
+                    "candidate_complete_execution_only"
+                    if v2_candidate
+                    else "non_production_execution_only"
+                ),
                 "note": (
+                    "This receipt binds a checker-complete candidate but does "
+                    "not authorize production execution or establish release "
+                    "readiness."
+                    if v2_candidate
+                    else
                     "This receipt does not authorize a production broadcast or "
                     "establish release readiness."
                 ),
             },
-            "plan": {
-                "path": require_repo_path(
-                    plan_path.relative_to(repo_root).as_posix(),
-                    "receipt.plan.path",
-                ),
-                "sha256": plan_sha256,
-                "candidate_id": plan["candidate"]["candidate_id"],
-                "release_receipt_sha256": plan["release_build"]["receipt_sha256"],
-                "target_catalog_sha256": plan["release_build"][
-                    "target_catalog_sha256"
-                ],
-                "release_config_sha256": plan["release_build"]["config_sha256"],
-                "release_foundry_config_sha256": plan["release_build"][
-                    "foundry_config_sha256"
-                ],
-            },
+            "plan": execution_plan_binding(
+                plan,
+                plan_path=plan_path.relative_to(repo_root).as_posix(),
+                plan_sha256=plan_sha256,
+            ),
             "network": network,
             "finalization": {
                 "tip_block_number": final_tip["block_number"],
@@ -2495,7 +2661,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--mode",
         choices=sorted(EXECUTION_MODES),
         required=True,
-        help="operator-selected network posture; v1 production remains blocked",
+        help="operator-selected network posture; production remains blocked",
     )
     parser.add_argument(
         "--signer",
@@ -2507,7 +2673,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--authorize-live-broadcast",
         action="store_true",
-        help="explicitly authorize the v1 Sepolia live-testnet path",
+        help="explicitly authorize the reviewed Sepolia live-testnet path",
     )
     parser.add_argument(
         "--confirmations",
