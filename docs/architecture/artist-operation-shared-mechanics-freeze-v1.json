@@ -1,0 +1,492 @@
+{
+  "schema": "6529stream.artist-operation-shared-mechanics-freeze.v1",
+  "status": "PROPOSED_DECISION_REGISTER_ONLY",
+  "maturity": "pre_audit_source_blocked",
+  "evaluated_base": {
+    "commit": "eb274128e0e17f904890294eca9ea99dc23f78e5",
+    "tree": "d03d62b9be2049b1b7f5b736d658f1c38f2e3dae"
+  },
+  "authority_bindings": [
+    {
+      "id": "coordinator_source_gate",
+      "path": "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md",
+      "sha256": "df2f039ee0a8991cba38da084d2e41158bb857cfa005d8fcad45b30d592b727a"
+    },
+    {
+      "id": "adr_0023",
+      "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
+      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+    },
+    {
+      "id": "semantic_owner_matrix",
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+    },
+    {
+      "id": "semantic_owner_matrix_schema",
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+      "sha256": "b242c5480ecdf8e4aa57dc02d76fd8cd81631298eeda0b96cbba9b036d72b473"
+    },
+    {
+      "id": "semantic_owner_matrix_checker",
+      "path": "scripts/check_artist_semantic_owner_matrix.py",
+      "sha256": "75be5171655556711282de41a3feb909b0a9fdded45c565f66597d984427152b"
+    },
+    {
+      "id": "semantic_owner_matrix_tests",
+      "path": "scripts/test_artist_semantic_owner_matrix.py",
+      "sha256": "126269436e56b83f9e996b9b1e0961ebac08740a38a8e9789c70c302a8b0654f"
+    },
+    {
+      "id": "archive_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "sha256": "1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778"
+    },
+    {
+      "id": "archive_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "sha256": "2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+    },
+    {
+      "id": "registry_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "sha256": "038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+    },
+    {
+      "id": "registry_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "sha256": "6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+    }
+  ],
+  "selected_shape": {
+    "option": "D",
+    "scope": "shared_mechanics_decision_register_before_owner_packets",
+    "comprehensive_freeze_complete": false,
+    "typed_abi_only_authorizes_source": false,
+    "owner_packets_follow_shared_mechanics": true,
+    "selection_basis": [
+      "a comprehensive freeze would invent decisions the accepted evidence marks unresolved",
+      "typed ABI alone can never authorize Coordinator or owner source",
+      "owner-first packets would duplicate unsettled shared encodings across seven domains",
+      "a fail-closed shared register advances dependency closure without selecting unknown semantics"
+    ]
+  },
+  "phase_order": [
+    {
+      "index": 1,
+      "phase_id": "shared_mechanics",
+      "state": "decision_register_only",
+      "source_authorizing": false
+    },
+    {
+      "index": 2,
+      "phase_id": "owner_domain_packets",
+      "state": "blocked_by_prior_phase",
+      "source_authorizing": false
+    },
+    {
+      "index": 3,
+      "phase_id": "comprehensive_cross_surface_closure",
+      "state": "blocked_by_prior_phase",
+      "source_authorizing": false
+    },
+    {
+      "index": 4,
+      "phase_id": "independent_acceptance_before_source_reconsideration",
+      "state": "blocked_by_prior_phase",
+      "source_authorizing": false
+    }
+  ],
+  "fixed_invariants": {
+    "registry_role": "slim_immutable_typed_directory_only",
+    "archive_role": "append_only_versioned_evidence_only",
+    "semantic_owner_count": 7,
+    "one_authoritative_owner_per_domain": true,
+    "coordinator_role": "stateless_non_authoritative_typed_atomic_coordinator",
+    "coordinator_owns_semantic_authority": false,
+    "coordinator_owns_persistent_state": false,
+    "original_caller_required": true,
+    "snapshots_before_first_mutation": true,
+    "rollback_policy": "evm_revert_all_or_nothing",
+    "entrypoint_count": 57,
+    "required_entrypoint_mutability": "external_nonpayable",
+    "fallback_present": false,
+    "receive_present": false,
+    "nonzero_msg_value_policy": "abi_dispatch_rejects_before_any_effect",
+    "typed_collaborator_call_value_wei": 0,
+    "forced_balance_policy": "ignored_never_forwarded",
+    "generic_selector_or_calldata_route": false,
+    "delegatecall": false,
+    "callcode": false,
+    "proxy_or_upgrade": false,
+    "mutable_rebinding": false,
+    "operation_22_stop": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+  },
+  "operation_projection": {
+    "source": "docs/architecture/artist-semantic-owner-matrix-v2.json#operations",
+    "operation_count": 57,
+    "identity_fields": [
+      "operation_id",
+      "write",
+      "coordinator_recipe.recipe_id",
+      "coordinator_recipe.facade_entrypoint"
+    ],
+    "registry_signature_status": "unresolved_not_invented",
+    "coordinator_signature_status": "unresolved_not_invented",
+    "registry_state_mutability": "nonpayable",
+    "coordinator_state_mutability": "nonpayable",
+    "typed_collaborator_call_value_wei": 0,
+    "source_present": false,
+    "implementation_authorized": false,
+    "operation_22_effective_stop": "FINALITY_DEPENDENCY_ABI_AND_ADR0020_NOT_FROZEN"
+  },
+  "decision_rows": [
+    {
+      "surface_id": "entrypoint_abi",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "57 recipe identities and 57 facade entrypoint names are ordered and unique"
+      ],
+      "unresolved_decisions": [
+        "parameter and return types, structs, selectors, interface id, schema, and marker"
+      ],
+      "evidence_required": [
+        "Solidity-compatible ABI table plus selector and interface-id recomputation with hostile field-order tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "registry_ingress",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "Registry is a typed immutable directory and facade that forwards an authenticated original caller"
+      ],
+      "unresolved_decisions": [
+        "direct-caller versus Registry-forwarded ingress and exact Registry-to-Coordinator authentication"
+      ],
+      "evidence_required": [
+        "typed ingress protocol and spoofing tests without generic routing"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "original_caller",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "every recipe and every mutating owner authenticates the exact original caller"
+      ],
+      "unresolved_decisions": [
+        "derivation, forwarding field, anti-spoof rule, and relation to msg.sender"
+      ],
+      "evidence_required": [
+        "canonical caller envelope and direct, relayed, and spoofed-caller hostile cases"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "owner_snapshots",
+      "phase": "owner_domain_packets",
+      "fixed_facts": [
+        "seven owner domains are snapshotted in matrix order before the first mutation"
+      ],
+      "unresolved_decisions": [
+        "typed reads, return fields, revision width, commitment, state-root, tip encodings, and failure rules"
+      ],
+      "evidence_required": [
+        "one exact snapshot schema and hostile stale or malformed snapshot tests for each owner"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "owner_mutations",
+      "phase": "owner_domain_packets",
+      "fixed_facts": [
+        "matrix action identities and owner call order are exact"
+      ],
+      "unresolved_decisions": [
+        "typed mutation functions, calldata, acknowledgements, expected recipe and revision checks, and errors"
+      ],
+      "evidence_required": [
+        "row-to-owner call mapping plus rollback and wrong-owner hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "owner_storage",
+      "phase": "owner_domain_packets",
+      "fixed_facts": [
+        "one owner exists for every semantic state, record, replay, revision, root, and tip"
+      ],
+      "unresolved_decisions": [
+        "structs, mappings, key and value widths, packing, append fields, and revision, root, and tip formulas"
+      ],
+      "evidence_required": [
+        "exact seven-owner layouts and storage-layout drift receipts"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "replay_keys",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "64 replay surfaces have one exact owner each"
+      ],
+      "unresolved_decisions": [
+        "domain-separated preimages, field order, allocation, consumption, uniqueness, supersession, retirement, and conflict rollback"
+      ],
+      "evidence_required": [
+        "per-owner replay vectors and collision, reuse, supersession, and rollback hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "normative_owner_events",
+      "phase": "owner_domain_packets",
+      "fixed_facts": [
+        "54 event names have one normative owner and the Coordinator and Archive emit none of them"
+      ],
+      "unresolved_decisions": [
+        "parameter types and order, indexed fields, topics, emission points, and inter-owner emission order"
+      ],
+      "evidence_required": [
+        "complete event ABI and rollback-aware emission-order hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "provider_reads",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "five immutable typed provider identities and ordered snapshot ids are fixed while candidate values remain absent"
+      ],
+      "unresolved_decisions": [
+        "Core artist subset, Governance action fields, import continuity interface, operation 22 finality reconciliation, and fail-closed decoding"
+      ],
+      "evidence_required": [
+        "accepted provider subset interfaces and malformed or stale return-data hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "role_authority",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "three role literals, role ids, membership call, revision call, and original-caller subject are exact"
+      ],
+      "unresolved_decisions": [
+        "returned revision and state type and staged-Governance authenticated actor transport"
+      ],
+      "evidence_required": [
+        "typed authority snapshot and stale role-state or wrong-actor hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "signer_validation",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "Identity owns policy and replay while the issue 669 boundary is one stateless exact staticcall"
+      ],
+      "unresolved_decisions": [
+        "Registry GGP host read mechanics, validation request and result ABI, cap revision, and Identity acceptance protocol"
+      ],
+      "evidence_required": [
+        "typed request context preserving the issue 669 row plus ambiguous-result and cap-revision hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "recipe_commitment",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "RegistryV2 binds one nonzero ordered recipe-set hash for 57 recipes"
+      ],
+      "unresolved_decisions": [
+        "per-recipe domain and fields, canonical encoding, set-hash formula, and version transition"
+      ],
+      "evidence_required": [
+        "canonical vectors and order, omission, duplication, and version hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "archive_evidence",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "ArchiveV2 appends exact-key versioned evidence atomically and never decides semantic truth"
+      ],
+      "unresolved_decisions": [
+        "evidence id, version allocation, payload schema, snapshot and action commitments, append count, and retry interpretation"
+      ],
+      "evidence_required": [
+        "canonical payload vectors and conflict, partial append, and semantic-substitution hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "composite_manifest",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "ADR 0023 fixes the complete manifest field inventory and ordered owner, provider, and recipe projections"
+      ],
+      "unresolved_decisions": [
+        "Solidity and ABI types, order, encoding, hash and root formula, null rules, and verification failure behavior"
+      ],
+      "evidence_required": [
+        "canonical manifest vectors and field, order, null, and hash drift hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "operation_lock",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "only a typed transient operation reentrancy lock is permitted"
+      ],
+      "unresolved_decisions": [
+        "Solidity 0.8.19 mechanism, lock key and granularity, nesting, reset, and non-semantic-state proof"
+      ],
+      "evidence_required": [
+        "reentrancy, nested-call, revert-reset, and lock-persistence hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "construction",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "the predicted-address constructor DAG is acyclic and all bindings are immutable"
+      ],
+      "unresolved_decisions": [
+        "Coordinator constructor fields, binding-hash preimage, validation timing, and absent or mismatched code behavior"
+      ],
+      "evidence_required": [
+        "constructor vectors and address, codehash, interface, marker, schema, binding, and cycle hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "errors",
+      "phase": "cross_surface_closure",
+      "fixed_facts": [
+        "Coordinator emits no normative semantic event"
+      ],
+      "unresolved_decisions": [
+        "complete Coordinator, owner, and shared custom-error ABI and permission for non-normative diagnostics"
+      ],
+      "evidence_required": [
+        "complete error selectors and exact failure-path hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "native_value",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "all 57 Registry and Coordinator entrypoints are external nonpayable with no fallback or receive and all typed downstream calls carry zero value"
+      ],
+      "unresolved_decisions": [
+        "row-by-row ABI realization and hostile proof of rejection, zero forwarding, and forced-balance non-influence"
+      ],
+      "evidence_required": [
+        "ABI mutability projection and payable, fallback, receive, value-forwarding, and forced-balance hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "gas_and_call_discipline",
+      "phase": "shared_mechanics",
+      "fixed_facts": [
+        "every recipe is one transaction with exact snapshot order, owner order, and all-or-nothing rollback"
+      ],
+      "unresolved_decisions": [
+        "gas forwarding and reserve, EIP-150 treatment, return-data bounds, call limits, and reentrancy cases"
+      ],
+      "evidence_required": [
+        "measured recipe envelopes and gas, return-bomb, failure-order, and reentrancy hostile tests"
+      ],
+      "decision_status": "unresolved",
+      "selected_option": null,
+      "accepted": false,
+      "source_blocking": true
+    }
+  ],
+  "gate_state": {
+    "interface_and_storage_freeze_complete": false,
+    "coordinator_interface_accepted": false,
+    "coordinator_source_present": false,
+    "semantic_owner_sources_present": false,
+    "stateless_validator_source_present": false,
+    "implementation_authorized": false,
+    "operation_count": 57,
+    "accepted_decision_count": 0,
+    "unresolved_decision_count": 19,
+    "operation_22_stop_preserved": true
+  },
+  "exclusions": [
+    "Solidity and interface source",
+    "existing semantic-owner matrix semantics",
+    "contract catalogs",
+    "deployment profiles and manifests",
+    "candidate addresses and runtime evidence",
+    "readiness and status promotion",
+    "generated release artifacts and deterministic tail",
+    "CHANGELOG",
+    "issue 669-owned inventory, checker, and tests",
+    "live-chain, custody, signer, and governance actions"
+  ]
+}
