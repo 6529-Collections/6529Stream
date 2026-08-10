@@ -1,0 +1,1332 @@
+{
+  "schema": "6529stream.artist-owner-state-mechanics-foundation.v1",
+  "status": "PROPOSED_FOUNDATION_ONLY",
+  "maturity": "pre_audit_source_blocked",
+  "evaluated_base": {
+    "commit": "40a09e7fa5fc3ab0deb350b86a5a5eb318359c3f",
+    "tree": "c94ca72aa84e2924dedbd9b744353451cdceb1ee",
+    "shared_mechanics_accepted_count": 3,
+    "shared_mechanics_unresolved_count": 16
+  },
+  "authority_bindings": [
+    {
+      "id": "adr_0023",
+      "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
+      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+    },
+    {
+      "id": "coordinator_source_gate",
+      "path": "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md",
+      "sha256": "df2f039ee0a8991cba38da084d2e41158bb857cfa005d8fcad45b30d592b727a"
+    },
+    {
+      "id": "semantic_owner_matrix",
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+    },
+    {
+      "id": "semantic_owner_matrix_schema",
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.schema.json",
+      "sha256": "b242c5480ecdf8e4aa57dc02d76fd8cd81631298eeda0b96cbba9b036d72b473"
+    },
+    {
+      "id": "semantic_owner_matrix_checker",
+      "path": "scripts/check_artist_semantic_owner_matrix.py",
+      "sha256": "75be5171655556711282de41a3feb909b0a9fdded45c565f66597d984427152b"
+    },
+    {
+      "id": "semantic_owner_matrix_tests",
+      "path": "scripts/test_artist_semantic_owner_matrix.py",
+      "sha256": "126269436e56b83f9e996b9b1e0961ebac08740a38a8e9789c70c302a8b0654f"
+    },
+    {
+      "id": "shared_mechanics_packet",
+      "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
+      "sha256": "a631aed2a423a5aebb83e709151abe77cc2c5cc78c9354943b64e4b7a6116206"
+    },
+    {
+      "id": "shared_mechanics_schema",
+      "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.schema.json",
+      "sha256": "d61b29f63c662494047fc1b30bf72035ab7d586a23fe45c2bb6f2d8a0ae795b0"
+    },
+    {
+      "id": "shared_mechanics_checker",
+      "path": "scripts/check_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "d63f9e4193a9d8e382eaf994b69d4a5d1e3e5e402bb3d42c762f611e9eb77762"
+    },
+    {
+      "id": "shared_mechanics_tests",
+      "path": "scripts/test_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "0dff4eefa8e110f36c17b08b24a38f557ef9893ef12ea2f8d5e00da7406da54f"
+    },
+    {
+      "id": "archive_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "sha256": "1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778"
+    },
+    {
+      "id": "archive_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "sha256": "2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+    },
+    {
+      "id": "registry_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "sha256": "038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+    },
+    {
+      "id": "registry_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "sha256": "6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+    }
+  ],
+  "selected_foundation": {
+    "option_id": "lean_typed_mapping_transition_accumulator_v1",
+    "selection_posture": "outer_mechanics_only_no_decision_acceptance",
+    "rationale": [
+      "typed isolated storage preserves exactly one authoritative owner per semantic domain",
+      "immutable deployment-chain, Registry, Coordinator, ArchiveV2 and domain identity prevents cross-suite or cross-chain rekeying",
+      "a fixed header, roots and replay mapping bound constant work without exposing generic mutation",
+      "history-sensitive owner-recomputed accumulators make rollback, opaque-input and no-op drift observable while ArchiveV2 remains evidence-only"
+    ],
+    "rejected_options": [
+      {
+        "option_id": "generic_hash_only_envelopes",
+        "disposition": "rejected",
+        "reason": "does not freeze typed storage ownership or replay capabilities and can conceal incompatible domain state"
+      },
+      {
+        "option_id": "sparse_merkle_tree_for_all_state",
+        "disposition": "rejected",
+        "reason": "adds proof, gas and denial-of-service complexity without an accepted proof-consumer requirement"
+      },
+      {
+        "option_id": "full_append_only_owner_log",
+        "disposition": "rejected",
+        "reason": "unbounded owner-local history and enumeration duplicate ArchiveV2 evidence responsibilities"
+      },
+      {
+        "option_id": "premature_full_hybrid_acceptance",
+        "disposition": "rejected",
+        "reason": "would invent unresolved domain structs, replay scopes, lifecycle assignments, commitments and construction preimages"
+      }
+    ]
+  },
+  "inventory_bindings": {
+    "semantic_domains": {
+      "count": 7,
+      "canonical_sha256": "5d98a25f0886abed544bbb686a213be978b8f1e055a1b7f55d6e457cc239289a"
+    },
+    "operations": {
+      "count": 57,
+      "canonical_sha256": "50ce11e14d65ffcdc2b2756ee7a44fe26de1ec9a6930f29c9e102bbd0f450e87"
+    },
+    "replay_surfaces": {
+      "count": 64,
+      "canonical_sha256": "1b3771b462e8c3a2453102718d4d68ee33d060a9e126ab33f87344f1b31128ba"
+    },
+    "record_surfaces": {
+      "count": 37,
+      "canonical_sha256": "9ab9af1e2ac22c23f7521236e7628b76491993c7ebefa57d75e4c5b2deb0fa51"
+    },
+    "event_surfaces": {
+      "count": 54,
+      "canonical_sha256": "93d3b7d3dd2368ff6b3a6466138b599e92e1c288ab62400fb188e336139475fc"
+    }
+  },
+  "common_storage_layout": {
+    "slots": [
+      {
+        "slot": 0,
+        "label": "header",
+        "solidity_type": "OwnerHeaderV2",
+        "packing": "single_slot",
+        "fields": [
+          {
+            "name": "revision",
+            "type": "uint64",
+            "bit_offset": 0,
+            "bit_width": 64
+          },
+          {
+            "name": "recordSequence",
+            "type": "uint64",
+            "bit_offset": 64,
+            "bit_width": 64
+          }
+        ],
+        "reserved_high_bits": 128
+      },
+      {
+        "slot": 1,
+        "label": "stateRoot",
+        "solidity_type": "bytes32"
+      },
+      {
+        "slot": 2,
+        "label": "recordChainTip",
+        "solidity_type": "bytes32"
+      },
+      {
+        "slot": 3,
+        "label": "replay",
+        "solidity_type": "mapping(bytes32 => ReplayCellV2)"
+      }
+    ],
+    "typed_domain_state_start_slot": 4,
+    "immutable_binding_fields": [
+      "deploymentChainId",
+      "registry",
+      "coordinator",
+      "archiveV2",
+      "domainId"
+    ],
+    "mutation_authority": "immutable_coordinator_only",
+    "storage_gap_slots": 0,
+    "proxy_or_upgrade_storage": false,
+    "generic_mutation_storage": false,
+    "owner_address_binding": "address_this_in_every_outer_commitment",
+    "deployment_chain_id_source": "constructor_captured_immutable",
+    "live_block_chainid_forbidden": true
+  },
+  "replay_cell": {
+    "solidity_type": "ReplayCellV2",
+    "mapping_key_type": "bytes32",
+    "fields": [
+      {
+        "name": "commitment",
+        "type": "bytes32",
+        "slot_offset": 0
+      },
+      {
+        "name": "touchedRevision",
+        "type": "uint64",
+        "slot_offset": 1,
+        "bit_offset": 0
+      },
+      {
+        "name": "kind",
+        "type": "ReplayKindV2",
+        "slot_offset": 1,
+        "bit_offset": 64
+      },
+      {
+        "name": "status",
+        "type": "ReplayStatusV2",
+        "slot_offset": 1,
+        "bit_offset": 72
+      }
+    ],
+    "replay_kind_enum": [
+      {
+        "name": "UNSET",
+        "value": 0
+      },
+      {
+        "name": "ONE_SHOT",
+        "value": 1
+      },
+      {
+        "name": "MONOTONIC_COUNTER",
+        "value": 2
+      },
+      {
+        "name": "CHAIN_HEAD",
+        "value": 3
+      },
+      {
+        "name": "PERMANENT_LATCH",
+        "value": 4
+      },
+      {
+        "name": "IMMUTABLE_BINDING",
+        "value": 5
+      }
+    ],
+    "replay_status_enum": [
+      {
+        "name": "UNSET",
+        "value": 0
+      },
+      {
+        "name": "ACTIVE",
+        "value": 1
+      },
+      {
+        "name": "CONSUMED",
+        "value": 2
+      },
+      {
+        "name": "SUPERSEDED",
+        "value": 3
+      },
+      {
+        "name": "RETIRED",
+        "value": 4
+      }
+    ],
+    "capability_only": true,
+    "per_surface_assignment_frozen": false
+  },
+  "snapshot_protocol": {
+    "function_signature": "ownerStateSnapshotV2()",
+    "state_mutability": "view",
+    "return_fields": [
+      {
+        "position": 0,
+        "name": "domainId",
+        "type": "bytes32"
+      },
+      {
+        "position": 1,
+        "name": "revision",
+        "type": "uint64"
+      },
+      {
+        "position": 2,
+        "name": "stateRoot",
+        "type": "bytes32"
+      },
+      {
+        "position": 3,
+        "name": "recordChainTip",
+        "type": "bytes32"
+      }
+    ],
+    "commitment_domain": "6529STREAM_ARTIST_OWNER_SNAPSHOT_COMMITMENT_V2",
+    "commitment_encoding": "abi.encode",
+    "commitment_fields": [
+      "domain_separator",
+      "deployment_chain_id",
+      "registry_address",
+      "coordinator_address",
+      "archive_v2_address",
+      "owner_address",
+      "domain_id",
+      "revision",
+      "state_root",
+      "record_chain_tip"
+    ],
+    "runtime_codehash_commitment": null,
+    "failure_semantics": "revert_on_unavailable_malformed_or_noncanonical_return"
+  },
+  "genesis_protocol": {
+    "revision": 0,
+    "record_sequence": 0,
+    "state_root_domain": "6529STREAM_ARTIST_OWNER_STATE_GENESIS_V2",
+    "record_chain_tip_domain": "6529STREAM_ARTIST_OWNER_RECORD_GENESIS_V2",
+    "encoding": "abi.encode",
+    "ordered_fields": [
+      "domain_separator",
+      "deployment_chain_id",
+      "registry_address",
+      "coordinator_address",
+      "archive_v2_address",
+      "owner_address",
+      "domain_id"
+    ],
+    "require_nonzero_state_root": true,
+    "require_nonzero_record_chain_tip": true
+  },
+  "transition_protocol": {
+    "checked_revision_increment": 1,
+    "revision_increment_frequency": "exactly_once_per_successful_owner_action",
+    "checked_record_sequence_increment": "exact_record_count_zero_to_two_per_successful_owner_action",
+    "overflow_behavior": "revert",
+    "failure_semantics": "any_failure_reverts_header_roots_replay_domain_state_records_and_events",
+    "state_transition_domain": "6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2",
+    "state_transition_encoding": "abi.encode",
+    "state_transition_fields": [
+      "domain_separator",
+      "deployment_chain_id",
+      "registry_address",
+      "coordinator_address",
+      "archive_v2_address",
+      "owner_address",
+      "domain_id",
+      "prior_revision",
+      "next_revision",
+      "prior_state_root",
+      "action_commitment",
+      "next_domain_state_commitment",
+      "replay_delta_commitment",
+      "record_delta_commitment"
+    ],
+    "record_transition_domain": "6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2",
+    "record_transition_encoding": "abi.encode",
+    "record_transition_fields": [
+      "domain_separator",
+      "deployment_chain_id",
+      "registry_address",
+      "coordinator_address",
+      "archive_v2_address",
+      "owner_address",
+      "domain_id",
+      "prior_record_sequence",
+      "next_record_sequence",
+      "prior_record_chain_tip",
+      "record_commitment"
+    ],
+    "history_sensitive": true,
+    "no_op_success_forbidden": true,
+    "root_rewind_forbidden": true,
+    "record_chain_tip_rewind_forbidden": true,
+    "replay_delete_forbidden": true,
+    "replay_reopen_forbidden": true
+  },
+  "replay_key_protocol": {
+    "domain": "6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2",
+    "encoding": "abi.encode",
+    "ordered_fields": [
+      "domain_separator",
+      "deployment_chain_id",
+      "registry_address",
+      "coordinator_address",
+      "archive_v2_address",
+      "owner_address",
+      "domain_id",
+      "surface_id",
+      "scope_commitment"
+    ],
+    "scope_commitment_type": "bytes32",
+    "scope_commitment_schema": null,
+    "per_surface_scope_frozen": false,
+    "lifecycle_assignment_frozen": false
+  },
+  "owner_side_recomputation": {
+    "compute_location": "inside_typed_owner",
+    "mandatory_inputs": [
+      "accepted_recipe_identity",
+      "accepted_action_identity",
+      "original_caller",
+      "exact_typed_calldata",
+      "prior_owner_storage",
+      "actual_replay_transitions",
+      "actual_record_transitions"
+    ],
+    "computed_outputs": [
+      "action_commitment",
+      "next_domain_state_commitment",
+      "replay_delta_commitment",
+      "record_delta_commitment"
+    ],
+    "coordinator_supplied_commitment_words_allowed": false,
+    "external_supplied_commitment_words_allowed": false,
+    "action_commitment_preimage": null,
+    "domain_state_commitment_preimage": null,
+    "replay_delta_commitment_preimage": null,
+    "record_delta_commitment_preimage": null,
+    "exact_inner_preimages_resolved": false,
+    "source_blocking": true
+  },
+  "canonical_vectors": {
+    "fixture_scope": "outer_mechanics_only_inner_commitment_words_are_not_accepted_preimages",
+    "fixture_identity": {
+      "deployment_chain_id": "1",
+      "registry_address": "0x1111111111111111111111111111111111111111",
+      "coordinator_address": "0x2222222222222222222222222222222222222222",
+      "archive_v2_address": "0x3333333333333333333333333333333333333333",
+      "owner_address": "0x4444444444444444444444444444444444444444",
+      "domain_id": "0x5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "inner_commitment_fixture_words_resolve_schemas": false,
+    "vectors": {
+      "replay_key": {
+        "domain": "6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2",
+        "domain_separator_keccak256": "0xdaa7efdef2e9b2bd74631e4da43ea0042b9c257eb344805a490233e0f97d274b",
+        "inputs": {
+          "surface_id": "0x6666666666666666666666666666666666666666666666666666666666666666",
+          "scope_commitment": "0x7777777777777777777777777777777777777777777777777777777777777777"
+        },
+        "expected_commitment": "0xe0c096cb9d6990e93b72a1519208efb2b87e3c9c7ce93105f15558d9444ddf20"
+      },
+      "snapshot_commitment": {
+        "domain": "6529STREAM_ARTIST_OWNER_SNAPSHOT_COMMITMENT_V2",
+        "domain_separator_keccak256": "0xc9d678821d842153b03ede90b9787dd25a23439a5be18b4db082474fa81218bd",
+        "inputs": {
+          "revision": "8",
+          "state_root": "0x8888888888888888888888888888888888888888888888888888888888888888",
+          "record_chain_tip": "0x9999999999999999999999999999999999999999999999999999999999999999"
+        },
+        "expected_commitment": "0xd8b30bb567bffbd3f48dfccf0b311526286051fc2f407e04caa6ba8cdb265eba"
+      },
+      "genesis_state_root": {
+        "domain": "6529STREAM_ARTIST_OWNER_STATE_GENESIS_V2",
+        "domain_separator_keccak256": "0xedb0379233c83800c6db83238001f2822578b438f7dc95fd2a43cda0ec8e7fb3",
+        "inputs": {},
+        "expected_commitment": "0x9ab24e9404784bf21af02aef709108f55319dcc7f9afe633cc596cf801dc533d"
+      },
+      "genesis_record_chain_tip": {
+        "domain": "6529STREAM_ARTIST_OWNER_RECORD_GENESIS_V2",
+        "domain_separator_keccak256": "0xe9084c3bcfb3889af1e32b005d68171c85947716cfd83b71f8a8c893ecb731ee",
+        "inputs": {},
+        "expected_commitment": "0x5ff1dfca7a32d07d45100b83fea748b96004ff4497076837a4a8c047433181d1"
+      },
+      "state_transition": {
+        "domain": "6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2",
+        "domain_separator_keccak256": "0xe6d4afebab969e9516cf244bda38d4bc80dee0ae376b1c7c674fccaff16a74d0",
+        "inputs": {
+          "prior_revision": "8",
+          "next_revision": "9",
+          "prior_state_root": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "action_commitment": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "next_domain_state_commitment": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "replay_delta_commitment": "0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "record_delta_commitment": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        },
+        "expected_commitment": "0x8d56d70b74acabb1c7a5b8f5706d18dfc277d6e9bcfce8995e7f7cf434a915d3"
+      },
+      "record_transition": {
+        "domain": "6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2",
+        "domain_separator_keccak256": "0xee9923a60ff96c9c573fe0297f13dd797f0879da0f711079e7e3e5981fb8ab29",
+        "inputs": {
+          "prior_record_sequence": "10",
+          "next_record_sequence": "11",
+          "prior_record_chain_tip": "0x9999999999999999999999999999999999999999999999999999999999999999",
+          "record_commitment": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "expected_commitment": "0x5a898e38b34c5ee4cf061e3ee8b2e11012b00b7c5e41fd62010a33cc80e6ee97"
+      }
+    }
+  },
+  "constant_work_bounds": {
+    "operation_count": 57,
+    "total_owner_actions": 85,
+    "minimum_owner_actions_per_operation": 1,
+    "maximum_owner_actions_per_operation": 5,
+    "minimum_snapshots_per_operation": 1,
+    "maximum_snapshots_per_operation": 7,
+    "maximum_replay_writes_per_owner_action": 4,
+    "maximum_record_writes_per_owner_action": 2,
+    "unbounded_enumeration": false,
+    "external_calls_from_owner": false
+  },
+  "domain_layout_rows": [
+    {
+      "domain_id": "binding_lifecycle",
+      "owner_contract": "StreamArtistBindingLifecycle",
+      "storage_namespace": "6529stream.artist.binding-lifecycle.v2",
+      "coordinator_snapshot_order": 1,
+      "participating_operation_count": 23,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "collaborator_lifecycle",
+      "owner_contract": "StreamArtistCollaboratorLifecycle",
+      "storage_namespace": "6529stream.artist.collaborator-lifecycle.v2",
+      "coordinator_snapshot_order": 2,
+      "participating_operation_count": 16,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "storage_namespace": "6529stream.artist.identity-authority.v2",
+      "coordinator_snapshot_order": 3,
+      "participating_operation_count": 49,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "acceptance_lifecycle",
+      "owner_contract": "StreamArtistAcceptanceLifecycle",
+      "storage_namespace": "6529stream.artist.acceptance-lifecycle.v2",
+      "coordinator_snapshot_order": 4,
+      "participating_operation_count": 2,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "storage_namespace": "6529stream.artist.attribution-lifecycle.v2",
+      "coordinator_snapshot_order": 5,
+      "participating_operation_count": 19,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "payout_lifecycle",
+      "owner_contract": "StreamArtistPayoutLifecycle",
+      "storage_namespace": "6529stream.artist.payout-lifecycle.v2",
+      "coordinator_snapshot_order": 6,
+      "participating_operation_count": 2,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    },
+    {
+      "domain_id": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "storage_namespace": "6529stream.artist.consent-finality.v2",
+      "coordinator_snapshot_order": 7,
+      "participating_operation_count": 11,
+      "decision_status": "unresolved",
+      "selected_domain_struct": null,
+      "selected_domain_state_commitment": null,
+      "source_blocking": true
+    }
+  ],
+  "replay_surface_rows": [
+    {
+      "surface_id": "acceptance_lifecycle.replay.record_uniqueness",
+      "owner_domain": "acceptance_lifecycle",
+      "owner_contract": "StreamArtistAcceptanceLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.claim_record_hash_uniqueness",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.collection_declaration_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.correction_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.counter_statement_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.dispute_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.dispute_resolution_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.governance_action",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.governance_action_id_and_claim_transition_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.repudiation_cancellation_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.repudiation_execution_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.repudiation_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.repudiation_veto_key",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "attribution_lifecycle.replay.terminal_governance_action",
+      "owner_domain": "attribution_lifecycle",
+      "owner_contract": "StreamArtistAttributionLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "binding_lifecycle.replay.proposal_key",
+      "owner_domain": "binding_lifecycle",
+      "owner_contract": "StreamArtistBindingLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "binding_lifecycle.replay.proposal_terminal_transition_key",
+      "owner_domain": "binding_lifecycle",
+      "owner_contract": "StreamArtistBindingLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "binding_lifecycle.replay.refusal_uniqueness",
+      "owner_domain": "binding_lifecycle",
+      "owner_contract": "StreamArtistBindingLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "collaborator_lifecycle.replay.collaborator_proposal_key",
+      "owner_domain": "collaborator_lifecycle",
+      "owner_contract": "StreamArtistCollaboratorLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.consent_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.content_consent_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.freeze_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.policy_consent_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.ratification_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.recovery_approval_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.sale_consent_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.sanction_finalization_transition_key",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "consent_finality.replay.sanction_uniqueness",
+      "owner_domain": "consent_finality",
+      "owner_contract": "StreamArtistConsentFinalityLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.activation_cancellation_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.activation_execution_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.activation_request_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.attestation_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.contest_record_hash_and_subject_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.delegation_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.delegation_use",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.digest_revocation",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.directive_chain",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.dormancy_cancellation_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.dormancy_execution_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.dormancy_notice_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.finding_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.governance_action",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.governance_action_id",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.governance_action_when_accelerated",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.grant_chain",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.guardian_approval_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.guardian_set_chain",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.identity_revision_chain",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.identity_uniqueness",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.import_binding",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.import_binding_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.nonce_allocator",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.one_way_cutover_latch",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.one_way_delegation_revocation",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.recovery_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.recovery_veto_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.rotation_execution_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.rotation_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.rotation_veto_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.second_governance_action",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.standing_retirement",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.succession_chain",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.target_authorization_revocation",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "identity_authority.replay.verified_lane_key",
+      "owner_domain": "identity_authority",
+      "owner_contract": "StreamArtistIdentityAuthority",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    },
+    {
+      "surface_id": "payout_lifecycle.replay.designation_chain",
+      "owner_domain": "payout_lifecycle",
+      "owner_contract": "StreamArtistPayoutLifecycle",
+      "decision_status": "unresolved",
+      "replay_kind": null,
+      "replay_status_lifecycle": null,
+      "scope_commitment_schema": null,
+      "source_blocking": true
+    }
+  ],
+  "unresolved_dependencies": [
+    {
+      "id": "per_domain_structs",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "per_domain_state_commitments",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "per_surface_scope_commitments",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "per_surface_replay_lifecycles",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "action_commitment_schema",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "record_commitment_schema",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "construction_binding_preimage",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "entrypoint_abi",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "normative_owner_events",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "provider_read_protocol",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "role_and_signer_authority",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "recipe_and_composite_manifest_commitments",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "archive_evidence_protocol",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "operation_lock_and_errors",
+      "value": null,
+      "source_blocking": true
+    },
+    {
+      "id": "gas_and_call_discipline",
+      "value": null,
+      "source_blocking": true
+    }
+  ],
+  "prohibited_mechanics": [
+    "external_calls_from_owner",
+    "delegatecall",
+    "proxy",
+    "generic_upgrade",
+    "mutable_rebind",
+    "storage_gap",
+    "generic_mutation",
+    "replay_delete",
+    "replay_reopen",
+    "state_root_rewind",
+    "record_chain_tip_rewind",
+    "successful_no_op"
+  ],
+  "gate_state": {
+    "outer_foundation_selected_for_review": true,
+    "owner_storage_accepted": false,
+    "owner_snapshots_accepted": false,
+    "replay_keys_accepted": false,
+    "all_domain_layouts_resolved": false,
+    "all_replay_surfaces_resolved": false,
+    "construction_binding_resolved": false,
+    "shared_mechanics_modified": false,
+    "interface_freeze_complete": false,
+    "full_freeze_complete": false,
+    "implementation_authorized": false,
+    "source_present": false,
+    "deployment_authorized": false,
+    "readiness_credit": false
+  }
+}

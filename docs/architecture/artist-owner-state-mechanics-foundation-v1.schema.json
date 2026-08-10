@@ -1,0 +1,1417 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "maturity",
+    "evaluated_base",
+    "authority_bindings",
+    "selected_foundation",
+    "inventory_bindings",
+    "common_storage_layout",
+    "replay_cell",
+    "snapshot_protocol",
+    "genesis_protocol",
+    "transition_protocol",
+    "replay_key_protocol",
+    "owner_side_recomputation",
+    "canonical_vectors",
+    "constant_work_bounds",
+    "domain_layout_rows",
+    "replay_surface_rows",
+    "unresolved_dependencies",
+    "prohibited_mechanics",
+    "gate_state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "6529stream.artist-owner-state-mechanics-foundation.v1"
+    },
+    "status": {
+      "const": "PROPOSED_FOUNDATION_ONLY"
+    },
+    "maturity": {
+      "const": "pre_audit_source_blocked"
+    },
+    "evaluated_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "tree",
+        "shared_mechanics_accepted_count",
+        "shared_mechanics_unresolved_count"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "tree": {
+          "type": "string"
+        },
+        "shared_mechanics_accepted_count": {
+          "type": "integer"
+        },
+        "shared_mechanics_unresolved_count": {
+          "type": "integer"
+        }
+      }
+    },
+    "authority_bindings": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "selected_foundation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "option_id",
+        "selection_posture",
+        "rationale",
+        "rejected_options"
+      ],
+      "properties": {
+        "option_id": {
+          "type": "string"
+        },
+        "selection_posture": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string"
+          }
+        },
+        "rejected_options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "option_id",
+              "disposition",
+              "reason"
+            ],
+            "properties": {
+              "option_id": {
+                "type": "string"
+              },
+              "disposition": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "inventory_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic_domains",
+        "operations",
+        "replay_surfaces",
+        "record_surfaces",
+        "event_surfaces"
+      ],
+      "properties": {
+        "semantic_domains": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "canonical_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "operations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "canonical_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "replay_surfaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "canonical_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "record_surfaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "canonical_sha256": {
+              "type": "string"
+            }
+          }
+        },
+        "event_surfaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "count",
+            "canonical_sha256"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "canonical_sha256": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "common_storage_layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slots",
+        "typed_domain_state_start_slot",
+        "immutable_binding_fields",
+        "mutation_authority",
+        "storage_gap_slots",
+        "proxy_or_upgrade_storage",
+        "generic_mutation_storage",
+        "owner_address_binding",
+        "deployment_chain_id_source",
+        "live_block_chainid_forbidden"
+      ],
+      "properties": {
+        "slots": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "label",
+                "solidity_type",
+                "packing",
+                "fields",
+                "reserved_high_bits"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "solidity_type": {
+                  "type": "string"
+                },
+                "packing": {
+                  "type": "string"
+                },
+                "fields": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "name",
+                      "type",
+                      "bit_offset",
+                      "bit_width"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "bit_offset": {
+                        "type": "integer"
+                      },
+                      "bit_width": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "reserved_high_bits": {
+                  "type": "integer"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "label",
+                "solidity_type"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "solidity_type": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "label",
+                "solidity_type"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "solidity_type": {
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slot",
+                "label",
+                "solidity_type"
+              ],
+              "properties": {
+                "slot": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "solidity_type": {
+                  "type": "string"
+                }
+              }
+            }
+          ],
+          "items": false
+        },
+        "typed_domain_state_start_slot": {
+          "type": "integer"
+        },
+        "immutable_binding_fields": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        },
+        "mutation_authority": {
+          "type": "string"
+        },
+        "storage_gap_slots": {
+          "type": "integer"
+        },
+        "proxy_or_upgrade_storage": {
+          "type": "boolean"
+        },
+        "generic_mutation_storage": {
+          "type": "boolean"
+        },
+        "owner_address_binding": {
+          "type": "string"
+        },
+        "deployment_chain_id_source": {
+          "type": "string"
+        },
+        "live_block_chainid_forbidden": {
+          "type": "boolean"
+        }
+      }
+    },
+    "replay_cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solidity_type",
+        "mapping_key_type",
+        "fields",
+        "replay_kind_enum",
+        "replay_status_enum",
+        "capability_only",
+        "per_surface_assignment_frozen"
+      ],
+      "properties": {
+        "solidity_type": {
+          "type": "string"
+        },
+        "mapping_key_type": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "type",
+                "slot_offset"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "slot_offset": {
+                  "type": "integer"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "type",
+                "slot_offset",
+                "bit_offset"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "slot_offset": {
+                  "type": "integer"
+                },
+                "bit_offset": {
+                  "type": "integer"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "type",
+                "slot_offset",
+                "bit_offset"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "slot_offset": {
+                  "type": "integer"
+                },
+                "bit_offset": {
+                  "type": "integer"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "type",
+                "slot_offset",
+                "bit_offset"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "slot_offset": {
+                  "type": "integer"
+                },
+                "bit_offset": {
+                  "type": "integer"
+                }
+              }
+            }
+          ],
+          "items": false
+        },
+        "replay_kind_enum": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "replay_status_enum": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "capability_only": {
+          "type": "boolean"
+        },
+        "per_surface_assignment_frozen": {
+          "type": "boolean"
+        }
+      }
+    },
+    "snapshot_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "function_signature",
+        "state_mutability",
+        "return_fields",
+        "commitment_domain",
+        "commitment_encoding",
+        "commitment_fields",
+        "runtime_codehash_commitment",
+        "failure_semantics"
+      ],
+      "properties": {
+        "function_signature": {
+          "type": "string"
+        },
+        "state_mutability": {
+          "type": "string"
+        },
+        "return_fields": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "position",
+              "name",
+              "type"
+            ],
+            "properties": {
+              "position": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "commitment_domain": {
+          "const": "6529STREAM_ARTIST_OWNER_SNAPSHOT_COMMITMENT_V2"
+        },
+        "commitment_encoding": {
+          "type": "string"
+        },
+        "commitment_fields": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {
+            "type": "string"
+          }
+        },
+        "runtime_codehash_commitment": {
+          "type": "null"
+        },
+        "failure_semantics": {
+          "const": "revert_on_unavailable_malformed_or_noncanonical_return"
+        }
+      }
+    },
+    "genesis_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "record_sequence",
+        "state_root_domain",
+        "record_chain_tip_domain",
+        "encoding",
+        "ordered_fields",
+        "require_nonzero_state_root",
+        "require_nonzero_record_chain_tip"
+      ],
+      "properties": {
+        "revision": {
+          "type": "integer"
+        },
+        "record_sequence": {
+          "type": "integer"
+        },
+        "state_root_domain": {
+          "type": "string"
+        },
+        "record_chain_tip_domain": {
+          "type": "string"
+        },
+        "encoding": {
+          "type": "string"
+        },
+        "ordered_fields": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "string"
+          }
+        },
+        "require_nonzero_state_root": {
+          "type": "boolean"
+        },
+        "require_nonzero_record_chain_tip": {
+          "type": "boolean"
+        }
+      }
+    },
+    "transition_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checked_revision_increment",
+        "revision_increment_frequency",
+        "checked_record_sequence_increment",
+        "overflow_behavior",
+        "failure_semantics",
+        "state_transition_domain",
+        "state_transition_encoding",
+        "state_transition_fields",
+        "record_transition_domain",
+        "record_transition_encoding",
+        "record_transition_fields",
+        "history_sensitive",
+        "no_op_success_forbidden",
+        "root_rewind_forbidden",
+        "record_chain_tip_rewind_forbidden",
+        "replay_delete_forbidden",
+        "replay_reopen_forbidden"
+      ],
+      "properties": {
+        "checked_revision_increment": {
+          "type": "integer"
+        },
+        "revision_increment_frequency": {
+          "type": "string"
+        },
+        "checked_record_sequence_increment": {
+          "type": "string"
+        },
+        "overflow_behavior": {
+          "type": "string"
+        },
+        "failure_semantics": {
+          "type": "string"
+        },
+        "state_transition_domain": {
+          "const": "6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2"
+        },
+        "state_transition_encoding": {
+          "type": "string"
+        },
+        "state_transition_fields": {
+          "type": "array",
+          "minItems": 14,
+          "maxItems": 14,
+          "items": {
+            "type": "string"
+          }
+        },
+        "record_transition_domain": {
+          "const": "6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2"
+        },
+        "record_transition_encoding": {
+          "type": "string"
+        },
+        "record_transition_fields": {
+          "type": "array",
+          "minItems": 11,
+          "maxItems": 11,
+          "items": {
+            "type": "string"
+          }
+        },
+        "history_sensitive": {
+          "type": "boolean"
+        },
+        "no_op_success_forbidden": {
+          "type": "boolean"
+        },
+        "root_rewind_forbidden": {
+          "type": "boolean"
+        },
+        "record_chain_tip_rewind_forbidden": {
+          "type": "boolean"
+        },
+        "replay_delete_forbidden": {
+          "type": "boolean"
+        },
+        "replay_reopen_forbidden": {
+          "type": "boolean"
+        }
+      }
+    },
+    "replay_key_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "encoding",
+        "ordered_fields",
+        "scope_commitment_type",
+        "scope_commitment_schema",
+        "per_surface_scope_frozen",
+        "lifecycle_assignment_frozen"
+      ],
+      "properties": {
+        "domain": {
+          "type": "string"
+        },
+        "encoding": {
+          "type": "string"
+        },
+        "ordered_fields": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope_commitment_type": {
+          "type": "string"
+        },
+        "scope_commitment_schema": {
+          "type": "null"
+        },
+        "per_surface_scope_frozen": {
+          "type": "boolean"
+        },
+        "lifecycle_assignment_frozen": {
+          "type": "boolean"
+        }
+      }
+    },
+    "owner_side_recomputation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compute_location",
+        "mandatory_inputs",
+        "computed_outputs",
+        "coordinator_supplied_commitment_words_allowed",
+        "external_supplied_commitment_words_allowed",
+        "action_commitment_preimage",
+        "domain_state_commitment_preimage",
+        "replay_delta_commitment_preimage",
+        "record_delta_commitment_preimage",
+        "exact_inner_preimages_resolved",
+        "source_blocking"
+      ],
+      "properties": {
+        "compute_location": {
+          "type": "string"
+        },
+        "mandatory_inputs": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {
+            "type": "string"
+          }
+        },
+        "computed_outputs": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string"
+          }
+        },
+        "coordinator_supplied_commitment_words_allowed": {
+          "const": false
+        },
+        "external_supplied_commitment_words_allowed": {
+          "const": false
+        },
+        "action_commitment_preimage": {
+          "type": "null"
+        },
+        "domain_state_commitment_preimage": {
+          "type": "null"
+        },
+        "replay_delta_commitment_preimage": {
+          "type": "null"
+        },
+        "record_delta_commitment_preimage": {
+          "type": "null"
+        },
+        "exact_inner_preimages_resolved": {
+          "const": false
+        },
+        "source_blocking": {
+          "const": true
+        }
+      }
+    },
+    "canonical_vectors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixture_scope",
+        "fixture_identity",
+        "inner_commitment_fixture_words_resolve_schemas",
+        "vectors"
+      ],
+      "properties": {
+        "fixture_scope": {
+          "type": "string"
+        },
+        "fixture_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "deployment_chain_id",
+            "registry_address",
+            "coordinator_address",
+            "archive_v2_address",
+            "owner_address",
+            "domain_id"
+          ],
+          "properties": {
+            "deployment_chain_id": {
+              "type": "string"
+            },
+            "registry_address": {
+              "type": "string"
+            },
+            "coordinator_address": {
+              "type": "string"
+            },
+            "archive_v2_address": {
+              "type": "string"
+            },
+            "owner_address": {
+              "type": "string"
+            },
+            "domain_id": {
+              "type": "string"
+            }
+          }
+        },
+        "inner_commitment_fixture_words_resolve_schemas": {
+          "type": "boolean"
+        },
+        "vectors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "replay_key",
+            "snapshot_commitment",
+            "genesis_state_root",
+            "genesis_record_chain_tip",
+            "state_transition",
+            "record_transition"
+          ],
+          "properties": {
+            "replay_key": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "surface_id",
+                    "scope_commitment"
+                  ],
+                  "properties": {
+                    "surface_id": {
+                      "type": "string"
+                    },
+                    "scope_commitment": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            },
+            "snapshot_commitment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "revision",
+                    "state_root",
+                    "record_chain_tip"
+                  ],
+                  "properties": {
+                    "revision": {
+                      "type": "string"
+                    },
+                    "state_root": {
+                      "type": "string"
+                    },
+                    "record_chain_tip": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            },
+            "genesis_state_root": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [],
+                  "properties": {}
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            },
+            "genesis_record_chain_tip": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [],
+                  "properties": {}
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            },
+            "state_transition": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "prior_revision",
+                    "next_revision",
+                    "prior_state_root",
+                    "action_commitment",
+                    "next_domain_state_commitment",
+                    "replay_delta_commitment",
+                    "record_delta_commitment"
+                  ],
+                  "properties": {
+                    "prior_revision": {
+                      "type": "string"
+                    },
+                    "next_revision": {
+                      "type": "string"
+                    },
+                    "prior_state_root": {
+                      "type": "string"
+                    },
+                    "action_commitment": {
+                      "type": "string"
+                    },
+                    "next_domain_state_commitment": {
+                      "type": "string"
+                    },
+                    "replay_delta_commitment": {
+                      "type": "string"
+                    },
+                    "record_delta_commitment": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            },
+            "record_transition": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "domain",
+                "domain_separator_keccak256",
+                "inputs",
+                "expected_commitment"
+              ],
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "domain_separator_keccak256": {
+                  "type": "string"
+                },
+                "inputs": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "prior_record_sequence",
+                    "next_record_sequence",
+                    "prior_record_chain_tip",
+                    "record_commitment"
+                  ],
+                  "properties": {
+                    "prior_record_sequence": {
+                      "type": "string"
+                    },
+                    "next_record_sequence": {
+                      "type": "string"
+                    },
+                    "prior_record_chain_tip": {
+                      "type": "string"
+                    },
+                    "record_commitment": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "expected_commitment": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "constant_work_bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_count",
+        "total_owner_actions",
+        "minimum_owner_actions_per_operation",
+        "maximum_owner_actions_per_operation",
+        "minimum_snapshots_per_operation",
+        "maximum_snapshots_per_operation",
+        "maximum_replay_writes_per_owner_action",
+        "maximum_record_writes_per_owner_action",
+        "unbounded_enumeration",
+        "external_calls_from_owner"
+      ],
+      "properties": {
+        "operation_count": {
+          "type": "integer"
+        },
+        "total_owner_actions": {
+          "type": "integer"
+        },
+        "minimum_owner_actions_per_operation": {
+          "type": "integer"
+        },
+        "maximum_owner_actions_per_operation": {
+          "type": "integer"
+        },
+        "minimum_snapshots_per_operation": {
+          "type": "integer"
+        },
+        "maximum_snapshots_per_operation": {
+          "type": "integer"
+        },
+        "maximum_replay_writes_per_owner_action": {
+          "type": "integer"
+        },
+        "maximum_record_writes_per_owner_action": {
+          "type": "integer"
+        },
+        "unbounded_enumeration": {
+          "type": "boolean"
+        },
+        "external_calls_from_owner": {
+          "type": "boolean"
+        }
+      }
+    },
+    "domain_layout_rows": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "domain_id",
+          "owner_contract",
+          "storage_namespace",
+          "coordinator_snapshot_order",
+          "participating_operation_count",
+          "decision_status",
+          "selected_domain_struct",
+          "selected_domain_state_commitment",
+          "source_blocking"
+        ],
+        "properties": {
+          "domain_id": {
+            "type": "string"
+          },
+          "owner_contract": {
+            "type": "string"
+          },
+          "storage_namespace": {
+            "type": "string"
+          },
+          "coordinator_snapshot_order": {
+            "type": "integer"
+          },
+          "participating_operation_count": {
+            "type": "integer"
+          },
+          "decision_status": {
+            "const": "unresolved"
+          },
+          "selected_domain_struct": {
+            "type": "null"
+          },
+          "selected_domain_state_commitment": {
+            "type": "null"
+          },
+          "source_blocking": {
+            "const": true
+          }
+        }
+      }
+    },
+    "replay_surface_rows": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface_id",
+          "owner_domain",
+          "owner_contract",
+          "decision_status",
+          "replay_kind",
+          "replay_status_lifecycle",
+          "scope_commitment_schema",
+          "source_blocking"
+        ],
+        "properties": {
+          "surface_id": {
+            "type": "string"
+          },
+          "owner_domain": {
+            "type": "string"
+          },
+          "owner_contract": {
+            "type": "string"
+          },
+          "decision_status": {
+            "const": "unresolved"
+          },
+          "replay_kind": {
+            "type": "null"
+          },
+          "replay_status_lifecycle": {
+            "type": "null"
+          },
+          "scope_commitment_schema": {
+            "type": "null"
+          },
+          "source_blocking": {
+            "const": true
+          }
+        }
+      }
+    },
+    "unresolved_dependencies": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "value",
+          "source_blocking"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "value": {
+            "type": "null"
+          },
+          "source_blocking": {
+            "const": true
+          }
+        }
+      }
+    },
+    "prohibited_mechanics": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "type": "string"
+      }
+    },
+    "gate_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outer_foundation_selected_for_review",
+        "owner_storage_accepted",
+        "owner_snapshots_accepted",
+        "replay_keys_accepted",
+        "all_domain_layouts_resolved",
+        "all_replay_surfaces_resolved",
+        "construction_binding_resolved",
+        "shared_mechanics_modified",
+        "interface_freeze_complete",
+        "full_freeze_complete",
+        "implementation_authorized",
+        "source_present",
+        "deployment_authorized",
+        "readiness_credit"
+      ],
+      "properties": {
+        "outer_foundation_selected_for_review": {
+          "type": "boolean"
+        },
+        "owner_storage_accepted": {
+          "type": "boolean"
+        },
+        "owner_snapshots_accepted": {
+          "type": "boolean"
+        },
+        "replay_keys_accepted": {
+          "type": "boolean"
+        },
+        "all_domain_layouts_resolved": {
+          "type": "boolean"
+        },
+        "all_replay_surfaces_resolved": {
+          "type": "boolean"
+        },
+        "construction_binding_resolved": {
+          "type": "boolean"
+        },
+        "shared_mechanics_modified": {
+          "type": "boolean"
+        },
+        "interface_freeze_complete": {
+          "type": "boolean"
+        },
+        "full_freeze_complete": {
+          "type": "boolean"
+        },
+        "implementation_authorized": {
+          "type": "boolean"
+        },
+        "source_present": {
+          "type": "boolean"
+        },
+        "deployment_authorized": {
+          "type": "boolean"
+        },
+        "readiness_credit": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/artist-owner-state-mechanics-foundation-v1.schema.json",
+  "title": "6529Stream artist owner-state mechanics foundation v1"
+}
