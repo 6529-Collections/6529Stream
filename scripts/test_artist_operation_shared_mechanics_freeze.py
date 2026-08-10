@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import shutil
@@ -297,7 +298,35 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         self.assertEqual(row, CHECKER.EXPECTED_669_ROW)
         row["call_syntax"] = "signer.staticcall(context.erc1271GasCap)"
         self._write(CHECKER.MATRIX_PATH, matrix)
-        self._assert_rejected("authority semantic_owner_matrix sha256 drifted")
+        matrix_digest = hashlib.sha256(
+            (self.root / CHECKER.MATRIX_PATH).read_bytes()
+        ).hexdigest()
+
+        packet = self._packet()
+        matrix_binding = next(
+            binding
+            for binding in packet["authority_bindings"]
+            if binding["id"] == "semantic_owner_matrix"
+        )
+        matrix_binding["sha256"] = matrix_digest
+        self._write_packet(packet)
+
+        rebound_authorities = tuple(
+            (
+                authority_id,
+                relative,
+                matrix_digest if authority_id == "semantic_owner_matrix" else digest,
+            )
+            for authority_id, relative, digest in CHECKER.EXPECTED_AUTHORITY_BINDINGS
+        )
+        original_authorities = CHECKER.EXPECTED_AUTHORITY_BINDINGS
+        try:
+            CHECKER.EXPECTED_AUTHORITY_BINDINGS = rebound_authorities
+            self._assert_rejected(
+                "issue 669 exact stateless staticcall reservation drifted"
+            )
+        finally:
+            CHECKER.EXPECTED_AUTHORITY_BINDINGS = original_authorities
 
 
 if __name__ == "__main__":
