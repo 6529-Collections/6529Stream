@@ -539,6 +539,19 @@
           "items": {
             "$ref": "#/$defs/consideredOption"
           },
+          "contains": {
+            "type": "object",
+            "properties": {
+              "disposition": {
+                "const": "accepted"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1,
           "uniqueItems": true
         },
         "selected_values": {

@@ -7,8 +7,9 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from jsonschema import Draft202012Validator
@@ -33,7 +34,7 @@ JSON_SCHEMA_ID = (
 )
 EVALUATED_COMMIT = "eef6a4cc5070186cc6517cca90bd9ffe1f74ea06"
 EVALUATED_TREE = "1a56c7b27ed304f96f551d1bebd0aa93a4ee164e"
-SCHEMA_SHA256 = "094eea2ffd0955f000ca1d97465c0d7f7f1662cfc844481068b4308a79ed5505"
+SCHEMA_SHA256 = "f3840eae20ece438777922253099ab26276b51097618f04f86260d7e47df81ad"
 SELECTED_SHAPE_SHA256 = "9417c5fe3f8187ab75463384b1ef0932233369b097de459df5d10f86e80cc11b"
 PHASE_ORDER_SHA256 = "9faa90a8cd9027448dfdf344f23c9719ad0488e9f79d3a78f4fd40adab7075aa"
 FIXED_INVARIANTS_SHA256 = "5e4ae8a539187ab0c29969f189d956b41c2002ac046e80023644e85c19381543"
@@ -58,6 +59,10 @@ TOP_LEVEL_FIELDS = frozenset(
         "exclusions",
     }
 )
+
+MARKDOWN_HEADING_RE = re.compile(r"^[ ]{0,3}(#{1,6})[ \t]+(.+?)[ \t]*$")
+MARKDOWN_FENCE_RE = re.compile(r"^[ ]{0,3}(`{3,}|~{3,})(.*)$")
+MARKDOWN_FENCE_CLOSE_RE = re.compile(r"^[ ]{0,3}(`+|~+)[ \t]*$")
 
 EXPECTED_AUTHORITY_BINDINGS = (
     (
@@ -156,6 +161,35 @@ EXPECTED_NATIVE_VALUE_VALUES = {
     "archive_call_value_wei": 0,
     "forced_balance_forwarded": False,
     "forced_balance_recoverable_by_protocol": False,
+}
+EXPECTED_NATIVE_VALUE_OBLIGATIONS = {
+    "encoding_obligations": (
+        "each of the 57 Registry facade ABI entries and 57 matching Coordinator ABI entries encodes stateMutability as nonpayable",
+        "native value is transaction-envelope state and is absent from operation calldata, recipe commitments, replay preimages, Archive evidence and the composite manifest",
+        "the Registry and Coordinator ABIs contain neither fallback nor receive entries",
+    ),
+    "call_obligations": (
+        "every typed owner, provider, validator and Archive call executes with exactly zero wei",
+        "forced native balance is never read as operation input and is never forwarded, withdrawn, refunded or incorporated into a protocol decision",
+    ),
+    "error_obligations": (
+        "nonzero value sent to a recognized operation selector reverts in the Solidity nonpayable ABI dispatcher before function-body execution and commits no protocol custom-error selector",
+        "empty calldata or an unknown selector reverts because fallback and receive are absent and commits no protocol custom-error selector",
+        "downstream nonzero-call-value drift is forbidden rather than normalized or refunded",
+    ),
+    "test_obligations": (
+        "for every one of 57 operation pairs assert both Registry and Coordinator ABI stateMutability equals nonpayable",
+        "for every one of 57 operation pairs send nonzero value and prove rejection before any owner, provider, validator, Archive, state, event or evidence effect",
+        "prove empty calldata and unknown selectors reject value because fallback and receive are absent",
+        "instrument each typed collaborator category and prove exact zero call value",
+        "force native balance into Registry and Coordinator and prove representative and maximum-call recipes neither read nor forward nor recover it",
+    ),
+    "evidence": (
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+        "docs/architecture/artist-semantic-owner-matrix-v2.json#operations",
+    ),
 }
 
 EXPECTED_PRESENT_ARTIST_SOURCES = (
@@ -261,6 +295,140 @@ def _canonical_digest(value: Any) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _github_heading_slug(heading: str) -> str:
+    heading = heading.strip().rstrip("#").strip().lower()
+    heading = re.sub(r"<[^>]+>", "", heading)
+    heading = re.sub(r"[^\w\s-]", "", heading, flags=re.UNICODE)
+    heading = re.sub(r"\s+", "-", heading)
+    heading = re.sub(r"-+", "-", heading)
+    return heading.strip("-")
+
+
+def _markdown_heading_anchors(text: str) -> set[str]:
+    anchors: set[str] = set()
+    counts: dict[str, int] = {}
+    fence_marker: str | None = None
+    fence_length = 0
+    in_html_comment = False
+    for raw_line in text.splitlines():
+        if fence_marker is not None:
+            closing = MARKDOWN_FENCE_CLOSE_RE.match(raw_line)
+            if (
+                closing is not None
+                and closing.group(1)[0] == fence_marker
+                and len(closing.group(1)) >= fence_length
+            ):
+                fence_marker = None
+                fence_length = 0
+            continue
+
+        line_began_in_html_comment = in_html_comment
+        if not line_began_in_html_comment:
+            opening = MARKDOWN_FENCE_RE.match(raw_line)
+            if opening is not None:
+                run = opening.group(1)
+                if run[0] == "~" or "`" not in opening.group(2):
+                    fence_marker = run[0]
+                    fence_length = len(run)
+                    continue
+
+        visible: list[str] = []
+        cursor = 0
+        while cursor < len(raw_line):
+            if in_html_comment:
+                end = raw_line.find("-->", cursor)
+                if end == -1:
+                    visible.append(" " * (len(raw_line) - cursor))
+                    cursor = len(raw_line)
+                    continue
+                visible.append(" " * (end + 3 - cursor))
+                cursor = end + 3
+                in_html_comment = False
+                continue
+
+            start = raw_line.find("<!--", cursor)
+            if start == -1:
+                visible.append(raw_line[cursor:])
+                cursor = len(raw_line)
+                continue
+            visible.append(raw_line[cursor:start])
+            end = raw_line.find("-->", start + 4)
+            if end == -1:
+                visible.append(" " * (len(raw_line) - start))
+                cursor = len(raw_line)
+                in_html_comment = True
+                continue
+            visible.append(" " * (end + 3 - start))
+            cursor = end + 3
+
+        if line_began_in_html_comment:
+            continue
+        line = "".join(visible)
+        match = MARKDOWN_HEADING_RE.match(line)
+        if match is None:
+            continue
+        slug = _github_heading_slug(match.group(2))
+        if not slug:
+            continue
+        count = counts.get(slug, 0)
+        anchors.add(slug if count == 0 else f"{slug}-{count}")
+        counts[slug] = count + 1
+    return anchors
+
+
+def _resolve_evidence_reference(root: Path, reference: str) -> None:
+    if (
+        reference != reference.strip()
+        or reference.count("#") != 1
+        or "\\" in reference
+    ):
+        raise FreezeError(f"malformed evidence reference: {reference!r}")
+    relative, anchor = reference.split("#", 1)
+    parts = relative.split("/")
+    posix_path = PurePosixPath(relative)
+    if (
+        not relative
+        or not anchor
+        or posix_path.is_absolute()
+        or any(part in {"", ".", ".."} for part in parts)
+        or ":" in parts[0]
+    ):
+        raise FreezeError(
+            f"evidence reference must be repository-relative file#anchor: {reference!r}"
+        )
+
+    root = root.resolve()
+    try:
+        target = (root / Path(*parts)).resolve()
+        target.relative_to(root)
+    except (OSError, ValueError) as exc:
+        raise FreezeError(f"evidence reference escapes repository: {reference!r}") from exc
+
+    suffix = target.suffix.lower()
+    if suffix not in {".md", ".json"}:
+        raise FreezeError(f"unsupported evidence target type: {reference!r}")
+    if not target.is_file():
+        raise FreezeError(f"evidence target is missing: {reference!r}")
+
+    if suffix == ".md":
+        try:
+            text = target.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            raise FreezeError(f"evidence Markdown target is unreadable: {reference!r}") from exc
+        if anchor not in _markdown_heading_anchors(text):
+            raise FreezeError(f"evidence Markdown heading is missing: {reference!r}")
+        return
+
+    try:
+        document = load_strict_json(target)
+    except FreezeError as exc:
+        raise FreezeError(f"evidence JSON target is unreadable: {reference!r}") from exc
+    if not isinstance(document, dict):
+        raise FreezeError(f"evidence JSON target is not a top-level object: {reference!r}")
+    if anchor not in document:
+        raise FreezeError(f"evidence JSON top-level key is missing: {reference!r}")
+
+
 def _require_digest(label: str, value: Any, expected: str) -> None:
     observed = _canonical_digest(value)
     if observed != expected:
@@ -327,7 +495,7 @@ def _check_authorities(root: Path, packet: dict[str, Any]) -> None:
             )
 
 
-def _check_register(packet: dict[str, Any]) -> None:
+def _check_register(root: Path, packet: dict[str, Any]) -> None:
     _require_digest(
         "selected dependency shape",
         packet["selected_shape"],
@@ -356,21 +524,63 @@ def _check_register(packet: dict[str, Any]) -> None:
     actual = tuple((row["surface_id"], row["phase"]) for row in rows)
     if actual != EXPECTED_DECISION_PHASES:
         raise FreezeError("decision surface identity, phase, or order drifted")
-    accepted = tuple(row["surface_id"] for row in rows if row["accepted"])
+    accepted_rows = tuple(
+        row for row in rows if row["decision_status"] == "accepted"
+    )
+    unresolved_rows = tuple(
+        row for row in rows if row["decision_status"] == "unresolved"
+    )
+    if len(accepted_rows) + len(unresolved_rows) != len(rows):
+        raise FreezeError("decision status inventory drifted")
+    for row in rows:
+        if row["accepted"] is not (row["decision_status"] == "accepted"):
+            raise FreezeError(
+                f"decision {row['surface_id']} accepted boolean disagrees with status"
+            )
+    accepted = tuple(row["surface_id"] for row in accepted_rows)
     if accepted != EXPECTED_ACCEPTED_DECISIONS:
         raise FreezeError("accepted decision identity or count drifted")
+    gate = packet["gate_state"]
+    if (
+        gate["accepted_decision_count"] != len(accepted_rows)
+        or gate["unresolved_decision_count"] != len(unresolved_rows)
+        or gate["accepted_decision_count"] + gate["unresolved_decision_count"]
+        != len(rows)
+    ):
+        raise FreezeError("gate decision counts disagree with decision rows")
+
     for row in rows:
-        if row["surface_id"] == "native_value":
+        if row["decision_status"] == "accepted":
             if (
-                row["decision_status"] != "accepted"
-                or row["selected_option"] != EXPECTED_NATIVE_VALUE_OPTION
-                or not row["accepted"]
+                row["surface_id"] not in EXPECTED_ACCEPTED_DECISIONS
                 or row["source_blocking"]
                 or row["unresolved_decisions"]
                 or row["evidence_required"]
             ):
-                raise FreezeError("native-value decision acceptance drifted")
+                raise FreezeError(
+                    f"decision {row['surface_id']} acceptance state drifted"
+                )
             resolution = row["resolution"]
+            accepted_options = tuple(
+                option
+                for option in resolution["considered_options"]
+                if option["disposition"] == "accepted"
+            )
+            if len(accepted_options) != 1:
+                raise FreezeError(
+                    f"decision {row['surface_id']} must have exactly one accepted option"
+                )
+            if accepted_options[0]["option_id"] != row["selected_option"]:
+                raise FreezeError(
+                    f"decision {row['surface_id']} selected option disagrees with disposition"
+                )
+
+            if row["surface_id"] != "native_value":
+                raise FreezeError(
+                    f"accepted decision {row['surface_id']} has no exact checker binding"
+                )
+            if row["selected_option"] != EXPECTED_NATIVE_VALUE_OPTION:
+                raise FreezeError("native-value selected option drifted")
             dispositions = tuple(
                 (option["option_id"], option["disposition"])
                 for option in resolution["considered_options"]
@@ -379,10 +589,14 @@ def _check_register(packet: dict[str, Any]) -> None:
                 raise FreezeError("native-value considered options drifted")
             if resolution["selected_values"] != EXPECTED_NATIVE_VALUE_VALUES:
                 raise FreezeError("native-value exact values drifted")
+            for field, expected in EXPECTED_NATIVE_VALUE_OBLIGATIONS.items():
+                if tuple(resolution[field]) != expected:
+                    raise FreezeError(f"native-value {field} drifted")
+            for reference in resolution["evidence"]:
+                _resolve_evidence_reference(root, reference)
             continue
         if (
-            row["decision_status"] != "unresolved"
-            or row["selected_option"] is not None
+            row["selected_option"] is not None
             or row["accepted"]
             or not row["source_blocking"]
             or row.get("resolution") is not None
@@ -545,7 +759,7 @@ def check(root: Path) -> dict[str, int]:
     _check_meta(packet, schema, schema_path)
     _validate_schema(packet, schema)
     _check_authorities(root, packet)
-    _check_register(packet)
+    _check_register(root, packet)
     _check_matrix_projection(matrix, packet)
     _check_source_absence(root)
     return {
