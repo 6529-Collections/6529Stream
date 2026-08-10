@@ -2847,13 +2847,13 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `4d732c583f063bd83364eb42b4d255b433cf8bab`.
-- Captured at: `2026-08-09T11:38:52Z`.
+- Source commit: `baf459c1f29ec6ee9bfdac81006c8cc71b83d982`.
+- Captured at: `2026-08-09T19:48:03Z`.
 - Live gate: `python scripts/check_slither_baseline.py --run-slither`.
 - Status: exact normalized drift is gated; all 32 first-party production rows
   remain Open under issue #658.
-- Raw analyzed run: 3,237 findings across all impacts/scopes: 49 High, 847
-  Medium, 1,266 Low, 1,033 Informational, and 42 Optimization. High/Medium scope
+- Raw analyzed run: 3,242 findings across all impacts/scopes: 49 High, 847
+  Medium, 1,269 Low, 1,035 Informational, and 42 Optimization. High/Medium scope
   totals are first-party production `2/30/32`, vendored `1/9/10`, test
   `46/801/847`, script `0/7/7`, and other `0/0/0`.
 - Bounded assembly makes the Governance Executor's proposal-selected

@@ -110,6 +110,15 @@
         "StreamArtistArchiveV2"
       ]
     },
+    "smart-contracts/domains/artist/StreamArtistRegistryV2.sol": {
+      "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "sha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430",
+      "solc_keccak256": "0x7595cda73537c9df0dd7bc500fb8ff08f2f4f890bda4973d4b18a61407c52db6",
+      "license": "MIT",
+      "used_by": [
+        "StreamArtistRegistryV2"
+      ]
+    },
     "smart-contracts/domains/auctions/AuctionContract.sol": {
       "path": "smart-contracts/domains/auctions/AuctionContract.sol",
       "sha256": "sha256:8bd82d6bf5b5b08800ce3c44824fd7ca4872c7168f30ab4ac8c19d86f3123293",
@@ -464,6 +473,15 @@
         "StreamArtistArchiveV2"
       ]
     },
+    "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol": {
+      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "sha256": "sha256:6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54",
+      "solc_keccak256": "0x585badfd8c6017af8440d366709b1f854fd9935f2d2ec83b655f8520c44c5819",
+      "license": "MIT",
+      "used_by": [
+        "StreamArtistRegistryV2"
+      ]
+    },
     "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol": {
       "path": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
       "sha256": "sha256:9dad200d56cd072f126a89925e5e86678e1323e8d0686de2b4df3b1a3de31352",
@@ -787,6 +805,7 @@
       "license": "MIT",
       "used_by": [
         "StreamArtistArchiveV2",
+        "StreamArtistRegistryV2",
         "StreamAuctions",
         "StreamCollectionMetadata",
         "StreamContractMetadata",
@@ -1287,6 +1306,67 @@
       "verification": {
         "live_status": "not_available_until_broadcast",
         "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/domains/artist/StreamArtistArchiveV2.sol:StreamArtistArchiveV2 --constructor-args <encoded-constructor-args>"
+      }
+    },
+    "StreamArtistRegistryV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "source_sha256": "sha256:038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430",
+      "source_solc_keccak256": "0x7595cda73537c9df0dd7bc500fb8ff08f2f4f890bda4973d4b18a61407c52db6",
+      "artifact_path": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+      "artifact_sha256": "sha256:cc31e20df6fcca5df52fc262f19ec342de328027534602d160c367553bf96941",
+      "compilation_target": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2",
+      "compiler_version": "0.8.19+commit.7dd6d404",
+      "language": "Solidity",
+      "settings": {
+        "evm_version": "paris",
+        "optimizer": {
+          "enabled": true,
+          "runs": 200
+        },
+        "via_ir": true,
+        "metadata_bytecode_hash": "none",
+        "libraries": {}
+      },
+      "abi_sha256": "sha256:71b4c0a4d63ccb53a79a687080b2b04664dad4915ed4c4c411ca7e40f8967a5d",
+      "bytecode_hashes": {
+        "creation": {
+          "sha256": "sha256:db313a01f921bd3a280a52e777c74d4ef0c299dd9bf7118095dba1b89a3e70bb",
+          "linked": true,
+          "hash_mode": "bytes",
+          "release_artifact_sha256": "sha256:db313a01f921bd3a280a52e777c74d4ef0c299dd9bf7118095dba1b89a3e70bb"
+        },
+        "runtime": {
+          "sha256": "sha256:bb3787b10a23a88d0c82a280b60dac886f903ab49369cd9eac1991d344349840",
+          "linked": true,
+          "hash_mode": "bytes",
+          "release_artifact_sha256": "sha256:bb3787b10a23a88d0c82a280b60dac886f903ab49369cd9eac1991d344349840"
+        }
+      },
+      "constructor": {
+        "present": true,
+        "state_mutability": "nonpayable",
+        "inputs": [
+          {
+            "index": 0,
+            "name": "configuration",
+            "type": "tuple",
+            "internal_type": "struct IStreamArtistRegistryV2.ArtistRegistryConfigurationV2"
+          }
+        ]
+      },
+      "constructor_args": {
+        "status": "retained_per_deployment_manifest",
+        "deployment_manifest_dir": "deployments/examples",
+        "encoded_args": "not_available_until_broadcast"
+      },
+      "library_linking": {
+        "requires_linking": false,
+        "creation_link_references": [],
+        "runtime_link_references": []
+      },
+      "verification": {
+        "live_status": "not_available_until_broadcast",
+        "template": "forge verify-contract --chain-id <chain-id> --compiler-version v0.8.19+commit.7dd6d404 --num-of-optimizations 200 --via-ir --watch <deployed-address> smart-contracts/domains/artist/StreamArtistRegistryV2.sol:StreamArtistRegistryV2 --constructor-args <encoded-constructor-args>"
       }
     },
     "StreamAssetPolicyRegistry": {

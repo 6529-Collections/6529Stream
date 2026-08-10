@@ -7216,6 +7216,11 @@
         }
       ]
     },
+    "StreamArtistRegistryV2": {
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "artifact_path": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+      "events": []
+    },
     "StreamAssetPolicyRegistry": {
       "source": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
       "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",

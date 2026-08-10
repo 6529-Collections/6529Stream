@@ -1603,8 +1603,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 284 configured roots,
-expanding to exactly 460 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 286 configured roots,
+expanding to exactly 462 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
@@ -1616,10 +1616,10 @@ already covered baseline directory. The Governance V2 policy artifact, checker,
 and tests add three exact roots; those files plus the policy schema under the
 already covered schema directory add four exact entries. The additional exact
 root binds `scripts/check_contract_size_budget.py`, which is executed directly
-by `RISK-SIZE-001`. The #670 publication adds twelve exact roots for its Proposed
+by `RISK-SIZE-001`. The #670 publication adds fourteen exact roots for its Proposed
 ADR, strict matrix, schema, checker, hostile tests, frozen operation source,
 four existing immutable-provider interfaces read by the checker, and the
-reviewed ArchiveV2 implementation/interface source pair.
+reviewed ArchiveV2 and RegistryV2 implementation/interface source pairs.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,
@@ -2261,9 +2261,9 @@ compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
 [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `4d732c583f063bd83364eb42b4d255b433cf8bab` on
-`2026-08-09T11:38:52Z` records 3,237 findings: 49 High, 847 Medium, 1,266 Low,
-1,033 Informational, and 42 Optimization. Its High/Medium scope totals are
+at source commit `baf459c1f29ec6ee9bfdac81006c8cc71b83d982` on
+`2026-08-09T19:48:03Z` records 3,242 findings: 49 High, 847 Medium, 1,269 Low,
+1,035 Informational, and 42 Optimization. Its High/Medium scope totals are
 first-party production `2/30/32`, vendored `1/9/10`, test `46/801/847`, script
 `0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
 is never committed.

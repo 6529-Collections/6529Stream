@@ -2157,8 +2157,8 @@
     {
       "path": "scripts/check_artist_semantic_owner_matrix.py",
       "role": "runtime",
-      "source_sha256": "628149ff4d6269bb166bc23ada47d7b3ec8c3b73ff2cd3869f1458c518f47778",
-      "size_bytes": 41148,
+      "source_sha256": "75be5171655556711282de41a3feb909b0a9fdded45c565f66597d984427152b",
+      "size_bytes": 41345,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
@@ -2268,7 +2268,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 5
+          "count": 6
         },
         {
           "record": "{\"context\":\"keyword.value\",\"target\":\"pathlib.Path\"}",
@@ -2499,12 +2499,6 @@
         {
           "target": "local:MatrixError",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "2686639276a21d3263636755d45678389a6b1064aed394d7e7a18466ca51174c",
-          "count": 1
-        },
-        {
-          "target": "local:MatrixError",
-          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "2b8313f076f3991b1d6810c12bd9b1d99a40e792b66a4e456f325d878a0553d8",
           "count": 1
         },
@@ -2524,6 +2518,12 @@
           "target": "local:MatrixError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "2f20279cb5017cdc6b85e6865ebb27dd86965746b7fdbb2d8ba747a7826e064d",
+          "count": 1
+        },
+        {
+          "target": "local:MatrixError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "309231ad7fd75b10f82892d45d17afbc4b06435b6c3c2b1e78f520538fd09c9e",
           "count": 1
         },
         {
@@ -2949,12 +2949,6 @@
         {
           "target": "local:MatrixError",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "d4223b32f53a0b5fa7d89687188f2b07517dbf2c5538a80b84e04d22e5a44c14",
-          "count": 1
-        },
-        {
-          "target": "local:MatrixError",
-          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "d7abb31491072d0b1a3b1204e1bde5826f292d3d9fce9b2cc274cb82f1603431",
           "count": 1
         },
@@ -2986,6 +2980,12 @@
           "target": "local:MatrixError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e39de1ae7f5bffbb92dcffc5b505235bf430e88034f97712b46c6a6e30b78beb",
+          "count": 1
+        },
+        {
+          "target": "local:MatrixError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "e93e98bcf358cc9b32a8e78c240a6a3f87c1724668df1a47128f9c73d70f855e",
           "count": 1
         },
         {
@@ -3059,6 +3059,12 @@
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "19515bb1310f52cbb9aabe09618df822a7197f97c285cac33bb621cbf409d69e",
           "count": 1
+        },
+        {
+          "target": "local:REGISTRY_SOURCE_PATH.as_posix",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "a495133d81e62904cc950e4801528e1111622b2a44ffb675d9550aca67c3540e",
+          "count": 4
         },
         {
           "target": "local:SOURCE_PATH.as_posix",
@@ -3861,6 +3867,12 @@
         {
           "target": "local:sorted",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "7c2823301e32d1d5476d992ee3f6c2bddd5a07dd19bff1670572c712add2a1b2",
+          "count": 1
+        },
+        {
+          "target": "local:sorted",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "8eab468971e7aae3d83ccb8eb957f9de6a2bb2938a20e992afb516c1e5420b14",
           "count": 1
         },
@@ -4018,6 +4030,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "08d8e014eff2c72ceb89ea331438f20cd212b0c846e9b1f1034bfa63d29f2fc1",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "4167a040dc3d880777b7f2c3907cb7a4e01da120dd5dc55dfa643171af2121d1",
           "count": 1
         },
         {
@@ -26737,7 +26755,7 @@
     {
       "path": "scripts/check_slither_baseline.py",
       "role": "runtime",
-      "source_sha256": "ff569dba2283903c8430f252934b3f4581014e3954afd8c522e2e976af226778",
+      "source_sha256": "7ac55d3713386b9eed636c527b1d8187b1b0af6428dfd85252e2a1857e966e46",
       "size_bytes": 47072,
       "imports": [
         {
@@ -33447,8 +33465,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "0ab40723930eeab4e7551ca7ec9fca8d0961fc4f108c0aea33275b2259a23220",
-      "size_bytes": 179294,
+      "source_sha256": "bf262fb3c23c142783acb307c1de0e1ccedc82ad5791a953fb3ca0e002f2095f",
+      "size_bytes": 179440,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -33814,7 +33832,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 367
+          "count": 369
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -38849,6 +38867,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "4167a040dc3d880777b7f2c3907cb7a4e01da120dd5dc55dfa643171af2121d1",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "41d36eb914b5b36dbffab437c0441e7cb674c5e5c1c6ba5af4918c851f166c63",
           "count": 1
         },
@@ -39360,6 +39384,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "89c52cb2cf1e42dd126f9ee1a1509125e88024ca44fcdb0b09c20b562bffb476",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "8a1d64d897280a2d97e6a9a6166b594d9ab11ff4ea4a005f7d278a66a6c49bf0",
           "count": 1
         },
         {
@@ -48615,8 +48645,8 @@
     {
       "path": "scripts/test_artist_semantic_owner_matrix.py",
       "role": "focused-test",
-      "source_sha256": "d659dc9d03eb9c80a29526c83c5860edb606690d5d31d97c497193720eb39dcb",
-      "size_bytes": 25064,
+      "source_sha256": "126269436e56b83f9e996b9b1e0961ebac08740a38a8e9789c70c302a8b0654f",
+      "size_bytes": 26088,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
@@ -48761,6 +48791,18 @@
           "count": 1
         },
         {
+          "target": "expression:BinOp:ae1ed8ca325644d06c5a1612dcd9347b2ca4b2556e2e8eac9172a924a0038575.is_file",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "3651e97e9b5614e485dd82a28ce8c8de4941a247e5bd927e3a94ef939024870c",
+          "count": 1
+        },
+        {
+          "target": "expression:BinOp:ae1ed8ca325644d06c5a1612dcd9347b2ca4b2556e2e8eac9172a924a0038575.unlink",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "bb07c4e3c7b86726efff3a7c2871f1447f3e4df9ad5e40c8e2acee338db1bf9c",
+          "count": 1
+        },
+        {
           "target": "expression:BinOp:e0fb1bed754d67338aeb525abfede188579accee004e5488ff9f255974bf5f14.read_text",
           "shape": "positional=0;starred=0;keywords=encoding",
           "ast_sha256": "a0ec9aed15dea8053794bb301200a8f2724e7c5efc18c30dcfceee11bbbb2388",
@@ -48851,6 +48893,12 @@
           "count": 1
         },
         {
+          "target": "local:CHECKER.REGISTRY_SOURCE_PATH.as_posix",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "0729b0e38c91017dd0f1e4a40be178fa0e84b943031bfc862e393a0eb9f30102",
+          "count": 1
+        },
+        {
           "target": "local:CHECKER.check",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "bc2279a4c9ecdf10cf29903f4389a26a21b10ddc58219c300497280f9158e7a1",
@@ -48871,7 +48919,7 @@
         {
           "target": "local:all",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "605d7b71194939cf498c998420cae9b0397dc8dda63ddfa4cf3c735361c3ceb2",
+          "ast_sha256": "5d2a5938ab2b118f0fe75aaa6cb48496cc643053dd27b33b319bde5282d5e33b",
           "count": 1
         },
         {
@@ -48919,13 +48967,13 @@
         {
           "target": "local:path.write_text",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "3ee207ff303a8ea7ff30a8e7ff2c12a17a73e33aabb7ff6e3535714baf298ef3",
+          "ast_sha256": "3e21ed54f9de534569c74b8e06adc56172471246fdb6a75b5733dd3155731b1c",
           "count": 1
         },
         {
           "target": "local:path.write_text",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "ac908597cdf7fddefef5c3bb39a3bee181f050ab5079d92cf4e325dd8c97fd0a",
+          "ast_sha256": "f724c392c47e0f2d0e4254cc774d7c4388ca2a8dac6ed7d30b426cb7a26ff74a",
           "count": 1
         },
         {
@@ -49057,6 +49105,12 @@
         {
           "target": "local:self._assert_rejected",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "5a28943296df863c11935c3ddb87754bdfa765987e2b4862a2a7139faeade5d8",
+          "count": 1
+        },
+        {
+          "target": "local:self._assert_rejected",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5b01d81744795c7829ce16406ba3c76c4f5bc900fc3ac4703889f272d0612e87",
           "count": 1
         },
@@ -49094,6 +49148,12 @@
           "target": "local:self._assert_rejected",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "69d6d97f8413ee0675a81eeb86ecf983e5bc7044d255fc3daa1e2ca339bebf07",
+          "count": 1
+        },
+        {
+          "target": "local:self._assert_rejected",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "756c852fab053b4bcfac09a49c4e2150f88a5a5b9f929015d32f90fbfa15220b",
           "count": 1
         },
         {
@@ -49213,12 +49273,6 @@
         {
           "target": "local:self._assert_rejected",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "e12234882970b6b3f007a08c359ccf9dbd56ebad9364bf42d28e1883800a5889",
-          "count": 1
-        },
-        {
-          "target": "local:self._assert_rejected",
-          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e25c435c59b526534aeab7593c1dec1709c357a391b8db75e85102eaf979b291",
           "count": 1
         },
@@ -49238,7 +49292,7 @@
           "target": "local:self._matrix",
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "379bad597aaa592b89be8a1727e5e30800b588f197441d62ca406f605e8314c3",
-          "count": 42
+          "count": 43
         },
         {
           "target": "local:self._read",
@@ -49331,9 +49385,21 @@
           "count": 1
         },
         {
+          "target": "local:self.assertIn",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "1383c21910a1b11bf00ec682cfb14040b1c9b963170c5aa928d9b6e39c977087",
+          "count": 1
+        },
+        {
           "target": "local:self.assertIs",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "25becf84361b40b2ad191a378441a8ad0779708ba963052809e5df15a09484c9",
+          "count": 1
+        },
+        {
+          "target": "local:self.assertIs",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "61b70df8d1ec9ccc6800fb5dd73e037a62b4a0dd892c77fa4efb63805f0c144a",
           "count": 1
         },
         {
@@ -49345,7 +49411,19 @@
         {
           "target": "local:self.assertIs",
           "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "cb45611f4906780427f888f70f67946757bbdb35096cbec04251bfaa488fd247",
+          "count": 1
+        },
+        {
+          "target": "local:self.assertIs",
+          "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "f6f50de080bc41c6417b4658f8ff01e8e274f06c5852d76917131deb62f68934",
+          "count": 1
+        },
+        {
+          "target": "local:self.assertIs",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "f9111a7b276538d553b0e8a09b95f060fec4224b12add20b17156245f99a74d5",
           "count": 1
         },
         {
@@ -49369,7 +49447,13 @@
         {
           "target": "local:self.assertTrue",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "ec4b160137691f8f95d3b8c7e56faf9a1aa27a77611b5495d1869a477e27567d",
+          "ast_sha256": "70b96b56a358fcc58020c5c476280f95495e33bf7a4af879705f386e0d4fca87",
+          "count": 1
+        },
+        {
+          "target": "local:self.assertTrue",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "70bbd69ab5ae0a36b20ed5228ed5c30d07605e1b2d7902c74c6836c5ccaf50f3",
           "count": 1
         },
         {
@@ -56387,7 +56471,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "9492473e9b17d389a54e11b6f11e574f3a3739f77f28d0415b733ddf16c07bdf",
+      "source_sha256": "ea45188ae423c14e6fbe10075bd6b09084dcab965b0b552146739ebfb3a29f24",
       "size_bytes": 172989,
       "imports": [
         {

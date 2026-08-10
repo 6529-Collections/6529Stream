@@ -6,13 +6,13 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 252,
-    "contract_count": 19,
+    "custom_error_count": 256,
+    "contract_count": 20,
     "category_counts": {
       "access_control": 19,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 40,
+      "configuration": 44,
       "metadata_integrity": 41,
       "mint_ledger_accounting": 16,
       "mint_manager_policy": 43,
@@ -26,7 +26,7 @@
     "severity_counts": {
       "critical": 19,
       "high": 186,
-      "medium": 47
+      "medium": 51
     },
     "duplicate_selectors": {
       "0x1372e27c": [
@@ -1612,6 +1612,136 @@
           "test/StreamMetadataUtf8.t.sol",
           "test/StreamCustomErrorNegative.t.sol",
           "test/StreamArtistArchiveV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistRegistryV2:ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+      "contract": "StreamArtistRegistryV2",
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "name": "ArtistRegistryExternalProviderBindingMismatch",
+      "signature": "ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)",
+      "selector": "0xf8958cff",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "enum IStreamArtistRegistryV2.ArtistExternalProviderV2",
+          "name": "provider",
+          "type": "uint8"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "expectedBindingHash",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "suppliedBindingHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistRegistryV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistRegistryV2:ArtistRegistryInvalidPin(uint8,uint8)",
+      "contract": "StreamArtistRegistryV2",
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "name": "ArtistRegistryInvalidPin",
+      "signature": "ArtistRegistryInvalidPin(uint8,uint8)",
+      "selector": "0x96e28507",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint8",
+          "name": "pinClass",
+          "type": "uint8"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "pinIndex",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistRegistryV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistRegistryV2:ArtistRegistryInvalidRecipeSetHash(bytes32)",
+      "contract": "StreamArtistRegistryV2",
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "name": "ArtistRegistryInvalidRecipeSetHash",
+      "signature": "ArtistRegistryInvalidRecipeSetHash(bytes32)",
+      "selector": "0x209009a3",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recipeSetHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistRegistryV2.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamArtistRegistryV2:ArtistRegistryPinAddressAlias(address)",
+      "contract": "StreamArtistRegistryV2",
+      "source": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "name": "ArtistRegistryPinAddressAlias",
+      "signature": "ArtistRegistryPinAddressAlias(address)",
+      "selector": "0x0ea7e59b",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "expectedAddress",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamArtistRegistryV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

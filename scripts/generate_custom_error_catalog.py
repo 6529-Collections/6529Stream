@@ -283,6 +283,10 @@ CATEGORY_BY_ERROR_ID = {
     "StreamArtistArchiveV2:SSTORE2DataTooLarge(uint256)": "metadata_integrity",
     "StreamArtistArchiveV2:SSTORE2InvalidPointer(address)": "metadata_integrity",
     "StreamArtistArchiveV2:SSTORE2WriteFailed()": "metadata_integrity",
+    "StreamArtistRegistryV2:ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)": "configuration",
+    "StreamArtistRegistryV2:ArtistRegistryInvalidPin(uint8,uint8)": "configuration",
+    "StreamArtistRegistryV2:ArtistRegistryInvalidRecipeSetHash(bytes32)": "configuration",
+    "StreamArtistRegistryV2:ArtistRegistryPinAddressAlias(address)": "configuration",
     "StreamMintManager:ReentrancyGuardReentrantCall()": "mint_manager_policy",
     "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)": "primary_settlement_safety",
     "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)": "primary_settlement_safety",
@@ -485,6 +489,18 @@ TRACEABILITY_BY_ERROR_ID = {
     ],
     "StreamArtistArchiveV2:SSTORE2WriteFailed()": [
         "test/StreamArtistArchiveV2.t.sol",
+    ],
+    "StreamArtistRegistryV2:ArtistRegistryExternalProviderBindingMismatch(uint8,bytes32,bytes32)": [
+        "test/StreamArtistRegistryV2.t.sol",
+    ],
+    "StreamArtistRegistryV2:ArtistRegistryInvalidPin(uint8,uint8)": [
+        "test/StreamArtistRegistryV2.t.sol",
+    ],
+    "StreamArtistRegistryV2:ArtistRegistryInvalidRecipeSetHash(bytes32)": [
+        "test/StreamArtistRegistryV2.t.sol",
+    ],
+    "StreamArtistRegistryV2:ArtistRegistryPinAddressAlias(address)": [
+        "test/StreamArtistRegistryV2.t.sol",
     ],
     "StreamCollectionMetadata:CollectionDoesNotExist(uint256)": [
         "test/StreamCollectionMetadata.t.sol",

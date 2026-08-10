@@ -1304,7 +1304,10 @@
           "if": {
             "properties": {
               "component": {
-                "const": "archive"
+                "enum": [
+                  "registry_directory",
+                  "archive"
+                ]
               }
             },
             "required": [
