@@ -337,11 +337,12 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         )
         self.assertEqual(
             first["generated_by"],
-            "scripts/materialize_canonical_deployment_plan.py:3",
+            "scripts/materialize_canonical_deployment_plan.py:4",
         )
         self.assertFalse(first["release_posture"]["production_candidate"])
         self.assertFalse(first["release_posture"]["readiness_evidence"])
         deployment = first["deployments"][0]
+        self.assertNotIn("expected_address", deployment)
         self.assertEqual(
             deployment["constructor"]["encoded_args_keccak256"],
             self.fixture.candidate["instances"][0]["constructor"][

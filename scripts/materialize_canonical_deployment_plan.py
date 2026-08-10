@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Materialize deterministic initcode from the canonical isolated release build.
 
-This is a reusable tooling foundation for issues #656 and #677.  The v1
-candidate schema deliberately accepts only explicitly non-production
-candidates.  It does not broadcast, derive deployment addresses, prove
-constructor semantics, or make release-readiness claims.
+This is a reusable tooling foundation for issues #656 and #677. The legacy v1
+candidate remains limited to explicit non-production fixtures. A v2 candidate
+is consumed only after the canonical checker proves it complete and blocker
+free; neither path makes a release-readiness claim.
 """
 
 from __future__ import annotations
@@ -34,8 +34,9 @@ except ModuleNotFoundError:  # pragma: no cover - exercised only on broken toolc
 
 
 CANDIDATE_SCHEMA = "6529stream.canonical-deployment-candidate.v1"
+CANDIDATE_V2_SCHEMA = "6529stream.canonical-deployment-candidate.v2"
 PLAN_SCHEMA = "6529stream.canonical-deployment-plan.v1"
-GENERATOR_VERSION = "3"
+GENERATOR_VERSION = "4"
 DEFAULT_CANDIDATE = Path(
     "deployments/config/canonical-deployment-candidate-non-production.json"
 )
@@ -813,7 +814,211 @@ def validate_candidate(value: Any) -> dict[str, Any]:
             candidate.get("release_build")
         ),
         "instances": instances,
+        "candidate_identity_sha256": None,
+        "candidate_identity_keccak256": None,
     }
+
+
+def _v2_library_bindings(value: Any, path: str) -> list[dict[str, str]]:
+    """Project checked v2 library references into the existing plan model."""
+    references = require_list(value, path)
+    result: list[dict[str, str]] = []
+    for index, item in enumerate(references):
+        item_path = f"{path}[{index}]"
+        reference = require_dict(item, item_path)
+        require_exact_keys(
+            reference,
+            {"library_id", "source", "name", "address"},
+            item_path,
+        )
+        result.append(
+            {
+                "source": reference["source"],
+                "name": reference["name"],
+                "address": reference["address"],
+            }
+        )
+    return result
+
+
+def _v2_deployable_projection(
+    value: Any,
+    *,
+    index: int,
+    identifier_key: str,
+    profile_entry_id: int | None,
+    path: str,
+) -> dict[str, Any]:
+    """Project one checker-approved v2 library or instance into plan input."""
+    item = require_dict(value, path)
+    projected = {
+        "order": index + 1,
+        "instance_id": item.get(identifier_key),
+        "profile_entry_id": profile_entry_id,
+        "target": item.get("target"),
+        "depends_on": item.get("depends_on"),
+        "constructor": item.get("constructor"),
+        "libraries": _v2_library_bindings(
+            item.get("linked_libraries"),
+            f"{path}.linked_libraries",
+        ),
+        "runtime": item.get("runtime"),
+        "expected_initcode_keccak256": item.get(
+            "expected_initcode_keccak256"
+        ),
+    }
+    validated = validate_instance(projected, index)
+    validated["expected_address"] = require_address(
+        item.get("address"),
+        f"{path}.address",
+    )
+    validated["expected_linked_creation_keccak256"] = require_keccak(
+        item.get("expected_linked_creation_keccak256"),
+        f"{path}.expected_linked_creation_keccak256",
+    )
+    return validated
+
+
+def validate_complete_v2_candidate(
+    repo_root: Path,
+    candidate_path: Path,
+) -> tuple[dict[str, Any], str]:
+    """Audit, resnapshot, and project one complete canonical v2 candidate.
+
+    The checker runs before release-receipt or artifact validation. The second
+    snapshot and identity comparison close the audit-to-materialization drift
+    window without inventing a parallel candidate or identity schema.
+    """
+    import check_canonical_deployment_candidate as candidate_checker
+    try:
+        audit = candidate_checker.require_complete_candidate(
+            repo_root,
+            candidate_path=candidate_path.relative_to(repo_root),
+        )
+    except (ValueError, candidate_checker.CandidateError) as exc:
+        raise DeploymentPlanError(str(exc)) from exc
+
+    candidate_value, candidate_sha = load_json_with_sha256(candidate_path)
+    candidate = require_dict(candidate_value, "candidate")
+    if candidate_sha != audit.raw_candidate_sha256:
+        raise DeploymentPlanError(
+            "canonical deployment candidate v2 changed after completeness audit"
+        )
+    try:
+        identity_sha256, identity_keccak256 = candidate_checker.candidate_identity(
+            candidate
+        )
+    except candidate_checker.CandidateError as exc:
+        raise DeploymentPlanError(str(exc)) from exc
+    if (
+        identity_sha256 != audit.candidate_identity_sha256
+        or identity_keccak256 != audit.candidate_identity_keccak256
+    ):
+        raise DeploymentPlanError(
+            "canonical deployment candidate v2 identity changed after audit"
+        )
+
+    libraries = require_list(
+        candidate.get("linked_libraries"),
+        "candidate.linked_libraries",
+    )
+    instances = require_list(candidate.get("instances"), "candidate.instances")
+    projected: list[dict[str, Any]] = []
+    for library_index, library in enumerate(libraries):
+        projected.append(
+            _v2_deployable_projection(
+                library,
+                index=len(projected),
+                identifier_key="library_id",
+                profile_entry_id=None,
+                path=f"candidate.linked_libraries[{library_index}]",
+            )
+        )
+    for instance_index, instance in enumerate(instances):
+        instance_object = require_dict(
+            instance,
+            f"candidate.instances[{instance_index}]",
+        )
+        projected.append(
+            _v2_deployable_projection(
+                instance_object,
+                index=len(projected),
+                identifier_key="instance_id",
+                profile_entry_id=require_int(
+                    instance_object.get("profile_entry_id"),
+                    f"candidate.instances[{instance_index}].profile_entry_id",
+                ),
+                path=f"candidate.instances[{instance_index}]",
+            )
+        )
+    if not projected:
+        raise DeploymentPlanError(
+            "complete canonical deployment candidate v2 has no deployables"
+        )
+    identifiers = [item["instance_id"] for item in projected]
+    if len(identifiers) != len(set(identifiers)):
+        raise DeploymentPlanError(
+            "canonical deployment candidate v2 deployable IDs collide"
+        )
+    seen: set[str] = set()
+    for item in projected:
+        for dependency in item["depends_on"]:
+            if dependency not in seen:
+                raise DeploymentPlanError(
+                    f"{item['instance_id']} dependency {dependency} must name "
+                    "an earlier candidate deployable"
+                )
+        seen.add(item["instance_id"])
+
+    release_binding = require_dict(
+        candidate.get("release_build"),
+        "candidate.release_build",
+    )
+    network = require_dict(candidate.get("network"), "candidate.network")
+    return (
+        {
+            "schema_version": CANDIDATE_V2_SCHEMA,
+            "candidate_id": require_identifier(
+                candidate.get("candidate_id"),
+                "candidate.candidate_id",
+            ),
+            "candidate_kind": "genesis_release_candidate",
+            "production_candidate": True,
+            "readiness_evidence": False,
+            "network": {
+                "environment": require_string(
+                    network.get("environment"),
+                    "candidate.network.environment",
+                ),
+                "name": require_identifier(
+                    network.get("name"),
+                    "candidate.network.name",
+                ),
+                "chain_id": require_int(
+                    network.get("chain_id"),
+                    "candidate.network.chain_id",
+                ),
+            },
+            "release_build": validate_release_build_binding(
+                {
+                    key: release_binding.get(key)
+                    for key in (
+                        "receipt_path",
+                        "receipt_sha256",
+                        "target_catalog_sha256",
+                        "config_path",
+                        "config_sha256",
+                        "foundry_config_path",
+                        "foundry_config_sha256",
+                    )
+                }
+            ),
+            "instances": projected,
+            "candidate_identity_sha256": identity_sha256,
+            "candidate_identity_keccak256": identity_keccak256,
+        },
+        candidate_sha,
+    )
 
 
 def target_catalog(receipt: dict[str, Any]) -> list[dict[str, str]]:
@@ -1615,7 +1820,7 @@ def materialize_instance(
         }
         for immutable_id in sorted(immutable_references, key=int)
     ]
-    return {
+    deployment = {
         "order": instance["order"],
         "instance_id": instance["instance_id"],
         "profile_entry_id": instance["profile_entry_id"],
@@ -1643,6 +1848,9 @@ def materialize_instance(
         "expected_runtime_length_bytes": len(expected_runtime),
         "expected_runtime_keccak256": actual_runtime_hash,
     }
+    if "expected_address" in instance:
+        deployment["expected_address"] = instance["expected_address"]
+    return deployment
 
 
 def materialize_deployment_plan(
@@ -1651,7 +1859,7 @@ def materialize_deployment_plan(
     *,
     receipt_validator: ReceiptValidator = default_receipt_validator,
 ) -> dict[str, Any]:
-    """Validate all inputs and return one deterministic non-production plan."""
+    """Validate all inputs and return one deterministic execution plan."""
     repo_root = repo_root.resolve()
     candidate_path = normalize_repo_path(
         repo_root,
@@ -1659,13 +1867,20 @@ def materialize_deployment_plan(
         "deployment candidate",
     )
     candidate_value, candidate_sha = load_json_with_sha256(candidate_path)
-    candidate = validate_candidate(candidate_value)
-    validate_draft_2020_12_schema(
-        repo_root,
-        CANDIDATE_SCHEMA_PATH,
-        candidate_value,
-        "deployment candidate",
-    )
+    candidate_object = require_dict(candidate_value, "candidate")
+    if candidate_object.get("schema_version") == CANDIDATE_V2_SCHEMA:
+        candidate, candidate_sha = validate_complete_v2_candidate(
+            repo_root,
+            candidate_path,
+        )
+    else:
+        candidate = validate_candidate(candidate_value)
+        validate_draft_2020_12_schema(
+            repo_root,
+            CANDIDATE_SCHEMA_PATH,
+            candidate_value,
+            "deployment candidate",
+        )
     (
         receipt,
         receipt_path,
@@ -1674,25 +1889,43 @@ def materialize_deployment_plan(
         artifacts,
     ) = validate_receipt_binding(repo_root, candidate, receipt_validator)
     targets = receipt_target_map(catalog)
-    deployments = [
-        materialize_instance(
+    deployments: list[dict[str, Any]] = []
+    for instance in candidate["instances"]:
+        deployment = materialize_instance(
             repo_root,
             instance,
             targets,
             artifacts,
         )
-        for instance in candidate["instances"]
-    ]
+        if (
+            candidate["schema_version"] == CANDIDATE_V2_SCHEMA
+            and deployment["linked_creation_bytecode_keccak256"]
+            != instance["expected_linked_creation_keccak256"]
+        ):
+            raise DeploymentPlanError(
+                f"candidate deployable {instance['instance_id']} linked creation "
+                "bytecode hash does not match the checker-complete v2 binding"
+            )
+        deployments.append(deployment)
+    is_v2 = candidate["schema_version"] == CANDIDATE_V2_SCHEMA
     plan = {
         "schema_version": PLAN_SCHEMA,
         "generated_by": (
             f"scripts/materialize_canonical_deployment_plan.py:{GENERATOR_VERSION}"
         ),
         "release_posture": {
-            "production_candidate": False,
+            "production_candidate": candidate["production_candidate"],
             "readiness_evidence": False,
-            "status": "non_production_tooling_only",
+            "status": (
+                "candidate_complete_tooling_only"
+                if is_v2
+                else "non_production_tooling_only"
+            ),
             "note": (
+                "This plan binds a checker-complete candidate but does not "
+                "authorize production execution or establish release readiness."
+                if is_v2
+                else
                 "This plan does not close issues #656 or #677, authorize a "
                 "broadcast, or establish public-beta or production readiness."
             ),
@@ -1700,8 +1933,15 @@ def materialize_deployment_plan(
         "candidate": {
             "path": candidate_path.relative_to(repo_root).as_posix(),
             "sha256": candidate_sha,
+            "schema_version": candidate["schema_version"],
             "candidate_id": candidate["candidate_id"],
             "candidate_kind": candidate["candidate_kind"],
+            "candidate_identity_sha256": candidate[
+                "candidate_identity_sha256"
+            ],
+            "candidate_identity_keccak256": candidate[
+                "candidate_identity_keccak256"
+            ],
         },
         "network": candidate["network"],
         "release_build": {
@@ -1751,8 +1991,9 @@ def check_output(path: Path, plan: dict[str, Any]) -> None:
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Materialize deterministic non-production initcode from the "
-            "validated canonical isolated release build."
+            "Materialize deterministic initcode from the validated canonical "
+            "isolated release build. Complete v2 candidates remain "
+            "production-execution blocked."
         )
     )
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
@@ -1782,7 +2023,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             write_output(repo_root, output_path, plan)
             print(
-                "materialized non-production canonical deployment plan: "
+                "materialized canonical deployment plan: "
                 f"{output_path}"
             )
         return 0

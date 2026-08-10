@@ -551,6 +551,23 @@ def _library_blockers(candidate: dict[str, Any]) -> list[str]:
     return blockers
 
 
+def _deployable_address_blockers(candidate: dict[str, Any]) -> list[str]:
+    """Reject address aliasing across the library and instance namespaces."""
+    instance_addresses = {
+        instance["address"] for instance in candidate["instances"]
+    }
+    library_addresses = {
+        library["address"] for library in candidate["linked_libraries"]
+    }
+    collisions = sorted(instance_addresses & library_addresses)
+    if not collisions:
+        return []
+    return [
+        "linked-library and candidate-instance addresses collide: "
+        + ", ".join(collisions)
+    ]
+
+
 def _binding_blockers(candidate: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
     instances = {
@@ -699,6 +716,7 @@ def audit_candidate(
     blockers = _top_level_blockers(candidate)
     blockers.extend(_instance_blockers(candidate, profile))
     blockers.extend(_library_blockers(candidate))
+    blockers.extend(_deployable_address_blockers(candidate))
     blockers.extend(_binding_blockers(candidate))
     return CandidateAudit(
         candidate_id=candidate["candidate_id"],
@@ -710,6 +728,29 @@ def audit_candidate(
         linked_library_count=len(candidate["linked_libraries"]),
         blockers=tuple(blockers),
     )
+
+
+def require_complete_candidate(
+    repo_root: Path,
+    candidate_path: Path = DEFAULT_CANDIDATE,
+    schema_path: Path = DEFAULT_SCHEMA,
+    profile_path: Path = DEFAULT_PROFILE,
+    risk_path: Path = DEFAULT_RISK_REGISTER,
+) -> CandidateAudit:
+    """Return the canonical v2 audit only when no completeness blocker remains."""
+    audit = audit_candidate(
+        repo_root,
+        candidate_path=candidate_path,
+        schema_path=schema_path,
+        profile_path=profile_path,
+        risk_path=risk_path,
+    )
+    if audit.blockers:
+        raise CandidateError(
+            "canonical deployment candidate v2 is incomplete:\n- "
+            + "\n- ".join(audit.blockers)
+        )
+    return audit
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:

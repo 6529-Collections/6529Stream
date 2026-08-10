@@ -9,10 +9,12 @@ import json
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 from typing import Any
 
 import check_canonical_deployment_candidate as checker
+import execute_canonical_deployment_plan as executor
 import materialize_canonical_deployment_plan as materializer
 
 
@@ -24,6 +26,8 @@ SYNTHETIC_CANDIDATE = Path("deployments/config/synthetic-candidate-v2.json")
 SYNTHETIC_EVIDENCE = Path(
     "deployments/canonical-deployment-evidence/synthetic-candidate-v2.json"
 )
+SYNTHETIC_SENDER = "0x0000000000000000000000000000000000000677"
+SYNTHETIC_STARTING_NONCE = 11
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -103,6 +107,7 @@ class SyntheticCandidate:
         self.profile = materializer.load_json(self.root / checker.DEFAULT_PROFILE)
         self.candidate = self._candidate()
         self.evidence: dict[str, Any] = {}
+        self.bind_create_sequence()
         self.bind_evidence()
 
     def close(self) -> None:
@@ -235,6 +240,17 @@ class SyntheticCandidate:
             "out_of_inventory": copy.deepcopy(self.profile["out_of_inventory"]),
         }
 
+    def bind_create_sequence(self) -> None:
+        deployables = [
+            *self.candidate["linked_libraries"],
+            *self.candidate["instances"],
+        ]
+        for index, deployable in enumerate(deployables):
+            deployable["address"] = executor.create_address(
+                SYNTHETIC_SENDER,
+                SYNTHETIC_STARTING_NONCE + index,
+            )
+
     def bind_evidence(self) -> None:
         identity_sha256, identity_keccak256 = checker.candidate_identity(
             self.candidate
@@ -278,6 +294,151 @@ class SyntheticCandidate:
             self.root,
             candidate_path=SYNTHETIC_CANDIDATE,
         )
+
+    def _snapshot(
+        self,
+        path: Path,
+    ) -> materializer.release_build.ReleaseFileSnapshot:
+        resolved = path.resolve()
+        raw = resolved.read_bytes()
+        return materializer.release_build.ReleaseFileSnapshot(
+            path=resolved,
+            raw=raw,
+            sha256=materializer.sha256_bytes(raw),
+        )
+
+    def prepare_materialization(self) -> materializer.ReceiptValidator:
+        """Create a 37-instance isolated-build universe without Forge."""
+        plan_schema = self.root / materializer.PLAN_SCHEMA_PATH
+        plan_schema.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO_ROOT / materializer.PLAN_SCHEMA_PATH, plan_schema)
+        config_path = self.root / materializer.CANONICAL_CONFIG
+        config_path.parent.mkdir(parents=True, exist_ok=True)
+        config_path.write_text("{}\n", encoding="utf-8", newline="\n")
+        foundry_path = self.root / materializer.CANONICAL_FOUNDRY_CONFIG
+        foundry_path.write_text(
+            "[profile.default]\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+        creation = bytes.fromhex("6000")
+        runtime = bytes.fromhex("6001")
+        empty_constructor_hash = materializer.keccak256_hex(b"")
+        creation_hash = materializer.keccak256_hex(creation)
+        runtime_hash = materializer.keccak256_hex(runtime)
+        targets: dict[tuple[str, str, str], dict[str, str]] = {}
+        artifact_paths: dict[str, Path] = {}
+        artifact = {
+            "abi": [],
+            "bytecode": {
+                "object": "0x" + creation.hex(),
+                "linkReferences": {},
+            },
+            "deployedBytecode": {
+                "object": "0x" + runtime.hex(),
+                "linkReferences": {},
+                "immutableReferences": {},
+            },
+        }
+        for instance in self.candidate["instances"]:
+            target = instance["target"]
+            relative = target["artifact_relative_path"]
+            artifact_path = self.root / "out-release" / relative
+            if relative not in artifact_paths:
+                write_json(artifact_path, artifact)
+                artifact_paths[relative] = artifact_path
+            target["artifact_sha256"] = materializer.file_sha256(artifact_path)
+            targets[
+                (target["kind"], target["name"], target["source"])
+            ] = copy.deepcopy(target)
+            instance["constructor"] = {
+                "types": [],
+                "arguments": [],
+                "encoded_args_keccak256": empty_constructor_hash,
+            }
+            instance["linked_libraries"] = []
+            instance["runtime"] = {
+                "immutable_values": {},
+                "expected_keccak256": runtime_hash,
+            }
+            instance["expected_linked_creation_keccak256"] = creation_hash
+            instance["expected_initcode_keccak256"] = creation_hash
+            instance["on_chain"]["initcode_keccak256"] = creation_hash
+            instance["on_chain"]["runtime_code_keccak256"] = runtime_hash
+
+        receipt_path = self.root / materializer.CANONICAL_RECEIPT
+        receipt = {
+            "schema_version": "6529stream.release-build.v1",
+            "source": {
+                "config": materializer.CANONICAL_CONFIG.as_posix(),
+                "config_sha256": materializer.file_sha256(config_path),
+                "foundry_config": materializer.CANONICAL_FOUNDRY_CONFIG.as_posix(),
+                "foundry_config_sha256": materializer.file_sha256(foundry_path),
+            },
+            "policy": {
+                "compilation_unit": "one target and its import closure",
+                "solc_version": "0.8.19",
+                "solc_long_version": "0.8.19+commit.7dd6d404",
+                "evm_version": "paris",
+                "optimizer_enabled": True,
+                "optimizer_runs": 200,
+                "via_ir": True,
+                "bytecode_hash": "none",
+                "cbor_metadata": False,
+                "controlled_forge_environment": {"FOUNDRY_PROFILE": "default"},
+                "forge_profile": "default",
+                "foundry_version": "test",
+                "forge_version": "test",
+                "forge_version_sha256": deterministic_sha(0),
+                "sanitized_environment_prefixes": ["DAPP_", "FOUNDRY_"],
+                "restricted_source_roots": ["script", "test"],
+                "portable_compiler_paths": {
+                    "basePath": ".",
+                    "includePaths": ["."],
+                    "allowPaths": [".", "lib"],
+                },
+            },
+            "targets": sorted(
+                targets.values(),
+                key=lambda item: (
+                    item["kind"],
+                    item["name"],
+                    item["source"],
+                ),
+            ),
+        }
+        write_json(receipt_path, receipt)
+        self.candidate["release_build"] = {
+            "status": "complete",
+            "receipt_path": materializer.CANONICAL_RECEIPT.as_posix(),
+            "receipt_sha256": materializer.file_sha256(receipt_path),
+            "target_catalog_sha256": materializer.target_catalog_sha256(receipt),
+            "config_path": materializer.CANONICAL_CONFIG.as_posix(),
+            "config_sha256": materializer.file_sha256(config_path),
+            "foundry_config_path": materializer.CANONICAL_FOUNDRY_CONFIG.as_posix(),
+            "foundry_config_sha256": materializer.file_sha256(foundry_path),
+        }
+        self.bind_evidence()
+
+        def validator(
+            _repo_root: Path,
+            validated_config_path: Path,
+            validated_foundry_path: Path,
+            _output_dir: Path,
+        ) -> materializer.release_build.ValidatedReleaseOutput:
+            return materializer.release_build.ValidatedReleaseOutput(
+                receipt=copy.deepcopy(receipt),
+                receipt_snapshot=self._snapshot(receipt_path),
+                config_snapshot=self._snapshot(validated_config_path),
+                foundry_config_snapshot=self._snapshot(validated_foundry_path),
+                artifact_snapshots=tuple(
+                    self._snapshot(path)
+                    for path in sorted(artifact_paths.values())
+                ),
+            )
+
+        return validator
 
 
 class CandidateV2Tests(unittest.TestCase):
@@ -331,6 +492,252 @@ class CandidateV2Tests(unittest.TestCase):
             audit = fixture.audit()
             self.assertEqual(audit.instance_count, 37)
             self.assertEqual(audit.blockers, ())
+        finally:
+            fixture.close()
+
+    def test_planning_candidate_fails_before_release_receipt_validation(self) -> None:
+        receipt_validator = mock.Mock()
+        with self.assertRaisesRegex(
+            materializer.DeploymentPlanError,
+            "canonical deployment candidate v2 is incomplete",
+        ):
+            materializer.materialize_deployment_plan(
+                REPO_ROOT,
+                REPO_ROOT / checker.DEFAULT_CANDIDATE,
+                receipt_validator=receipt_validator,
+            )
+        receipt_validator.assert_not_called()
+
+    def test_executor_rejects_planning_candidate_before_rpc_or_forge(self) -> None:
+        with (
+            mock.patch.object(executor, "rpc_client") as rpc_client,
+            mock.patch.object(executor, "start_local_anvil") as start_anvil,
+            mock.patch.object(executor.subprocess, "run") as command_runner,
+            mock.patch("sys.stderr"),
+        ):
+            result = executor.main(
+                [
+                    "--repo-root",
+                    str(REPO_ROOT),
+                    "--candidate",
+                    checker.DEFAULT_CANDIDATE.as_posix(),
+                    "--plan",
+                    "tmp/nonexistent-v2-plan.json",
+                    "--mode",
+                    "anvil",
+                    "--local-anvil",
+                ]
+            )
+        self.assertEqual(result, 1)
+        rpc_client.assert_not_called()
+        start_anvil.assert_not_called()
+        command_runner.assert_not_called()
+
+    def test_blocked_complete_candidate_fails_before_materialization(self) -> None:
+        fixture = SyntheticCandidate()
+        try:
+            fixture.candidate["instances"][0]["review_status"] = "unreviewed"
+            fixture.bind_evidence()
+            receipt_validator = mock.Mock()
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "is not reviewed",
+            ):
+                materializer.materialize_deployment_plan(
+                    fixture.root,
+                    fixture.root / SYNTHETIC_CANDIDATE,
+                    receipt_validator=receipt_validator,
+                )
+            receipt_validator.assert_not_called()
+        finally:
+            fixture.close()
+
+    def test_identity_drift_after_audit_fails_closed(self) -> None:
+        fixture = SyntheticCandidate()
+        try:
+            def audit_then_mutate(*args: Any, **kwargs: Any) -> checker.CandidateAudit:
+                audit = checker.audit_candidate(*args, **kwargs)
+                fixture.candidate["candidate_id"] = "mutated-after-audit"
+                write_json(fixture.root / SYNTHETIC_CANDIDATE, fixture.candidate)
+                return audit
+
+            with (
+                mock.patch.object(
+                    checker,
+                    "require_complete_candidate",
+                    side_effect=audit_then_mutate,
+                ),
+                self.assertRaisesRegex(
+                    materializer.DeploymentPlanError,
+                    "changed after completeness audit",
+                ),
+            ):
+                materializer.validate_complete_v2_candidate(
+                    fixture.root,
+                    fixture.root / SYNTHETIC_CANDIDATE,
+                )
+        finally:
+            fixture.close()
+
+    def test_complete_candidate_identity_flows_through_plan_receipt_binding(
+        self,
+    ) -> None:
+        fixture = SyntheticCandidate()
+        try:
+            receipt_validator = fixture.prepare_materialization()
+            plan = materializer.materialize_deployment_plan(
+                fixture.root,
+                fixture.root / SYNTHETIC_CANDIDATE,
+                receipt_validator=receipt_validator,
+            )
+            audit = fixture.audit()
+            self.assertEqual(len(plan["deployments"]), 37)
+            self.assertEqual(
+                [item["expected_address"] for item in plan["deployments"]],
+                [
+                    executor.create_address(
+                        SYNTHETIC_SENDER,
+                        SYNTHETIC_STARTING_NONCE + index,
+                    )
+                    for index in range(37)
+                ],
+            )
+            self.assertEqual(
+                executor.require_v2_expected_create_addresses(
+                    plan,
+                    sender=SYNTHETIC_SENDER,
+                    starting_nonce=SYNTHETIC_STARTING_NONCE,
+                ),
+                [item["expected_address"] for item in plan["deployments"]],
+            )
+            self.assertEqual(
+                plan["candidate"]["candidate_identity_sha256"],
+                audit.candidate_identity_sha256,
+            )
+            self.assertEqual(
+                plan["candidate"]["candidate_identity_keccak256"],
+                audit.candidate_identity_keccak256,
+            )
+            self.assertEqual(
+                plan["release_posture"]["status"],
+                "candidate_complete_tooling_only",
+            )
+            invalid_plan = copy.deepcopy(plan)
+            invalid_plan["candidate"]["candidate_identity_sha256"] = None
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "canonical deployment plan does not satisfy",
+            ):
+                materializer.validate_draft_2020_12_schema(
+                    fixture.root.resolve(),
+                    materializer.PLAN_SCHEMA_PATH,
+                    invalid_plan,
+                    "canonical deployment plan",
+                )
+            missing_address_plan = copy.deepcopy(plan)
+            del missing_address_plan["deployments"][0]["expected_address"]
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "expected_address.*required",
+            ):
+                materializer.validate_draft_2020_12_schema(
+                    fixture.root.resolve(),
+                    materializer.PLAN_SCHEMA_PATH,
+                    missing_address_plan,
+                    "canonical deployment plan",
+                )
+            binding = executor.execution_plan_binding(
+                plan,
+                plan_path="tmp/canonical-deployment-plan.json",
+                plan_sha256=deterministic_sha(0xE1),
+            )
+            self.assertEqual(
+                binding["candidate_identity_sha256"],
+                audit.candidate_identity_sha256,
+            )
+            self.assertEqual(
+                binding["candidate_identity_keccak256"],
+                audit.candidate_identity_keccak256,
+            )
+            self.assertNotIn("candidate_sha256", binding)
+        finally:
+            fixture.close()
+
+    def test_cross_namespace_address_collision_is_blocking(self) -> None:
+        fixture = SyntheticCandidate()
+        try:
+            address = fixture.candidate["instances"][0]["address"]
+            library = {
+                "order": 1,
+                "library_id": "fixture-library",
+                "target": {
+                    "kind": "production_contract",
+                    "name": "FixtureLibrary",
+                    "source": "smart-contracts/FixtureLibrary.sol",
+                    "artifact_relative_path": "FixtureLibrary.sol/FixtureLibrary.json",
+                    "artifact_sha256": deterministic_sha(0xEE),
+                },
+                "address": address,
+                "depends_on": [],
+                "constructor": {
+                    "types": [],
+                    "arguments": [],
+                    "encoded_args_keccak256": deterministic_hash(0x10),
+                },
+                "linked_libraries": [],
+                "runtime": {
+                    "immutable_values": {},
+                    "expected_keccak256": deterministic_hash(0x11),
+                },
+                "expected_linked_creation_keccak256": deterministic_hash(0x12),
+                "expected_initcode_keccak256": deterministic_hash(0x13),
+                "on_chain": {
+                    "status": "observed",
+                    "deployment_transaction": deterministic_hash(0x14),
+                    "block_number": 1000,
+                    "block_hash": deterministic_hash(0x15),
+                    "initcode_keccak256": deterministic_hash(0x13),
+                    "runtime_code_keccak256": deterministic_hash(0x11),
+                    "source_verification_status": "verified",
+                },
+                "review_status": "reviewed",
+            }
+            fixture.candidate["linked_libraries"] = [library]
+            fixture.candidate["instances"][0]["linked_libraries"] = [
+                {
+                    "library_id": library["library_id"],
+                    "source": library["target"]["source"],
+                    "name": library["target"]["name"],
+                    "address": address,
+                }
+            ]
+            fixture.bind_evidence()
+            self.assertIn(
+                "linked-library and candidate-instance addresses collide: "
+                + address,
+                fixture.audit().blockers,
+            )
+        finally:
+            fixture.close()
+
+    def test_complete_candidate_linked_creation_binding_is_consumed(self) -> None:
+        fixture = SyntheticCandidate()
+        try:
+            receipt_validator = fixture.prepare_materialization()
+            fixture.candidate["instances"][0][
+                "expected_linked_creation_keccak256"
+            ] = deterministic_hash(0xF1)
+            fixture.bind_evidence()
+            self.assertEqual(fixture.audit().blockers, ())
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "linked creation bytecode hash does not match",
+            ):
+                materializer.materialize_deployment_plan(
+                    fixture.root,
+                    fixture.root / SYNTHETIC_CANDIDATE,
+                    receipt_validator=receipt_validator,
+                )
         finally:
             fixture.close()
 

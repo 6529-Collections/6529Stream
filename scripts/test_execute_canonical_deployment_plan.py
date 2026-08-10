@@ -24,15 +24,41 @@ INITCODE = "0x6000"
 RUNTIME = "0x6001"
 
 
-def plan_document(*, production: bool = False) -> dict[str, object]:
+def plan_document(
+    *,
+    production: bool = False,
+    v2: bool = False,
+) -> dict[str, object]:
+    if v2:
+        production = True
     return {
         "release_posture": {
             "production_candidate": production,
-            "status": "non_production_tooling_only",
+            "status": (
+                "candidate_complete_tooling_only"
+                if v2
+                else "non_production_tooling_only"
+            ),
         },
         "candidate": {
             "candidate_id": "fixture",
             "sha256": "sha256:" + ("11" * 32),
+            "schema_version": (
+                executor.materializer.CANDIDATE_V2_SCHEMA
+                if v2
+                else executor.materializer.CANDIDATE_SCHEMA
+            ),
+            "candidate_kind": (
+                "genesis_release_candidate"
+                if v2
+                else "non_production_fixture"
+            ),
+            "candidate_identity_sha256": (
+                "sha256:" + ("77" * 32) if v2 else None
+            ),
+            "candidate_identity_keccak256": (
+                "0x" + ("88" * 32) if v2 else None
+            ),
         },
         "release_build": {
             "receipt_sha256": "sha256:" + ("22" * 32),
@@ -40,7 +66,10 @@ def plan_document(*, production: bool = False) -> dict[str, object]:
             "config_sha256": "sha256:" + ("55" * 32),
             "foundry_config_sha256": "sha256:" + ("66" * 32),
         },
-        "network": {"environment": "anvil", "chain_id": 31337},
+        "network": {
+            "environment": "local" if v2 else "anvil",
+            "chain_id": 31337,
+        },
         "deployments": [
             {
                 "order": 1,
@@ -78,6 +107,7 @@ def plan_document(*, production: bool = False) -> dict[str, object]:
                 "expected_runtime_keccak256": executor.materializer.keccak256_hex(
                     bytes.fromhex(RUNTIME[2:])
                 ),
+                **({"expected_address": DEPLOYED} if v2 else {}),
             }
         ],
     }
@@ -277,13 +307,177 @@ class CanonicalSnapshotTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(
                     executor.CanonicalExecutionError,
-                    "refuses production candidates",
+                    "invalid authority posture",
                 ):
                     executor.canonical_plan_snapshot(
                         root,
                         root / "candidate.json",
                         plan_path,
                     )
+
+    def test_v2_identity_drift_is_rejected_before_execution(self) -> None:
+        expected = plan_document(v2=True)
+        mutated = copy.deepcopy(expected)
+        mutated["candidate"]["candidate_identity_sha256"] = (
+            "sha256:" + ("99" * 32)
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            plan_path = root / "tmp/plan.json"
+            plan_path.parent.mkdir(parents=True)
+            plan_path.write_bytes(
+                executor.materializer.json_text(mutated).encode("utf-8")
+            )
+            with mock.patch.object(
+                executor.materializer,
+                "materialize_deployment_plan",
+                return_value=expected,
+            ):
+                with self.assertRaisesRegex(
+                    executor.CanonicalExecutionError,
+                    "stale or mutated",
+                ):
+                    executor.canonical_plan_snapshot(
+                        root,
+                        root / "candidate.json",
+                        plan_path,
+                    )
+
+
+class CandidateAddressBindingTests(unittest.TestCase):
+    def test_v2_create_sequence_accepts_exact_sender_nonce_order(self) -> None:
+        plan = plan_document(v2=True)
+        self.assertEqual(
+            executor.require_v2_expected_create_addresses(
+                plan,
+                sender=SENDER,
+                starting_nonce=0,
+            ),
+            [DEPLOYED],
+        )
+
+    def test_v2_create_sequence_rejects_omission_sender_nonce_and_drift(self) -> None:
+        cases: list[tuple[str, dict[str, object], str, int, str]] = []
+        missing = plan_document(v2=True)
+        del missing["deployments"][0]["expected_address"]
+        cases.append(("missing", missing, SENDER, 0, "expected_address"))
+        cases.append(
+            (
+                "wrong-sender",
+                plan_document(v2=True),
+                "0x0000000000000000000000000000000000000012",
+                0,
+                "does not match CREATE address",
+            )
+        )
+        cases.append(
+            (
+                "wrong-nonce",
+                plan_document(v2=True),
+                SENDER,
+                1,
+                "does not match CREATE address",
+            )
+        )
+        drifted = plan_document(v2=True)
+        drifted["deployments"][0]["expected_address"] = (
+            "0x00000000000000000000000000000000000000ff"
+        )
+        cases.append(
+            (
+                "drifted-address",
+                drifted,
+                SENDER,
+                0,
+                "does not match CREATE address",
+            )
+        )
+        for name, plan, sender, nonce, expected_error in cases:
+            with self.subTest(case=name), self.assertRaisesRegex(
+                executor.CanonicalExecutionError,
+                expected_error,
+            ):
+                executor.require_v2_expected_create_addresses(
+                    plan,
+                    sender=sender,
+                    starting_nonce=nonce,
+                )
+
+    def test_library_consumer_address_drift_fails_before_forge(self) -> None:
+        plan = plan_document(v2=True)
+        library = plan["deployments"][0]
+        library["instance_id"] = "fixture-library"
+        wrong_library_address = executor.create_address(SENDER, 7)
+        library["expected_address"] = wrong_library_address
+        consumer = copy.deepcopy(library)
+        consumer["order"] = 2
+        consumer["instance_id"] = "fixture-consumer"
+        consumer["expected_address"] = executor.create_address(SENDER, 1)
+        consumer["libraries"] = [
+            {
+                "source": "smart-contracts/FixtureLibrary.sol",
+                "name": "FixtureLibrary",
+                "address": wrong_library_address,
+                "creation_positions": [],
+                "runtime_positions": [],
+            }
+        ]
+        plan["deployments"] = [library, consumer]
+        raw = executor.materializer.json_text(plan).encode("utf-8")
+        digest = executor.prefixed_sha256(raw)
+        command_runner = mock.Mock()
+        forge_command = mock.Mock()
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "tmp/address-drift.json"
+            prepare_executor_files(root)
+
+            def rpc(method: str, params: object) -> object:
+                if method == "eth_chainId":
+                    return "0x7a69"
+                if method == "eth_getTransactionCount":
+                    return "0x0"
+                raise AssertionError(f"unexpected RPC method {method}: {params}")
+
+            with (
+                mock.patch.object(
+                    executor,
+                    "canonical_plan_snapshot",
+                    return_value=(plan, raw, digest),
+                ),
+                mock.patch.object(
+                    executor,
+                    "validate_broadcaster_source",
+                    return_value=executor.prefixed_sha256(
+                        (root / executor.DEFAULT_SCRIPT).read_bytes()
+                    ),
+                ),
+                mock.patch.object(
+                    executor,
+                    "forge_command",
+                    forge_command,
+                ),
+                self.assertRaisesRegex(
+                    executor.CanonicalExecutionError,
+                    "fixture-library expected address .* does not match CREATE",
+                ),
+            ):
+                executor.execute_plan(
+                    root,
+                    root / "candidate.json",
+                    root / "tmp/plan.json",
+                    output,
+                    rpc_url="http://127.0.0.1:8545",
+                    sender=SENDER,
+                    signer_cli=["--unlocked"],
+                    execution_mode="local",
+                    ephemeral_local=False,
+                    command_runner=command_runner,
+                    rpc=rpc,
+                )
+        forge_command.assert_not_called()
+        command_runner.assert_not_called()
 
 
 class IsolationTests(unittest.TestCase):
@@ -1667,8 +1861,9 @@ class SuccessfulExecutionTests(unittest.TestCase):
         output: Path,
         *,
         publish_side_effect: object | None = None,
+        v2: bool = False,
     ) -> dict[str, object]:
-        plan = plan_document()
+        plan = plan_document(v2=v2)
         raw = executor.materializer.json_text(plan).encode("utf-8")
         digest = executor.prefixed_sha256(raw)
         prepare_executor_files(root)
@@ -1746,8 +1941,8 @@ class SuccessfulExecutionTests(unittest.TestCase):
                         rpc_url="http://127.0.0.1:8545",
                         sender=SENDER,
                         signer_cli=["--unlocked"],
-                        execution_mode="anvil",
-                        ephemeral_local=True,
+                        execution_mode="local" if v2 else "anvil",
+                        ephemeral_local=not v2,
                         command_runner=run_command,
                         rpc=rpc,
                     )
@@ -1759,8 +1954,8 @@ class SuccessfulExecutionTests(unittest.TestCase):
                 rpc_url="http://127.0.0.1:8545",
                 sender=SENDER,
                 signer_cli=["--unlocked"],
-                execution_mode="anvil",
-                ephemeral_local=True,
+                execution_mode="local" if v2 else "anvil",
+                ephemeral_local=not v2,
                 command_runner=run_command,
                 rpc=rpc,
             )
@@ -1784,6 +1979,39 @@ class SuccessfulExecutionTests(unittest.TestCase):
             journal = json.loads(journals[0].read_text(encoding="utf-8"))
             self.assertTrue(journal["success"])
             self.assertEqual(executor.FINAL_JOURNAL_STATUS, journal["status"])
+
+    def test_complete_v2_identity_is_bound_in_execution_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output = root / "tmp/v2-success.json"
+            receipt = self.execute(root, output, v2=True)
+            self.assertTrue(receipt["release_posture"]["production_candidate"])
+            self.assertFalse(receipt["release_posture"]["readiness_evidence"])
+            self.assertEqual(
+                receipt["release_posture"]["status"],
+                "candidate_complete_execution_only",
+            )
+            self.assertEqual(
+                receipt["plan"]["candidate_identity_sha256"],
+                "sha256:" + ("77" * 32),
+            )
+            self.assertEqual(
+                receipt["plan"]["candidate_identity_keccak256"],
+                "0x" + ("88" * 32),
+            )
+            self.assertNotIn("candidate_sha256", receipt["plan"])
+            invalid_receipt = copy.deepcopy(receipt)
+            invalid_receipt["plan"]["candidate_identity_keccak256"] = None
+            with self.assertRaisesRegex(
+                executor.materializer.DeploymentPlanError,
+                "canonical deployment execution receipt does not satisfy",
+            ):
+                executor.materializer.validate_draft_2020_12_schema(
+                    root.resolve(),
+                    executor.EXECUTION_SCHEMA_PATH,
+                    invalid_receipt,
+                    "canonical deployment execution receipt",
+                )
 
     def test_receipt_publication_failure_resets_journal_success(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
