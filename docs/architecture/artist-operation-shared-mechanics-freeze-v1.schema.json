@@ -304,6 +304,15 @@
         "identity_fields",
         "registry_signature_status",
         "coordinator_signature_status",
+        "ingress_mode",
+        "registry_original_caller_capture",
+        "registry_original_caller_input_present",
+        "coordinator_first_common_argument",
+        "coordinator_ingress_authority",
+        "coordinator_zero_original_caller_policy",
+        "owner_original_caller_forwarding",
+        "owner_mutation_authority",
+        "relayer_may_differ_from_signer",
         "registry_state_mutability",
         "coordinator_state_mutability",
         "typed_collaborator_call_value_wei",
@@ -337,6 +346,33 @@
         },
         "coordinator_signature_status": {
           "const": "unresolved_not_invented"
+        },
+        "ingress_mode": {
+          "const": "immutable_registry_only_typed_facade"
+        },
+        "registry_original_caller_capture": {
+          "const": "immediate_msg_sender"
+        },
+        "registry_original_caller_input_present": {
+          "const": false
+        },
+        "coordinator_first_common_argument": {
+          "const": "address originalCaller"
+        },
+        "coordinator_ingress_authority": {
+          "const": "immutable_registry"
+        },
+        "coordinator_zero_original_caller_policy": {
+          "const": "reject_before_effects"
+        },
+        "owner_original_caller_forwarding": {
+          "const": "same_address_unchanged"
+        },
+        "owner_mutation_authority": {
+          "const": "immutable_coordinator"
+        },
+        "relayer_may_differ_from_signer": {
+          "const": true
         },
         "registry_state_mutability": {
           "const": "nonpayable"
@@ -664,10 +700,10 @@
           "const": 57
         },
         "accepted_decision_count": {
-          "const": 1
+          "const": 3
         },
         "unresolved_decision_count": {
-          "const": 18
+          "const": 16
         },
         "operation_22_stop_preserved": {
           "const": true

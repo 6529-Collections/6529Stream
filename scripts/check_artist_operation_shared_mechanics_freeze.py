@@ -34,13 +34,13 @@ JSON_SCHEMA_ID = (
 )
 EVALUATED_COMMIT = "eef6a4cc5070186cc6517cca90bd9ffe1f74ea06"
 EVALUATED_TREE = "1a56c7b27ed304f96f551d1bebd0aa93a4ee164e"
-SCHEMA_SHA256 = "f3840eae20ece438777922253099ab26276b51097618f04f86260d7e47df81ad"
+SCHEMA_SHA256 = "d61b29f63c662494047fc1b30bf72035ab7d586a23fe45c2bb6f2d8a0ae795b0"
 SELECTED_SHAPE_SHA256 = "9417c5fe3f8187ab75463384b1ef0932233369b097de459df5d10f86e80cc11b"
 PHASE_ORDER_SHA256 = "9faa90a8cd9027448dfdf344f23c9719ad0488e9f79d3a78f4fd40adab7075aa"
 FIXED_INVARIANTS_SHA256 = "5e4ae8a539187ab0c29969f189d956b41c2002ac046e80023644e85c19381543"
-OPERATION_PROJECTION_SHA256 = "baab6362ef92d9b1c27ca4bda2117a8818e66fc4ea2b80d3d090144ce24ed969"
-DECISION_ROWS_SHA256 = "27031b7092d81767cc5ac9b4573cfcf9f5faee1f53a95d9da9a5542a17a404f2"
-GATE_STATE_SHA256 = "41ef4a06b79f0478a71ad4aadd7230179f6daf3f57cb5207fdf006ce276831fa"
+OPERATION_PROJECTION_SHA256 = "027cc006e9ea5248c0ed4ff573dc52d594a72ddf73036b3c62745d843f673120"
+DECISION_ROWS_SHA256 = "163d573fef499772e7cbf56080b78bff0eff1e60693033c8535e3ba9e96b75f9"
+GATE_STATE_SHA256 = "f76ff6d113b0fde161464ab70ee84dc00022c322bb53b3b0bb8e20036aa5cf12"
 EXCLUSIONS_SHA256 = "3d917a006edccebf17dd61967de693dd8f75e44273cbd9117419fc14cb8a01bc"
 
 TOP_LEVEL_FIELDS = frozenset(
@@ -139,7 +139,121 @@ EXPECTED_DECISION_PHASES = (
     ("gas_and_call_discipline", "shared_mechanics"),
 )
 
-EXPECTED_ACCEPTED_DECISIONS = ("native_value",)
+EXPECTED_ACCEPTED_DECISIONS = (
+    "registry_ingress",
+    "original_caller",
+    "native_value",
+)
+EXPECTED_REGISTRY_INGRESS_OPTION = "immutable_registry_only_typed_facade_v1"
+EXPECTED_REGISTRY_INGRESS_OPTION_DISPOSITIONS = (
+    ("direct_coordinator_ingress", "rejected"),
+    ("dual_registry_and_direct_ingress", "rejected"),
+    ("caller_supplied_original_caller", "rejected"),
+    ("trusted_forwarder_or_meta_transaction_ingress", "rejected"),
+    ("generic_selector_or_calldata_dispatch", "rejected"),
+    ("immutable_registry_only_typed_facade_v1", "accepted"),
+)
+EXPECTED_REGISTRY_INGRESS_VALUES = {
+    "registry_ingress_mode": "immutable_registry_only_typed_facade",
+    "registry_entrypoint_count": 57,
+    "registry_entrypoint_mutability": "external_nonpayable",
+    "registry_captures_immediate_msg_sender": True,
+    "registry_original_caller_input_present": False,
+    "coordinator_entrypoint_count": 57,
+    "coordinator_first_common_argument_type": "address",
+    "coordinator_first_common_argument_name": "originalCaller",
+    "coordinator_requires_immutable_registry_sender": True,
+    "coordinator_requires_nonzero_original_caller": True,
+    "direct_coordinator_ingress": False,
+    "dual_ingress": False,
+    "trusted_forwarder_ingress": False,
+    "generic_dispatch": False,
+}
+EXPECTED_REGISTRY_INGRESS_OBLIGATIONS = {
+    "encoding_obligations": (
+        "each of the 57 Registry facade entries is typed, external and nonpayable and has no caller-supplied originalCaller field",
+        "each of the 57 matching typed Coordinator operation projections has the same first common argument address originalCaller while its selector, remaining parameters and returns remain unresolved",
+        "Registry and Coordinator expose no generic selector, calldata, fallback or receive surface and authorize no direct or alternate ingress path",
+    ),
+    "call_obligations": (
+        "Registry captures its immediate msg.sender and forwards that same address as originalCaller to the one immutably bound Coordinator",
+        "Coordinator accepts every typed operation only from its immutable Registry and rejects address zero originalCaller before snapshots, calls or effects",
+        "direct callers, a fake Registry, a substituted Registry authority and caller injection never reach an owner, provider, validator or Archive call",
+    ),
+    "error_obligations": (
+        "direct or fake-Registry Coordinator ingress rejects before any state, event, evidence or collaborator effect without selecting an exact custom-error ABI in this packet",
+        "zero originalCaller rejects before any state, event, evidence or collaborator effect without selecting an exact custom-error ABI in this packet, while caller-supplied or altered Registry forwarding fails exact source and trace acceptance",
+        "unknown selectors, generic calldata and alternate ingress have no effect and remain rejected by the absent fallback, receive and generic-routing surfaces",
+    ),
+    "test_obligations": (
+        "for every one of 57 operation projections prove Registry-only typed nonpayable ingress, immediate msg.sender capture, no originalCaller input and the same first common Coordinator address originalCaller field",
+        "for every one of 57 operation projections prove direct Coordinator, fake Registry, zero caller and caller-injection attempts reject before any owner, provider, validator, Archive, state, event or evidence effect",
+        "prove caller-supplied, dual, trusted-forwarder, unknown-selector and generic-calldata routes do not exist and have no effect",
+        "prove immutable Registry authority substitution rejects at runtime and any forwarded-caller substitution fails exact source and forwarding-trace acceptance rather than being normalized",
+    ),
+    "evidence": (
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md#slim-registry",
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+        "docs/architecture/artist-semantic-owner-matrix-v2.json#operations",
+    ),
+}
+EXPECTED_ORIGINAL_CALLER_OPTION = "immediate_registry_sender_forwarded_unchanged_v1"
+EXPECTED_ORIGINAL_CALLER_OPTION_DISPOSITIONS = (
+    ("tx_origin_derived", "rejected"),
+    ("signer_substitution", "rejected"),
+    ("role_or_governance_actor_substitution", "rejected"),
+    ("provider_owner_or_coordinator_substitution", "rejected"),
+    ("caller_supplied_or_trusted_forwarder_claim", "rejected"),
+    ("immediate_registry_sender_forwarded_unchanged_v1", "accepted"),
+)
+EXPECTED_ORIGINAL_CALLER_VALUES = {
+    "definition": "immediate_registry_submitter",
+    "registry_capture_expression": "msg.sender",
+    "coordinator_transport_type": "address",
+    "coordinator_transport_position": "first_common_argument",
+    "coordinator_zero_original_caller_allowed": False,
+    "owner_transport": "unchanged",
+    "owner_requires_immutable_coordinator_sender": True,
+    "tx_origin_authoritative": False,
+    "signer_substitutes_original_caller": False,
+    "role_or_governance_actor_substitutes_original_caller": False,
+    "provider_owner_or_coordinator_substitutes_original_caller": False,
+    "relayer_may_differ_from_signer": True,
+}
+EXPECTED_ORIGINAL_CALLER_OBLIGATIONS = {
+    "encoding_obligations": (
+        "originalCaller is one bare address and the first common argument in each of 57 typed Coordinator operation projections",
+        "Registry operation calldata contains no caller-asserted originalCaller and Registry derives it only from the immediate msg.sender",
+        "exact owner mutation parameter order and context packing remain unresolved, but every eventual mutating owner call must carry the same originalCaller address unchanged",
+    ),
+    "call_obligations": (
+        "Coordinator verifies immutable Registry msg.sender and nonzero originalCaller before snapshots and forwards that address unchanged to every mutating owner in the recipe",
+        "each mutating owner verifies its immutable Coordinator msg.sender before authenticating the unchanged originalCaller against its own exact authority rules",
+        "originalCaller is never replaced by tx.origin, a signer, role holder, governance actor, provider, owner, Coordinator or trusted-forwarder claim",
+        "a relayer may be originalCaller while a distinct signer satisfies an independently frozen signature rule",
+    ),
+    "error_obligations": (
+        "zero originalCaller rejects before any state, event, evidence or downstream effect without selecting an exact custom-error ABI in this packet, while altered or injected caller derivation fails exact source, ABI and trace acceptance",
+        "Registry or Coordinator authority substitution rejects before any owner mutation and owner calls from any address other than the immutable Coordinator reject before owner effects",
+        "tx.origin, signer, role, governance, provider, owner or Coordinator identity mismatch is never normalized into originalCaller",
+    ),
+    "test_obligations": (
+        "for every one of 57 operation projections assert Registry msg.sender is the sole derivation and the identical nonzero address reaches every mutating owner",
+        "prove direct and fake-Registry calls, zero caller and immutable-authority substitution reject with no effects and prove caller injection or altered owner forwarding fails exact source, ABI and trace acceptance",
+        "prove tx.origin mismatch does not change originalCaller and prove a valid relayer distinct from the signer remains the authenticated originalCaller",
+        "prove signer, role, governance, provider, owner and Coordinator identities cannot substitute for originalCaller",
+        "prove unknown selectors and generic calldata cannot manufacture or forward an originalCaller and have no effect",
+    ),
+    "evidence": (
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#frozen-facts-that-source-must-preserve",
+        "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md#blocking-acceptance-surfaces",
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md#slim-registry",
+        "docs/adr/0023-modular-artist-authority-domain-ownership.md#stateless-atomic-operation-coordinator",
+        "docs/architecture/artist-semantic-owner-matrix-v2.json#operations",
+    ),
+}
 EXPECTED_NATIVE_VALUE_OPTION = "nonpayable_zero_value_end_to_end_v1"
 EXPECTED_NATIVE_VALUE_OPTION_DISPOSITIONS = (
     ("payable_passthrough_or_custody", "rejected"),
@@ -575,23 +689,40 @@ def _check_register(root: Path, packet: dict[str, Any]) -> None:
                     f"decision {row['surface_id']} selected option disagrees with disposition"
                 )
 
-            if row["surface_id"] != "native_value":
-                raise FreezeError(
-                    f"accepted decision {row['surface_id']} has no exact checker binding"
-                )
-            if row["selected_option"] != EXPECTED_NATIVE_VALUE_OPTION:
-                raise FreezeError("native-value selected option drifted")
             dispositions = tuple(
                 (option["option_id"], option["disposition"])
                 for option in resolution["considered_options"]
             )
-            if dispositions != EXPECTED_NATIVE_VALUE_OPTION_DISPOSITIONS:
-                raise FreezeError("native-value considered options drifted")
-            if resolution["selected_values"] != EXPECTED_NATIVE_VALUE_VALUES:
-                raise FreezeError("native-value exact values drifted")
-            for field, expected in EXPECTED_NATIVE_VALUE_OBLIGATIONS.items():
+            surface = row["surface_id"]
+            if surface == "registry_ingress":
+                expected_option = EXPECTED_REGISTRY_INGRESS_OPTION
+                expected_dispositions = EXPECTED_REGISTRY_INGRESS_OPTION_DISPOSITIONS
+                expected_values = EXPECTED_REGISTRY_INGRESS_VALUES
+                expected_obligations = EXPECTED_REGISTRY_INGRESS_OBLIGATIONS
+            elif surface == "original_caller":
+                expected_option = EXPECTED_ORIGINAL_CALLER_OPTION
+                expected_dispositions = EXPECTED_ORIGINAL_CALLER_OPTION_DISPOSITIONS
+                expected_values = EXPECTED_ORIGINAL_CALLER_VALUES
+                expected_obligations = EXPECTED_ORIGINAL_CALLER_OBLIGATIONS
+            elif surface == "native_value":
+                expected_option = EXPECTED_NATIVE_VALUE_OPTION
+                expected_dispositions = EXPECTED_NATIVE_VALUE_OPTION_DISPOSITIONS
+                expected_values = EXPECTED_NATIVE_VALUE_VALUES
+                expected_obligations = EXPECTED_NATIVE_VALUE_OBLIGATIONS
+            else:
+                raise FreezeError(
+                    f"accepted decision {surface} has no exact checker binding"
+                )
+            diagnostic = surface.replace("_", "-")
+            if row["selected_option"] != expected_option:
+                raise FreezeError(f"{diagnostic} selected option drifted")
+            if dispositions != expected_dispositions:
+                raise FreezeError(f"{diagnostic} considered options drifted")
+            if resolution["selected_values"] != expected_values:
+                raise FreezeError(f"{diagnostic} exact values drifted")
+            for field, expected in expected_obligations.items():
                 if tuple(resolution[field]) != expected:
-                    raise FreezeError(f"native-value {field} drifted")
+                    raise FreezeError(f"{diagnostic} {field} drifted")
             for reference in resolution["evidence"]:
                 _resolve_evidence_reference(root, reference)
             continue
@@ -659,6 +790,20 @@ def _check_matrix_projection(matrix: dict[str, Any], packet: dict[str, Any]) -> 
     projection = packet["operation_projection"]
     if (
         projection["operation_count"] != len(operations)
+        or projection["ingress_mode"]
+        != "immutable_registry_only_typed_facade"
+        or projection["registry_original_caller_capture"]
+        != "immediate_msg_sender"
+        or projection["registry_original_caller_input_present"]
+        or projection["coordinator_first_common_argument"]
+        != "address originalCaller"
+        or projection["coordinator_ingress_authority"] != "immutable_registry"
+        or projection["coordinator_zero_original_caller_policy"]
+        != "reject_before_effects"
+        or projection["owner_original_caller_forwarding"]
+        != "same_address_unchanged"
+        or projection["owner_mutation_authority"] != "immutable_coordinator"
+        or not projection["relayer_may_differ_from_signer"]
         or projection["registry_state_mutability"] != "nonpayable"
         or projection["coordinator_state_mutability"] != "nonpayable"
         or projection["typed_collaborator_call_value_wei"] != 0
@@ -666,7 +811,7 @@ def _check_matrix_projection(matrix: dict[str, Any], packet: dict[str, Any]) -> 
         or projection["implementation_authorized"]
         or projection["operation_22_effective_stop"] != stop
     ):
-        raise FreezeError("57-operation value/source projection drifted")
+        raise FreezeError("57-operation ingress/caller/value/source projection drifted")
 
     directory = matrix["directory"]
     coordinator = matrix["operation_coordinator"]

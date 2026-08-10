@@ -66,10 +66,18 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         self._write(CHECKER.PACKET_PATH, packet)
 
     @staticmethod
-    def _native_row(packet: dict[str, Any]) -> dict[str, Any]:
+    def _decision_row(
+        packet: dict[str, Any], surface_id: str
+    ) -> dict[str, Any]:
         return next(
-            row for row in packet["decision_rows"] if row["surface_id"] == "native_value"
+            row
+            for row in packet["decision_rows"]
+            if row["surface_id"] == surface_id
         )
+
+    @classmethod
+    def _native_row(cls, packet: dict[str, Any]) -> dict[str, Any]:
+        return cls._decision_row(packet, "native_value")
 
     def _assert_rejected(self, expected: str | None = None) -> None:
         if expected is None:
@@ -92,20 +100,26 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         target.write_text(updated_text, encoding="utf-8")
         rebound_digest = hashlib.sha256(target.read_bytes()).hexdigest()
         packet = self._packet()
-        rebound_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
+        rebound_obligations = {
+            "registry_ingress": CHECKER.EXPECTED_REGISTRY_INGRESS_OBLIGATIONS,
+            "original_caller": CHECKER.EXPECTED_ORIGINAL_CALLER_OBLIGATIONS,
+            "native_value": CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS,
+        }
         if evidence_replacement is not None:
             previous_reference, rebound_reference = evidence_replacement
-            evidence = self._native_row(packet)["resolution"]["evidence"]
-            evidence[evidence.index(previous_reference)] = rebound_reference
-            rebound_obligations = {
-                **CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS,
-                "evidence": tuple(
-                    rebound_reference if value == previous_reference else value
-                    for value in CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS[
-                        "evidence"
-                    ]
-                ),
-            }
+            for surface_id, obligations in tuple(rebound_obligations.items()):
+                row = self._decision_row(packet, surface_id)
+                evidence = row["resolution"]["evidence"]
+                if previous_reference not in evidence:
+                    continue
+                evidence[evidence.index(previous_reference)] = rebound_reference
+                rebound_obligations[surface_id] = {
+                    **obligations,
+                    "evidence": tuple(
+                        rebound_reference if value == previous_reference else value
+                        for value in obligations["evidence"]
+                    ),
+                }
         binding = next(
             row
             for row in packet["authority_bindings"]
@@ -124,13 +138,23 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         )
         original_authorities = CHECKER.EXPECTED_AUTHORITY_BINDINGS
         original_decision_digest = CHECKER.DECISION_ROWS_SHA256
-        original_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
+        original_ingress_obligations = CHECKER.EXPECTED_REGISTRY_INGRESS_OBLIGATIONS
+        original_caller_obligations = CHECKER.EXPECTED_ORIGINAL_CALLER_OBLIGATIONS
+        original_native_obligations = CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS
         try:
             CHECKER.EXPECTED_AUTHORITY_BINDINGS = rebound_authorities
             CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
                 packet["decision_rows"]
             )
-            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = rebound_obligations
+            CHECKER.EXPECTED_REGISTRY_INGRESS_OBLIGATIONS = rebound_obligations[
+                "registry_ingress"
+            ]
+            CHECKER.EXPECTED_ORIGINAL_CALLER_OBLIGATIONS = rebound_obligations[
+                "original_caller"
+            ]
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = rebound_obligations[
+                "native_value"
+            ]
             if expected_error is not None:
                 self._assert_rejected(expected_error)
                 return None
@@ -138,7 +162,13 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         finally:
             CHECKER.EXPECTED_AUTHORITY_BINDINGS = original_authorities
             CHECKER.DECISION_ROWS_SHA256 = original_decision_digest
-            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = original_obligations
+            CHECKER.EXPECTED_REGISTRY_INGRESS_OBLIGATIONS = (
+                original_ingress_obligations
+            )
+            CHECKER.EXPECTED_ORIGINAL_CALLER_OBLIGATIONS = (
+                original_caller_obligations
+            )
+            CHECKER.EXPECTED_NATIVE_VALUE_OBLIGATIONS = original_native_obligations
 
     def test_baseline_is_exact(self) -> None:
         counts = CHECKER.check(self.root)
@@ -146,8 +176,8 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             "authority_bindings": 10,
             "phases": 4,
             "decision_rows": 19,
-            "accepted_decisions": 1,
-            "unresolved_decisions": 18,
+            "accepted_decisions": 3,
+            "unresolved_decisions": 16,
             "operations": 57,
         })
 
@@ -166,13 +196,16 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         )
         self.assertFalse(packet["operation_projection"]["source_present"])
         self.assertFalse(packet["operation_projection"]["implementation_authorized"])
-        self.assertEqual(packet["gate_state"]["accepted_decision_count"], 1)
-        self.assertEqual(packet["gate_state"]["unresolved_decision_count"], 18)
+        self.assertEqual(packet["gate_state"]["accepted_decision_count"], 3)
+        self.assertEqual(packet["gate_state"]["unresolved_decision_count"], 16)
         accepted = [row for row in packet["decision_rows"] if row["accepted"]]
-        self.assertEqual([row["surface_id"] for row in accepted], ["native_value"])
-        self.assertFalse(accepted[0]["source_blocking"])
+        self.assertEqual(
+            [row["surface_id"] for row in accepted],
+            ["registry_ingress", "original_caller", "native_value"],
+        )
+        self.assertTrue(all(not row["source_blocking"] for row in accepted))
         unresolved = [row for row in packet["decision_rows"] if not row["accepted"]]
-        self.assertEqual(len(unresolved), 18)
+        self.assertEqual(len(unresolved), 16)
         self.assertTrue(all(row["source_blocking"] for row in unresolved))
         matrix = self._read(CHECKER.MATRIX_PATH)
         self.assertEqual(len(matrix["operations"]), 57)
@@ -448,7 +481,7 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             expected_error=None,
         )
         self.assertIsNotNone(counts)
-        self.assertEqual(counts["accepted_decisions"], 1)
+        self.assertEqual(counts["accepted_decisions"], 3)
         with self.assertRaisesRegex(
             CHECKER.FreezeError,
             "evidence Markdown heading is missing",
@@ -504,7 +537,7 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
             ),
         )
         self.assertIsNotNone(counts)
-        self.assertEqual(counts["accepted_decisions"], 1)
+        self.assertEqual(counts["accepted_decisions"], 3)
 
     def test_collapsed_space_anchor_cannot_pass_after_all_digest_rebinding(
         self,
@@ -590,6 +623,274 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
         )
         self._write_packet(packet)
         self._assert_rejected("decision rows drifted")
+
+    def test_ingress_and_original_caller_projection_is_uniform_across_57_operations(
+        self,
+    ) -> None:
+        packet = self._packet()
+        projection = packet["operation_projection"]
+        matrix = self._read(CHECKER.MATRIX_PATH)
+        self.assertEqual(len(matrix["operations"]), 57)
+        self.assertEqual(
+            projection["ingress_mode"],
+            "immutable_registry_only_typed_facade",
+        )
+        self.assertEqual(
+            projection["registry_original_caller_capture"],
+            "immediate_msg_sender",
+        )
+        self.assertFalse(projection["registry_original_caller_input_present"])
+        self.assertEqual(
+            projection["coordinator_first_common_argument"],
+            "address originalCaller",
+        )
+        self.assertEqual(
+            projection["coordinator_ingress_authority"],
+            "immutable_registry",
+        )
+        self.assertEqual(
+            projection["coordinator_zero_original_caller_policy"],
+            "reject_before_effects",
+        )
+        self.assertEqual(
+            projection["owner_original_caller_forwarding"],
+            "same_address_unchanged",
+        )
+        self.assertEqual(
+            projection["owner_mutation_authority"],
+            "immutable_coordinator",
+        )
+        self.assertTrue(projection["relayer_may_differ_from_signer"])
+        for expected_id, operation in enumerate(matrix["operations"], start=1):
+            with self.subTest(operation_id=expected_id):
+                self.assertEqual(operation["operation_id"], expected_id)
+                recipe = operation["coordinator_recipe"]
+                self.assertTrue(recipe["original_caller_authenticated"])
+                self.assertFalse(recipe["generic_dispatch"])
+                self.assertFalse(operation["source_requirements"]["source_present"])
+                self.assertFalse(
+                    operation["source_requirements"]["implementation_authorized"]
+                )
+
+    def test_ingress_and_caller_hostiles_reach_exact_value_guards(self) -> None:
+        hostile_cases = (
+            (
+                "direct_coordinator",
+                "registry_ingress",
+                "direct_coordinator_ingress",
+                True,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "dual_ingress",
+                "registry_ingress",
+                "dual_ingress",
+                True,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "caller_injection",
+                "registry_ingress",
+                "registry_original_caller_input_present",
+                True,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "fake_registry",
+                "registry_ingress",
+                "coordinator_requires_immutable_registry_sender",
+                False,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "zero_original_caller",
+                "registry_ingress",
+                "coordinator_requires_nonzero_original_caller",
+                False,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "unknown_or_generic_selector_no_effect",
+                "registry_ingress",
+                "generic_dispatch",
+                True,
+                "registry-ingress exact values drifted",
+            ),
+            (
+                "tx_origin_mismatch",
+                "original_caller",
+                "tx_origin_authoritative",
+                True,
+                "original-caller exact values drifted",
+            ),
+            (
+                "signer_substitution",
+                "original_caller",
+                "signer_substitutes_original_caller",
+                True,
+                "original-caller exact values drifted",
+            ),
+            (
+                "relayer_signer_distinction",
+                "original_caller",
+                "relayer_may_differ_from_signer",
+                False,
+                "original-caller exact values drifted",
+            ),
+            (
+                "zero_transport",
+                "original_caller",
+                "coordinator_zero_original_caller_allowed",
+                True,
+                "original-caller exact values drifted",
+            ),
+            (
+                "altered_forwarding",
+                "original_caller",
+                "owner_transport",
+                "altered",
+                "original-caller exact values drifted",
+            ),
+            (
+                "coordinator_authority_substitution",
+                "original_caller",
+                "owner_requires_immutable_coordinator_sender",
+                False,
+                "original-caller exact values drifted",
+            ),
+            (
+                "role_or_governance_authority_substitution",
+                "original_caller",
+                "role_or_governance_actor_substitutes_original_caller",
+                True,
+                "original-caller exact values drifted",
+            ),
+        )
+        for case, surface_id, field, hostile, expected_error in hostile_cases:
+            with self.subTest(case=case, surface_id=surface_id, field=field):
+                packet = self._packet()
+                row = self._decision_row(packet, surface_id)
+                row["resolution"]["selected_values"][field] = hostile
+                self._write_packet(packet)
+                original_digest = CHECKER.DECISION_ROWS_SHA256
+                try:
+                    CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                        packet["decision_rows"]
+                    )
+                    self._assert_rejected(expected_error)
+                finally:
+                    CHECKER.DECISION_ROWS_SHA256 = original_digest
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.PACKET_PATH,
+                        self.root / CHECKER.PACKET_PATH,
+                    )
+
+    def test_ingress_and_caller_projection_hostiles_reach_exact_guard(self) -> None:
+        hostile_cases = (
+            ("ingress_mode", "dual_registry_and_direct"),
+            ("registry_original_caller_capture", "caller_supplied"),
+            ("registry_original_caller_input_present", True),
+            ("coordinator_first_common_argument", "bytes32 originalCaller"),
+            ("coordinator_ingress_authority", "substituted_registry"),
+            ("coordinator_zero_original_caller_policy", "allow"),
+            ("owner_original_caller_forwarding", "altered"),
+            ("owner_mutation_authority", "substituted_coordinator"),
+            ("relayer_may_differ_from_signer", False),
+        )
+        for field, hostile in hostile_cases:
+            with self.subTest(field=field):
+                packet = self._packet()
+                packet["operation_projection"][field] = hostile
+                self._write_packet(packet)
+                schema = self._read(CHECKER.SCHEMA_PATH)
+                schema["$defs"]["operationProjection"]["properties"][field][
+                    "const"
+                ] = hostile
+                self._write(CHECKER.SCHEMA_PATH, schema)
+                original_schema_digest = CHECKER.SCHEMA_SHA256
+                original_digest = CHECKER.OPERATION_PROJECTION_SHA256
+                try:
+                    CHECKER.SCHEMA_SHA256 = hashlib.sha256(
+                        (self.root / CHECKER.SCHEMA_PATH).read_bytes()
+                    ).hexdigest()
+                    CHECKER.OPERATION_PROJECTION_SHA256 = CHECKER._canonical_digest(
+                        packet["operation_projection"]
+                    )
+                    self._assert_rejected(
+                        "57-operation ingress/caller/value/source projection drifted"
+                    )
+                finally:
+                    CHECKER.SCHEMA_SHA256 = original_schema_digest
+                    CHECKER.OPERATION_PROJECTION_SHA256 = original_digest
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.PACKET_PATH,
+                        self.root / CHECKER.PACKET_PATH,
+                    )
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.SCHEMA_PATH,
+                        self.root / CHECKER.SCHEMA_PATH,
+                    )
+
+    def test_ingress_and_caller_options_reach_independent_guards(self) -> None:
+        for surface_id, expected_error in (
+            ("registry_ingress", "registry-ingress considered options drifted"),
+            ("original_caller", "original-caller considered options drifted"),
+        ):
+            with self.subTest(surface_id=surface_id):
+                packet = self._packet()
+                row = self._decision_row(packet, surface_id)
+                row["resolution"]["considered_options"][0][
+                    "option_id"
+                ] = "renamed_hostile_option"
+                self._write_packet(packet)
+                original_digest = CHECKER.DECISION_ROWS_SHA256
+                try:
+                    CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                        packet["decision_rows"]
+                    )
+                    self._assert_rejected(expected_error)
+                finally:
+                    CHECKER.DECISION_ROWS_SHA256 = original_digest
+                    shutil.copy2(
+                        REPO_ROOT / CHECKER.PACKET_PATH,
+                        self.root / CHECKER.PACKET_PATH,
+                    )
+
+    def test_ingress_and_caller_obligations_reach_independent_guards(self) -> None:
+        obligations_by_surface = {
+            "registry_ingress": CHECKER.EXPECTED_REGISTRY_INGRESS_OBLIGATIONS,
+            "original_caller": CHECKER.EXPECTED_ORIGINAL_CALLER_OBLIGATIONS,
+        }
+        for surface_id, obligations in obligations_by_surface.items():
+            for field in obligations:
+                for mutation in ("delete", "replace"):
+                    with self.subTest(
+                        surface_id=surface_id,
+                        field=field,
+                        mutation=mutation,
+                    ):
+                        packet = self._packet()
+                        values = self._decision_row(packet, surface_id)["resolution"][
+                            field
+                        ]
+                        if mutation == "delete":
+                            values.pop()
+                        else:
+                            values[0] = "same-cardinality hostile replacement"
+                        self._write_packet(packet)
+                        original_digest = CHECKER.DECISION_ROWS_SHA256
+                        try:
+                            CHECKER.DECISION_ROWS_SHA256 = CHECKER._canonical_digest(
+                                packet["decision_rows"]
+                            )
+                            diagnostic = surface_id.replace("_", "-")
+                            self._assert_rejected(f"{diagnostic} {field} drifted")
+                        finally:
+                            CHECKER.DECISION_ROWS_SHA256 = original_digest
+                            shutil.copy2(
+                                REPO_ROOT / CHECKER.PACKET_PATH,
+                                self.root / CHECKER.PACKET_PATH,
+                            )
 
     def test_native_value_exact_values_reach_independent_guard(self) -> None:
         packet = self._packet()
@@ -718,7 +1019,9 @@ class ArtistOperationSharedMechanicsFreezeTests(unittest.TestCase):
 
     def test_accepted_boolean_reaches_independent_status_guard(self) -> None:
         packet = self._packet()
-        self._native_row(packet)["accepted"] = False
+        for row in packet["decision_rows"]:
+            if row["decision_status"] == "accepted":
+                row["accepted"] = False
         self._write_packet(packet)
 
         schema = self._read(CHECKER.SCHEMA_PATH)
