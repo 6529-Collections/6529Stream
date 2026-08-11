@@ -156,7 +156,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 294)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 299)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3151,11 +3151,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 294)
-        self.assertEqual(len(manifest["files"]), 470)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 299)
+        self.assertEqual(len(manifest["files"]), 475)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            470,
+            475,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3436,6 +3436,18 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assert_committed_checksums_cover(expected_paths)
 
+    def test_committed_checksums_cover_artist_owner_record_continuity_packet(
+        self,
+    ) -> None:
+        expected_paths = {
+            Path("docs/architecture/artist-owner-record-continuity-v1.json"),
+            Path("docs/architecture/artist-owner-record-continuity-v1.md"),
+            Path("docs/architecture/artist-owner-record-continuity-v1.schema.json"),
+            Path("scripts/check_artist_owner_record_continuity.py"),
+            Path("scripts/test_artist_owner_record_continuity.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {
             Path("CHANGELOG.md"),
@@ -3536,7 +3548,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 470)
+        self.assertEqual(len(classifications), 475)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

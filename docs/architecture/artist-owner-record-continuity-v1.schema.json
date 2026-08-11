@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/artist-owner-record-continuity-v1.schema.json",
+  "title": "Artist owner dual-record continuity prerequisite",
+  "type": "object",
+  "required": [
+    "schema",
+    "status",
+    "maturity",
+    "evaluated_base",
+    "authority_bindings",
+    "selected_shape",
+    "inventory_bindings",
+    "owner_domain_ids",
+    "semantic_record_protocol",
+    "owner_record_commitment_protocol",
+    "logical_receipt_mapping",
+    "record_ordering",
+    "record_chain_transition",
+    "record_delta_commitment_protocol",
+    "archive_boundary",
+    "failure_and_rollback",
+    "canonical_vectors",
+    "prohibited_mechanics",
+    "unresolved_dependencies",
+    "gate_state",
+    "semantic_digest"
+  ],
+  "properties": {
+    "schema": {"const": "6529stream.artist-owner-record-continuity.v1"},
+    "status": {"const": "PROPOSED_RECORD_CONTINUITY_PREREQUISITE"},
+    "maturity": {"const": "pre_audit_source_blocked"},
+    "evaluated_base": {
+      "type": "object",
+      "required": ["commit", "tree"],
+      "properties": {
+        "commit": {"const": "501d63499f97586ff9fd5128ec63e9c8489eea1f"},
+        "tree": {"const": "75cacef8a99201b33ae17a7987ac34201bef305f"}
+      },
+      "additionalProperties": false
+    },
+    "authority_bindings": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/authority_binding"}
+    },
+    "selected_shape": {
+      "type": "object",
+      "required": ["option_id", "selection_posture", "rationale", "rejected_options"],
+      "properties": {
+        "option_id": {"const": "dual_semantic_hash_and_owner_v2_commitment"},
+        "selection_posture": {"const": "record_inner_prerequisite_only"},
+        "rationale": {"type": "array", "minItems": 4, "items": {"type": "string", "minLength": 1}},
+        "rejected_options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["option_id", "reason"],
+            "properties": {
+              "option_id": {"type": "string", "minLength": 1},
+              "reason": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "inventory_bindings": {
+      "type": "object",
+      "required": ["record_domains", "created_records", "owner_record_batches", "owner_domains"],
+      "properties": {
+        "record_domains": {"$ref": "#/$defs/inventory_binding"},
+        "created_records": {"$ref": "#/$defs/inventory_binding"},
+        "owner_record_batches": {
+          "allOf": [
+            {"$ref": "#/$defs/inventory_binding"},
+            {
+              "type": "object",
+              "required": ["maximum_records_per_owner_action", "only_two_record_batch"],
+              "properties": {
+                "maximum_records_per_owner_action": {"const": 2},
+                "only_two_record_batch": {"type": "object"}
+              }
+            }
+          ]
+        },
+        "owner_domains": {"$ref": "#/$defs/inventory_binding"}
+      },
+      "additionalProperties": false
+    },
+    "owner_domain_ids": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "required": ["domain_id", "storage_namespace", "domain_value_rule", "domain_value"],
+        "properties": {
+          "domain_id": {"type": "string", "minLength": 1},
+          "storage_namespace": {"type": "string", "pattern": "^6529stream\\.artist\\..+\\.v2$"},
+          "domain_value_rule": {"const": "keccak256(bytes(storage_namespace))"},
+          "domain_value": {"$ref": "#/$defs/bytes32"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "semantic_record_protocol": {
+      "type": "object",
+      "required": ["identity", "authority", "record_domain_count", "encoding", "semantic_hash_must_be_nonzero", "owner_must_recompute_from_typed_inputs_and_immutable_constants", "implicit_storage_or_current_state_join_allowed", "live_block_chainid_allowed", "abi_encode_packed_allowed"],
+      "properties": {
+        "identity": {"const": "exact retained record-domain semantic hash"},
+        "authority": {"const": "record_event_correction.record_domain_rows and record_reconstruction_rows"},
+        "record_domain_count": {"const": 37},
+        "encoding": {"const": "exact correction-row encoding"},
+        "semantic_hash_must_be_nonzero": {"const": true},
+        "owner_must_recompute_from_typed_inputs_and_immutable_constants": {"const": true},
+        "implicit_storage_or_current_state_join_allowed": {"const": false},
+        "live_block_chainid_allowed": {"const": false},
+        "abi_encode_packed_allowed": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "owner_record_commitment_protocol": {
+      "type": "object",
+      "required": ["domain", "domain_separator_keccak256", "schema_version", "encoding", "ordered_fields", "requirements"],
+      "properties": {
+        "domain": {"const": "6529STREAM_ARTIST_OWNER_RECORD_COMMITMENT_V2"},
+        "domain_separator_keccak256": {"const": "0x2524f38d4b0732cdfa0810161b89161cfa6da3e7cc1b6cab90fd8b71fbfbd861"},
+        "schema_version": {"const": 2},
+        "encoding": {"const": "abi.encode"},
+        "ordered_fields": {
+          "const": [
+            {"name": "domain_separator", "type": "bytes32"},
+            {"name": "schema_version", "type": "uint16"},
+            {"name": "deployment_chain_id", "type": "uint256"},
+            {"name": "registry_address", "type": "address"},
+            {"name": "coordinator_address", "type": "address"},
+            {"name": "archive_v2_address", "type": "address"},
+            {"name": "owner_address", "type": "address"},
+            {"name": "owner_domain_id", "type": "bytes32"},
+            {"name": "owner_revision", "type": "uint64"},
+            {"name": "record_sequence", "type": "uint64"},
+            {"name": "original_caller", "type": "address"},
+            {"name": "record_domain", "type": "bytes32"},
+            {"name": "semantic_record_hash", "type": "bytes32"}
+          ]
+        },
+        "requirements": {"type": "object", "minProperties": 8}
+      },
+      "additionalProperties": false
+    },
+    "logical_receipt_mapping": {
+      "type": "object",
+      "required": ["coordinate", "value", "physical_storage_slot_selected", "insert_only", "delete_allowed", "overwrite_allowed", "enumeration_allowed", "latest_or_current_pointer_allowed", "same_semantic_record_retry", "different_domain_same_semantic_hash", "supersession"],
+      "properties": {
+        "coordinate": {"const": ["record_domain", "semantic_record_hash"]},
+        "value": {"const": "owner_record_commitment"},
+        "physical_storage_slot_selected": {"const": false},
+        "insert_only": {"const": true},
+        "delete_allowed": {"const": false},
+        "overwrite_allowed": {"const": false},
+        "enumeration_allowed": {"const": false},
+        "latest_or_current_pointer_allowed": {"const": false},
+        "same_semantic_record_retry": {"const": "revert_duplicate_owner_record_no_sequence_or_tip_change"},
+        "different_domain_same_semantic_hash": {"const": "distinct_typed_coordinate"},
+        "supersession": {"const": "new_semantic_record_and_new_owner_commitment_prior_receipts_remain_immutable"}
+      },
+      "additionalProperties": false
+    },
+    "record_ordering": {
+      "type": "object",
+      "required": ["source", "per_owner_filter", "order", "allowed_record_counts", "only_two_record_owner_action_operation_id", "unbounded_or_dynamic_record_loop_allowed"],
+      "properties": {
+        "source": {"const": "record_event_correction.operation_join_rows.record_bindings"},
+        "per_owner_filter": {"const": true},
+        "order": {"const": ["primary", "secondary"]},
+        "allowed_record_counts": {"const": [0, 1, 2]},
+        "only_two_record_owner_action_operation_id": {"const": 35},
+        "unbounded_or_dynamic_record_loop_allowed": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "record_chain_transition": {
+      "type": "object",
+      "required": ["authority", "domain", "domain_separator_keccak256", "encoding", "ordered_fields", "application", "zero_record_rule", "overflow_rule"],
+      "properties": {
+        "authority": {"const": "owner_state_foundation.transition_protocol.record_transition"},
+        "domain": {"const": "6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2"},
+        "domain_separator_keccak256": {"const": "0xee9923a60ff96c9c573fe0297f13dd797f0879da0f711079e7e3e5981fb8ab29"},
+        "encoding": {"const": "abi.encode"},
+        "ordered_fields": {
+          "const": [
+            {"name": "domain_separator", "type": "bytes32"},
+            {"name": "deployment_chain_id", "type": "uint256"},
+            {"name": "registry_address", "type": "address"},
+            {"name": "coordinator_address", "type": "address"},
+            {"name": "archive_v2_address", "type": "address"},
+            {"name": "owner_address", "type": "address"},
+            {"name": "domain_id", "type": "bytes32"},
+            {"name": "prior_record_sequence", "type": "uint64"},
+            {"name": "next_record_sequence", "type": "uint64"},
+            {"name": "prior_record_chain_tip", "type": "bytes32"},
+            {"name": "record_commitment", "type": "bytes32"}
+          ]
+        },
+        "application": {"const": "once_per_present_record_in_frozen_record_order"},
+        "zero_record_rule": {"const": "record_sequence_and_record_chain_tip_unchanged"},
+        "overflow_rule": {"const": "revert_before_any_mutation_or_event"}
+      },
+      "additionalProperties": false
+    },
+    "record_delta_commitment_protocol": {
+      "type": "object",
+      "required": ["domain", "domain_separator_keccak256", "schema_version", "encoding", "ordered_fields", "requirements"],
+      "properties": {
+        "domain": {"const": "6529STREAM_ARTIST_OWNER_RECORD_DELTA_V2"},
+        "domain_separator_keccak256": {"const": "0x8ffc87ac7a69cf11f845f37d440821760d42d49ad78aa90d3b437aca24cdba4e"},
+        "schema_version": {"const": 2},
+        "encoding": {"const": "abi.encode"},
+        "ordered_fields": {
+          "const": [
+            {"name": "domain_separator", "type": "bytes32"},
+            {"name": "schema_version", "type": "uint16"},
+            {"name": "deployment_chain_id", "type": "uint256"},
+            {"name": "registry_address", "type": "address"},
+            {"name": "coordinator_address", "type": "address"},
+            {"name": "archive_v2_address", "type": "address"},
+            {"name": "owner_address", "type": "address"},
+            {"name": "owner_domain_id", "type": "bytes32"},
+            {"name": "owner_revision", "type": "uint64"},
+            {"name": "prior_record_sequence", "type": "uint64"},
+            {"name": "next_record_sequence", "type": "uint64"},
+            {"name": "prior_record_chain_tip", "type": "bytes32"},
+            {"name": "record_count", "type": "uint8"},
+            {"name": "record_0_domain", "type": "bytes32"},
+            {"name": "record_0_semantic_hash", "type": "bytes32"},
+            {"name": "record_0_owner_commitment", "type": "bytes32"},
+            {"name": "record_1_domain", "type": "bytes32"},
+            {"name": "record_1_semantic_hash", "type": "bytes32"},
+            {"name": "record_1_owner_commitment", "type": "bytes32"},
+            {"name": "next_record_chain_tip", "type": "bytes32"}
+          ]
+        },
+        "requirements": {"type": "object", "minProperties": 6}
+      },
+      "additionalProperties": false
+    },
+    "archive_boundary": {"type": "object", "minProperties": 7},
+    "failure_and_rollback": {"type": "object", "minProperties": 12},
+    "canonical_vectors": {
+      "type": "object",
+      "required": ["fixture_scope", "fixture_identity", "record_fixtures", "record_delta_vectors"],
+      "properties": {
+        "fixture_scope": {"const": "record_continuity_mechanics_only_semantic_hash_fixture_words_do_not_accept_entrypoint_or_record_component_abi"},
+        "fixture_identity": {"type": "object", "minProperties": 10},
+        "record_fixtures": {"type": "array", "minItems": 2, "maxItems": 2},
+        "record_delta_vectors": {"type": "array", "minItems": 3, "maxItems": 3}
+      },
+      "additionalProperties": false
+    },
+    "prohibited_mechanics": {
+      "const": [
+        "live_block_chainid",
+        "tx_origin",
+        "abi_encode_packed",
+        "opaque_coordinator_commitment_word",
+        "external_commitment_word",
+        "implicit_storage_or_current_state_join",
+        "generic_hash_only_record_identity",
+        "record_receipt_delete_or_overwrite",
+        "record_chain_tip_rewind",
+        "record_sequence_decrement_or_reuse",
+        "unbounded_record_enumeration_or_history_loop",
+        "archive_authority_or_latest_pointer",
+        "delegatecall",
+        "proxy_or_generic_upgrade",
+        "mutable_rebind"
+      ]
+    },
+    "unresolved_dependencies": {
+      "type": "array",
+      "minItems": 19,
+      "maxItems": 19,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "gate_state": {
+      "type": "object",
+      "required": [
+        "record_continuity_prerequisite_selected_for_review",
+        "semantic_record_hash_retained",
+        "owner_v2_record_commitment_resolved",
+        "record_delta_commitment_resolved",
+        "logical_receipt_mapping_resolved_without_slot",
+        "dual_continuity_prerequisite_resolved",
+        "shared_mechanics_modified",
+        "owner_storage_accepted",
+        "owner_snapshots_accepted",
+        "replay_keys_accepted",
+        "all_domain_layouts_resolved",
+        "all_replay_surfaces_resolved",
+        "four_inner_commitments_resolved",
+        "interface_freeze_complete",
+        "full_freeze_complete",
+        "implementation_authorized",
+        "source_present",
+        "deployment_authorized",
+        "readiness_credit"
+      ],
+      "properties": {
+        "record_continuity_prerequisite_selected_for_review": {"const": true},
+        "semantic_record_hash_retained": {"const": true},
+        "owner_v2_record_commitment_resolved": {"const": true},
+        "record_delta_commitment_resolved": {"const": true},
+        "logical_receipt_mapping_resolved_without_slot": {"const": true},
+        "dual_continuity_prerequisite_resolved": {"const": true},
+        "shared_mechanics_modified": {"const": false},
+        "owner_storage_accepted": {"const": false},
+        "owner_snapshots_accepted": {"const": false},
+        "replay_keys_accepted": {"const": false},
+        "all_domain_layouts_resolved": {"const": false},
+        "all_replay_surfaces_resolved": {"const": false},
+        "four_inner_commitments_resolved": {"const": false},
+        "interface_freeze_complete": {"const": false},
+        "full_freeze_complete": {"const": false},
+        "implementation_authorized": {"const": false},
+        "source_present": {"const": false},
+        "deployment_authorized": {"const": false},
+        "readiness_credit": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "semantic_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "bytes32": {"type": "string", "pattern": "^0x[0-9a-f]{64}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "authority_binding": {
+      "type": "object",
+      "required": ["id", "path", "sha256"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "inventory_binding": {
+      "type": "object",
+      "required": ["count", "ordered_projection", "sha256"],
+      "properties": {
+        "count": {"type": "integer", "minimum": 1},
+        "ordered_projection": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "maximum_records_per_owner_action": {"type": "integer"},
+        "only_two_record_batch": {"type": "object"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

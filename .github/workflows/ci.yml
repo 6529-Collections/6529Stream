@@ -438,6 +438,14 @@ jobs:
           python3 scripts/test_artist_record_event_reconstruction_correction.py 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log
           python3 scripts/check_artist_record_event_reconstruction_correction.py 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log
 
+      - name: Artist owner-record continuity gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_artist_owner_record_continuity.py 2>&1 | tee ci-logs/artist-owner-record-continuity-tests.log
+          python3 scripts/check_artist_owner_record_continuity.py 2>&1 | tee ci-logs/artist-owner-record-continuity-check.log
+
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh
         run: |

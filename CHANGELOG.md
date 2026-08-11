@@ -7,6 +7,20 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Wired the Proposed dual owner-record continuity prerequisite into the
+  canonical Unix, Windows, Make, pull-request CI, and checksum validation
+  paths. The checksum-bound gate preserves all 37 retained semantic record
+  domains while independently proving 40 record creations in 39 owner batches,
+  seven immutable owner identities, owner-V2 commitments, ordered record-chain
+  transitions, and fixed zero/one/two record-delta envelopes. Logical receipts
+  are insertion-only, supersession preserves predecessors, ArchiveV2 remains
+  evidence-only, and opaque Coordinator words, live `block.chainid`, packed
+  hashing, implicit current-state joins, enumeration, delegatecall, upgrade,
+  and readiness promotion remain forbidden. This prerequisite does not select
+  physical owner storage or operation ABI, accept `owner_storage`,
+  `owner_snapshots`, or `replay_keys`, authorize any of the 57 operation
+  sources, or add Solidity, audit, deployment, public-beta, production, or
+  readiness credit.
 - Wired the Proposed artist record/event reconstruction correction packet into
   the canonical Unix, Windows, Make, pull-request CI, and release-mode
   validation paths. The checksum-bound gate mechanically enforces 37 record
