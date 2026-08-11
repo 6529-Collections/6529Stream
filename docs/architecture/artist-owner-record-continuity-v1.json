@@ -1,0 +1,436 @@
+{
+  "schema": "6529stream.artist-owner-record-continuity.v1",
+  "status": "PROPOSED_RECORD_CONTINUITY_PREREQUISITE",
+  "maturity": "pre_audit_source_blocked",
+  "evaluated_base": {
+    "commit": "501d63499f97586ff9fd5128ec63e9c8489eea1f",
+    "tree": "75cacef8a99201b33ae17a7987ac34201bef305f"
+  },
+  "authority_bindings": [
+    {
+      "id": "adr_0023",
+      "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
+      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+    },
+    {
+      "id": "owner_state_foundation",
+      "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.json",
+      "sha256": "94fde0bdb326920a2528fbf0cb7f3f4923421915be53fadbb2aaf1c8e360ee91"
+    },
+    {
+      "id": "record_event_correction",
+      "path": "docs/architecture/artist-record-event-reconstruction-correction-v1.json",
+      "sha256": "e6df09205c1bfd7a4a74301c794d8d67cbd68fa8c1b2f6f97ecb06046ac853af"
+    },
+    {
+      "id": "shared_mechanics",
+      "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
+      "sha256": "a631aed2a423a5aebb83e709151abe77cc2c5cc78c9354943b64e4b7a6116206"
+    },
+    {
+      "id": "semantic_owner_matrix",
+      "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
+      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+    },
+    {
+      "id": "archive_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+      "sha256": "1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778"
+    },
+    {
+      "id": "archive_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "sha256": "2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+    },
+    {
+      "id": "registry_v2_implementation",
+      "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+      "sha256": "038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+    },
+    {
+      "id": "registry_v2_interface",
+      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "sha256": "6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+    }
+  ],
+  "selected_shape": {
+    "option_id": "dual_semantic_hash_and_owner_v2_commitment",
+    "selection_posture": "record_inner_prerequisite_only",
+    "rationale": [
+      "the exact retained semantic hash preserves the 37-family compatibility identity",
+      "the owner V2 commitment binds immutable suite and owner identity plus successful owner revision, record sequence and original caller",
+      "the fixed zero-one-two record delta closes bounded record history without selecting an entrypoint ABI",
+      "the later action commitment remains responsible for recipe, action and exact typed calldata identity"
+    ],
+    "rejected_options": [
+      {
+        "option_id": "legacy_semantic_hash_only",
+        "reason": "does not bind isolated V2 owner identity, revision, sequence or history"
+      },
+      {
+        "option_id": "replace_legacy_hash_with_owner_v2_hash",
+        "reason": "breaks retained record identity and historical reconstruction compatibility"
+      },
+      {
+        "option_id": "opaque_or_generic_record_word",
+        "reason": "allows Coordinator supplied identity and conceals typed record-domain and semantic-hash boundaries"
+      },
+      {
+        "option_id": "wait_for_entrypoint_abi",
+        "reason": "unnecessary because record identity is fully determined by exact record components, owner identity, original caller and owner history; action identity remains separately blocked"
+      }
+    ]
+  },
+  "inventory_bindings": {
+    "record_domains": {
+      "count": 37,
+      "ordered_projection": "surface_id,record_domain,owner_domain,owner_contract,domain_value",
+      "sha256": "1a369e03eedbbafad6c6619eea58ec977c2d4b670cc7c8bddc72ffacc42542d6"
+    },
+    "created_records": {
+      "count": 40,
+      "ordered_projection": "operation_id,write,role,record_domain,owner_domain",
+      "sha256": "bdcf66619a8752e6e8a8b170c2947ebddc29f21ff27e413e9fafe341ebd9458b"
+    },
+    "owner_record_batches": {
+      "count": 39,
+      "ordered_projection": "operation_id,write,owner_domain,ordered_role_and_record_domain_pairs",
+      "sha256": "ec324319dcb6a8628ef8db3151585d5c72a1b3ca20e1950cd6b80a06eb4ce139",
+      "maximum_records_per_owner_action": 2,
+      "only_two_record_batch": {
+        "operation_id": 35,
+        "write": "recoverArtistIdentity",
+        "owner_domain": "identity_authority",
+        "ordered_records": [
+          {
+            "role": "primary",
+            "record_domain": "IDENTITY_RECOVERY_RECORD_DOMAIN"
+          },
+          {
+            "role": "secondary",
+            "record_domain": "IDENTITY_RECOVERY_SUPERSESSION_DOMAIN"
+          }
+        ]
+      }
+    },
+    "owner_domains": {
+      "count": 7,
+      "ordered_projection": "domain_id,owner_contract,storage_namespace",
+      "sha256": "bf85166627a5e73687bbd0b8ff0e9f9ea0bf7e7288e8312b87bdc846f9f7c7ba"
+    }
+  },
+  "owner_domain_ids": [
+    {
+      "domain_id": "binding_lifecycle",
+      "storage_namespace": "6529stream.artist.binding-lifecycle.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0xbaafb92238e6c08a1640858ae21979e8c328eab49e99507986e767f041094eb2"
+    },
+    {
+      "domain_id": "collaborator_lifecycle",
+      "storage_namespace": "6529stream.artist.collaborator-lifecycle.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0x5dad6e369eefadf15aa44cee330e69b9c2380798a8f5582493b7a4e59f2365f0"
+    },
+    {
+      "domain_id": "identity_authority",
+      "storage_namespace": "6529stream.artist.identity-authority.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0x1b0dd53dfa76f8d43a27b96148dae3ebe0609a01dfd55dedacf1fb71c51bfba3"
+    },
+    {
+      "domain_id": "acceptance_lifecycle",
+      "storage_namespace": "6529stream.artist.acceptance-lifecycle.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0x57a9434ee33b95b85a6552b9fc2fef4af9843e9e6c4a9dc1a527037955c79ad6"
+    },
+    {
+      "domain_id": "attribution_lifecycle",
+      "storage_namespace": "6529stream.artist.attribution-lifecycle.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0xf9c6e034436285d64b39abb3b388bdaeb9d80a4561c4cb23ba2bf6f6231ab45a"
+    },
+    {
+      "domain_id": "payout_lifecycle",
+      "storage_namespace": "6529stream.artist.payout-lifecycle.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0xe642144c68650878eddff1994d4629c8504455a418494d0858f4d32dcb655a3a"
+    },
+    {
+      "domain_id": "consent_finality",
+      "storage_namespace": "6529stream.artist.consent-finality.v2",
+      "domain_value_rule": "keccak256(bytes(storage_namespace))",
+      "domain_value": "0xd88ac7b3633026f3ea2643af4b4ddbe6b9b7ff82226a907d41511b96f745c169"
+    }
+  ],
+  "semantic_record_protocol": {
+    "identity": "exact retained record-domain semantic hash",
+    "authority": "record_event_correction.record_domain_rows and record_reconstruction_rows",
+    "record_domain_count": 37,
+    "encoding": "exact correction-row encoding",
+    "semantic_hash_must_be_nonzero": true,
+    "owner_must_recompute_from_typed_inputs_and_immutable_constants": true,
+    "implicit_storage_or_current_state_join_allowed": false,
+    "live_block_chainid_allowed": false,
+    "abi_encode_packed_allowed": false
+  },
+  "owner_record_commitment_protocol": {
+    "domain": "6529STREAM_ARTIST_OWNER_RECORD_COMMITMENT_V2",
+    "domain_separator_keccak256": "0x2524f38d4b0732cdfa0810161b89161cfa6da3e7cc1b6cab90fd8b71fbfbd861",
+    "schema_version": 2,
+    "encoding": "abi.encode",
+    "ordered_fields": [
+      {"name": "domain_separator", "type": "bytes32"},
+      {"name": "schema_version", "type": "uint16"},
+      {"name": "deployment_chain_id", "type": "uint256"},
+      {"name": "registry_address", "type": "address"},
+      {"name": "coordinator_address", "type": "address"},
+      {"name": "archive_v2_address", "type": "address"},
+      {"name": "owner_address", "type": "address"},
+      {"name": "owner_domain_id", "type": "bytes32"},
+      {"name": "owner_revision", "type": "uint64"},
+      {"name": "record_sequence", "type": "uint64"},
+      {"name": "original_caller", "type": "address"},
+      {"name": "record_domain", "type": "bytes32"},
+      {"name": "semantic_record_hash", "type": "bytes32"}
+    ],
+    "requirements": {
+      "deployment_chain_id_source": "constructor_captured_immutable",
+      "address_sources": "immutable_registry_coordinator_archive_and_address_this_owner",
+      "owner_domain_source": "exact owner_domain_ids row for this owner",
+      "owner_revision_rule": "next_revision_equals_checked_prior_revision_plus_one_for_the_successful_owner_action",
+      "record_sequence_rule": "checked_prior_record_sequence_plus_one_based_record_position",
+      "original_caller_rule": "nonzero immediate Registry submitter forwarded unchanged through Coordinator",
+      "record_domain_rule": "exact nonzero correction record domain owned by this owner",
+      "semantic_hash_rule": "exact nonzero owner_recomputed retained semantic hash",
+      "commitment_must_be_nonzero": true
+    }
+  },
+  "logical_receipt_mapping": {
+    "coordinate": ["record_domain", "semantic_record_hash"],
+    "value": "owner_record_commitment",
+    "physical_storage_slot_selected": false,
+    "insert_only": true,
+    "delete_allowed": false,
+    "overwrite_allowed": false,
+    "enumeration_allowed": false,
+    "latest_or_current_pointer_allowed": false,
+    "same_semantic_record_retry": "revert_duplicate_owner_record_no_sequence_or_tip_change",
+    "different_domain_same_semantic_hash": "distinct_typed_coordinate",
+    "supersession": "new_semantic_record_and_new_owner_commitment_prior_receipts_remain_immutable"
+  },
+  "record_ordering": {
+    "source": "record_event_correction.operation_join_rows.record_bindings",
+    "per_owner_filter": true,
+    "order": ["primary", "secondary"],
+    "allowed_record_counts": [0, 1, 2],
+    "only_two_record_owner_action_operation_id": 35,
+    "unbounded_or_dynamic_record_loop_allowed": false
+  },
+  "record_chain_transition": {
+    "authority": "owner_state_foundation.transition_protocol.record_transition",
+    "domain": "6529STREAM_ARTIST_OWNER_RECORD_TRANSITION_V2",
+    "domain_separator_keccak256": "0xee9923a60ff96c9c573fe0297f13dd797f0879da0f711079e7e3e5981fb8ab29",
+    "encoding": "abi.encode",
+    "ordered_fields": [
+      {"name": "domain_separator", "type": "bytes32"},
+      {"name": "deployment_chain_id", "type": "uint256"},
+      {"name": "registry_address", "type": "address"},
+      {"name": "coordinator_address", "type": "address"},
+      {"name": "archive_v2_address", "type": "address"},
+      {"name": "owner_address", "type": "address"},
+      {"name": "domain_id", "type": "bytes32"},
+      {"name": "prior_record_sequence", "type": "uint64"},
+      {"name": "next_record_sequence", "type": "uint64"},
+      {"name": "prior_record_chain_tip", "type": "bytes32"},
+      {"name": "record_commitment", "type": "bytes32"}
+    ],
+    "application": "once_per_present_record_in_frozen_record_order",
+    "zero_record_rule": "record_sequence_and_record_chain_tip_unchanged",
+    "overflow_rule": "revert_before_any_mutation_or_event"
+  },
+  "record_delta_commitment_protocol": {
+    "domain": "6529STREAM_ARTIST_OWNER_RECORD_DELTA_V2",
+    "domain_separator_keccak256": "0x8ffc87ac7a69cf11f845f37d440821760d42d49ad78aa90d3b437aca24cdba4e",
+    "schema_version": 2,
+    "encoding": "abi.encode",
+    "ordered_fields": [
+      {"name": "domain_separator", "type": "bytes32"},
+      {"name": "schema_version", "type": "uint16"},
+      {"name": "deployment_chain_id", "type": "uint256"},
+      {"name": "registry_address", "type": "address"},
+      {"name": "coordinator_address", "type": "address"},
+      {"name": "archive_v2_address", "type": "address"},
+      {"name": "owner_address", "type": "address"},
+      {"name": "owner_domain_id", "type": "bytes32"},
+      {"name": "owner_revision", "type": "uint64"},
+      {"name": "prior_record_sequence", "type": "uint64"},
+      {"name": "next_record_sequence", "type": "uint64"},
+      {"name": "prior_record_chain_tip", "type": "bytes32"},
+      {"name": "record_count", "type": "uint8"},
+      {"name": "record_0_domain", "type": "bytes32"},
+      {"name": "record_0_semantic_hash", "type": "bytes32"},
+      {"name": "record_0_owner_commitment", "type": "bytes32"},
+      {"name": "record_1_domain", "type": "bytes32"},
+      {"name": "record_1_semantic_hash", "type": "bytes32"},
+      {"name": "record_1_owner_commitment", "type": "bytes32"},
+      {"name": "next_record_chain_tip", "type": "bytes32"}
+    ],
+    "requirements": {
+      "owner_revision_rule": "same_checked_next_revision_used_by_every_record_in_the_successful_owner_action",
+      "next_sequence": "prior_record_sequence_plus_record_count_checked_uint64",
+      "prior_tip_rule": "exact_nonzero_current_owner_record_chain_tip",
+      "present_slot_rule": "domain_semantic_hash_and_owner_commitment_are_all_nonzero_and_independently_recomputed",
+      "absent_slot_rule": "domain_semantic_hash_and_owner_commitment_are_all_zero",
+      "one_record_rule": "slot_zero_present_slot_one_absent",
+      "two_record_rule": "both_slots_present_in_primary_then_secondary_order",
+      "next_tip_rule": "result_of_zero_one_or_two_ordered_record_chain_transitions",
+      "zero_record_delta": "nonzero_commitment_with_unchanged_sequence_and_tip_and_two_absent_slots"
+    }
+  },
+  "archive_boundary": {
+    "archive_is_evidence_only": true,
+    "archive_can_authorize_owner_state": false,
+    "owner_reads_archive": false,
+    "archive_content_hash_pointer_or_block_in_owner_commitment": false,
+    "reserved_evidence_projection": {
+      "evidence_id": "owner_record_commitment",
+      "evidence_version": "record_sequence",
+      "append_requirement_accepted": false,
+      "evidence_bytes_schema_accepted": false
+    },
+    "same_content_retry": "archive_returns_appended_false_but_does_not_make_owner_semantic_retry_valid",
+    "conflicting_retry": "archive_reverts_and_if_called_in_same_transaction_all_owner_and_archive_changes_revert"
+  },
+  "failure_and_rollback": {
+    "owner_computes_all_record_words_internally": true,
+    "coordinator_or_external_commitment_word_allowed": false,
+    "semantic_duplicate": "revert_before_sequence_tip_receipt_or_event_change",
+    "wrong_owner_domain": "revert",
+    "zero_or_unknown_record_domain": "revert",
+    "zero_semantic_hash": "revert",
+    "zero_original_caller": "revert",
+    "stale_revision_sequence_or_tip": "revert",
+    "record_sequence_overflow": "revert",
+    "record_count_or_order_drift": "revert",
+    "downstream_owner_archive_event_or_recipe_failure": "revert_entire_transaction",
+    "partial_success_allowed": false,
+    "successful_record_no_op_allowed": false
+  },
+  "canonical_vectors": {
+    "fixture_scope": "record_continuity_mechanics_only_semantic_hash_fixture_words_do_not_accept_entrypoint_or_record_component_abi",
+    "fixture_identity": {
+      "deployment_chain_id": "1",
+      "registry_address": "0x1111111111111111111111111111111111111111",
+      "coordinator_address": "0x2222222222222222222222222222222222222222",
+      "archive_v2_address": "0x3333333333333333333333333333333333333333",
+      "owner_address": "0x4444444444444444444444444444444444444444",
+      "owner_domain": "identity_authority",
+      "owner_domain_id": "0x1b0dd53dfa76f8d43a27b96148dae3ebe0609a01dfd55dedacf1fb71c51bfba3",
+      "owner_revision": "9",
+      "prior_record_sequence": "10",
+      "prior_record_chain_tip": "0x9999999999999999999999999999999999999999999999999999999999999999",
+      "original_caller": "0x5555555555555555555555555555555555555555"
+    },
+    "record_fixtures": [
+      {
+        "position": 0,
+        "record_domain_name": "IDENTITY_RECOVERY_RECORD_DOMAIN",
+        "record_domain": "0x459749364fd07c3a8f1998b82d893d33ef0942c30d94666b42dac1e37ba5feff",
+        "semantic_record_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "record_sequence": "11",
+        "expected_owner_record_commitment": "0xf9e6ce3db993d46c4630e01ab985212cc609f4ede3310bd1a926bd784bafed70",
+        "expected_record_chain_tip": "0x8dfe9694373c844dfba888b1f86a4165a16cd92de70793d7ce18ad8c59d0e060"
+      },
+      {
+        "position": 1,
+        "record_domain_name": "IDENTITY_RECOVERY_SUPERSESSION_DOMAIN",
+        "record_domain": "0x0c8573762967a1af597f2a7afc4b655a87b3e22d2b11fbab6cf13c6f7b1396ae",
+        "semantic_record_hash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "record_sequence": "12",
+        "expected_owner_record_commitment": "0x0940dc8f1a5aa5a5837cd5df2cb2e0d213d24aa03e8ba67f140dd1367deda140",
+        "expected_record_chain_tip": "0x001774eb134dae83118373af3b3b84cda4f6953f2b5868c075dc3ca504111d14"
+      }
+    ],
+    "record_delta_vectors": [
+      {
+        "record_count": 0,
+        "expected_next_record_sequence": "10",
+        "expected_next_record_chain_tip": "0x9999999999999999999999999999999999999999999999999999999999999999",
+        "expected_record_delta_commitment": "0x2ad36ea5331fee2089dcdfa71dd148ed91d172b82b8608fc518425cae5cda0fe"
+      },
+      {
+        "record_count": 1,
+        "expected_next_record_sequence": "11",
+        "expected_next_record_chain_tip": "0x8dfe9694373c844dfba888b1f86a4165a16cd92de70793d7ce18ad8c59d0e060",
+        "expected_record_delta_commitment": "0xa5d4832b467aa54b347026183e4afe6bb5a9bbf33a899bd4ecf66c2440d1a2c5"
+      },
+      {
+        "record_count": 2,
+        "expected_next_record_sequence": "12",
+        "expected_next_record_chain_tip": "0x001774eb134dae83118373af3b3b84cda4f6953f2b5868c075dc3ca504111d14",
+        "expected_record_delta_commitment": "0x27b4a3d9e57bffa88bf9d43d737e8c0ddbb3e2d73a5486608692058e95b17f12"
+      }
+    ]
+  },
+  "prohibited_mechanics": [
+    "live_block_chainid",
+    "tx_origin",
+    "abi_encode_packed",
+    "opaque_coordinator_commitment_word",
+    "external_commitment_word",
+    "implicit_storage_or_current_state_join",
+    "generic_hash_only_record_identity",
+    "record_receipt_delete_or_overwrite",
+    "record_chain_tip_rewind",
+    "record_sequence_decrement_or_reuse",
+    "unbounded_record_enumeration_or_history_loop",
+    "archive_authority_or_latest_pointer",
+    "delegatecall",
+    "proxy_or_generic_upgrade",
+    "mutable_rebind"
+  ],
+  "unresolved_dependencies": [
+    "entrypoint_abi",
+    "owner_mutations",
+    "owner_storage",
+    "owner_snapshots",
+    "replay_keys",
+    "action_commitment_preimage",
+    "domain_state_commitment_preimage",
+    "replay_delta_commitment_preimage",
+    "normative_owner_events_acceptance",
+    "provider_reads",
+    "role_authority",
+    "signer_validation",
+    "recipe_commitment",
+    "archive_evidence_bytes_and_call_order",
+    "composite_manifest",
+    "construction",
+    "errors",
+    "operation_lock",
+    "gas_and_call_discipline"
+  ],
+  "gate_state": {
+    "record_continuity_prerequisite_selected_for_review": true,
+    "semantic_record_hash_retained": true,
+    "owner_v2_record_commitment_resolved": true,
+    "record_delta_commitment_resolved": true,
+    "logical_receipt_mapping_resolved_without_slot": true,
+    "dual_continuity_prerequisite_resolved": true,
+    "shared_mechanics_modified": false,
+    "owner_storage_accepted": false,
+    "owner_snapshots_accepted": false,
+    "replay_keys_accepted": false,
+    "all_domain_layouts_resolved": false,
+    "all_replay_surfaces_resolved": false,
+    "four_inner_commitments_resolved": false,
+    "interface_freeze_complete": false,
+    "full_freeze_complete": false,
+    "implementation_authorized": false,
+    "source_present": false,
+    "deployment_authorized": false,
+    "readiness_credit": false
+  },
+  "semantic_digest": "sha256:d146f6454951437e579cf4a9fa109a3c8c185d1cd3ece279dac522a027d5d6dd"
+}

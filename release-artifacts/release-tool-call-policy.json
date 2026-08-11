@@ -33465,8 +33465,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "9e6dce3452dd0ee2eccbda6f1c6422689a120ab967d662b8dde70e84fa8d1cf9",
-      "size_bytes": 180069,
+      "source_sha256": "d482d73c7392c54038086ba1c76708d64f793b11cea6f51876ac421e9bad2fa6",
+      "size_bytes": 180405,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -33832,7 +33832,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 377
+          "count": 382
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -38753,6 +38753,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "2fcf1ed625823896a16fef9da956df568ec364732753c662c0c1ceaa2916cce9",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "30936a7ade0eb31726467fab0b317940171c1b2f2021ad636b38e947f138b1fa",
           "count": 1
         },
@@ -38988,6 +38994,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "55a340a62112edfc8754f0225e6cde149e69a69131333d8976162283c6c3a3ed",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "5b91b44280c1bd7033695438fc74490c310770e1b8cc2931f90bcea60c02834f",
           "count": 1
         },
         {
@@ -39881,6 +39893,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "cd85d58215d2ce52a8225dae1b3a79a2eeff9bb068615c1bdd6f7411781c5688",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "cd8d26e96a1a266f5b4cf29c7f514b4d5c0236cd5039e685c7012e30be5ee392",
           "count": 1
         },
@@ -39888,6 +39906,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "cec96520f61464dd2036b4edc880b830ab38fdbd876a04043b3d4cb38daba047",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "cfb9004d2a2a7d3e1fd99e2ccd39e16de97748dcfa9ea650faf1ff6bf4dc3509",
           "count": 1
         },
         {
@@ -40200,6 +40224,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "f88c4900048c0d82fa50ab75142fbfdac6300852b9b3f7dacac3f7a51905218c",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "fb3abfd58c2b630f56810d6e30478752b67fa6333bea9ffb8858ec24cea14226",
           "count": 1
         },
         {
@@ -56519,7 +56549,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "67181fd3f657d5c0ae2cf8392d31c0f861c96c07d483d5021fefad4c9b3d02fd",
+      "source_sha256": "b5b2afbfa8ec7346facaaddbae66d4c26053bfe8adb38bdb73acab6998df2d82",
       "size_bytes": 172989,
       "imports": [
         {

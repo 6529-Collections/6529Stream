@@ -42,11 +42,11 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: governed-parameter-identifiers-check
 .PHONY: governed-parameter-inventory-check
 .PHONY: governance-action-policy-check
-.PHONY: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check
+.PHONY: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check artist-owner-record-continuity-check
 check: governed-parameter-identifiers-check
 check: governed-parameter-inventory-check
 check: governance-action-policy-check
-check: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check
+check: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check artist-owner-record-continuity-check
 
 build:
 	forge build
@@ -483,6 +483,10 @@ artist-semantic-owner-matrix-check:
 artist-record-event-reconstruction-correction-check:
 	$(PYTHON) scripts/test_artist_record_event_reconstruction_correction.py
 	$(PYTHON) scripts/check_artist_record_event_reconstruction_correction.py
+
+artist-owner-record-continuity-check:
+	$(PYTHON) scripts/test_artist_owner_record_continuity.py
+	$(PYTHON) scripts/check_artist_owner_record_continuity.py
 
 audit-package-check:
 	$(PYTHON) scripts/test_audit_package.py

@@ -118,6 +118,8 @@ if ($candidateStrictExit -ne 1) {
 & $pythonPath @pythonArgs "scripts\check_artist_semantic_owner_matrix.py"
 & $pythonPath @pythonArgs "scripts\test_artist_record_event_reconstruction_correction.py"
 & $pythonPath @pythonArgs "scripts\check_artist_record_event_reconstruction_correction.py"
+& $pythonPath @pythonArgs "scripts\test_artist_owner_record_continuity.py"
+& $pythonPath @pythonArgs "scripts\check_artist_owner_record_continuity.py"
 & $pythonPath @pythonArgs "scripts\test_system_manifest_payload_vector.py"
 & $pythonPath @pythonArgs "scripts\check_system_manifest_payload_vector.py"
 & $pythonPath @pythonArgs "scripts\test_system_manifest_payload_vector_reference.py"
