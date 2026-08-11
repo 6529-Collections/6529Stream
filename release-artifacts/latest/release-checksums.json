@@ -310,7 +310,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:5c4818b2923953f19334c5bd7bd7a60e6fcddce8de48ab5528a67d3c60e68d19"
+    "sha256": "sha256:005efdb57a18f8c766fe87e159c00f52aeb44ad638a57fe16a64c2708c58851a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -2229,8 +2229,8 @@
     },
     {
       "path": "scripts/test_artist_owner_record_continuity.py",
-      "sha256": "sha256:5d623f6a1f0685d6a6451a611efea8c685a31e919095651962a5e458ea9c8d90",
-      "size_bytes": 24887
+      "sha256": "sha256:6cdb1453318e5ad8ca1d83709fd4f564ff6c665fb32cd3463cd8d524fedfb5d0",
+      "size_bytes": 25191
     },
     {
       "path": "scripts/test_artist_record_event_reconstruction_correction.py",

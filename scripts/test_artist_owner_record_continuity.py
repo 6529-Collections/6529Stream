@@ -457,11 +457,17 @@ class ArtistOwnerRecordContinuityTests(unittest.TestCase):
         self._write_packet(packet)
         self._assert_rejected_after_semantic_rebind("record delta vector fixture rows drifted")
 
-    def test_two_record_delta_order_drift_is_rejected(self) -> None:
+    def test_record_fixture_order_drift_is_rejected(self) -> None:
         packet = self._packet()
         packet["canonical_vectors"]["record_fixtures"].reverse()
         self._write_packet(packet)
         self._assert_rejected_after_semantic_rebind("record vector fixture rows drifted")
+
+    def test_record_delta_vector_order_drift_is_rejected(self) -> None:
+        packet = self._packet()
+        packet["canonical_vectors"]["record_delta_vectors"].reverse()
+        self._write_packet(packet)
+        self._assert_rejected_after_semantic_rebind("record delta vector fixture rows drifted")
 
     def test_original_caller_alias_changes_commitment(self) -> None:
         packet = self._packet()
