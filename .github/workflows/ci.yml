@@ -176,6 +176,8 @@ jobs:
             scripts/argparse_helpers.py \
             scripts/build_release_artifacts.py \
             scripts/test_release_build_artifacts.py \
+            scripts/check_canonical_deployment_candidate.py \
+            scripts/test_canonical_deployment_candidate.py \
             scripts/materialize_canonical_deployment_plan.py \
             scripts/test_materialize_canonical_deployment_plan.py \
             scripts/generate_release_artifacts.py \
@@ -519,6 +521,16 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p ci-logs tmp
+          python3 scripts/test_canonical_deployment_candidate.py 2>&1 | tee ci-logs/canonical-deployment-candidate-tests.log
+          python3 scripts/check_canonical_deployment_candidate.py 2>&1 | tee ci-logs/canonical-deployment-candidate.log
+          set +e
+          python3 scripts/check_canonical_deployment_candidate.py --require-complete 2>&1 | tee ci-logs/canonical-deployment-candidate-strict.log
+          candidate_strict_exit=${PIPESTATUS[0]}
+          set -e
+          if [ "$candidate_strict_exit" -ne 1 ]; then
+            echo "expected incomplete canonical deployment candidate v2 to exit 1, got $candidate_strict_exit" >&2
+            exit 1
+          fi
           python3 scripts/test_materialize_canonical_deployment_plan.py 2>&1 | tee ci-logs/canonical-deployment-plan-tests.log
           python3 scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json 2>&1 | tee ci-logs/canonical-deployment-plan.log
           python3 scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json --check 2>&1 | tee ci-logs/canonical-deployment-plan-check.log

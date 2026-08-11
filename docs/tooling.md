@@ -524,14 +524,39 @@ plan.
 
 The committed v2 planning document at
 `deployments/config/canonical-deployment-candidate-v2-planning.json` has 37
-profile rows, zero linked libraries, zero instances, and 46 completeness
-blockers. Its ordinary structural check succeeds; `--require-complete` fails.
-It cannot reach plan materialization, RPC, Forge, or broadcast, and it is not a
-frozen candidate or readiness evidence.
+profile rows, zero linked libraries, zero instances, and 44 completeness
+blockers. The planning document now binds only the completed canonical Solidity
+source-layout manifest and the unchanged 37-entry genesis profile by exact
+repository path and SHA-256. Source commit, dependency inventories, canonical
+build, concrete instances, linked libraries, and retained evidence remain
+unavailable. Its ordinary structural check succeeds; `--require-complete`
+fails. It cannot reach plan materialization, RPC, Forge, or broadcast, and it
+is not a frozen candidate or readiness evidence.
+
+This bounded two-pin packet was selected because both inputs are stable merged
+authorities and can close stale planning blockers without choosing deployment
+facts. An early partial build recipe was rejected because the incomplete target
+catalog and legacy revenue implementation would create review churn and could
+misstate the eventual candidate source set. A monolithic candidate packet was
+also rejected because waiting for every protocol and live-input dependency
+would stall the independently verifiable layout/profile progress and create a
+larger review surface.
+
+The source-layout pin was taken from the merged manifest's direct SHA-256,
+`a4a8be3df18da217e4efc3d4d09b151807bdc152125f524f1493dd39690d9f65`.
+An earlier 63-hex transcription omitted the `d` in `...807bdc...` and was
+rejected by the unchanged digest schema before generation. Relaxing the schema
+was rejected because it would weaken the fail-closed binding; stopping the
+packet was unnecessary once the exact merged bytes independently reproduced
+the valid 64-hex digest.
 
 After producing the canonical isolated build, run the focused tool as follows:
 
 ```bash
+python scripts/test_canonical_deployment_candidate.py
+python scripts/check_canonical_deployment_candidate.py
+# Expected to fail with exit 1 while the committed planning candidate has blockers.
+python scripts/check_canonical_deployment_candidate.py --require-complete
 python scripts/test_materialize_canonical_deployment_plan.py
 python scripts/materialize_canonical_deployment_plan.py \
   --candidate deployments/config/canonical-deployment-candidate-non-production.json \
@@ -542,12 +567,18 @@ python scripts/materialize_canonical_deployment_plan.py \
   --check
 ```
 
-The ordinary Make, Bash, PowerShell, and Linux CI aggregate gates run this
+The ordinary Make, Bash, PowerShell, and Linux CI aggregate gates first run the
+candidate-v2 19-test suite, require the committed planning check to report
+37 profile rows, zero libraries, zero instances, and 44 blockers, and require
+strict completion to fail with exit 1. They then run the
 unit/materialize/reparse-check sequence immediately after they create and
-validate `out-release/`. The checked candidate remains the same narrow
-non-production fixture; gate inclusion does not turn the ephemeral plan into a
-release artifact or deployment authorization. Because Draft validation is
-inside the materializer, both the committed candidate and the real generated
+validate `out-release/`. Both candidate enforcement files are members of the
+canonical checksum trust set, so the release tail and wrapper cannot remain
+green after unreviewed checker or test drift. The materialized candidate
+remains the same narrow non-production fixture; gate inclusion does not turn
+the ephemeral plan into a release artifact or deployment authorization.
+Because Draft validation is inside the materializer, both the committed
+candidate and the real generated
 plan are schema-checked in every one of those gate paths.
 
 Candidate-supplied immutable values are assertions, not values derived from
@@ -1626,8 +1657,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 292 configured roots,
-expanding to exactly 468 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 294 configured roots,
+expanding to exactly 470 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and

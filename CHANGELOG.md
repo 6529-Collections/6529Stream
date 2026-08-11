@@ -22,6 +22,18 @@ the release policy in `docs/release-policy.md`.
   source-blocking, all 57 source/authorization flags remain false, and this
   validation wiring grants no Solidity, audit, deployment, public-beta,
   production, or readiness credit.
+- Bound the existing canonical deployment candidate-v2 planning document to
+  exactly two stable merged authorities: the post-#716 Solidity source-layout
+  manifest and the unchanged 37-entry genesis deployment profile. The checker
+  now verifies both canonical paths and SHA-256 digests, and focused hostile
+  tests reject path, hash, or status drift. The honest completeness count falls
+  from 46 to 44 while source commit, governed-parameter and record-family
+  identities, canonical build, retained evidence, linked libraries, and all
+  concrete instances remain unavailable. The candidate stays planning-only,
+  production-disabled, unbound, undeployed, pre-audit, and not readiness
+  evidence. The candidate checker and focused tests are now checksum-covered,
+  and every canonical deployment-plan gate runs the 19-test suite, confirms
+  the ordinary 37/0/0/44 result, and requires strict completion to exit 1.
 - Connected checker-complete canonical deployment candidate v2 documents to
   the existing non-production plan materializer and executor without adding a
   parallel plan or receipt schema. Materializer generator 4 binds the

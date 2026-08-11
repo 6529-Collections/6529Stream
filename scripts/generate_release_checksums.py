@@ -432,7 +432,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "9f99712a64a5d1f0fa6f96b6bde66d5108e0db23996b732d460ceda6961435c5",
+        "67181fd3f657d5c0ae2cf8392d31c0f861c96c07d483d5021fefad4c9b3d02fd",
         172_989,
     ),
 }
@@ -459,6 +459,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_release_build_artifacts.py"),
     Path("scripts/materialize_canonical_deployment_plan.py"),
     Path("scripts/test_materialize_canonical_deployment_plan.py"),
+    Path("scripts/check_canonical_deployment_candidate.py"),
+    Path("scripts/test_canonical_deployment_candidate.py"),
     Path("scripts/generate_release_checksums.py"),
     Path("scripts/test_release_checksums.py"),
     Path("scripts/check_changelog.py"),

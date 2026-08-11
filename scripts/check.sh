@@ -40,6 +40,17 @@ forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol -
 "$python_bin" scripts/test_release_build_artifacts.py
 "$python_bin" scripts/build_release_artifacts.py
 "$python_bin" scripts/build_release_artifacts.py --check
+"$python_bin" scripts/test_canonical_deployment_candidate.py
+"$python_bin" scripts/check_canonical_deployment_candidate.py
+if "$python_bin" scripts/check_canonical_deployment_candidate.py --require-complete; then
+  echo "expected incomplete canonical deployment candidate v2" >&2
+  exit 1
+else
+  candidate_strict_exit=$?
+  if [ "$candidate_strict_exit" -ne 1 ]; then
+    exit "$candidate_strict_exit"
+  fi
+fi
 "$python_bin" scripts/test_materialize_canonical_deployment_plan.py
 "$python_bin" scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json
 "$python_bin" scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json --check

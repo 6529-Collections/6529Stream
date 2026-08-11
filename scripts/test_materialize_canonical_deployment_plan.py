@@ -1322,6 +1322,9 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             (repo_root / ".gitignore").read_text(encoding="utf-8"),
         )
         for token in (
+            "scripts/test_canonical_deployment_candidate.py",
+            "scripts/check_canonical_deployment_candidate.py",
+            "--require-complete",
             "scripts/test_materialize_canonical_deployment_plan.py",
             "scripts/materialize_canonical_deployment_plan.py --candidate "
             "deployments/config/canonical-deployment-candidate-non-production.json "
@@ -1336,6 +1339,18 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         release_at = shell.index(
             '"$python_bin" scripts/build_release_artifacts.py --check'
         )
+        candidate_unit_at = shell.index(
+            '"$python_bin" scripts/test_canonical_deployment_candidate.py'
+        )
+        candidate_check_at = shell.index(
+            '"$python_bin" scripts/check_canonical_deployment_candidate.py',
+            candidate_unit_at,
+        )
+        candidate_strict_at = shell.index(
+            '"$python_bin" scripts/check_canonical_deployment_candidate.py '
+            "--require-complete",
+            candidate_check_at,
+        )
         unit_at = shell.index(
             '"$python_bin" scripts/test_materialize_canonical_deployment_plan.py'
         )
@@ -1348,7 +1363,10 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             "--output tmp/canonical-deployment-plan.json --check",
             write_at,
         )
-        self.assertLess(release_at, unit_at)
+        self.assertLess(release_at, candidate_unit_at)
+        self.assertLess(candidate_unit_at, candidate_check_at)
+        self.assertLess(candidate_check_at, candidate_strict_at)
+        self.assertLess(candidate_strict_at, unit_at)
         self.assertLess(unit_at, write_at)
         self.assertLess(write_at, check_at)
 
@@ -1357,6 +1375,18 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         )
         release_at = powershell.index(
             '"scripts\\build_release_artifacts.py" "--check"'
+        )
+        candidate_unit_at = powershell.index(
+            '"scripts\\test_canonical_deployment_candidate.py"'
+        )
+        candidate_check_at = powershell.index(
+            '"scripts\\check_canonical_deployment_candidate.py"',
+            candidate_unit_at,
+        )
+        candidate_strict_at = powershell.index(
+            '"scripts\\check_canonical_deployment_candidate.py" '
+            '"--require-complete"',
+            candidate_check_at,
         )
         unit_at = powershell.index(
             '"scripts\\test_materialize_canonical_deployment_plan.py"'
@@ -1369,7 +1399,10 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             '"tmp\\canonical-deployment-plan.json" "--check"',
             write_at,
         )
-        self.assertLess(release_at, unit_at)
+        self.assertLess(release_at, candidate_unit_at)
+        self.assertLess(candidate_unit_at, candidate_check_at)
+        self.assertLess(candidate_check_at, candidate_strict_at)
+        self.assertLess(candidate_strict_at, unit_at)
         self.assertLess(unit_at, write_at)
         self.assertLess(write_at, check_at)
 
@@ -1384,6 +1417,16 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         self.assertLess(release_at, gate_at)
         self.assertLess(gate_at, size_at)
         block = workflow[gate_at:size_at]
+        self.assertLess(
+            block.index("test_canonical_deployment_candidate.py"),
+            block.index("check_canonical_deployment_candidate.py"),
+        )
+        self.assertLess(
+            block.index("check_canonical_deployment_candidate.py"),
+            block.index("--require-complete"),
+        )
+        self.assertIn("candidate_strict_exit=${PIPESTATUS[0]}", block)
+        self.assertIn('[ "$candidate_strict_exit" -ne 1 ]', block)
         self.assertLess(
             block.index("test_materialize_canonical_deployment_plan.py"),
             block.index(
