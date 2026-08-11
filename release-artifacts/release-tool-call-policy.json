@@ -33465,8 +33465,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "bf262fb3c23c142783acb307c1de0e1ccedc82ad5791a953fb3ca0e002f2095f",
-      "size_bytes": 179440,
+      "source_sha256": "93a0bbe988ff6876e43320c598c8c3033bf7c8bd56bbe281d162d783ad7f54c9",
+      "size_bytes": 179948,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -33832,7 +33832,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 369
+          "count": 375
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -38849,6 +38849,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "40a9373adacd42169ccc9d9e6ae627673e85f568bf88ce072ac3d64c82358f44",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "40b66068a4114181f55f7f7e4d8368d8906da6df08f0091d30bf59c773cecc81",
           "count": 1
         },
@@ -39126,6 +39132,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "6ad77ee5ecbd91387d3ad3c0945cd8e3df4e7b18873a93b522d09d0a3c08b1a4",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "6b112f4b7701dd488136238b7ccec00829f88eeadb0cd3460bbc1483429ca9ef",
           "count": 1
         },
         {
@@ -39431,6 +39443,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "9363c36f8a77651bd12a53fcf8525d7cd2362bed3853573a8f9d0c3c8d66c743",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "93bbbea3bd894bd0cd6a11127d06e183d74217f91d42e2238f6ed13f344b7d26",
           "count": 1
         },
@@ -39570,6 +39588,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "a85af9cca918e94e6ad27e7f5640bfa8323e52aece36a3e38c6def3a3abce1e4",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "a8c72ed1fad6ce5d04b2bef5fe0c32188cf3803ebfd168a46912e74d1434cf60",
           "count": 1
         },
         {
@@ -40007,6 +40031,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "e2fbe7c4eaf4151088ff14641e5d5613c09fd682e8940998520059db95dad92c",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e38c9f2da3a438f4aca795576cc45afee59d5990e80ab352dde14453e7466ccc",
           "count": 1
         },
@@ -40158,6 +40188,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "f88c4900048c0d82fa50ab75142fbfdac6300852b9b3f7dacac3f7a51905218c",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "fb7be9f0ecc4ce966cd02a536cc77ffc52ac52d2cabee4b5f2c25289f2658502",
           "count": 1
         },
         {
@@ -56471,7 +56507,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "ea45188ae423c14e6fbe10075bd6b09084dcab965b0b552146739ebfb3a29f24",
+      "source_sha256": "9f99712a64a5d1f0fa6f96b6bde66d5108e0db23996b732d460ceda6961435c5",
       "size_bytes": 172989,
       "imports": [
         {

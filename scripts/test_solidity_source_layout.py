@@ -29,6 +29,103 @@ class SoliditySourceLayoutTests(unittest.TestCase):
     def test_committed_repository_passes(self) -> None:
         self.assertEqual(self.errors(REPO_ROOT), [])
 
+    def test_historical_git_object_archive_has_one_exact_stale_path_exception(
+        self,
+    ) -> None:
+        old_path = f"{checker.EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol"
+        self.assertEqual(
+            {
+                Path(
+                    "docs/architecture/"
+                    "artist-record-event-reconstruction-historical-git-objects-v1.json"
+                ): {old_path: 2},
+                Path(
+                    "scripts/check_artist_record_event_reconstruction_correction.py"
+                ): {old_path: 2},
+                Path(
+                    "scripts/test_artist_record_event_reconstruction_correction.py"
+                ): {old_path: 1},
+            },
+            checker.STALE_PATH_EVIDENCE_ALLOWLIST,
+        )
+
+    def test_historical_archive_exception_rejects_another_stale_path(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            archive = (
+                root
+                / "docs/architecture/"
+                "artist-record-event-reconstruction-historical-git-objects-v1.json"
+            )
+            archive.parent.mkdir(parents=True)
+            archive.write_text(
+                "smart-contracts/" + "StreamCore.sol\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(
+                any(
+                    "stale pre-migration source path" in error
+                    for error in self.errors(root)
+                )
+            )
+
+    def test_historical_archive_exception_rejects_extra_duplicate(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            archive = (
+                root
+                / "docs/architecture/"
+                "artist-record-event-reconstruction-historical-git-objects-v1.json"
+            )
+            archive.parent.mkdir(parents=True)
+            old_path = f"{checker.EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol"
+            archive.write_text("\n".join([old_path] * 3), encoding="utf-8")
+            self.assertTrue(
+                any(
+                    "historical stale-path evidence count or case drift" in error
+                    for error in self.errors(root)
+                )
+            )
+
+    def test_historical_archive_exception_rejects_case_mutation(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            archive = (
+                root
+                / "docs/architecture/"
+                "artist-record-event-reconstruction-historical-git-objects-v1.json"
+            )
+            archive.parent.mkdir(parents=True)
+            old_path = f"{checker.EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol"
+            archive.write_text(
+                old_path + "\n" + old_path.replace("Approvals", "approvals"),
+                encoding="utf-8",
+            )
+            self.assertTrue(
+                any(
+                    "historical stale-path evidence count or case drift" in error
+                    for error in self.errors(root)
+                )
+            )
+
+    def test_historical_archive_exception_rejects_allowed_path_in_another_file(
+        self,
+    ) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            path = root / "docs/architecture/unrelated.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                f"{checker.EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(
+                any(
+                    "stale pre-migration source path" in error
+                    for error in self.errors(root)
+                )
+            )
+
     def test_duplicate_old_path_fails(self) -> None:
         with self.fixture() as temp:
             root = Path(temp)

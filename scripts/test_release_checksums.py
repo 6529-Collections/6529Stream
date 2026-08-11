@@ -156,7 +156,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 286)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 292)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3151,11 +3151,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 286)
-        self.assertEqual(len(manifest["files"]), 462)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 292)
+        self.assertEqual(len(manifest["files"]), 468)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            462,
+            468,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3407,6 +3407,31 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
         self.assert_committed_checksums_cover(expected_paths)
 
+    def test_committed_checksums_cover_artist_record_event_correction_packet(
+        self,
+    ) -> None:
+        expected_paths = {
+            Path(
+                "docs/architecture/"
+                "artist-record-event-reconstruction-correction-v1.json"
+            ),
+            Path(
+                "docs/architecture/"
+                "artist-record-event-reconstruction-correction-v1.md"
+            ),
+            Path(
+                "docs/architecture/"
+                "artist-record-event-reconstruction-correction-v1.schema.json"
+            ),
+            Path(
+                "docs/architecture/"
+                "artist-record-event-reconstruction-historical-git-objects-v1.json"
+            ),
+            Path("scripts/check_artist_record_event_reconstruction_correction.py"),
+            Path("scripts/test_artist_record_event_reconstruction_correction.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {
             Path("CHANGELOG.md"),
@@ -3507,7 +3532,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 462)
+        self.assertEqual(len(classifications), 468)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

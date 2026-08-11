@@ -428,6 +428,14 @@ jobs:
           python -m pip check
           python -m playwright install --with-deps chromium
 
+      - name: Artist record/event reconstruction correction gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_artist_record_event_reconstruction_correction.py 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log
+          python3 scripts/check_artist_record_event_reconstruction_correction.py 2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log
+
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh
         run: |
