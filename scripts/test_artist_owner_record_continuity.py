@@ -129,11 +129,29 @@ class ArtistOwnerRecordContinuityTests(unittest.TestCase):
         path.write_bytes(path.read_bytes() + b" ")
         self._assert_rejected("authority digest drifted: owner_state_foundation")
 
-    def test_authority_path_escape_is_rejected(self) -> None:
+    def test_authority_inventory_validation_precedes_path_validation(self) -> None:
         packet = self._packet()
         packet["authority_bindings"][0]["path"] = "../outside.md"
         self._write_packet(packet)
         self._assert_rejected("authority binding inventory drifted")
+
+    def test_safe_path_rejects_parent_traversal(self) -> None:
+        with self.assertRaises(CHECKER.ContinuityError) as raised:
+            CHECKER._safe_path(self.root, "../outside.md")
+        self.assertEqual(str(raised.exception), "unsafe authority path: ../outside.md")
+
+    def test_safe_path_rejects_repository_root(self) -> None:
+        with self.assertRaises(CHECKER.ContinuityError) as raised:
+            CHECKER._safe_path(self.root, ".")
+        self.assertEqual(str(raised.exception), "authority path escapes repository: .")
+
+    def test_safe_path_rejects_existing_directory(self) -> None:
+        with self.assertRaises(CHECKER.ContinuityError) as raised:
+            CHECKER._safe_path(self.root, "docs/architecture")
+        self.assertEqual(
+            str(raised.exception),
+            "authority path is not a file: docs/architecture",
+        )
 
     def test_authority_symlink_is_rejected(self) -> None:
         packet = self._packet()
