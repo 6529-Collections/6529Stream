@@ -1,0 +1,1012 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/artist-record-event-reconstruction-correction-v1.schema.json",
+  "title": "6529Stream artist record/event reconstruction correction v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status",
+    "maturity",
+    "evaluated_base",
+    "authority_bindings",
+    "selected_shape",
+    "inventory",
+    "event_protocol",
+    "record_protocol",
+    "permitted_constants",
+    "record_domain_rows",
+    "event_surface_rows",
+    "operation_join_rows",
+    "record_reconstruction_rows",
+    "correction_rules",
+    "canonical_event_vectors",
+    "canonical_record_vectors",
+    "historical_compatibility",
+    "unresolved_dependencies",
+    "gate_state",
+    "semantic_digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "6529stream.artist-record-event-reconstruction-correction.v1"
+    },
+    "status": {
+      "const": "PROPOSED_CORRECTION_PACKET_ONLY"
+    },
+    "maturity": {
+      "const": "pre_audit_source_blocked"
+    },
+    "evaluated_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "tree",
+        "shared_mechanics_accepted_count",
+        "shared_mechanics_unresolved_count"
+      ],
+      "properties": {
+        "commit": {
+          "const": "1cd16e1c8bde97a5f5cc7cd3c8f39169e09c38ea"
+        },
+        "tree": {
+          "const": "94c67b852c2ee582043cbcef42254e515d33698e"
+        },
+        "shared_mechanics_accepted_count": {
+          "const": 3
+        },
+        "shared_mechanics_unresolved_count": {
+          "const": 16
+        }
+      }
+    },
+    "authority_bindings": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "$ref": "#/$defs/authorityBinding"
+      }
+    },
+    "selected_shape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "option_id",
+        "selection_posture",
+        "rationale",
+        "options"
+      ],
+      "properties": {
+        "option_id": {
+          "const": "complete_field_source_mapping_minimal_suffixes_independent_vectors"
+        },
+        "selection_posture": {
+          "const": "selected_for_architecture_review_only"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "option_id",
+              "selected",
+              "reason"
+            ],
+            "properties": {
+              "option_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "selected": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "contains": {
+            "type": "object",
+            "required": [
+              "option_id",
+              "selected"
+            ],
+            "properties": {
+              "option_id": {
+                "const": "complete_field_source_mapping_minimal_suffixes_independent_vectors"
+              },
+              "selected": {
+                "const": true
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_domains",
+        "normative_events",
+        "operations",
+        "corrected_events",
+        "preserved_events",
+        "historical_genesis_event_coverage",
+        "historical_split_event_coverage",
+        "created_record_bindings",
+        "record_component_bindings"
+      ],
+      "properties": {
+        "record_domains": {
+          "const": 37
+        },
+        "normative_events": {
+          "const": 54
+        },
+        "operations": {
+          "const": 57
+        },
+        "corrected_events": {
+          "const": 15
+        },
+        "preserved_events": {
+          "const": 39
+        },
+        "historical_genesis_event_coverage": {
+          "const": 21
+        },
+        "historical_split_event_coverage": {
+          "const": 2
+        },
+        "created_record_bindings": {
+          "const": 40
+        },
+        "record_component_bindings": {
+          "const": 430
+        }
+      }
+    },
+    "event_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version_position",
+        "schema_version_type",
+        "maximum_indexed_fields",
+        "topic0",
+        "field_encoding",
+        "generic_event_allowed",
+        "anonymous_events_allowed",
+        "preservation_rule",
+        "historical_implementation_posture"
+      ],
+      "properties": {
+        "schema_version_position": {
+          "const": 0
+        },
+        "schema_version_type": {
+          "const": "uint16"
+        },
+        "maximum_indexed_fields": {
+          "const": 3
+        },
+        "topic0": {
+          "const": "keccak256(canonical event signature)"
+        },
+        "field_encoding": {
+          "const": "Solidity ABI event encoding"
+        },
+        "generic_event_allowed": {
+          "const": false
+        },
+        "anonymous_events_allowed": {
+          "const": false
+        },
+        "preservation_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "historical_implementation_posture": {
+          "const": "compatibility evidence only; not baseline, source authorization, deployment evidence, or readiness credit"
+        }
+      }
+    },
+    "record_protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "semantic_hash_mode",
+        "encoding",
+        "abi_encode_packed_allowed",
+        "event_only_reconstruction_required",
+        "immutable_context_fields",
+        "dual_continuity_packet_created",
+        "owner_v2_record_commitment_created",
+        "implicit_storage_or_current_state_joins_allowed",
+        "every_created_record_component_mapped"
+      ],
+      "properties": {
+        "semantic_hash_mode": {
+          "const": "retain exact V1 domain and preimage schema"
+        },
+        "encoding": {
+          "const": "abi.encode except the explicitly double-hashed import leaf"
+        },
+        "abi_encode_packed_allowed": {
+          "const": false
+        },
+        "event_only_reconstruction_required": {
+          "const": true
+        },
+        "immutable_context_fields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "prefixItems": [
+            {
+              "const": "recordDomain"
+            },
+            {
+              "const": "deploymentChainId"
+            },
+            {
+              "const": "RegistryV2"
+            },
+            {
+              "const": "provider:core"
+            },
+            {
+              "const": "provider:finality_registry"
+            },
+            {
+              "const": "typed protocol discriminator constants"
+            }
+          ]
+        },
+        "dual_continuity_packet_created": {
+          "const": false
+        },
+        "owner_v2_record_commitment_created": {
+          "const": false
+        },
+        "implicit_storage_or_current_state_joins_allowed": {
+          "const": false
+        },
+        "every_created_record_component_mapped": {
+          "const": true
+        }
+      }
+    },
+    "permitted_constants": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "$ref": "#/$defs/permittedConstant"
+      }
+    },
+    "record_domain_rows": {
+      "type": "array",
+      "minItems": 37,
+      "maxItems": 37,
+      "items": {
+        "$ref": "#/$defs/recordRow"
+      }
+    },
+    "event_surface_rows": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "items": {
+        "$ref": "#/$defs/eventRow"
+      }
+    },
+    "operation_join_rows": {
+      "type": "array",
+      "minItems": 57,
+      "maxItems": 57,
+      "items": {
+        "$ref": "#/$defs/operationRow"
+      }
+    },
+    "record_reconstruction_rows": {
+      "type": "array",
+      "minItems": 40,
+      "maxItems": 40,
+      "items": {
+        "$ref": "#/$defs/reconstructionRow"
+      }
+    },
+    "correction_rules": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "$ref": "#/$defs/correctionRule"
+      }
+    },
+    "canonical_event_vectors": {
+      "type": "array",
+      "minItems": 54,
+      "maxItems": 54,
+      "items": {
+        "$ref": "#/$defs/eventVector"
+      }
+    },
+    "canonical_record_vectors": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/recordVector"
+      }
+    },
+    "historical_compatibility": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "commit",
+          "artist_source_file_count",
+          "normative_event_coverage",
+          "normative_event_total",
+          "posture"
+        ],
+        "properties": {
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "artist_source_file_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "normative_event_coverage": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 54
+          },
+          "normative_event_total": {
+            "const": 54
+          },
+          "generic_event": {
+            "type": "string"
+          },
+          "posture": {
+            "const": "compatibility_evidence_only"
+          }
+        }
+      }
+    },
+    "unresolved_dependencies": {
+      "type": "array",
+      "minItems": 17,
+      "maxItems": 17,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "gate_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correction_packet_selected_for_review",
+        "record_event_join_complete",
+        "normative_owner_events_accepted",
+        "shared_mechanics_modified",
+        "shared_mechanics_accepted_count",
+        "shared_mechanics_unresolved_count",
+        "all_domain_layouts_resolved",
+        "all_replay_surfaces_resolved",
+        "four_inner_commitments_resolved",
+        "interface_freeze_complete",
+        "full_freeze_complete",
+        "implementation_authorized",
+        "source_present",
+        "deployment_authorized",
+        "readiness_credit"
+      ],
+      "properties": {
+        "correction_packet_selected_for_review": {
+          "const": true
+        },
+        "record_event_join_complete": {
+          "const": true
+        },
+        "normative_owner_events_accepted": {
+          "const": false
+        },
+        "shared_mechanics_modified": {
+          "const": false
+        },
+        "shared_mechanics_accepted_count": {
+          "const": 3
+        },
+        "shared_mechanics_unresolved_count": {
+          "const": 16
+        },
+        "all_domain_layouts_resolved": {
+          "const": false
+        },
+        "all_replay_surfaces_resolved": {
+          "const": false
+        },
+        "four_inner_commitments_resolved": {
+          "const": false
+        },
+        "interface_freeze_complete": {
+          "const": false
+        },
+        "full_freeze_complete": {
+          "const": false
+        },
+        "implementation_authorized": {
+          "const": false
+        },
+        "source_present": {
+          "const": false
+        },
+        "deployment_authorized": {
+          "const": false
+        },
+        "readiness_credit": {
+          "const": false
+        }
+      }
+    },
+    "semantic_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "authorityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "recordRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "record_domain",
+        "owner_domain",
+        "owner_contract",
+        "domain_preimage",
+        "domain_value",
+        "legacy_preimage",
+        "authority_source",
+        "encoding",
+        "decision_status"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^record:"
+        },
+        "record_domain": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+_DOMAIN$"
+        },
+        "owner_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain_preimage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain_value": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "legacy_preimage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "encoding": {
+          "const": "abi.encode"
+        },
+        "decision_status": {
+          "const": "retained_v1_semantic_hash_schema"
+        }
+      }
+    },
+    "eventField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "name",
+        "indexed"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "indexed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "eventRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "event",
+        "emitter_domain",
+        "emitter_contract",
+        "schema_version_field",
+        "legacy_signature",
+        "v2_signature",
+        "v2_topic0",
+        "fields",
+        "correction_id",
+        "unchanged_from_normative_v1"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^event:"
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "emitter_domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "emitter_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_version_field": {
+          "$ref": "#/$defs/eventField"
+        },
+        "legacy_signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "v2_signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "v2_topic0": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/eventField"
+          }
+        },
+        "correction_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unchanged_from_normative_v1": {
+          "type": "boolean"
+        }
+      }
+    },
+    "operationRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "write",
+        "record_bindings",
+        "event_bindings",
+        "source_fields",
+        "source_present",
+        "implementation_authorized"
+      ],
+      "properties": {
+        "operation_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 57
+        },
+        "write": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_bindings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object"
+          }
+        },
+        "event_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object"
+          }
+        },
+        "source_fields": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_present": {
+          "const": false
+        },
+        "implementation_authorized": {
+          "const": false
+        }
+      }
+    },
+    "eventVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "surface_id",
+        "signature",
+        "topic0",
+        "indexed_positions"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^event:"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "topic0": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "indexed_positions": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "permittedConstant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "constant_id",
+        "type",
+        "value_rule",
+        "authority"
+      ],
+      "properties": {
+        "constant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "componentBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "type",
+        "component",
+        "source_kind",
+        "source"
+      ],
+      "properties": {
+        "position": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_kind": {
+          "enum": [
+            "event_field",
+            "immutable_constant"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^(event|constant):"
+        }
+      }
+    },
+    "reconstructionRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation_id",
+        "write",
+        "role",
+        "record_domain",
+        "component_bindings",
+        "implicit_storage_join",
+        "reconstruction_complete"
+      ],
+      "properties": {
+        "operation_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 57
+        },
+        "write": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "secondary"
+          ]
+        },
+        "record_domain": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+_DOMAIN$"
+        },
+        "component_bindings": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/componentBinding"
+          }
+        },
+        "implicit_storage_join": {
+          "const": false
+        },
+        "reconstruction_complete": {
+          "const": true
+        }
+      }
+    },
+    "correctionRule": {
+      "type": "object",
+      "required": [
+        "correction_id",
+        "operation_ids",
+        "event",
+        "record_domains",
+        "field_rule",
+        "required_suffix",
+        "mapping_authority"
+      ],
+      "properties": {
+        "correction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 57
+          }
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_domains": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+_DOMAIN$"
+          }
+        },
+        "field_rule": {
+          "const": "append_only_unindexed_suffix"
+        },
+        "required_suffix": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/eventField"
+          }
+        },
+        "mapping_authority": {
+          "const": "record_reconstruction_rows"
+        },
+        "other_operation_suffix_rule": {
+          "type": "string"
+        },
+        "collision_rule": {
+          "type": "string"
+        },
+        "invariants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "hash_mode": {
+          "type": "string"
+        }
+      }
+    },
+    "vectorComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "type",
+        "name",
+        "value"
+      ],
+      "properties": {
+        "position": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^0x[0-9a-f]{64}$"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "recordVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vector_id",
+        "correction_id",
+        "operation_id",
+        "record_domain",
+        "hash_mode",
+        "components",
+        "expected_abi_words",
+        "expected_hash"
+      ],
+      "properties": {
+        "vector_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operation_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 57
+        },
+        "record_domain": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+_DOMAIN$"
+        },
+        "hash_mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/vectorComponent"
+          }
+        },
+        "expected_abi_words": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string",
+            "pattern": "^0x[0-9a-f]{64}$"
+          }
+        },
+        "expected_inner_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "expected_hash": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}
