@@ -174,6 +174,9 @@ ALIASED_EVENT_SOURCES = {
     (3, "BINDING_REFUSAL_RECORD_DOMAIN", "nonce"): "event:ArtistAttributionStateChanged.recordNonce",
     (3, "BINDING_REFUSAL_RECORD_DOMAIN", "signedAt"): "event:ArtistAttributionStateChanged.recordSignedAt",
     (7, "ACCEPTANCE_RECORD_DOMAIN", "signer"): "event:CollaboratorAccepted.collaborator",
+    (44, "DISPUTE_RECORD_DOMAIN", "collectionId"): "event:AttributionDisputeOpened.collectionId",
+    (44, "DISPUTE_RECORD_DOMAIN", "bindingGeneration"): "event:AttributionDisputeOpened.bindingGeneration",
+    (44, "DISPUTE_RECORD_DOMAIN", "reasonHash"): "event:AttributionDisputeOpened.reasonHash",
     (45, "DISPUTE_RECORD_DOMAIN", "opener"): "event:AttributionCounterStatementRecorded.signer",
     (45, "DISPUTE_RECORD_DOMAIN", "openerAuthorityClass"): "event:AttributionCounterStatementRecorded.authorityClass",
     (45, "DISPUTE_RECORD_DOMAIN", "openedAt"): "event:AttributionCounterStatementRecorded.recordedAt",
@@ -472,6 +475,11 @@ def _event_rows(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     declarations = _normative_events(normative_text)
     matrix_names = [row["event"] for row in matrix["event_surfaces"]]
+    unexpected_suffixes = sorted(set(EXPECTED_SUFFIXES) - set(matrix_names))
+    if unexpected_suffixes:
+        raise CorrectionError(
+            f"suffix fixture event is not normative: {unexpected_suffixes}"
+        )
     if set(declarations) - set(matrix_names) != {"ArtistRegistryParameterChanged"}:
         raise CorrectionError("normative administrative-event exclusion drifted")
     if set(matrix_names) - set(declarations):
@@ -615,6 +623,11 @@ def _reconstruction_rows(
                         raise CorrectionError(
                             f"unmapped record component: operation {operation['operation_id']} "
                             f"{record_domain}.{name}"
+                        )
+                    if len(selected) > 1:
+                        raise CorrectionError(
+                            f"ambiguous record component source: operation "
+                            f"{operation['operation_id']} {record_domain}.{name}"
                         )
                     source = f"event:{selected[0][0]['event']}.{selected[0][1]['name']}"
                 if source.startswith("constant:"):
@@ -850,12 +863,17 @@ def _historical_event_coverage(root: Path, commit: str, wanted: set[str]) -> tup
     ]
     names: set[str] = set()
     for relative in paths:
-        source = subprocess.check_output(
-            ["git", "show", f"{commit}:{relative}"],
-            cwd=root,
-            text=True,
-            errors="replace",
-        )
+        try:
+            source = subprocess.check_output(
+                ["git", "show", f"{commit}:{relative}"],
+                cwd=root,
+                text=True,
+                errors="replace",
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            raise CorrectionError(
+                f"cannot read historical source {commit}:{relative}: {exc}"
+            ) from exc
         names.update(re.findall(r"\bevent\s+(\w+)\s*\(", source))
     return len(paths), len(names & wanted)
 
@@ -937,12 +955,16 @@ def check(root: Path = Path("."), packet_override: dict[str, Any] | None = None)
         raise CorrectionError("40 created-record component mappings drifted")
     if packet["permitted_constants"] != EXPECTED_CONSTANTS:
         raise CorrectionError("permitted immutable constant inventory drifted")
+    corrected_events = sum(
+        not row["unchanged_from_normative_v1"] for row in expected_events
+    )
+    preserved_events = len(expected_events) - corrected_events
     if packet["inventory"] != {
         "record_domains": 37,
         "normative_events": 54,
         "operations": 57,
-        "corrected_events": 15,
-        "preserved_events": 39,
+        "corrected_events": corrected_events,
+        "preserved_events": preserved_events,
         "historical_genesis_event_coverage": 21,
         "historical_split_event_coverage": 2,
         "created_record_bindings": 40,

@@ -360,6 +360,7 @@
       "maxItems": 2,
       "items": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "commit",
           "artist_source_file_count",
@@ -837,6 +838,7 @@
     },
     "correctionRule": {
       "type": "object",
+      "additionalProperties": false,
       "required": [
         "correction_id",
         "operation_ids",

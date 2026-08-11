@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -47,6 +48,13 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.CorrectionError, expected):
                 checker.check(ROOT, packet)
 
+    def assert_upstream_rejected(self, foundation: dict, expected: str) -> None:
+        shared = checker.load_json(ROOT / checker.SHARED_PATH)
+        matrix = checker.load_json(ROOT / checker.MATRIX_PATH)
+        with patch.object(checker, "load_json", side_effect=[foundation, shared, matrix]):
+            with self.assertRaisesRegex(checker.CorrectionError, expected):
+                checker._validate_upstream_posture(ROOT)
+
     def event(self, packet: dict, name: str) -> dict:
         return next(row for row in packet["event_surface_rows"] if row["event"] == name)
 
@@ -70,14 +78,133 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def test_baseline_packet_passes(self) -> None:
         checker.check(ROOT)
 
+    def test_aggregate_local_and_ci_wiring_is_exact(self) -> None:
+        shell_wrapper = (ROOT / "scripts" / "check.sh").read_text(encoding="utf-8")
+        powershell_wrapper = (ROOT / "scripts" / "check.ps1").read_text(
+            encoding="utf-8"
+        )
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        ci_workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+        release_mode = (
+            ROOT / ".github" / "workflows" / "release-mode.yml"
+        ).read_text(encoding="utf-8")
+
+        shell_test = (
+            '"$python_bin" scripts/test_artist_record_event_reconstruction_correction.py'
+        )
+        shell_check = (
+            '"$python_bin" scripts/check_artist_record_event_reconstruction_correction.py'
+        )
+        powershell_test = (
+            '& $pythonPath @pythonArgs '
+            '"scripts\\test_artist_record_event_reconstruction_correction.py"'
+        )
+        powershell_check = (
+            '& $pythonPath @pythonArgs '
+            '"scripts\\check_artist_record_event_reconstruction_correction.py"'
+        )
+        for wrapper, test_command, check_command in (
+            (shell_wrapper, shell_test, shell_check),
+            (powershell_wrapper, powershell_test, powershell_check),
+        ):
+            self.assertEqual(1, wrapper.count(test_command))
+            self.assertEqual(1, wrapper.count(check_command))
+            self.assertLess(wrapper.index(test_command), wrapper.index(check_command))
+
+        make_target = (
+            "artist-record-event-reconstruction-correction-check:\n"
+            "\t$(PYTHON) scripts/test_artist_record_event_reconstruction_correction.py\n"
+            "\t$(PYTHON) scripts/check_artist_record_event_reconstruction_correction.py\n"
+        )
+        self.assertEqual(1, makefile.count(make_target))
+        self.assertIn(
+            ".PHONY: record-family-authorization-check "
+            "artist-semantic-owner-matrix-check "
+            "artist-record-event-reconstruction-correction-check",
+            makefile,
+        )
+        self.assertIn(
+            "check: record-family-authorization-check "
+            "artist-semantic-owner-matrix-check "
+            "artist-record-event-reconstruction-correction-check",
+            makefile,
+        )
+
+        ci_gate = (
+            "      - name: Artist record/event reconstruction correction gate\n"
+            "        shell: bash\n"
+            "        run: |\n"
+            "          set -o pipefail\n"
+            "          mkdir -p ci-logs\n"
+            "          python3 scripts/test_artist_record_event_reconstruction_correction.py "
+            "2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-tests.log\n"
+            "          python3 scripts/check_artist_record_event_reconstruction_correction.py "
+            "2>&1 | tee ci-logs/artist-record-event-reconstruction-correction-check.log\n"
+        )
+        self.assertEqual(1, ci_workflow.count(ci_gate))
+        self.assertIn("fetch-depth: 0", release_mode)
+        self.assertEqual(1, release_mode.count("bash scripts/check.sh"))
+
     def test_schema_is_draft_2020_12_valid(self) -> None:
         Draft202012Validator.check_schema(self.schema)
         self.assertEqual([], list(Draft202012Validator(self.schema).iter_errors(self.packet)))
+
+    def test_historical_compatibility_schema_rejects_unknown_property(self) -> None:
+        packet = self.copy_packet()
+        packet["historical_compatibility"][0]["unexpected"] = True
+        self.assert_rejected(packet, "schema validation failed")
+
+    def test_correction_rule_schema_rejects_unknown_property(self) -> None:
+        packet = self.copy_packet()
+        packet["correction_rules"][0]["unexpected"] = True
+        self.assert_rejected(packet, "schema validation failed")
 
     def test_semantic_digest_is_independent(self) -> None:
         packet = self.copy_packet()
         packet["semantic_digest"] = "sha256:" + "00" * 32
         self.assert_rejected(packet, "semantic digest drifted", rebind=False)
+
+    def test_authority_binding_digest_drift_is_rejected(self) -> None:
+        packet = self.copy_packet()
+        packet["authority_bindings"][0]["sha256"] = "0" * 64
+        self.assert_rejected(packet, "authority bindings drifted")
+
+    def test_evaluated_base_commit_and_tree_drift_are_rejected(self) -> None:
+        for field in ("commit", "tree"):
+            with self.subTest(field=field):
+                packet = self.copy_packet()
+                packet["evaluated_base"][field] = "0" * 40
+                self.rebind(packet)
+                with patch.object(checker, "_validate_schema", return_value=None):
+                    with self.assertRaisesRegex(
+                        checker.CorrectionError, "evaluated-base receipt drifted"
+                    ):
+                        checker.check(ROOT, packet)
+
+    def test_resolved_owner_layout_is_rejected_by_upstream_posture(self) -> None:
+        foundation = checker.load_json(ROOT / checker.FOUNDATION_PATH)
+        foundation["domain_layout_rows"][0]["decision_status"] = "accepted"
+        self.assert_upstream_rejected(
+            foundation, "seven owner layout rows no longer remain unresolved"
+        )
+
+    def test_resolved_replay_surface_is_rejected_by_upstream_posture(self) -> None:
+        foundation = checker.load_json(ROOT / checker.FOUNDATION_PATH)
+        foundation["replay_surface_rows"][0]["decision_status"] = "accepted"
+        self.assert_upstream_rejected(
+            foundation, "64 replay rows no longer remain unresolved"
+        )
+
+    def test_resolved_inner_preimage_is_rejected_by_upstream_posture(self) -> None:
+        foundation = checker.load_json(ROOT / checker.FOUNDATION_PATH)
+        foundation["owner_side_recomputation"]["action_commitment_preimage"] = (
+            "opaque coordinator word"
+        )
+        self.assert_upstream_rejected(
+            foundation, "four owner inner preimages no longer remain null"
+        )
 
     def test_record_omission_is_rejected(self) -> None:
         packet = self.copy_packet()
@@ -360,6 +487,16 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
         artist_id["source"] = "event:ArtistPolicyConsentRecorded.policyHash"
         self.assert_rejected(packet, "40 created-record component mappings drifted")
 
+    def test_implicit_event_source_ambiguity_is_rejected(self) -> None:
+        aliases = dict(checker.ALIASED_EVENT_SOURCES)
+        aliases.pop((44, "DISPUTE_RECORD_DOMAIN", "collectionId"))
+        with patch.object(checker, "ALIASED_EVENT_SOURCES", aliases):
+            self.assert_rejected(
+                self.copy_packet(),
+                "ambiguous record component source: operation 44 "
+                "DISPUTE_RECORD_DOMAIN.collectionId",
+            )
+
     def test_mapping_completion_claim_cannot_be_lowered(self) -> None:
         packet = self.copy_packet()
         packet["record_reconstruction_rows"][0]["reconstruction_complete"] = False
@@ -386,6 +523,16 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
                 packet = self.copy_packet()
                 self.event(packet, event_name)["fields"].pop()
                 self.assert_rejected(packet, "54 ordered event rows drifted")
+
+    def test_unused_suffix_fixture_is_rejected(self) -> None:
+        suffixes = deepcopy(checker.EXPECTED_SUFFIXES)
+        suffixes["PhantomEvent"] = [
+            {"type": "bytes32", "name": "phantom", "indexed": False}
+        ]
+        with patch.object(checker, "EXPECTED_SUFFIXES", suffixes):
+            self.assert_rejected(
+                self.copy_packet(), "suffix fixture event is not normative"
+            )
 
     def test_history_invariant_omission_is_rejected(self) -> None:
         packet = self.copy_packet()
@@ -517,7 +664,22 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def test_historical_posture_promotion_is_rejected(self) -> None:
         packet = self.copy_packet()
         packet["historical_compatibility"][0]["posture"] = "baseline"
-        self.assert_rejected(packet, "schema validation failed|historical compatibility packet claim drifted")
+        self.assert_rejected(packet, "schema validation failed")
+
+    def test_historical_git_show_failure_is_translated(self) -> None:
+        commit = "0" * 40
+        relative = "smart-contracts/ArtistHistorical.sol"
+        failure = subprocess.CalledProcessError(128, ["git", "show"])
+        with patch.object(
+            checker.subprocess,
+            "check_output",
+            side_effect=[relative + "\n", failure],
+        ):
+            with self.assertRaisesRegex(
+                checker.CorrectionError,
+                f"cannot read historical source {commit}:{relative}",
+            ):
+                checker._historical_event_coverage(ROOT, commit, {"ArtistEvent"})
 
     def test_normative_events_acceptance_is_rejected(self) -> None:
         packet = self.copy_packet()

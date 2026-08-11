@@ -7,6 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Wired the Proposed artist record/event reconstruction correction packet into
+  the canonical Unix, Windows, Make, pull-request CI, and release-mode
+  validation paths. The checksum-bound gate mechanically enforces 37 record
+  domains, 54 normative events (39 preserved and 15 minimally corrected), 57
+  operation joins, 40 created-record mappings, 430 typed field-source
+  bindings, nine permitted immutable constants, and four independently derived
+  vectors. Historical 21/54 and 2/54 implementation coverage remains
+  compatibility evidence only; shared mechanics remains 3/19, all seven owner
+  layouts, 64 replay rows, and four inner envelopes remain unresolved and
+  source-blocking, all 57 source/authorization flags remain false, and this
+  validation wiring grants no Solidity, audit, deployment, public-beta,
+  production, or readiness credit.
 - Connected checker-complete canonical deployment candidate v2 documents to
   the existing non-production plan materializer and executor without adding a
   parallel plan or receipt schema. Materializer generator 4 binds the
