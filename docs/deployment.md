@@ -195,7 +195,7 @@ projects linked libraries before instances, and carries each expected address
 into the existing plan schema. The identity excludes only retained evidence;
 that evidence must bind the projected identity and cannot include the raw
 candidate-artifact SHA-256. The committed v2 planning document has 37 profile
-rows, zero linked libraries, zero instances, and 46 completeness blockers. Its
+rows, zero linked libraries, zero instances, and 44 completeness blockers. Its
 ordinary structural check succeeds while `--require-complete` fails, so it
 cannot reach materialization, RPC, Forge, or broadcast.
 

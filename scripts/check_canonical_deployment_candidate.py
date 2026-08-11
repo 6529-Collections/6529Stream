@@ -30,6 +30,7 @@ DEFAULT_SCHEMA = Path(
     "deployments/schema/canonical-deployment-candidate.v2.schema.json"
 )
 DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
+DEFAULT_SOURCE_LAYOUT = Path("smart-contracts/source-layout.json")
 DEFAULT_RISK_REGISTER = Path("release-artifacts/latest/risk-register.json")
 GOVERNANCE_RISK_ID = "RISK-GOV-003"
 GOVERNANCE_RISK_REQUIRED = {
@@ -683,6 +684,16 @@ def audit_candidate(
         raise CandidateError(
             f"genesis profile must contain exactly {PROFILE_ENTRY_COUNT} entries"
         )
+    source_layout_binding = candidate["source_layout"]
+    if source_layout_binding["manifest_path"] is not None:
+        if source_layout_binding["manifest_path"] != DEFAULT_SOURCE_LAYOUT.as_posix():
+            raise CandidateError("candidate source-layout path is noncanonical")
+        _, source_layout_sha256 = _load_object(
+            _resolve(root, DEFAULT_SOURCE_LAYOUT, "source-layout manifest"),
+            "source-layout manifest",
+        )
+        if source_layout_binding["manifest_sha256"] != source_layout_sha256:
+            raise CandidateError("candidate source-layout SHA-256 mismatch")
     profile_binding = candidate["genesis_profile"]
     if profile_binding["path"] != profile_path.as_posix():
         raise CandidateError("candidate genesis-profile path is noncanonical")

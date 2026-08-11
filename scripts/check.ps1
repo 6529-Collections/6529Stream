@@ -90,6 +90,13 @@ forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --m
 & $pythonPath @pythonArgs "scripts\test_release_build_artifacts.py"
 & $pythonPath @pythonArgs "scripts\build_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\build_release_artifacts.py" "--check"
+& $pythonPath @pythonArgs "scripts\test_canonical_deployment_candidate.py"
+& $pythonPath @pythonArgs "scripts\check_canonical_deployment_candidate.py"
+& $pythonExecutable @pythonBaseArgs "scripts\check_canonical_deployment_candidate.py" "--require-complete"
+$candidateStrictExit = $LASTEXITCODE
+if ($candidateStrictExit -ne 1) {
+    throw "expected incomplete canonical deployment candidate v2 to exit 1, got $candidateStrictExit"
+}
 & $pythonPath @pythonArgs "scripts\test_materialize_canonical_deployment_plan.py"
 & $pythonPath @pythonArgs "scripts\materialize_canonical_deployment_plan.py" "--candidate" "deployments\config\canonical-deployment-candidate-non-production.json" "--output" "tmp\canonical-deployment-plan.json"
 & $pythonPath @pythonArgs "scripts\materialize_canonical_deployment_plan.py" "--candidate" "deployments\config\canonical-deployment-candidate-non-production.json" "--output" "tmp\canonical-deployment-plan.json" "--check"

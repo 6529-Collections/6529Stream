@@ -99,6 +99,7 @@ class SyntheticCandidate:
         for relative in (
             checker.DEFAULT_SCHEMA,
             checker.DEFAULT_PROFILE,
+            checker.DEFAULT_SOURCE_LAYOUT,
             checker.DEFAULT_RISK_REGISTER,
         ):
             target = self.root / relative
@@ -176,6 +177,9 @@ class SyntheticCandidate:
         _, profile_sha256 = materializer.load_json_with_sha256(
             self.root / checker.DEFAULT_PROFILE
         )
+        _, source_layout_sha256 = materializer.load_json_with_sha256(
+            self.root / checker.DEFAULT_SOURCE_LAYOUT
+        )
         return {
             "schema_version": checker.CANDIDATE_SCHEMA_VERSION,
             "candidate_id": "synthetic-mainnet-candidate-v2",
@@ -194,8 +198,8 @@ class SyntheticCandidate:
                 "migration_issue": (
                     "https://github.com/6529-Collections/6529Stream/issues/716"
                 ),
-                "manifest_path": "release-artifacts/solidity-source-layout.json",
-                "manifest_sha256": deterministic_sha(0x31),
+                "manifest_path": checker.DEFAULT_SOURCE_LAYOUT.as_posix(),
+                "manifest_sha256": source_layout_sha256,
             },
             "genesis_profile": {
                 "status": "complete",
@@ -441,28 +445,138 @@ class SyntheticCandidate:
         return validator
 
 
+class PlanningCandidate:
+    def __init__(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.root = Path(self.temporary.name)
+        for relative in (
+            checker.DEFAULT_CANDIDATE,
+            checker.DEFAULT_SCHEMA,
+            checker.DEFAULT_PROFILE,
+            checker.DEFAULT_SOURCE_LAYOUT,
+            checker.DEFAULT_RISK_REGISTER,
+        ):
+            target = self.root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(REPO_ROOT / relative, target)
+        self.candidate = materializer.load_json(
+            self.root / checker.DEFAULT_CANDIDATE
+        )
+
+    def close(self) -> None:
+        self.temporary.cleanup()
+
+    def audit(self) -> checker.CandidateAudit:
+        write_json(self.root / checker.DEFAULT_CANDIDATE, self.candidate)
+        return checker.audit_candidate(self.root)
+
+
 class CandidateV2Tests(unittest.TestCase):
     def test_committed_planning_candidate_is_honest_and_incomplete(self) -> None:
         audit = checker.audit_candidate(REPO_ROOT)
         self.assertEqual(audit.profile_entry_count, 37)
         self.assertEqual(audit.instance_count, 0)
+        self.assertEqual(audit.linked_library_count, 0)
+        self.assertEqual(len(audit.blockers), 44)
         self.assertIn("candidate status is planning", audit.blockers)
-        self.assertIn("source layout remains pending issue #716", audit.blockers)
+        self.assertNotIn("source layout remains pending issue #716", audit.blockers)
+        self.assertNotIn("genesis profile identity is not frozen", audit.blockers)
         self.assertIn("canonical retained evidence is not bound", audit.blockers)
         candidate = materializer.load_json(REPO_ROOT / checker.DEFAULT_CANDIDATE)
+        self.assertEqual(candidate["status"], "planning")
         self.assertFalse(candidate["production_candidate"])
         self.assertFalse(candidate["readiness_evidence"])
         self.assertIsNone(candidate["source_commit"])
+        self.assertEqual(
+            candidate["source_layout"],
+            {
+                "status": "complete",
+                "migration_issue": (
+                    "https://github.com/6529-Collections/6529Stream/issues/716"
+                ),
+                "manifest_path": checker.DEFAULT_SOURCE_LAYOUT.as_posix(),
+                "manifest_sha256": (
+                    "sha256:a4a8be3df18da217e4efc3d4d09b151807bdc152125f524f1493dd39690d9f65"
+                ),
+            },
+        )
+        self.assertEqual(candidate["genesis_profile"]["status"], "complete")
+        self.assertEqual(
+            candidate["genesis_profile"]["sha256"],
+            "sha256:e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135",
+        )
+        self.assertEqual(candidate["governed_parameter_inventory"]["status"], "pending_dependency")
+        self.assertEqual(candidate["record_family_authorization"]["status"], "pending_dependency")
+        self.assertEqual(candidate["release_build"]["status"], "not_available")
+        self.assertEqual(candidate["retained_evidence"]["status"], "not_available")
+        self.assertEqual(candidate["linked_libraries"], [])
+        self.assertEqual(candidate["instances"], [])
+
+    def test_planning_source_layout_pin_fails_closed_on_path_hash_or_status_drift(
+        self,
+    ) -> None:
+        for field, value, expected in (
+            ("manifest_path", "smart-contracts/other-layout.json", "path is noncanonical"),
+            ("manifest_sha256", deterministic_sha(0xA4), "SHA-256 mismatch"),
+        ):
+            with self.subTest(field=field):
+                fixture = PlanningCandidate()
+                try:
+                    fixture.candidate["source_layout"][field] = value
+                    with self.assertRaisesRegex(checker.CandidateError, expected):
+                        fixture.audit()
+                finally:
+                    fixture.close()
+
+        fixture = PlanningCandidate()
+        try:
+            fixture.candidate["source_layout"]["status"] = "pending_issue_716"
+            self.assertIn(
+                "source layout remains pending issue #716",
+                fixture.audit().blockers,
+            )
+        finally:
+            fixture.close()
+
+    def test_planning_profile_pin_fails_closed_on_path_hash_or_status_drift(
+        self,
+    ) -> None:
+        for field, value, expected in (
+            (
+                "path",
+                "release-artifacts/other-profile.json",
+                "genesis_profile.*path",
+            ),
+            ("sha256", deterministic_sha(0xE0), "SHA-256 mismatch"),
+        ):
+            with self.subTest(field=field):
+                fixture = PlanningCandidate()
+                try:
+                    fixture.candidate["genesis_profile"][field] = value
+                    with self.assertRaisesRegex(checker.CandidateError, expected):
+                        fixture.audit()
+                finally:
+                    fixture.close()
+
+        fixture = PlanningCandidate()
+        try:
+            fixture.candidate["genesis_profile"]["status"] = "planning"
+            self.assertIn(
+                "genesis profile identity is not frozen",
+                fixture.audit().blockers,
+            )
+        finally:
+            fixture.close()
 
     def test_committed_planning_identity_golden(self) -> None:
         audit = checker.audit_candidate(REPO_ROOT)
         self.assertEqual(
             audit.candidate_identity_sha256,
-            "sha256:e07d83502d70090f80276a270f29f5d47b5087fb2517f1207e2d91fc927a37fe",
+            "sha256:5154fbedd7e4f0a0168729ec030415f13d9e68f44e02b68328923ca7c8f881f4",
         )
         self.assertEqual(
             audit.candidate_identity_keccak256,
-            "0xec2d74f7e290c3d36a8b16f6b96007a143968d22e197e7de8747668c26c50ea1",
+            "0x432f9c5a600332213a9090089d61a1bde66db96d7b50ace89c29f5215bea58c4",
         )
 
     def test_identity_excludes_only_retained_evidence(self) -> None:
@@ -475,7 +589,7 @@ class CandidateV2Tests(unittest.TestCase):
             "sha256": deterministic_sha(0xFE),
         }
         self.assertEqual(checker.candidate_identity(candidate), before)
-        candidate["source_layout"]["status"] = "complete"
+        candidate["source_layout"]["status"] = "pending_issue_716"
         self.assertNotEqual(checker.candidate_identity(candidate), before)
 
     def test_identity_is_stable_across_member_order(self) -> None:

@@ -12,16 +12,16 @@
   },
   "source_commit": null,
   "source_layout": {
-    "status": "pending_issue_716",
+    "status": "complete",
     "migration_issue": "https://github.com/6529-Collections/6529Stream/issues/716",
-    "manifest_path": null,
-    "manifest_sha256": null
+    "manifest_path": "smart-contracts/source-layout.json",
+    "manifest_sha256": "sha256:a4a8be3df18da217e4efc3d4d09b151807bdc152125f524f1493dd39690d9f65"
   },
   "genesis_profile": {
-    "status": "planning",
+    "status": "complete",
     "path": "release-artifacts/genesis-deployment-profile.json",
     "schema_version": "6529stream.genesis-deployment-profile.v2",
-    "sha256": null,
+    "sha256": "sha256:e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135",
     "entry_count": 37
   },
   "governed_parameter_inventory": {

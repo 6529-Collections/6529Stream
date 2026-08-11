@@ -33465,8 +33465,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "93a0bbe988ff6876e43320c598c8c3033bf7c8bd56bbe281d162d783ad7f54c9",
-      "size_bytes": 179948,
+      "source_sha256": "9e6dce3452dd0ee2eccbda6f1c6422689a120ab967d662b8dde70e84fa8d1cf9",
+      "size_bytes": 180069,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -33832,7 +33832,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 375
+          "count": 377
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -39491,6 +39491,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "9ae73a13f3bb61c553a8fc6cf8ef0783707002c2104a577bf9ad08c417fbc36b",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "9c03b9edcb41784cf98c38c03d55de0bf3fe5cc7f9818a0258148510647ed384",
           "count": 1
         },
@@ -39630,6 +39636,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "abb25eaef6372142328ff14e7624c5c9c289190290c8721a40a2871e7ea19b3c",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "ac47e27920ca21c93e33dc381aedac82eb5f62907501f19904e923dbb8b84a23",
           "count": 1
         },
         {
@@ -56507,7 +56519,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "9f99712a64a5d1f0fa6f96b6bde66d5108e0db23996b732d460ceda6961435c5",
+      "source_sha256": "67181fd3f657d5c0ae2cf8392d31c0f861c96c07d483d5021fefad4c9b3d02fd",
       "size_bytes": 172989,
       "imports": [
         {

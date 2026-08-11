@@ -94,6 +94,9 @@ release-build-check: release-build
 	$(PYTHON) scripts/build_release_artifacts.py --check
 
 canonical-deployment-plan-check: release-build-check
+	$(PYTHON) scripts/test_canonical_deployment_candidate.py
+	$(PYTHON) scripts/check_canonical_deployment_candidate.py
+	@if $(PYTHON) scripts/check_canonical_deployment_candidate.py --require-complete; then echo "expected incomplete canonical deployment candidate v2" >&2; exit 1; else status=$$?; if [ $$status -ne 1 ]; then exit $$status; fi; fi
 	$(PYTHON) scripts/test_materialize_canonical_deployment_plan.py
 	$(PYTHON) scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json
 	$(PYTHON) scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json --check
