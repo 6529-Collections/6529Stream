@@ -13,8 +13,11 @@ the release policy in `docs/release-policy.md`.
   domains, 54 normative events (39 preserved and 15 minimally corrected), 57
   operation joins, 40 created-record mappings, 430 typed field-source
   bindings, nine permitted immutable constants, and four independently derived
-  vectors. Historical 21/54 and 2/54 implementation coverage remains
-  compatibility evidence only; shared mechanics remains 3/19, all seven owner
+  vectors. The checker now derives historical 21/54 and 2/54 coverage from one
+  checksum-rooted archive of two raw commit objects, four raw trees, and 38
+  deduplicated blob payloads instead of relying on machine-local Git refs or a
+  Git subprocess. That historical coverage remains compatibility evidence
+  only; shared mechanics remains 3/19, all seven owner
   layouts, 64 replay rows, and four inner envelopes remain unresolved and
   source-blocking, all 57 source/authorization flags remain false, and this
   validation wiring grants no Solidity, audit, deployment, public-beta,

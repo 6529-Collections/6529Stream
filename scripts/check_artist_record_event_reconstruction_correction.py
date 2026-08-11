@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import hashlib
 import json
 import re
-import subprocess
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -25,9 +26,86 @@ OPERATION_MATRIX_PATH = Path(
 )
 FOUNDATION_PATH = Path("docs/architecture/artist-owner-state-mechanics-foundation-v1.json")
 SHARED_PATH = Path("docs/architecture/artist-operation-shared-mechanics-freeze-v1.json")
+HISTORICAL_ARCHIVE_PATH = Path(
+    "docs/architecture/"
+    "artist-record-event-reconstruction-historical-git-objects-v1.json"
+)
 
 EXPECTED_BASE = "1cd16e1c8bde97a5f5cc7cd3c8f39169e09c38ea"
 EXPECTED_TREE = "94c67b852c2ee582043cbcef42254e515d33698e"
+EXPECTED_HISTORICAL_ARCHIVE_SHA256 = (
+    "f867c363abfc6290e7fb9e1efad02bdcecbdb45c51e98fd664cf911e3eecae55"
+)
+EXPECTED_HISTORICAL_ARCHIVE_SCHEMA = (
+    "6529stream.artist-record-event-reconstruction-historical-git-objects.v1"
+)
+EXPECTED_HISTORICAL_ARCHIVE_STATUS = (
+    "MACHINE_LOCAL_GIT_OBJECTS_ARCHIVED_FOR_COMPATIBILITY_EVIDENCE_ONLY"
+)
+EXPECTED_HISTORICAL_POSTURE = (
+    "compatibility_evidence_only_machine_local_git_objects_archived"
+)
+EXPECTED_HISTORICAL_SNAPSHOTS = (
+    (
+        "genesis_monolith",
+        "58599147cadd7bb36d74e5a37485ff5d49ae9129",
+        "6138e2431e86f906d71969c2b74bf9feba2a0780",
+        "c4de81dc0654860d7665073d2beb43e10339803a",
+        12,
+        21,
+        (
+            ("smart-contracts/IStreamArtistConsent.sol", "383953f6706f2fe5c3624b19de9357d7900ba898"),
+            ("smart-contracts/IStreamArtistRegistry.sol", "f3ff80a416e7d7e5448ec264bee3347dfe2e41d8"),
+            ("smart-contracts/IStreamArtistVerifyGasSource.sol", "74ef65680537a50cb2b2e41ddbf9c0eb7d289fe2"),
+            ("smart-contracts/StreamArtistApprovals.sol", "7c08b938df7c9ba4eab59ccb9551c275e650913b"),
+            ("smart-contracts/StreamArtistRegistry.sol", "9e629f01545b7690f99ff1b7cc4c220d67bc146d"),
+            ("smart-contracts/StreamArtistRegistryAuthLib.sol", "7d57ee83efd0cab4b81536cde31bf5dc8c2b251a"),
+            ("smart-contracts/StreamArtistRegistryBindingLib.sol", "0fb0c4484c96e0cf669aa605a9ea0cb6f16516e8"),
+            ("smart-contracts/StreamArtistRegistryConsentLib.sol", "a22c39887b53c54be95adb32644d78536095cebe"),
+            ("smart-contracts/StreamArtistRegistryDomains.sol", "ed8646b3e35e85aad739b0bf5980d7ad4ded53ed"),
+            ("smart-contracts/StreamArtistRegistryHashing.sol", "c4fd667110d03b467ffc2fce5c0d8a18afaf8a43"),
+            ("smart-contracts/StreamArtistRegistrySigVer.sol", "5596c4a44569fd2f099f13da72934c8adfdda0d8"),
+            ("smart-contracts/StreamArtistRegistryState.sol", "867a0d2a23d5ac0829b52a435fa2f0b7ff25ee58"),
+        ),
+    ),
+    (
+        "split_prototype",
+        "1c991bc9f7d3a35e36f6fa2ec2a1044d1ed65ff7",
+        "e9b6e8e2c2084772ecf475cc94cb86191f214ac8",
+        "9eb8e07bb564dbe8a95670695d867d2b786681cc",
+        27,
+        2,
+        (
+            ("smart-contracts/IStreamArtistConsent.sol", "d741cb66ac58ed706c354f3122df29684463e7e0"),
+            ("smart-contracts/IStreamArtistMutationController.sol", "86190c172dc0639192c76eafdf3a2b0f930af0dc"),
+            ("smart-contracts/IStreamArtistPayloadStore.sol", "9ab3d610be3c00e6971cca9d0a3a07b3f94a9c8f"),
+            ("smart-contracts/IStreamArtistRead.sol", "26d401634ecdba583bcf42bfd39afc66b2313368"),
+            ("smart-contracts/IStreamArtistRecoveryEvidence.sol", "260034b8efb9501090ac74da705760d918fea926"),
+            ("smart-contracts/IStreamArtistRegistry.sol", "92c360d29b78f664c7487873845a7209b35e6aa9"),
+            ("smart-contracts/IStreamArtistRegistryMutationHost.sol", "05a8fac751de1c2829a878a47aa2dd5685d87319"),
+            ("smart-contracts/IStreamArtistRegistryValidationCommon.sol", "aec187584c5ed0756cd142fe36036b95e0787848"),
+            ("smart-contracts/IStreamArtistRegistryValidatorA.sol", "14cb824505473f9a839fd1623c30a2952560a7ad"),
+            ("smart-contracts/IStreamArtistRegistryValidatorB.sol", "80ed578edfda83c55d10a97b687049566c74b948"),
+            ("smart-contracts/IStreamArtistRegistryValidatorC.sol", "b59739c1c218643af60c4ca9dd44e86a3e8378e2"),
+            ("smart-contracts/IStreamArtistRegistryWritesA.sol", "97ec0cff5f877331d7a0108f023d60a5a8c20bea"),
+            ("smart-contracts/IStreamArtistRegistryWritesB.sol", "fcf413f685d026df558f0aa32cc60e9ac4e5c28e"),
+            ("smart-contracts/IStreamArtistRegistryWritesC.sol", "8ae19137447119f91efd8e6462be85d5e9f721c6"),
+            ("smart-contracts/IStreamArtistRegistryWritesV1.sol", "e383a37a396861a71a2771650a67f06876deef57"),
+            ("smart-contracts/StreamArtistApprovals.sol", "7c08b938df7c9ba4eab59ccb9551c275e650913b"),
+            ("smart-contracts/StreamArtistMutationControllerA.sol", "f66f3108dc4dd51b728d53c83ce0e7e7ff03dbb1"),
+            ("smart-contracts/StreamArtistMutationControllerB.sol", "2bc7c191540fc5be785813c71c31fe7a75fca75c"),
+            ("smart-contracts/StreamArtistMutationControllerBase.sol", "b9568826d39c5b56ba4e081438942038a44fff72"),
+            ("smart-contracts/StreamArtistMutationControllerC.sol", "158f63c6cfec99d8824b4a41d56ac7a2a7a112bb"),
+            ("smart-contracts/StreamArtistPayloadStore.sol", "82b2b9c6d38b451547e9586ad4c350553d79a169"),
+            ("smart-contracts/StreamArtistReadSatellite.sol", "51a83c3200f555a2d810795a1f36f8cb1932c826"),
+            ("smart-contracts/StreamArtistRegistry.sol", "564711f07796a0df1189bdf14093699f057eb44d"),
+            ("smart-contracts/StreamArtistRegistryValidatorA.sol", "9e7fbb8eba1ec6ad048508138244037cd814c383"),
+            ("smart-contracts/StreamArtistRegistryValidatorB.sol", "673ad6883a8ac2a5ade782b911fec5c75de07646"),
+            ("smart-contracts/StreamArtistRegistryValidatorBase.sol", "77b5c426bbe21fbdbb1380aaf57c1cb452826969"),
+            ("smart-contracts/StreamArtistRegistryValidatorC.sol", "0729b425a6b31ae06005c5a73747997ff2dfc31b"),
+        ),
+    ),
+)
 
 EXPECTED_BINDING_PATHS = [
     ("adr_0023", "docs/adr/0023-modular-artist-authority-domain-ownership.md"),
@@ -37,6 +115,11 @@ EXPECTED_BINDING_PATHS = [
     ("semantic_owner_matrix_checker", "scripts/check_artist_semantic_owner_matrix.py"),
     ("semantic_owner_matrix_tests", "scripts/test_artist_semantic_owner_matrix.py"),
     ("operation_matrix", "release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json"),
+    (
+        "historical_git_object_archive",
+        "docs/architecture/"
+        "artist-record-event-reconstruction-historical-git-objects-v1.json",
+    ),
     ("owner_state_foundation", "docs/architecture/artist-owner-state-mechanics-foundation-v1.json"),
     ("owner_state_foundation_schema", "docs/architecture/artist-owner-state-mechanics-foundation-v1.schema.json"),
     ("owner_state_foundation_checker", "scripts/check_artist_owner_state_mechanics_foundation.py"),
@@ -845,37 +928,312 @@ def _validate_independent_record_vectors(
         raise CorrectionError("typed canonical record vector bytes/schema drifted")
 
 
-def _historical_event_coverage(root: Path, commit: str, wanted: set[str]) -> tuple[int, int]:
-    try:
-        output = subprocess.check_output(
-            ["git", "ls-tree", "-r", "--name-only", commit],
-            cwd=root,
-            text=True,
+def _decode_historical_objects(
+    rows: Any,
+    object_type: str,
+    expected_count: int,
+    seen_oids: set[str],
+) -> dict[str, bytes]:
+    if not isinstance(rows, list) or len(rows) != expected_count:
+        raise CorrectionError(
+            f"historical archive {object_type} object inventory drifted"
         )
-    except (OSError, subprocess.CalledProcessError) as exc:
-        raise CorrectionError(f"cannot inspect historical source {commit}: {exc}") from exc
-    paths = [
-        line
-        for line in output.splitlines()
-        if line.startswith("smart-contracts/")
-        and "Artist" in line
-        and line.endswith(".sol")
-    ]
-    names: set[str] = set()
-    for relative in paths:
-        try:
-            source = subprocess.check_output(
-                ["git", "show", f"{commit}:{relative}"],
-                cwd=root,
-                text=True,
-                errors="replace",
-            )
-        except (OSError, subprocess.CalledProcessError) as exc:
+    decoded: dict[str, bytes] = {}
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {
+            "oid",
+            "size_bytes",
+            "data_base64",
+        }:
+            raise CorrectionError(f"historical archive {object_type} object shape drifted")
+        oid = row["oid"]
+        if not isinstance(oid, str) or re.fullmatch(r"[0-9a-f]{40}", oid) is None:
+            raise CorrectionError(f"historical archive {object_type} object id malformed")
+        if oid in seen_oids:
+            raise CorrectionError(f"historical archive duplicate object id: {oid}")
+        seen_oids.add(oid)
+        encoded = row["data_base64"]
+        if not isinstance(encoded, str):
             raise CorrectionError(
-                f"cannot read historical source {commit}:{relative}: {exc}"
+                f"historical archive {object_type} object base64 is not a string"
+            )
+        try:
+            raw = base64.b64decode(encoded, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise CorrectionError(
+                f"historical archive malformed base64 for {object_type} {oid}"
             ) from exc
-        names.update(re.findall(r"\bevent\s+(\w+)\s*\(", source))
-    return len(paths), len(names & wanted)
+        if row["size_bytes"] != len(raw):
+            raise CorrectionError(
+                f"historical archive {object_type} object size drifted: {oid}"
+            )
+        actual_oid = hashlib.sha1(
+            f"{object_type} {len(raw)}\0".encode("ascii") + raw
+        ).hexdigest()
+        if actual_oid != oid:
+            raise CorrectionError(
+                f"historical archive {object_type} object id drifted: {oid}"
+            )
+        decoded[oid] = raw
+    return decoded
+
+
+def _parse_historical_tree(raw: bytes, label: str) -> list[tuple[str, str, str]]:
+    rows: list[tuple[str, str, str]] = []
+    names: set[str] = set()
+    offset = 0
+    while offset < len(raw):
+        space = raw.find(b" ", offset)
+        nul = raw.find(b"\0", space + 1)
+        if space <= offset or nul < 0 or nul + 21 > len(raw):
+            raise CorrectionError(f"historical archive malformed tree: {label}")
+        try:
+            mode = raw[offset:space].decode("ascii")
+            name = raw[space + 1 : nul].decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise CorrectionError(
+                f"historical archive non-UTF-8 tree entry: {label}"
+            ) from exc
+        if re.fullmatch(r"[0-7]{5,6}", mode) is None:
+            raise CorrectionError(f"historical archive malformed tree mode: {label}")
+        if (
+            not name
+            or name in {".", ".."}
+            or "/" in name
+            or "\\" in name
+            or name in names
+        ):
+            raise CorrectionError(f"historical archive unsafe/duplicate tree path: {label}")
+        names.add(name)
+        rows.append((mode, name, raw[nul + 1 : nul + 21].hex()))
+        offset = nul + 21
+    return rows
+
+
+def _historical_archive_binding() -> dict[str, Any]:
+    return {
+        "path": HISTORICAL_ARCHIVE_PATH.as_posix(),
+        "raw_sha256": EXPECTED_HISTORICAL_ARCHIVE_SHA256,
+        "schema": EXPECTED_HISTORICAL_ARCHIVE_SCHEMA,
+        "commit_object_count": 2,
+        "tree_object_count": 4,
+        "unique_blob_object_count": 38,
+        "selected_source_path_count": 39,
+        "posture": EXPECTED_HISTORICAL_POSTURE,
+    }
+
+
+def _validate_historical_archive(
+    root: Path,
+    packet: dict[str, Any],
+    wanted_events: set[str],
+) -> list[tuple[int, int]]:
+    if packet["historical_git_object_archive"] != _historical_archive_binding():
+        raise CorrectionError("historical archive packet binding drifted")
+    archive_path = root / HISTORICAL_ARCHIVE_PATH
+    current = archive_path
+    while current != root:
+        if current.is_symlink():
+            raise CorrectionError("historical archive path is a symlink")
+        current = current.parent
+    try:
+        archive_bytes = archive_path.read_bytes()
+    except OSError as exc:
+        raise CorrectionError(f"cannot read historical archive: {exc}") from exc
+    if hashlib.sha256(archive_bytes).hexdigest() != EXPECTED_HISTORICAL_ARCHIVE_SHA256:
+        raise CorrectionError("historical archive raw SHA-256 drifted")
+    try:
+        archive = json.loads(
+            archive_bytes.decode("utf-8"),
+            object_pairs_hook=_object_pairs,
+            parse_float=_reject_float,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise CorrectionError(f"historical archive JSON is malformed: {exc}") from exc
+    if not isinstance(archive, dict) or set(archive) != {
+        "schema",
+        "status",
+        "artifact_path",
+        "object_encoding",
+        "oid_derivation",
+        "selection_rule",
+        "inventory",
+        "snapshots",
+        "commit_objects",
+        "tree_objects",
+        "blob_objects",
+    }:
+        raise CorrectionError("historical archive top-level shape drifted")
+    if archive["schema"] != EXPECTED_HISTORICAL_ARCHIVE_SCHEMA:
+        raise CorrectionError("historical archive schema drifted")
+    if archive["status"] != EXPECTED_HISTORICAL_ARCHIVE_STATUS:
+        raise CorrectionError("historical archive compatibility-only status drifted")
+    if archive["artifact_path"] != HISTORICAL_ARCHIVE_PATH.as_posix():
+        raise CorrectionError("historical archive declared path drifted")
+    if archive["object_encoding"] != (
+        "base64_of_raw_git_object_payload_without_loose_object_header"
+    ):
+        raise CorrectionError("historical archive object encoding drifted")
+    if archive["oid_derivation"] != (
+        "sha1(type + SP + decimal_byte_length + NUL + raw_payload)"
+    ):
+        raise CorrectionError("historical archive object-id derivation drifted")
+    if archive["selection_rule"] != (
+        "direct smart-contracts tree entries whose UTF-8 name contains Artist and ends .sol"
+    ):
+        raise CorrectionError("historical archive source-selection rule drifted")
+    if archive["inventory"] != {
+        "commit_objects": 2,
+        "tree_objects": 4,
+        "unique_blob_objects": 38,
+        "selected_source_paths": 39,
+    }:
+        raise CorrectionError("historical archive declared inventory drifted")
+
+    seen_oids: set[str] = set()
+    commits = _decode_historical_objects(
+        archive["commit_objects"], "commit", 2, seen_oids
+    )
+    trees = _decode_historical_objects(archive["tree_objects"], "tree", 4, seen_oids)
+    blobs = _decode_historical_objects(archive["blob_objects"], "blob", 38, seen_oids)
+    if not isinstance(archive["snapshots"], list) or len(archive["snapshots"]) != 2:
+        raise CorrectionError("historical archive snapshot inventory drifted")
+
+    coverage: list[tuple[int, int]] = []
+    referenced_blobs: set[str] = set()
+    expected_packet_history: list[dict[str, Any]] = []
+    for snapshot, expected in zip(
+        archive["snapshots"], EXPECTED_HISTORICAL_SNAPSHOTS, strict=True
+    ):
+        (
+            snapshot_id,
+            commit_oid,
+            root_oid,
+            smart_oid,
+            source_count,
+            event_coverage,
+            selected_sources,
+        ) = expected
+        if not isinstance(snapshot, dict) or set(snapshot) != {
+            "snapshot_id",
+            "commit_oid",
+            "root_tree_oid",
+            "smart_contracts_tree_oid",
+            "artist_source_file_count",
+            "normative_event_coverage",
+            "selected_sources",
+        }:
+            raise CorrectionError("historical archive snapshot shape drifted")
+        selected_value = snapshot["selected_sources"]
+        if not isinstance(selected_value, list):
+            raise CorrectionError("historical archive selected source inventory malformed")
+        seen_paths: set[str] = set()
+        for source_row in selected_value:
+            if not isinstance(source_row, dict) or set(source_row) != {
+                "path",
+                "blob_oid",
+            }:
+                raise CorrectionError("historical archive selected source row malformed")
+            relative = source_row["path"]
+            blob_oid = source_row["blob_oid"]
+            if (
+                not isinstance(relative, str)
+                or not relative.startswith("smart-contracts/")
+                or relative.count("/") != 1
+                or "\\" in relative
+                or "/../" in f"/{relative}/"
+                or not relative.endswith(".sol")
+            ):
+                raise CorrectionError(
+                    "historical archive selected source escapes smart-contracts"
+                )
+            if relative in seen_paths:
+                raise CorrectionError("historical archive duplicate selected source path")
+            seen_paths.add(relative)
+            if not isinstance(blob_oid, str) or re.fullmatch(
+                r"[0-9a-f]{40}", blob_oid
+            ) is None:
+                raise CorrectionError("historical archive selected blob id malformed")
+        expected_snapshot = {
+            "snapshot_id": snapshot_id,
+            "commit_oid": commit_oid,
+            "root_tree_oid": root_oid,
+            "smart_contracts_tree_oid": smart_oid,
+            "artist_source_file_count": source_count,
+            "normative_event_coverage": event_coverage,
+            "selected_sources": [
+                {"path": path, "blob_oid": blob_oid}
+                for path, blob_oid in selected_sources
+            ],
+        }
+        if snapshot != expected_snapshot:
+            raise CorrectionError("historical archive exact snapshot/path/blob map drifted")
+        if commit_oid not in commits or root_oid not in trees or smart_oid not in trees:
+            raise CorrectionError("historical archive commit/tree object is missing")
+
+        tree_headers = [
+            line[5:].decode("ascii")
+            for line in commits[commit_oid].splitlines()
+            if line.startswith(b"tree ")
+        ]
+        if tree_headers != [root_oid]:
+            raise CorrectionError("historical archive commit-to-root tree link drifted")
+        root_rows = _parse_historical_tree(trees[root_oid], f"root:{commit_oid}")
+        smart_rows = [row for row in root_rows if row[1] == "smart-contracts"]
+        if smart_rows != [("40000", "smart-contracts", smart_oid)]:
+            raise CorrectionError("historical archive root-to-smart-contracts tree link drifted")
+        source_rows = _parse_historical_tree(trees[smart_oid], f"smart-contracts:{commit_oid}")
+        selected_from_tree: list[tuple[str, str]] = []
+        for mode, name, blob_oid in source_rows:
+            if "Artist" not in name or not name.endswith(".sol"):
+                continue
+            if mode == "120000":
+                raise CorrectionError("historical archive selected source is a symlink")
+            if mode != "100644":
+                raise CorrectionError("historical archive selected source mode drifted")
+            relative = f"smart-contracts/{name}"
+            if not relative.startswith("smart-contracts/") or relative.count("/") != 1:
+                raise CorrectionError("historical archive selected source escapes smart-contracts")
+            selected_from_tree.append((relative, blob_oid))
+        if tuple(selected_from_tree) != selected_sources:
+            raise CorrectionError("historical archive tree-derived source inventory drifted")
+
+        event_names: set[str] = set()
+        for relative, blob_oid in selected_sources:
+            if blob_oid not in blobs:
+                raise CorrectionError(f"historical archive selected blob is missing: {relative}")
+            referenced_blobs.add(blob_oid)
+            try:
+                source = blobs[blob_oid].decode("utf-8")
+            except UnicodeDecodeError as exc:
+                raise CorrectionError(
+                    f"historical archive selected blob is not UTF-8 Solidity: {relative}"
+                ) from exc
+            event_names.update(re.findall(r"\bevent\s+(\w+)\s*\(", source))
+        actual_coverage = (len(selected_sources), len(event_names & wanted_events))
+        if actual_coverage != (source_count, event_coverage):
+            raise CorrectionError(
+                f"historical compatibility evidence drifted: {snapshot_id}={actual_coverage}"
+            )
+        coverage.append(actual_coverage)
+        history = {
+            "commit": commit_oid,
+            "root_tree": root_oid,
+            "smart_contracts_tree": smart_oid,
+            "artist_source_file_count": source_count,
+            "normative_event_coverage": event_coverage,
+            "normative_event_total": 54,
+            "posture": EXPECTED_HISTORICAL_POSTURE,
+        }
+        if snapshot_id == "split_prototype":
+            history["generic_event"] = "ArtistOperationCommitted"
+        expected_packet_history.append(history)
+
+    if referenced_blobs != set(blobs):
+        raise CorrectionError("historical archive contains missing or extra blob objects")
+    if packet["historical_compatibility"] != expected_packet_history:
+        raise CorrectionError("historical compatibility packet claim drifted")
+    return coverage
 
 
 def _validate_upstream_posture(root: Path) -> None:
@@ -1061,28 +1419,11 @@ def check(root: Path = Path("."), packet_override: dict[str, Any] | None = None)
         raise CorrectionError("packet semantic digest drifted")
 
     wanted_events = {row["event"] for row in matrix["event_surfaces"]}
-    first = _historical_event_coverage(root, packet["historical_compatibility"][0]["commit"], wanted_events)
-    second = _historical_event_coverage(root, packet["historical_compatibility"][1]["commit"], wanted_events)
-    if first != (12, 21) or second != (27, 2):
-        raise CorrectionError(f"historical compatibility evidence drifted: {first}, {second}")
-    if packet["historical_compatibility"] != [
-        {
-            "commit": "58599147cadd7bb36d74e5a37485ff5d49ae9129",
-            "artist_source_file_count": 12,
-            "normative_event_coverage": 21,
-            "normative_event_total": 54,
-            "posture": "compatibility_evidence_only",
-        },
-        {
-            "commit": "1c991bc9f7d3a35e36f6fa2ec2a1044d1ed65ff7",
-            "artist_source_file_count": 27,
-            "normative_event_coverage": 2,
-            "normative_event_total": 54,
-            "generic_event": "ArtistOperationCommitted",
-            "posture": "compatibility_evidence_only",
-        },
+    if _validate_historical_archive(root, packet, wanted_events) != [
+        (12, 21),
+        (27, 2),
     ]:
-        raise CorrectionError("historical compatibility packet claim drifted")
+        raise CorrectionError("historical compatibility coverage projection drifted")
 
     _validate_upstream_posture(root)
     rationale = (root / RATIONALE_PATH).read_text(encoding="utf-8")

@@ -139,10 +139,17 @@ supersededRecordHashes))`. The dynamic-array offset and length are committed;
 - All 57 operation record/event joins retain their exact create/existing and
   source-order projections. Forty created-record rows map all 430 ordered
   preimage components without an implicit storage/current-state join.
-- Historical commit `58599147` covers only 21/54 normative events, and split
-  prototype `1c991bc9` covers only 2/54 while using generic
-  `ArtistOperationCommitted`. Both are compatibility evidence only, never a
-  source, deployment, or readiness baseline.
+- Historical commit `58599147cadd7bb36d74e5a37485ff5d49ae9129`
+  (`6138e2431e86f906d71969c2b74bf9feba2a0780` root,
+  `c4de81dc0654860d7665073d2beb43e10339803a` `smart-contracts` tree)
+  covers only 21/54 normative events. Split prototype
+  `1c991bc9f7d3a35e36f6fa2ec2a1044d1ed65ff7`
+  (`e9b6e8e2c2084772ecf475cc94cb86191f214ac8` root,
+  `9eb8e07bb564dbe8a95670695d867d2b786681cc` `smart-contracts` tree)
+  covers only 2/54 while using generic `ArtistOperationCommitted`. Both commits
+  were machine-local and are now archived as exact Git object payloads for
+  compatibility evidence only, never as a source, deployment, audit, or
+  readiness baseline.
 - Shared mechanics remains exactly 3 accepted and 16 unresolved. All seven
   layout rows, all 64 replay rows, and all four owner inner preimages remain
   null, unresolved, and source-blocking.
@@ -157,12 +164,26 @@ record vector has a named typed component schema; checker-owned typed fixture
 values independently produce and pin every ABI word and record hash, including
 the history inner/double hash and dynamic-array offset/length words.
 
+Historical compatibility is self-contained in
+`docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json`
+(raw SHA-256
+`f867c363abfc6290e7fb9e1efad02bdcecbdb45c51e98fd664cf911e3eecae55`).
+The archive contains two raw commit payloads, four raw tree payloads, and 38
+unique raw blob payloads encoded as base64; the 39 selected paths deduplicate
+the shared `StreamArtistApprovals.sol` blob. The checker uses no Git ref or Git
+subprocess. It independently recomputes every Git SHA-1 from
+`type + SP + decimal byte length + NUL + raw payload`, traverses each commit to
+its root and direct `smart-contracts` tree, derives the exact Artist Solidity
+path/blob inventory and event names, and reproduces 12/21 plus 27/2.
+
 Hostile tests must reject omission, insertion, reordering, type/name/index
 drift, topic drift, unmapped or storage-sourced components, provider/constant
 substitution, record-preimage drift, packed encoding, array ambiguity,
 cross-record and cross-event substitution, generic-event fallback, and
 coordinated component/word/hash/semantic-digest re-pins for static, history,
-and dynamic vectors, as well as historical-readiness or source promotion.
+and dynamic vectors. Historical archive hostiles additionally reject missing,
+extra, duplicate, outside, symlinked, malformed-base64, object-ID, tree, path,
+blob, archive-digest, commit/tree-ID, readiness, and source-promotion drift.
 
 This packet changes architecture evidence only. It authorizes no Solidity,
 deployment, live-chain action, audit claim, or readiness credit.

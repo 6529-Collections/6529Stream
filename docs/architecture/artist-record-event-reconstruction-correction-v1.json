@@ -45,6 +45,11 @@
       "sha256": "34e768291af8fd0327cbd6d99177d4a829fa8d8076fdc18da58bf74912efa8df"
     },
     {
+      "id": "historical_git_object_archive",
+      "path": "docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json",
+      "sha256": "f867c363abfc6290e7fb9e1efad02bdcecbdb45c51e98fd664cf911e3eecae55"
+    },
+    {
       "id": "owner_state_foundation",
       "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.json",
       "sha256": "94fde0bdb326920a2528fbf0cb7f3f4923421915be53fadbb2aaf1c8e360ee91"
@@ -10441,21 +10446,35 @@
       "expected_hash": "0x3de8b19205fc04d0d8c9a9a9115124bd4b5de9d34175d5f8bdc1a4e3e2307a66"
     }
   ],
+  "historical_git_object_archive": {
+    "path": "docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json",
+    "raw_sha256": "f867c363abfc6290e7fb9e1efad02bdcecbdb45c51e98fd664cf911e3eecae55",
+    "schema": "6529stream.artist-record-event-reconstruction-historical-git-objects.v1",
+    "commit_object_count": 2,
+    "tree_object_count": 4,
+    "unique_blob_object_count": 38,
+    "selected_source_path_count": 39,
+    "posture": "compatibility_evidence_only_machine_local_git_objects_archived"
+  },
   "historical_compatibility": [
     {
       "commit": "58599147cadd7bb36d74e5a37485ff5d49ae9129",
+      "root_tree": "6138e2431e86f906d71969c2b74bf9feba2a0780",
+      "smart_contracts_tree": "c4de81dc0654860d7665073d2beb43e10339803a",
       "artist_source_file_count": 12,
       "normative_event_coverage": 21,
       "normative_event_total": 54,
-      "posture": "compatibility_evidence_only"
+      "posture": "compatibility_evidence_only_machine_local_git_objects_archived"
     },
     {
       "commit": "1c991bc9f7d3a35e36f6fa2ec2a1044d1ed65ff7",
+      "root_tree": "e9b6e8e2c2084772ecf475cc94cb86191f214ac8",
+      "smart_contracts_tree": "9eb8e07bb564dbe8a95670695d867d2b786681cc",
       "artist_source_file_count": 27,
       "normative_event_coverage": 2,
       "normative_event_total": 54,
-      "generic_event": "ArtistOperationCommitted",
-      "posture": "compatibility_evidence_only"
+      "posture": "compatibility_evidence_only_machine_local_git_objects_archived",
+      "generic_event": "ArtistOperationCommitted"
     }
   ],
   "unresolved_dependencies": [
@@ -10494,5 +10513,5 @@
     "deployment_authorized": false,
     "readiness_credit": false
   },
-  "semantic_digest": "sha256:81c93be7d89e4867fe759374b7672153cd11792eec219516770413c30bc49688"
+  "semantic_digest": "sha256:1928243d0e87c2da60e07ff2c2c43d260cb26be2aa321fbc1de10a301a5cd084"
 }

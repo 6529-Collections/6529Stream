@@ -1626,8 +1626,8 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 291 configured roots,
-expanding to exactly 467 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 292 configured roots,
+expanding to exactly 468 covered-file entries in each checksum index. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
@@ -1643,6 +1643,12 @@ by `RISK-SIZE-001`. The #670 publication adds fourteen exact roots for its Propo
 ADR, strict matrix, schema, checker, hostile tests, frozen operation source,
 four existing immutable-provider interfaces read by the checker, and the
 reviewed ArchiveV2 and RegistryV2 implementation/interface source pairs.
+The record/event reconstruction historical Git-object archive is one further
+exact root and file. It makes the compatibility-only 12/21 and 27/2 source/event
+projections reproducible in a fresh checkout by binding raw commit, tree, and
+deduplicated blob payloads; its checker recomputes object IDs and traverses the
+archived trees without requiring a Git ref or Git subprocess. This archive does
+not authorize those historical sources or add deployment or readiness credit.
 
 The deliberately narrow Python dependency grammar supports ordinary
 `Import`/`ImportFrom` and direct string-literal `importlib.import_module`,

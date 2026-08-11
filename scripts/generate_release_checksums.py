@@ -432,7 +432,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "5128028d4c80fe9b89e876aefbc7f83c50d21628aed435fe80095aed5238ae73",
+        "9f99712a64a5d1f0fa6f96b6bde66d5108e0db23996b732d460ceda6961435c5",
         172_989,
     ),
 }
@@ -492,6 +492,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/architecture/artist-record-event-reconstruction-correction-v1.json"),
     Path("docs/architecture/artist-record-event-reconstruction-correction-v1.md"),
     Path("docs/architecture/artist-record-event-reconstruction-correction-v1.schema.json"),
+    Path("docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json"),
     Path("scripts/check_artist_record_event_reconstruction_correction.py"),
     Path("scripts/test_artist_record_event_reconstruction_correction.py"),
     Path("scripts/generate_post_entropy_completion_gas.py"),

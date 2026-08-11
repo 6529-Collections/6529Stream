@@ -69,6 +69,18 @@ ROOT_TEXT_FILES = (
     Path("foundry.toml"),
     Path("slither.config.json"),
 )
+STALE_PATH_EVIDENCE_ALLOWLIST = {
+    Path(
+        "docs/architecture/"
+        "artist-record-event-reconstruction-historical-git-objects-v1.json"
+    ): {f"{EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol": 2},
+    Path("scripts/check_artist_record_event_reconstruction_correction.py"): {
+        f"{EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol": 2
+    },
+    Path("scripts/test_artist_record_event_reconstruction_correction.py"): {
+        f"{EXPECTED_SOURCE_ROOT}/StreamArtistApprovals.sol": 1
+    },
+}
 DECLARATION_RE = re.compile(
     r"(?:^|[;}])\s*(?:abstract\s+)?(contract|interface|library)\s+"
     r"[A-Za-z_$][A-Za-z0-9_$]*",
@@ -371,14 +383,28 @@ def check_repository(repo_root: Path) -> list[str]:
     for path in _text_files(repo_root):
         if path.resolve() == manifest_absolute:
             continue
+        relative_path = Path(_relative(path, repo_root))
+        allowed_historical_paths = STALE_PATH_EVIDENCE_ALLOWLIST.get(relative_path, {})
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             errors.append(f"source-layout text surface is not UTF-8: {_relative(path, repo_root)}")
             continue
-        normalized_text = text.replace("\\", "/").casefold()
+        path_normalized_text = text.replace("\\", "/")
+        normalized_text = path_normalized_text.casefold()
         for old_path in old_paths:
-            if old_path.casefold() in normalized_text:
+            folded_count = normalized_text.count(old_path.casefold())
+            expected_count = allowed_historical_paths.get(old_path)
+            if expected_count is not None:
+                exact_count = path_normalized_text.count(old_path)
+                if exact_count != expected_count or folded_count != expected_count:
+                    errors.append(
+                        "historical stale-path evidence count or case drift in "
+                        f"{_relative(path, repo_root)}: {old_path} "
+                        f"(expected {expected_count}, exact {exact_count}, "
+                        f"case-folded {folded_count})"
+                    )
+            elif folded_count:
                 errors.append(
                     f"stale pre-migration source path in {_relative(path, repo_root)}: {old_path}"
                 )

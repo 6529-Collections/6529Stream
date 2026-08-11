@@ -22,6 +22,7 @@
     "correction_rules",
     "canonical_event_vectors",
     "canonical_record_vectors",
+    "historical_git_object_archive",
     "historical_compatibility",
     "unresolved_dependencies",
     "gate_state",
@@ -63,8 +64,8 @@
     },
     "authority_bindings": {
       "type": "array",
-      "minItems": 15,
-      "maxItems": 15,
+      "minItems": 16,
+      "maxItems": 16,
       "items": {
         "$ref": "#/$defs/authorityBinding"
       }
@@ -354,45 +355,128 @@
         "$ref": "#/$defs/recordVector"
       }
     },
+    "historical_git_object_archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "raw_sha256",
+        "schema",
+        "commit_object_count",
+        "tree_object_count",
+        "unique_blob_object_count",
+        "selected_source_path_count",
+        "posture"
+      ],
+      "properties": {
+        "path": {
+          "const": "docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json"
+        },
+        "raw_sha256": {
+          "const": "f867c363abfc6290e7fb9e1efad02bdcecbdb45c51e98fd664cf911e3eecae55"
+        },
+        "schema": {
+          "const": "6529stream.artist-record-event-reconstruction-historical-git-objects.v1"
+        },
+        "commit_object_count": {
+          "const": 2
+        },
+        "tree_object_count": {
+          "const": 4
+        },
+        "unique_blob_object_count": {
+          "const": 38
+        },
+        "selected_source_path_count": {
+          "const": 39
+        },
+        "posture": {
+          "const": "compatibility_evidence_only_machine_local_git_objects_archived"
+        }
+      }
+    },
     "historical_compatibility": {
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "commit",
-          "artist_source_file_count",
-          "normative_event_coverage",
-          "normative_event_total",
-          "posture"
-        ],
-        "properties": {
-          "commit": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{40}$"
-          },
-          "artist_source_file_count": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "normative_event_coverage": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 54
-          },
-          "normative_event_total": {
-            "const": 54
-          },
-          "generic_event": {
-            "type": "string"
-          },
-          "posture": {
-            "const": "compatibility_evidence_only"
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "commit",
+            "root_tree",
+            "smart_contracts_tree",
+            "artist_source_file_count",
+            "normative_event_coverage",
+            "normative_event_total",
+            "posture"
+          ],
+          "properties": {
+            "commit": {
+              "const": "58599147cadd7bb36d74e5a37485ff5d49ae9129"
+            },
+            "root_tree": {
+              "const": "6138e2431e86f906d71969c2b74bf9feba2a0780"
+            },
+            "smart_contracts_tree": {
+              "const": "c4de81dc0654860d7665073d2beb43e10339803a"
+            },
+            "artist_source_file_count": {
+              "const": 12
+            },
+            "normative_event_coverage": {
+              "const": 21
+            },
+            "normative_event_total": {
+              "const": 54
+            },
+            "posture": {
+              "const": "compatibility_evidence_only_machine_local_git_objects_archived"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "commit",
+            "root_tree",
+            "smart_contracts_tree",
+            "artist_source_file_count",
+            "normative_event_coverage",
+            "normative_event_total",
+            "generic_event",
+            "posture"
+          ],
+          "properties": {
+            "commit": {
+              "const": "1c991bc9f7d3a35e36f6fa2ec2a1044d1ed65ff7"
+            },
+            "root_tree": {
+              "const": "e9b6e8e2c2084772ecf475cc94cb86191f214ac8"
+            },
+            "smart_contracts_tree": {
+              "const": "9eb8e07bb564dbe8a95670695d867d2b786681cc"
+            },
+            "artist_source_file_count": {
+              "const": 27
+            },
+            "normative_event_coverage": {
+              "const": 2
+            },
+            "normative_event_total": {
+              "const": 54
+            },
+            "generic_event": {
+              "const": "ArtistOperationCommitted"
+            },
+            "posture": {
+              "const": "compatibility_evidence_only_machine_local_git_objects_archived"
+            }
           }
         }
-      }
+      ]
     },
     "unresolved_dependencies": {
       "type": "array",

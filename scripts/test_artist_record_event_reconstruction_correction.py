@@ -3,9 +3,10 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
-import subprocess
+import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -24,6 +25,11 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.packet = checker.load_json(ROOT / checker.PACKET_PATH)
         cls.schema = checker.load_json(ROOT / checker.SCHEMA_PATH)
+        cls.archive = checker.load_json(ROOT / checker.HISTORICAL_ARCHIVE_PATH)
+        cls.wanted_events = {
+            row["event"]
+            for row in checker.load_json(ROOT / checker.MATRIX_PATH)["event_surfaces"]
+        }
 
     def copy_packet(self) -> dict:
         return deepcopy(self.packet)
@@ -40,13 +46,85 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def assert_rejected(self, packet: dict, expected: str, *, rebind: bool = True) -> None:
         if rebind:
             self.rebind(packet)
-        with patch.object(
-            checker,
-            "_historical_event_coverage",
-            side_effect=[(12, 21), (27, 2)],
-        ):
-            with self.assertRaisesRegex(checker.CorrectionError, expected):
-                checker.check(ROOT, packet)
+        with self.assertRaisesRegex(checker.CorrectionError, expected):
+            checker.check(ROOT, packet)
+
+    def write_archive(self, root: Path, archive: dict) -> tuple[Path, str]:
+        path = root / checker.HISTORICAL_ARCHIVE_PATH
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(archive, indent=2) + "\n", encoding="utf-8")
+        return path, hashlib.sha256(path.read_bytes()).hexdigest()
+
+    def assert_archive_rejected(
+        self,
+        archive: dict,
+        expected: str,
+        *,
+        packet_mutator=None,
+        expected_snapshots=None,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            _path, archive_sha = self.write_archive(temp_root, archive)
+            packet = self.copy_packet()
+            packet["historical_git_object_archive"]["raw_sha256"] = archive_sha
+            next(
+                row
+                for row in packet["authority_bindings"]
+                if row["id"] == "historical_git_object_archive"
+            )["sha256"] = archive_sha
+            if packet_mutator is not None:
+                packet_mutator(packet, archive)
+            self.rebind(packet)
+            snapshots = (
+                checker.EXPECTED_HISTORICAL_SNAPSHOTS
+                if expected_snapshots is None
+                else expected_snapshots
+            )
+            with (
+                patch.object(
+                    checker, "EXPECTED_HISTORICAL_ARCHIVE_SHA256", archive_sha
+                ),
+                patch.object(checker, "EXPECTED_HISTORICAL_SNAPSHOTS", snapshots),
+            ):
+                with self.assertRaisesRegex(checker.CorrectionError, expected):
+                    checker._validate_historical_archive(
+                        temp_root, packet, self.wanted_events
+                    )
+
+    def object_row(self, archive: dict, group: str, oid: str) -> dict:
+        return next(row for row in archive[group] if row["oid"] == oid)
+
+    def repin_object(self, row: dict, object_type: str, raw: bytes) -> str:
+        oid = hashlib.sha1(
+            f"{object_type} {len(raw)}\0".encode("ascii") + raw
+        ).hexdigest()
+        row.update(
+            {
+                "oid": oid,
+                "size_bytes": len(raw),
+                "data_base64": base64.b64encode(raw).decode("ascii"),
+            }
+        )
+        return oid
+
+    def replace_tree_entry(
+        self,
+        raw: bytes,
+        *,
+        mode: str,
+        name: str,
+        old_oid: str,
+        new_oid: str | None = None,
+        new_mode: str | None = None,
+    ) -> bytes:
+        marker = f"{mode} {name}\0".encode("utf-8") + bytes.fromhex(old_oid)
+        replacement = (
+            f"{new_mode or mode} {name}\0".encode("utf-8")
+            + bytes.fromhex(new_oid or old_oid)
+        )
+        self.assertEqual(1, raw.count(marker))
+        return raw.replace(marker, replacement, 1)
 
     def assert_upstream_rejected(self, foundation: dict, expected: str) -> None:
         shared = checker.load_json(ROOT / checker.SHARED_PATH)
@@ -659,27 +737,245 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def test_historical_coverage_promotion_is_rejected(self) -> None:
         packet = self.copy_packet()
         packet["historical_compatibility"][0]["normative_event_coverage"] = 54
-        self.assert_rejected(packet, "historical compatibility packet claim drifted")
+        self.assert_rejected(packet, "schema validation failed")
 
     def test_historical_posture_promotion_is_rejected(self) -> None:
         packet = self.copy_packet()
         packet["historical_compatibility"][0]["posture"] = "baseline"
         self.assert_rejected(packet, "schema validation failed")
 
-    def test_historical_git_show_failure_is_translated(self) -> None:
-        commit = "0" * 40
-        relative = "smart-contracts/ArtistHistorical.sol"
-        failure = subprocess.CalledProcessError(128, ["git", "show"])
-        with patch.object(
-            checker.subprocess,
-            "check_output",
-            side_effect=[relative + "\n", failure],
-        ):
-            with self.assertRaisesRegex(
-                checker.CorrectionError,
-                f"cannot read historical source {commit}:{relative}",
-            ):
-                checker._historical_event_coverage(ROOT, commit, {"ArtistEvent"})
+    def test_historical_archive_is_self_contained_and_deduplicated(self) -> None:
+        self.assertEqual(2, len(self.archive["commit_objects"]))
+        self.assertEqual(4, len(self.archive["tree_objects"]))
+        self.assertEqual(38, len(self.archive["blob_objects"]))
+        self.assertEqual(
+            39,
+            sum(len(row["selected_sources"]) for row in self.archive["snapshots"]),
+        )
+        approval_oids = [
+            source["blob_oid"]
+            for snapshot in self.archive["snapshots"]
+            for source in snapshot["selected_sources"]
+            if source["path"] == "smart-contracts/StreamArtistApprovals.sol"
+        ]
+        self.assertEqual(
+            ["7c08b938df7c9ba4eab59ccb9551c275e650913b"] * 2,
+            approval_oids,
+        )
+        self.assertEqual(
+            [(12, 21), (27, 2)],
+            checker._validate_historical_archive(
+                ROOT, self.copy_packet(), self.wanted_events
+            ),
+        )
+
+    def test_checker_has_no_git_subprocess_or_ref_dependency(self) -> None:
+        source = (ROOT / "scripts/check_artist_record_event_reconstruction_correction.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("import subprocess", source)
+        self.assertNotIn("git ls-tree", source)
+        self.assertNotIn("git show", source)
+        self.assertNotIn("git rev-parse", source)
+        self.assertNotIn("subprocess", checker.__dict__)
+
+    def test_historical_archive_missing_object_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["blob_objects"].pop()
+        self.assert_archive_rejected(archive, "blob object inventory drifted")
+
+    def test_historical_archive_extra_object_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        raw = b"extra historical object"
+        oid = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+        archive["blob_objects"].append(
+            {
+                "oid": oid,
+                "size_bytes": len(raw),
+                "data_base64": base64.b64encode(raw).decode(),
+            }
+        )
+        self.assert_archive_rejected(archive, "blob object inventory drifted")
+
+    def test_historical_archive_duplicate_object_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["blob_objects"][-1] = deepcopy(archive["blob_objects"][0])
+        self.assert_archive_rejected(archive, "duplicate object id")
+
+    def test_historical_archive_outside_path_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["snapshots"][0]["selected_sources"][0]["path"] = "../Artist.sol"
+        self.assert_archive_rejected(archive, "escapes smart-contracts")
+
+    def test_historical_archive_missing_selected_path_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["snapshots"][0]["selected_sources"].pop()
+        self.assert_archive_rejected(archive, "exact snapshot/path/blob map drifted")
+
+    def test_historical_archive_extra_selected_path_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["snapshots"][0]["selected_sources"].append(
+            {
+                "path": "smart-contracts/UnexpectedArtist.sol",
+                "blob_oid": archive["blob_objects"][0]["oid"],
+            }
+        )
+        self.assert_archive_rejected(archive, "exact snapshot/path/blob map drifted")
+
+    def test_historical_archive_duplicate_selected_path_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["snapshots"][0]["selected_sources"][-1] = deepcopy(
+            archive["snapshots"][0]["selected_sources"][0]
+        )
+        self.assert_archive_rejected(archive, "duplicate selected source path")
+
+    def test_historical_archive_malformed_base64_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        archive["blob_objects"][0]["data_base64"] = "not***base64"
+        self.assert_archive_rejected(archive, "malformed base64")
+
+    def test_historical_archive_object_id_drift_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        row = archive["blob_objects"][0]
+        raw = base64.b64decode(row["data_base64"]) + b"\n"
+        row["size_bytes"] = len(raw)
+        row["data_base64"] = base64.b64encode(raw).decode()
+        self.assert_archive_rejected(archive, "blob object id drifted")
+
+    def test_historical_archive_malformed_tree_is_rejected(self) -> None:
+        with self.assertRaisesRegex(checker.CorrectionError, "malformed tree"):
+            checker._parse_historical_tree(b"100644 Artist.sol\0short", "hostile")
+
+    def test_historical_archive_file_symlink_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            target = temp_root / "archive-target.json"
+            target.write_bytes((ROOT / checker.HISTORICAL_ARCHIVE_PATH).read_bytes())
+            archive_path = temp_root / checker.HISTORICAL_ARCHIVE_PATH
+            archive_path.parent.mkdir(parents=True, exist_ok=True)
+            archive_path.symlink_to(target)
+            with self.assertRaisesRegex(checker.CorrectionError, "path is a symlink"):
+                checker._validate_historical_archive(
+                    temp_root, self.copy_packet(), self.wanted_events
+                )
+
+    def test_historical_archive_selected_tree_symlink_is_rejected(self) -> None:
+        archive = deepcopy(self.archive)
+        snapshot = archive["snapshots"][0]
+        smart_oid = snapshot["smart_contracts_tree_oid"]
+        smart_row = self.object_row(archive, "tree_objects", smart_oid)
+        smart_raw = base64.b64decode(smart_row["data_base64"])
+        source = snapshot["selected_sources"][0]
+        name = source["path"].removeprefix("smart-contracts/")
+        smart_raw = self.replace_tree_entry(
+            smart_raw,
+            mode="100644",
+            name=name,
+            old_oid=source["blob_oid"],
+            new_mode="120000",
+        )
+        new_smart_oid = self.repin_object(smart_row, "tree", smart_raw)
+        old_root_oid = snapshot["root_tree_oid"]
+        root_row = self.object_row(archive, "tree_objects", old_root_oid)
+        root_raw = self.replace_tree_entry(
+            base64.b64decode(root_row["data_base64"]),
+            mode="40000",
+            name="smart-contracts",
+            old_oid=smart_oid,
+            new_oid=new_smart_oid,
+        )
+        new_root_oid = self.repin_object(root_row, "tree", root_raw)
+        old_commit_oid = snapshot["commit_oid"]
+        commit_row = self.object_row(archive, "commit_objects", old_commit_oid)
+        commit_raw = base64.b64decode(commit_row["data_base64"])
+        commit_raw = commit_raw.replace(
+            f"tree {old_root_oid}\n".encode(),
+            f"tree {new_root_oid}\n".encode(),
+            1,
+        )
+        new_commit_oid = self.repin_object(commit_row, "commit", commit_raw)
+        snapshot.update(
+            {
+                "commit_oid": new_commit_oid,
+                "root_tree_oid": new_root_oid,
+                "smart_contracts_tree_oid": new_smart_oid,
+            }
+        )
+        expected = list(deepcopy(checker.EXPECTED_HISTORICAL_SNAPSHOTS))
+        current = list(expected[0])
+        current[1:4] = [new_commit_oid, new_root_oid, new_smart_oid]
+        expected[0] = tuple(current)
+        self.assert_archive_rejected(
+            archive,
+            "selected source is a symlink",
+            expected_snapshots=tuple(expected),
+        )
+
+    def test_historical_archive_coordinated_blob_tree_commit_repin_is_rejected(
+        self,
+    ) -> None:
+        archive = deepcopy(self.archive)
+        snapshot = archive["snapshots"][0]
+        source = snapshot["selected_sources"][0]
+        old_blob_oid = source["blob_oid"]
+        blob_row = self.object_row(archive, "blob_objects", old_blob_oid)
+        new_blob_oid = self.repin_object(
+            blob_row,
+            "blob",
+            base64.b64decode(blob_row["data_base64"]) + b"\n",
+        )
+        source["blob_oid"] = new_blob_oid
+        old_smart_oid = snapshot["smart_contracts_tree_oid"]
+        smart_row = self.object_row(archive, "tree_objects", old_smart_oid)
+        name = source["path"].removeprefix("smart-contracts/")
+        smart_raw = self.replace_tree_entry(
+            base64.b64decode(smart_row["data_base64"]),
+            mode="100644",
+            name=name,
+            old_oid=old_blob_oid,
+            new_oid=new_blob_oid,
+        )
+        new_smart_oid = self.repin_object(smart_row, "tree", smart_raw)
+        old_root_oid = snapshot["root_tree_oid"]
+        root_row = self.object_row(archive, "tree_objects", old_root_oid)
+        root_raw = self.replace_tree_entry(
+            base64.b64decode(root_row["data_base64"]),
+            mode="40000",
+            name="smart-contracts",
+            old_oid=old_smart_oid,
+            new_oid=new_smart_oid,
+        )
+        new_root_oid = self.repin_object(root_row, "tree", root_raw)
+        old_commit_oid = snapshot["commit_oid"]
+        commit_row = self.object_row(archive, "commit_objects", old_commit_oid)
+        commit_raw = base64.b64decode(commit_row["data_base64"]).replace(
+            f"tree {old_root_oid}\n".encode(),
+            f"tree {new_root_oid}\n".encode(),
+            1,
+        )
+        new_commit_oid = self.repin_object(commit_row, "commit", commit_raw)
+        snapshot.update(
+            {
+                "commit_oid": new_commit_oid,
+                "root_tree_oid": new_root_oid,
+                "smart_contracts_tree_oid": new_smart_oid,
+            }
+        )
+
+        def mutate_packet(packet: dict, _archive: dict) -> None:
+            packet["historical_compatibility"][0].update(
+                {
+                    "commit": new_commit_oid,
+                    "root_tree": new_root_oid,
+                    "smart_contracts_tree": new_smart_oid,
+                }
+            )
+
+        self.assert_archive_rejected(
+            archive,
+            "exact snapshot/path/blob map drifted",
+            packet_mutator=mutate_packet,
+        )
 
     def test_normative_events_acceptance_is_rejected(self) -> None:
         packet = self.copy_packet()
