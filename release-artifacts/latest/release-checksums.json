@@ -303,7 +303,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:67336367a10f25067e147c9bfe34e135acef075af3876058942ad1355bf36677"
+    "sha256": "sha256:2fc52e54efeb8952dab2acf4cf1c8af45bb9118f55b3c8aadf8987965060f928"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1857,8 +1857,8 @@
     },
     {
       "path": "scripts/check_artist_record_event_reconstruction_correction.py",
-      "sha256": "sha256:5e080a5de117f0a9fddc8f3b911c2a3cfcec3537559b3d5f6a3c17aa312a6d19",
-      "size_bytes": 70128
+      "sha256": "sha256:541ebfbbdb1fe2bec5bdcdd72691e5fe7d0aeb5ef07f25c2434c7383ecbcdafb",
+      "size_bytes": 70164
     },
     {
       "path": "scripts/check_artist_semantic_owner_matrix.py",
@@ -2197,8 +2197,8 @@
     },
     {
       "path": "scripts/test_artist_record_event_reconstruction_correction.py",
-      "sha256": "sha256:da450d78714dbaab19ac31232071c6f795b0f08b450600c3fc34b7193e80e5c0",
-      "size_bytes": 47776
+      "sha256": "sha256:b33464399f7c38864599d95e646744c913e06e3b380fdd45a1eabffea09f9db6",
+      "size_bytes": 48005
     },
     {
       "path": "scripts/test_artist_semantic_owner_matrix.py",

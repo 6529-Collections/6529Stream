@@ -968,7 +968,8 @@ def _decode_historical_objects(
                 f"historical archive {object_type} object size drifted: {oid}"
             )
         actual_oid = hashlib.sha1(
-            f"{object_type} {len(raw)}\0".encode("ascii") + raw
+            f"{object_type} {len(raw)}\0".encode("ascii") + raw,
+            usedforsecurity=False,
         ).hexdigest()
         if actual_oid != oid:
             raise CorrectionError(

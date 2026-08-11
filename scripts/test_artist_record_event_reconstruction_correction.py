@@ -97,7 +97,8 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
 
     def repin_object(self, row: dict, object_type: str, raw: bytes) -> str:
         oid = hashlib.sha1(
-            f"{object_type} {len(raw)}\0".encode("ascii") + raw
+            f"{object_type} {len(raw)}\0".encode("ascii") + raw,
+            usedforsecurity=False,
         ).hexdigest()
         row.update(
             {
@@ -787,7 +788,10 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
     def test_historical_archive_extra_object_is_rejected(self) -> None:
         archive = deepcopy(self.archive)
         raw = b"extra historical object"
-        oid = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+        oid = hashlib.sha1(
+            f"blob {len(raw)}\0".encode() + raw,
+            usedforsecurity=False,
+        ).hexdigest()
         archive["blob_objects"].append(
             {
                 "oid": oid,
@@ -853,7 +857,10 @@ class ArtistRecordEventReconstructionCorrectionTests(unittest.TestCase):
             target.write_bytes((ROOT / checker.HISTORICAL_ARCHIVE_PATH).read_bytes())
             archive_path = temp_root / checker.HISTORICAL_ARCHIVE_PATH
             archive_path.parent.mkdir(parents=True, exist_ok=True)
-            archive_path.symlink_to(target)
+            try:
+                archive_path.symlink_to(target)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable on this platform: {exc}")
             with self.assertRaisesRegex(checker.CorrectionError, "path is a symlink"):
                 checker._validate_historical_archive(
                     temp_root, self.copy_packet(), self.wanted_events
