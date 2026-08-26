@@ -39,7 +39,7 @@ jobs:
           python-version: "3.12.10"
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
 
@@ -116,7 +116,7 @@ jobs:
           python-version: "3.12.13"
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
 
@@ -153,7 +153,7 @@ jobs:
           python-version: "3.12.13"
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
 

@@ -310,7 +310,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:005efdb57a18f8c766fe87e159c00f52aeb44ad638a57fe16a64c2708c58851a"
+    "sha256": "sha256:f401df9cdebadd90c08ecf874b0ea031417834cfd5545af91d39a2c67bfd884c"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -359,12 +359,12 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:75540ee7f1d6b1e935cc99a5f9272f9645b1d92a5697d93c3c2769bd191aff17",
+      "sha256": "sha256:37874c41833eb35524410846fb7b59863322ae9b60da60f79615ee5d5c8b54ee",
       "size_bytes": 58422
     },
     {
       "path": ".github/workflows/release-mode.yml",
-      "sha256": "sha256:3ec2745d1a14676c4e78e63afe5fd62f0eb5d165e271202114942a6a31fa48fb",
+      "sha256": "sha256:15c57031881c21ee99e2cc0b6eb7b4513f43c6f076a64123642be31fbfc6d74f",
       "size_bytes": 3608
     },
     {
@@ -2049,7 +2049,7 @@
     },
     {
       "path": "scripts/check_python_toolchain.py",
-      "sha256": "sha256:7e287fa86d926c0f1c9e657dfb3c614a5ab5a15bee5ff19db96959724a0c2504",
+      "sha256": "sha256:197418a13a04de239e16991585d4b792e37240e769a8b42cdceceaa81ead9910",
       "size_bytes": 29719
     },
     {
