@@ -297,10 +297,12 @@ status lives in
 Local evidence and accepted non-Slither dispositions are separate from
 unresolved production blockers:
 
-- The normalized first-party production Slither rows are all Open. Test,
-  vendored, and script findings are reported outside that release-blocking set;
-  they are not used to accept or suppress any of the 28 analyzer-visible rows
-  or the separately tracked `RISK-GOV-003` authority.
+- The normalized first-party production Slither inventory retains 32 rows:
+  30 remain Open and two Medium `incorrect-equality` rows have focused False
+  Positive dispositions. Test, vendored, and script findings are reported
+  outside that release-blocking set; they are not used to accept or suppress
+  any retained production row or the separately tracked `RISK-GOV-003`
+  authority.
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does

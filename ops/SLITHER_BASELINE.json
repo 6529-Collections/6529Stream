@@ -164,7 +164,7 @@
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
+      "rationale": "Slither reports state variable `_scopedComponents` as uninitialized at smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:76 `_scopedComponents`. Writer/read reachability has not yet been proven, so the row remains open.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
