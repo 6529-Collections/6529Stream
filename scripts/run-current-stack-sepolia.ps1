@@ -37,12 +37,15 @@ function Invoke-Tool([string]$Program, [string[]]$Arguments, [AllowNull()][strin
     $executable = (Get-Command $Program -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
     $captured = if (-not $PSBoundParameters.ContainsKey('StandardInput')) { & $executable @Arguments 2>&1 }
         else { $StandardInput | & $executable @Arguments 2>&1 }
-    if ($LASTEXITCODE -ne 0) { throw "$Program failed; command output withheld." }
+    if ($LASTEXITCODE -ne 0) {
+        $selector=if ($Arguments[0] -eq 'estimate') {[regex]::Match(($captured -join ' '),'0x[0-9a-fA-F]{8}').Value} else {''}
+        throw "$Program $($Arguments[0]) failed $selector; command output withheld."
+    }
     return ($captured -join "`n").Trim()
 }
 function Cast([string[]]$Arguments) {
     # Genesis calldata and deployed runtime exceed Windows' command-line limit.
-    if ($Arguments.Count -eq 2 -and $Arguments[0] -eq 'keccak') {
+    if ($Arguments.Count -eq 2 -and $Arguments[0] -eq 'keccak' -and $Arguments[1].StartsWith('0x')) {
         return Invoke-Tool 'cast' @('keccak') $Arguments[1]
     }
     return Invoke-Tool 'cast' $Arguments
@@ -70,13 +73,33 @@ function With-Signer([object]$Account,[string]$Program,[string[]]$Arguments) {
     if (-not $Broadcast) { throw 'Signing requires -Broadcast; default mode is read-only.' }
     $secure = (Get-Content -Raw -LiteralPath $Account.passwordRecord).Trim() | ConvertTo-SecureString
     $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    $passwordDirectory=$null
+    $passwordFile=$null
     try {
         $password = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
-        return Invoke-Tool $Program ($Arguments + @('--keystore',$Account.keystore,'--password',$password))
+        $passwordDirectory=Join-Path $env:TEMP ('stream-signer-'+[guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $passwordDirectory | Out-Null
+        $acl=Get-Acl -LiteralPath $passwordDirectory
+        $acl.SetAccessRuleProtection($true,$false)
+        foreach ($identity in @([Security.Principal.WindowsIdentity]::GetCurrent().User,
+            [Security.Principal.SecurityIdentifier]::new('S-1-5-18'))) {
+            $rule=[Security.AccessControl.FileSystemAccessRule]::new(
+                $identity,'FullControl','ContainerInherit,ObjectInherit','None','Allow')
+            $acl.AddAccessRule($rule)
+        }
+        Set-Acl -LiteralPath $passwordDirectory -AclObject $acl
+        $passwordFile=Join-Path $passwordDirectory 'password'
+        [IO.File]::WriteAllText($passwordFile,$password,[Text.UTF8Encoding]::new($false))
+        return Invoke-Tool $Program ($Arguments + @('--keystore',$Account.keystore,'--password-file',$passwordFile))
     } finally {
-        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
-        $password = $null
-        $secure.Dispose()
+        try {
+            if ($passwordFile -and (Test-Path -LiteralPath $passwordFile)) {Remove-Item -LiteralPath $passwordFile -Force}
+            if ($passwordDirectory -and (Test-Path -LiteralPath $passwordDirectory)) {Remove-Item -LiteralPath $passwordDirectory -Force}
+        } finally {
+            [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+            $password = $null
+            $secure.Dispose()
+        }
     }
 }
 function Record-Receipt([string]$Label,[object]$Receipt) {
@@ -84,6 +107,7 @@ function Record-Receipt([string]$Label,[object]$Receipt) {
     $state.receipts[$Label] = [ordered]@{
         transactionHash=$Receipt.transactionHash;blockNumber=$Receipt.blockNumber
         gasUsed=$Receipt.gasUsed;effectiveGasPrice=$Receipt.effectiveGasPrice;status=$Receipt.status
+        feePayer=$Receipt.from
     }
     Save-State
 }
@@ -360,7 +384,7 @@ try {
         $artistSignature=Sign-Typed $artist $typed
         $platformSignature=Sign-Typed $platform $typed
         $tuple='('+(($message.Values)-join ',')+')'
-        $paidMint=Send 'paidMint' $state.addresses.sale 'buy((uint256,bytes32,address,address,address,bytes32,bytes32,bytes32,bytes32,uint256,bytes32,uint64,uint64),bytes,bytes,bytes)' @($tuple,$tokenData,$artistSignature,$platformSignature) $MintPriceWei
+        $paidMint=Send 'paidMint' $state.addresses.sale 'buy((uint256,bytes32,address,address,address,bytes32,bytes32,bytes32,bytes32,uint256,bytes32,uint64,uint64),bytes,bytes,bytes)' @($tuple,$tokenData,$platformSignature,$artistSignature) $MintPriceWei
         $artistSignature=$null;$platformSignature=$null
         $state.tokenId=Mint-TokenId $paidMint $state.addresses.sale
         $state.mintPriceWei=$MintPriceWei
@@ -384,6 +408,32 @@ try {
     if ($Stage -eq 'Readback') {
         Require-Addresses
         $state.subscriptionReadback=Subscription-State
+        $state.addresses.roleRegistry=(Read $state.addresses.executor 'roleRegistry()(address)')[0]
+        $rootState=Read $state.addresses.executor 'governanceRootState()(address,bytes32,uint64)'
+        $state.addresses.governanceRoot=$rootState[0]
+        $state.governanceRootState=@{address=$rootState[0];codeHash=$rootState[1];revision=$rootState[2]}
+        $state.addresses.assetPolicyRegistry=(Read $state.addresses.factory 'assetPolicyRegistry()(address)')[0]
+        if ($state.Contains('wallet')) {$state.addresses.splitWallet=$state.wallet}
+        $state.governanceRoles=[ordered]@{}
+        $roleSource=Get-Content -Raw -LiteralPath 'smart-contracts/domains/governance/StreamRoles.sol'
+        foreach ($match in [regex]::Matches($roleSource,'keccak256\("(ROLE_[A-Z_]+)"\)')) {
+            $roleName=$match.Groups[1].Value
+            $roleHash=Cast @('keccak',$roleName)
+            $count=Uint (Read $state.addresses.roleRegistry 'roleHolderCount(bytes32)(uint256)' @($roleHash))[0]
+            if ($count -gt 32) {throw 'Unexpected role enumeration size.'}
+            $holders=@(for ($i=0; $i -lt $count; $i++) {
+                (Read $state.addresses.roleRegistry 'roleHolderAt(bytes32,uint256)(address)' @($roleHash,$i.ToString()))[0]
+            })
+            $state.governanceRoles[$roleName]=$holders
+        }
+        $state.governanceActors=[ordered]@{root=@{address=$rootState[0];controller=(Read $rootState[0] 'controller()(address)')[0]}}
+        $guardianIndex=0
+        foreach ($guardian in $state.governanceRoles.ROLE_TERMINAL_FREEZE_VETO) {
+            $name="guardian$guardianIndex"
+            $state.addresses[$name]=$guardian
+            $state.governanceActors[$name]=@{address=$guardian;controller=(Read $guardian 'controller()(address)')[0]}
+            $guardianIndex++
+        }
         $state.runtimeCodeHashes=[ordered]@{}
         foreach ($name in $state.addresses.Keys) {
             $code=Cast @('code',$state.addresses[$name],'--rpc-url',$RpcUrl)
@@ -395,6 +445,17 @@ try {
         }
         if ($state.Contains('providerRequestId')) {
             $state.providerResult=Read $state.addresses.provider 'providerResultStatus(uint256)(uint8,bytes32,bytes32,bool,bool)' @($state.providerRequestId)
+            $topic=Cast @('keccak','VRFEntropyReceived(uint16,bytes32,uint256,bytes32)')
+            $requestTopic='0x'+(Uint $state.providerRequestId).ToString('x').TrimStart('0').PadLeft(64,'0')
+            $filter=@{address=$state.addresses.provider;fromBlock=$state.receipts.requestEntropy.blockNumber;toBlock='latest';topics=@($topic,$state.requestKey,$requestTopic)}
+            $fulfilled=@(Rpc 'eth_getLogs' @(($filter | ConvertTo-Json -Compress)))
+            if ($fulfilled.Count -gt 1) {throw 'Unexpected duplicate oracle fulfillment event.'}
+            if ($fulfilled.Count -eq 1) {
+                $receipt=Rpc 'eth_getTransactionReceipt' @($fulfilled[0].transactionHash)
+                if (@($receipt.logs | Where-Object {$_.address -ieq $coordinator}).Count -eq 0) {throw 'Fulfillment receipt lacks the upstream coordinator event.'}
+                Record-Receipt 'oracleFulfillment' $receipt
+                $state.oracleFulfillment=@{transactionHash=$receipt.transactionHash;blockNumber=$receipt.blockNumber;providerEventTopic=$topic;requestKey=$state.requestKey;providerRequestId=$state.providerRequestId}
+            }
         }
         if ($state.Contains('tokenId')) {
             $uri=(Read $state.addresses.core 'tokenURI(uint256)(string)' @($state.tokenId))[0]
@@ -423,7 +484,9 @@ try {
     }
     $feesPaid=[bigint]0
     foreach ($receipt in $state.receipts.Values) {
-        $feesPaid+=(Uint $receipt.gasUsed)*(Uint $receipt.effectiveGasPrice)
+        if (-not $receipt.Contains('feePayer') -or $receipt.feePayer -ieq $deployer.address) {
+            $feesPaid+=(Uint $receipt.gasUsed)*(Uint $receipt.effectiveGasPrice)
+        }
     }
     $state.recordedGasFeesPaidWei=$feesPaid.ToString()
     $state.deployerBalanceWei=(Uint (Cast @('balance',$deployer.address,'--rpc-url',$RpcUrl))).ToString()

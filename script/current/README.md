@@ -92,7 +92,9 @@ broadcast receipts under `broadcast/DeployCurrentStack.s.sol/<chainId>/`.
 
 `scripts/run-current-stack-sepolia.ps1` uses public account metadata and encrypted
 keystores under `$env:USERPROFILE/.codex/stream-testnet/`. Password records remain
-protected by Windows DPAPI; plaintext passwords exist only in process memory.
+protected by Windows DPAPI. Signing uses a temporary password file restricted to
+the current Windows identity and SYSTEM, removed in `finally`; password values
+never enter child-process arguments.
 The helper never exports a private key or saves signatures in its public report.
 Use PowerShell 7. Its default invocation performs live reads only:
 
