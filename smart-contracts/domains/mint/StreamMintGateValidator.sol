@@ -5,6 +5,7 @@ import "../../vendor/openzeppelin/IERC165.sol";
 import "../../interfaces/stream/IStreamMintGate.sol";
 import "../../interfaces/stream/IStreamMintManager.sol";
 import "../../interfaces/stream/IStreamMintModuleRegistry.sol";
+import "../../interfaces/stream/IStreamModuleRegistry.sol";
 import "./StreamMintOperationIdentity.sol";
 
 /// @notice Closed-world gate configuration and request validation for StreamMintManager.
@@ -12,6 +13,15 @@ import "./StreamMintOperationIdentity.sol";
 library StreamMintGateValidator {
     uint256 private constant GATE_ERC165_PROBE_GAS = 30_000;
     uint256 private constant MAX_GATE_NULLIFIERS = 16;
+    bytes32 public constant MINT_GATE_MODULE_TYPE = keccak256("6529STREAM_MINT_GATE_V1");
+
+    /// @notice Accepts the canonical registry and the historical mint-registry fixture surface.
+    function isSupportedRegistry(IERC165 registry) external view returns (bool) {
+        return address(registry).code.length != 0 && _supports(registry, type(IERC165).interfaceId)
+            && !_supports(registry, 0xffffffff)
+            && (_supports(registry, type(IStreamModuleRegistry).interfaceId)
+                || _supports(registry, type(IStreamMintModuleRegistry).interfaceId));
+    }
 
     struct GateCall {
         address gate;
@@ -30,7 +40,7 @@ library StreamMintGateValidator {
 
     function validateConfiguration(
         IStreamMintManager.MintGateConfig calldata gateConfig,
-        IStreamMintModuleRegistry moduleRegistry
+        IERC165 moduleRegistry
     ) external view returns (IStreamMintManager.MintGateConfig memory) {
         if (gateConfig.gate == address(0)) {
             if (
@@ -86,7 +96,7 @@ library StreamMintGateValidator {
         uint256 quantity,
         bytes32 boundPolicyHash,
         IStreamMintManager.MintGateConfig memory gateConfig,
-        IStreamMintModuleRegistry moduleRegistry,
+        IERC165 moduleRegistry,
         address executor
     ) external view returns (StreamMintOperationIdentity.MintAuthorization memory) {
         if (batch.authorizationId == bytes32(0)) {
@@ -224,7 +234,7 @@ library StreamMintGateValidator {
     }
 
     function _requireGateStillActive(
-        IStreamMintModuleRegistry moduleRegistry,
+        IERC165 moduleRegistry,
         IStreamMintManager.MintGateConfig memory gateConfig
     ) private view {
         IStreamMintModuleRegistry.MintModuleInfo memory info =
@@ -244,12 +254,15 @@ library StreamMintGateValidator {
         }
     }
 
-    function _requireActiveGateInfo(IStreamMintModuleRegistry moduleRegistry, address gate)
+    function _requireActiveGateInfo(IERC165 moduleRegistry, address gate)
         private
         view
         returns (IStreamMintModuleRegistry.MintModuleInfo memory info)
     {
-        try moduleRegistry.moduleInfo(gate) returns (
+        if (_supports(moduleRegistry, type(IStreamModuleRegistry).interfaceId)) {
+            return _canonicalGateInfo(IStreamModuleRegistry(address(moduleRegistry)), gate);
+        }
+        try IStreamMintModuleRegistry(address(moduleRegistry)).moduleInfo(gate) returns (
             IStreamMintModuleRegistry.MintModuleInfo memory moduleInfo
         ) {
             info = moduleInfo;
@@ -263,6 +276,43 @@ library StreamMintGateValidator {
                 || !_gateAdvertisesInterface(gate)
         ) {
             revert IStreamMintManager.MintGateNotActive(gate);
+        }
+    }
+
+    function _canonicalGateInfo(IStreamModuleRegistry registry, address gate)
+        private
+        view
+        returns (IStreamMintModuleRegistry.MintModuleInfo memory info)
+    {
+        StreamModuleRecord memory record = registry.moduleRecord(gate);
+        if (
+            record.status != ModuleRegistryStatus.ACTIVE
+                || record.moduleType != MINT_GATE_MODULE_TYPE
+                || record.interfaceId != type(IStreamMintGate).interfaceId
+                || record.moduleGasLimit == 0 || record.moduleVersion == bytes32(0)
+                || record.moduleManifestHash == bytes32(0) || record.revision == 0
+                || gate.code.length == 0 || record.runtimeCodeHash != gate.codehash
+                || !_gateAdvertisesInterface(gate)
+        ) revert IStreamMintManager.MintGateNotActive(gate);
+        // Preserve the existing phase ABI without truncating the canonical bytes32 version.
+        // Both full commitments are pinned into the phase's metadata-identity field.
+        info = IStreamMintModuleRegistry.MintModuleInfo({
+            status: IStreamMintModuleRegistry.ModuleStatus.ACTIVE,
+            interfaceId: record.interfaceId,
+            semanticVersion: 0,
+            codehash: record.runtimeCodeHash,
+            metadataHash: keccak256(abi.encode(record.moduleVersion, record.moduleManifestHash)),
+            gasLimit: record.moduleGasLimit
+        });
+    }
+
+    function _supports(IERC165 target, bytes4 interfaceId) private view returns (bool) {
+        try target.supportsInterface{ gas: GATE_ERC165_PROBE_GAS }(interfaceId) returns (
+            bool supported
+        ) {
+            return supported;
+        } catch {
+            return false;
         }
     }
 

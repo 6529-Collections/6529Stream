@@ -70,7 +70,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     /// @notice StreamMintLedger dependency that enforces phase counter consumption.
     IStreamMintLedger public immutable mintLedger;
     /// @notice Registry dependency that approves optional mint gate modules.
-    IStreamMintModuleRegistry public immutable moduleRegistry;
+    IERC165 public immutable moduleRegistry;
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public override nextOperationNonce;
 
@@ -102,11 +102,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
 
-    constructor(
-        IStreamCore core_,
-        IStreamMintLedger mintLedger_,
-        IStreamMintModuleRegistry moduleRegistry_
-    ) {
+    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_) {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
@@ -129,14 +125,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
             revert InvalidMintLedgerContract(address(mintLedger_));
         }
 
-        if (address(moduleRegistry_).code.length == 0) {
-            revert InvalidMintModuleRegistry(address(moduleRegistry_));
-        }
-        try moduleRegistry_.isStreamMintModuleRegistry() returns (bool ok) {
-            if (!ok) {
-                revert InvalidMintModuleRegistry(address(moduleRegistry_));
-            }
-        } catch {
+        if (!StreamMintGateValidator.isSupportedRegistry(moduleRegistry_)) {
             revert InvalidMintModuleRegistry(address(moduleRegistry_));
         }
 
