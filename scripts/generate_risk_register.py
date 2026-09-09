@@ -1027,6 +1027,15 @@ def _strip_historical_size_blocks(relative_path: Path, text: str) -> str:
 def _live_size_scan_text(relative_path: Path, text: str) -> str:
     scan_text = text
     if relative_path == Path("ops/AUTONOMOUS_RUN.md"):
+        if text.startswith("# 6529Stream Delivery State\n"):
+            # The compact delivery state has no historical appendix. Scan every
+            # line, so this format cannot hide stale measurements behind a cutoff.
+            for heading in ("## Current Repository State\n", "## Target\n", "## Integration baseline\n"):
+                if text.count(heading) != 1:
+                    raise checker.RiskRegisterError(
+                        f"delivery state must contain exactly one heading {heading.strip()!r}"
+                    )
+            return text
         for heading in (
             AUTONOMOUS_CURRENT_RUN_HEADING,
             AUTONOMOUS_PACKAGING_HEADING,

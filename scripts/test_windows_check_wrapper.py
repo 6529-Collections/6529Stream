@@ -48,6 +48,7 @@ class WindowsCheckWrapperTests(unittest.TestCase):
             self.assertNotIn(key, current)
         self.assertIn("param([switch]$CurrentStack)", self.check_content)
         self.assertIn('$env:FOUNDRY_PROFILE = "current"', self.check_content)
+        self.assertIn('"scripts\\test_current_stack_deployment_verification.py"', self.check_content)
         self.assertIn(
             '[Environment]::SetEnvironmentVariable("FOUNDRY_PROFILE", $previousFoundryProfile)',
             self.check_content,

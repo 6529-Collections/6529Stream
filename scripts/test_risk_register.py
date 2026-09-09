@@ -788,6 +788,32 @@ class RiskRegisterTests(unittest.TestCase):
 
             generator.validate_live_size_mirrors(root)
 
+    def test_compact_delivery_state_scans_all_lines(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_live_size_mirrors(root)
+            relative = Path("ops/AUTONOMOUS_RUN.md")
+            text = (
+                "# 6529Stream Delivery State\n\n"
+                "## Current Repository State\n\n## Target\n\n## Integration baseline\n"
+                + "\n".join(generator.LIVE_SIZE_MIRROR_REQUIREMENTS[relative])
+                + "\n"
+            )
+            write_text(root / relative, text)
+            generator.validate_live_size_mirrors(root)
+            # A purported historical marker cannot exempt any part of the
+            # compact active state from stale-measurement checking.
+            write_text(root / relative, text + generator.HISTORICAL_SIZE_BLOCK_START
+                       + "\ncurrent 24,128\n" + generator.HISTORICAL_SIZE_BLOCK_END)
+            with self.assertRaisesRegex(generator.checker.RiskRegisterError, "stale current Core-size"):
+                generator.validate_live_size_mirrors(root)
+
+    def test_compact_delivery_state_rejects_missing_scope_heading(self) -> None:
+        with self.assertRaisesRegex(generator.checker.RiskRegisterError, "delivery state.*heading"):
+            generator._live_size_scan_text(
+                Path("ops/AUTONOMOUS_RUN.md"), "# 6529Stream Delivery State\n## Target\n"
+            )
+
     def test_live_size_mirrors_allow_exact_approved_baseline_margin(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
