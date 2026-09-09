@@ -57,6 +57,12 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   48 transactions, about 100.27 million estimated execution gas. Its largest
   transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
 
+The default target-isolated Core size evidence remains
+`release-artifacts/latest/bytecode-release-proof.json`. It describes that
+engineering compilation; the exact Sepolia instance compilation is retained
+separately under `deployments/current/sepolia-2026-09-09/compilation` and must
+not be inferred from the default proof.
+
 ## Active owners
 
 | Owner | Branch | Current output |
