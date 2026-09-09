@@ -129,7 +129,7 @@ The original checkout contains substantial unrelated uncommitted work. Keep
 it intact while useful source is recovered into the current layout. Never
 merge the entire old checkout. Preserve active artist-provenance work.
 
-The September cleanup removed 51 obsolete worktrees and archived 18 superseded
+The September cleanup retired 53 obsolete worktrees and archived 19 superseded
 tasks. Branch references remain. Verified recovery bundles, index and working
 patches, and persistent recovery references preserve the retired dirty artist
 and specification checkouts. Local preservation copies retain ignored notes,
@@ -138,6 +138,10 @@ active artist-provenance task remain intact. The original checkout's 129
 changed tracked paths and 31 untracked paths are also preserved in a verified
 recovery bundle and file copies. Restore that checkout to merged main after
 the RC merge, then remove the finished builder checkouts.
+Six registered worktrees remain: the original checkout, integration,
+three active builders and the immutable review baseline. One retired empty
+directory remains after Windows and automatic approval review rejected its
+removal; it has no Git worktree registration or retained source files.
 
 ## Remaining full-v1 work
 
