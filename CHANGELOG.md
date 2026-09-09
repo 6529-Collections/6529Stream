@@ -24,6 +24,8 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Keep token and registered-scope entropy subjects distinct when requesting
+  randomness; the regression covers unchanged token inputs and both lifecycles.
 - Added current contract/interface navigation and replaced the stale autonomous
   run log with a concise integration and delivery record.
 - Allow the sealed current-stack Executor to admit replacement satellite

@@ -9,7 +9,7 @@ technical and delivery decisions autonomously and use parallel builders.
 | --- | --- |
 | Remote | `6529-Collections/6529Stream` |
 | Active PR branch | `codex/current-stack-integration` |
-| Last merged PR | https://github.com/6529-Collections/6529Stream/pull/737 |
+| Last merged PR | https://github.com/6529-Collections/6529Stream/pull/736 |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/738 |
 | Active PR | https://github.com/6529-Collections/6529Stream/pull/739 |
 | Next issue | TBD |
@@ -64,6 +64,11 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   five cross-checks, including Core authority, all eight pointers, mint policy,
   split/royalty and VRF configuration. The dedicated deployer controls this
   development instance's root and veto-guardian actors.
+- Final independent flow review identified a token/scope identity defect in
+  the optional requester path. The private registered-scope guard is fixed;
+  five isolated regressions pass under normal and via-IR compilation. The
+  earlier Sepolia instance remains historical, with no requester grants.
+  A corrected-source deployment and final validation are now in progress.
 - The pinned real-coordinator fork rehearsal includes all linked libraries:
   48 transactions, about 100.27 million estimated execution gas. Its largest
   transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
@@ -82,7 +87,7 @@ Historical proof details are not duplicated in this active run state.
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
 | Deployment | `codex/sepolia-current-launch` | Exact-source deployment and actual VRF demonstration; exclusive deployer nonce ownership |
 | Product/tooling | `codex/current-default-release-reconciliation` | Full validation and final default artifact reconciliation |
-| Governance/review | `codex/current-slither-review` | Catalog/genesis complete; PR #737 merged; finish #736 and capture current-source static analysis |
+| Governance/review | `codex/current-slither-review` | Both earlier PRs merged; capture fixed-source production static analysis and reconcile reviewed findings |
 
 ## Working method
 

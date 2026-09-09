@@ -1,5 +1,10 @@
 # Current-stack Sepolia instance: 9 September 2026
 
+This is the historical first development instance, before the registered-scope
+identity correction. No requester grants were enabled here. The release
+candidate uses the corrected coordinator source and a separate deployment;
+do not treat this instance as the frozen release candidate.
+
 This directory retains the exact compilation used for the current-stack
 Sepolia deployment. All 45 deployment transactions succeeded and the first
 paid mint created token 1. The real randomness request is waiting for
