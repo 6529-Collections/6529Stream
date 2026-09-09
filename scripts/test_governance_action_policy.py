@@ -18,6 +18,32 @@ class GovernanceActionPolicyCheckerTest(unittest.TestCase):
     def test_repository_policy_passes(self) -> None:
         checker.check(copy.deepcopy(self.policy))
 
+    def test_catalog_snapshot_delegation_cannot_omit_saved_hash_or_validation(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        bootstrap = checker.BOOTSTRAP_PATH.read_text(encoding="utf-8")
+        for before, after in (
+            ("_actionPolicyCatalogHashes[actionId] = _actionPolicy.catalogHash;", ""),
+            ("StreamGovernanceBootstrap.validateExecution(", "differentValidation("),
+            ("scheduledCatalogHash: _actionPolicyCatalogHashes[actionId]", "scheduledCatalogHash: _actionPolicy.catalogHash"),
+        ):
+            with self.subTest(source=before):
+                self.assertIn(before, executor)
+                with self.assertRaisesRegex(ValueError, "snapshot delegation"):
+                    checker.validate_catalog_snapshot_source(executor.replace(before, after), bootstrap)
+
+    def test_catalog_snapshot_helper_must_compare_and_reject_stale_catalog(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        bootstrap = checker.BOOTSTRAP_PATH.read_text(encoding="utf-8")
+        for before, after in (
+            ("currentCatalogHash = actionPolicy.catalogHash;", "currentCatalogHash = bytes32(0);"),
+            ("if (scheduledCatalogHash != currentCatalogHash)", "if (false)"),
+            ("revert IStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(", "ignoreMismatch("),
+        ):
+            with self.subTest(source=before):
+                self.assertIn(before, bootstrap)
+                with self.assertRaisesRegex(ValueError, "snapshot check"):
+                    checker.validate_catalog_snapshot_source(executor, bootstrap.replace(before, after))
+
     def test_unknown_tuple_policy_cannot_be_permissive(self) -> None:
         policy = copy.deepcopy(self.policy)
         policy["runtime_enforcement"]["unknown_tuple_policy"] = "allow"

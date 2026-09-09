@@ -32,6 +32,9 @@ POLICY_LIBRARY_PATH = (
 MANIFEST_PATH = (
     ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceManifest.sol"
 )
+BOOTSTRAP_PATH = (
+    ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceBootstrap.sol"
+)
 
 EXPECTED_ACTION_CLASSES = {
     0: "IMMEDIATE_TIGHTENING",
@@ -114,6 +117,24 @@ def fail(message: str) -> None:
 def require(condition: bool, message: str) -> None:
     if not condition:
         fail(message)
+
+
+def validate_catalog_snapshot_source(executor_source: str, bootstrap_source: str) -> None:
+    executor = re.sub(r"\s+", "", executor_source)
+    bootstrap = re.sub(r"\s+", "", bootstrap_source)
+    require(
+        "_actionPolicyCatalogHashes[actionId]=_actionPolicy.catalogHash;" in executor
+        and "StreamGovernanceBootstrap.validateExecution(" in executor
+        and "scheduledCatalogHash:_actionPolicyCatalogHashes[actionId]" in executor,
+        "scheduled catalog snapshot delegation",
+    )
+    require(
+        "currentCatalogHash=actionPolicy.catalogHash;" in bootstrap
+        and "bytes32scheduledCatalogHash=ctx.scheduledCatalogHash;" in bootstrap
+        and "if(scheduledCatalogHash!=currentCatalogHash)" in bootstrap
+        and "revertIStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(" in bootstrap,
+        "scheduled catalog snapshot check",
+    )
 
 
 def _uint_word(value: int) -> bytes:
@@ -404,9 +425,8 @@ def check(policy: dict) -> None:
         and "function validateCalls(" in policy_source,
         "executor must validate at schedule and execution",
     )
-    require(
-        "GovernanceActionPolicySnapshotMismatch" in executor_source,
-        "scheduled catalog snapshot check",
+    validate_catalog_snapshot_source(
+        executor_source, BOOTSTRAP_PATH.read_text(encoding="utf-8")
     )
     for source_domain in (
         "ACTION_POLICY_ENTRY_V1",

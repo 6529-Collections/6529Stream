@@ -44,6 +44,7 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
             CHECKER.SOURCE_PATH,
             CHECKER.ARCHIVE_SOURCE_PATH,
             CHECKER.REGISTRY_SOURCE_PATH,
+            CHECKER.CURRENT_REGISTRY_SOURCE_PATH,
             *PROVIDER_INTERFACE_PATHS,
         ):
             destination = self.root / relative
@@ -517,6 +518,18 @@ class ArtistSemanticOwnerMatrixTests(unittest.TestCase):
         self._assert_rejected(
             "registry_directory source is absent.*exact source requirement is present"
         )
+
+    def test_current_registry_does_not_complete_v2_components(self) -> None:
+        self.assertTrue((self.root / CHECKER.CURRENT_REGISTRY_SOURCE_PATH).is_file())
+        CHECKER.check(self.root)
+        matrix = self._matrix()
+        self.assertFalse(matrix["source_requirements"]["implementation_authorized"])
+        self.assertTrue(all(not row["source_requirements"]["implementation_authorized"]
+                            for row in matrix["operations"]))
+
+    def test_missing_current_registry_source_fails_closed(self) -> None:
+        (self.root / CHECKER.CURRENT_REGISTRY_SOURCE_PATH).unlink()
+        self._assert_rejected("canonical artist source set drifted")
 
     def test_missing_archive_source_fails_closed(self) -> None:
         (self.root / CHECKER.ARCHIVE_SOURCE_PATH).unlink()
