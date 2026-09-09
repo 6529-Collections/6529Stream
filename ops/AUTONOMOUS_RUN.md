@@ -3,13 +3,28 @@
 Updated 9 September 2026 UTC. The owner authorized the integrator to make
 technical and delivery decisions autonomously and use parallel builders.
 
+## Current Repository State
+
+| Field | Value |
+| --- | --- |
+| Remote | `6529-Collections/6529Stream` |
+| Active PR branch | `codex/current-stack-integration` |
+| Last merged PR | https://github.com/6529-Collections/6529Stream/pull/735 |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/738 |
+| Active PR | TBD |
+| Next issue | TBD |
+| Roadmap file | `ops/ROADMAP.md` |
+| Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
+| State file | `ops/AUTONOMOUS_RUN.md` |
+| Last updated | 2026-09-09 |
+
 ## Target
 
 Deliver a working current-stack contract system and an organized repository
 that developers can navigate, then freeze a tested release candidate and
 launch it on testnet. First complete transaction: collection creation, signed
 native sale, mint through real Core/manager/ledger, split withdrawals, entropy
-fulfillment, rendered metadata, transfer, and burn. Integrate auctions next.
+fulfillment, rendered metadata, transfer, and burn, alongside English auctions.
 The full-v1 backlog remains visible; unsupported features are not complete.
 
 ## Integration baseline
@@ -23,17 +38,22 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   payment, immutable split wallets, replay protection, and atomic rollback.
 - Integrated concrete entropy coordinator and metadata router for current
   Core. Focused external randomness tests use a controllable test provider.
-- Actual whole-stack deployment and transaction tests are being assembled.
-  These are the next acceptance checkpoint, not a completed result.
+- Integrated English auctions, artist-accepted attribution, real royalty
+  resolution, atomic genesis and a VRF v2.5 adapter.
+- Five whole-stack tests passed: paid lifecycle, auction/refunds, failed
+  delivery rollback, delayed operating controls and governance-root rotation.
+- Maximum metadata content is measured through Core. The planner provides
+  12 million router gas; read callers should allow at least 16 million total.
+- Deployment simulation, broader verification and testnet launch remain open.
 
 ## Active owners
 
 | Owner | Branch | Current output |
 | --- | --- | --- |
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
-| Mint and sales | `codex/runtime-sales` | Native sale integrated; English auction implementation next |
-| Entropy and metadata | `codex/entropy-metadata` | Coordinator/router integrated; real VRF v2.5 provider next |
-| Genesis and governance | `codex/genesis-integration` | One-time atomic initialization, actual SystemManifest, deployment planner, executor bytecode size |
+| Deployment | `codex/deploy-current` | Repeatable deployment and executable demonstration |
+| Product review | `codex/current-stack-cross-domain` | Independent cross-domain tests and integration defects |
+| Governance | `codex/catalog-evolution` | Delayed catalog extension so replacement satellites remain governable |
 
 ## Working method
 
@@ -70,12 +90,12 @@ merge the entire old checkout. Preserve active artist-provenance work.
 The September cleanup removed 42 obsolete merged worktrees and archived nine
 superseded tasks. Branch references remain. Local preservation copies retain
 ignored notes and validation transcripts from explicit cleanup candidates.
-Four active delivery checkouts and ten review/recovery checkouts remain.
-Clean up recovery checkouts after their useful work is incorporated or saved.
+Clean up recovery and superseded builder checkouts after their useful work is
+incorporated or saved. A temporary installer repair checkout handles PR #737.
 
 ## Remaining full-v1 work
 
-Artist lifecycle and recovery, royalty resolution, additional payment/sale
+Artist lifecycle and recovery, additional payment/sale
 modes, complete deployment inventory, advanced entropy recovery, and external
 release evidence are not implied by the first working flow. Use
 [ROADMAP.md](ROADMAP.md) and [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md) for

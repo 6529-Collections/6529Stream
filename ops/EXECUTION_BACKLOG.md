@@ -1,5 +1,11 @@
 # 6529Stream Execution Backlog
 
+## Current integration
+
+| Item | Outcome | Gate | Status |
+| --- | --- | --- | --- |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active issue #738 on branch `codex/current-stack-integration` |
+
 Status: historical full-v1 backlog. Current delivery priorities and lane
 ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
 reset prioritizes working current-stack transactions before release paperwork;
@@ -4183,7 +4189,7 @@ unless an external dependency changes.
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
 | `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | PR #683 merged the foundation and #665 closed; PR #686 merged ADR 0017's raise-only target. The #685 slice adds the immutable action/native-value catalog and local/release gates; #684 parameter bindings, #656 exact candidate expansion, deployment/rehearsal evidence, and independent review remain |
-| `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Active PR #687 / issue #684 on branch `codex/governed-parameter-inventory`; the first slice adds the exact 50-binding schema-validated policy inventory and production `--require-complete` gate, but candidate bindings remain `not_available`, guarded-consumer lists remain `planning`, candidate completion is blocked pending #656 structured instance/linked-library reconciliation, and #684/`RISK-GOV-004` stay open |
+| `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Historical PR #687 / issue #684 on branch `codex/governed-parameter-inventory`; the first slice adds the exact 50-binding schema-validated policy inventory and production `--require-complete` gate, but candidate bindings remain `not_available`, guarded-consumer lists remain `planning`, candidate completion is blocked pending #656 structured instance/linked-library reconciliation, and #684/`RISK-GOV-004` stay open |
 | `GOV-013` | Enforce the closed-world Governance V2 target/selector/native-value action policy | C/E/F/G | Implemented by the issue #685 slice: one-way catalog bind, exact tuple/runtime/value checks at schedule and execution, typed value semantics, hostile-route tests, monitoring events, machine catalog, and release-checksum binding. Exact candidate deployment/rehearsal/review evidence remains blocked on #656, so `RISK-GOV-003` stays High and non-waivable |
 
 ### Integration Readiness
