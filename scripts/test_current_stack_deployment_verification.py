@@ -70,6 +70,24 @@ class BytecodeTests(unittest.TestCase):
         with self.assertRaisesRegex(verifier.VerificationError, "self-address differs"):
             verifier.compare_runtime(item, actual, SENDER, {})
 
+    def test_via_ir_library_deploy_address_is_checked_not_masked(self):
+        item = contract("307f" + "00" * 32 + "14", kind="library",
+                        immutables={"library_deploy_address": [{"start": 2, "length": 32}]})
+        actual = b"\x30\x7f" + bytes(12) + verifier.hex_bytes(ADDRESS) + b"\x14"
+        record = verifier.compare_runtime(item, actual, ADDRESS, {})
+        self.assertTrue(record["library_self_address"]["verified"])
+        self.assertEqual(record["immutable_observations"], [])
+        self.assertEqual(record["non_immutable_bytes_verified"], len(actual))
+        with self.assertRaisesRegex(verifier.VerificationError, "self-address differs"):
+            verifier.compare_runtime(item, actual, SENDER, {})
+
+    def test_pure_library_without_self_guard_is_compared_exactly(self):
+        item = contract(kind="library")
+        record = verifier.compare_runtime(item, bytes.fromhex("600100"), ADDRESS, {})
+        self.assertIsNone(record["library_self_address"])
+        with self.assertRaisesRegex(verifier.VerificationError, "outside immutable"):
+            verifier.compare_runtime(item, bytes.fromhex("600200"), ADDRESS, {})
+
 
 class DeploymentTests(unittest.TestCase):
     def setUp(self):

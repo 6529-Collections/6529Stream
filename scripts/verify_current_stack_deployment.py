@@ -96,21 +96,34 @@ def compare_runtime(contract: dict, actual: bytes, deployed_address: str,
     expected, links = linked_bytes(contract["evm"]["deployedBytecode"], libraries)
     require(len(actual) == len(expected) and bool(actual), "Runtime length differs from compiler")
     expected = bytearray(expected)
+    immutable_ranges = references(
+        contract["evm"]["deployedBytecode"].get("immutableReferences", {}), len(expected))
     self_fixup = None
-    if contract["kind"] == "library":
-        require(expected[:21] == b"\x73" + bytes(20), "Unknown Solidity library self-address encoding")
+    self_ranges = []
+    if "library_deploy_address" in immutable_ranges:
+        require(contract["kind"] == "library", "Library deploy-address reference on a non-library")
+        self_ranges = immutable_ranges.pop("library_deploy_address")
+        for start, length in self_ranges:
+            require(length == 32 and expected[start:start + length] == bytes(32),
+                    "Unknown compiler library deploy-address encoding")
+            expected[start:start + length] = bytes(12) + hex_bytes(deployed_address)
+            require(actual[start:start + length] == expected[start:start + length],
+                    "Solidity library self-address differs")
+        self_fixup = {"encoding": "compiler library_deploy_address immutable",
+                      "references": [{"offset": start, "length": length} for start, length in self_ranges],
+                      "address": address(deployed_address), "verified": True}
+    elif contract["kind"] == "library" and expected[:21] == b"\x73" + bytes(20):
+        self_ranges = [(1, 20)]
         expected[1:21] = hex_bytes(deployed_address)
         self_fixup = {"offset": 1, "length": 20, "address": address(deployed_address),
                       "verified": actual[1:21] == expected[1:21]}
         require(self_fixup["verified"], "Solidity library self-address differs")
-    immutable_ranges = references(
-        contract["evm"]["deployedBytecode"].get("immutableReferences", {}), len(expected))
     link_ranges = references(contract["evm"]["deployedBytecode"].get("linkReferences", {}),
                              len(expected), links=True)
     reserved = {i for positions in link_ranges.values() for start, length in positions
                 for i in range(start, start + length)}
-    if self_fixup:
-        reserved.update(range(1, 21))
+    for start, length in self_ranges:
+        reserved.update(range(start, start + length))
     observations = []
     masked = set()
     for ast_id, positions in immutable_ranges.items():
