@@ -87,3 +87,76 @@ separate post-genesis transaction. Otherwise the nominated artist must call
 `acceptArtist` or provide its EIP-712 acceptance signature before any sale or
 auction can mint. The deployment returns addresses and leaves standard Foundry
 broadcast receipts under `broadcast/DeployCurrentStack.s.sol/<chainId>/`.
+
+### Dedicated Sepolia account workflow
+
+`scripts/run-current-stack-sepolia.ps1` uses public account metadata and encrypted
+keystores under `$env:USERPROFILE/.codex/stream-testnet/`. Password records remain
+protected by Windows DPAPI; plaintext passwords exist only in process memory.
+The helper never exports a private key or saves signatures in its public report.
+Use PowerShell 7. Its default invocation performs live reads only:
+
+```powershell
+pwsh -NoProfile -File scripts/run-current-stack-sepolia.ps1 -Stage Preflight
+```
+
+It verifies the actual coordinator and proving key, reads recent base fees and
+the deployer balance, and calculates a full-flow budget before allowing any
+transaction. The expected fee budget includes a modest reserve; the per-call
+maximum fee remains a separate bound. The default demo mint price is 0.000001
+Sepolia ETH, and the requested native subscription deposit is 0.005 Sepolia ETH.
+`-MaxFeePerGasWei`, `-PriorityFeeWei`, `-SubscriptionFundingWei`, and `-MintPriceWei`
+allow explicit public operating values. None is a signing secret.
+
+After funding, run these stages in order with `-Broadcast`:
+
+| Stage | Result |
+| --- | --- |
+| `Subscription` | Creates the subscription, reads its actual receipt ID, funds it, verifies ownership and native balance |
+| `Deploy` | Runs the real VRF stack simulation, checks every gas limit, checkpoints the exact plan, deploys, and saves public addresses and receipts |
+| `ResumeDeploy` | Resumes the checkpointed Forge transaction sequence, charging the estimate only for outstanding transactions; recovers a completed run without signing |
+| `Activate` | Registers the adapter as a consumer and relays the artist's signed acceptance |
+| `Mint` | Makes the low-price signed purchase and submits a real VRF request |
+| `Readback` | Reads provider delivery, final metadata, royalties, subscription state, and live runtime code hashes; no `-Broadcast` needed |
+| `Settle` | After final metadata, releases both shares and transfers the token to the artist |
+
+If the paid mint succeeds but the request does not, `RequestEntropy` resumes from
+the recorded token. Each confirmed transaction is retained immediately in
+`$env:TEMP/6529stream-current-sepolia/state.json`, without raw signing arguments.
+For an interrupted Forge deployment, retain its standard broadcast files and use
+`ResumeDeploy` on the same source commit. The helper verifies each recorded
+transaction's sender, nonce, target, value, and calldata hash. A fresh `Deploy`
+is blocked by an existing attempt or broadcast file. If the broadcast file is
+missing, recover the receipts before continuing. Only one process should own the
+dedicated deployer's nonce sequence.
+
+Subscription IDs incorporate a block hash. The live helper therefore waits for
+the actual `SubscriptionCreated` receipt before constructing deployment calldata.
+It never uses a subscription ID predicted by a script simulation.
+
+`RehearseSepoliaCurrentStack.s.sol` separately tests deployment against the real
+coordinator on a pinned fork. It grants simulated ETH, creates and funds a fork
+subscription, deploys the stack, adds the consumer, and verifies the readbacks.
+It does not forge a VRF response or claim an oracle fulfillment. Run it with a
+Sepolia `--fork-url` and `--fork-block-number`, `--via-ir --isolate`, and the three
+public `STREAM_DEPLOYER`, `STREAM_ARTIST`, and `STREAM_PLATFORM_SIGNER` values.
+This rehearsal entry point is for dry runs only; use `DeployCurrentStack` through
+the helper for a real broadcast.
+
+Coordinator and key parameters come from the
+[Chainlink Sepolia network configuration](https://docs.chain.link/vrf/v2-5/supported-networks#ethereum-sepolia-testnet).
+The helper checks the deployed coordinator's `s_config` and `s_provingKeys` before
+use: 3 confirmations, 1,500,000 callback gas, a 2,500,000 upstream maximum, and
+native subscription billing.
+
+The complete fork rehearsal at Sepolia block 11670719 includes 48 transactions
+and all linked libraries: 100,267,574 estimated execution gas before the demo.
+Its largest transaction gas limit at the helper's 120% multiplier is 16,175,894,
+below Sepolia's 16,777,216 cap. These are simulation measurements, not live
+receipts. Each real deployment is simulated again against its actual subscription.
+
+Run the helper's offline receipt/recovery regression checks with:
+
+```powershell
+pwsh -NoProfile -File scripts/test_current_stack_sepolia.ps1
+```

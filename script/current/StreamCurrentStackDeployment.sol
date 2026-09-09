@@ -100,14 +100,22 @@ abstract contract StreamCurrentStackDeployment {
             "urn:6529stream:development:entropy",
             keccak256("development entropy module")
         );
-        router = new StreamMetadataRouter(
-            address(core),
-            address(executor),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:development:metadata",
-            keccak256("development metadata module"),
-            artistRegistry
+        // Keep the broadcast initcode identical to the named compiler artifact.
+        // A specialized `new` expression can otherwise defeat Forge's constructor decoder.
+        bytes memory routerInitcode = bytes.concat(
+            type(StreamMetadataRouter).creationCode,
+            abi.encode(
+                address(core), address(executor), DEPLOYMENT_HASH,
+                "urn:6529stream:development:metadata",
+                keccak256("development metadata module"), artistRegistry
+            )
         );
+        address deployedRouter;
+        assembly ("memory-safe") {
+            deployedRouter := create(0, add(routerInitcode, 32), mload(routerInitcode))
+        }
+        require(deployedRouter != address(0), "metadata deployment failed");
+        router = StreamMetadataRouter(deployedRouter);
         if (localDevelopment) {
             provider = new DevelopmentEntropyProvider(address(entropy), deployer);
         } else {
