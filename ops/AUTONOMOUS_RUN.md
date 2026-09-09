@@ -11,7 +11,7 @@ technical and delivery decisions autonomously and use parallel builders.
 | Active PR branch | `codex/current-stack-integration` |
 | Last merged PR | https://github.com/6529-Collections/6529Stream/pull/737 |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/738 |
-| Active PR | TBD |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/739 |
 | Next issue | TBD |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
