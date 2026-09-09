@@ -5,7 +5,6 @@
 .gitignore text eol=lf
 .github/CODEOWNERS text eol=lf
 release-artifacts/** text eol=lf
-deployments/current/*/compilation/** linguist-generated=true
 
 *.sol text eol=lf
 *.md text eol=lf

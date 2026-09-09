@@ -62,6 +62,7 @@ The default target-isolated Core size evidence remains
 engineering compilation; the exact Sepolia instance compilation is retained
 separately under `deployments/current/sepolia-2026-09-09/compilation` and must
 not be inferred from the default proof.
+Historical proof details are not duplicated in this active run state.
 
 ## Active owners
 
