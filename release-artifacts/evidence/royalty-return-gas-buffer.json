@@ -20,8 +20,8 @@
     },
     {
       "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-      "sha256": "sha256:ed1b67c0b42dc9f43dccfa22524eb694ccb93a9ee7672c02b66e8b2d2a824c24",
-      "size_bytes": 25920
+      "sha256": "sha256:535c6a381b5045bac997b83a7ddf1b8ff95f93454da40dc69898f32c8053baf9",
+      "size_bytes": 26116
     },
     {
       "path": "smart-contracts/core/StreamCore.sol",
@@ -45,8 +45,8 @@
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec",
-      "size_bytes": 34850
+      "sha256": "sha256:cc2d423183cd30822e0132fba78056115d1dd476dc3ee05268b5f637ad170cf4",
+      "size_bytes": 33901
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",

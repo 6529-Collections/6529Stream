@@ -35,8 +35,8 @@
     },
     {
       "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:ee1786eae8e3aa2b58ccc5f1d9d461407f401c0f6a873c8d1bd451564c7a84ec",
-      "size_bytes": 34850
+      "sha256": "sha256:cc2d423183cd30822e0132fba78056115d1dd476dc3ee05268b5f637ad170cf4",
+      "size_bytes": 33901
     },
     {
       "path": "docs/stream-entropy-coordinator.md",

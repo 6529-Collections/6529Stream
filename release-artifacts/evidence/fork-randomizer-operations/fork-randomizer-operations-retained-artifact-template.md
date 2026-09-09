@@ -55,9 +55,9 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:725d1947fc78126018ca2b4dce5a3bcc3ec9f36f6ab005cbc28c5c4de01c838f`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:f18b1b4cf58f6e67786b2080a25e55a0f25d4227d914914d5d76b4ec262ecd44`
-- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:e1aecf3995a0d693b3393ace3cd0800b068396d20626ce05c30840c2ed04f842`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:ae9a3efc67041c4475edbe8f2584b1cf5a4abd3627bcf4a2a4c38289744b1343`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:89ce751bf16c885d0ca6b6a9e8499653d4e2e435952ca8b719ce511c7c0eba6f`
+- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:3b49b1d397ebfb047b313fb31ddaa5f810eb38e0b30bacc588ad2f05ab0f9955`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
 - Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`
@@ -109,3 +109,8 @@ python scripts/generate_release_checksums.py --check
 - Public beta remains blocked on the incomplete rows listed in the generated
   public-beta blocker report, including external audit, deployment/testnet
   rehearsal review, verified address, and explorer verification evidence.
+
+Current release reconciliation refreshes generated manifest, address-book, and
+ABI references only. The historical source commit, raw broadcast, provider
+placeholders, and observations remain unchanged. This pending record does not
+attest deployment or operation of the current stack.
