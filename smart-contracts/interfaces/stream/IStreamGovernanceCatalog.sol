@@ -20,7 +20,7 @@ interface IStreamGovernanceCatalog {
         uint256 newEntryCount
     );
 
-    /// @notice Append 1–128 entries, with a total catalog limit of 1,024.
+    /// @notice Append 1–64 entries, with a total catalog limit of 1,024.
     /// @dev Entries sort by keccak256(abi.encode(actionClass,target,selector)).
     ///      Requires a sealed Executor and an ordinary root-proposed class-3
     ///      batch consisting exactly of this call then manifest publication.

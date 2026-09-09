@@ -8,7 +8,9 @@ extensions. Existing entries, exact-target authority, native-value restrictions,
 and ordinary action delays remain unchanged.
 
 The initial catalog is revision zero. A root-proposed class-3 action, delayed
-at least 48 hours, may append 1–128 entries to a catalog of at most 1,024 entries.
+at least 48 hours, may append 1–64 entries to a catalog of at most 1,024 entries.
+This fits the existing 24,575-byte calldata publication even with the required
+manifest tail and its maximum 2,048-byte URI.
 Each addition retains the existing entry schema and must name an exact action
 class, target, selector, live code hash, profile identity, call type and value
 policy. Additions sort by the existing policy key; duplicate keys, including

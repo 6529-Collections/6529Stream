@@ -280,13 +280,13 @@ contract StreamGovernanceCatalogTest is StreamGovernanceBootstrapHarness {
     }
 
     function testExtensionBoundsAndSortingAreEnforced() public {
-        GovernanceActionPolicyEntry[] memory entries = new GovernanceActionPolicyEntry[](129);
+        GovernanceActionPolicyEntry[] memory entries = new GovernanceActionPolicyEntry[](65);
         (, bytes32 root, uint256 count,) = a.executor.governanceActionPolicyState();
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamGovernanceCatalog.GovernanceCatalogExtensionSize.selector,
-                uint256(129),
-                count + 129
+                uint256(65),
+                count + 65
             )
         );
         StreamGovernanceActionPolicy.extensionTransition(
@@ -325,6 +325,40 @@ contract StreamGovernanceCatalogTest is StreamGovernanceBootstrapHarness {
         _execute(_configuration(replacement, 5), 1);
         _execute(_configuration(second, 8), 1);
         require(replacement.value() == 5 && second.value() == 8, "both additions usable");
+    }
+
+    function testMaximumExtensionAndManifestURIFitPublicationEnvelope() public {
+        GovernanceActionPolicyEntry[] memory entries = new GovernanceActionPolicyEntry[](64);
+        for (uint256 i; i < entries.length; ++i) {
+            entries[i] = _zeroPolicy(
+                1, address(replacement), bytes4(uint32(0x80000000 + i)), keccak256("EXACT_ROW")
+            );
+        }
+        _sortActionPolicies(entries);
+        Proposal memory p = _extension(entries);
+        bytes memory uri = new bytes(2_048);
+        for (uint256 i; i < uri.length; ++i) {
+            uri[i] = 0x61;
+        }
+        StreamGovernanceBootstrapManifestMock.StreamSystemManifestUpdate memory update =
+            StreamGovernanceBootstrapManifestMock.StreamSystemManifestUpdate({
+                manifestHash: a.manifestHash,
+                manifestURI: string(uri),
+                eventCatalogHash: keccak256("events"),
+                compatibilityMatrixHash: keccak256("compatibility"),
+                numericIdCatalogHash: keccak256("ids"),
+                schemaCatalogHash: keccak256("schema"),
+                canonicalizationCatalogHash: keccak256("canonical"),
+                specBundleHash: keccak256("spec"),
+                reconstructionClientHash: keccak256("client")
+            });
+        p.data[1] = abi.encodeCall(a.manifest.publishStreamSystemManifest, (a.payloadRoot, update));
+        p.calls[1].callDataHash = keccak256(p.data[1]);
+        require(abi.encode(p.data).length <= 24_575, "full maximum-size batch fits SSTORE2");
+        (,, uint256 beforeCount,) = a.executor.governanceActionPolicyState();
+        _execute(p, 3);
+        (,, uint256 afterCount, uint64 revision) = a.executor.governanceActionPolicyState();
+        require(afterCount == beforeCount + 64 && revision == 1, "maximum extension admitted");
     }
 
     function testRequiresFinalManifestAndRejectsWrongClass() public {

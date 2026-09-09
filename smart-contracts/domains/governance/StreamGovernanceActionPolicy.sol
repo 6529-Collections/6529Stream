@@ -80,7 +80,9 @@ library StreamGovernanceActionPolicy {
         returns (bytes32 catalogHash, bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
     {
         uint256 newCount = oldEntryCount + additions.length;
-        if (additions.length == 0 || additions.length > 128 || newCount > MAX_ACTION_POLICY_ENTRIES)
+        // 64 rows leave room for the required manifest tail, including its
+        // maximum URI, inside the existing 24,575-byte calldata publication.
+        if (additions.length == 0 || additions.length > 64 || newCount > MAX_ACTION_POLICY_ENTRIES)
         {
             revert IStreamGovernanceCatalog.GovernanceCatalogExtensionSize(
                 additions.length, newCount
