@@ -69,6 +69,14 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   five isolated regressions pass under normal and via-IR compilation. The
   earlier Sepolia instance remains historical, with no requester grants.
   A corrected-source deployment and final validation are now in progress.
+- Fresh fixed-source Slither capture completed in 87 seconds, covering all
+  143 production Solidity files. The baseline retains 44 detector rows:
+  30 Open and 14 reviewed false positives. Excluding test/script compilation
+  from this production scan does not suppress any production finding.
+- Corrected-deployment funding preflight estimates 1.24 ETH total for the
+  replacement stack, demonstration and subscription reserve. An additional
+  1.20 Sepolia ETH has been requested; deployment retains exclusive nonce
+  ownership and separate compiler, broadcast and operational state paths.
 - The pinned real-coordinator fork rehearsal includes all linked libraries:
   48 transactions, about 100.27 million estimated execution gas. Its largest
   transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
@@ -87,7 +95,7 @@ Historical proof details are not duplicated in this active run state.
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
 | Deployment | `codex/sepolia-current-launch` | Exact-source deployment and actual VRF demonstration; exclusive deployer nonce ownership |
 | Product/tooling | `codex/current-default-release-reconciliation` | Full validation and final default artifact reconciliation |
-| Governance/review | `codex/current-slither-review` | Both earlier PRs merged; capture fixed-source production static analysis and reconcile reviewed findings |
+| Governance/review | `codex/current-slither-review` | Both earlier PRs merged; fixed-source static analysis complete; retire finished worktrees |
 
 ## Working method
 
