@@ -672,6 +672,8 @@ DEFAULT_COVERED_PATHS = [
     Path("smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol"),
     Path("smart-contracts/domains/artist/StreamArtistArchiveV2.sol"),
     Path("smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol"),
+    Path("smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol"),
+    Path("smart-contracts/interfaces/stream/IStreamCollectionArtistRegistry.sol"),
     Path("smart-contracts/domains/artist/StreamArtistRegistryV2.sol"),
     Path("smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol"),
     Path("docs/audit-package.md"),

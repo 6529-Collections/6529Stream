@@ -144,11 +144,12 @@ Static-analysis review inputs:
 - [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
   normalized first-party production high/medium finding set;
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
-  mirror. The 32 retained rows comprise 2 High and 30 Medium findings: 30 remain
-  Open (zero confirmed gaps, six design-review rows, and 24 pending
-  dispositions), while two `StreamSplitWallet` `incorrect-equality` rows have
-  focused, source-traced False Positive dispositions. Those dispositions do
-  not waive any other row or promote protocol maturity.
+  mirror. The 44 retained rows comprise 4 High and 40 Medium findings: 30 remain
+  Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24
+  pending dispositions). Fourteen rows have source-traced False Positive
+  dispositions (2 High, 12 Medium), including the two previously reviewed
+  `StreamSplitWallet` equality rows. Those dispositions do not waive any Open
+  row or promote protocol maturity.
 - The bounded assembly call in `StreamGovernanceExecutor` makes its
   proposal-selected native-value authority invisible to Slither without
   removing that authority. The generated risk register therefore preserves it
@@ -297,10 +298,11 @@ status lives in
 Local evidence and accepted non-Slither dispositions are separate from
 unresolved production blockers:
 
-- The normalized first-party production Slither inventory retains 32 rows:
-  30 remain Open and two Medium `incorrect-equality` rows have focused False
-  Positive dispositions. Test, vendored, and script findings are reported
-  outside that release-blocking set; they are not used to accept or suppress
+- The normalized first-party production Slither inventory retains 44 rows:
+  30 remain Open and 14 have focused False Positive dispositions. The live
+  scan compiles every production source and excludes test/script compilation;
+  vendored findings remain outside the normalized first-party set. Separate
+  historical test/script diagnostics are outside that release-blocking set; they are not used to accept or suppress
   any retained production row or the separately tracked `RISK-GOV-003`
   authority.
 - Local Anvil ceremony, randomizer operations, and release signature evidence

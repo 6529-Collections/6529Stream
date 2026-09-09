@@ -62,6 +62,8 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
         "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
         "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+        "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol",
+        "smart-contracts/interfaces/stream/IStreamCollectionArtistRegistry.sol",
         "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
         "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
         *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
@@ -76,11 +78,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 299
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 299
+    len(TEST_CANONICAL_COVERED_PATHS) != 301
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 301
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 299 unique coverage roots"
+        "canonical verifier fixtures require exactly 301 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("scripts/generate_risk_register.py"),
@@ -753,12 +755,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 299)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 299)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 299)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 301)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 301)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 301)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "5ca078dab8957bb5cede1d5c121b872c59eb616cc17e103d34f1cc563d90f2d7",
+            "7c60e452447a70bca1eb09e2fbb48143d18f68903495c4c694e9a92e6dd1b03d",
         )
         self.assertIn(
             "scripts/test_windows_ci_wrapper.py",
@@ -1532,8 +1534,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 128_549,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "ff688fdeab7ddb1c33596a8aaddf6af93cb3aa3c29c563fb16987c714828478c",
-                49_512,
+                "77dbd34317af8828cc7dcd3f4cdd789776d96b22865ddc2315386edfb7a4fb17",
+                49_634,
             ),
         }
         self.assertEqual(
@@ -2433,8 +2435,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 475)
-        self.assertEqual(summary.checksum_manifest_records, 475)
+        self.assertEqual(summary.checksum_entries, 477)
+        self.assertEqual(summary.checksum_manifest_records, 477)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2446,8 +2448,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 475)
-        self.assertEqual(data["checksum_manifest_records"], 475)
+        self.assertEqual(data["checksum_entries"], 477)
+        self.assertEqual(data["checksum_manifest_records"], 477)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

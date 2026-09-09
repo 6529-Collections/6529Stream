@@ -1672,8 +1672,11 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 299 configured roots,
-expanding to exactly 475 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 301 configured roots,
+expanding to exactly 477 covered-file entries in each checksum index. The current
+collection artist registry and its interface are explicit roots so the immutable
+verifier sees the same artist source inventory as the working checkout. This
+does not authorize the unimplemented V2 artist suite. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and

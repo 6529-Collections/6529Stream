@@ -156,7 +156,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 299)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 301)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3151,11 +3151,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 299)
-        self.assertEqual(len(manifest["files"]), 475)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 301)
+        self.assertEqual(len(manifest["files"]), 477)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            475,
+            477,
         )
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
@@ -3403,6 +3403,8 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path(
                 "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol"
             ),
+            Path("smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol"),
+            Path("smart-contracts/interfaces/stream/IStreamCollectionArtistRegistry.sol"),
             Path("smart-contracts/domains/artist/StreamArtistRegistryV2.sol"),
             Path(
                 "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol"
@@ -3548,7 +3550,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             files,
         )
 
-        self.assertEqual(len(classifications), 475)
+        self.assertEqual(len(classifications), 477)
         self.assertEqual(classifications[".gitattributes"].classification, "lf")
         self.assertEqual(classifications["scripts/check.sh"].classification, "lf")
         self.assertEqual(classifications["scripts/check.ps1"].classification, "crlf")

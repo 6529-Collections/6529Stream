@@ -248,18 +248,19 @@ contributors who start from the README.
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 32 retained
-  findings: 2 High and 30 Medium. Thirty rows remain Open: zero confirmed
-  gaps, six design-review rows, and 24 pending dispositions. Two
-  `StreamSplitWallet` `incorrect-equality` rows have narrow False Positive
-  dispositions backed by focused boundary tests. The machine-readable source is
+- The normalized first-party production Slither baseline contains 44 retained
+  findings: 4 High and 40 Medium. Thirty rows remain Open (2 High, 28 Medium):
+  zero confirmed gaps, six design-review rows, and 24 pending dispositions.
+  Fourteen rows have narrow False Positive dispositions (2 High, 12 Medium),
+  including the two previously reviewed `StreamSplitWallet` equality rows. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue
   [#658](https://github.com/6529-Collections/6529Stream/issues/658) owns the
   blocker. CI checks metadata on every default run and executes a dedicated
-  exact normalized high/medium drift gate; low, informational, optimization,
-  vendored, test, and script findings remain reported separately and do not
-  reduce the first-party blocker.
+  exact normalized high/medium drift gate over all production source inputs.
+  Low, informational, optimization, and vendored findings are outside that
+  normalized set; test/script compilation is excluded from the live scan.
+  Those boundaries do not reduce the first-party blocker.
 - Bounded assembly in `StreamGovernanceExecutor` prevents governed-call
   returndata bombs but makes the proposal-selected native-value call invisible
   to Slither's `arbitrary-send-eth` detector. That analyzer disappearance is not
