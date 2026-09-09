@@ -71,6 +71,7 @@ try {
     ConvertTo-SecureString 'public-test-sentinel' -AsPlainText -Force | ConvertFrom-SecureString | Set-Content -LiteralPath $passwordRecord
     $Broadcast=$true
     $script:observedPasswordFile=$null
+    $script:failSignerProbe=$false
     function Invoke-Tool([string]$Program,[string[]]$Arguments) {
         Check ('--password' -notin $Arguments) 'A plaintext password must never enter argv.'
         $index=[array]::IndexOf($Arguments,'--password-file')
@@ -78,11 +79,16 @@ try {
         $script:observedPasswordFile=$Arguments[$index+1]
         Check ((Get-Acl -LiteralPath (Split-Path -Parent $script:observedPasswordFile)).AreAccessRulesProtected) 'Password directory must reject inherited access.'
         Check ((Get-Content -Raw -LiteralPath $script:observedPasswordFile) -eq 'public-test-sentinel') 'Password file must preserve exact content.'
+        if ($script:failSignerProbe) {throw 'Expected signer tool failure.'}
         return 'probe-succeeded'
     }
     $probe=With-Signer @{passwordRecord=$passwordRecord;keystore='unused-test-keystore'} 'fake' @('wallet','address')
     Check ($probe -eq 'probe-succeeded') 'Signer probe must complete.'
     Check (-not (Test-Path -LiteralPath $script:observedPasswordFile)) 'Password file must be deleted.'
     Check (-not (Test-Path -LiteralPath (Split-Path -Parent $script:observedPasswordFile))) 'Password directory must be deleted.'
+    $script:failSignerProbe=$true
+    Reject {With-Signer @{passwordRecord=$passwordRecord;keystore='unused-test-keystore'} 'fake' @('wallet','address')} 'Signer failure must propagate.'
+    Check (-not (Test-Path -LiteralPath $script:observedPasswordFile)) 'Failed signer must remove its password file.'
+    Check (-not (Test-Path -LiteralPath (Split-Path -Parent $script:observedPasswordFile))) 'Failed signer must remove its password directory.'
 } finally {Remove-Item -LiteralPath $passwordRecord -ErrorAction SilentlyContinue}
 Write-Output 'PASS: receipt token identity, duplicate rejection, fresh-attempt guards, exact-plan resume, paid-gas exclusion and transaction cap.'
