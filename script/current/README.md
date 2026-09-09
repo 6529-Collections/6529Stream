@@ -148,6 +148,11 @@ those same paths for its later stages and recovery. Relative compiler and
 broadcast paths resolve from the repository root. Archive an earlier deployment's
 complete compiler outputs, build-info, broadcast files, and public state before
 compiling a corrected candidate; earlier addresses remain historical evidence.
+`-DeploymentGasEstimateMultiplier` controls the explicit deployment gas margin
+(default 120 percent). Use the same value when resuming. A complete simulation
+must show every buffered limit below the chain cap before the helper signs;
+the corrected candidate uses 115 percent because its exact genesis estimate
+fits the cap with that margin.
 
 Subscription IDs incorporate a block hash. The live helper therefore waits for
 the actual `SubscriptionCreated` receipt before constructing deployment calldata.

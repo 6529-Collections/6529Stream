@@ -7,6 +7,7 @@ param(
     [string]$ArtifactDirectory = 'out/current-stack-sepolia',
     [string]$CacheDirectory = 'cache/current-stack-sepolia',
     [string]$BroadcastDirectory = 'broadcast',
+    [ValidateRange(100,200)][int]$DeploymentGasEstimateMultiplier = 120,
     [string]$SubscriptionFundingWei = '1200000000000000000',
     [string]$MintPriceWei = '1000000000000',
     [string]$MaxFeePerGasWei = '0',
@@ -212,7 +213,7 @@ try {
         Validate-RecordedDeployment $recorded
         $remaining=Remaining-DeploymentGas $recorded
         $receiptOnlyRecovery=$remaining -eq 0
-        $remainingGasBudget=[bigint]::Divide(($remaining*100+119),120)+3000000
+        $remainingGasBudget=[bigint]::Divide(($remaining*100+$DeploymentGasEstimateMultiplier-1),$DeploymentGasEstimateMultiplier)+3000000
     }
     # Chainlink gates fulfillment on the gas lane's maximum-cost reserve, not the
     # current transaction gas price. The 300k allowance covers verification and
@@ -236,6 +237,7 @@ try {
         subscriptionReserveTargetWei=$subscriptionTarget.ToString();minimumVRFReserveWei=$minimumVRFReserve.ToString()
         recentMaximumBaseFeeWei=$recentMaximum.ToString();recentPriorityFeeSamples=$history.reward
         shortfallWei=[bigint]::Max(0,$required-$balance).ToString();requestedStage=$Stage;broadcast=[bool]$Broadcast
+        deploymentGasEstimateMultiplier=$DeploymentGasEstimateMultiplier
     }
     Save-State
     if ((-not $Broadcast -and $Stage -ne 'Readback') -or $Stage -eq 'Preflight') {
@@ -296,11 +298,14 @@ try {
             $forgeArguments = @('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
                 '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
                 '--rpc-url',$RpcUrl,'--sender',$deployer.address,'--slow',
-                '--with-gas-price',$maxFee.ToString(),'--priority-gas-price',$tip.ToString(),'--gas-estimate-multiplier','120'
+                '--with-gas-price',$maxFee.ToString(),'--priority-gas-price',$tip.ToString(),'--gas-estimate-multiplier',$DeploymentGasEstimateMultiplier.ToString()
             )
             $sourceCommit=Invoke-Tool 'git' @('rev-parse','HEAD')
             if ($Stage -eq 'ResumeDeploy') {
                 if ($sourceCommit -ne $state.deploymentAttempt.sourceCommit) { throw 'Resume must use the checkpoint source commit.' }
+                if ($state.deploymentAttempt.Contains('gasEstimateMultiplier') -and $state.deploymentAttempt.gasEstimateMultiplier -ne $DeploymentGasEstimateMultiplier) {
+                    throw 'Resume must use the checkpoint deployment gas multiplier.'
+                }
                 $recorded=Get-Content -Raw -LiteralPath $broadcastFile | ConvertFrom-Json -AsHashtable
                 Validate-RecordedDeployment $recorded
                 if (-not $receiptOnlyRecovery) {
@@ -316,7 +321,7 @@ try {
                 if ($gas -gt $transactionGasCap) {throw 'Deployment transaction exceeds Sepolia gas cap.'}
                 $estimatedTotal += $gas
             }
-            $expectedGas = [bigint]::Divide(($estimatedTotal*100+119),120)+3000000
+            $expectedGas = [bigint]::Divide(($estimatedTotal*100+$DeploymentGasEstimateMultiplier-1),$DeploymentGasEstimateMultiplier)+3000000
             if ([bigint]::Divide(($expectedGas*$expectedFee*110+99),100)+(Uint $MintPriceWei) -gt $balance) {
                 throw 'Exact deployment simulation exceeds the complete-flow funding budget.'
             }
@@ -324,6 +329,7 @@ try {
             $state.deploymentAttempt=[ordered]@{
                 sourceCommit=$sourceCommit;startingNonce=(Uint (Cast @('nonce',$deployer.address,'--rpc-url',$RpcUrl))).ToString()
                 artifactDirectory=$ArtifactDirectory;cacheDirectory=$CacheDirectory;broadcastDirectory=$BroadcastDirectory
+                gasEstimateMultiplier=$DeploymentGasEstimateMultiplier
                 broadcastFile=$broadcastFile;status='checkpointed-before-signing'
                 transactions=@($dryRun.transactions | ForEach-Object {
                     $tx=$_.transaction
