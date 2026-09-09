@@ -220,7 +220,8 @@ class PublicRpc:
         key = json.dumps([method, params])
         if key not in self.cache:
             payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method, "params": params}).encode()
-            request = urllib.request.Request(self.url, data=payload, headers={"Content-Type": "application/json"})
+            request = urllib.request.Request(self.url, data=payload, headers={
+                "Content-Type": "application/json", "User-Agent": "6529Stream-bytecode-verifier/1"})
             try:
                 with urllib.request.urlopen(request, timeout=30) as response:
                     result = json.load(response)
