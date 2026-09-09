@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b7d2dc7f4c7cb34d712c1842f85ce233026f6e088accf4f44f0fd8417c464740",
-      "size_bytes": 162229
+      "sha256": "sha256:f173aa5346807a1024d1534cf272f88a6f8ad78be3d963bfb4fc4966fd65f076",
+      "size_bytes": 162783
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:fc6523c66b6163d22c3cdfb9613adc4e1a3efeba525181bec12a76d359a6651c",
+      "sha256": "sha256:8fda20230ccec75242fa45af684d371268d300fc511a87e3e0c76e37a5622ba7",
       "size_bytes": 33995
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -46,6 +46,7 @@
     "section": "Unreleased",
     "entries": [
       "Updated the pinned Foundry toolchain action to use its native installer on Linux and Windows. CI now checks changelog coverage before tool installation and compilation so missing release notes fail promptly.",
+      "Dispositioned the two retained `StreamSplitWallet` `incorrect-equality` findings as detector-specific false positives without suppressing the detector or changing production Solidity. Focused Foundry coverage proves the exact zero-release sentinel, the adjacent one-wei release boundary, unchanged observation handling, monotonic increases, and decreasing-observation rejection. The canonical 32-row semantic inventory remains unchanged; 30 rows remain Open and the protocol remains pre-audit and blocked from public beta and production.",
       "Wired the Proposed dual owner-record continuity prerequisite into the canonical Unix, Windows, Make, pull-request CI, and checksum validation paths. The checksum-bound gate preserves all 37 retained semantic record domains while independently proving 40 record creations in 39 owner batches, seven immutable owner identities, owner-V2 commitments, ordered record-chain transitions, and fixed zero/one/two record-delta envelopes. Logical receipts are insertion-only, supersession preserves predecessors, ArchiveV2 remains evidence-only, and opaque Coordinator words, live `block.chainid`, packed hashing, implicit current-state joins, enumeration, delegatecall, upgrade, and readiness promotion remain forbidden. This prerequisite does not select physical owner storage or operation ABI, accept `owner_storage`, `owner_snapshots`, or `replay_keys`, authorize any of the 57 operation sources, or add Solidity, audit, deployment, public-beta, production, or readiness credit.",
       "Wired the Proposed artist record/event reconstruction correction packet into the canonical Unix, Windows, Make, pull-request CI, and release-mode validation paths. The checksum-bound gate mechanically enforces 37 record domains, 54 normative events (39 preserved and 15 minimally corrected), 57 operation joins, 40 created-record mappings, 430 typed field-source bindings, nine permitted immutable constants, and four independently derived vectors. The checker now derives historical 21/54 and 2/54 coverage from one checksum-rooted archive of two raw commit objects, four raw trees, and 38 deduplicated blob payloads instead of relying on machine-local Git refs or a Git subprocess. That historical coverage remains compatibility evidence only; shared mechanics remains 3/19, all seven owner layouts, 64 replay rows, and four inner envelopes remain unresolved and source-blocking, all 57 source/authorization flags remain false, and this validation wiring grants no Solidity, audit, deployment, public-beta, production, or readiness credit.",
       "Bound the existing canonical deployment candidate-v2 planning document to exactly two stable merged authorities: the post-#716 Solidity source-layout manifest and the unchanged 37-entry genesis deployment profile. The checker now verifies both canonical paths and SHA-256 digests, and focused hostile tests reject path, hash, or status drift. The honest completeness count falls from 46 to 44 while source commit, governed-parameter and record-family identities, canonical build, retained evidence, linked libraries, and all concrete instances remain unavailable. The candidate stays planning-only, production-disabled, unbound, undeployed, pre-audit, and not readiness evidence. The candidate checker and focused tests are now checksum-covered, and every canonical deployment-plan gate runs the 19-test suite, confirms the ordinary 37/0/0/44 result, and requires strict completion to exit 1.",
