@@ -15662,11 +15662,11 @@
     "StreamMintLedger": {
       "source": "smart-contracts/domains/mint/StreamMintLedger.sol",
       "artifact_path": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
-      "abi_sha256": "sha256:94327f9a2721f154d76a8f1b889b6094c3a08a8c342987a6086b2e1313c75cae",
-      "abi_entries": 45,
+      "abi_sha256": "sha256:2210b16797bc48c2ded18997e9e5f694c773cf3df2e586a3be170c556b375d2d",
+      "abi_entries": 46,
       "entry_counts": {
         "constructors": 0,
-        "functions": 19,
+        "functions": 20,
         "events": 10,
         "errors": 16,
         "fallbacks": 0,
@@ -16268,6 +16268,27 @@
             ],
             "outputs": [],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "transferOwnership(address)",
@@ -17022,11 +17043,11 @@
     "StreamMintManager": {
       "source": "smart-contracts/domains/mint/StreamMintManager.sol",
       "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
-      "abi_sha256": "sha256:7b3399fede76194f9b11b330dc7127faf34ff591634861a8062416e57d132784",
-      "abi_entries": 103,
+      "abi_sha256": "sha256:a3bc4c6c1c51b7fb377b6d9d01207cf58c2e3c3eb61dbcc26bba9b485b099147",
+      "abi_entries": 104,
       "entry_counts": {
         "constructors": 1,
-        "functions": 49,
+        "functions": 50,
         "events": 12,
         "errors": 41,
         "fallbacks": 0,
@@ -17052,7 +17073,7 @@
               {
                 "name": "moduleRegistry_",
                 "type": "address",
-                "internal_type": "contract IStreamMintModuleRegistry"
+                "internal_type": "contract IERC165"
               }
             ],
             "state_mutability": "nonpayable"
@@ -17933,7 +17954,7 @@
               {
                 "name": "",
                 "type": "address",
-                "internal_type": "contract IStreamMintModuleRegistry"
+                "internal_type": "contract IERC165"
               }
             ],
             "state_mutability": "view"
@@ -18456,6 +18477,27 @@
             ],
             "outputs": [],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "transferOwnership(address)",
