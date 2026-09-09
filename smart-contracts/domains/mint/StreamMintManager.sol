@@ -7,12 +7,13 @@ import "../../interfaces/stream/IStreamMintManager.sol";
 import "../../interfaces/stream/IStreamMintModuleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCoreExecutor.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
-contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
+contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC165 {
     /// @notice Domain separator for active phase policy hashes.
     bytes32 public constant POLICY_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_POLICY_V1");
     /// @notice Domain separator for phase configuration hashes.
@@ -147,6 +148,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     /// @notice Returns true for deployment validation.
     function isStreamMintManager() external pure override returns (bool) {
         return true;
+    }
+
+    /// @notice Advertises the manager interface required by Core satellite validation.
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return
+            interfaceId == type(IStreamMintManager).interfaceId
+                || super.supportsInterface(interfaceId);
     }
 
     /// @notice Configures and registers a launch-static phase policy.
