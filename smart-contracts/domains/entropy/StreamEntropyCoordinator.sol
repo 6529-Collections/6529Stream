@@ -463,8 +463,7 @@ contract StreamEntropyCoordinator is
     function _notify(uint256 tokenId, bytes32 requestKey) private {
         try core.emitMetadataUpdate(tokenId, requestKey) {
             metadataNotificationPending[tokenId] = false;
-        }
-        catch {
+        } catch {
             metadataNotificationPending[tokenId] = true;
             emit MetadataNotificationFailed(tokenId, requestKey);
         }
@@ -473,7 +472,10 @@ contract StreamEntropyCoordinator is
     function retryMetadataNotification(uint256 tokenId) external nonReentrant {
         Subject storage subject = _subjects[_tokenKey(tokenId)];
         if (
-            subject.status != StreamEntropyStatus.FINALIZED || !metadataNotificationPending[tokenId]
+            !metadataNotificationPending[tokenId]
+                || (subject.status != StreamEntropyStatus.FINALIZED
+                    && subject.status != StreamEntropyStatus.STALE
+                    && subject.status != StreamEntropyStatus.FAILED)
         ) revert InvalidToken(tokenId);
         _notify(tokenId, subject.requestKey);
     }

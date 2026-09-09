@@ -20,6 +20,12 @@ interface EntropyGasMeasurementVm {
     function cool(address account) external;
 }
 
+contract UnavailableEntropyMetadataEmitter {
+    fallback() external {
+        revert("metadata emitter temporarily unavailable");
+    }
+}
+
 /// @notice Domain tests use the real permanent Core; only external actors/registry are fixtures.
 contract StreamEntropyMetadataTest is CharacterizationTestBase {
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
@@ -352,6 +358,22 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         // two-thirds of 500k, reserving headroom. This is local evidence, not fork-repricing proof.
         require(gasUsed < 333333, "VRF callback headroom");
         emit NativeVRFCallbackGasMeasured(gasUsed);
+    }
+
+    function testTerminalMetadataNotificationCanRetryAfterEmitterRecovery() public {
+        uint256 tokenId = _mint();
+        (bytes32 requestKey,) = entropy.requestEntropy(tokenId);
+        bytes memory coreCode = address(core).code;
+        UnavailableEntropyMetadataEmitter unavailable = new UnavailableEntropyMetadataEmitter();
+        vm.etch(address(core), address(unavailable).code);
+        vm.roll(block.number + 11);
+        entropy.markRequestStale(requestKey);
+        require(entropy.metadataNotificationPending(tokenId), "terminal refresh retained for retry");
+        vm.etch(address(core), coreCode);
+        entropy.retryMetadataNotification(tokenId);
+        require(!entropy.metadataNotificationPending(tokenId), "terminal refresh delivered");
+        _assertState(tokenId, "stale");
+        require(entropy.pendingRequestCount() == 0, "retry cannot reactivate randomness");
     }
 
     function _mint() private returns (uint256 id) {
