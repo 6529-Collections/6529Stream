@@ -406,10 +406,18 @@ library StreamGovernanceManifest {
         bytes32 currentOldValueHash,
         bytes32 currentNewValueHash
     ) public {
-        if (!state.isSealed) revert IStreamGovernanceExecutor.SystemManifestBootstrapNotSealed();
+        if (!state.isSealed) {
+            revert IStreamGovernanceExecutor.SystemManifestBootstrapNotSealed();
+        }
         StreamGovernanceActionPolicy.extend(
-            actionPolicy, expectedRevision, expectedOldCatalogHash, expectedNewCatalogHash,
-            additions, currentScopeHash, currentOldValueHash, currentNewValueHash
+            actionPolicy,
+            expectedRevision,
+            expectedOldCatalogHash,
+            expectedNewCatalogHash,
+            additions,
+            currentScopeHash,
+            currentOldValueHash,
+            currentNewValueHash
         );
         // These are the current policy commitments read by scheduling/execution;
         // the original genesis commitment remains in its binding and seal events.

@@ -1,9 +1,11 @@
 # 6529Stream
 
-6529Stream is a Solidity protocol for 6529 NFT drops. It covers fixed-price
-minting, auction flows, curator rewards, TDH-authorized execution, metadata
-generation, one-of-one provenance and permanence artifacts, royalty disclosure,
-and randomizer adapter flows.
+6529Stream is a Solidity protocol for 6529 NFT drops. The current stack provides
+signed native-ETH fixed-price sales and English auctions, artist-accepted
+attribution, shared mint accounting, immutable revenue splits, asynchronous
+entropy, on-chain metadata, royalty disclosure and delayed governance around
+a permanent ERC-721 Core. The broader specification also covers curator
+rewards, TDH authorization, provenance, permanence and recovery features.
 
 For the active implementation, start with the
 [current-stack walkthrough](docs/current-stack.md),
@@ -12,12 +14,17 @@ For the active implementation, start with the
 These identify the current Core and the contracts that work with it; the
 broader specification below includes features still being implemented.
 
+Run the current product flows with
+`forge test --via-ir --match-path 'test/current/*.t.sol' -vvv`.
+For deployment and an executable paid-mint demonstration, use the
+[current deployment guide](script/current/README.md).
+
 ## Current Maturity
 
 This repository has a serious pre-audit local baseline, but it is not
 production-ready and not a security claim.
 
-`make check` currently proves compilation, Foundry test execution, production
+The canonical `make check` gate checks compilation, Foundry test execution, production
 runtime size limits, local deployment rehearsal, deterministic release artifact
 generation, ABI compatibility checks, source-verification inputs, protocol
 surface reports, release manifests, checksum bundles, integration docs,

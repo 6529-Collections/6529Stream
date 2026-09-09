@@ -723,7 +723,9 @@ contract StreamGovernanceExecutor is
         override
         returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)
     {
-        bytes memory encoded = StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(_policy, scopeHash, cursor, limit);
+        bytes memory encoded = StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(
+            _policy, scopeHash, cursor, limit
+        );
         assembly ("memory-safe") {
             return(add(encoded, 0x20), mload(encoded))
         }
@@ -909,16 +911,36 @@ contract StreamGovernanceExecutor is
     ) external override {
         _requireSelfCall(StreamGovernanceActionClasses.POINTER_REPLACEMENT);
         StreamGovernanceManifest.extendActionPolicy(
-            _manifest, _actionPolicy, expectedRevision, expectedOldCatalogHash,
-            expectedNewCatalogHash, additions, _currentScopeHash, _currentOldValueHash, _currentNewValueHash
+            _manifest,
+            _actionPolicy,
+            expectedRevision,
+            expectedOldCatalogHash,
+            expectedNewCatalogHash,
+            additions,
+            _currentScopeHash,
+            _currentOldValueHash,
+            _currentNewValueHash
         );
     }
 
     /// @inheritdoc IStreamGovernanceCatalog
-    function governanceActionPolicyState() external view override returns (
-        bytes32 candidateProfileHash, bytes32 catalogHash, uint256 entryCount, uint64 revision
-    ) {
-        return (_actionPolicy.candidateProfileHash, _actionPolicy.catalogHash, _actionPolicy.entries.length, _actionPolicy.revision);
+    function governanceActionPolicyState()
+        external
+        view
+        override
+        returns (
+            bytes32 candidateProfileHash,
+            bytes32 catalogHash,
+            uint256 entryCount,
+            uint64 revision
+        )
+    {
+        return (
+            _actionPolicy.candidateProfileHash,
+            _actionPolicy.catalogHash,
+            _actionPolicy.entries.length,
+            _actionPolicy.revision
+        );
     }
 
     /// @inheritdoc IStreamGovernanceExecutor

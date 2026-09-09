@@ -11,7 +11,9 @@ integrated build supports.
 1. Genesis deploys the executor, role registry, canonical module registry,
    Core and product satellites. A committed plan registers modules, installs
    pointers, creates the initial collection and configures its entropy and
-   metadata. The final calls freeze the SystemManifest pointer and seal setup.
+   metadata. A separate preparation transaction binds the exact committed
+   governance catalog and guardians. Activation executes all product changes
+   atomically; its final calls freeze the SystemManifest pointer and seal setup.
    The collection's nominated artist then accepts its attribution, directly
    or through a relayed EIP-712 signature. Acceptance requires no artist gas
    when relayed and cannot be replaced after it is recorded.
@@ -52,12 +54,13 @@ implementation ownership.
 
 ## Run the product tests
 
-The combined test deploys actual protocol contracts and uses a controllable
-external randomness provider. It checks the paid flow, auction custody and
-refunds, rollback across satellites, and governance after genesis:
+The product suites deploy actual protocol contracts and use a controllable
+external randomness provider. They check the paid flow, auction custody and
+refunds, rollback across satellites, stale consent, shared lifetime supply,
+payment conservation, and governance after genesis:
 
 ```bash
-forge test --match-path test/current/StreamCurrentStack.t.sol --via-ir -vvv
+forge test --via-ir --match-path 'test/current/*.t.sol' -vvv
 ```
 
 The focused domain suites are `StreamFixedPriceSaleAdapter`,
@@ -70,6 +73,30 @@ The helpers in `script/current/` assemble exact governance transition hashes
 from deployed objects. They are deployment planning code, not contracts that
 replace the executor or bypass Core authorization. Ordinary governance delays
 remain after genesis initialization.
+
+Use the [deployment guide](../script/current/README.md) for offline simulation,
+an existing local Anvil node, and Sepolia configuration. The isolated full-stack
+simulation measured 10,966,570 gas for preparation and 12,683,466 for activation,
+including transaction intrinsic costs. Each fits the 16,777,216 transaction gas
+cap. These measurements describe simulation; deployed addresses and successful
+testnet receipts are separate evidence.
+
+## Replace and configure modules
+
+Core pointers and the action catalog are separate controls. A replacement
+module must first be registered and admitted to governance's allowed calls;
+changing a pointer does not grant configuration authority automatically.
+
+`IStreamGovernanceCatalog` permits the governance root to propose append-only
+catalog additions after sealing. An extension waits 48 hours and executes in
+the same batch as a fresh SystemManifest publication. Existing entries cannot
+be rewritten, and an invalid publication rolls the entire extension back.
+Each extension accepts at most 64 entries; the whole catalog is capped at
+1,024. Newly admitted calls still use their normal action class and delay.
+
+The current-stack catalog tests exercise the real SystemManifest's second
+publication and then configure a replacement entropy coordinator through the
+actual executor. Existing tokens retain their original entropy coordinator.
 
 ## Application boundaries
 
@@ -85,6 +112,10 @@ remain after genesis initialization.
   proceeds; unsolicited wallet deposits can also accrue to its split recipients.
 - Deployment facts identify which modules exist. Absent optional satellites
   are represented by zero discovery fields; they are not simulated features.
+- Metadata reads at the supported maximum content size need at least
+  16 million total call gas; the deployment planner gives the router 12 million.
+  Completed on-chain metadata carries token data inside `animation_url` and
+  declares `token_data_location` as `animation_url:tokenDataBase64`.
 
 This is a development/testnet implementation under active integration. Full
 artist lifecycle and recovery, additional payment modes, advanced entropy recovery and the wider

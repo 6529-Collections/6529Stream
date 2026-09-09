@@ -42,9 +42,17 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   resolution, atomic genesis and a VRF v2.5 adapter.
 - Five whole-stack tests passed: paid lifecycle, auction/refunds, failed
   delivery rollback, delayed operating controls and governance-root rotation.
+- Four additional cross-domain tests passed for rejection recovery, payment
+  conservation, lifetime supply and stale authorization policies.
 - Maximum metadata content is measured through Core. The planner provides
   12 million router gas; read callers should allow at least 16 million total.
-- Deployment simulation, broader verification and testnet launch remain open.
+- Isolated deployment simulation passed: preparation 10,966,570 gas and
+  activation/sealing 12,683,466 gas, both including intrinsic transaction cost.
+- Delayed append-only catalog extension is implemented, with real-manifest
+  integration verification running alongside the broad Foundry suite.
+- Dedicated Sepolia deployer has 0.01 test ETH. Current base fees require about
+  0.072 ETH for deployment alone; additional test funding is pending. No
+  subscription or deployment transaction has been sent.
 
 ## Active owners
 
@@ -52,8 +60,8 @@ The full-v1 backlog remains visible; unsupported features are not complete.
 | --- | --- | --- |
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
 | Deployment | `codex/deploy-current` | Repeatable deployment and executable demonstration |
-| Product review | `codex/current-stack-cross-domain` | Independent cross-domain tests and integration defects |
-| Governance | `codex/catalog-evolution` | Delayed catalog extension so replacement satellites remain governable |
+| Product/tooling | `codex/current-stack-tooling` | Current ABI/artifact inventory and normal build/check integration |
+| Governance/review | `codex/catalog-evolution` | Catalog/genesis integration complete; finish existing PRs #737 and #736 |
 
 ## Working method
 
@@ -87,7 +95,7 @@ The original checkout contains substantial unrelated uncommitted work. Keep
 it intact while useful source is recovered into the current layout. Never
 merge the entire old checkout. Preserve active artist-provenance work.
 
-The September cleanup removed 42 obsolete merged worktrees and archived nine
+The September cleanup removed 42 obsolete merged worktrees and archived 12
 superseded tasks. Branch references remain. Local preservation copies retain
 ignored notes and validation transcripts from explicit cleanup candidates.
 Clean up recovery and superseded builder checkouts after their useful work is
