@@ -26,6 +26,10 @@ the release policy in `docs/release-policy.md`.
 
 - Keep token and registered-scope entropy subjects distinct when requesting
   randomness; the regression covers unchanged token inputs and both lifecycles.
+- Scope the live Slither gate to all production Solidity sources, excluding
+  expensive test and script constructor closures. Refresh exact source/capture
+  provenance and retain reviewed detector-specific dispositions without
+  suppressing findings or changing audit readiness.
 - Added current contract/interface navigation and replaced the stale autonomous
   run log with a concise integration and delivery record.
 - Allow the sealed current-stack Executor to admit replacement satellite

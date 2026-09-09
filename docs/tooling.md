@@ -2371,20 +2371,23 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 32 retained findings: 2 High and 30 Medium.
-Thirty remain Open and two Medium `StreamSplitWallet` `incorrect-equality`
-rows have focused, source-traced False Positive dispositions. The
-compact normalized JSON lives at
-[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
-classifications, rationales, and open proof requirements or disposition
-evidence in
-[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `baf459c1f29ec6ee9bfdac81006c8cc71b83d982` on
-`2026-08-09T19:48:03Z` records 3,242 findings: 49 High, 847 Medium, 1,269 Low,
-1,035 Informational, and 42 Optimization. Its High/Medium scope totals are
-first-party production `2/30/32`, vendored `1/9/10`, test `46/801/847`, script
-`0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
-is never committed.
+The current checked baseline retains 44 findings: 4 High and 40 Medium.
+Thirty remain Open and 14 have reviewed, detector-specific False Positive
+dispositions. The compact normalized JSON lives at
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with source-traced
+rationales and focused regression references in
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
+
+The live gate uses Crytic Compile's production-only Foundry mode: every
+`smart-contracts/**/*.sol` input is compiled, while `test/` and `script/`
+constructor closures are excluded. It omits `--foundry-compile-all` and retains
+the exact first-party High/Medium comparison. The current unfiltered
+production capture contains 784 results (5 High, 49 Medium, 102 Low,
+620 Informational, 8 Optimization), including all 143 production source files.
+High/Medium scope totals are production `4/40/44`, vendored `1/9/10`, and zero
+for excluded test/script scopes and other sources. Exact source commit,
+capture time, tool versions, and raw digest remain in the canonical baseline.
+Raw Slither JSON is temporary analyzer output and is never committed.
 After a production-source edit intentionally stales the strict provenance hash,
 use the diagnostic `--candidate-slither-json` plus `--candidate-output` mode to
 materialize semantic identities and scope counts in an OS temporary directory

@@ -30,58 +30,60 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = "baf459c1f29ec6ee9bfdac81006c8cc71b83d982"
-EXPECTED_CAPTURED_AT_UTC = "2026-08-09T19:48:03Z"
+EXPECTED_ANALYZED_COMMIT = "ba4bcedeaecf90f2b81a1d764e48c7c64250bce2"
+EXPECTED_CAPTURED_AT_UTC = "2026-09-09T23:25:48Z"
 EXPECTED_CAPTURE_COMMAND = (
-    "python -m slither . --config-file slither.config.json --foundry-compile-all "
-    "--json <temp-file>"
+    "python -m slither . --config-file slither.config.json "
+    "--json-types detectors --json <temp-file> --fail-none"
 )
 EXPECTED_GATE_COMMAND = (
-    "python -m slither . --config-file slither.config.json --foundry-compile-all "
+    "python -m slither . --config-file slither.config.json "
     "--exclude-low --exclude-informational --exclude-optimization "
     "--json-types detectors --json <temp-file> --fail-none"
 )
-EXPECTED_CAPTURE_NATIVE_EXIT_CODE = -1
-EXPECTED_RAW_JSON_SIZE_BYTES = 339_619_039
+EXPECTED_CAPTURE_NATIVE_EXIT_CODE = 0
+EXPECTED_RAW_JSON_SIZE_BYTES = 35670229
 EXPECTED_RAW_JSON_SHA256 = (
-    "sha256:038a857f2210bf977186db786d050664413aee6029fae7b64dd935e4e86de823"
+    "sha256:f6cf2b94d04ec5e0b758a69cdbc041f589b06fdc08afe92294df010700d1b7aa"
 )
 
 IMPACTS = ("High", "Medium")
-EXPECTED_COUNTS = {"High": 2, "Medium": 30, "total": 32}
+EXPECTED_COUNTS = {"High": 4, "Medium": 40, "total": 44}
 EXPECTED_CAPTURE_COUNTS = {
-    "High": 49,
-    "Medium": 847,
-    "Low": 1269,
-    "Informational": 1035,
-    "Optimization": 42,
-    "total": 3242,
+    "High": 5,
+    "Medium": 49,
+    "Low": 102,
+    "Informational": 620,
+    "Optimization": 8,
+    "total": 784,
 }
 EXPECTED_SCOPE_COUNTS = {
-    "first_party_production": {"High": 2, "Medium": 30, "total": 32},
+    "first_party_production": {"High": 4, "Medium": 40, "total": 44},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
-    "test": {"High": 46, "Medium": 801, "total": 847},
-    "script": {"High": 0, "Medium": 7, "total": 7},
+    "test": {"High": 0, "Medium": 0, "total": 0},
+    "script": {"High": 0, "Medium": 0, "total": 0},
     "other": {"High": 0, "Medium": 0, "total": 0},
 }
 EXPECTED_TRIAGE_COUNTS = {
     "confirmed_gap": 0,
     "design_review": 6,
     "pending_disposition": 24,
-    "false_positive": 2,
+    "false_positive": 14,
 }
 EXPECTED_STATUS_COUNTS = {
     "Open": 30,
-    "False Positive": 2,
+    "False Positive": 14,
 }
 EXPECTED_DETECTOR_COUNTS = {
-    ("High", "arbitrary-send-eth"): 1,
+    ("High", "arbitrary-send-eth"): 2,
+    ("High", "encode-packed-collision"): 1,
     ("High", "uninitialized-state"): 1,
     ("Medium", "divide-before-multiply"): 1,
     ("Medium", "incorrect-equality"): 3,
-    ("Medium", "reentrancy-no-eth"): 5,
-    ("Medium", "uninitialized-local"): 7,
-    ("Medium", "unused-return"): 14,
+    ("Medium", "locked-ether"): 1,
+    ("Medium", "reentrancy-no-eth"): 8,
+    ("Medium", "uninitialized-local"): 10,
+    ("Medium", "unused-return"): 17,
 }
 VENDORED_PATHS = (
     "smart-contracts/vendor/openzeppelin/Base64.sol",
@@ -450,7 +452,7 @@ def validate_provenance(repo_root: Path, value: Any) -> Dict[str, Any]:
     )
     if capture_exit != EXPECTED_CAPTURE_NATIVE_EXIT_CODE:
         raise SlitherBaselineError(
-            "provenance.capture_native_exit_code must retain the audited "
+            "provenance.capture_native_exit_code must retain the recorded "
             f"{EXPECTED_CAPTURE_NATIVE_EXIT_CODE} exit"
         )
     if provenance["capture_json_success"] is not True:
@@ -765,7 +767,8 @@ def render_markdown(data: Mapping[str, Any]) -> str:
             "## High/Medium Scope Separation",
             "",
             "Only first-party production rows are release-blocking inventory. Vendored,",
-            "test, and script rows stay visible as separately classified diagnostic input.",
+            "test, and script rows are separate diagnostic scopes. The production gate",
+            "compiles every smart-contracts source and excludes test/script constructor closures.",
             "",
             "| Scope | High | Medium | Total |",
             "| --- | ---: | ---: | ---: |",
@@ -1001,7 +1004,6 @@ def slither_command(output_path: Path) -> List[str]:
         ".",
         "--config-file",
         CONFIG_PATH.as_posix(),
-        "--foundry-compile-all",
         "--exclude-low",
         "--exclude-informational",
         "--exclude-optimization",

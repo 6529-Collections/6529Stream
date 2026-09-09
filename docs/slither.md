@@ -1,12 +1,9 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-high/medium baseline. The current baseline contains 32 retained findings: 2
-High and 30 Medium. Thirty rows remain Open and two Medium
-`incorrect-equality` rows have narrow, source-traced False Positive
-dispositions backed by focused tests. The retained rows are a review and
-burn-down queue; they are not proof of exploitability, an audit completion
-claim, or evidence that the protocol is ready for public beta or production.
+High/Medium baseline. The current inventory retains 44 findings: 4 High and
+40 Medium. Thirty remain Open, and 14 have detector-specific False Positive
+dispositions. Matching this inventory is not an audit or a readiness claim.
 
 Slither is a direct pin in `requirements-tools.txt` and is transitively
 hash-locked for the Linux CI/release boundary through
@@ -24,28 +21,43 @@ hash-locked for the Linux CI/release boundary through
 
 ## Current Capture
 
-The canonical unfiltered capture was produced from the exact source bytes
-frozen at commit `baf459c1f29ec6ee9bfdac81006c8cc71b83d982` on
-`2026-08-09T19:48:03Z`. It contains 3,242 findings across all impacts and
-scopes: 49 High, 847 Medium, 1,269 Low, 1,035 Informational, and 42
-Optimization. The High/Medium scope split is:
+The production-only capture analyzes every Solidity file under
+`smart-contracts/`, including production libraries, interfaces, and vendored
+utilities. Crytic Compile's default Foundry mode excludes `test/` and `script/`
+constructor closures; normal Foundry regression tests remain independent.
+The capture's exact source commit, timestamp, input hashes, native exit, and
+raw output digest are recorded in `ops/SLITHER_BASELINE.json`.
+
+The checked compiler inputs contain all 143 production source files, with
+contents verified against the source tree and compiler output for every file.
+They contain no test or script source. Slither reports 179 analyzed contracts
+across its compilation units (164 unique compiler contract outputs), using
+101 detectors. This captures all production targets without optimizing the
+large deployment/test constructors merely to analyze production code.
+
+The unfiltered production run contains 784 findings: 5 High, 49 Medium,
+102 Low, 620 Informational, and 8 Optimization. Its High/Medium split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| First-party production | 2 | 30 | 32 |
+| First-party production | 4 | 40 | 44 |
 | Vendored | 1 | 9 | 10 |
-| Test | 46 | 801 | 847 |
-| Script | 0 | 7 | 7 |
+| Test (excluded from this scan) | 0 | 0 | 0 |
+| Script (excluded from this scan) | 0 | 0 | 0 |
 | Other | 0 | 0 | 0 |
 
-The permanent-Core refresh removed the former High uninitialized burn-block
-mapping row and one transitional completion-order row, while adding six
-review-sensitive Medium rows for permanent-Core callback ordering, royalty
-arithmetic, the explicit block-zero guard, and returned router tuples. The net
-inventory moves from 28 to 32 without accepting, suppressing, or marking false
-positive any remaining row. Focused tests preserve the former burn-block fix
-and the new permanent-Core paths; public-beta and production readiness remain
-blocked.
+The current-stack refresh retains the 30 existing Open findings and both
+reviewed split-wallet equality dispositions. Two Core read findings have
+updated line anchors with unchanged dispositions. Twelve new findings have
+source-traced, detector-specific False Positive dispositions covering JSON
+formatting, explicit default locals, deliberately omitted tuple fields,
+provider funding, guarded callbacks, and signed auction value flow. These
+findings remain in exact drift comparison; none is suppressed or removed.
+The capture includes the separate registered-scope authorization correction;
+its five focused regressions passed in normal and IR compiler modes. The
+detector dispositions do not serve as proof of that separate authority boundary.
+Focused regression sources are cited per row. Broader authority, integration,
+and audit review remains independent of those detector-specific conclusions.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to
@@ -101,8 +113,9 @@ make slither-baseline-check
 The complete target first runs the fast metadata gate, then invokes
 `scripts/check_slither_baseline.py --run-slither` with the pinned toolchain and
 compares the normalized first-party High and Medium rows with the tracked
-baseline. New rows and stale rows fail the check. CI runs this target in a
-dedicated Ubuntu job with a 45-minute timeout so live analyzer cost does not
+baseline. The live command omits `--foundry-compile-all`: tests and scripts are
+not analyzer targets, while every production source is compiled. New rows and
+stale rows fail the check. CI runs this target in a dedicated Ubuntu job with a 45-minute timeout so live analyzer cost does not
 make the default wrappers slow.
 
 The canonical machine-readable baseline is
@@ -126,14 +139,15 @@ It runs:
 slither . --config-file slither.config.json --foundry-compile-all
 ```
 
-This unfiltered diagnostic can exit non-zero while tracked baseline findings
-remain open. Use `make slither-baseline-check` for the fail-on-drift contract.
+This optional whole-repository diagnostic also compiles test and script
+constructors and can be substantially slower. It can exit non-zero while
+tracked baseline findings remain open. Use `make slither-baseline-check` for the fail-on-drift contract.
 
-Raw JSON is useful while investigating or intentionally refreshing the
-normalized baseline:
+Capture all production detector impacts while investigating or intentionally
+refreshing the normalized baseline:
 
 ```bash
-slither . --config-file slither.config.json --foundry-compile-all --json /tmp/slither-report.json
+python -m slither . --config-file slither.config.json --json-types detectors --json /tmp/slither-report.json --fail-none
 ```
 
 Raw Slither JSON can be large, is temporary working data, and must never be
