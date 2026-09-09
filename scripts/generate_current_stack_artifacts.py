@@ -40,7 +40,7 @@ def require(condition: bool, message: str) -> None:
 
 def object_text(value: Any) -> str:
     require(isinstance(value, str), "missing compiler bytecode object")
-    return value.removeprefix("0x")
+    return value[2:] if value.startswith("0x") else value
 
 
 def runtime_size(value: str) -> int:
