@@ -1416,12 +1416,28 @@ library StreamGovernanceBootstrap {
         }
     }
 
-    function bytesEqual(bytes memory left, bytes memory right) public pure returns (bool) {
+    function bytesEqual(bytes memory left, bytes memory right) public pure returns (bool equal) {
         if (left.length != right.length) return false;
-        for (uint256 i = 0; i < left.length; i++) {
-            if (left[i] != right[i]) return false;
+        // Compare exact bytes in words. The final partial word masks padding;
+        // byte-by-byte Solidity indexing otherwise dominates large genesis calls.
+        assembly ("memory-safe") {
+            let length := mload(left)
+            let l := add(left, 0x20)
+            let r := add(right, 0x20)
+            let end := add(l, and(length, not(31)))
+            equal := 1
+            for { } lt(l, end) { l := add(l, 0x20) r := add(r, 0x20) } {
+                if iszero(eq(mload(l), mload(r))) {
+                    equal := 0
+                    break
+                }
+            }
+            let remainder := and(length, 31)
+            if and(equal, iszero(iszero(remainder))) {
+                let shift := mul(sub(32, remainder), 8)
+                equal := eq(shr(shift, mload(l)), shr(shift, mload(r)))
+            }
         }
-        return true;
     }
 
     function _isEip7702DelegatedEOA(address account) private view returns (bool delegated) {

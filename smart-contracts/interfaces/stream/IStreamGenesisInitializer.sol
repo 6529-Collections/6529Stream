@@ -17,9 +17,11 @@ interface IStreamGenesisInitializer {
     error GenesisPlanHashMismatch(bytes32 expected, bytes32 actual);
     error GenesisAlreadyInitialized();
     error GenesisDidNotSeal();
+    error GenesisPreparationAlreadyBound();
 
     event GenesisPlanCommitted(bytes32 indexed planHash, address indexed authority);
     event GenesisInitialized(bytes32 indexed planHash, uint256 batchCount);
+    event GenesisPrepared(bytes32 indexed planHash);
 
     function genesisPlanHash() external view returns (bytes32);
     function genesisInitialized() external view returns (bool);
@@ -32,6 +34,16 @@ interface IStreamGenesisInitializer {
         GenesisBatch[] calldata batches
     ) external view returns (bytes32);
     function initializeGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external;
+
+    /// @notice Optionally bind the exact committed governance catalog/lifecycle
+    ///         in a separate transaction before atomic product setup and sealing.
+    /// @dev Uses the identical complete plan encoding. Preparation is durable;
+    ///      failed initialization leaves it available for an exact-plan retry.
+    ///      No ordinary pre-seal actions may run after the plan is committed.
+    function prepareGenesis(
         SystemManifestBootstrapBinding calldata binding,
         GenesisBatch[] calldata batches
     ) external;

@@ -129,7 +129,7 @@ contract StreamGovernanceExecutor is
         return _genesisPlanHash(msg.data[4:]);
     }
 
-    /// @dev Both entry points have identical ABI argument types. Commit their
+    /// @dev The plan entry points have identical ABI argument types. Commit their
     ///      exact argument bytes, including any trailing bytes, without embedding
     ///      a second large nested-struct encoder in the permanent Executor.
     function _genesisPlanHash(bytes calldata encodedPlan) private view returns (bytes32) {
@@ -138,32 +138,47 @@ contract StreamGovernanceExecutor is
         );
     }
 
-    /// @notice Initialize and seal the real stack in one transaction.
-    /// @dev Only these committed genesis batches execute immediately. They retain
-    ///      ordinary action classes, calldata publication, per-call transition
-    ///      contexts, action policy, replay protection and final inventory checks.
-    ///      A partial initialization never persists: the final batch must seal.
-    function initializeGenesis(
-        SystemManifestBootstrapBinding calldata binding,
-        GenesisBatch[] calldata batches
-    ) external override nonReentrant {
+    function _requireCommittedGenesisPlan(uint256 batchCount) private view {
         if (msg.sender != genesisBootstrapAuthority) {
             revert GenesisBootstrapActorRequired(msg.sender);
         }
         if (genesisInitialized || _manifest.isSealed) revert GenesisAlreadyInitialized();
-        if (genesisPlanHash == bytes32(0) || _manifest.bound || batches.length == 0) {
-            revert InvalidGenesisPlan();
-        }
+        if (genesisPlanHash == bytes32(0) || batchCount == 0) revert InvalidGenesisPlan();
         bytes32 actual = _genesisPlanHash(msg.data[4:]);
         if (actual != genesisPlanHash) revert GenesisPlanHashMismatch(genesisPlanHash, actual);
+    }
+
+    /// @inheritdoc IStreamGenesisInitializer
+    function prepareGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external override nonReentrant {
+        _requireCommittedGenesisPlan(batches.length);
+        if (_manifest.bound) revert GenesisPreparationAlreadyBound();
+        _bindSystemManifestBootstrap(binding);
+        emit GenesisPrepared(genesisPlanHash);
+    }
+
+    /// @notice Initialize and seal the real stack in one transaction.
+    /// @dev Only these committed genesis batches execute immediately. They retain
+    ///      ordinary action classes, calldata publication, per-call transition
+    ///      contexts, action policy, replay protection and final inventory checks.
+    ///      Product initialization never partially persists: the final batch
+    ///      must seal. An optional prior preparation remains available on retry.
+    function initializeGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external override nonReentrant {
+        _requireCommittedGenesisPlan(batches.length);
         if (block.timestamp > type(uint64).max - 7 days) {
             revert GovernanceTimestampOverflow(block.timestamp);
         }
 
-        // Consume before interacting. A revert rolls the entire ceremony back.
+        // Consume before interacting. Reverts roll back this transaction; a
+        // previously prepared binding remains available for the same-plan retry.
         genesisInitialized = true;
         _policy.committedGenesisActive = true;
-        _bindSystemManifestBootstrap(binding);
+        if (!_manifest.bound) _bindSystemManifestBootstrap(binding);
         for (uint256 i; i < batches.length; ++i) {
             if (_manifest.isSealed) revert GenesisAlreadyInitialized();
             GenesisBatch memory batch = batches[i];
@@ -1009,6 +1024,7 @@ contract StreamGovernanceExecutor is
         GovernanceCall[] memory calls
     ) private returns (bytes32 actionId) {
         if (_executing) revert GovernanceSchedulingDuringExecution();
+        if (genesisPlanHash != bytes32(0) && !genesisInitialized) revert InvalidGenesisPlan();
         bool bootstrapAuthority =
             _manifest.bound && !_manifest.isSealed && msg.sender == genesisBootstrapAuthority;
         bool privilegedProposer = bootstrapAuthority || msg.sender == owner();

@@ -91,6 +91,73 @@ contract StreamGenesisInitializerTest is StreamGovernanceBootstrapHarness {
         artifacts.executor.initializeGenesis(_binding, batches);
     }
 
+    function _prepare(BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) private {
+        vm.prank(artifacts.bootstrapAuthority);
+        artifacts.executor.prepareGenesis(_binding, batches);
+    }
+
+    function testPreparedGenesisUsesSamePlanAndSealsWithoutOrdinaryActions() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
+        _commit(artifacts, batches);
+        _prepare(artifacts, batches);
+        require(!artifacts.executor.genesisInitialized(), "preparation is not initialization");
+        require(artifacts.executor.governanceNonce() == 0, "no product action in preparation");
+        require(artifacts.manifest.streamSystemManifestPointerCount() == 0, "not published before seal");
+        vm.expectRevert(abi.encodeWithSelector(IStreamGenesisInitializer.GenesisPreparationAlreadyBound.selector));
+        _prepare(artifacts, batches);
+        _initialize(artifacts, batches);
+        require(artifacts.executor.genesisInitialized() && artifacts.executor.owner() == address(this), "final runtime authority");
+        require(artifacts.manifest.streamSystemManifestPointerCount() == 1, "sealed publication");
+        vm.expectRevert(abi.encodeWithSelector(IStreamGenesisInitializer.GenesisAlreadyInitialized.selector));
+        _prepare(artifacts, batches);
+    }
+
+    function testPreparationRequiresAuthorityAndExactFullCommittedPlan() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
+        _commit(artifacts, batches);
+        vm.expectRevert(abi.encodeWithSelector(IStreamGovernanceExecutor.GenesisBootstrapActorRequired.selector, address(this)));
+        artifacts.executor.prepareGenesis(_binding, batches);
+        batches[0].callDatas[0] = abi.encodePacked(batches[0].callDatas[0], bytes1(0x01));
+        bytes32 expected = artifacts.executor.genesisPlanHash();
+        bytes32 actual = artifacts.executor.hashGenesisPlan(_binding, batches);
+        vm.expectRevert(abi.encodeWithSelector(IStreamGenesisInitializer.GenesisPlanHashMismatch.selector, expected, actual));
+        _prepare(artifacts, batches);
+    }
+
+    function testPreparedPlanCannotRunOrdinaryPreSealActions() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
+        _commit(artifacts, batches);
+        _prepare(artifacts, batches);
+        GovernanceActionRequest memory request = GovernanceActionRequest({
+            actionClass: 1, target: address(artifacts.trigger), value: 0,
+            selector: artifacts.trigger.bootstrapWrite.selector,
+            callData: abi.encodeCall(artifacts.trigger.bootstrapWrite, (7)),
+            scopeHash: keccak256("scope"), oldValueHash: keccak256("old"), newValueHash: keccak256("new"),
+            notBefore: uint64(block.timestamp + 48 hours), expiresAfter: uint64(block.timestamp + 9 days),
+            reasonHash: keccak256("test"), reasonURI: "test", manifestHash: artifacts.manifestHash
+        });
+        vm.expectRevert(abi.encodeWithSelector(IStreamGenesisInitializer.InvalidGenesisPlan.selector));
+        vm.prank(artifacts.bootstrapAuthority);
+        artifacts.executor.scheduleGovernanceAction(request);
+        _initialize(artifacts, batches);
+    }
+
+    function testPreparedInitializationFailureCanRetryWithoutPartialProductState() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
+        _commit(artifacts, batches);
+        _prepare(artifacts, batches);
+        uint256 guardianCount = artifacts.roleRegistry.roleHolderCount(keccak256("ROLE_TERMINAL_FREEZE_VETO"));
+        artifacts.manifest.setFailPublication(true);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "publication failed"));
+        _initialize(artifacts, batches);
+        require(!artifacts.executor.genesisInitialized() && artifacts.executor.governanceNonce() == 0, "failed setup rolled back");
+        require(artifacts.manifest.streamSystemManifestPointerCount() == 0, "no partial publication");
+        require(artifacts.roleRegistry.roleHolderCount(keccak256("ROLE_TERMINAL_FREEZE_VETO")) == guardianCount, "committed preparation remains");
+        artifacts.manifest.setFailPublication(false);
+        _initialize(artifacts, batches);
+        require(artifacts.executor.genesisInitialized(), "exact plan retried");
+    }
+
     function testInitializesAndSealsWithoutTimeWarpAndClosesInitializer() public {
         (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
         uint256 beforeTimestamp = block.timestamp;

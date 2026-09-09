@@ -29,6 +29,10 @@ the release policy in `docs/release-policy.md`.
   extensions. Exact target/code/value policies remain immutable per entry;
   extensions publish the SystemManifest atomically and invalidate actions
   scheduled under older catalog roots. Core and its authority binding are unchanged.
+- Permit optional preparation of the exact committed genesis binding before
+  atomic product initialization and sealing. Ordinary actions cannot run between
+  preparation and initialization; a failed initialization can retry the same
+  plan. Compare governance calldata in exact words to reduce validation gas.
 
 - Wired the Proposed dual owner-record continuity prerequisite into the
   canonical Unix, Windows, Make, pull-request CI, and checksum validation

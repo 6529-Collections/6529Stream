@@ -51,3 +51,15 @@ original-entry continuity, exact transition/revision checks, root-only authority
 atomic publication rollback. Existing pagination and root/guardian regressions
 cover the unchanged read ABI and authority boundaries. This is an implementation
 decision, not audit or production-readiness evidence.
+
+Deployment preparation may bind the exact committed catalog and initial
+governance lifecycle in a separate transaction using `prepareGenesis(binding,
+batches)`. It authenticates the same complete plan as `initializeGenesis`, may
+run only once, and does not initialize products or seal. Ordinary pre-seal
+scheduling is blocked once a plan is committed. The final initializer applies
+all product batches and seals atomically; a failed attempt retains only the
+already committed preparation and can retry the identical plan. This separates
+catalog storage costs from product setup for the Ethereum transaction gas cap;
+the deployment script must measure each transaction, including cold access and
+intrinsic gas. The initializer may still perform both phases atomically for a
+smaller plan. No deployment authority survives the final seal.
