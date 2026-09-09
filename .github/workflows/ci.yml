@@ -152,6 +152,27 @@ jobs:
         with:
           python-version: "3.12.13"
 
+      - name: Changelog gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_changelog_check.py 2>&1 | tee ci-logs/changelog-tests.log
+
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            base_ref="${{ github.event.pull_request.base.sha }}"
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_ref="${{ github.event.before }}"
+          else
+            base_ref=""
+          fi
+
+          if [ -n "$base_ref" ]; then
+            python3 scripts/check_changelog.py --base-ref "$base_ref" 2>&1 | tee ci-logs/changelog-check.log
+          else
+            python3 scripts/check_changelog.py 2>&1 | tee ci-logs/changelog-check.log
+          fi
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
@@ -972,27 +993,6 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_verify_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-verifier-tests.log
           python3 scripts/verify_release_artifacts.py 2>&1 | tee ci-logs/release-artifact-verifier-check.log
-
-      - name: Changelog gate
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          python3 scripts/test_changelog_check.py 2>&1 | tee ci-logs/changelog-tests.log
-
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            base_ref="${{ github.event.pull_request.base.sha }}"
-          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            base_ref="${{ github.event.before }}"
-          else
-            base_ref=""
-          fi
-
-          if [ -n "$base_ref" ]; then
-            python3 scripts/check_changelog.py --base-ref "$base_ref" 2>&1 | tee ci-logs/changelog-check.log
-          else
-            python3 scripts/check_changelog.py 2>&1 | tee ci-logs/changelog-check.log
-          fi
 
       - name: Deployment rehearsal gate parity
         shell: bash
