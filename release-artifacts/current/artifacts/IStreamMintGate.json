@@ -1,0 +1,323 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "authorizer",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "initialRecipients",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "beneficiaries",
+          "type": "address[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "contextHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "gateData",
+          "type": "bytes"
+        }
+      ],
+      "name": "validateMint",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "nullifiers",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "authorizerKind",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "maxQuantity",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintGate.GateResult",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialRecipients",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "beneficiaries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "validateMint",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "nullifiers",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "authorizerKind",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "maxQuantity",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintGate.GateResult",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)": {
+            "notice": "Validates one mint request against gate-specific evidence."
+          }
+        },
+        "notice": "View-only eligibility module for StreamMintManager phases.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/IStreamMintGate.sol": "IStreamMintGate"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/IStreamMintGate.sol": {
+        "keccak256": "0x7b40142b4c12a6338b29a0fa4b039d80e959f47d7c93184fa58b54b482d78413",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://7ceeec142bee712113d52adb72c01d7ffb79cc764096287ffb730d1f6e632f2d",
+          "dweb:/ipfs/QmPhqcBPGqqLmVbCUvAoCTvfHvaYK8guZ1cduTguiTXZuG"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)": "a4285bba"
+  }
+}

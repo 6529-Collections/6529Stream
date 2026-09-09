@@ -1,0 +1,2698 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "callData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint256",
+          "name": "gasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completionBuffer",
+          "type": "uint256"
+        }
+      ],
+      "name": "boundedRouterString",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "value",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "codeIsLive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "registryPointer",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedModuleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "expectedInterfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "eligiblePointer",
+      "outputs": [
+        {
+          "internalType": "enum StreamCoreValidationStatus",
+          "name": "status",
+          "type": "StreamCoreValidationStatus"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "candidate",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "gasParameterScopeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCoreGasParameterState",
+          "name": "parameter",
+          "type": "tuple"
+        }
+      ],
+      "name": "gasParameterStateHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCoreGasParameterState",
+          "name": "previous",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCoreGasParameterState",
+          "name": "candidate",
+          "type": "tuple"
+        }
+      ],
+      "name": "gasParameterTransitionHashes",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "oldValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newValueHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "deploymentManifestHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "genesisModuleRegistry",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "pointer",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "name": "isGovernanceExecutor",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "pointer",
+          "type": "tuple"
+        }
+      ],
+      "name": "isLiveModuleRegistry",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "governanceExecutor",
+          "type": "address"
+        }
+      ],
+      "name": "pointerConfiguration",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "known",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        }
+      ],
+      "name": "pointerScopeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "pointer",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "name": "pointerStateHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "previous",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "candidate",
+          "type": "tuple"
+        }
+      ],
+      "name": "pointerTransitionHashes",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "oldValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newValueHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "registryPointer",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCorePointerState",
+          "name": "current",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "governanceExecutor",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "nextRevision",
+          "type": "uint64"
+        }
+      ],
+      "name": "preparePointerUpdate",
+      "outputs": [
+        {
+          "internalType": "enum StreamCoreValidationStatus",
+          "name": "status",
+          "type": "StreamCoreValidationStatus"
+        },
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "candidate",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "preRevisionCandidateHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamCorePointerTransitionPlan",
+          "name": "plan",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "name": "readCurrentAction",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamCoreExternalReads.CurrentAction",
+          "name": "action",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "readModuleRecord",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "valid",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamCoreExternalReads.ModuleRecordFacts",
+          "name": "facts",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "gasLimit",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "completionBuffer",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "callData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "uint256",
+          "name": "salePrice",
+          "type": "uint256"
+        }
+      ],
+      "name": "resolveRoyalty",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "royaltyAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterfaceStrict",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x6080806040523461001a576123319081610020823930815050f35b600080fdfe6040608081526004908136101561001557600080fd5b60009160e0908335821c9182630eb4cdba146107d757826321422496146107bb57826324d2e7181461065a578263397e8c16146106225782633c1fe8b2146105fc5782633e34db2f146105525782634849f9961461050c57826352f762cc1461047a5782635618b7ec146104565782635af2b486146103f25782635d5729481461038b57826367f36d731461034d5782639caddc56146102f2578263aff1f44b146101df57508163b4ca922d146101bd578163b77b2ad814610193578163bfa9b93f1461012d575063c2596011146100ec57600080fd5b8060031936011261012957602090610102610924565b9061010c82611fe8565b918261011c575b50519015158152f35b3f60243514915083610113565b5080fd5b83915060a036600319011261012957610144610924565b91606435906001600160401b038211610190575061017a929161016991369101610be1565b608435916044359060243590611c80565b82516001600160a01b0390921682526020820152f35b80fd5b50506020366003190112610129576020906101b46101af610924565b611620565b90519015158152f35b8284602036600319011261019057506101d860209235611551565b9051908152f35b9391506102a0366003190112610129576101f836610a11565b91610140366101631901126101905783519461021386610849565b6001600160a01b036101643581811681036102ee5787526101843560208801526101a43580151581036102ee57878701526101c43560608801526101e4356001600160e01b0319811681036102ee5760808801526102043590811681036102ea5760a08701526102243560ff811681036102ea5760c087015261024435908601526102643561010086015261028435906001600160401b038216820361019057509184916102ca936101206102e697015235611515565b9251918252602082015260408101919091529081906060820190565b0390f35b8280fd5b8380fd5b50905060603660031901126102ea5761030961093f565b604435939091906001600160a01b038516850361019057509261032f9160609435610c70565b90839293519315158452602084015263ffffffff60e01b1690820152f35b5090506101803660031901126102ea5761036636610a11565b9061016435936001600160401b03851685036101905750926101d89160209435611437565b50905060803660031901126102ea576103a2610924565b92602435906001600160401b038211610190575060ff936103cc6102e6936103da93369101610be1565b906064359160443591611bcd565b90928051948594168452806020850152830190610c4b565b83856020366003190112610190575060a060ff610415610410610924565b611641565b9190938051941515855282511515602086015260208301518186015282015116606084015260608101516080840152608081015182840152015160c0820152f35b505050610140600319360112610129576020906101b461047536610955565b611ed3565b83858160031936011261019057506001600160401b03610120926104ad61049f610924565b6104a761093f565b90611807565b90938051941515855260ff8251166020860152602082015181860152810151606085015263ffffffff60e01b6060820151166080850152608081015160a085015260a081015160c085015260c081015182850152015116610100820152f35b5050506080600319360112610129576101609061055061053e61052d610924565b606435906044359060243590611024565b90925192151583526020830190610af1565bf35b8482856101203660031901126102ea5761056b36610b73565b9160803660a31901126102ee578151936105848561087b565b60a435855260c435602086015260e43560ff81168103610129578386015261010435906001600160401b038216820361019057506105d96105d26102e694936105e093606089015235611551565b948561159a565b948461159a565b9051938493846040919493926060820195825260208201520152565b50828460a036600319011261019057506101d860209261061b36610b73565b903561159a565b5050508060031936011261012957610638610924565b602435926001600160e01b03198416840361019057506020926101b491611e33565b9150506103003660031901126102ea5761067336610955565b92610140366101431901126101905782519361068e85610849565b6001600160a01b03926101443584811681036102ee5786526101643560208701526101843580151581036102ee57868601526101a43560608701526101c4356001600160e01b0319811681036102ee5760808701526101e43584811681036102ee5760a08701526102043560ff811681036102ee5760c08701526102243590860152610244356101008601526001600160401b03946102643586811681036102ee576101208201526102a435928484168403610190576102c4359485168503610190576102e4359687168703610190575092610776926101e0969260809561028435916112d5565b909261078481518095610ace565b610792602085018351610af1565b602082015161016085015281015161018084015260608101516101a084015201516101c0820152f35b508284602036600319011261019057506101d8602092356113e8565b5050506101a0600319360112610129576107f036610955565b610144356001600160a01b03811681036102ee5761018435936001600160e01b0319851685036101905750610834610160946105509361083f93610164359161111d565b919093518094610ace565b6020830190610af1565b61014081019081106001600160401b0382111761086557604052565b634e487b7160e01b600052604160045260246000fd5b608081019081106001600160401b0382111761086557604052565b61010081019081106001600160401b0382111761086557604052565b60a081019081106001600160401b0382111761086557604052565b606081019081106001600160401b0382111761086557604052565b602081019081106001600160401b0382111761086557604052565b90601f801991011681019081106001600160401b0382111761086557604052565b600435906001600160a01b038216820361093a57565b600080fd5b602435906001600160a01b038216820361093a57565b61014090600319011261093a576040519061096f82610849565b816001600160a01b03600435818116810361093a5782526024356020830152604435801515810361093a57604083015260643560608301526084356001600160e01b03198116810361093a57608083015260a435908116810361093a5760a082015260c43560ff8116810361093a5760c082015260e43560e08201526101043561010082015261012435906001600160401b038216820361093a576101200152565b61014090602319011261093a5760405190610a2b82610849565b816001600160a01b03602435818116810361093a5782526044356020830152606435801515810361093a576040830152608435606083015260a4356001600160e01b03198116810361093a57608083015260c435908116810361093a5760a082015260e43560ff8116810361093a5760c08201526101043560e08201526101243561010082015261014435906001600160401b038216820361093a576101200152565b906006821015610adb5752565b634e487b7160e01b600052602160045260246000fd5b60018060a01b03808251168352602082015160208401526040820151151560408401526060820151606084015263ffffffff60e01b608083015116608084015260a08201511660a083015260ff60c08201511660c083015260e081015160e083015261010080820151908301526001600160401b036101208092015116910152565b608090602319011261093a5760405190610b8c8261087b565b816024358152604435602082015260643560ff8116810361093a576040820152608435906001600160401b038216820361093a5760600152565b6001600160401b03811161086557601f01601f191660200190565b81601f8201121561093a57803590610bf882610bc6565b92610c066040519485610903565b8284526020838301011161093a57816000926020809301838601378301015290565b60005b838110610c3b5750506000910152565b8181015183820152602001610c2b565b90602091610c6481518092818552858086019101610c28565b601f01601f1916010190565b929190916000936000936000937f03f4d9e115b9c4c43ab58684ef44935e7cf92d54b8db1d97a707c8526faa3c1b8314610fa2577f03f5dfc0687afbbc9c86bda58667bf3bb235a2d1cbe7273bbbe4d5301fb0b6d28314610f4e5750507f136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e28114610f3c577f7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a8114610f2a577faef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f48114610f18577fead6d91d79d13e47343aa9d24c2198c5e4fcd612fdd9531d8b2549bab76514748114610ee4577fafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c918114610eb0577fb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb8114610e9e577fd43cf73a122b502fe5e16c9100883f4371b93df4467921d97b4e220819fb8ebe8114610e8c577fd90b9e0160ba8e56a77078d6022d52bf0cd862ba5a5adfb6f792287e31399f908114610e7a577fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c48114610e68577fe5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd8114610e565750565b6001945092506313ea5d7360e11b9150565b6001945092506377e19fd760e11b9150565b600194509250630b0908bd60e21b9150565b6001945092506347291ea160e01b9150565b60019450925063979b977f60e01b9150565b50600193507f217d16181cfb7c9bb7e1687d0b13ef4b864e9154dc37b60f75a88bec454b546792506355254e6360e11b9150565b50600193507f50e132608386d4b0bf237635eb7bfd9473f667085fa7d7b18f81c5045c28905092506320da17d760e21b9150565b600194509250636ee40fe160e11b9150565b60019450925063222d442760e01b9150565b60019450925063b4074ed760e01b9150565b9295509093506001600160a01b03908116911614159050610f9c57507fa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e905b600191906377faad4f60e01b90565b90610f8d565b50600195507f47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec69450631bb3076f60e11b93505050565b60405190610fe582610849565b816101206000918281528260208201528260408201528260608201528260808201528260a08201528260c08201528260e0820152826101008201520152565b93929190611030610fd8565b61103986611fe8565b158015611115575b801561110a575b8015611102575b80156110fa575b80156110ea575b6110df57506040519461106f86610849565b60018060a01b0316908186526020860152600060408601527fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c460608601526377e19fd760e11b608086015260a0850152600160c085015260e0840152610100830152600161012083015260019190565b945050505060009190565b506110f486611d59565b1561105d565b508315611056565b50821561104f565b5081863f1415611048565b508115611041565b91909392611129610fd8565b9261113386611fe8565b156112ca5761114181611ed3565b156112bf5780516001600160a01b03949061115f9088908716611807565b9490156112b257873f93600160ff8751161491826112a4575b5081611289575b8161127b575b8161126d575b8161125f575b81611251575b8161123a575b81611229575b501561121d57506020830151908463ffffffff60e01b6060860151169151169160ff8551169360a060c087015196015196604051996111e18b610849565b1689526020890152600060408901526060880152608087015260a086015260c085015260e0840152610100830152600061012083015260009190565b95505050505060029190565b611234915088611e33565b386111a3565b60e08601516001600160401b03161515915061119d565b60a086015115159150611197565b60c086015115159150611191565b60808601518514915061118b565b604086015115159150611185565b60608601516001600160e01b0319808316911614915061117f565b602087015114915038611178565b5095505050505060019190565b505050915060019190565b505050915060029190565b909195939492956040519160a08301926001600160401b03938181108582111761086557604052611304610fd8565b815260009889602083015289604083015289606083015289608083015261132d82998286610c70565b9491939093156113d857506001600160e01b03198416156113ca579061135493929161111d565b8752809760068210156113b65750806113ae5750906113886113a79493926101209483868a51019116905283885191611515565b6080899693960152604088015283602088015286519201511691611437565b6060830152565b965050505050565b634e487b7160e01b81526021600452602490fd5b506004995050505050505050565b60039b5099505050505050505050565b60405160208101917ff4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb8352466040830152306060830152608082015260808152611431816108b2565b51902090565b90917f1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d0439260018060a01b038082511691602081015191604082015115159160608101519163ffffffff60e01b6080830151169060a0830151169260ff60c0840151169460e08401519661010080950151986040519b60208d019d8e5260408d015260608c015260808b015260a08a015260c089015260e08801528601526101208501526101408401526101608301526001600160401b03908161018091168184015282526101a0820190828210908211176108655760405251902090565b61152561154e91949293946113e8565b936001600160401b03611542610120958287820151169088611437565b94820151169085611437565b90565b60405160208101917f9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a718352466040830152306060830152608082015260808152611431816108b2565b90606081519160208101519060ff604082015116906001600160401b03938491015116916040519460208601967f5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c885260408701526060860152608085015260a084015260c083015260c0825260e0820190828210908211176108655760405251902090565b61162981611fe8565b1561163b5761163790611641565b5090565b50600090565b604080516001600160401b03939260c08201858111838210176108655783526000808352602091818385015281858501528160608501528160808501528160a0850152839685518481019163546ea28160e01b835260048252878201908282109082111761179d5787525183928392905afa923d9360c085118082151760011461178c5786519580875280858789013e8601603f01601f191687525b611785575b158015611779575b8015611760575b611756575060c08380518101031261019057818301519384151580950361012957808401519360608101519260ff8416809403610190575060808101519060c060a082015191015160a08a015260808901526060880152860152840152825260019190565b9550925050509190565b50606084015160081c15600184860151111516156116f1565b5060c0845114156116ea565b50816116e2565b8651848152858101885295506116dd565b634e487b7160e01b85526041600452602485fd5b81601f8201121561093a5780516117c781610bc6565b926117d56040519485610903565b8184526020828401011161093a5761154e9160208085019101610c28565b51906001600160401b038216820361093a57565b91906000806040519461181986610896565b8186528160208701528160408701528160608701528160808701528160a08701528160c08701528160e087015285936040516020810191630a9aa01d60e21b835260018060a01b0316602482015260248152611874816108cd565b51915afa923d936109c0851180821517600114611bb75760405195808752806000602089013e8601603f01601f19166040525b611baf575b158015611b9f575b611b965750825183019260208185031261093a5760208101516001600160401b03811161093a5761018081830186031261093a576040519461018086018681106001600160401b038211176108655760405260208284010151600481101561093a5786528282016040818101516020890152606082015190880152608001516001600160e01b03198116810361093a57606087015260a0828401015163ffffffff8116810361093a57608087015282820160c08181015160a089015260e080830151918901919091526101008201519088015261012001516001600160401b03811161093a576119b4610180916020806119ee95019186880101016117b1565b92836101008901526119cb610140828701016117f3565b6101208901526119e0610160828701016117f3565b6101408901528401016117f3565b61016086015251906020815191012060405160208082015285516004811015610adb576040820152602086015160608201526040860151608082015263ffffffff60e01b60608701511660a082015263ffffffff60808701511660c082015260a086015160e082015260c086015161010082015260e0860151610120820152611adb81611a8e6101008901516101806101408401526101c0830190610c4b565b6001600160401b036101208a0151166101608301526001600160401b036101408a0151166101808301526001600160401b036101608a0151166101a083015203601f198101835282610903565b602081519101201490811591611b8d575b8115611b81575b50611b7a57508151916004831015610adb57602081015190604081015163ffffffff60e01b60608301511660a08301519060c0840151926001600160401b0361016060e0870151960151169560ff60405199611b4e8b610896565b168952602089015260408801526060870152608086015260a085015260c084015260e083015260019190565b6000925090565b61080091501138611af3565b80159150611aec565b92505060009190565b50611ba9846120a2565b156118b4565b5060006118ac565b94506040519460008652602086016040526118a7565b9192611bda90845a6121d5565b15611c6e57600092839260208351930191fa3d9015620100008211600182821714611c585760405192808452806000602086013e8301603f01601f19166040525b611c4757611c3057611c2c9061221f565b9091565b50600690604051611c40816108e8565b6000815290565b5050600790604051611c40816108e8565b9150604051916000835260208301604052611c1b565b505050600690604051611c40816108e8565b94939291611c8f90825a6121d5565b15611d4c57600080928192829760208351930191fa60403d149081611d39575b15908115611d30575b508015611d24575b8015611d19575b611cfa576001600160a01b03169283158015611d11575b8015611d06575b611cfa57612710808281850602049204020190565b50509050600090600090565b506103e88111611ce5565b508015611cde565b5061ffff8411611cc7565b508060a01c1515611cc0565b90501538611cb8565b945090604081803e519060205194611caf565b5050509050600090600090565b604051906301ffc9a760e01b611d9060209382858201526377e19fd760e11b602482015260248152611d8a816108cd565b83612044565b9015908115611e27575b8115611e0c575b50611e0457611dd191604051918483015263ffffffff60e01b602483015260248252611dcc826108cd565b612044565b81929192611df9575b82611de457505090565b908092508180518101031261093a5701511590565b805182149250611dda565b505050600090565b9050838180518101031261093a578301516001141538611da1565b80518514159150611d9a565b90604051916301ffc9a760e01b90611e6f602094838682015263ffffffff60e01b809516602482015260248152611e69816108cd565b82612044565b9015908115611ec7575b8115611eac575b50611ea357611dd1926040519285840152602483015260248252611dcc826108cd565b50505050600090565b9050848180518101031261093a578401516001141538611e80565b80518614159150611e79565b805160208201516001600160a01b039182169290611ef084611fe8565b9384611fdd575b505082611faf575b82611f90575b82611f80575b82611f6e575b82611f60575b82611f51575b82611f39575b82611f2d57505090565b61154e92505116611d59565b6101208101516001600160401b031615159250611f23565b61010081015115159250611f1d565b60e081015115159250611f17565b60c081015160ff166001149250611f11565b60a0810151821615159250611f0b565b60808101516001600160e01b0319166377e19fd760e11b149250611f05565b60608101517fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c4149250611eff565b3f1492503880611ef7565b6001600160a01b03811615159081612012575b81612004575090565b61200e915061201d565b1590565b803b15159150611ffb565b6017813b0361163b576000806003923c6000516001600160e81b03191661ef0160f01b1490565b6000918291602082519201905afa903d90602082118084151760011461208c5760405192808452806000602086013e8301603f01601f19166040525b61208657565b60009250565b9150604051916000835260208301604052612080565b9081516101c080821080156121a7575b61219f5760019360208082015103612196575b600360408201511161218d575b60a08101516001600160e01b0316612184575b60c081015160201c61217b575b6101808061014083015103612172575b61016082015160401c612169575b81015160401c612160575b6101a081015160401c612157575b810151610800811181151761214e575b601f01601f1916010361214857565b60009150565b60009450612139565b60009450612129565b6000945061211b565b60009550612110565b60009550612102565b600094506120f2565b600094506120e5565b600094506120d2565b600094506120c5565b506000925050565b506109c082116120b2565b919082039182116121bf57565b634e487b7160e01b600052601160045260246000fd5b818110611e0457816121e6916121b2565b90603f80820491066122165760ff60005b1681018091116121bf57808210611e0457612211916121b2565b101590565b60ff60016121f7565b805190606082106122f15760208101918251602060408401519114801590612329575b8015612315575b61230257601f81018082116121bf57601f191691603f1981019081116121bf5782036123025761227990826121b2565b80159182156122bb575b505050805181019160208284031261093a5751916001600160401b03831161093a576122b69260208092019201016117b1565b600091565b60409084010151918160031b91820460081417156121bf576001901b9060001982019182116121bf57166122f157388080612283565b5050600890604051611c40816108e8565b50505050600890604051611c40816108e8565b50603f1982018281116121bf578111612249565b50801561224256",
+    "sourceMap": "1741:24374:7:-:0;;;;;;;;;;;;;;;;;;;;;"
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x6040608081526004908136101561001557600080fd5b60009160e0908335821c9182630eb4cdba146107d757826321422496146107bb57826324d2e7181461065a578263397e8c16146106225782633c1fe8b2146105fc5782633e34db2f146105525782634849f9961461050c57826352f762cc1461047a5782635618b7ec146104565782635af2b486146103f25782635d5729481461038b57826367f36d731461034d5782639caddc56146102f2578263aff1f44b146101df57508163b4ca922d146101bd578163b77b2ad814610193578163bfa9b93f1461012d575063c2596011146100ec57600080fd5b8060031936011261012957602090610102610924565b9061010c82611fe8565b918261011c575b50519015158152f35b3f60243514915083610113565b5080fd5b83915060a036600319011261012957610144610924565b91606435906001600160401b038211610190575061017a929161016991369101610be1565b608435916044359060243590611c80565b82516001600160a01b0390921682526020820152f35b80fd5b50506020366003190112610129576020906101b46101af610924565b611620565b90519015158152f35b8284602036600319011261019057506101d860209235611551565b9051908152f35b9391506102a0366003190112610129576101f836610a11565b91610140366101631901126101905783519461021386610849565b6001600160a01b036101643581811681036102ee5787526101843560208801526101a43580151581036102ee57878701526101c43560608801526101e4356001600160e01b0319811681036102ee5760808801526102043590811681036102ea5760a08701526102243560ff811681036102ea5760c087015261024435908601526102643561010086015261028435906001600160401b038216820361019057509184916102ca936101206102e697015235611515565b9251918252602082015260408101919091529081906060820190565b0390f35b8280fd5b8380fd5b50905060603660031901126102ea5761030961093f565b604435939091906001600160a01b038516850361019057509261032f9160609435610c70565b90839293519315158452602084015263ffffffff60e01b1690820152f35b5090506101803660031901126102ea5761036636610a11565b9061016435936001600160401b03851685036101905750926101d89160209435611437565b50905060803660031901126102ea576103a2610924565b92602435906001600160401b038211610190575060ff936103cc6102e6936103da93369101610be1565b906064359160443591611bcd565b90928051948594168452806020850152830190610c4b565b83856020366003190112610190575060a060ff610415610410610924565b611641565b9190938051941515855282511515602086015260208301518186015282015116606084015260608101516080840152608081015182840152015160c0820152f35b505050610140600319360112610129576020906101b461047536610955565b611ed3565b83858160031936011261019057506001600160401b03610120926104ad61049f610924565b6104a761093f565b90611807565b90938051941515855260ff8251166020860152602082015181860152810151606085015263ffffffff60e01b6060820151166080850152608081015160a085015260a081015160c085015260c081015182850152015116610100820152f35b5050506080600319360112610129576101609061055061053e61052d610924565b606435906044359060243590611024565b90925192151583526020830190610af1565bf35b8482856101203660031901126102ea5761056b36610b73565b9160803660a31901126102ee578151936105848561087b565b60a435855260c435602086015260e43560ff81168103610129578386015261010435906001600160401b038216820361019057506105d96105d26102e694936105e093606089015235611551565b948561159a565b948461159a565b9051938493846040919493926060820195825260208201520152565b50828460a036600319011261019057506101d860209261061b36610b73565b903561159a565b5050508060031936011261012957610638610924565b602435926001600160e01b03198416840361019057506020926101b491611e33565b9150506103003660031901126102ea5761067336610955565b92610140366101431901126101905782519361068e85610849565b6001600160a01b03926101443584811681036102ee5786526101643560208701526101843580151581036102ee57868601526101a43560608701526101c4356001600160e01b0319811681036102ee5760808701526101e43584811681036102ee5760a08701526102043560ff811681036102ee5760c08701526102243590860152610244356101008601526001600160401b03946102643586811681036102ee576101208201526102a435928484168403610190576102c4359485168503610190576102e4359687168703610190575092610776926101e0969260809561028435916112d5565b909261078481518095610ace565b610792602085018351610af1565b602082015161016085015281015161018084015260608101516101a084015201516101c0820152f35b508284602036600319011261019057506101d8602092356113e8565b5050506101a0600319360112610129576107f036610955565b610144356001600160a01b03811681036102ee5761018435936001600160e01b0319851685036101905750610834610160946105509361083f93610164359161111d565b919093518094610ace565b6020830190610af1565b61014081019081106001600160401b0382111761086557604052565b634e487b7160e01b600052604160045260246000fd5b608081019081106001600160401b0382111761086557604052565b61010081019081106001600160401b0382111761086557604052565b60a081019081106001600160401b0382111761086557604052565b606081019081106001600160401b0382111761086557604052565b602081019081106001600160401b0382111761086557604052565b90601f801991011681019081106001600160401b0382111761086557604052565b600435906001600160a01b038216820361093a57565b600080fd5b602435906001600160a01b038216820361093a57565b61014090600319011261093a576040519061096f82610849565b816001600160a01b03600435818116810361093a5782526024356020830152604435801515810361093a57604083015260643560608301526084356001600160e01b03198116810361093a57608083015260a435908116810361093a5760a082015260c43560ff8116810361093a5760c082015260e43560e08201526101043561010082015261012435906001600160401b038216820361093a576101200152565b61014090602319011261093a5760405190610a2b82610849565b816001600160a01b03602435818116810361093a5782526044356020830152606435801515810361093a576040830152608435606083015260a4356001600160e01b03198116810361093a57608083015260c435908116810361093a5760a082015260e43560ff8116810361093a5760c08201526101043560e08201526101243561010082015261014435906001600160401b038216820361093a576101200152565b906006821015610adb5752565b634e487b7160e01b600052602160045260246000fd5b60018060a01b03808251168352602082015160208401526040820151151560408401526060820151606084015263ffffffff60e01b608083015116608084015260a08201511660a083015260ff60c08201511660c083015260e081015160e083015261010080820151908301526001600160401b036101208092015116910152565b608090602319011261093a5760405190610b8c8261087b565b816024358152604435602082015260643560ff8116810361093a576040820152608435906001600160401b038216820361093a5760600152565b6001600160401b03811161086557601f01601f191660200190565b81601f8201121561093a57803590610bf882610bc6565b92610c066040519485610903565b8284526020838301011161093a57816000926020809301838601378301015290565b60005b838110610c3b5750506000910152565b8181015183820152602001610c2b565b90602091610c6481518092818552858086019101610c28565b601f01601f1916010190565b929190916000936000936000937f03f4d9e115b9c4c43ab58684ef44935e7cf92d54b8db1d97a707c8526faa3c1b8314610fa2577f03f5dfc0687afbbc9c86bda58667bf3bb235a2d1cbe7273bbbe4d5301fb0b6d28314610f4e5750507f136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e28114610f3c577f7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a8114610f2a577faef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f48114610f18577fead6d91d79d13e47343aa9d24c2198c5e4fcd612fdd9531d8b2549bab76514748114610ee4577fafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c918114610eb0577fb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb8114610e9e577fd43cf73a122b502fe5e16c9100883f4371b93df4467921d97b4e220819fb8ebe8114610e8c577fd90b9e0160ba8e56a77078d6022d52bf0cd862ba5a5adfb6f792287e31399f908114610e7a577fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c48114610e68577fe5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd8114610e565750565b6001945092506313ea5d7360e11b9150565b6001945092506377e19fd760e11b9150565b600194509250630b0908bd60e21b9150565b6001945092506347291ea160e01b9150565b60019450925063979b977f60e01b9150565b50600193507f217d16181cfb7c9bb7e1687d0b13ef4b864e9154dc37b60f75a88bec454b546792506355254e6360e11b9150565b50600193507f50e132608386d4b0bf237635eb7bfd9473f667085fa7d7b18f81c5045c28905092506320da17d760e21b9150565b600194509250636ee40fe160e11b9150565b60019450925063222d442760e01b9150565b60019450925063b4074ed760e01b9150565b9295509093506001600160a01b03908116911614159050610f9c57507fa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e905b600191906377faad4f60e01b90565b90610f8d565b50600195507f47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec69450631bb3076f60e11b93505050565b60405190610fe582610849565b816101206000918281528260208201528260408201528260608201528260808201528260a08201528260c08201528260e0820152826101008201520152565b93929190611030610fd8565b61103986611fe8565b158015611115575b801561110a575b8015611102575b80156110fa575b80156110ea575b6110df57506040519461106f86610849565b60018060a01b0316908186526020860152600060408601527fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c460608601526377e19fd760e11b608086015260a0850152600160c085015260e0840152610100830152600161012083015260019190565b945050505060009190565b506110f486611d59565b1561105d565b508315611056565b50821561104f565b5081863f1415611048565b508115611041565b91909392611129610fd8565b9261113386611fe8565b156112ca5761114181611ed3565b156112bf5780516001600160a01b03949061115f9088908716611807565b9490156112b257873f93600160ff8751161491826112a4575b5081611289575b8161127b575b8161126d575b8161125f575b81611251575b8161123a575b81611229575b501561121d57506020830151908463ffffffff60e01b6060860151169151169160ff8551169360a060c087015196015196604051996111e18b610849565b1689526020890152600060408901526060880152608087015260a086015260c085015260e0840152610100830152600061012083015260009190565b95505050505060029190565b611234915088611e33565b386111a3565b60e08601516001600160401b03161515915061119d565b60a086015115159150611197565b60c086015115159150611191565b60808601518514915061118b565b604086015115159150611185565b60608601516001600160e01b0319808316911614915061117f565b602087015114915038611178565b5095505050505060019190565b505050915060019190565b505050915060029190565b909195939492956040519160a08301926001600160401b03938181108582111761086557604052611304610fd8565b815260009889602083015289604083015289606083015289608083015261132d82998286610c70565b9491939093156113d857506001600160e01b03198416156113ca579061135493929161111d565b8752809760068210156113b65750806113ae5750906113886113a79493926101209483868a51019116905283885191611515565b6080899693960152604088015283602088015286519201511691611437565b6060830152565b965050505050565b634e487b7160e01b81526021600452602490fd5b506004995050505050505050565b60039b5099505050505050505050565b60405160208101917ff4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb8352466040830152306060830152608082015260808152611431816108b2565b51902090565b90917f1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d0439260018060a01b038082511691602081015191604082015115159160608101519163ffffffff60e01b6080830151169060a0830151169260ff60c0840151169460e08401519661010080950151986040519b60208d019d8e5260408d015260608c015260808b015260a08a015260c089015260e08801528601526101208501526101408401526101608301526001600160401b03908161018091168184015282526101a0820190828210908211176108655760405251902090565b61152561154e91949293946113e8565b936001600160401b03611542610120958287820151169088611437565b94820151169085611437565b90565b60405160208101917f9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a718352466040830152306060830152608082015260808152611431816108b2565b90606081519160208101519060ff604082015116906001600160401b03938491015116916040519460208601967f5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c885260408701526060860152608085015260a084015260c083015260c0825260e0820190828210908211176108655760405251902090565b61162981611fe8565b1561163b5761163790611641565b5090565b50600090565b604080516001600160401b03939260c08201858111838210176108655783526000808352602091818385015281858501528160608501528160808501528160a0850152839685518481019163546ea28160e01b835260048252878201908282109082111761179d5787525183928392905afa923d9360c085118082151760011461178c5786519580875280858789013e8601603f01601f191687525b611785575b158015611779575b8015611760575b611756575060c08380518101031261019057818301519384151580950361012957808401519360608101519260ff8416809403610190575060808101519060c060a082015191015160a08a015260808901526060880152860152840152825260019190565b9550925050509190565b50606084015160081c15600184860151111516156116f1565b5060c0845114156116ea565b50816116e2565b8651848152858101885295506116dd565b634e487b7160e01b85526041600452602485fd5b81601f8201121561093a5780516117c781610bc6565b926117d56040519485610903565b8184526020828401011161093a5761154e9160208085019101610c28565b51906001600160401b038216820361093a57565b91906000806040519461181986610896565b8186528160208701528160408701528160608701528160808701528160a08701528160c08701528160e087015285936040516020810191630a9aa01d60e21b835260018060a01b0316602482015260248152611874816108cd565b51915afa923d936109c0851180821517600114611bb75760405195808752806000602089013e8601603f01601f19166040525b611baf575b158015611b9f575b611b965750825183019260208185031261093a5760208101516001600160401b03811161093a5761018081830186031261093a576040519461018086018681106001600160401b038211176108655760405260208284010151600481101561093a5786528282016040818101516020890152606082015190880152608001516001600160e01b03198116810361093a57606087015260a0828401015163ffffffff8116810361093a57608087015282820160c08181015160a089015260e080830151918901919091526101008201519088015261012001516001600160401b03811161093a576119b4610180916020806119ee95019186880101016117b1565b92836101008901526119cb610140828701016117f3565b6101208901526119e0610160828701016117f3565b6101408901528401016117f3565b61016086015251906020815191012060405160208082015285516004811015610adb576040820152602086015160608201526040860151608082015263ffffffff60e01b60608701511660a082015263ffffffff60808701511660c082015260a086015160e082015260c086015161010082015260e0860151610120820152611adb81611a8e6101008901516101806101408401526101c0830190610c4b565b6001600160401b036101208a0151166101608301526001600160401b036101408a0151166101808301526001600160401b036101608a0151166101a083015203601f198101835282610903565b602081519101201490811591611b8d575b8115611b81575b50611b7a57508151916004831015610adb57602081015190604081015163ffffffff60e01b60608301511660a08301519060c0840151926001600160401b0361016060e0870151960151169560ff60405199611b4e8b610896565b168952602089015260408801526060870152608086015260a085015260c084015260e083015260019190565b6000925090565b61080091501138611af3565b80159150611aec565b92505060009190565b50611ba9846120a2565b156118b4565b5060006118ac565b94506040519460008652602086016040526118a7565b9192611bda90845a6121d5565b15611c6e57600092839260208351930191fa3d9015620100008211600182821714611c585760405192808452806000602086013e8301603f01601f19166040525b611c4757611c3057611c2c9061221f565b9091565b50600690604051611c40816108e8565b6000815290565b5050600790604051611c40816108e8565b9150604051916000835260208301604052611c1b565b505050600690604051611c40816108e8565b94939291611c8f90825a6121d5565b15611d4c57600080928192829760208351930191fa60403d149081611d39575b15908115611d30575b508015611d24575b8015611d19575b611cfa576001600160a01b03169283158015611d11575b8015611d06575b611cfa57612710808281850602049204020190565b50509050600090600090565b506103e88111611ce5565b508015611cde565b5061ffff8411611cc7565b508060a01c1515611cc0565b90501538611cb8565b945090604081803e519060205194611caf565b5050509050600090600090565b604051906301ffc9a760e01b611d9060209382858201526377e19fd760e11b602482015260248152611d8a816108cd565b83612044565b9015908115611e27575b8115611e0c575b50611e0457611dd191604051918483015263ffffffff60e01b602483015260248252611dcc826108cd565b612044565b81929192611df9575b82611de457505090565b908092508180518101031261093a5701511590565b805182149250611dda565b505050600090565b9050838180518101031261093a578301516001141538611da1565b80518514159150611d9a565b90604051916301ffc9a760e01b90611e6f602094838682015263ffffffff60e01b809516602482015260248152611e69816108cd565b82612044565b9015908115611ec7575b8115611eac575b50611ea357611dd1926040519285840152602483015260248252611dcc826108cd565b50505050600090565b9050848180518101031261093a578401516001141538611e80565b80518614159150611e79565b805160208201516001600160a01b039182169290611ef084611fe8565b9384611fdd575b505082611faf575b82611f90575b82611f80575b82611f6e575b82611f60575b82611f51575b82611f39575b82611f2d57505090565b61154e92505116611d59565b6101208101516001600160401b031615159250611f23565b61010081015115159250611f1d565b60e081015115159250611f17565b60c081015160ff166001149250611f11565b60a0810151821615159250611f0b565b60808101516001600160e01b0319166377e19fd760e11b149250611f05565b60608101517fde86dd5f33a5b2bd22cfbe7752609f5086a946f705768f7e2e6cb501157a41c4149250611eff565b3f1492503880611ef7565b6001600160a01b03811615159081612012575b81612004575090565b61200e915061201d565b1590565b803b15159150611ffb565b6017813b0361163b576000806003923c6000516001600160e81b03191661ef0160f01b1490565b6000918291602082519201905afa903d90602082118084151760011461208c5760405192808452806000602086013e8301603f01601f19166040525b61208657565b60009250565b9150604051916000835260208301604052612080565b9081516101c080821080156121a7575b61219f5760019360208082015103612196575b600360408201511161218d575b60a08101516001600160e01b0316612184575b60c081015160201c61217b575b6101808061014083015103612172575b61016082015160401c612169575b81015160401c612160575b6101a081015160401c612157575b810151610800811181151761214e575b601f01601f1916010361214857565b60009150565b60009450612139565b60009450612129565b6000945061211b565b60009550612110565b60009550612102565b600094506120f2565b600094506120e5565b600094506120d2565b600094506120c5565b506000925050565b506109c082116120b2565b919082039182116121bf57565b634e487b7160e01b600052601160045260246000fd5b818110611e0457816121e6916121b2565b90603f80820491066122165760ff60005b1681018091116121bf57808210611e0457612211916121b2565b101590565b60ff60016121f7565b805190606082106122f15760208101918251602060408401519114801590612329575b8015612315575b61230257601f81018082116121bf57601f191691603f1981019081116121bf5782036123025761227990826121b2565b80159182156122bb575b505050805181019160208284031261093a5751916001600160401b03831161093a576122b69260208092019201016117b1565b600091565b60409084010151918160031b91820460081417156121bf576001901b9060001982019182116121bf57166122f157388080612283565b5050600890604051611c40816108e8565b50505050600890604051611c40816108e8565b50603f1982018281116121bf578111612249565b50801561224256",
+    "sourceMap": "1741:24374:7:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;22192:24;;;;:::i;:::-;:55;;;;1741:24374;;;;;;;;;22192:55;22220:15;1741:24374;;22220:27;;-1:-1:-1;22192:55:7;;;1741:24374;;;;;;;-1:-1:-1;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;:::i;:::-;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;-1:-1:-1;;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;;;;:::i;:::-;;:::i;:::-;;;;;;;;;;;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;;;;;;;;;;-1:-1:-1;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;;:::i;:::-;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;-1:-1:-1;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;:::i;:::-;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;-1:-1:-1;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;;:::i;:::-;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;:::i;:::-;-1:-1:-1;1741:24374:7;-1:-1:-1;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;:::i;:::-;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;12056:30;1741:24374;;;:::i;:::-;12056:30;:::i;1741:24374::-;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;:::i;:::-;;;:::i;:::-;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;:::i;:::-;;;;;;;;-1:-1:-1;;1741:24374:7;;;;;;;:::i;:::-;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;14664:42;14605:34;1741:24374;;;14731:43;1741:24374;;;;;;14605:34;:::i;:::-;14664:42;;;:::i;:::-;14731:43;;;:::i;:::-;1741:24374;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;;:::i;:::-;;;;:::i;:::-;;;;;;;;;;;;;;:::i;:::-;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;:::i;:::-;;-1:-1:-1;;1741:24374:7;;-1:-1:-1;;1741:24374:7;;;;;;;:::i;:::-;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;;;;-1:-1:-1;;1741:24374:7;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;:::i;:::-;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;;;:::i;:::-;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;1908:66;1741:24374;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;:::o;:::-;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;:::o;:::-;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;:::o;:::-;;;;;;;;;;;;;;;:::i;:::-;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;:::i;:::-;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;:::o;:::-;;;;;;;;;:::o;:::-;;;;-1:-1:-1;1741:24374:7;;;;;-1:-1:-1;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;:::o;:::-;-1:-1:-1;;;;;1741:24374:7;;;;;;-1:-1:-1;;1741:24374:7;;;;:::o;:::-;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;;;;;;;;;;;;;;:::o;:::-;;;;;;;;-1:-1:-1;;1741:24374:7;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;-1:-1:-1;;1741:24374:7;;;;:::o;5605:2145::-;;;;;1741:24374;5757:18;1741:24374;5777:18;1741:24374;5815:39;2464:66;5815:39;;5811:156;;2603:66;5980:46;;5976:233;;6222:36;;2732:66;6222:36;;6218:131;;2864:66;6362:39;;6358:137;;2996:66;6508:39;;6504:147;;3138:66;6664:49;;6660:166;;3271:66;6839:40;;6835:152;;3407:66;7000:43;;6996:145;;3549:66;7154:49;;7150:156;;3685:66;7319:43;;7315:145;;3817:66;7473:39;;7469:137;;3945:66;7619:35;;7615:129;;5605:2145;:::o;7615:129::-;7678:4;;-1:-1:-1;7670:63:7;-1:-1:-1;;;;7697:35:7;-1:-1:-1;7670:63:7:o;7469:137::-;7536:4;;-1:-1:-1;7528:67:7;-1:-1:-1;;;;7555:39:7;-1:-1:-1;7528:67:7:o;7315:145::-;7386:4;;-1:-1:-1;7378:71:7;-1:-1:-1;;;;7405:43:7;-1:-1:-1;7378:71:7:o;7150:156::-;7227:4;;-1:-1:-1;7219:76:7;-1:-1:-1;;;;7246:48:7;-1:-1:-1;7219:76:7:o;6996:145::-;7067:4;;-1:-1:-1;7059:71:7;-1:-1:-1;;;;7086:43:7;-1:-1:-1;7059:71:7:o;6835:152::-;-1:-1:-1;6903:4:7;;-1:-1:-1;4348:66:7;;-1:-1:-1;;;;6935:40:7;-1:-1:-1;6895:81:7:o;6660:166::-;-1:-1:-1;6737:4:7;;-1:-1:-1;4489:66:7;;-1:-1:-1;;;;4216:66:7;-1:-1:-1;6729:86:7:o;6504:147::-;6571:4;;-1:-1:-1;6563:77:7;-1:-1:-1;;;;6590:49:7;-1:-1:-1;6563:77:7:o;6358:137::-;6425:4;;-1:-1:-1;6417:67:7;-1:-1:-1;;;;6444:39:7;-1:-1:-1;6417:67:7:o;6218:131::-;6282:4;;-1:-1:-1;6274:64:7;-1:-1:-1;;;;6301:36:7;-1:-1:-1;6274:64:7:o;5976:233::-;6055:69;;-1:-1:-1;6055:69:7;;-1:-1:-1;;;;;;1741:24374:7;;;;;6055:28;1741:24374;;-1:-1:-1;1741:24374:7;;6055:69;4216:66;6055:69;;1741:24374;;6138:60;-1:-1:-1;;;4216:66:7;6138:60::o;6055:69::-;;;;5811:156;-1:-1:-1;5878:4:7;;-1:-1:-1;4084:66:7;;-1:-1:-1;;;;5916:39:7;-1:-1:-1;;;5870:86:7:o;1741:24374::-;;;;;;;:::i;:::-;;;-1:-1:-1;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o;7756:1157::-;;;;;1741:24374;;:::i;:::-;8028:26;;;:::i;:::-;8027:27;1741:24374;;8027:60;;7756:1157;8027:116;;;;7756:1157;8027:152;;;;7756:1157;8027:208;;;;7756:1157;8027:303;;;;7756:1157;8010:379;;1741:24374;;;;;;;:::i;:::-;;;;;;;1826:1;;;;8408:466;;;1826:1;-1:-1:-1;1741:24374:7;8408:466;;1826:1;3817:66;8408:466;;;1826:1;7555:39;;;8408:466;;;1826:1;1741:24374;8408:466;;1826:1;1741:24374;8408:466;;;1826:1;8408:466;;;1826:1;8408:466;;;1826:1;1741:24374;8408:466;;;1826:1;1741:24374;8884:22;7756:1157;:::o;8010:379::-;8355:23;;;;;-1:-1:-1;8355:23:7;;:::o;8027:303::-;8256:74;;;;:::i;:::-;8255:75;8027:303;;:208;8199:36;;;8027:208;;:152;8147:32;;;8027:152;;:116;8107:17;;;;:36;;8027:116;;:60;8058:29;;;8027:60;;8919:1635;;;;;1741:24374;;:::i;:::-;9241:24;;;;:::i;:::-;9240:25;9236:117;;9367:38;;;:::i;:::-;9366:39;9362:133;;1741:24374;;-1:-1:-1;;;;;1741:24374:7;;9570:48;;1741:24374;;;;9570:48;:::i;:::-;9632:12;;;9628:106;;9769:15;;1741:24374;;;;;;20802:38;:81;;;;8919:1635;20802:138;;;;8919:1635;20802:176;;;8919:1635;20802:233;;;8919:1635;20802:276;;;8919:1635;20802:335;;;8919:1635;20802:359;;;8919:1635;20802:427;;;8919:1635;9798:122;;9794:214;;10172:17;;;;1741:24374;;;;;;10216:18;;;1741:24374;;;;;;;;;;10357:25;1741:24374;10357:25;;;1741:24374;10420:29;;1741:24374;;;;;;;;:::i;:::-;;1826:1;;10172:17;10029:456;;1826:1;-1:-1:-1;1741:24374:7;10029:456;;1826:1;10216:18;10029:456;;1826:1;10029:456;;;1826:1;1741:24374;10029:456;;1826:1;10357:25;10029:456;;1826:1;1741:24374;10029:456;;1826:1;10029:456;;;1826:1;-1:-1:-1;10029:456:7;;;1826:1;-1:-1:-1;10495:52:7;8919:1635;:::o;9794:214::-;9936:61;;;;;;9944:41;9936:61;;:::o;20802:427::-;21177:52;;;;;:::i;:::-;20802:427;;;:359;21141:15;;;1741:24374;-1:-1:-1;;;;;1741:24374:7;21141:20;;;-1:-1:-1;20802:359:7;;:335;1741:24374;21094:29;;1741:24374;21094:43;;;-1:-1:-1;20802:335:7;;:276;21039:25;;;1741:24374;21039:39;;;-1:-1:-1;20802:276:7;;:233;20994:22;;;1741:24374;20994:41;;;-1:-1:-1;20802:233:7;;:176;20944:20;;;1741:24374;20944:34;;;-1:-1:-1;20802:176:7;;:138;20899:18;;;1741:24374;-1:-1:-1;;;;;;1741:24374:7;;;;;20899:41;;-1:-1:-1;20802:138:7;;:81;20844:17;;;1741:24374;20844:39;;-1:-1:-1;20802:81:7;;;9628:106;9660:63;;;;;;;1741:24374;9660:63;;:::o;9362:133::-;9421:63;;;;;9429:43;9421:63;;:::o;9236:117::-;9281:61;;;;;9289:41;9281:61;;:::o;10560:1349::-;;;;;;;;1741:24374;;;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;;;;;;;:::i;:::-;;;-1:-1:-1;1741:24374:7;;;;;;;;;;;;;;;;;;;;;11110:61;10896:43;11110:61;;;;:::i;:::-;11185:6;;;;;;11181:69;;-1:-1:-1;;;;;;;1741:24374:7;;11264:32;11260:125;;11433:81;;;;;;:::i;:::-;11394:120;;;1741:24374;;;;;;;11528:42;;11524:69;;11604:23;;11721:61;11836:66;11604:23;;;;:14;;;;;:23;1741:24374;;1826:1;;11767:14;;;11721:61;;:::i;:::-;1741:24374;11688:17;;;;;1826:1;1741:24374;11669:17;;1826:1;11653:14;1741:24374;11653:14;;1826:1;11869:14;;11885:16;;1741:24374;;11836:66;;:::i;:::-;1741:24374;11792:29;;1826:1;10560:1349::o;11524:69::-;11572:21;-1:-1:-1;;;;;11572:21:7:o;1741:24374::-;-1:-1:-1;;;1741:24374:7;;;;;;;;11260:125;-1:-1:-1;11320:47:7;;-1:-1:-1;;;;;;;;11312:62:7:o;11181:69::-;11201:42;;-1:-1:-1;11193:57:7;-1:-1:-1;;;;;;;;;11193:57:7:o;12099:315::-;1741:24374;;12216:181;;;1741:24374;1908:66;1741:24374;;12309:13;1741:24374;1908:66;;1741:24374;12349:4;1908:66;;;1741:24374;1908:66;;;1741:24374;1908:66;12216:181;;;;;:::i;:::-;1741:24374;12193:214;;12099:315;:::o;12420:689::-;;;2055:66;12420:689;1741:24374;;;;;;;;;12765:16;;;;1741:24374;12799:14;;;;2055:66;1741:24374;;12831:18;;;;1741:24374;;;;;12867:19;;;1741:24374;;12904:16;1741:24374;12904:16;;1741:24374;;12938:22;1741:24374;12938:22;;;1741:24374;;12978:26;1741:24374;12978:26;;1741:24374;13022:30;;;;;1741:24374;;12799:14;1741:24374;12621:471;12765:16;12621:471;;1741:24374;;;12799:14;2055:66;;1741:24374;12831:18;2055:66;;1741:24374;12867:19;2055:66;;1741:24374;;2055:66;;1741:24374;12938:22;2055:66;;1741:24374;;2055:66;;1741:24374;2055:66;;1741:24374;2055:66;;;1741:24374;2055:66;;;1741:24374;2055:66;;;1741:24374;-1:-1:-1;;;;;2055:66:7;;;1741:24374;;2055:66;;;1741:24374;12621:471;;2055:66;1741:24374;;;;;;;;;;;;12799:14;1741:24374;;12598:504;;12420:689;:::o;13115:471::-;13386:29;13521:58;13115:471;;;;;13386:29;:::i;:::-;1741:24374;-1:-1:-1;;;;;13440:56:7;13478:17;;;;;;1741:24374;;13440:56;;;:::i;:::-;13560:18;;;1741:24374;;13521:58;;;:::i;:::-;13115:471;:::o;13592:263::-;1741:24374;;13714:124;;;1741:24374;2193:66;1741:24374;;13782:13;1741:24374;1908:66;;1741:24374;13806:4;1908:66;;;1741:24374;1908:66;;;1741:24374;1908:66;13714:124;;;;;:::i;13861:452::-;;14264:18;2331:66;;14191:15;;;;2331:66;14224:22;1741:24374;14224:22;;;1741:24374;;;-1:-1:-1;;;;;14264:18:7;;;;1741:24374;;;14224:22;1741:24374;14055:241;14191:15;14055:241;;1741:24374;2331:66;1741:24374;;14224:22;2331:66;;1741:24374;14264:18;2331:66;;1741:24374;2331:66;;;1741:24374;2331:66;;;1741:24374;2331:66;;;1741:24374;2331:66;14055:241;;2331:66;1741:24374;;;;;;;;;;;;14224:22;1741:24374;;14032:274;;13861:452;:::o;14787:212::-;14877:26;;;:::i;:::-;14876:27;14872:45;;14943:27;;;:::i;:::-;14980:12;14787:212;:::o;14872:45::-;14905:12;-1:-1:-1;14905:12:7;:::o;15145:709::-;1741:24374;;;-1:-1:-1;;;;;1741:24374:7;15145:709;1741:24374;;;;;;;;;;;;;;-1:-1:-1;1741:24374:7;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;15247:27;1741:24374;;;15362:48;;;1741:24374;;;;15362:48;;;;;1741:24374;;;;;;;;;;;;;;;22796:748;1741:24374;;;;;22796:748;;;;;1741:24374;22796:748;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;22796:748:7;;;;23553:30;;22796:748;15430:3;1741:24374;;15430:25;;22796:748;15430:61;;;;22796:748;15426:114;;1741:24374;;;;;15749:67;;5083:36;;;;15749:67;;;5083:36;1741:24374;;;;;;;;;5083:36;;;;;1741:24374;5083:36;;;1741:24374;;;;;;;;;5083:36;1741:24374;5083:36;;;;1741:24374;;5083:36;;;;;;1741:24374;15717:19;;1826:1;1741:24374;15684:19;;1826:1;1741:24374;15654:16;;1826:1;15622:18;;1826:1;15593:15;;1826:1;;;1741:24374;15826:21;15145:709;:::o;15426:114::-;15507:22;;;;;;;;:::o;15430:61::-;24809:186;1741:24374;24809:186;;;;;;;;;;;;;;15459:32;15430:61;;:25;1741:24374;;;;15437:18;;15430:25;;23553:30;23568:15;;23553:30;;22796:748;;;;;;;;;;;;-1:-1:-1;22796:748:7;;1741:24374;-1:-1:-1;;;1741:24374:7;;;15362:48;1741:24374;15362:48;1741:24374;;4774:5;;;;;;;;;;;;;;:::i;:::-;1741:24374;;;;;;;:::i;:::-;4774:5;;;;;;;;;;;;;;;;;;;;:::i;:::-;;1741:24374;-1:-1:-1;;;;;1741:24374:7;;;;;;4774:5::o;15860:1303::-;;;-1:-1:-1;1741:24374:7;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;15977:30;1741:24374;;;;16108:75;;16131:43;;;;16108:75;;1741:24374;;;;;;16108:75;;;1741:24374;16108:75;;;;;;:::i;:::-;22796:748;;;;;;;4774:5;22796:748;;;;;;;;;;1741:24374;22796:748;;;;;;-1:-1:-1;1741:24374:7;22796:748;;;;;;;-1:-1:-1;;22796:748:7;1741:24374;22796:748;;23553:30;;22796:748;16250:3;1741:24374;;16250:46;;22796:748;16246:73;;1741:24374;;;16365:38;;4774:5;1741:24374;4774:5;;;;;;1741:24374;16365:38;;4774:5;-1:-1:-1;;;;;4774:5:7;;;;;;;;;;;;;1741:24374;;;4774:5;1741:24374;;;;;-1:-1:-1;;;;;1741:24374:7;;;;;;;;4774:5;;;;;;;;;;;;;;;;1741:24374;4774:5;;;5083:36;1741:24374;4774:5;;;1741:24374;4774:5;;5083:36;4774:5;;;;1741:24374;4774:5;;-1:-1:-1;;;;;;1741:24374:7;;;;;;;4774:5;;;1741:24374;4774:5;;;;;1741:24374;4774:5;;;;;;1741:24374;4774:5;;;;;;1741:24374;4774:5;;;5083:36;1741:24374;4774:5;;;1741:24374;4774:5;;;5083:36;4774:5;;;;;;;1741:24374;4774:5;;5083:36;4774:5;;;;;;;-1:-1:-1;;;;;4774:5:7;;;;;;16365:38;1741:24374;16365:38;4774:5;16365:38;;4774:5;;;;;;;:::i;:::-;;;1741:24374;4774:5;;;;;;;;;;:::i;:::-;;;;;;;;;;;;:::i;:::-;;;;;;;;;:::i;:::-;;;;;1741:24374;;;;;16365:38;;16498:15;1741:24374;;;16527:18;;;4774:5;;;;;;;;;1741:24374;4774:5;;;1741:24374;4774:5;;;1741:24374;4774:5;;1741:24374;;4774:5;;;1741:24374;4774:5;;1741:24374;;;;;4774:5;;;1741:24374;;4774:5;;1741:24374;;;4774:5;;;;1741:24374;4774:5;;;1741:24374;4774:5;;;1741:24374;4774:5;;1741:24374;;4774:5;;;1741:24374;4774:5;;1741:24374;;4774:5;;;;;;1741:24374;16527:18;4774:5;;1741:24374;4774:5;;;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;4774:5:7;;;;1741:24374;4774:5;;;1741:24374;-1:-1:-1;;;;;4774:5:7;;;;1741:24374;4774:5;;;1741:24374;-1:-1:-1;;;;;4774:5:7;;;;1741:24374;4774:5;;;1741:24374;16527:18;1741:24374;;16527:18;;;;;;:::i;:::-;1741:24374;;;16527:18;;16517:29;16498:48;;;;:66;;;22796:748;16498:128;;;;22796:748;16481:202;;;4843:5;;;4774;;;;;;;1741:24374;4774:5;;1741:24374;4774:5;1741:24374;4774:5;;1741:24374;;;;;4774:5;;1741:24374;;;4774:5;;1741:24374;4774:5;1741:24374;4774:5;;1741:24374;4774:5;-1:-1:-1;;;;;4774:5:7;1741:24374;4774:5;;1741:24374;4774:5;;1741:24374;;;;;;;;;;:::i;:::-;;1826:1;;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;16700:426;;1826:1;1741:24374;17136:20;15860:1303;:::o;16481:202::-;-1:-1:-1;;;16651:21:7;:::o;16498:128::-;4843:5;16584:42;;;16498:128;;;:66;16550:14;;;-1:-1:-1;16498:66:7;;16246:73;16298:21;;;-1:-1:-1;16298:21:7;;:::o;16250:46::-;16258:38;;;;:::i;:::-;16257:39;16250:46;;23553:30;23568:15;-1:-1:-1;23553:30:7;;22796:748;;;1741:24374;22796:748;;-1:-1:-1;22796:748:7;;1741:24374;22796:748;;1741:24374;22796:748;;;17417:750;;;17638:82;17417:750;17682:9;;17638:82;:::i;:::-;17637:83;17633:164;;-1:-1:-1;23838:861:7;;;;;;;;;;;;;4904:6;23838:861;;;;;;;;;;;;;;;;-1:-1:-1;23838:861:7;;;;;;;;-1:-1:-1;;23838:861:7;;;;17953:74;;18037:59;;18113:47;;;:::i;:::-;18106:54;;17417:750::o;18037:59::-;18046:50;438:1:8;1741:24374:7;;;;;;:::i;:::-;-1:-1:-1;438:1:8;;18046:50:7;:::o;17953:74::-;17968:59;;497:1:8;1741:24374:7;;;;;;:::i;23838:861::-;;;;;;-1:-1:-1;23838:861:7;;;;;;;;;17633:164;17736:50;;;438:1:8;1741:24374:7;;;;;;:::i;18340:1445::-;;;;;18589:82;18340:1445;18633:9;;18589:82;:::i;:::-;18588:83;18584:136;;1741:24374;18776:15;;;;;18829:345;;;;;;;;;;;;;;;18340:1445;19200:3;1741:24374;;;19200:23;;18340:1445;19200:60;;;;;18340:1445;19200:115;;;;18340:1445;19183:190;;-1:-1:-1;;;;;1741:24374:7;;19486:22;;:34;;;;18340:1445;19486:60;;;;18340:1445;19482:113;;5019:6;;;;;;;;;;;;18340:1445;:::o;19482:113::-;19562:22;;;;1741:24374;19562:22;1741:24374;19562:22;:::o;19486:60::-;19524:22;4960:5;19524:22;;19486:60;;:34;19512:8;;;19486:34;;19200:115;19280:35;1741:24374;19280:35;;19200:115;;:60;1741:24374;;19252:3;1741:24374;19227:33;;19200:60;;:23;19207:16;;;19200:23;;;18829:345;;;;;;;;;;;;;;;18584:136;18687:22;;;;;1741:24374;18687:22;1741:24374;18687:22;:::o;19791:757::-;1741:24374;;20035:34;;;;19972:125;20012:71;;;;;;;7555:39;;;20012:71;;;1741:24374;20012:71;;;;;;:::i;:::-;19972:125;;:::i;:::-;20111:11;;1741:24374;;;20111:40;;19791:757;20111:84;;;;19791:757;20107:127;;;20288:156;1741:24374;;;20340:78;;;;;1741:24374;;;20012:71;20340:78;;1741:24374;20012:71;20340:78;;;;;:::i;:::-;20288:156;:::i;:::-;20461:37;;;;;;19791:757;20461:80;;;20454:87;;19791:757;:::o;20461:80::-;1741:24374;;;;;;;20502:34;;1741:24374;;;;20502:34;1741:24374;20502:39;19791:757;:::o;20461:37::-;1741:24374;;20474:24;;;-1:-1:-1;20461:37:7;;20107:127;20211:12;;;-1:-1:-1;20211:12:7;:::o;20111:84::-;1741:24374;;;;;;20155:35;;1741:24374;;;;20155:35;;1741:24374;20194:1;20155:40;;20111:84;;;:40;1741:24374;;20126:25;;;;-1:-1:-1;20111:40:7;;19791:757;;1741:24374;;20035:34;;;;20012:71;19972:125;20012:71;;;;;;;1741:24374;;;;;;20012:71;;;1741:24374;20012:71;;;;;;:::i;:::-;19972:125;;:::i;:::-;20111:11;;1741:24374;;;20111:40;;19791:757;20111:84;;;;19791:757;20107:127;;;20288:156;1741:24374;;;20340:78;;;;;20012:71;20340:78;;1741:24374;20012:71;20340:78;;;;;:::i;20107:127::-;20211:12;;;;-1:-1:-1;20211:12:7;:::o;20111:84::-;1741:24374;;;;;;20155:35;;1741:24374;;;;20155:35;;1741:24374;20194:1;20155:40;;20111:84;;;:40;1741:24374;;20126:25;;;;-1:-1:-1;20111:40:7;;21242:669;1741:24374;;21413:16;;;1741:24374;-1:-1:-1;;;;;1741:24374:7;;;;;22192:24;1741:24374;22192:24;:::i;:::-;:55;;;;21242:669;21385:107;;;;;21242:669;21385:185;;;21242:669;21385:231;;;21242:669;21385:282;;;21242:669;21385:338;;;21242:669;21385:398;;;21242:669;21385:423;;;21242:669;21385:519;;;21378:526;;21242:669;:::o;21385:519::-;21824:80;1741:24374;;;;21824:80;:::i;21385:423::-;21787:16;;;1741:24374;-1:-1:-1;;;;;1741:24374:7;21787:21;;;-1:-1:-1;21385:423:7;;:398;21739:30;;;1741:24374;21739:44;;;-1:-1:-1;21385:398:7;;:338;21683:26;;;1741:24374;21683:40;;;-1:-1:-1;21385:338:7;;:282;21620:22;;;1741:24374;;;;21620:47;;-1:-1:-1;21385:282:7;;:231;1741:24374;21586:16;;1741:24374;;;21586:30;;;-1:-1:-1;21385:231:7;;:185;21508:19;;;1741:24374;-1:-1:-1;;;;;;1741:24374:7;-1:-1:-1;;;21508:62:7;;-1:-1:-1;21385:185:7;;:107;21446:18;;;1741:24374;3817:66;21446:46;;-1:-1:-1;21385:107:7;;22192:55;22220:15;:27;;-1:-1:-1;22192:55:7;;;;21917:169;-1:-1:-1;;;;;1741:24374:7;;22004:20;;;;:47;;21917:169;22004:75;;;21997:82;21917:169;:::o;22004:75::-;22056:23;;;;:::i;:::-;22055:24;21917:169;:::o;22004:47::-;22028:18;;:23;;;-1:-1:-1;22004:47:7;;22260:316;22377:2;22354:19;;:25;22350:43;;-1:-1:-1;22426:109:7;;;;-1:-1:-1;22426:109:7;-1:-1:-1;;;;;;1741:24374:7;-1:-1:-1;;;22551:18:7;;22260:316::o;22582:1008::-;-1:-1:-1;22582:1008:7;;;20012:71;22796:748;;;;;;;;;;20012:71;22796:748;;;;;;;;;;;;;;;;;-1:-1:-1;20012:71:7;22796:748;;;;;;;-1:-1:-1;;22796:748:7;;;;23553:30;;22582:1008::o;23553:30::-;-1:-1:-1;;;22582:1008:7:o;22796:748::-;;;;;;-1:-1:-1;22796:748:7;;20012:71;22796:748;;;;;;25007:1106;;1741:24374;;25171:3;25158:16;;;:62;;;;25007:1106;25154:80;;25244:863;;;;;;;;;;25007:1106;25244:863;;;;;;;;25007:1106;25244:863;;;;-1:-1:-1;;;;;25244:863:7;;;25007:1106;25244:863;;;;;;;;25007:1106;25244:863;;;;;;;;;25007:1106;25244:863;;;;;;;;25007:1106;25244:863;;;;;;;25007:1106;25244:863;;;;;;;;25007:1106;25244:863;;;;;;;;;;;25007:1106;1741:24374;25244:863;-1:-1:-1;;25244:863:7;;;;;25007:1106::o;25244:863::-;;;-1:-1:-1;25007:1106:7:o;25244:863::-;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;;;;-1:-1:-1;25244:863:7;;25154:80;-1:-1:-1;25229:5:7;;-1:-1:-1;;25222:12:7:o;25158:62::-;25178:42;4774:5;25178:42;;25158:62;;1741:24374;;;;;;;;;;:::o;:::-;;;;;;;;;;;;844:470:8;1015:23;;;1011:41;;1083:23;;;;:::i;:::-;5019:6:7;1153:2:8;5019:6:7;;;;;1153:2:8;;1741:24374:7;-1:-1:-1;1159:26:8;1741:24374:7;;;;;;;;1200:28:8;;;1196:46;;1259:28;;;:::i;:::-;:48;;844:470;:::o;1159:26::-;1741:24374:7;1184:1:8;1159:26;;1392:1319;1741:24374:7;;1597:17:8;1612:2;1597:17;;1593:61;;1719:144;;;;;;;;;;;1876:12;;;;:33;;;1392:1319;1876:69;;;;1392:1319;1872:138;;2059:2;1741:24374:7;;;;;;;-1:-1:-1;;2043:34:8;;-1:-1:-1;;1741:24374:7;;;;;;;2091:33:8;;2087:102;;2217:27;;;;:::i;:::-;2258:12;;;;;2254:390;;1392:1319;1741:24374:7;;;;;2671:32:8;;388:1;1719:144;388:1;;;;;;;;-1:-1:-1;;;;;388:1:8;;;;;2671:32;1719:144;2671:32;;;388:1;;;;:::i;:::-;-1:-1:-1;;1392:1319:8:o;2254:390::-;1719:144;2317:128;;;;;556:1;;;;;;;2490;556;;;;;2532;556;;1741:24374:7;;;;;;;;;;2510:45:8;2505:129;;2254:390;;;;;2505:129;2581:38;;2490:1;1741:24374:7;1719:144:8;1741:24374:7;;;;:::i;2087:102:8:-;2140:38;;;;556:1;1741:24374:7;1719:144:8;1741:24374:7;;;;:::i;1876:69:8:-;-1:-1:-1;;;1741:24374:7;;;;;;;1913:32:8;;1876:69;;:33;1892:17;;;1876:33;"
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "completionBuffer",
+              "type": "uint256"
+            }
+          ],
+          "name": "boundedRouterString",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "value",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "codeIsLive",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "registryPointer",
+              "type": "tuple"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "eligiblePointer",
+          "outputs": [
+            {
+              "internalType": "enum StreamCoreValidationStatus",
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "candidate",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameterScopeHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "floor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "failureClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "parameter",
+              "type": "tuple"
+            }
+          ],
+          "name": "gasParameterStateHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "floor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "failureClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "previous",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "floor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "failureClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCoreGasParameterState",
+              "name": "candidate",
+              "type": "tuple"
+            }
+          ],
+          "name": "gasParameterTransitionHashes",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "genesisModuleRegistry",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "isGovernanceExecutor",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "tuple"
+            }
+          ],
+          "name": "isLiveModuleRegistry",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "name": "pointerConfiguration",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "known",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "pointerScopeHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "pointer",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "name": "pointerStateHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "previous",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "candidate",
+              "type": "tuple"
+            }
+          ],
+          "name": "pointerTransitionHashes",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "registryPointer",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "codeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "address",
+                  "name": "registry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "registryStatus",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCorePointerState",
+              "name": "current",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "nextRevision",
+              "type": "uint64"
+            }
+          ],
+          "name": "preparePointerUpdate",
+          "outputs": [
+            {
+              "internalType": "enum StreamCoreValidationStatus",
+              "name": "status",
+              "type": "StreamCoreValidationStatus"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "codeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "frozen",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "moduleType",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "interfaceId",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "registry",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "registryStatus",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "moduleManifestHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "deploymentManifestHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "revision",
+                      "type": "uint64"
+                    }
+                  ],
+                  "internalType": "struct StreamCorePointerState",
+                  "name": "candidate",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "preRevisionCandidateHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamCorePointerTransitionPlan",
+              "name": "plan",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "readCurrentAction",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "executing",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "actionId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamCoreExternalReads.CurrentAction",
+              "name": "action",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "readModuleRecord",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "valid",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleVersion",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "runtimeCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamCoreExternalReads.ModuleRecordFacts",
+              "name": "facts",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gasLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "completionBuffer",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "uint256",
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "resolveRoyalty",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterfaceStrict",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "The linked library owns no storage and makes no authorization or state-transition      decisions. It validates exact returndata shapes before returning compact facts to Core.",
+        "kind": "dev",
+        "methods": {
+          "boundedRouterString(address,bytes,uint256,uint256)": {
+            "details": "The embedding Core supplies authenticated live GGP values. Malformed,      failed, and oversized responses return a status instead of reverting."
+          },
+          "resolveRoyalty(address,uint256,uint256,bytes,uint256)": {
+            "details": "Invalid responses fail soft to the ERC-2981 zero-royalty tuple."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "boundedRouterString(address,bytes,uint256,uint256)": {
+            "notice": "Calls a metadata router with governed gas and bounded returndata."
+          },
+          "resolveRoyalty(address,uint256,uint256,bytes,uint256)": {
+            "notice": "Resolves a royalty through a governed, buffered, exact-shape static read."
+          }
+        },
+        "notice": "Bounded, fail-closed external reads used by StreamCore.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/core/StreamCoreExternalReads.sol": "StreamCoreExternalReads"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/core/StreamCoreExternalReads.sol": {
+        "keccak256": "0x252d704cc3ef9659adf2f99547f66ef93c0ad9659f35d3f1bc0bb518fc177660",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://5a92571801efd0eb421b5c95efd252b8bb951b3d5a014e988fd625b75b420b20",
+          "dweb:/ipfs/QmZZ3t8Skkz3DJwe7k7JXwc2mKvkbuYFfbCAN9dqy33d1c"
+        ]
+      },
+      "smart-contracts/core/StreamCoreReadBuffer.sol": {
+        "keccak256": "0x06ff68b1538eb724d2512adeac7640928984b7285d65a63b7a2cc85552d93c85",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://fe4bb1f241870cbef1b6d414150bdcb66883144fb35b686e5cc000f367809e12",
+          "dweb:/ipfs/QmVozBgMchVkUxgaRd5c8VYEHgVHEVFLaspjMwiPuNNVFu"
+        ]
+      },
+      "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol": {
+        "keccak256": "0x02f5ac86cc10d5471c54e8757cc45c081781f7f79aa05f11eceecf5de3282089",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://cba1e613a27365154f26fa12eaf1c8fa675f494118a619fbccb03887abf6f4f2",
+          "dweb:/ipfs/QmWRRWZvMX7sGMWzXgNtM9T1ALwxZgwr2m8HKtaCace6W5"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol": {
+        "keccak256": "0xaf8b305238e363a7aa6abb7eea1e9b483b4994b89fc45d540be8baeceffbfdc0",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://74fd3c7e344cbc0cd656f935e02a5d7f5d23f1bfdc09b067a5ceceaf911a39f9",
+          "dweb:/ipfs/QmX21cjJ8xaqV5Cpsm72vJXXrFm86Q6Q5QaPoh48oDjgtP"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamCollectionArtistRegistry.sol": {
+        "keccak256": "0x8e74d7f22ac67fdbeda9bdac43f23e8fc894dd6e257d5e924fdfac6c450938f4",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://4c32230ac0ab80d923497400028aae8460cd070981cbc5b1da47ba6776de33ee",
+          "dweb:/ipfs/QmRswjtrdCeenMwDqgSvKEwM5JXowGAzUDMPTiNcdU4nMA"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol": {
+        "keccak256": "0x07a447f07f3157757f5f5400ecb5cafc39bf19fdb0fc2b37b1d7d25f2968e86e",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://a08f390a1abf9f2acaf6d3b38222ab2af8ea67d413779b2ee1fd9599e9b7dfae",
+          "dweb:/ipfs/Qmf1CHfdQCTbGV3TV5jxNoA4ExUaJ8NoJUiAADoghzrPB6"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol": {
+        "keccak256": "0x0ec3179c552497b02f840e87991e08b1df1d5a9b206930f8c66d31cefc2db957",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://d63db23dbe94853be13cef732470be65cab7edefccd07eab6dbd1709dd8e81ee",
+          "dweb:/ipfs/Qmd2kzZ6v7fcZ5ng6hmVJemSApxyLoyHUZ6bNwRKCFdnCB"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol": {
+        "keccak256": "0x390e20a6f9efc15ca0611a6fd3966b33c2c28925f590d71ad40134a467e29a75",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ba7ffebf9167ba7bfcd719fa6e8f427052c83dbf4ef6153e565a4b3fe3e5f573",
+          "dweb:/ipfs/QmPpm86V91oG21gQXptYjmcY1EWC11MePKLMhtQUf7LTm1"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamMintManager.sol": {
+        "keccak256": "0xb38f604e79a3aa0e48b725901b05f2f52d33dfed86ab9aead6b5a3bc91b498a4",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://509d473f4e491e405cdf5f051afcbe972e64dc781776a677c7488649731dcc16",
+          "dweb:/ipfs/QmbZ2tax7JunXw4bQENMZgpjK2MzS1pQg1n5mxav12Pmri"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamMintModuleRegistry.sol": {
+        "keccak256": "0x4245147544fb451a5addfcd0fabf8888da6411a61c2e70876ed9746154286bc1",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://bae0036ec58395158988aab47ace9ebb000115a45a179730ce73d95198d5640f",
+          "dweb:/ipfs/QmbCd2Umo3UHzniu8Gzq6XNuJvHca1LZFoNaiJ7uCbE3hW"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamModuleRegistry.sol": {
+        "keccak256": "0x6516e94fd48fbb7779bd237b6cdd3c6c79e116e122003296dac04e840ce02780",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3a07aad883fb4f663380554b7f426a9697e6e5e72a93fdb050bf3cade8423f0e",
+          "dweb:/ipfs/QmacRRimG1QhDrJ2qi5DcEMPoLj1GhC4cmWESqivNwGboU"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamRoyaltyResolver.sol": {
+        "keccak256": "0x5b099f302293a48b277517746b8c2cdb8849ef405c20ee812116fc65c2b4b53e",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://27888192f96cba14ea3da0a46ec9e15406b9addbd65939ed8d562c0f72a71740",
+          "dweb:/ipfs/QmbHVE2QqLob4RcFPUiQtZc39XZ4t26eLB6XefPMevdNEW"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamSystemManifest.sol": {
+        "keccak256": "0x71078e57b1c5035d2c5f39f549c71d491c1a1c8fd2f4f37cc37f7eeb0f889408",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1659a736aaac056de4be4f70e14eca7a85bef774d991270389a0d19185fcbe28",
+          "dweb:/ipfs/QmWA293pJHY3Yg19v9RnAf5sYthRc8cM7aBxANxgNuyMUa"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "boundedRouterString(address,bytes,uint256,uint256)": "5d572948",
+    "codeIsLive(address,bytes32)": "c2596011",
+    "eligiblePointer(StreamCorePointerState,address,bytes32,bytes4)": "0eb4cdba",
+    "gasParameterScopeHash(bytes32)": "b4ca922d",
+    "gasParameterStateHash(bytes32,StreamCoreGasParameterState)": "3c1fe8b2",
+    "gasParameterTransitionHashes(bytes32,StreamCoreGasParameterState,StreamCoreGasParameterState)": "3e34db2f",
+    "genesisModuleRegistry(address,bytes32,bytes32,bytes32)": "4849f996",
+    "isGovernanceExecutor(address)": "b77b2ad8",
+    "isLiveModuleRegistry(StreamCorePointerState)": "5618b7ec",
+    "pointerConfiguration(bytes32,address,address)": "9caddc56",
+    "pointerScopeHash(bytes32)": "21422496",
+    "pointerStateHash(bytes32,StreamCorePointerState,uint64)": "67f36d73",
+    "pointerTransitionHashes(bytes32,StreamCorePointerState,StreamCorePointerState)": "aff1f44b",
+    "preparePointerUpdate(StreamCorePointerState,StreamCorePointerState,bytes32,address,address,uint64)": "24d2e718",
+    "readCurrentAction(address)": "5af2b486",
+    "readModuleRecord(address,address)": "52f762cc",
+    "resolveRoyalty(address,uint256,uint256,bytes,uint256)": "bfa9b93f",
+    "supportsInterfaceStrict(address,bytes4)": "397e8c16"
+  }
+}
