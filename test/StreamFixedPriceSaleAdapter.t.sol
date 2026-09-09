@@ -144,11 +144,17 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     function testPayerValueDeadlineAndPolicyAreEnforced() public {
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamFixedPriceSaleAdapter.IncorrectSaleValue.selector, 1 ether, 2 ether
+            )
+        );
         sale.buy{ value: 2 ether }(authorization, tokenData, platformSig, artistSig);
         authorization.payer = address(0xBAD);
         (platformSig, artistSig) = _sign(authorization);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamFixedPriceSaleAdapter.InvalidSaleAuthorization.selector)
+        );
         sale.buy{ value: 1 ether }(authorization, tokenData, platformSig, artistSig);
         authorization = _authorization();
         authorization.mintPolicyHash = keccak256("stale");
@@ -158,7 +164,11 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
         authorization = _authorization();
         (platformSig, artistSig) = _sign(authorization);
         vm.warp(uint256(authorization.deadline) + 1);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamFixedPriceSaleAdapter.SaleExpired.selector, authorization.deadline
+            )
+        );
         sale.buy{ value: 1 ether }(authorization, tokenData, platformSig, artistSig);
         _assertNothingConsumed(authorization);
     }

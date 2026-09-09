@@ -247,7 +247,11 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         (bytes memory platformSig, bytes memory artistSig) = _sign(authorization);
         authorization.reservePrice = 2 ether;
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamEnglishAuctionHouse.InvalidAuctionSignature.selector, platform
+            )
+        );
         house.createAuction(authorization, tokenData, platformSig, artistSig);
         authorization = _authorization();
         vm.expectRevert();
@@ -260,7 +264,9 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
         authorization.deadline = uint64(block.timestamp);
         (platformSig, artistSig) = _sign(authorization);
         vm.warp(block.timestamp + 1);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamEnglishAuctionHouse.InvalidAuctionAuthorization.selector)
+        );
         house.createAuction(authorization, tokenData, platformSig, artistSig);
         require(
             core.totalSupply() == 0 && manager.nextOperationNonce() == 0,
