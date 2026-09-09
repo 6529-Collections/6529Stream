@@ -80,6 +80,7 @@ contract StreamEntropyCoordinator is
     uint256 public totalFeeCredits;
     uint256 public pendingRequestCount;
     mapping(uint256 => bool) public metadataNotificationPending;
+    mapping(bytes32 => bool) private _registeredScopes;
 
     error Unauthorized(address caller);
     error InvalidDependency(address target);
@@ -298,6 +299,7 @@ contract StreamEntropyCoordinator is
         );
         if (_subjects[scopeId].status != StreamEntropyStatus.NONE) revert InvalidSubject(scopeId);
         _lockPolicy(collectionId);
+        _registeredScopes[scopeId] = true;
         _subjects[scopeId].collectionId = collectionId;
         _subjects[scopeId].status = StreamEntropyStatus.REGISTERED;
         emit EntropyScopeRegistered(collectionId, scopeId, scopeKind, scopeRef);
@@ -313,7 +315,8 @@ contract StreamEntropyCoordinator is
         if (msg.sender != authority && !requesters[msg.sender]) {
             revert Unauthorized(msg.sender);
         }
-        if (scopeInputsHash == 0) revert InvalidSubject(scopeId);
+        // Token keys share _subjects storage but must never enter the mutable scope-input path.
+        if (!_registeredScopes[scopeId] || scopeInputsHash == 0) revert InvalidSubject(scopeId);
         _subjects[scopeId].inputsHash = scopeInputsHash;
         return _request(scopeId, 0, scopeId);
     }
