@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/IStreamGenesisInitializer.sol";
 import "../../interfaces/stream/IStreamGovernedParameterAuthority.sol";
 import "../../interfaces/stream/IStreamRoleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
@@ -24,6 +25,7 @@ import "./StreamGovernancePolicy.sol";
 ///     isolated governed self-call with a direction-sensitive action class.
 contract StreamGovernanceExecutor is
     IStreamGovernanceExecutor,
+    IStreamGenesisInitializer,
     IStreamGovernedParameterAuthority,
     Ownable,
     ReentrancyGuard
@@ -85,6 +87,11 @@ contract StreamGovernanceExecutor is
     uint256 private _currentBatchLength;
     uint256 private _currentCallIndex;
 
+    bytes32 public override genesisPlanHash;
+    bool public override genesisInitialized;
+
+    bytes32 private constant GENESIS_PLAN_V1 = keccak256("6529STREAM_GENESIS_PLAN_V1");
+
     function _checkOwner() internal view override {
         if (!_manifest.isSealed) revert SystemManifestBootstrapNotSealed();
         super._checkOwner();
@@ -96,6 +103,89 @@ contract StreamGovernanceExecutor is
             revert InvalidGenesisBootstrapAuthority(genesisBootstrapAuthority_);
         }
         genesisBootstrapAuthority = genesisBootstrapAuthority_;
+    }
+
+    /// @notice Commit the exact initialization once, after all target code exists.
+    /// @dev The commitment includes this chain and Executor. Keeping it out of
+    ///      constructor bytecode avoids a self-reference through target codehashes.
+    function commitGenesisPlan(bytes32 planHash) external override nonReentrant {
+        if (msg.sender != genesisBootstrapAuthority) {
+            revert GenesisBootstrapActorRequired(msg.sender);
+        }
+        if (genesisPlanHash != bytes32(0)) revert GenesisPlanAlreadyCommitted();
+        if (planHash == bytes32(0) || _manifest.bound || _nonce != 0) {
+            revert InvalidGenesisPlan();
+        }
+        genesisPlanHash = planHash;
+        emit GenesisPlanCommitted(planHash, msg.sender);
+    }
+
+    function hashGenesisPlan(SystemManifestBootstrapBinding calldata, GenesisBatch[] calldata)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _genesisPlanHash(msg.data[4:]);
+    }
+
+    /// @dev Both entry points have identical ABI argument types. Commit their
+    ///      exact argument bytes, including any trailing bytes, without embedding
+    ///      a second large nested-struct encoder in the permanent Executor.
+    function _genesisPlanHash(bytes calldata encodedPlan) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(GENESIS_PLAN_V1, block.chainid, address(this), keccak256(encodedPlan))
+        );
+    }
+
+    /// @notice Initialize and seal the real stack in one transaction.
+    /// @dev Only these committed genesis batches execute immediately. They retain
+    ///      ordinary action classes, calldata publication, per-call transition
+    ///      contexts, action policy, replay protection and final inventory checks.
+    ///      A partial initialization never persists: the final batch must seal.
+    function initializeGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external override nonReentrant {
+        if (msg.sender != genesisBootstrapAuthority) {
+            revert GenesisBootstrapActorRequired(msg.sender);
+        }
+        if (genesisInitialized || _manifest.isSealed) revert GenesisAlreadyInitialized();
+        if (genesisPlanHash == bytes32(0) || _manifest.bound || batches.length == 0) {
+            revert InvalidGenesisPlan();
+        }
+        bytes32 actual = _genesisPlanHash(msg.data[4:]);
+        if (actual != genesisPlanHash) revert GenesisPlanHashMismatch(genesisPlanHash, actual);
+        if (block.timestamp > type(uint64).max - 7 days) {
+            revert GovernanceTimestampOverflow(block.timestamp);
+        }
+
+        // Consume before interacting. A revert rolls the entire ceremony back.
+        genesisInitialized = true;
+        _bindSystemManifestBootstrap(binding);
+        for (uint256 i; i < batches.length; ++i) {
+            if (_manifest.isSealed) revert GenesisAlreadyInitialized();
+            GenesisBatch calldata batch = batches[i];
+            _publishCallData(batch.callDatas);
+            (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+                _deriveBatchTransitionHashes(batch.calls, _callsHash(batch.calls));
+            StreamGovernanceBootstrap.ScheduleContext memory ctx =
+                StreamGovernanceBootstrap.ScheduleContext({
+                    actionClass: batch.actionClass,
+                    scopeHash: scopeHash,
+                    oldValueHash: oldValueHash,
+                    newValueHash: newValueHash,
+                    notBefore: uint64(block.timestamp),
+                    expiresAfter: uint64(block.timestamp + 7 days),
+                    reasonHash: genesisPlanHash,
+                    reasonURI: "genesis",
+                    manifestHash: binding.expectedManifestHash
+                });
+            bytes32 actionId = _schedule(ctx, batch.calls);
+            _execute(actionId, batch.calls, batch.callDatas);
+        }
+        if (!_manifest.isSealed || _pendingScheduledActionCount != 0) revert GenesisDidNotSeal();
+        emit GenesisInitialized(genesisPlanHash, batches.length);
     }
 
     /// @dev Ownership is part of the versioned governance state machine. The
@@ -812,6 +902,11 @@ contract StreamGovernanceExecutor is
         override
         nonReentrant
     {
+        if (genesisPlanHash != bytes32(0)) revert GenesisPlanAlreadyCommitted();
+        _bindSystemManifestBootstrap(binding);
+    }
+
+    function _bindSystemManifestBootstrap(SystemManifestBootstrapBinding calldata binding) private {
         StreamGovernanceManifest.bind(
             _manifest,
             _policy,
@@ -941,7 +1036,15 @@ contract StreamGovernanceExecutor is
         if (ctx.newValueHash != derivedNewValueHash) {
             revert BatchNewValueHashMismatch(derivedNewValueHash, ctx.newValueHash);
         }
-        _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
+        // This state exists only inside the non-reentrant atomic initializer;
+        // successful initialization seals, and a failed initialization rolls back.
+        if (genesisInitialized && !_manifest.isSealed) {
+            if (!bootstrapAuthority) {
+                revert InvalidGenesisPlan();
+            }
+        } else {
+            _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
+        }
         uint256 nonceUsed = _nonce;
         actionId = _computeActionId(ctx, callsHash, nonceUsed);
         _validateManifestTailComposition(

@@ -897,7 +897,7 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
             actionPolicies: actionPolicies
         });
         vm.prank(artifacts.bootstrapAuthority);
-        artifacts.executor.bindSystemManifestBootstrap(binding);
+        _bindExecutorForFixture(artifacts.executor, binding);
         (bool stateOk, bytes memory stateData) = address(artifacts.executor)
             .staticcall(abi.encodeCall(artifacts.executor.systemManifestBootstrapState, ()));
         require(stateOk, "bound bootstrap state");
@@ -905,6 +905,14 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
         artifacts.initialGuardianSetHash = state.initialGuardianSetHash;
         artifacts.terminalFreezeVetoMutationChain = state.terminalFreezeVetoMutationChain;
         artifacts.terminalFreezeVetoMutationRevision = state.terminalFreezeVetoMutationRevision;
+    }
+
+    /// @dev Override only to retain an unbound snapshot for atomic-genesis tests.
+    function _bindExecutorForFixture(
+        StreamGovernanceExecutor executor,
+        SystemManifestBootstrapBinding memory binding
+    ) internal virtual {
+        executor.bindSystemManifestBootstrap(binding);
     }
 
     function _initialActionPolicies(
@@ -1182,7 +1190,7 @@ abstract contract StreamGovernanceBootstrapHarness is CharacterizationTestBase {
     }
 
     function _bootstrapSealCalls(BootstrapArtifacts memory artifacts)
-        private
+        internal
         view
         returns (GovernanceCall[] memory calls, bytes[] memory callDatas)
     {
