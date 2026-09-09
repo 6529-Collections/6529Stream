@@ -27,9 +27,25 @@ contract UnavailableEntropyMetadataEmitter {
     }
 }
 
+contract NativeMetadataEncodingHarness is StreamMetadataRouter {
+    constructor(
+        address core_,
+        address authority_,
+        bytes32 manifest_,
+        IStreamCollectionArtistRegistry artist_
+    )
+        StreamMetadataRouter(core_, authority_, manifest_, "ipfs://local-test", manifest_, artist_)
+    { }
+
+    function prepareScript(string memory raw) external pure returns (string memory) {
+        return _prepareScript(raw);
+    }
+}
+
 /// @notice Domain tests use the real permanent Core; only external actors/registry are fixtures.
 contract StreamEntropyMetadataTest is CharacterizationTestBase {
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
+    event log_named_uint(string key, uint256 value);
     bytes32 private constant MANAGER =
         0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2;
     bytes32 private constant ENTROPY =
@@ -64,10 +80,10 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         gasConfigs[1] = StreamCore.GasParameterGenesisConfig(
             0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7, 2910000, 1460000, 1
         );
-        // Metadata includes JSON escaping and Base64 HTML. This fixture grants 2m router gas;
-        // release sizing must measure the largest allowed artist script and token data separately.
+        // Full 16 KiB token data plus 8 KiB script requires nested Base64 encoding. The cold
+        // maximum-content test below measures this budget and Core's 64 KiB response ceiling.
         gasConfigs[2] = StreamCore.GasParameterGenesisConfig(
-            0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93, 2000000, 250000, 1
+            0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93, 12000000, 250000, 1
         );
         // Cold first registration writes coordinator-owned identity; Core's atomic mint must
         // provide at least the measured registration envelope. This product fixture grants 200k.
@@ -92,8 +108,8 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         artistRegistry = new StreamCollectionArtistRegistry(
             address(core), address(this), MANIFEST, "ipfs://local-artist", MANIFEST
         );
-        router = new StreamMetadataRouter(
-            address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST, artistRegistry
+        router = new NativeMetadataEncodingHarness(
+            address(core), address(this), MANIFEST, artistRegistry
         );
         provider = new MockStreamEntropyProvider(address(entropy));
         _install(MANAGER, address(this), type(IStreamMintManager).interfaceId);
@@ -351,6 +367,132 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
             keccak256(bytes(core.tokenURI(id)))
                 == keccak256(bytes(router.tokenURI(address(core), id))),
             "Core serves attributed metadata within configured gas"
+        );
+    }
+
+    function testMaximumOnchainScriptFitsCoreMetadataBudget() public {
+        bytes memory script = new bytes(8192);
+        for (uint256 i; i < script.length; ++i) {
+            script[i] = 0x20;
+        }
+        uint256 configurationGas = gasleft();
+        router.setCollectionScript(1, string(script));
+        configurationGas -= gasleft();
+        emit log_named_uint("maximum ASCII script configuration gas", configurationGas);
+        require(
+            configurationGas < 14000000, "maximum script leaves configuration transaction headroom"
+        );
+        uint256 id = _mint();
+        (, uint256 requestId) = entropy.requestEntropy(id);
+        provider.fulfill(requestId, bytes32(uint256(4)));
+        _coolMetadata();
+        uint256 startGas = gasleft();
+        string memory expected = router.tokenURI(address(core), id);
+        emit log_named_uint("cold metadata gas", startGas - gasleft());
+        emit log_named_uint("metadata URI bytes", bytes(expected).length);
+        _coolMetadata();
+        require(
+            keccak256(bytes(core.tokenURI(id))) == keccak256(bytes(expected)),
+            "largest admitted script must render through Core instead of fallback"
+        );
+    }
+
+    function _coolMetadata() private {
+        EntropyGasMeasurementVm(address(vm)).cool(address(router));
+        EntropyGasMeasurementVm(address(vm)).cool(address(entropy));
+        EntropyGasMeasurementVm(address(vm)).cool(address(artistRegistry));
+        EntropyGasMeasurementVm(address(vm)).cool(address(core));
+    }
+
+    function testMaximumTokenDataScriptAndEscapedIdentityFitCoreResponse() public {
+        // This is a real Core mint at its 16 KiB input maximum, with the largest router script
+        // and admitted escaped identity. Compare Core's bounded read to the complete URI;
+        // checking the router alone would miss either gas exhaustion or oversized fallback.
+        string memory name = string(_repeatedByte(256, 0x4e));
+        string memory description = string(_repeatedByte(2048, 0x22));
+        string memory image = string(abi.encodePacked("ipfs://", _repeatedByte(761, 0x61)));
+        router.setCollectionMetadata(1, name, description, image, "");
+        bytes memory script = _repeatedByte(8192, 0x20);
+        bytes memory endTag = bytes("</script");
+        for (uint256 i; i < 1024; ++i) {
+            for (uint256 j; j < 8; ++j) {
+                script[i * 8 + j] = endTag[j];
+            }
+        }
+        uint256 scriptConfigurationGas = gasleft();
+        router.setCollectionScript(1, string(script));
+        scriptConfigurationGas -= gasleft();
+        emit log_named_uint("maximum escaped script configuration gas", scriptConfigurationGas);
+        require(
+            scriptConfigurationGas < 15000000, "escaped script fits one configuration transaction"
+        );
+        bytes memory data = _repeatedByte(16384, 0x31);
+        (uint256 id,) =
+            core.mintFromManager(1, RECIPIENT, data, keccak256(data), keccak256("maximum"));
+        (, uint256 requestId) = entropy.requestEntropy(id);
+        provider.fulfill(requestId, bytes32(uint256(4)));
+        _coolMetadata();
+        uint256 startGas = gasleft();
+        string memory expected = router.tokenURI(address(core), id);
+        uint256 gasUsed = startGas - gasleft();
+        emit log_named_uint("maximum cold metadata gas", gasUsed);
+        emit log_named_uint("maximum metadata URI bytes", bytes(expected).length);
+        require(gasUsed < 11000000, "maximum content has 1m gas headroom");
+        require(abi.encode(expected).length <= 65536, "complete URI fits Core response ceiling");
+        _coolMetadata();
+        startGas = gasleft();
+        string memory actual = core.tokenURI(id);
+        emit log_named_uint("maximum cold Core tokenURI gas", startGas - gasleft());
+        require(
+            keccak256(bytes(actual)) == keccak256(bytes(expected)),
+            "maximum content must reach collectors instead of Core fallback"
+        );
+        string memory json = router.tokenMetadataJSON(address(core), id);
+        require(
+            keccak256(bytes(abi.decode(vm.parseJson(json, ".description"), (string))))
+                == keccak256(bytes(description)),
+            "prepared identity round trips through valid JSON"
+        );
+        require(
+            keccak256(bytes(abi.decode(vm.parseJson(json, ".token_data_location"), (string))))
+                == keccak256("animation_url:tokenDataBase64"),
+            "complete token data remains in onchain animation"
+        );
+    }
+
+    function testEscapedIdentityAboveResponseEnvelopeRevertsAtomically() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.MetadataJSONLimitExceeded.selector,
+                uint256(12289),
+                uint256(5120)
+            )
+        );
+        router.setCollectionMetadata(1, "n", string(_repeatedByte(2048, 0x01)), "", "");
+        require(
+            keccak256(bytes(router.collectionMetadata(1).description)) == keccak256("Description"),
+            "configuration rollback"
+        );
+    }
+
+    function _repeatedByte(uint256 length, bytes1 value)
+        private
+        pure
+        returns (bytes memory result)
+    {
+        result = new bytes(length);
+        for (uint256 i; i < length; ++i) {
+            result[i] = value;
+        }
+    }
+
+    function testFuzzPreparedScriptMatchesEstablishedEscaping(bytes memory data) public view {
+        if (data.length > 512) return;
+        string memory raw = string(abi.encodePacked(data, "</ScRiPt", data, "</script></scrip"));
+        require(
+            keccak256(bytes(NativeMetadataEncodingHarness(address(router)).prepareScript(raw)))
+                == keccak256(bytes(StreamMetadataRenderer.escapeScriptElementEndTags(raw))),
+            "optimized preparation preserves established escaping for mixed case and boundaries"
         );
     }
 
