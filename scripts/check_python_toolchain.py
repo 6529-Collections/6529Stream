@@ -151,11 +151,12 @@ WORKFLOW_APPROVED_INSTALL_LINES = {
     RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
 }
 WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
-    CI_WORKFLOW_PATH: 3,
+    CI_WORKFLOW_PATH: 4,
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_PYTHON_VERSIONS = {
     CI_WORKFLOW_PATH: (
+        PYTHON_VERSION,
         WINDOWS_PYTHON_VERSION,
         PYTHON_VERSION,
         PYTHON_VERSION,
@@ -167,11 +168,16 @@ WORKFLOW_SOLC_SELECT_COUNTS = {
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_EXPECTED_JOB_NAMES = {
-    CI_WORKFLOW_PATH: {"windows-wrapper", "slither-baseline", "foundry"},
+    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry"},
     RELEASE_WORKFLOW_PATH: {"release-mode"},
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
     CI_WORKFLOW_PATH: {
+        "current-stack": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 0,
+            "solc_select": 0,
+        },
         "windows-wrapper": {
             "python_version": WINDOWS_PYTHON_VERSION,
             "playwright": 0,

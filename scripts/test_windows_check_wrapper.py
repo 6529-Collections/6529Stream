@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import unittest
+import tomllib
 from pathlib import Path
 
 
@@ -31,6 +32,26 @@ class WindowsCheckWrapperTests(unittest.TestCase):
         self.assertIn("if ($exitCode -ne 0)", self.helper_content)
         self.assertIn('throw "$FilePath$displayArgs failed with exit code $exitCode."', self.helper_content)
         self.assertIn('. (Join-Path $PSScriptRoot "windows-check-helpers.ps1")', self.check_content)
+
+    def test_current_stack_mode_uses_isolated_global_ir_profile(self) -> None:
+        profiles = tomllib.loads((REPO_ROOT / "foundry.toml").read_text())["profile"]
+        current = profiles["current"]
+        self.assertTrue(current["via_ir"])
+        self.assertTrue(current["build_info"])
+        self.assertEqual(current["test"], "test/current")
+        self.assertEqual(current["script"], "script/current")
+        self.assertEqual(current["out"], "out/current")
+        self.assertEqual(current["cache_path"], "cache/current")
+        # Inheritance keeps the release compiler settings identical. Overrides
+        # here must not silently produce a different candidate build.
+        for key in ("solc_version", "optimizer", "optimizer_runs", "evm_version", "bytecode_hash", "cbor_metadata"):
+            self.assertNotIn(key, current)
+        self.assertIn("param([switch]$CurrentStack)", self.check_content)
+        self.assertIn('$env:FOUNDRY_PROFILE = "current"', self.check_content)
+        self.assertIn(
+            '[Environment]::SetEnvironmentVariable("FOUNDRY_PROFILE", $previousFoundryProfile)',
+            self.check_content,
+        )
 
     def test_forge_is_routed_through_checked_wrapper(self) -> None:
         self.assertIn(

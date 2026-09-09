@@ -47,10 +47,21 @@ steps:
 
 
 def valid_multi_job_ci_workflow() -> str:
-    """Return three isolated pinned toolchain jobs accepted for CI."""
+    """Return four isolated pinned toolchain jobs accepted for CI."""
 
     return f"""\
 jobs:
+  current-stack:
+    steps:
+      - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
+        with:
+          python-version: "{checker.PYTHON_VERSION}"
+      - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}
+        with:
+          version: {checker.FOUNDRY_VERSION}
+      - run: |
+          {checker.LOCK_INSTALL_COMMAND}
+          {checker.PIP_CHECK_COMMAND}
   windows-wrapper:
     steps:
       - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
@@ -202,7 +213,7 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
-    def test_three_isolated_ci_toolchain_jobs_pass(self) -> None:
+    def test_four_isolated_ci_toolchain_jobs_pass(self) -> None:
         """Each CI job independently installs the same pinned environment."""
 
         self.assertEqual(

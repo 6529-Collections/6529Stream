@@ -101,6 +101,21 @@ checksum binding and PR review remain the controls for arbitrary command changes
 
 ## Local Checks
 
+For the supported current stack, run `make current-stack-check`, or on Windows:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1 -CurrentStack
+```
+
+This selects the `current` Foundry profile: global via-IR compilation with the
+same Solidity 0.8.19, optimizer 200, Paris and metadata settings as the canonical
+release build. It compiles the contracts and current deployment scripts, runs
+the cross-domain tests in `test/current`, and checks release target coverage,
+formatting, source layout and the permanent Core ABI. Outputs remain under
+ignored `out/current` and `cache/current`. The default profile and full release
+checks retain their historical scope. This focused command does not regenerate
+release evidence or replace the broader domain and release validation.
+
 Fresh contributors should start with
 [`first-30-minutes.md`](first-30-minutes.md). That checked guide explains the
 minimal setup path, `forge` not being on `PATH`, Windows wrapper usage, known
@@ -1894,7 +1909,7 @@ missing inventory all fail.
 
 The canonical inventory is
 [`ops/EXTERNAL_CALL_GAS_INVENTORY.json`](../ops/EXTERNAL_CALL_GAS_INVENTORY.json).
-Its finality, minting, and revenue rows are temporary open remediation work
+Its finality, minting, revenue, and entropy rows are temporary open remediation work
 tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
 call-row taxonomy reserves `artist-authority` under the controlling
@@ -2048,6 +2063,40 @@ Slither and `solc-select` tool environment. Foundry itself is downloaded from
 the pinned release asset and verified with SHA256 before extraction.
 
 ## Release Artifacts
+
+The current candidate is separate from the historical engineering artifact
+baseline in `latest`. Its reviewed targets are in
+`release-artifacts/current-contracts.json`. After validating the selected
+current build, export it without recompiling:
+
+```bash
+python scripts/generate_current_stack_artifacts.py
+python scripts/generate_current_stack_artifacts.py --check
+```
+
+The exporter reads `out/current` by default; `--foundry-out` selects the actual
+output used for a deployment rehearsal. It requires complete build-info and
+checks that every selected ABI and bytecode object, including the deployment
+script, belongs to one globally-via-IR compiler input with the pinned settings.
+It rejects stale sources, mismatched outputs and runtime size violations. The
+separate `release-artifacts/current` bundle retains that exact compiler input,
+source hashes, ABIs, bytecode, recursively linked library targets, link references
+and immutable references. These
+are compilation facts: constructor arguments, deployed library addresses and
+actual on-chain runtime hashes still need deployment evidence.
+
+The current CI job runs concurrently with the historical Foundry job. Its
+profile excludes historical test and script bytecode while compiling the
+actual current deployment closure. It exports the selected build as a CI
+artifact. The single-controller `StreamGovernanceActor` remains a
+development/testnet authority template; the local `DevelopmentEntropyProvider`
+is not an exported deployable target. Explicit semantic interface IDs use
+Solidity `type(I).interfaceId`; a full ABI selector XOR also includes inherited
+methods and may differ.
+
+The historical generator sequence below still maintains the default
+engineering checks. Its target-isolated bytecode must not be substituted for
+the exact current deployment compilation, even when ABI and source match.
 
 After changing any production contract ABI or event surface, optionally run the
 aggregate diagnostic, then build the canonical target-isolated artifacts and

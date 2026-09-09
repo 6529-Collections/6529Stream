@@ -19,11 +19,21 @@ compilation_restrictions = [
     { paths = "smart-contracts/domains/governance/{StreamGovernanceExecutor,StreamGovernanceBootstrap,StreamGovernanceEvidence,StreamGovernanceManifest,StreamGovernancePolicy,StreamRoleRegistry}.sol", via_ir = true },
     { paths = "smart-contracts/domains/modules/StreamModuleRegistry.sol", via_ir = true },
     { paths = "test/{StreamGovernanceV2HolderRehearsal.t.sol,helpers/StreamGovernanceV2HolderRehearsalMocks.sol}", via_ir = true },
+    { paths = "script/current/**", via_ir = true },
+    { paths = "test/{current/**,StreamCollectionArtistRegistry.t.sol,StreamEnglishAuctionHouse.t.sol,StreamEntropyMetadata.t.sol,StreamEntropyProviderVRF.t.sol,StreamFixedPriceSaleAdapter.t.sol,StreamGenesisInitializer.t.sol,StreamGovernanceActor.t.sol,StreamGovernanceCatalog.t.sol,StreamMintCanonicalRegistry.t.sol,StreamMintPointerCompatibility.t.sol,StreamRoyaltyResolver.t.sol,StreamSystemManifest.t.sol}", via_ir = true },
 ]
 fs_permissions = [
     { access = "read", path = "./test/fixtures" },
     { access = "read", path = "./deployments" },
 ]
+
+[profile.current]
+test = "test/current"
+script = "script/current"
+out = "out/current"
+cache_path = "cache/current"
+via_ir = true
+build_info = true
 
 [fmt]
 line_length = 100

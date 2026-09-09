@@ -48,6 +48,17 @@ check: governed-parameter-inventory-check
 check: governance-action-policy-check
 check: record-family-authorization-check artist-semantic-owner-matrix-check artist-record-event-reconstruction-correction-check artist-owner-record-continuity-check
 
+.PHONY: current-stack-check
+current-stack-check: export FOUNDRY_PROFILE := current
+current-stack-check:
+	forge build
+	forge test -vvv
+	$(PYTHON) scripts/test_release_artifacts.py
+	$(PYTHON) scripts/test_current_stack_artifacts.py
+	$(PYTHON) scripts/check_solidity_formatting.py
+	$(PYTHON) scripts/check_solidity_source_layout.py
+	$(PYTHON) scripts/check_abi_compatibility.py --target-only
+
 build:
 	forge build
 
