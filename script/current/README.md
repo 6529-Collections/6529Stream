@@ -106,9 +106,19 @@ It verifies the actual coordinator and proving key, reads recent base fees and
 the deployer balance, and calculates a full-flow budget before allowing any
 transaction. The expected fee budget includes a modest reserve; the per-call
 maximum fee remains a separate bound. The default demo mint price is 0.000001
-Sepolia ETH, and the requested native subscription deposit is 0.005 Sepolia ETH.
+Sepolia ETH. The default native subscription reserve is 1.2 Sepolia ETH for this
+500 gwei lane and 1,500,000 callback limit. This is refundable subscription capital,
+separate from the much smaller actual fulfillment charge. Chainlink's service can
+leave an accepted request pending until this maximum-cost reserve is funded.
 `-MaxFeePerGasWei`, `-PriorityFeeWei`, `-SubscriptionFundingWei`, and `-MintPriceWei`
 allow explicit public operating values. None is a signing secret.
+
+The helper checks the live lane cap, native premium and flat fee, with 300,000 gas
+for verification and coordinator overhead. It rejects a target below that reserve.
+The demonstrated request's Subscription Manager displayed a 1.1133045 ETH Max Cost;
+its initial 0.005 ETH deposit was insufficient, even though transaction gas was
+affordable. A later 1.12 ETH target exceeds the checked 1.116 ETH reserve. Unused
+capital remains in the owned subscription; it is not reported as gas spent.
 
 After funding, run these stages in order with `-Broadcast`:
 

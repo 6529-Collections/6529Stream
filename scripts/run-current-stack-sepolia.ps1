@@ -4,7 +4,7 @@ param(
     [string]$RpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com',
     [string]$AccountsPath = (Join-Path $env:USERPROFILE '.codex/stream-testnet/accounts.json'),
     [string]$OutputDirectory = (Join-Path $env:TEMP '6529stream-current-sepolia'),
-    [string]$SubscriptionFundingWei = '5000000000000000',
+    [string]$SubscriptionFundingWei = '1200000000000000000',
     [string]$MintPriceWei = '1000000000000',
     [string]$MaxFeePerGasWei = '0',
     [string]$PriorityFeeWei = '1000000',
@@ -206,7 +206,16 @@ try {
         $receiptOnlyRecovery=$remaining -eq 0
         $remainingGasBudget=[bigint]::Divide(($remaining*100+119),120)+3000000
     }
-    $nativeFunding = if ($state.Contains('subscriptionFunded')) {[bigint]0} else {Uint $SubscriptionFundingWei}
+    # Chainlink gates fulfillment on the gas lane's maximum-cost reserve, not the
+    # current transaction gas price. The 300k allowance covers verification and
+    # coordinator overhead; the observed Sepolia UI max cost was 1.1133045 ETH.
+    $minimumVRFReserve=[bigint]::Divide((1800000*(Uint $provingKey[1])*(100+(Uint $config[7]))+99),100)+(Uint $config[5])*1000000000000
+    $subscriptionTarget=if (-not $PSBoundParameters.ContainsKey('SubscriptionFundingWei') -and $state.Contains('subscriptionReserveTargetWei')) {
+        Uint $state.subscriptionReserveTargetWei
+    } else {Uint $SubscriptionFundingWei}
+    if ($subscriptionTarget -lt $minimumVRFReserve) {throw 'Selected subscription funding is below the gas-lane fulfillment reserve.'}
+    $subscriptionBalance=if ($state.Contains('subscriptionId')) {Uint (Subscription-State)[1]} else {[bigint]0}
+    $nativeFunding=if ($state.Contains('oracleFulfillment')) {[bigint]0} else {[bigint]::Max(0,$subscriptionTarget-$subscriptionBalance)}
     $expectedFee = $baseFee+$tip
     $required = [bigint]::Divide(($remainingGasBudget*$expectedFee*110+99),100)+$nativeFunding+(Uint $MintPriceWei)
     $state.accounts = @{deployer=$deployer.address;artist=$artist.address;platform=$platform.address;protocol=$deployer.address}
@@ -216,6 +225,7 @@ try {
         priorityFeeWei=$tip.ToString();maxFeeWei=$maxFee.ToString();balanceWei=$balance.ToString()
         remainingGasBudget=$remainingGasBudget.ToString();estimatedRequiredBalanceWei=$required.ToString()
         expectedFeePerGasWei=$expectedFee.ToString();feeReservePercent=10;subscriptionFundingWei=$nativeFunding.ToString()
+        subscriptionReserveTargetWei=$subscriptionTarget.ToString();minimumVRFReserveWei=$minimumVRFReserve.ToString()
         recentMaximumBaseFeeWei=$recentMaximum.ToString();recentPriorityFeeSamples=$history.reward
         shortfallWei=[bigint]::Max(0,$required-$balance).ToString();requestedStage=$Stage;broadcast=[bool]$Broadcast
     }
@@ -230,6 +240,7 @@ try {
     }
 
     if ($Stage -eq 'Subscription') {
+        $state.subscriptionReserveTargetWei=$subscriptionTarget.ToString()
         if (-not $state.Contains('subscriptionId')) {
             $receipt = Send 'createSubscription' $coordinator 'createSubscription()'
             $topic = Cast @('keccak','SubscriptionCreated(uint256,address)')
@@ -240,9 +251,10 @@ try {
         }
         $subscription = Subscription-State
         if ($subscription[3] -ine $deployer.address) { throw 'Dedicated deployer does not own subscription.' }
-        $topup = [bigint]::Max(0,(Uint $SubscriptionFundingWei)-(Uint $subscription[1]))
+        $topup = [bigint]::Max(0,$subscriptionTarget-(Uint $subscription[1]))
         if ($topup -gt 0) {
-            $null = Send 'fundSubscription' $coordinator 'fundSubscriptionWithNative(uint256)' @($state.subscriptionId) $topup.ToString()
+            $fundLabel=if ($state.receipts.Contains('fundSubscription')) {"fundSubscriptionTopup-$($state.receipts.Count)"} else {'fundSubscription'}
+            $null = Send $fundLabel $coordinator 'fundSubscriptionWithNative(uint256)' @($state.subscriptionId) $topup.ToString()
         }
         $subscription = Subscription-State
         $state.subscriptionFunded = (Uint $subscription[1]).ToString()
