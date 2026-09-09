@@ -9,7 +9,7 @@ technical and delivery decisions autonomously and use parallel builders.
 | --- | --- |
 | Remote | `6529-Collections/6529Stream` |
 | Active PR branch | `codex/current-stack-integration` |
-| Last merged PR | https://github.com/6529-Collections/6529Stream/pull/735 |
+| Last merged PR | https://github.com/6529-Collections/6529Stream/pull/737 |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/738 |
 | Active PR | TBD |
 | Next issue | TBD |
@@ -48,19 +48,22 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   12 million router gas; read callers should allow at least 16 million total.
 - Isolated deployment simulation passed: preparation 10,966,570 gas and
   activation/sealing 12,683,466 gas, both including intrinsic transaction cost.
-- Delayed append-only catalog extension is implemented, with real-manifest
-  integration verification running alongside the broad Foundry suite.
-- Dedicated Sepolia deployer has 0.01 test ETH. Current base fees require about
-  0.072 ETH for deployment alone; additional test funding is pending. No
-  subscription or deployment transaction has been sent.
+- Delayed append-only catalog extension and rollback both passed against the
+  real SystemManifest. All eleven current-stack integration scenarios pass.
+- Dedicated Sepolia deployer received 0.20 test ETH. The actual VRF subscription
+  is created and funded with 0.005 ETH; both transaction receipts succeeded.
+  The selected final Solidity source is compiling for the live deployment.
+- The pinned real-coordinator fork rehearsal includes all linked libraries:
+  48 transactions, about 100.27 million estimated execution gas. Its largest
+  transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
 
 ## Active owners
 
 | Owner | Branch | Current output |
 | --- | --- | --- |
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
-| Deployment | `codex/deploy-current` | Repeatable deployment and executable demonstration |
-| Product/tooling | `codex/current-stack-tooling` | Current ABI/artifact inventory and normal build/check integration |
+| Deployment | `codex/sepolia-current-launch` | Exact-source deployment and actual VRF demonstration; exclusive deployer nonce ownership |
+| Product/tooling | `codex/current-default-release-reconciliation` | Full validation and final default artifact reconciliation |
 | Governance/review | `codex/catalog-evolution` | Catalog/genesis integration complete; finish existing PRs #737 and #736 |
 
 ## Working method
@@ -95,11 +98,13 @@ The original checkout contains substantial unrelated uncommitted work. Keep
 it intact while useful source is recovered into the current layout. Never
 merge the entire old checkout. Preserve active artist-provenance work.
 
-The September cleanup removed 42 obsolete merged worktrees and archived 12
-superseded tasks. Branch references remain. Local preservation copies retain
-ignored notes and validation transcripts from explicit cleanup candidates.
-Clean up recovery and superseded builder checkouts after their useful work is
-incorporated or saved. A temporary installer repair checkout handles PR #737.
+The September cleanup removed 50 obsolete worktrees and archived 14 superseded
+tasks. Branch references remain. Verified recovery bundles, index and working
+patches, and persistent recovery references preserve the retired dirty artist
+and specification checkouts. Local preservation copies retain ignored notes,
+untracked source and validation transcripts. The original dirty checkout and
+active artist-provenance task remain intact. Remove the last temporary repair
+and builder checkouts when their work is integrated and validation is complete.
 
 ## Remaining full-v1 work
 
