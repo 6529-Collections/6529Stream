@@ -24,6 +24,9 @@ interface IStreamGenesisInitializer {
     function genesisPlanHash() external view returns (bytes32);
     function genesisInitialized() external view returns (bool);
     function commitGenesisPlan(bytes32 planHash) external;
+    /// @notice Hash the exact ABI argument bytes for the corresponding initializer
+    ///         call, domain-separated by this chain and Executor. Use the same
+    ///         encoding for hashing and initialization (including any trailing bytes).
     function hashGenesisPlan(
         SystemManifestBootstrapBinding calldata binding,
         GenesisBatch[] calldata batches

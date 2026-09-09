@@ -30,7 +30,6 @@ contract StreamGovernanceExecutor is
     Ownable,
     ReentrancyGuard
 {
-    uint256 private constant MAX_GOVERNANCE_REVERT_DATA_BYTES = 4_096;
     uint256 private constant MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 64;
     uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
     uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
@@ -162,29 +161,20 @@ contract StreamGovernanceExecutor is
 
         // Consume before interacting. A revert rolls the entire ceremony back.
         genesisInitialized = true;
+        _policy.committedGenesisActive = true;
         _bindSystemManifestBootstrap(binding);
         for (uint256 i; i < batches.length; ++i) {
             if (_manifest.isSealed) revert GenesisAlreadyInitialized();
-            GenesisBatch calldata batch = batches[i];
-            _publishCallData(batch.callDatas);
-            (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
-                _deriveBatchTransitionHashes(batch.calls, _callsHash(batch.calls));
+            GenesisBatch memory batch = batches[i];
             StreamGovernanceBootstrap.ScheduleContext memory ctx =
-                StreamGovernanceBootstrap.ScheduleContext({
-                    actionClass: batch.actionClass,
-                    scopeHash: scopeHash,
-                    oldValueHash: oldValueHash,
-                    newValueHash: newValueHash,
-                    notBefore: uint64(block.timestamp),
-                    expiresAfter: uint64(block.timestamp + 7 days),
-                    reasonHash: genesisPlanHash,
-                    reasonURI: "genesis",
-                    manifestHash: binding.expectedManifestHash
-                });
+                StreamGovernanceBootstrap.prepareGenesisBatch(
+                    _policy, batch, genesisPlanHash, binding.expectedManifestHash
+                );
             bytes32 actionId = _schedule(ctx, batch.calls);
             _execute(actionId, batch.calls, batch.callDatas);
         }
         if (!_manifest.isSealed || _pendingScheduledActionCount != 0) revert GenesisDidNotSeal();
+        _policy.committedGenesisActive = false;
         emit GenesisInitialized(genesisPlanHash, batches.length);
     }
 
@@ -1277,62 +1267,22 @@ contract StreamGovernanceExecutor is
     {
         uint256 startBalance = address(this).balance;
         GovernanceAction storage action = _actions[actionId];
-        if (action.status == GovernanceActionStatus.NONE) {
-            revert GovernanceActionUnknown(actionId);
-        }
-        if (action.status != GovernanceActionStatus.SCHEDULED) {
-            revert GovernanceActionNotScheduled(actionId);
-        }
-        if (block.timestamp < action.notBefore) {
-            revert GovernanceActionNotExecutable(actionId, action.notBefore);
-        }
-        if (block.timestamp > action.expiresAfter) {
-            revert GovernanceActionExpiredWindow(actionId, action.expiresAfter);
-        }
-        // Defense in depth: records with a retired or unknown class can never
-        // cross the execution boundary, even if storage or imported state is
-        // corrupted outside the ordinary scheduling path.
-        StreamGovernanceBootstrap.validateActionClass(action.actionClass);
-
-        // [GOV-BATCH] rule 1: recompute callsHash and actionId from the
-        // supplied batch and require both to match the stored action.
-        bytes32 callsHash = _callsHash(calls);
-        if (callsHash != action.callHash) {
-            revert CallsHashMismatch(actionId);
-        }
-        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
-            _deriveBatchTransitionHashes(calls, callsHash);
-        if (
-            derivedScopeHash != action.scopeHash || derivedOldValueHash != action.oldValueHash
-                || derivedNewValueHash != action.newValueHash
-        ) {
-            revert ActionIdMismatch(actionId);
-        }
-        if (
-            StreamGovernanceBootstrap.governanceActionIdFromStored(
-                    action, callsHash, _actionNonces[actionId]
-                ) != actionId
-        ) {
-            revert ActionIdMismatch(actionId);
-        }
-        bytes[] memory scheduledCallDatas = _readCanonicalCallDatas(_callDataPointers[actionId]);
-        if (callDatas.length != calls.length || scheduledCallDatas.length != calls.length) {
-            revert CallDataCountMismatch(calls.length, callDatas.length);
-        }
-        if (!_actionPolicy.bound) revert GovernanceActionPolicyNotBound();
-        bytes32 currentCatalogHash = _actionPolicy.catalogHash;
-        bytes32 scheduledCatalogHash = _actionPolicyCatalogHashes[actionId];
-        if (scheduledCatalogHash != currentCatalogHash) {
-            revert GovernanceActionPolicySnapshotMismatch(
-                actionId, scheduledCatalogHash, currentCatalogHash
-            );
-        }
-        uint256 totalValue = _validateCalls(action.actionClass, calls, scheduledCallDatas);
-        for (uint256 i = 0; i < calls.length; i++) {
-            if (!_bytesEqual(callDatas[i], scheduledCallDatas[i])) {
-                revert ScheduledCallDataMismatch(i);
-            }
-        }
+        (uint256 totalValue, bytes[] memory scheduledCallDatas, bytes32 currentCatalogHash) = StreamGovernanceBootstrap.validateExecution(
+            _policy,
+            _actionPolicy,
+            action,
+            StreamGovernanceBootstrap.ExecutionValidationContext({
+                actionId: actionId,
+                nonce: _actionNonces[actionId],
+                callDataPointer: _callDataPointers[actionId],
+                scheduledCatalogHash: _actionPolicyCatalogHashes[actionId],
+                roleRegistry: address(_manifest.roleRegistry),
+                systemManifestSatellite: _manifest.systemManifestSatellite,
+                sealSelector: this.sealSystemManifestBootstrap.selector
+            }),
+            calls,
+            callDatas
+        );
         bool bootstrapSeal = !_manifest.isSealed && calls.length == 2
             && calls[0].target == address(this)
             && calls[0].selector == this.sealSystemManifestBootstrap.selector;
@@ -1391,7 +1341,7 @@ contract StreamGovernanceExecutor is
             _currentScopeHash = calls[i].scopeHash;
             _currentOldValueHash = calls[i].oldValueHash;
             _currentNewValueHash = calls[i].newValueHash;
-            _executeCall(actionId, i, calls[i], callDatas[i]);
+            StreamGovernanceBootstrap.executeCall(_policy, actionId, i, calls[i], callDatas[i]);
             _currentScopeHash = bytes32(0);
             _currentOldValueHash = bytes32(0);
             _currentNewValueHash = bytes32(0);
@@ -1440,44 +1390,6 @@ contract StreamGovernanceExecutor is
         emit GovernanceActionPolicyValidated(
             SCHEMA_VERSION, actionId, 2, _actionPolicy.candidateProfileHash, currentCatalogHash
         );
-    }
-
-    function _executeCall(
-        bytes32 actionId,
-        uint256 callIndex,
-        GovernanceCall memory call_,
-        bytes memory callData
-    ) private {
-        if (callData.length == 0) {
-            if (call_.target.code.length == 0 && !_policy.approvedNativeReceivers[call_.target]) {
-                revert NativeReceiverNotApproved(call_.target);
-            }
-        } else if (call_.target.code.length == 0) {
-            revert TargetHasNoCode(callIndex, call_.target);
-        }
-        address target = call_.target;
-        uint256 value = call_.value;
-        bool success;
-        uint256 returnDataBytes;
-        assembly ("memory-safe") {
-            // Successful governed calls have no return-value contract. Use a
-            // zero-sized output buffer so a target cannot force the Executor
-            // to allocate or copy an unbounded success payload.
-            success := call(gas(), target, value, add(callData, 0x20), mload(callData), 0x00, 0x00)
-            returnDataBytes := returndatasize()
-        }
-        if (success) return;
-        if (returnDataBytes == 0) revert GovernanceCallFailed(actionId, callIndex);
-        if (returnDataBytes > MAX_GOVERNANCE_REVERT_DATA_BYTES) {
-            revert GovernanceCallReturndataTooLarge(
-                actionId, callIndex, returnDataBytes, MAX_GOVERNANCE_REVERT_DATA_BYTES
-            );
-        }
-        assembly ("memory-safe") {
-            let returnData := mload(0x40)
-            returndatacopy(returnData, 0x00, returnDataBytes)
-            revert(returnData, returnDataBytes)
-        }
     }
 
     function _validateCalls(
