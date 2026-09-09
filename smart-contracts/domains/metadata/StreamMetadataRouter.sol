@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/IStreamCore.sol";
 import "../../interfaces/stream/IStreamMetadataRouter.sol";
 import "../../interfaces/stream/IStreamEntropyView.sol";
+import "../../interfaces/stream/IStreamCollectionArtistRegistry.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
 import "../modules/StreamModuleBase.sol";
@@ -32,6 +33,7 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
     }
     IStreamCore public immutable core;
     address public immutable authority;
+    IStreamCollectionArtistRegistry public immutable artistRegistry;
     mapping(uint256 => CollectionMetadata) private _collections;
     string private _contractMetadataURI;
 
@@ -50,7 +52,8 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         address authority_,
         bytes32 deploymentManifestHash,
         string memory manifestURI,
-        bytes32 manifestHash
+        bytes32 manifestHash,
+        IStreamCollectionArtistRegistry artistRegistry_
     )
         StreamModuleBase(
             keccak256("6529stream.metadata-router.schema.v1"),
@@ -66,6 +69,13 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         }
         core = IStreamCore(core_);
         authority = authority_;
+        if (
+            address(artistRegistry_).code.length == 0 || artistRegistry_.core() != core_
+                || !artistRegistry_.supportsInterface(
+                    type(IStreamCollectionArtistRegistry).interfaceId
+                ) || artistRegistry_.supportsInterface(0xffffffff)
+        ) revert InvalidManifest();
+        artistRegistry = artistRegistry_;
     }
 
     function streamModuleType() public pure override returns (bytes32) {
@@ -164,6 +174,7 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
                 "{",
                 _identityJSON(metadata, facts.serial),
                 _propertiesJSON(facts),
+                _artistJSON(facts.collectionId),
                 animationField,
                 "}"
             )
@@ -174,7 +185,9 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         (bool exists, uint256 collectionId, uint256 serial, bool burned) =
             core.tokenCollectionIdentity(tokenId);
         if (!exists || burned || core.tokenLifecycle(tokenId) != uint8(StreamTokenLifecycle.MINTED))
-        revert InvalidToken(tokenId);
+        {
+            revert InvalidToken(tokenId);
+        }
         address coordinator = core.coordinatorAtMint(tokenId);
         (bytes32 seed, bool finalized) = IStreamEntropyView(coordinator).tokenSeed(tokenId);
         StreamEntropyStatus entropyStatus =
@@ -185,6 +198,21 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
                 ? "stale"
                 : entropyStatus == StreamEntropyStatus.FAILED ? "failed" : "pending";
         return TokenFacts(tokenId, collectionId, serial, seed, finalized, state);
+    }
+
+    function _artistJSON(uint256 collectionId) private view returns (bytes memory) {
+        IStreamCollectionArtistRegistry.Attribution memory record =
+            artistRegistry.attribution(collectionId);
+        if (record.artist == address(0)) return ',"artist_attribution":"unaccepted"';
+        return abi.encodePacked(
+            ',"artist":"',
+            uint256(uint160(record.artist)).toHexString(20),
+            '","artist_identity_hash":"',
+            uint256(record.identityHash).toHexString(32),
+            '","artist_acceptance_hash":"',
+            uint256(record.acceptanceHash).toHexString(32),
+            '"'
+        );
     }
 
     function _identityJSON(CollectionMetadata storage metadata, uint256 serial)

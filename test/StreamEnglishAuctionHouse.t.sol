@@ -67,7 +67,7 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
 
     function setUp() public {
         _setUpSaleFixture();
-        house = new StreamEnglishAuctionHouse(core, manager, factory, platform);
+        house = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
         _configureSalePhase(PHASE, address(house));
         vm.deal(FIRST_BIDDER, 100 ether);
         vm.deal(SECOND_BIDDER, 100 ether);
@@ -310,6 +310,9 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
 
     function testContractArtistUnsoldNFTStaysEscrowedUntilAuthorizedPullClaim() public {
         AuctionContractArtist contractArtist = new AuctionContractArtist();
+        _bindFixtureArtist(address(contractArtist));
+        house = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
+        manager.setPhaseExecutor(1, PHASE, address(house), true);
         IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
         authorization.artist = address(contractArtist);
         contractArtist.authorize(house.authorizationDigest(authorization));
@@ -345,6 +348,28 @@ contract StreamEnglishAuctionHouseTest is StreamSaleTestBase {
         require(
             house.auctionStatus(tokenId) == IStreamEnglishAuctionHouse.AuctionStatus.SettledNoBid,
             "terminal no-bid status"
+        );
+    }
+
+    function testFullySignedAuctionCannotAttributeAnotherArtist() public {
+        IStreamEnglishAuctionHouse.AuctionAuthorization memory authorization = _authorization();
+        authorization.artist = vm.addr(999);
+        bytes32 digest = house.authorizationDigest(authorization);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
+        bytes memory platformSignature = abi.encodePacked(r, s, v);
+        (v, r, s) = vm.sign(999, digest);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionArtistRegistry.ArtistRegistryArtistMismatch.selector,
+                1,
+                artist,
+                authorization.artist
+            )
+        );
+        house.createAuction(authorization, tokenData, platformSignature, abi.encodePacked(r, s, v));
+        require(
+            core.totalSupply() == 0 && manager.nextOperationNonce() == 0,
+            "no unauthorized attribution minted"
         );
     }
 

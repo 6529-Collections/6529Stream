@@ -12,6 +12,7 @@ import "./mocks/MockVRFCoordinatorV2Plus.sol";
 import "../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import "../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
 import "../smart-contracts/core/StreamCore.sol";
 import "../smart-contracts/core/StreamCoreExternalReads.sol";
 import "../smart-contracts/interfaces/stream/IStreamMintManager.sol";
@@ -44,6 +45,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
     PermanentTargetModuleRegistry private registry;
     StreamEntropyCoordinator private entropy;
     StreamMetadataRouter private router;
+    StreamCollectionArtistRegistry private artistRegistry;
     MockStreamEntropyProvider private provider;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
@@ -87,8 +89,11 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         entropy = new StreamEntropyCoordinator(
             address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST
         );
+        artistRegistry = new StreamCollectionArtistRegistry(
+            address(core), address(this), MANIFEST, "ipfs://local-artist", MANIFEST
+        );
         router = new StreamMetadataRouter(
-            address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST
+            address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST, artistRegistry
         );
         provider = new MockStreamEntropyProvider(address(entropy));
         _install(MANAGER, address(this), type(IStreamMintManager).interfaceId);
@@ -126,6 +131,15 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         );
         executor.setAction(1, scope, oldState, newState);
         executor.execute(address(core), abi.encodeCall(core.createCollection, (2, false, 0, 0)));
+        artistRegistry.nominateArtist(1, RECIPIENT, keccak256("artist identity"));
+        bytes32 nomination = artistRegistry.attribution(1).nominationHash;
+        vm.prank(RECIPIENT);
+        artistRegistry.acceptArtist(1, nomination, 0, uint64(block.timestamp + 1 days), "");
+        _install(
+            keccak256("ARTIST_REGISTRY"),
+            address(artistRegistry),
+            type(IStreamCollectionArtistRegistry).interfaceId
+        );
         entropy.configureCollection(1, address(provider), keccak256("collection-salt"), true, 10);
         router.setCollectionMetadata(
             1, 'Artist "Collection"', "Description", "ipfs://image", "https://example.test/art/"
@@ -319,6 +333,25 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         string memory json = router.tokenMetadataJSON(address(core), id);
         string memory animation = abi.decode(vm.parseJson(json, ".animation_url"), (string));
         require(bytes(animation).length > 100, "actual onchain HTML");
+    }
+
+    function testMetadataExposesAcceptedArtistEvidence() public {
+        uint256 id = _mint();
+        string memory json = router.tokenMetadataJSON(address(core), id);
+        require(
+            abi.decode(vm.parseJson(json, ".artist"), (address)) == RECIPIENT,
+            "accepted artist address"
+        );
+        require(
+            abi.decode(vm.parseJson(json, ".artist_acceptance_hash"), (bytes32))
+                == artistRegistry.attribution(1).acceptanceHash,
+            "artist acceptance evidence"
+        );
+        require(
+            keccak256(bytes(core.tokenURI(id)))
+                == keccak256(bytes(router.tokenURI(address(core), id))),
+            "Core serves attributed metadata within configured gas"
+        );
     }
 
     function testRealCoreNativeVRFRequestCallbackAndFinalMetadata() public {

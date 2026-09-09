@@ -6,6 +6,7 @@ import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
+import "../../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
 
 /// @dev Actual Core, manager, ledger and splits; governance and entropy are boundary fixtures.
 abstract contract StreamSaleTestBase is CharacterizationTestBase {
@@ -23,6 +24,7 @@ abstract contract StreamSaleTestBase is CharacterizationTestBase {
     StreamMintManager internal manager;
     StreamMintLedger internal ledger;
     StreamSplitFactory internal factory;
+    StreamCollectionArtistRegistry internal artistRegistry;
     bytes32 internal profile;
     address internal wallet;
     address internal artist;
@@ -44,11 +46,31 @@ abstract contract StreamSaleTestBase is CharacterizationTestBase {
         _install(MANAGER_POINTER, address(manager), type(IStreamMintManager).interfaceId);
         _install(ENTROPY_POINTER, address(entropy), type(IStreamEntropyCoordinator).interfaceId);
         _createCollection();
+        _bindFixtureArtist(artist);
         factory = new StreamSplitFactory(new StreamAssetPolicyRegistry());
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(protocol, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("profile-metadata"));
+    }
+
+    function _bindFixtureArtist(address nominee) internal {
+        artistRegistry = new StreamCollectionArtistRegistry(
+            address(core),
+            address(this),
+            keccak256("deploy"),
+            "urn:test:artist",
+            keccak256("artist module")
+        );
+        artistRegistry.nominateArtist(1, nominee, keccak256("artist identity"));
+        bytes32 nomination = artistRegistry.attribution(1).nominationHash;
+        vm.prank(nominee);
+        artistRegistry.acceptArtist(1, nomination, 0, uint64(block.timestamp + 1 days), "");
+        _install(
+            keccak256("ARTIST_REGISTRY"),
+            address(artistRegistry),
+            type(IStreamCollectionArtistRegistry).interfaceId
+        );
     }
 
     function _configureSalePhase(bytes32 phaseId, address executor) internal {

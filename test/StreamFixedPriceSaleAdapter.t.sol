@@ -67,7 +67,7 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
 
     function setUp() public {
         _setUpSaleFixture();
-        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform);
+        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
         _configureSalePhase(PHASE, address(sale));
     }
 
@@ -179,12 +179,37 @@ contract StreamFixedPriceSaleAdapterTest is StreamSaleTestBase {
     }
 
     function testERC1271ArtistAndPlatformSignersCanBuy() public {
+        address contractArtist = address(new NativeSale1271Signer(artist));
+        _bindFixtureArtist(contractArtist);
+        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
+        manager.setPhaseExecutor(1, PHASE, address(sale), true);
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
-        authorization.artist = address(new NativeSale1271Signer(artist));
+        authorization.artist = contractArtist;
         sale.setPlatformSigner(address(new NativeSale1271Signer(platform)));
         authorization.signerEpoch = sale.signerEpoch();
         _buy(authorization);
         require(core.totalSupply() == 1 && wallet.balance == 1 ether, "ERC1271 paid mint");
+    }
+
+    function testFullySignedSaleCannotAttributeAnotherArtist() public {
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization = _authorization();
+        authorization.artist = vm.addr(999);
+        bytes32 digest = sale.authorizationDigest(authorization);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
+        bytes memory platformSignature = abi.encodePacked(r, s, v);
+        (v, r, s) = vm.sign(999, digest);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionArtistRegistry.ArtistRegistryArtistMismatch.selector,
+                1,
+                artist,
+                authorization.artist
+            )
+        );
+        sale.buy{ value: authorization.price }(
+            authorization, tokenData, platformSignature, abi.encodePacked(r, s, v)
+        );
+        _assertNothingConsumed(authorization);
     }
 
     function _authorization()

@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/IStreamArtworkFinalityRegistry.sol";
 import "../interfaces/stream/IStreamCollectionMetadata.sol";
+import "../interfaces/stream/IStreamCollectionArtistRegistry.sol";
 import "../interfaces/stream/IStreamEntropyCoordinator.sol";
 import "../interfaces/stream/IStreamMetadataRouter.sol";
 import "../interfaces/stream/IStreamMintLedger.sol";
@@ -147,7 +148,7 @@ library StreamCoreExternalReads {
             return (true, pointerType, type(IStreamMetadataRouter).interfaceId);
         }
         if (pointerType == _POINTER_ARTIST_REGISTRY) {
-            return (true, pointerType, bytes4(0));
+            return (true, pointerType, type(IStreamCollectionArtistRegistry).interfaceId);
         }
         if (pointerType == _POINTER_ARTWORK_FINALITY_RECOVERY) {
             return (true, _MODULE_ARTWORK_FINALITY_RECOVERY, _INTERFACE_ARTWORK_FINALITY_RECOVERY);

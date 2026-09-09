@@ -5,6 +5,7 @@ import "../../interfaces/stream/IStreamEnglishAuctionHouse.sol";
 import "../../interfaces/stream/IStreamCore.sol";
 import "../../interfaces/stream/IStreamMintManager.sol";
 import "../../interfaces/stream/IStreamSplitFactory.sol";
+import "../../interfaces/stream/IStreamCollectionArtistRegistry.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC721Receiver.sol";
 import "../../vendor/openzeppelin/Math.sol";
@@ -34,6 +35,7 @@ contract StreamEnglishAuctionHouse is
     IStreamCore public immutable core;
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
+    IStreamCollectionArtistRegistry public immutable artistRegistry;
     address public platformSigner;
     uint64 public signerEpoch = 1;
     bool public paused;
@@ -50,11 +52,18 @@ contract StreamEnglishAuctionHouse is
         IStreamCore core_,
         IStreamMintManager mintManager_,
         IStreamSplitFactory splitFactory_,
-        address platformSigner_
+        address platformSigner_,
+        IStreamCollectionArtistRegistry artistRegistry_
     ) {
         if (
             address(core_).code.length == 0 || address(mintManager_).code.length == 0
                 || address(splitFactory_).code.length == 0 || platformSigner_ == address(0)
+        ) revert InvalidAuctionConfiguration();
+        if (
+            address(artistRegistry_).code.length == 0 || artistRegistry_.core() != address(core_)
+                || !artistRegistry_.supportsInterface(
+                    type(IStreamCollectionArtistRegistry).interfaceId
+                ) || artistRegistry_.supportsInterface(0xffffffff)
         ) revert InvalidAuctionConfiguration();
         if (IStreamAuctionManagerBinding(address(mintManager_)).core() != address(core_)) {
             revert InvalidAuctionConfiguration();
@@ -63,6 +72,7 @@ contract StreamEnglishAuctionHouse is
         mintManager = mintManager_;
         splitFactory = splitFactory_;
         platformSigner = platformSigner_;
+        artistRegistry = artistRegistry_;
     }
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
@@ -130,6 +140,7 @@ contract StreamEnglishAuctionHouse is
     ) external override nonReentrant returns (uint256 tokenId) {
         if (paused) revert AuctionsPaused();
         _validateAuthorization(authorization, tokenData);
+        artistRegistry.requireArtist(authorization.collectionId, authorization.artist);
         bytes32 digest = authorizationDigest(authorization);
         _requireSignature(platformSigner, digest, platformSignature);
         _requireSignature(authorization.artist, digest, artistSignature);
