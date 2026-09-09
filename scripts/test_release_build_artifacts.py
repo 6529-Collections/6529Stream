@@ -4959,6 +4959,26 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 self.assertIn(dependency, makefile)
         self.assertNotIn(".NOTPARALLEL", makefile)
 
+    def _assert_default_wrapper_order(
+        self, text: str, expected_commands: list[str], *, powershell: bool
+    ) -> None:
+        if powershell:
+            # CurrentStack is a separate early-return path and does not consume
+            # the target-isolated historical release build. Keep every command
+            # before and after that guarded block in the default-path check.
+            branch = re.search(r"(?ms)^if \(\$CurrentStack\) \{\n.*?^\}\n", text)
+            self.assertIsNotNone(branch, "missing CurrentStack guard")
+            assert branch is not None
+            self.assertTrue(branch.group().endswith("\n    return\n}\n"),
+                            "CurrentStack must return before the default path")
+            text = text[:branch.start()] + text[branch.end():]
+        lines = [line.strip() for line in text.splitlines()]
+        positions = []
+        for command in expected_commands:
+            self.assertEqual(lines.count(command), 1, command)
+            positions.append(lines.index(command))
+        self.assertEqual(positions, sorted(positions))
+
     def test_check_wrappers_order_release_builder_before_all_consumers(self) -> None:
         wrapper_commands = {
             "PowerShell": (
@@ -5001,15 +5021,25 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
 
         for wrapper_name, (path, expected_commands) in wrapper_commands.items():
             with self.subTest(wrapper=wrapper_name):
-                lines = [
-                    line.strip()
-                    for line in path.read_text(encoding="utf-8").splitlines()
-                ]
-                positions: list[int] = []
-                for command in expected_commands:
-                    self.assertEqual(lines.count(command), 1, command)
-                    positions.append(lines.index(command))
-                self.assertEqual(positions, sorted(positions))
+                self._assert_default_wrapper_order(
+                    path.read_text(encoding="utf-8"), expected_commands,
+                    powershell=wrapper_name == "PowerShell",
+                )
+
+    def test_default_wrapper_order_rejects_consumer_before_builder(self) -> None:
+        text = "if ($CurrentStack) {\n    consume\n    return\n}\nconsume\nbuild\n"
+        with self.assertRaises(AssertionError):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
+
+    def test_default_wrapper_order_rejects_duplicate_consumer_outside_guard(self) -> None:
+        text = "consume\nif ($CurrentStack) {\n    return\n}\nbuild\nconsume\n"
+        with self.assertRaises(AssertionError):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
+
+    def test_default_wrapper_order_rejects_current_path_fallthrough(self) -> None:
+        text = "if ($CurrentStack) {\n    consume\n}\nbuild\nconsume\n"
+        with self.assertRaisesRegex(AssertionError, "must return"):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
 
     def test_release_generator_rejects_post_build_artifact_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
