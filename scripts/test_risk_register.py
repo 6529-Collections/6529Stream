@@ -814,6 +814,22 @@ class RiskRegisterTests(unittest.TestCase):
                 Path("ops/AUTONOMOUS_RUN.md"), "# 6529Stream Delivery State\n## Target\n"
             )
 
+    def test_compact_delivery_state_distinguishes_heading_levels(self) -> None:
+        relative = Path("ops/AUTONOMOUS_RUN.md")
+        text = generator.AUTONOMOUS_DELIVERY_STATE_TITLE + "".join(
+            generator.AUTONOMOUS_DELIVERY_STATE_HEADINGS
+        )
+        for heading in generator.AUTONOMOUS_DELIVERY_STATE_HEADINGS:
+            with self.subTest(heading=heading):
+                deeper = heading.replace("\n## ", "\n### ", 1)
+                valid = text + deeper
+                self.assertEqual(generator._live_size_scan_text(relative, valid), valid)
+                for invalid in (text + heading, text.replace(heading, deeper, 1)):
+                    with self.assertRaisesRegex(
+                        generator.checker.RiskRegisterError, "delivery state.*heading"
+                    ):
+                        generator._live_size_scan_text(relative, invalid)
+
     def test_live_size_mirrors_allow_exact_approved_baseline_margin(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
