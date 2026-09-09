@@ -5,8 +5,25 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+### Added
+
+- Integrated the current Core with signed native fixed-price sales, English
+  auctions, canonical mint accounting, immutable split wallets and royalty
+  resolution. Sales and auctions require the accepted collection artist and
+  platform to sign the exact transaction terms.
+- Added collection artist nomination and relayed acceptance, a current entropy
+  coordinator with a VRF v2.5 adapter, and metadata rendering from the token's
+  original coordinator. Wider artist lifecycle and payment modes remain future work.
+- Added committed one-time genesis initialization, real system discovery and
+  current-stack tests covering paid mint, auction custody/refunds, withdrawals,
+  metadata, transfer/burn, receiver rollback and delayed governance rotation.
+  Normal governance delays remain after genesis. This development build is
+  not an audit, production release or completed testnet deployment.
+
 ### Changed
 
+- Added current contract/interface navigation and replaced the stale autonomous
+  run log with a concise integration and delivery record.
 - Wired the Proposed dual owner-record continuity prerequisite into the
   canonical Unix, Windows, Make, pull-request CI, and checksum validation
   paths. The checksum-bound gate preserves all 37 retained semantic record
