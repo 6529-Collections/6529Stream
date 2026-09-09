@@ -11,7 +11,7 @@ from pathlib import Path
 PYTHON_VERSION = "3.12.13"
 WINDOWS_PYTHON_VERSION = "3.12.10"
 SETUP_PYTHON_SHA = "ece7cb06caefa5fff74198d8649806c4678c61a1"
-FOUNDRY_TOOLCHAIN_SHA = "c7450ba673e133f5ee30098b3b54f444d3a2ca2d"
+FOUNDRY_TOOLCHAIN_SHA = "b00af27efadbc7b4ca8b82abbd903b17cc874d2a"
 FOUNDRY_VERSION = "v1.7.1"
 LOCK_INSTALL_COMMAND = (
     "python -m pip install --disable-pip-version-check --require-hashes "

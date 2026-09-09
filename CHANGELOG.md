@@ -34,6 +34,9 @@ the release policy in `docs/release-policy.md`.
   preparation and initialization; a failed initialization can retry the same
   plan. Compare governance calldata in exact words to reduce validation gas.
 
+- Updated the pinned Foundry toolchain action to use its native installer on
+  Linux and Windows. CI now checks changelog coverage before tool installation
+  and compilation so missing release notes fail promptly.
 - Wired the Proposed dual owner-record continuity prerequisite into the
   canonical Unix, Windows, Make, pull-request CI, and checksum validation
   paths. The checksum-bound gate preserves all 37 retained semantic record
