@@ -418,6 +418,9 @@ abstract contract StreamCurrentStackDeployment {
         (batches[3].calls[1], batches[3].callDatas[1]) =
             StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
+        // Bind the committed catalog in its own transaction so product activation
+        // and the final seal remain atomic within the chain's transaction gas cap.
+        executor.prepareGenesis(binding, batches);
         executor.initializeGenesis(binding, batches);
     }
 

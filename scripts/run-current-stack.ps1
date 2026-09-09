@@ -73,7 +73,7 @@ try {
         Where-Object { $_.Name -ne 'DeployCurrentStack.s.sol' } |
         ForEach-Object { $skip += @('--skip',$_.Name) }
     & forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack @skip `
-        --via-ir --out out/current-stack-development --cache-path cache/current-stack-development `
+        --via-ir --isolate --out out/current-stack-development --cache-path cache/current-stack-development `
         --rpc-url $RpcUrl --sender $deployer --unlocked --broadcast --slow
     if ($LASTEXITCODE -ne 0) { throw 'Current-stack deployment failed.' }
 

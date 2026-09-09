@@ -3,7 +3,8 @@
 `DeployCurrentStack.s.sol` deploys the current Core, governance, canonical module
 registry, mint manager and ledger, signed native sale, English auction, accepted
 artist registry, entropy coordinator, metadata router, royalty resolver, and
-immutable split wallet. It commits and executes one genesis plan, freezes the
+immutable split wallet. It commits one genesis plan, prepares its catalog in a
+separate transaction, then atomically activates and seals the stack. It freezes the
 SystemManifest pointer, and publishes an explicitly labeled development manifest.
 These module metadata hashes describe development configurations. They are not
 release checksums, audit evidence, or a frozen release candidate.
@@ -42,8 +43,13 @@ For deployment simulation without an RPC endpoint:
 ```powershell
 $env:STREAM_DEPLOYER = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
 $env:STREAM_PROTOCOL_TREASURY = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --skip test --sender $env:STREAM_DEPLOYER
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --isolate --skip test --sender $env:STREAM_DEPLOYER
 ```
+
+The current offline isolated simulation uses 10,966,570 gas for preparation and
+12,683,466 for activation plus sealing, including transaction intrinsic gas.
+These are simulation measurements, not RPC receipts. Re-estimate against the
+intended chain and final configuration before broadcasting.
 
 ## Sepolia
 
@@ -68,7 +74,7 @@ configuration; no upstream coordinator, key hash, or subscription is invented.
 Use an existing secure Foundry signer and the intended RPC endpoint:
 
 ```powershell
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
 ```
 
 The adapter must be added as a consumer of the supplied subscription, and that
