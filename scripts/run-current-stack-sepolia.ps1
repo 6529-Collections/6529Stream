@@ -34,7 +34,7 @@ foreach ($account in @($deployer,$artist,$platform)) {
 
 function Invoke-Tool([string]$Program, [string[]]$Arguments) {
     # Keep captured errors private: RPC endpoints or signer arguments may be sensitive.
-    $executable = (Get-Command $Program -CommandType Application -ErrorAction Stop).Source
+    $executable = (Get-Command $Program -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
     $captured = & $executable @Arguments 2>&1
     if ($LASTEXITCODE -ne 0) { throw "$Program failed; command output withheld." }
     return ($captured -join "`n").Trim()
