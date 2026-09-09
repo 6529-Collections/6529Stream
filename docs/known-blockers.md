@@ -248,10 +248,11 @@ contributors who start from the README.
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 32 open
-  findings: 2 High and 30 Medium. Zero rows are confirmed gaps, six rows
-  require design review, and 26 remain pending disposition. None is
-  accepted or classified as a false positive. The machine-readable source is
+- The normalized first-party production Slither baseline contains 32 retained
+  findings: 2 High and 30 Medium. Thirty rows remain Open: zero confirmed
+  gaps, six design-review rows, and 24 pending dispositions. Two
+  `StreamSplitWallet` `incorrect-equality` rows have narrow False Positive
+  dispositions backed by focused boundary tests. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue
   [#658](https://github.com/6529-Collections/6529Stream/issues/658) owns the

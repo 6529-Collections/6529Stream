@@ -164,7 +164,7 @@
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
+      "rationale": "Slither reports state variable `_scopedComponents` as uninitialized at smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:76 `_scopedComponents`. Writer/read reachability has not yet been proven, so the row remains open.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
@@ -303,17 +303,17 @@
         }
       ],
       "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/domains/revenue/StreamSplitWallet.sol:200 release. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: `amount == 0` is an exact sentinel for the absence of releasable entitlement, not a manipulable balance target. The branch reverts before release-ledger, transfer, or observation effects; every positive amount follows the same CEI release path. The equality is required to distinguish no claim from the smallest valid one-wei claim.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.",
-        "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
-        "Record independent reviewer disposition or a reviewed fix under issue #658."
+        "Source evidence: smart-contracts/domains/revenue/StreamSplitWallet.sol release computes the cumulative entitlement first, then uses `amount == 0` only to reject a no-op before any state mutation or external call.",
+        "Focused executable evidence: test/StreamSplitWallet.t.sol::testReleaseZeroSentinelRevertsAndPositiveBoundaryReleases proves exact zero reverts without effects and the adjacent one-wei value releases successfully.",
+        "Accounting evidence: test/StreamSplitWallet.t.sol::testNativeAccountingInvariantsAcrossReceiptReleaseAndSyncRounds proves positive releases preserve cumulative entitlement conservation."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -349,17 +349,17 @@
         }
       ],
       "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/domains/revenue/StreamSplitWallet.sol:253 _recordObservation. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: `observed == previous` is the intentional unchanged high-water-mark branch after the function has already rejected every decrease. Returning without a duplicate event is the specified behavior; any increase updates the stored observation and emits `AssetSynced`, so equality cannot bypass a required state transition.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.",
-        "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
-        "Record independent reviewer disposition or a reviewed fix under issue #658."
+        "Source evidence: smart-contracts/domains/revenue/StreamSplitWallet.sol _recordObservation initializes once, rejects `observed < previous`, returns only for exact equality, and records every `observed > previous` increase.",
+        "Focused executable evidence: test/StreamSplitWallet.t.sol::testSyncAssetRecordsInitializationIncreaseAndSkipsUnchangedObservations covers first-zero initialization, unchanged zero, increase, and unchanged positive observations with exact event assertions.",
+        "Negative-boundary evidence: test/StreamSplitWallet.t.sol::testSyncAssetRejectsDecreasingObservedReceipts proves the immediately lower branch reverts with the retained high-water mark."
       ],
       "gate": "Gate C / Gate F"
     },

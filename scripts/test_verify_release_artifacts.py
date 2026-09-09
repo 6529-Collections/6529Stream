@@ -1532,8 +1532,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 128_549,
             ),
             Path("scripts/check_slither_baseline.py"): (
-                "7ac55d3713386b9eed636c527b1d8187b1b0af6428dfd85252e2a1857e966e46",
-                47_072,
+                "ff688fdeab7ddb1c33596a8aaddf6af93cb3aa3c29c563fb16987c714828478c",
+                49_512,
             ),
         }
         self.assertEqual(

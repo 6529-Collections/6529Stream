@@ -98,16 +98,47 @@ class SlitherBaselineTests(unittest.TestCase):
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
 
-    def test_committed_triage_boundary_is_exact_and_all_open(self) -> None:
+    def test_committed_triage_and_status_boundaries_are_exact(self) -> None:
         rows = load_baseline()["findings"]
         triage: dict[str, int] = {
             key: 0 for key in checker.EXPECTED_TRIAGE_COUNTS
         }
+        statuses: dict[str, int] = {
+            key: 0 for key in checker.EXPECTED_STATUS_COUNTS
+        }
         for row in rows:
             triage[row["triage_class"]] = triage.get(row["triage_class"], 0) + 1
-            self.assertEqual(row["status"], "Open")
+            statuses[row["status"]] = statuses.get(row["status"], 0) + 1
             self.assertEqual(row["source_kind"], "first_party_production")
         self.assertEqual(triage, checker.EXPECTED_TRIAGE_COUNTS)
+        self.assertEqual(statuses, checker.EXPECTED_STATUS_COUNTS)
+
+    def test_committed_false_positives_are_only_split_wallet_equality_rows(self) -> None:
+        rows = [
+            row
+            for row in load_baseline()["findings"]
+            if row["status"] == "False Positive"
+        ]
+        self.assertEqual(
+            {row["fingerprint"] for row in rows},
+            {
+                "sha256:0b04fab8809606f193c03e4b36f6e2637f4bf206e8e0f37cca602bf2b314deb9",
+                "sha256:3a8fa406fd87274e4df731130c3099a9c127b9c69ba9c7e5f217c697e5e63fa4",
+            },
+        )
+        for row in rows:
+            self.assertEqual(row["detector"], "incorrect-equality")
+            self.assertEqual(
+                row["source"]["path"],
+                "smart-contracts/domains/revenue/StreamSplitWallet.sol",
+            )
+            self.assertEqual(row["triage_class"], "false_positive")
+            self.assertTrue(
+                any(
+                    "test/StreamSplitWallet.t.sol" in item
+                    for item in row["required_proof"]
+                )
+            )
 
     def test_cli_requires_one_explicit_mode(self) -> None:
         with redirect_stderr(StringIO()):
@@ -362,6 +393,20 @@ class SlitherBaselineTests(unittest.TestCase):
         )
         row["triage_class"] = "pending_disposition"
         self.assert_invalid(data, "design-review detector")
+
+    def test_baseline_rejects_false_positive_without_focused_test_evidence(self) -> None:
+        data = load_baseline()
+        row = next(item for item in data["findings"] if item["status"] == "False Positive")
+        row["required_proof"] = [
+            "Source review: smart-contracts/domains/revenue/StreamSplitWallet.sol retains exact semantics."
+        ]
+        self.assert_invalid(data, "must cite focused executable tests")
+
+    def test_baseline_rejects_false_positive_triage_on_open_row(self) -> None:
+        data = load_baseline()
+        row = next(item for item in data["findings"] if item["status"] == "Open")
+        row["triage_class"] = "false_positive"
+        self.assert_invalid(data, "requires False Positive status")
 
     def test_live_compare_reports_exact_scope_counts(self) -> None:
         baseline = load_baseline()

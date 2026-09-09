@@ -39,6 +39,14 @@ the release policy in `docs/release-policy.md`.
 - Updated the pinned Foundry toolchain action to use its native installer on
   Linux and Windows. CI now checks changelog coverage before tool installation
   and compilation so missing release notes fail promptly.
+- Dispositioned the two retained `StreamSplitWallet` `incorrect-equality`
+  findings as detector-specific false positives without suppressing the detector
+  or changing production Solidity. Focused Foundry coverage proves the exact
+  zero-release sentinel, the adjacent one-wei release boundary, unchanged
+  observation handling, monotonic increases, and decreasing-observation
+  rejection. The canonical 32-row semantic inventory remains unchanged; 30
+  rows remain Open and the protocol remains pre-audit and blocked from public
+  beta and production.
 - Wired the Proposed dual owner-record continuity prerequisite into the
   canonical Unix, Windows, Make, pull-request CI, and checksum validation
   paths. The checksum-bound gate preserves all 37 retained semantic record

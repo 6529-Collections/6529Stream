@@ -26801,8 +26801,8 @@
     {
       "path": "scripts/check_slither_baseline.py",
       "role": "runtime",
-      "source_sha256": "7ac55d3713386b9eed636c527b1d8187b1b0af6428dfd85252e2a1857e966e46",
-      "size_bytes": 47072,
+      "source_sha256": "ff688fdeab7ddb1c33596a8aaddf6af93cb3aa3c29c563fb16987c714828478c",
+      "size_bytes": 49512,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
@@ -26908,7 +26908,7 @@
         },
         {
           "record": "{\"context\":\"Subscript.value\",\"target\":\"collections.Counter\"}",
-          "count": 3
+          "count": 4
         },
         {
           "record": "{\"context\":\"Subscript.value\",\"target\":\"sys.argv\"}",
@@ -27000,7 +27000,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"collections.Counter\"}",
-          "count": 4
+          "count": 6
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"hashlib.sha256\"}",
@@ -27066,12 +27066,18 @@
           "target": "collections.Counter",
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "4e1264dd51f9450f3d438d645464dc8e8bbef5ea9a297994ee50049bd03210a6",
-          "count": 3
+          "count": 4
         },
         {
           "target": "collections.Counter",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5a087e6555088846aef80c2c6adc1e1a0d1c46b44d0f4983d7220defe5b45d14",
+          "count": 1
+        },
+        {
+          "target": "collections.Counter",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "68183e617d65e9c8ef81a7a55abcf1c289b43f2533f1e3f646e971204db549ed",
           "count": 1
         },
         {
@@ -27231,6 +27237,12 @@
           "count": 1
         },
         {
+          "target": "local:EXPECTED_STATUS_COUNTS.values",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "13f9b02c464a947861acb9b253e6dd15b83bf357fec687b0451014ed0b3bc579",
+          "count": 1
+        },
+        {
           "target": "local:EXPECTED_TRIAGE_COUNTS.values",
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "52c0821b27ae0798119134af2391af8d82875d15fa2034770c6a319b890d9048",
@@ -27299,6 +27311,12 @@
         {
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "20048b5b310962853a5669ea6beeac6981b29ffaf8c3a2603196f5dc93ba2de0",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "27cd2eabf1f20b5448302d4c1bed3f88bd7408f3aacfd72d86f8c6e686396bb8",
           "count": 1
         },
@@ -27329,13 +27347,13 @@
         {
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "421e38f80da1da6b20dcdd996011f72ea6ce85e4d982826185da276b9a54073b",
+          "ast_sha256": "3d1562b470ff7f2917a7b3ced4addfc0941d9d62a9d954896fdb3f32787bf436",
           "count": 1
         },
         {
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "436c3db7984276eba7394b7d8f0ec5959401634207b5b7114a3e1c602620c279",
+          "ast_sha256": "421e38f80da1da6b20dcdd996011f72ea6ce85e4d982826185da276b9a54073b",
           "count": 1
         },
         {
@@ -27414,6 +27432,12 @@
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5721f0799d0482e28d9109f74b5fbeb21223249536af02447e0ee3f47da8d959",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "5753139ae8ccfbb453be53b7082ae65dcf165fed646da9b1dc34b06d5027d3ac",
           "count": 1
         },
         {
@@ -27516,6 +27540,12 @@
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "8e3cd2ac53aebaf8e442a20ac07bde150039cb3a763e9e84276ffabfd0fe0789",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "92e0ba07124947ddf2e603b4edb3faaedf316163b2dd50a5d2a82ab96e631829",
           "count": 1
         },
         {
@@ -27653,6 +27683,12 @@
         {
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "e447d57cc8f0a54548c0c5266865f01043ee0723b9e4080ece8ba69764109899",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "e5cb736c863b5edecaf33b6adb8a0bfd84fcc8fc661ed497df05fededf8f782a",
           "count": 1
         },
@@ -27677,6 +27713,12 @@
         {
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "edf3051b16a32fff496efdeaf9ef92c576c0b22230f1dcd27610f39f4398ec8a",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "ef336e705f3db7918bb76251d137bfdf289fcd359abd9305b630701a5107164d",
           "count": 1
         },
@@ -27684,6 +27726,12 @@
           "target": "local:SlitherBaselineError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "f1e587490bcad7bc10bc6bf63fea4b8c5eb9d73ff87a007c4cf6b794dbc9df4f",
+          "count": 1
+        },
+        {
+          "target": "local:SlitherBaselineError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "fb33ce42f5d72df60e3800c6a4d863e82a12ffd6f0eb450e8a7fc261f838d3b0",
           "count": 1
         },
         {
@@ -27720,6 +27768,18 @@
           "target": "local:all",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "8db1eabe5e999a050d20a6a6d1292a66f52dfe246d6deefd89c3c02c6903f062",
+          "count": 1
+        },
+        {
+          "target": "local:any",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "5b3bf7fa39d70080fa0bc3eeb0ba010796610b6a1e78d1e01244a4501c5b7ed6",
+          "count": 1
+        },
+        {
+          "target": "local:any",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "7a938c5ab422086cef5a86f1a8ee06fb5dfa28adc8f8e95fe5fd2fbeffc122ef",
           "count": 1
         },
         {
@@ -28097,25 +28157,25 @@
         {
           "target": "local:lines.extend",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "3bb43facde611ba8d46098f652622c9bffa3ee55504d87b9952f34dbd5e3dbc7",
-          "count": 1
-        },
-        {
-          "target": "local:lines.extend",
-          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5ad9e72653843a6835628c7cde8cc2a38d7de6561ce2b0c841d06afb4a2a5608",
           "count": 1
         },
         {
           "target": "local:lines.extend",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "74f6f6de29641940f64ec19a8c80551141fbf8a5983c1e9f9e14d26b0def21fc",
+          "ast_sha256": "86bb377c51522636b2167171a83e16f69cb70709f94adefc639dfd8c430c541d",
           "count": 1
         },
         {
           "target": "local:lines.extend",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "86bb377c51522636b2167171a83e16f69cb70709f94adefc639dfd8c430c541d",
+          "ast_sha256": "91b552a0237a34f54440013246505023be77e2da57415d1e45a4fa065d35a94c",
+          "count": 1
+        },
+        {
+          "target": "local:lines.extend",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "97c12ae1c5bc3cc3b7c06c453aa1503eb3421e77ebbf78dc0962739a1f7c8403",
           "count": 1
         },
         {
@@ -28581,6 +28641,12 @@
           "count": 1
         },
         {
+          "target": "local:rationale.lower",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "682e96950a13ff5802b017e8cb3604ef2b287fe5e3717e30a03dcde7e7d71dd0",
+          "count": 1
+        },
+        {
           "target": "local:relative.encode",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "a29b65b769beac7f568be02fd9e64798ae9aa11940d2c61568d844f3d41038ac",
@@ -28806,6 +28872,12 @@
           "target": "local:require_string",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "0b34afbd213d990ce4de15e66081f2ee4d513b5525b0164b77853cdccf4ce8c8",
+          "count": 1
+        },
+        {
+          "target": "local:require_string",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "19f5954ddf79e8c9f3347cc8a9239226e6cf85eadf9c47907a974e756d80919d",
           "count": 1
         },
         {
@@ -29112,6 +29184,12 @@
           "target": "local:sum",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "67103f2e120e3a04824f81e1fb9174d9df5ffd8a2d06ad596d8c2c0b2258424f",
+          "count": 1
+        },
+        {
+          "target": "local:sum",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "795cba012dfdba4aa4abc96885cc287da99158ab433da970caf37f5b4cc886d8",
           "count": 1
         },
         {
@@ -33511,7 +33589,7 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "d482d73c7392c54038086ba1c76708d64f793b11cea6f51876ac421e9bad2fa6",
+      "source_sha256": "ce4f92ccb0b2d8e1a7886d3366c31a4ed946dddb47753203add26c99267bfc1c",
       "size_bytes": 180405,
       "imports": [
         {
@@ -56649,7 +56727,7 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "b5b2afbfa8ec7346facaaddbae66d4c26053bfe8adb38bdb73acab6998df2d82",
+      "source_sha256": "6349e9963c27677d8fb544b3ada4ed0d166a468f42c9788524c20d430bb2ab0a",
       "size_bytes": 172989,
       "imports": [
         {

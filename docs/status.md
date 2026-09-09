@@ -508,9 +508,12 @@ The current Gate A smoke baseline proves:
 - `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
-  dedicated pinned exact-drift analysis in CI. The current set is 32 Open rows
-  (2 High, 30 Medium): zero confirmed gaps, six design-review rows, and 26
-  pending dispositions. This is a release blocker and not a risk acceptance.
+  dedicated pinned exact-drift analysis in CI. The current set is 32 retained
+  rows (2 High, 30 Medium): 30 remain Open, comprising zero confirmed gaps,
+  six design-review rows, and 24 pending dispositions. Two Medium
+  `StreamSplitWallet` `incorrect-equality` rows have narrow False Positive
+  dispositions backed by focused tests. The remaining Open set is a release
+  blocker and the dispositions do not promote maturity.
   Bounded assembly made the Governance Executor's proposal-selected
   native-value authority invisible to Slither without removing it. That
   analyzer disappearance is not remediation. The checksum-covered closed-world

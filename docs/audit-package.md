@@ -144,9 +144,11 @@ Static-analysis review inputs:
 - [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
   normalized first-party production high/medium finding set;
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
-  mirror. All 32 rows (2 High and 30 Medium) are Open: zero confirmed gaps, six
-  design-review rows, and 26 pending dispositions. No row is accepted or marked
-  false positive.
+  mirror. The 32 retained rows comprise 2 High and 30 Medium findings: 30 remain
+  Open (zero confirmed gaps, six design-review rows, and 24 pending
+  dispositions), while two `StreamSplitWallet` `incorrect-equality` rows have
+  focused, source-traced False Positive dispositions. Those dispositions do
+  not waive any other row or promote protocol maturity.
 - The bounded assembly call in `StreamGovernanceExecutor` makes its
   proposal-selected native-value authority invisible to Slither without
   removing that authority. The generated risk register therefore preserves it
@@ -278,7 +280,7 @@ Known unresolved blockers are tracked in
 [`docs/known-blockers.md`](known-blockers.md) and
 [`ops/ROADMAP.md`](../ops/ROADMAP.md), then summarized in the generated
 [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
-Current major unresolved categories include the 32 open first-party production
+Current major unresolved categories include the 30 open first-party production
 Slither high/medium findings, the separately tracked `RISK-GOV-003` Governance
 Executor native-value blocker, the #684 / `RISK-GOV-004` governed-parameter
 production-binding blocker, and external evidence gaps for
@@ -295,10 +297,12 @@ status lives in
 Local evidence and accepted non-Slither dispositions are separate from
 unresolved production blockers:
 
-- The normalized first-party production Slither rows are all Open. Test,
-  vendored, and script findings are reported outside that release-blocking set;
-  they are not used to accept or suppress any of the 28 analyzer-visible rows
-  or the separately tracked `RISK-GOV-003` authority.
+- The normalized first-party production Slither inventory retains 32 rows:
+  30 remain Open and two Medium `incorrect-equality` rows have focused False
+  Positive dispositions. Test, vendored, and script findings are reported
+  outside that release-blocking set; they are not used to accept or suppress
+  any retained production row or the separately tracked `RISK-GOV-003`
+  authority.
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does

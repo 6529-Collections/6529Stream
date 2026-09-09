@@ -1182,7 +1182,7 @@ class RiskRegisterTests(unittest.TestCase):
             if risk["id"] == generator.SLITHER_RISK_ID
         )
 
-        self.assertIn("2 High and 30 Medium open", risk["residual_risk"])
+        self.assertIn("2 High and 28 Medium open", risk["residual_risk"])
 
     def test_rejects_duplicate_risk_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
