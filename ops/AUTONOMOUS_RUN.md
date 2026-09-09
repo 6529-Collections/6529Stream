@@ -60,6 +60,10 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   Public bytecode checks cover 36 deployed instances, including data contracts;
   Sourcify matched creation and runtime bytecode for all 30 named contracts
   and libraries. These observations do not constitute an external audit.
+- A pinned Sepolia configuration audit passed 130 asserted public reads and
+  five cross-checks, including Core authority, all eight pointers, mint policy,
+  split/royalty and VRF configuration. The dedicated deployer controls this
+  development instance's root and veto-guardian actors.
 - The pinned real-coordinator fork rehearsal includes all linked libraries:
   48 transactions, about 100.27 million estimated execution gas. Its largest
   transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
@@ -112,13 +116,15 @@ The original checkout contains substantial unrelated uncommitted work. Keep
 it intact while useful source is recovered into the current layout. Never
 merge the entire old checkout. Preserve active artist-provenance work.
 
-The September cleanup removed 50 obsolete worktrees and archived 18 superseded
+The September cleanup removed 51 obsolete worktrees and archived 18 superseded
 tasks. Branch references remain. Verified recovery bundles, index and working
 patches, and persistent recovery references preserve the retired dirty artist
 and specification checkouts. Local preservation copies retain ignored notes,
 untracked source and validation transcripts. The original dirty checkout and
-active artist-provenance task remain intact. Remove the last temporary repair
-and builder checkouts when their work is integrated and validation is complete.
+active artist-provenance task remain intact. The original checkout's 129
+changed tracked paths and 31 untracked paths are also preserved in a verified
+recovery bundle and file copies. Restore that checkout to merged main after
+the RC merge, then remove the finished builder checkouts.
 
 ## Remaining full-v1 work
 

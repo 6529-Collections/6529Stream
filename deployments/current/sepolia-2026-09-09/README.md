@@ -11,6 +11,14 @@ matches for all 30 named deployed contracts and libraries, including the split
 wallet. Each entry links to the public provider result. Raw SSTORE2 data
 contracts are covered by the separate public bytecode verification report.
 
+[Pinned wiring observations](wiring-observations.json) record 138 public reads
+at Sepolia block 11,671,023: 130 asserted reads and five cross-checks passed.
+They check Core's authority words, installed pointers, module links, mint
+policies, accepted attribution, splits, royalties and VRF settings. The root
+actor and both veto-guardian actors are controlled by the dedicated deployer
+in this test instance; the other fifteen governance roles are unassigned.
+This is a development authority setup, not a production signer ceremony.
+
 The [compilation manifest](compilation/manifest.json) binds the complete
 Solidity 0.8.19 compiler input and selected contract/interface/library outputs.
 It uses global via-IR, optimizer 200 runs, Paris, and no CBOR metadata suffix.
