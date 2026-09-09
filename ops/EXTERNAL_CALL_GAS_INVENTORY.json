@@ -171,6 +171,42 @@
       "lane": "revenue",
       "issue": "#669",
       "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+      "site": "_deliver",
+      "kind": "yul-call",
+      "operation": "call",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "entropy",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/mint/StreamMintGateValidator.sol",
+      "site": "_supports",
+      "kind": "call-option",
+      "operation": "external-call",
+      "expression": "GATE_ERC165_PROBE_GAS",
+      "expected_count": 1,
+      "path_class": "deployment-constructor",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/mint/StreamSaleSignatures.sol",
+      "site": "isValid",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
     }
   ],
   "explicit_probe_call_gas_expressions": [],
@@ -302,6 +338,16 @@
       "expected_count": 1,
       "path_class": "user-path",
       "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/mint/StreamSaleSignatures.sol",
+      "identifier": "CONTRACT_SIGNATURE_GAS",
+      "value": 100000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
       "issue": "#669",
       "disposition": "open-remediation-required"
     }

@@ -41,6 +41,7 @@ OPEN_CALL_LANES = {
     "finality",
     "minting",
     "revenue",
+    "entropy",
     ARTIST_AUTHORITY_LANE,
 }
 OPEN_LITERAL_LANES = {"finality", "minting", "revenue"}
