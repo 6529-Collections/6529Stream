@@ -350,10 +350,17 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             bytes("{\"purpose\":\"current-stack integration test\",\"version\":1}")
         );
         binding.expectedManifestHash = payloadHash;
-        binding.expectedTriggers = new SystemManifestBootstrapTriggerExpectation[](1);
+        binding.expectedTriggers = new SystemManifestBootstrapTriggerExpectation[](2);
         binding.expectedTriggers[0] = SystemManifestBootstrapTriggerExpectation(
             address(core), core.updateSatellitePointer.selector, address(core).codehash, 8
         );
+        binding.expectedTriggers[1] = SystemManifestBootstrapTriggerExpectation(
+            address(registry), registry.setModuleStatus.selector, address(registry).codehash, 3
+        );
+        if (uint160(address(core)) > uint160(address(registry))) {
+            (binding.expectedTriggers[0], binding.expectedTriggers[1]) =
+            (binding.expectedTriggers[1], binding.expectedTriggers[0]);
+        }
         binding.actionPolicyCandidateProfileHash = DEPLOYMENT_HASH;
         batches[3].actionClass = 3;
         batches[3].calls = new GovernanceCall[](2);
@@ -391,6 +398,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         (batches[3].calls[1], batches[3].callDatas[1]) =
             StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
+        executor.prepareGenesis(binding, batches);
         executor.initializeGenesis(binding, batches);
     }
 
@@ -460,7 +468,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](51);
+        rows = new GovernanceActionPolicyEntry[](52);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -487,6 +495,9 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         rows[20].actionClass = 2;
         uint256 i = 21;
         rows[i++] = _operatingPolicy(3, address(executor), executor.rotateGovernanceRoot.selector);
+        rows[i++] = _operatingPolicy(
+            3, address(executor), executor.extendGovernanceActionPolicy.selector
+        );
         rows[i++] = _operatingPolicy(0, address(executor), executor.registerProposer.selector);
         rows[i++] = _operatingPolicy(1, address(executor), executor.registerProposer.selector);
         rows[i++] = _operatingPolicy(0, address(executor), executor.registerCanceller.selector);

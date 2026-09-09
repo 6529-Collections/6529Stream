@@ -10,6 +10,7 @@ import "../../smart-contracts/libraries/SSTORE2.sol";
 ///         broadcast scripts. All address-bound domains name the actual Executor.
 library StreamGenesisManifestPlan {
     error InvalidPayloadLength(uint256 length);
+    error ManifestReadFailed();
 
     function writePayload(bytes memory payload)
         internal
@@ -182,6 +183,61 @@ library StreamGenesisManifestPlan {
             scope,
             oldHash,
             newHash
+        );
+    }
+
+    /// @notice Read the canonical flattened ABI as its equivalent structured state.
+    function readAggregate(StreamSystemManifest manifest)
+        internal
+        view
+        returns (StreamSystemManifest.AggregateState memory)
+    {
+        (bool ok, bytes memory result) =
+            address(manifest).staticcall(abi.encodeCall(manifest.streamSystemManifest, ()));
+        if (!ok) revert ManifestReadFailed();
+        // The returned fields are the struct body. A dynamic struct decoder also
+        // expects the top-level offset; nested address/hash structs are static.
+        return abi.decode(
+            bytes.concat(abi.encode(uint256(32)), result), (StreamSystemManifest.AggregateState)
+        );
+    }
+
+    /// @notice Plan a later publication against the manifest's actual current revision.
+    function publicationCall(
+        StreamSystemManifest manifest,
+        address payloadRoot,
+        StreamSystemManifestUpdate memory update,
+        StreamSystemManifest.ModuleAddresses memory modules
+    ) internal view returns (GovernanceCall memory call_, bytes memory data) {
+        (call_, data) = firstPublicationCall(manifest, payloadRoot, update, modules);
+        StreamSystemManifest.AggregateState memory current = readAggregate(manifest);
+        call_.oldValueHash = _publicationStateHash(
+            call_.scopeHash,
+            current.manifestHash,
+            keccak256(bytes(current.manifestURI)),
+            manifest.streamSystemManifestPointer(),
+            keccak256(abi.encode(current.modules)),
+            keccak256(abi.encode(current.discovery)),
+            current.revision
+        );
+        call_.newValueHash = _publicationStateHash(
+            call_.scopeHash,
+            update.manifestHash,
+            keccak256(bytes(update.manifestURI)),
+            payloadRoot,
+            keccak256(abi.encode(modules)),
+            keccak256(
+                abi.encode(
+                    update.eventCatalogHash,
+                    update.compatibilityMatrixHash,
+                    update.numericIdCatalogHash,
+                    update.schemaCatalogHash,
+                    update.canonicalizationCatalogHash,
+                    update.specBundleHash,
+                    update.reconstructionClientHash
+                )
+            ),
+            current.revision + 1
         );
     }
 
