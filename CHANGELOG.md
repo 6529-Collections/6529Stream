@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Updated the pinned Foundry toolchain action to use its native installer on
+  Linux and Windows. CI now checks changelog coverage before tool installation
+  and compilation so missing release notes fail promptly.
 - Dispositioned the two retained `StreamSplitWallet` `incorrect-equality`
   findings as detector-specific false positives without suppressing the detector
   or changing production Solidity. Focused Foundry coverage proves the exact
