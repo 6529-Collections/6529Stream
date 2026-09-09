@@ -98,7 +98,7 @@ The original checkout contains substantial unrelated uncommitted work. Keep
 it intact while useful source is recovered into the current layout. Never
 merge the entire old checkout. Preserve active artist-provenance work.
 
-The September cleanup removed 50 obsolete worktrees and archived 14 superseded
+The September cleanup removed 50 obsolete worktrees and archived 18 superseded
 tasks. Branch references remain. Verified recovery bundles, index and working
 patches, and persistent recovery references preserve the retired dirty artist
 and specification checkouts. Local preservation copies retain ignored notes,

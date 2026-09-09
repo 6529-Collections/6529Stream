@@ -14,8 +14,9 @@ For the active implementation, start with the
 These identify the current Core and the contracts that work with it; the
 broader specification below includes features still being implemented.
 
-Run the current product flows with
-`forge test --via-ir --match-path 'test/current/*.t.sol' -vvv`.
+Run the current product flows with `make current-stack-check`, or on Windows
+with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1 -CurrentStack`.
+This selects the current profile and its integration suites.
 For deployment and an executable paid-mint demonstration, use the
 [current deployment guide](script/current/README.md).
 

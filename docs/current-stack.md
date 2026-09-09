@@ -60,8 +60,14 @@ refunds, rollback across satellites, stale consent, shared lifetime supply,
 payment conservation, and governance after genesis:
 
 ```bash
-forge test --via-ir --match-path 'test/current/*.t.sol' -vvv
+FOUNDRY_PROFILE=current forge test -vvv
 ```
+
+On Windows, set `$env:FOUNDRY_PROFILE = 'current'` before `forge test -vvv`.
+The `current` profile selects these integration suites and their shared
+compilation settings. Run `make current-stack-check` or the Windows
+`scripts/check.ps1 -CurrentStack` wrapper to include artifact and layout checks.
+Use the default profile for the broader regression suite before release.
 
 The focused domain suites are `StreamFixedPriceSaleAdapter`,
 `StreamEnglishAuctionHouse`, `StreamMintCanonicalRegistry`, `StreamEntropyMetadata`,
