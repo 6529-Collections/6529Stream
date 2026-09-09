@@ -26,6 +26,7 @@ import "./StreamGovernancePolicy.sol";
 contract StreamGovernanceExecutor is
     IStreamGovernanceExecutor,
     IStreamGenesisInitializer,
+    IStreamGovernanceCatalog,
     IStreamGovernedParameterAuthority,
     Ownable,
     ReentrancyGuard
@@ -707,8 +708,10 @@ contract StreamGovernanceExecutor is
         override
         returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)
     {
-        (actionIds, vetoDeadlines, nextCursor) =
-            StreamGovernanceBootstrap.terminalFreezeActionPage(_policy, scopeHash, cursor, limit);
+        bytes memory encoded = StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(_policy, scopeHash, cursor, limit);
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
+        }
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -880,6 +883,27 @@ contract StreamGovernanceExecutor is
     {
         chainHash = _policy.tailChainHash;
         recordCount = uint64(_policy.tailEntries.length);
+    }
+
+    /// @inheritdoc IStreamGovernanceCatalog
+    function extendGovernanceActionPolicy(
+        uint64 expectedRevision,
+        bytes32 expectedOldCatalogHash,
+        bytes32 expectedNewCatalogHash,
+        GovernanceActionPolicyEntry[] calldata additions
+    ) external override {
+        _requireSelfCall(StreamGovernanceActionClasses.POINTER_REPLACEMENT);
+        StreamGovernanceManifest.extendActionPolicy(
+            _manifest, _actionPolicy, expectedRevision, expectedOldCatalogHash,
+            expectedNewCatalogHash, additions, _currentScopeHash, _currentOldValueHash, _currentNewValueHash
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceCatalog
+    function governanceActionPolicyState() external view override returns (
+        bytes32 candidateProfileHash, bytes32 catalogHash, uint256 entryCount, uint64 revision
+    ) {
+        return (_actionPolicy.candidateProfileHash, _actionPolicy.catalogHash, _actionPolicy.entries.length, _actionPolicy.revision);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor

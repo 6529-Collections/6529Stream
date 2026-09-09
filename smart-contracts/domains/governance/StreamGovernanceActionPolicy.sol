@@ -2,10 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/IStreamGovernanceCatalog.sol";
 
 /// @notice Closed-world Governance V2 action and native-value policy.
-/// @dev The catalog is materialized once during bootstrap, has no mutation
-///      entrypoint, and stores a commitment for every selected-entry proof.
+/// @dev Genesis binds revision zero; delayed append-only extensions admit new
+///      exact targets without changing any existing selected-entry proof.
 ///      Scheduling and execution both verify the bound catalog commitment plus
 ///      every selected entry's immutable hash, exact live target, and value
 ///      policy. Public functions execute by DELEGATECALL from
@@ -32,6 +33,12 @@ library StreamGovernanceActionPolicy {
         keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_CHAIN_V1");
     bytes32 private constant ACTION_POLICY_CATALOG_V1 =
         keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_CATALOG_V1");
+    bytes32 private constant ACTION_POLICY_EXTENSION_V1 =
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_EXTENSION_V1");
+    bytes32 private constant ACTION_POLICY_SCOPE_V1 =
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_SCOPE_V1");
+    bytes32 private constant ACTION_POLICY_STATE_V1 =
+        keccak256("6529STREAM_GOVERNANCE_ACTION_POLICY_STATE_V1");
 
     struct State {
         bool bound;
@@ -40,6 +47,7 @@ library StreamGovernanceActionPolicy {
         GovernanceActionPolicyEntry[] entries;
         mapping(bytes32 => uint256) entryIndexPlusOne;
         mapping(bytes32 => bytes32) entryHashes;
+        uint64 revision;
     }
 
     event GovernanceActionPolicyBound(
@@ -48,6 +56,138 @@ library StreamGovernanceActionPolicy {
         bytes32 indexed catalogHash,
         uint256 entryCount
     );
+
+    event GovernanceActionPolicyExtended(
+        uint64 indexed revision,
+        bytes32 indexed oldCatalogHash,
+        bytes32 indexed newCatalogHash,
+        uint256 oldEntryCount,
+        uint256 newEntryCount
+    );
+
+    /// @notice Deterministic extension and exact per-call transition commitments.
+    /// @dev Does not inspect storage or target liveness; execution does both.
+    function extensionTransition(
+        address executor,
+        bytes32 candidateProfileHash,
+        bytes32 oldCatalogHash,
+        uint256 oldEntryCount,
+        uint64 revision,
+        GovernanceActionPolicyEntry[] memory additions
+    )
+        public
+        view
+        returns (bytes32 catalogHash, bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        uint256 newCount = oldEntryCount + additions.length;
+        if (additions.length == 0 || additions.length > 128 || newCount > MAX_ACTION_POLICY_ENTRIES)
+        {
+            revert IStreamGovernanceCatalog.GovernanceCatalogExtensionSize(
+                additions.length, newCount
+            );
+        }
+        uint64 nextRevision = revision + 1;
+        catalogHash = keccak256(
+            abi.encode(
+                ACTION_POLICY_EXTENSION_V1,
+                block.chainid,
+                executor,
+                candidateProfileHash,
+                nextRevision,
+                oldCatalogHash,
+                oldEntryCount,
+                keccak256(abi.encode(additions))
+            )
+        );
+        scopeHash = keccak256(abi.encode(ACTION_POLICY_SCOPE_V1, block.chainid, executor));
+        oldValueHash = keccak256(
+            abi.encode(
+                ACTION_POLICY_STATE_V1,
+                scopeHash,
+                candidateProfileHash,
+                revision,
+                oldCatalogHash,
+                oldEntryCount
+            )
+        );
+        newValueHash = keccak256(
+            abi.encode(
+                ACTION_POLICY_STATE_V1,
+                scopeHash,
+                candidateProfileHash,
+                nextRevision,
+                catalogHash,
+                newCount
+            )
+        );
+    }
+
+    function extend(
+        State storage state,
+        uint64 expectedRevision,
+        bytes32 expectedOldCatalogHash,
+        bytes32 expectedNewCatalogHash,
+        GovernanceActionPolicyEntry[] calldata additions,
+        bytes32 currentScopeHash,
+        bytes32 currentOldValueHash,
+        bytes32 currentNewValueHash
+    ) public {
+        if (!state.bound) {
+            revert IStreamGovernanceExecutor.GovernanceActionPolicyNotBound();
+        }
+        if (state.revision != expectedRevision) {
+            revert IStreamGovernanceCatalog.GovernanceCatalogRevisionMismatch(
+                expectedRevision, state.revision
+            );
+        }
+        if (state.catalogHash != expectedOldCatalogHash) {
+            revert IStreamGovernanceExecutor.GovernanceActionPolicyCatalogHashMismatch(
+                expectedOldCatalogHash, state.catalogHash
+            );
+        }
+        uint256 oldCount = state.entries.length;
+        (bytes32 newCatalogHash, bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) = extensionTransition(
+            address(this),
+            state.candidateProfileHash,
+            state.catalogHash,
+            oldCount,
+            state.revision,
+            additions
+        );
+        if (newCatalogHash != expectedNewCatalogHash) {
+            revert IStreamGovernanceExecutor.GovernanceActionPolicyCatalogHashMismatch(
+                expectedNewCatalogHash, newCatalogHash
+            );
+        }
+        if (
+            currentScopeHash != scopeHash || currentOldValueHash != oldValueHash
+                || currentNewValueHash != newValueHash
+        ) {
+            revert IStreamGovernanceExecutor.GovernanceTransitionContextMismatch();
+        }
+        bytes32 priorKey;
+        for (uint256 i; i < additions.length; ++i) {
+            GovernanceActionPolicyEntry calldata entry = additions[i];
+            uint256 index = oldCount + i;
+            _validateEntry(entry, index, true);
+            bytes32 key = policyKey(entry.actionClass, entry.target, entry.selector);
+            if (i != 0 && uint256(priorKey) >= uint256(key)) {
+                revert IStreamGovernanceExecutor.GovernanceActionPolicyEntriesNotSorted(i);
+            }
+            if (state.entryIndexPlusOne[key] != 0) {
+                revert IStreamGovernanceCatalog.GovernanceCatalogDuplicateEntry(key);
+            }
+            priorKey = key;
+            state.entries.push(entry);
+            state.entryIndexPlusOne[key] = index + 1;
+            state.entryHashes[key] = _entryHash(entry, index);
+        }
+        state.catalogHash = newCatalogHash;
+        state.revision += 1;
+        emit GovernanceActionPolicyExtended(
+            state.revision, expectedOldCatalogHash, newCatalogHash, oldCount, state.entries.length
+        );
+    }
 
     function bind(
         State storage state,

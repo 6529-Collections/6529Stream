@@ -24,6 +24,12 @@ the release policy in `docs/release-policy.md`.
 
 - Added current contract/interface navigation and replaced the stale autonomous
   run log with a concise integration and delivery record.
+- Allow the sealed current-stack Executor to admit replacement satellite
+  administration through root-proposed, 48-hour-delayed append-only catalog
+  extensions. Exact target/code/value policies remain immutable per entry;
+  extensions publish the SystemManifest atomically and invalidate actions
+  scheduled under older catalog roots. Core and its authority binding are unchanged.
+
 - Wired the Proposed dual owner-record continuity prerequisite into the
   canonical Unix, Windows, Make, pull-request CI, and checksum validation
   paths. The checksum-bound gate preserves all 37 retained semantic record

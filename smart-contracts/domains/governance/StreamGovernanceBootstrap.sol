@@ -265,6 +265,13 @@ library StreamGovernanceBootstrap {
 
     /// @notice Encode the existing action read ABI outside the Executor's
     ///         permanent bytecode budget, including virtual expiry status.
+    function encodeTerminalFreezeActionPage(PolicyState storage state, bytes32 scopeHash, uint256 cursor, uint256 limit)
+        public view returns (bytes memory)
+    {
+        (bytes32[] memory ids, uint64[] memory deadlines, uint256 next) = terminalFreezeActionPage(state, scopeHash, cursor, limit);
+        return abi.encode(ids, deadlines, next);
+    }
+
     function encodeGovernanceAction(GovernanceAction storage stored)
         public
         view
@@ -1327,6 +1334,15 @@ library StreamGovernanceBootstrap {
 
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
+            if (call_.target == address(this) && call_.selector == IStreamGovernanceCatalog.extendGovernanceActionPolicy.selector) {
+                if (bootstrapScoped || calls.length != 2 || i != 0 || actionClass != 3 || call_.value != 0) {
+                    revert IStreamGovernanceCatalog.GovernanceCatalogExtensionComposition();
+                }
+                // Catalog revision is a built-in tail trigger. It cannot be
+                // disabled or registered later under a different action mask.
+                hasTrigger = true;
+                triggerCount += 1;
+            }
             if (
                 call_.target == address(this) && call_.selector == registerTailSelector
                     && (calls.length != 1 || actionClass != 2)
