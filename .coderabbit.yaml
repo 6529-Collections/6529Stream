@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  path_filters:
+    # Review generators and their tests; omit their deterministic output bundles.
+    - "!deployments/current/**/compilation/**"
+    - "!release-artifacts/latest/**"
+    - "!deployments/examples/**"
+    - "!deployments/address-books/**"

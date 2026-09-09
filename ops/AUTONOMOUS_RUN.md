@@ -50,9 +50,16 @@ The full-v1 backlog remains visible; unsupported features are not complete.
   activation/sealing 12,683,466 gas, both including intrinsic transaction cost.
 - Delayed append-only catalog extension and rollback both passed against the
   real SystemManifest. All eleven current-stack integration scenarios pass.
-- Dedicated Sepolia deployer received 0.20 test ETH. The actual VRF subscription
-  is created and funded with 0.005 ETH; both transaction receipts succeeded.
-  The selected final Solidity source is compiling for the live deployment.
+- Dedicated Sepolia deployer received 0.20 test ETH. All 45 stack deployment
+  transactions succeeded, followed by activation, artist acceptance, a paid
+  mint and an actual VRF request. Chainlink holds that request for its required
+  subscription reserve: the observed minimum is 1.1133045 ETH and the current
+  balance is 0.02 ETH. Additional test funding is pending; the request remains
+  intact. The deployment helper now checks the configured gas-lane reserve.
+- The supported current build and all eleven integration scenarios pass.
+  Public bytecode checks cover 36 deployed instances, including data contracts;
+  Sourcify matched creation and runtime bytecode for all 30 named contracts
+  and libraries. These observations do not constitute an external audit.
 - The pinned real-coordinator fork rehearsal includes all linked libraries:
   48 transactions, about 100.27 million estimated execution gas. Its largest
   transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
@@ -71,7 +78,7 @@ Historical proof details are not duplicated in this active run state.
 | Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
 | Deployment | `codex/sepolia-current-launch` | Exact-source deployment and actual VRF demonstration; exclusive deployer nonce ownership |
 | Product/tooling | `codex/current-default-release-reconciliation` | Full validation and final default artifact reconciliation |
-| Governance/review | `codex/catalog-evolution` | Catalog/genesis integration complete; finish existing PRs #737 and #736 |
+| Governance/review | `codex/current-slither-review` | Catalog/genesis complete; PR #737 merged; finish #736 and capture current-source static analysis |
 
 ## Working method
 

@@ -1,8 +1,15 @@
 # Current-stack Sepolia instance: 9 September 2026
 
 This directory retains the exact compilation used for the current-stack
-Sepolia deployment. The transaction demonstration and verification reports
-will accompany it after their live readbacks complete.
+Sepolia deployment. All 45 deployment transactions succeeded and the first
+paid mint created token 1. The real randomness request is waiting for
+Chainlink's subscription reserve; the final demonstration report follows
+after the callback, withdrawals and transfer complete.
+
+[Sourcify verification](source-verification.json) records creation and runtime
+matches for all 30 named deployed contracts and libraries, including the split
+wallet. Each entry links to the public provider result. Raw SSTORE2 data
+contracts are covered by the separate public bytecode verification report.
 
 The [compilation manifest](compilation/manifest.json) binds the complete
 Solidity 0.8.19 compiler input and selected contract/interface/library outputs.
