@@ -30,9 +30,13 @@ def require(condition: bool, message: str) -> None:
         raise VerificationError(message)
 
 
+def unprefixed(value: str) -> str:
+    return value[2:] if value.startswith("0x") else value
+
+
 def hex_bytes(value: str) -> bytes:
     require(isinstance(value, str), "Expected hexadecimal bytes")
-    value = value.removeprefix("0x")
+    value = unprefixed(value)
     require(bool(re.fullmatch(r"(?:[a-fA-F0-9]{2})*", value)), "Invalid hexadecimal bytes")
     return bytes.fromhex(value)
 
@@ -73,7 +77,7 @@ def references(value: dict, size: int, *, links: bool = False) -> dict:
 
 
 def linked_bytes(bytecode: dict, libraries: dict[str, str]) -> tuple[bytes, list]:
-    raw = bytecode["object"].removeprefix("0x")
+    raw = unprefixed(bytecode["object"])
     require(len(raw) % 2 == 0, "Odd compiler bytecode length")
     links = references(bytecode.get("linkReferences", {}), len(raw) // 2, links=True)
     observations = []
@@ -175,8 +179,8 @@ def load_contracts(build_paths: list[Path], artifacts: Path | None = None) -> tu
                         target = artifact.get("metadata", {}).get("settings", {}).get("compilationTarget", {})
                         if target != {source: name}:
                             continue
-                        if all(artifact.get(field, {}).get("object", "").removeprefix("0x") ==
-                               output["evm"][field]["object"].removeprefix("0x")
+                        if all(unprefixed(artifact.get(field, {}).get("object", "")) ==
+                               unprefixed(output["evm"][field]["object"])
                                and artifact[field].get("linkReferences", {}) == output["evm"][field].get("linkReferences", {})
                                for field in ("bytecode", "deployedBytecode")):
                             require(artifact["deployedBytecode"].get("immutableReferences", {}) ==
