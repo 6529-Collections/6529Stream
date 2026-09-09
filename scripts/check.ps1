@@ -78,6 +78,7 @@ if ($CurrentStack) {
         & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
         & $pythonPath @pythonArgs "scripts\test_current_stack_artifacts.py"
         & $pythonPath @pythonArgs "scripts\test_current_stack_deployment_verification.py"
+        & $pythonPath @pythonArgs "scripts\test_current_stack_observations.py"
         & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
         & $pythonPath @pythonArgs "scripts\check_solidity_source_layout.py"
         & $pythonPath @pythonArgs "scripts\check_abi_compatibility.py" "--target-only"

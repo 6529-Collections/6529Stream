@@ -56,6 +56,7 @@ current-stack-check:
 	$(PYTHON) scripts/test_release_artifacts.py
 	$(PYTHON) scripts/test_current_stack_artifacts.py
 	$(PYTHON) scripts/test_current_stack_deployment_verification.py
+	$(PYTHON) scripts/test_current_stack_observations.py
 	$(PYTHON) scripts/check_solidity_formatting.py
 	$(PYTHON) scripts/check_solidity_source_layout.py
 	$(PYTHON) scripts/check_abi_compatibility.py --target-only
