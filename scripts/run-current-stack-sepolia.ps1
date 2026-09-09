@@ -123,6 +123,11 @@ function Require-FreshDeployment([string]$BroadcastFile) {
         throw 'An existing deployment attempt requires receipt recovery with ResumeDeploy; a new deployment is blocked.'
     }
 }
+function Transaction-Value([object]$Transaction) {
+    # Foundry omits the zero value on its generated library deployment transactions.
+    if ($Transaction.Contains('value')) {return Uint $Transaction['value']}
+    return [bigint]0
+}
 function Validate-RecordedDeployment([object]$Run) {
     if ($Run.transactions.Count -ne $state.deploymentAttempt.transactions.Count) {
         throw 'Recorded deployment transaction count differs from the checkpoint.'
@@ -132,8 +137,8 @@ function Validate-RecordedDeployment([object]$Run) {
         $expected=$state.deploymentAttempt.transactions[$i]
         $inputHash=Cast @('keccak',$tx.input)
         if ($tx.from -ine $deployer.address -or (Uint $tx.nonce).ToString() -ne $expected.nonce -or
-            $inputHash -ne $expected.inputHash -or [string]$tx.to -ine $expected.to -or
-            (Uint $tx.value).ToString() -ne $expected.value -or (Uint $tx.gas) -gt $transactionGasCap) {
+            $inputHash -ne $expected.inputHash -or [string]$tx['to'] -ine $expected.to -or
+            (Transaction-Value $tx).ToString() -ne $expected.value -or (Uint $tx.gas) -gt $transactionGasCap) {
             throw 'Recorded deployment differs from the exact checkpoint; manual receipt recovery required.'
         }
     }
@@ -276,7 +281,7 @@ try {
                 broadcastFile=$broadcastFile;status='checkpointed-before-signing'
                 transactions=@($dryRun.transactions | ForEach-Object {
                     $tx=$_.transaction
-                    @{nonce=(Uint $tx.nonce).ToString();to=[string]$tx.to;value=(Uint $tx.value).ToString();inputHash=(Cast @('keccak',$tx.input));gasLimit=(Uint $tx.gas).ToString()}
+                    @{nonce=(Uint $tx.nonce).ToString();to=[string]$tx['to'];value=(Transaction-Value $tx).ToString();inputHash=(Cast @('keccak',$tx.input));gasLimit=(Uint $tx.gas).ToString()}
                 })
             }
             $firstNonce=$state.deploymentAttempt.transactions[0].nonce

@@ -6,7 +6,7 @@ $path=Join-Path $PSScriptRoot 'run-current-stack-sepolia.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw 'Sepolia helper syntax errors.'}
 # Load only pure receipt/recovery functions. No account files, RPC calls or signers run.
-$names=@('Invoke-Tool','Cast','Uint','Mint-TokenId','Require-FreshDeployment','Validate-RecordedDeployment','Remaining-DeploymentGas')
+$names=@('Invoke-Tool','Cast','Uint','Mint-TokenId','Require-FreshDeployment','Transaction-Value','Validate-RecordedDeployment','Remaining-DeploymentGas')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -50,6 +50,8 @@ $run=@{
     )
     receipts=@(@{transactionHash='0xaaaa';status='0x1'})
 }
+Validate-RecordedDeployment $run
+$run.transactions[1].transaction.Remove('value')
 Validate-RecordedDeployment $run
 Check ((Remaining-DeploymentGas $run) -eq 131072) 'Recovery must exclude already paid gas.'
 $run.receipts+=@{transactionHash='0xbbbb';status='0x1'}
