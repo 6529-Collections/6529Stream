@@ -1,6 +1,9 @@
 # 6529Stream Execution Backlog
 
-Status: active implementation map.
+Status: historical full-v1 backlog. Current delivery priorities and lane
+ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
+reset prioritizes working current-stack transactions before release paperwork;
+the entries below remain useful scope and acceptance-criteria references.
 
 This backlog turns the strategic roadmap in `ops/ROADMAP.md` into PR-sized
 work. It combines three inputs:
