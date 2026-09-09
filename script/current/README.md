@@ -142,6 +142,13 @@ is blocked by an existing attempt or broadcast file. If the broadcast file is
 missing, recover the receipts before continuing. Only one process should own the
 dedicated deployer's nonce sequence.
 
+For a new deployment, use a new `-OutputDirectory` and distinct
+`-ArtifactDirectory`, `-CacheDirectory`, and `-BroadcastDirectory` paths. Keep
+those same paths for its later stages and recovery. Relative compiler and
+broadcast paths resolve from the repository root. Archive an earlier deployment's
+complete compiler outputs, build-info, broadcast files, and public state before
+compiling a corrected candidate; earlier addresses remain historical evidence.
+
 Subscription IDs incorporate a block hash. The live helper therefore waits for
 the actual `SubscriptionCreated` receipt before constructing deployment calldata.
 It never uses a subscription ID predicted by a script simulation.

@@ -4,6 +4,9 @@ param(
     [string]$RpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com',
     [string]$AccountsPath = (Join-Path $env:USERPROFILE '.codex/stream-testnet/accounts.json'),
     [string]$OutputDirectory = (Join-Path $env:TEMP '6529stream-current-sepolia'),
+    [string]$ArtifactDirectory = 'out/current-stack-sepolia',
+    [string]$CacheDirectory = 'cache/current-stack-sepolia',
+    [string]$BroadcastDirectory = 'broadcast',
     [string]$SubscriptionFundingWei = '1200000000000000000',
     [string]$MintPriceWei = '1000000000000',
     [string]$MaxFeePerGasWei = '0',
@@ -14,6 +17,11 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $repoRoot = Split-Path -Parent $PSScriptRoot
+foreach ($pathName in @('ArtifactDirectory','CacheDirectory','BroadcastDirectory')) {
+    $selectedPath=Get-Variable -Name $pathName -ValueOnly
+    if (-not [IO.Path]::IsPathRooted($selectedPath)) {$selectedPath=Join-Path $repoRoot $selectedPath}
+    Set-Variable -Name $pathName -Value ([IO.Path]::GetFullPath($selectedPath))
+}
 $coordinator = '0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B'
 $keyHash = '0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae'
 $transactionGasCap = [bigint]16777216
@@ -263,7 +271,7 @@ try {
 
     if ($Stage -in @('Deploy','ResumeDeploy')) {
         if ($state.Contains('addresses')) { throw 'Addresses already recorded; use Activate or Readback.' }
-        $broadcastFile = Join-Path $repoRoot 'broadcast/DeployCurrentStack.s.sol/11155111/run-latest.json'
+        $broadcastFile = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/11155111/run-latest.json'
         if ($Stage -eq 'Deploy') { Require-FreshDeployment $broadcastFile }
         elseif (-not $state.Contains('deploymentAttempt') -or -not (Test-Path -LiteralPath $broadcastFile)) {
             throw 'Resume requires the checkpoint and its original Forge broadcast file; recover receipts before continuing.'
@@ -272,6 +280,7 @@ try {
         $subscription = Subscription-State
         if ($subscription[3] -ine $deployer.address -or (Uint $subscription[1]) -eq 0) { throw 'Owned funded subscription required.' }
         $environment = @{
+            FOUNDRY_BROADCAST=$BroadcastDirectory
             STREAM_DEPLOYER=$deployer.address;STREAM_PROTOCOL_TREASURY=$deployer.address
             STREAM_ARTIST=$artist.address;STREAM_PLATFORM_SIGNER=$platform.address
             STREAM_VRF_COORDINATOR=$coordinator;STREAM_VRF_SUBSCRIPTION_ID=$state.subscriptionId
@@ -285,7 +294,7 @@ try {
             Get-ChildItem script -Recurse -Filter '*.s.sol' | Where-Object Name -ne 'DeployCurrentStack.s.sol' |
                 ForEach-Object {$skip+=@('--skip',$_.Name)}
             $forgeArguments = @('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
-                '--via-ir','--build-info','--isolate','--out','out/current-stack-sepolia','--cache-path','cache/current-stack-sepolia',
+                '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
                 '--rpc-url',$RpcUrl,'--sender',$deployer.address,'--slow',
                 '--with-gas-price',$maxFee.ToString(),'--priority-gas-price',$tip.ToString(),'--gas-estimate-multiplier','120'
             )
@@ -299,7 +308,7 @@ try {
                 }
             } else {
             $null = Invoke-Tool 'forge' $forgeArguments
-            $dryRunFile = Join-Path $repoRoot 'broadcast/DeployCurrentStack.s.sol/11155111/dry-run/run-latest.json'
+            $dryRunFile = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/11155111/dry-run/run-latest.json'
             $dryRun = Get-Content -Raw -LiteralPath $dryRunFile | ConvertFrom-Json -AsHashtable
             $estimatedTotal = [bigint]0
             foreach ($tx in $dryRun.transactions) {
@@ -314,6 +323,7 @@ try {
             $state.estimatedDeploymentGas=$estimatedTotal.ToString()
             $state.deploymentAttempt=[ordered]@{
                 sourceCommit=$sourceCommit;startingNonce=(Uint (Cast @('nonce',$deployer.address,'--rpc-url',$RpcUrl))).ToString()
+                artifactDirectory=$ArtifactDirectory;cacheDirectory=$CacheDirectory;broadcastDirectory=$BroadcastDirectory
                 broadcastFile=$broadcastFile;status='checkpointed-before-signing'
                 transactions=@($dryRun.transactions | ForEach-Object {
                     $tx=$_.transaction
