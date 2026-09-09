@@ -324,7 +324,11 @@ def verify(contracts: dict, broadcast: dict, rpc, runtime_only: dict[str, str] |
                 int(receipt["blockNumber"], 16) <= int(block_number, 16),
                 "Internal deployment enclosing transaction is not successful and mined")
         require(hex_bytes(tx["input"]) == hex_bytes(entry["transaction"]["input"]) and
-                address(tx["to"]) == address(entry["transaction"]["to"]),
+                address(tx["to"]) == address(entry["transaction"]["to"]) and
+                address(tx["from"]) == address(entry["transaction"]["from"]) and
+                int(tx["nonce"], 16) == int(entry["transaction"]["nonce"], 16) and
+                int(tx.get("value", "0x0"), 16) ==
+                int(entry["transaction"].get("value", "0x0"), 16),
                 "Internal deployment enclosing public call differs from broadcast")
         for internal in entry["additionalContracts"]:
             deployed_address = address(internal["address"])

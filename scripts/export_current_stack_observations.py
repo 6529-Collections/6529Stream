@@ -41,6 +41,8 @@ def number(value: object) -> int:
 
 
 def observations(state: dict, metadata: dict, verification: dict) -> dict:
+    require(all(isinstance(value, dict) for value in (state, metadata, verification)),
+            "Observation inputs must be objects")
     require(state.get("chainId") == 11155111 and verification.get("chain_id") == 11155111,
             "Sepolia observations required")
     require(state.get("demonstrated") is True and state.get("metadataState") == "final"
@@ -49,7 +51,9 @@ def observations(state: dict, metadata: dict, verification: dict) -> dict:
             and verification.get("result") == "bytecode comparisons passed", "Successful bytecode check required")
     accounts = {name: public_hex(state["accounts"][name], 20)
                 for name in ("deployer", "artist", "platform", "protocol")}
-    addresses = {name: public_hex(value, 20) for name, value in state["addresses"].items()}
+    address_rows = state["addresses"]
+    require(isinstance(address_rows, dict), "Invalid deployment addresses")
+    addresses = {name: public_hex(value, 20) for name, value in address_rows.items()}
     verified = {public_hex(row["address"], 20) for row in verification["contracts"]}
     require(set(addresses.values()).issubset(verified), "Deployment address lacks bytecode observation")
     wallet = public_hex(state["wallet"], 20)
@@ -62,7 +66,9 @@ def observations(state: dict, metadata: dict, verification: dict) -> dict:
     require(public_hex(provider[1], 32) == public_hex(state["requestKey"], 32),
             "Provider result belongs to another request")
     receipts = {}
-    for label, receipt in state["receipts"].items():
+    receipt_rows = state["receipts"]
+    require(isinstance(receipt_rows, dict), "Invalid transaction receipts")
+    for label, receipt in receipt_rows.items():
         require(bool(re.fullmatch(r"[A-Za-z0-9-]+", label)), "Invalid public receipt label")
         require(number(receipt["status"]) == 1, "Unsuccessful transaction in completed demo")
         receipts[label] = {

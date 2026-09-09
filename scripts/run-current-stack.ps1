@@ -98,7 +98,7 @@ try {
         schema='6529stream.current-local-demo.v1'; state='deployed'; chainId=31337; rpcUrl=$RpcUrl
         developmentEntropy=$true; randomnessDisclosure='Controller-supplied local values; not secure randomness.'
         deployer=$deployer; protocol=$protocol; addresses=$addresses; profile=$profile
-        broadcastReceipts=$broadcastPath; demoReceipts=[ordered]@{}
+        broadcastReceipts='broadcast/DeployCurrentStack.s.sol/31337/run-latest.json'; demoReceipts=[ordered]@{}
     }
     Write-PublicResult $result
     if ($DeployOnly) { Write-Output (Join-Path $OutputDirectory 'current-stack.json'); return }

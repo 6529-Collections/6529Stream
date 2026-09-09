@@ -69,6 +69,18 @@ class ObservationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.export()
 
+    def test_invalid_objects_use_the_controlled_failure_path(self):
+        for invalid in ([], "invalid", 17, None):
+            for index in range(3):
+                inputs = [self.state, self.metadata, self.verification]
+                inputs[index] = invalid
+                with self.subTest(input=index, value=invalid), self.assertRaises(ValueError):
+                    observations(*inputs)
+            for field in ("addresses", "receipts"):
+                state = {**self.state, field: invalid}
+                with self.subTest(field=field, value=invalid), self.assertRaises(ValueError):
+                    observations(state, self.metadata, self.verification)
+
 
 if __name__ == "__main__":
     unittest.main()

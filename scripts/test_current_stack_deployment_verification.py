@@ -149,7 +149,7 @@ class DeploymentTests(unittest.TestCase):
 
     def test_internal_creation_has_explicit_trace_limitation(self):
         call_hash = "0x" + "44" * 32
-        call = {"from": SENDER, "to": ADDRESS, "input": "0x1234"}
+        call = {"from": SENDER, "to": ADDRESS, "input": "0x1234", "nonce": "0x4"}
         self.broadcast["transactions"].append({"hash": call_hash, "transactionType": "CALL",
             "transaction": call, "additionalContracts": [{"contractName": "C", "address": SENDER,
                 "transactionType": "CREATE2", "initCode": "0x60026000"}]})
@@ -166,6 +166,29 @@ class DeploymentTests(unittest.TestCase):
         self.broadcast["transactions"][1]["additionalContracts"][0]["initCode"] = "0x60036000"
         with self.assertRaisesRegex(verifier.VerificationError, "no unique compiler"):
             verifier.verify({"x.sol:C": self.item}, self.broadcast, rpc)
+
+    def test_internal_creation_binds_enclosing_sender_nonce_and_value(self):
+        call_hash = "0x" + "44" * 32
+        supplied = {"from": SENDER, "to": ADDRESS, "input": "0x1234", "nonce": "0x4"}
+        self.broadcast["transactions"].append({"hash": call_hash, "transactionType": "CALL",
+            "transaction": supplied, "additionalContracts": [{"contractName": "C", "address": SENDER,
+                "transactionType": "CREATE2", "initCode": "0x60026000"}]})
+        public_tx = {**supplied, "value": "0x0"}
+
+        def rpc(method, params):
+            if method == "eth_getTransactionByHash" and params == [call_hash]:
+                return public_tx
+            if method == "eth_getTransactionReceipt" and params == [call_hash]:
+                return {**self.receipt, "transactionHash": call_hash}
+            return self.rpc(method, params)
+
+        # Foundry may omit a zero value; the public transaction states it explicitly.
+        self.assertEqual(len(verifier.verify({"x.sol:C": self.item}, self.broadcast, rpc)["contracts"]), 2)
+        for field, value in (("from", "0x" + "55" * 20), ("nonce", "0x5"), ("value", "0x1")):
+            public_tx = {**supplied, "value": "0x0", field: value}
+            with self.subTest(field=field), self.assertRaisesRegex(
+                    verifier.VerificationError, "enclosing public call differs"):
+                verifier.verify({"x.sol:C": self.item}, self.broadcast, rpc)
 
     def test_sstore2_data_runtime_requires_exact_bytes(self):
         preamble = "600b5981380380925939f3"
