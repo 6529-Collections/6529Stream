@@ -31,7 +31,7 @@ library StreamCurrentStackPlan {
         );
         rows[2] = StreamCore.GasParameterGenesisConfig(
             0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93,
-            2_000_000,
+            12_000_000,
             250_000,
             1
         );
