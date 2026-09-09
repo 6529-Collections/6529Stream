@@ -4,7 +4,7 @@
 
 | Item | Outcome | Gate | Status |
 | --- | --- | --- | --- |
-| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active issue #738 on branch `codex/current-stack-integration` |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active issue #738, PR #739, branch `codex/current-stack-integration` |
 
 Status: historical full-v1 backlog. Current delivery priorities and lane
 ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
