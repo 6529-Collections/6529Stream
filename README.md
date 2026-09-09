@@ -5,6 +5,13 @@ minting, auction flows, curator rewards, TDH-authorized execution, metadata
 generation, one-of-one provenance and permanence artifacts, royalty disclosure,
 and randomizer adapter flows.
 
+For the active implementation, start with the
+[current-stack walkthrough](docs/current-stack.md),
+[contract source map](smart-contracts/README.md), and
+[public interface map](smart-contracts/interfaces/stream/README.md).
+These identify the current Core and the contracts that work with it; the
+broader specification below includes features still being implemented.
+
 ## Current Maturity
 
 This repository has a serious pre-audit local baseline, but it is not
