@@ -1,0 +1,169 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "keyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "subId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint16",
+              "name": "requestConfirmations",
+              "type": "uint16"
+            },
+            {
+              "internalType": "uint32",
+              "name": "callbackGasLimit",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "numWords",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "extraArgs",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IVRFCoordinatorV2Plus.RandomWordsRequest",
+          "name": "request",
+          "type": "tuple"
+        }
+      ],
+      "name": "requestRandomWords",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "requestId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "keyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "subId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint16",
+                  "name": "requestConfirmations",
+                  "type": "uint16"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "callbackGasLimit",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "numWords",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "extraArgs",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IVRFCoordinatorV2Plus.RandomWordsRequest",
+              "name": "request",
+              "type": "tuple"
+            }
+          ],
+          "name": "requestRandomWords",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "requestId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "ABI source: Chainlink contracts-v1.3.0 VRFV2PlusClient / IVRFCoordinatorV2Plus. https://github.com/smartcontractkit/chainlink/tree/contracts-v1.3.0/contracts/src/v0.8/vrf/dev",
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "notice": "Minimal VRF v2.5 subscription request ABI. No upstream ownership dependency.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/integrations/chainlink/IVRFCoordinatorV2Plus.sol": "IVRFCoordinatorV2Plus"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/integrations/chainlink/IVRFCoordinatorV2Plus.sol": {
+        "keccak256": "0x42cf9c244291e26f5486eaca63cc0299e215daa023f47a07b462930318e689db",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://8076234d5d1d9558fffc403ce7ea9e1dfca4e5c6c55287fa140a723f43a3f63f",
+          "dweb:/ipfs/QmRH6YG3WydsdmaUEWS8s81fqTWLRFghBDCWxNm7fdtVyw"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "requestRandomWords((bytes32,uint256,uint16,uint32,uint32,bytes))": "9b1c385e"
+  }
+}

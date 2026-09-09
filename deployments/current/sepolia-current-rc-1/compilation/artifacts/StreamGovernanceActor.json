@@ -1,0 +1,298 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "controller_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    },
+    {
+      "inputs": [],
+      "name": "controller",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "execute",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "result",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "GovernanceCallExecuted",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidController",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidTarget",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "UnauthorizedController",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x60a03461008757601f61035338819003918201601f19168301916001600160401b0383118484101761008c5780849260209460405283398101031261008757516001600160a01b0381168082036100875715610075576080526040516102b090816100a38239608051818181605a015260f40152f35b6040516336abb4df60e11b8152600490fd5b600080fd5b634e487b7160e01b600052604160045260246000fdfe60806040818152600480361015610021575b505050361561001f57600080fd5b005b600092833560e01c918263b61d27f61461008d57505063f77c4791146100475780610011565b34610089578160031936011261008957517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5080fd5b91509260606003193601126102ad576001600160a01b038235818116918282036102a9576024948535976044359367ffffffffffffffff918286116102a557366023870112156102a55785840135948386116102a157898701968a8736920101116102a1577f000000000000000000000000000000000000000000000000000000000000000016330361028e5750803b15610278578680918a51868882378c8188810185815203925af1903d1561026e573d9080821161025c57895198601f8301601f19908116603f01168a019182118a83101761024b5750895287523d86602089013e5b1561024357808210610215571161021157847fecebbd6dabc76c9a8980c114f3ce61a6209443e8494add6eb95dbf22f2241dff9163ffffffff60e01b9035169493965b815190815260209563ffffffff60e01b1686820152a282519382859384528251928382860152825b8481106101fb57505050828201840152601f01601f19168101030190f35b81810183015188820188015287955082016101dd565b8280fd5b5050507fecebbd6dabc76c9a8980c114f3ce61a6209443e8494add6eb95dbf22f2241dff84839493966101b5565b855160208701fd5b634e487b7160e01b89526041855288fd5b634e487b7160e01b8852604184528888fd5b5060609650610172565b885163d08525e960e01b81528084018790528890fd5b6311ca4b2760e31b815233848201528890fd5b8880fd5b8780fd5b8380fd5b80fd",
+    "sourceMap": "390:1141:24:-:0;;;;;;;;;;;;;-1:-1:-1;;390:1141:24;;;;-1:-1:-1;;;;;390:1141:24;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;390:1141:24;;;;;;;730:25;726:57;;793:24;;390:1141;;;;;;;;793:24;390:1141;;;;;;;;;;;726:57;390:1141;;-1:-1:-1;;;764:19:24;;;;;390:1141;-1:-1:-1;390:1141:24;;;;;;-1:-1:-1;390:1141:24;;;;;-1:-1:-1;390:1141:24"
+  },
+  "deployedBytecode": {
+    "immutableReferences": {
+      "34135": [
+        {
+          "length": 32,
+          "start": 90
+        },
+        {
+          "length": 32,
+          "start": 244
+        }
+      ]
+    },
+    "linkReferences": {},
+    "object": "0x60806040818152600480361015610021575b505050361561001f57600080fd5b005b600092833560e01c918263b61d27f61461008d57505063f77c4791146100475780610011565b34610089578160031936011261008957517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5080fd5b91509260606003193601126102ad576001600160a01b038235818116918282036102a9576024948535976044359367ffffffffffffffff918286116102a557366023870112156102a55785840135948386116102a157898701968a8736920101116102a1577f000000000000000000000000000000000000000000000000000000000000000016330361028e5750803b15610278578680918a51868882378c8188810185815203925af1903d1561026e573d9080821161025c57895198601f8301601f19908116603f01168a019182118a83101761024b5750895287523d86602089013e5b1561024357808210610215571161021157847fecebbd6dabc76c9a8980c114f3ce61a6209443e8494add6eb95dbf22f2241dff9163ffffffff60e01b9035169493965b815190815260209563ffffffff60e01b1686820152a282519382859384528251928382860152825b8481106101fb57505050828201840152601f01601f19168101030190f35b81810183015188820188015287955082016101dd565b8280fd5b5050507fecebbd6dabc76c9a8980c114f3ce61a6209443e8494add6eb95dbf22f2241dff84839493966101b5565b855160208701fd5b634e487b7160e01b89526041855288fd5b634e487b7160e01b8852604184528888fd5b5060609650610172565b885163d08525e960e01b81528084018790528890fd5b6311ca4b2760e31b815233848201528890fd5b8880fd5b8780fd5b8380fd5b80fd",
+    "sourceMap": "390:1141:24:-:0;;;;;;;;;;;;-1:-1:-1;390:1141:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;550:35;-1:-1:-1;;;;;390:1141:24;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;390:1141:24;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1002:10;390:1141;988:10;:24;984:71;;1069:18;;;:23;1065:57;;390:1141;;;;;;;;;;;;;;;;;1174:33;;;;;390:1141;;;;;;;;;;;;;;;;;-1:-1:-1;;390:1141:24;;;;;;;;;;;;;;;;;-1:-1:-1;390:1141:24;;;;;;;;;;;1221:8;1217:133;;1377:16;;;390:1141;;;;;;1439:47;390:1141;;;;;;;1377:47;;;;390:1141;;;;;;;;;;;;;;;1439:47;390:1141;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;390:1141:24;;;;;;;;-1:-1:-1;;390:1141:24;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;390:1141:24;;;;;;;;1377:47;;;;1439;1377;;;;;;;1217:133;1245:95;;390:1141;1245:95;;;390:1141;-1:-1:-1;;;390:1141:24;;;;;;;;-1:-1:-1;;;390:1141:24;;;;;;;;;-1:-1:-1;390:1141:24;;-1:-1:-1;390:1141:24;;1065:57;390:1141;;-1:-1:-1;;;1101:21:24;;;;;390:1141;;;;;1101:21;984:71;-1:-1:-1;;;1021:34:24;;988:10;1021:34;;;390:1141;1021:34;;;390:1141;;;;;;;;;;;;;;"
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "controller_",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidController",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidTarget",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedController",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "GovernanceCallExecuted",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "controller",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "execute",
+          "outputs": [
+            {
+              "internalType": "bytes",
+              "name": "result",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "stateMutability": "payable",
+          "type": "receive"
+        }
+      ],
+      "devdoc": {
+        "details": "A single immutable controller can exercise the role held by this contract.      Deploy distinct actors for the root and each terminal guardian. A production      profile should supply its chosen multisig/governance contracts instead.",
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "notice": "Callable contract authority for a development or testnet deployment.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/domains/governance/StreamGovernanceActor.sol": "StreamGovernanceActor"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/domains/governance/StreamGovernanceActor.sol": {
+        "keccak256": "0xbfb12fb837c091b7257b5fcfdf136ac8c68ccf45812f82ce54f194009119a43b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e24ae7c1c51f313baafc79859a533c5c7248daee15adbdce46797f08fd31a842",
+          "dweb:/ipfs/QmUbN87rhj6ZmcrhE42QN8mi1nGe27j8SMokD2stvGRBZh"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "controller()": "f77c4791",
+    "execute(address,uint256,bytes)": "b61d27f6"
+  }
+}

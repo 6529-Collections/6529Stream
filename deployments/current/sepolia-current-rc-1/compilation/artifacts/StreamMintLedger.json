@@ -1,0 +1,2822 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MAX_POLICY_GRACE_SECONDS",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCHEMA_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "VALUE_KEY_DOMAIN",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "resolutionHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintLedger.CounterConsumption[]",
+          "name": "consumptions",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "nullifiers",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "boundPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "consume",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "counterValue",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "subjectKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deriveCounterValueKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isManagerAuthorizationUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nullifier",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isManagerNullifierUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isManagerOperationRootUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isStreamMintLedger",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "ledgerWriter",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "policyGrace",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "previousPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "previousPolicyRevision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "previousPolicyGraceUntil",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "counterIds",
+          "type": "bytes32[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintLedger.LedgerCounterPolicy[]",
+          "name": "counterPolicies",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "uint64",
+          "name": "graceUntil",
+          "type": "uint64"
+        }
+      ],
+      "name": "registerPhasePolicy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registeredCounterPolicy",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintLedger.LedgerCounterPolicy",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registeredPhasePolicyHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "writer",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "name": "setLedgerWriter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "boundPolicyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerAuthorizationConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "valueKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "subjectKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "increment",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "newValue",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "cap",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "boundPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerCounterConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "valueKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "subjectKey",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "authorizer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "contextHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "resolutionHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerCounterConsumptionContext",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum IStreamMintLedger.CounterCapMode",
+          "name": "capMode",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+          "name": "deltaMode",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "staticCap",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "staticIncrement",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "counterConfigHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerCounterPolicyRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nullifier",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "boundPolicyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerNullifierConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "currentPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "boundPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerOperationRootConsumed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "MintLedgerPhasePolicyRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "previousPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "newPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "graceUntil",
+          "type": "uint64"
+        }
+      ],
+      "name": "MintLedgerPolicyGraceSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "writer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "name": "MintLedgerWriterUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AuthorizationAlreadyConsumed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "valueKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "projectedValue",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cap",
+          "type": "uint256"
+        }
+      ],
+      "name": "CounterCapExceeded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "counterIds",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "counterPolicies",
+          "type": "uint256"
+        }
+      ],
+      "name": "CounterPolicyLengthMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CounterPolicyMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CounterPolicyNotRegistered",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "suppliedValueKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedValueKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CounterValueKeyMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "valueKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CounterValueOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "DuplicateCounterPolicy",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidCounterPolicy",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "writer",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidLedgerWriter",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidPhasePolicy",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "graceUntil",
+          "type": "uint64"
+        }
+      ],
+      "name": "InvalidPolicyGrace",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nullifier",
+          "type": "bytes32"
+        }
+      ],
+      "name": "NullifierAlreadyConsumed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "OperationRootAlreadyConsumed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OperationRootRequired",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "writer",
+          "type": "address"
+        }
+      ],
+      "name": "UnauthorizedLedgerWriter",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x6080806040523461005b5760008054336001600160a01b0319821681178355916001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09080a3611f4590816100618239f35b600080fdfe608080604052600436101561001357600080fd5b60003560e01c90816301ffc9a7146119f757508063194dba81146119b05780632acb615f1461199257806335329e20146118b957806336346835146119575780634c310e0914611922578063549c84de146118d55780636233b32a146118b9578063715018a6146118605780637d9d849b1461182557806382e8f38314610dc657806383e3452a14610cee578063867137d314610ca15780638da5cb5b14610c7857806393623d2414610bf1578063a997295714610b6f578063d53343de14610255578063e05ac6da14610216578063e67d8006146101c95763f2fde38b146100fb57600080fd5b346101c45760203660031901126101c457610114611a4a565b61011c611eed565b6001600160a01b0390811690811561017057600054826bffffffffffffffffffffffff60a01b821617600055167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0600080a3005b60405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b600080fd5b346101c45760403660031901126101c4576001600160a01b036101ea611a4a565b16600052600b6020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760203660031901126101c4576001600160a01b03610237611a4a565b166000526001602052602060ff604060002054166040519015158152f35b346101c45760e03660031901126101c45761026e611a4a565b6084356001600160401b0381116101c45761028d903690600401611a8a565b6001600160401b0360a435116101c45736602360a4350112156101c4576001600160401b0360a43560040135116101c45736602460c060a435600401350260a4350101116101c4576001600160401b0360c4351660c435036101c4576102f1611e87565b6001600160a01b038316158015610b5c575b8015610b52575b8015610b48575b8015610b3e575b610b0d57336001600160a01b03841603610b0d5760a435600401358103610ae9576001600160a01b038316600081815260026020908152604080832060243580855290835281842060443580865290845282852054868652600685528386208387528552838620828752855283862054968652600585528386209286529184528285209085529092529091205494916001600160401b03169081600187018711610a6b576001600160a01b038416600090815260056020908152604080832060243584528252808320604435845290915290206001880190556064358214610ab2576001600160401b038114610a815760010191816109005750506001600160401b0360c435166108dd575b6001600160a01b0382166000818152600660209081526040808320602435808552908352818420604435808652908452828520805467ffffffffffffffff19166001600160401b0398909816979097179096558484526002835281842081855283528184208685528352928190206064359081905590519081529192917f6f41e2a9e986cff4c1e2f2cc6b6d88cc3eca296af684d42342ab2fa0e1e1ae459190a460005b8281106104d157005b6104dc818486611ae3565b3590811561079f5760005b81811061089b575060a4356004013581101561088557610510602460c0830260a4350101611eb8565b15801561085d575b8015610834575b8015610812575b80156107ff575b61079f576003604460c0830260a43501013510156101c4576001604460c0830260a43501013514806107dc575b61079f57604460c0820260a43501013515806107b8575b61079f5760018060a01b0383166000526003602052604060002060243560005260205260406000206044356000526020526040600020826000526020526040600020916105dc6105ca602460c0850260a4350101611eb8565b849060ff801983541691151516179055565b8254926002606460c0850260a43501013510156101c45761079a936affffffffffffffff000000610616608460c0870260a4350101611ec5565b60181b1667ffffffffffffffff60581b61063860a4803560c089020101611ec5565b60581b169161ff00604460c0880260a43501013560081b169072ffffffffffffffffffffffffffffffffffff0019161762ff0000606460c0880260a43501013560101b161717178155600160c460c0850260a43501013591015560018060a01b038416600052600460205260406000206024356000526020526040600020604435600052602052604060002081600052602052600187016040600020556001600160401b036106f0608460c0850260a4350101611ec5565b8161070360a460c0870281350101611ec5565b9160405194855261072260208601604460c0890260a435010135611aba565b61073a60408601606460c0890260a435010135611ac7565b16606084015216608082015260c460c0830260a43501013560a082015260643560c082015260443590602435907f694c9293d1bd959f76c9e1b65a51ba1e6d29a3eb94adf848703760bbae6d1ff660e060018060a01b03881692a4611ad4565b6104c8565b60405163728f72d560e01b815260048101839052602490fd5b506001600160401b036107d4608460c0840260a4350101611ec5565b161515610571565b506001600160401b036107f8608460c0840260a4350101611ec5565b161561055a565b5060c460c0820260a4350101351561052d565b506001600160401b0361082d60a460c0840281350101611ec5565b1615610526565b506003604460c0830260a43501013510156101c4576002604460c0830260a4350101351461051f565b506002606460c0830260a43501013510156101c457606460c0820260a4350101351515610518565b634e487b7160e01b600052603260045260246000fd5b826108ab82878996989599611ae3565b35146108c4576108ba90611ad4565b94909391946104e7565b60405163cf64ab2360e01b815260048101869052602490fd5b6040516391bb4b5160e01b815260c4356001600160401b03166004820152602490fd5b60c4356001600160401b03166109ad575060018060a01b038316600052600760205260406000206024356000526020526040600020604435600052602052600060016040822082815501555b6040519060018252602082015260643560408201526001600160401b0360c43516606082015260018060a01b03831690604435907fda73b2c9b96438804749ea3e293405d4959dc8df0aa691dc894006e4c0dedbc8608060243592a4610424565b62278d0042014211610a6b5762278d0042016001600160401b0360c43516116108dd576040516109dc81611b24565b828152602081019182526001600160401b03600160408301928260c435168452818060a01b038816600052600760205260406000206024356000526020526040600020604435600052602052604060002090518155019251166fffffffffffffffff00000000000000008354925160401b16916fffffffffffffffffffffffffffffffff19161717905561094c565b634e487b7160e01b600052601160045260246000fd5b60405163fc104ec960e01b81526001600160a01b038516600482015260248035908201526044803590820152606490fd5b9150506001600160401b0360c4351615610424576040516391bb4b5160e01b815260c4356001600160401b03166004820152602490fd5b60449060405190631cd455e560e21b8252600482015260a435600401356024820152fd5b60405163fc104ec960e01b81526001600160a01b038416600482015260248035908201526044803590820152606490fd5b5060643515610318565b5060443515610311565b506024351561030a565b506001600160a01b038316331415610303565b346101c457610b7d36611a60565b9160018060a01b031660005260076020526040600020906000526020526040600020906000526020526060604060002060408051610bba81611b24565b60018354938483520154906001600160401b0380831692836020840152841c16928391015260405192835260208301526040820152f35b346101c45760803660031901126101c45760c0610c20610c0f611a4a565b606435906044359060243590611b57565b60a060405191805115158352610c3e60208201516020850190611aba565b610c5060408201516040850190611ac7565b6001600160401b038060608301511660608501526080820151166080840152015160a0820152f35b346101c45760003660031901126101c4576000546040516001600160a01b039091168152602090f35b346101c45760403660031901126101c4576001600160a01b03610cc2611a4a565b1660005260096020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760403660031901126101c457610d07611a4a565b602435801515908181036101c457610d1d611eed565b6001600160a01b038316928315610dad57819081610da3575b50610d8a577f88d85fc89c81edc05ac1e9204dc5a5a9b0ea1b7d9ca3baf010890ec51f5103f691610d81602092856000526001845260406000209060ff801983541691151516179055565b604051908152a2005b604051634de4b4bf60e01b815260048101849052602490fd5b90503b1584610d36565b604051634de4b4bf60e01b815260048101859052602490fd5b346101c45760e03660031901126101c4576001600160401b03604435116101c4573660236044350112156101c4576001600160401b0360443560040135116101c4573660246101a060443560040135026044350101116101c4576084356001600160401b0381116101c457610e3f903690600401611a8a565b90610e48611e87565b3360005260026020526040600020600435600052602052604060002060243560005260205260406000205490610e8760a4358360243560043533611d1a565b60c435156118135733600052600b602052604060002060c43560005260205260ff604060002054166117f35760643515159283806117cd575b6117b35760005b81811061170b575060005b604435600401358110611039575033600052600b602052604060002060c43560005260205260406000209060019460ff19928684825416179055610fd4575b60005b818110610f605785856040519182526020820152606435604082015260a4359033907f32821c46b022bd0995b50921248ed67b1d69a27b6c7afcb0202dcb1fcbbebb24606060c43592a4005b80610f6f610fcf928487611ae3565b3533600052600a6020526040600020816000526020526040600020888682541617905560405188815260a435602082015233917f23bb00045254ab08fcfb223713983797db786dc4692827878cb7cef34f395b06604060c43593a4611ad4565b610f14565b33600052600960205260406000206064356000526020526040600020858382541617905560405185815260a4356020820152339060c435907f4ae914c98ae10051092be8a5fecc1584bd19371f9b629bc8a75a747a7eb77a80604060643592a4610f11565b60043560446101a083028135010135148015906116f3575b6116c757336000526003602052604060002060446101a083028135010135600052602052604060002060646101a08302604435010135600052602052604060002060846101a0830260443501013560005260205260406000206001604051916110b983611af3565b6001600160401b03815460ff8116151585526110de60ff8260081c1660208701611b3f565b6110f160ff8260101c1660408701611b4b565b818160181c16606086015260581c166080840152015460a0820152805115801561165d575b61161a5760246101a08302604435010135158015611606575b80156115f2575b80156115c4575b80156115ae575b8015611597575b6114f657611176604480356101a085020160a481013591608482013591606481013591013533611ca5565b8060246101a085026044350101350361156e5750602081015160038110156114bd5760011480611540575b6114f657602081015160038110156114bd57158061151a575b6114f65760246101a0830260443501013560005260086020526001600160401b03604060002054166001600160401b0381810311610a6b576001600160401b0361120f6101446101a086026044350101611ec5565b166001600160401b0382810316106114d3576001600160401b0361123e6101446101a086026044350101611ec5565b1601906001600160401b038211610a6b57602081015160038110156114bd576001148061149e575b61145e57506044356101a083020160248101356000908152600860205260409020805467ffffffffffffffff19166001600160401b0384161790556114599291906112b49061014401611ec5565b6001600160401b036112d16101646101a086026044350101611ec5565b6040805160018152336020820152604480356101a089020160848101359383019390935260a480840135606084015295851660808301529390951660a08601526001600160401b0390911660c080860191909152923560e085015260c4356101008086019190915292936064820135928201359160240135907f82be7e1cfba45b84607ebae03dd739d908e1f7f47c467e76baabb4e64e53e8889061012090a461138560c46101a085026044350101611ed9565b9161139a60e46101a086026044350101611ed9565b6113af6101046101a087026044350101611ed9565b936113c56101246101a088026044350101611ed9565b60408051600181523360208201526001600160a01b03938416918101919091529282166060840152948116608083015290931660a08401526044356101a0850201610184810135918401919091526101a481013560e084015260a481013592608482013592602490920135917f68e7b9f9704974af05c6bcc158d3acea48dbc8d9ad579356b095b8955847db7b91a4611ad4565b610ed2565b606493506001600160401b03606081920151169160246101a060405195635c9a8f6b60e11b87520260443501013560048501521660248301526044820152fd5b506001600160401b036060820151166001600160401b03831611611266565b634e487b7160e01b600052602160045260246000fd5b604051633cc24c8760e01b815260246101a0850260443501810135600483015290fd5b60405163fc27079f60e01b81526044356101a0840201608401356004820152602490fd5b506001600160401b036115386101646101a085026044350101611ec5565b1615156111ba565b506115566101646101a084026044350101611ec5565b6001600160401b0380606084015116911614156111a1565b8260449160246101a0604051936328b0409560e01b855202843501013560048301526024820152fd5b50602081015160038110156114bd5760021461114b565b50604081015160028110156114bd571515611144565b506115da6101446101a084026044350101611ec5565b6001600160401b03806080840151169116141561113d565b5060a46101a0830260443501013515611136565b5060846101a083026044350101351561112f565b6040516339974ca360e01b8152336004820152604480356101a0850201808201356024840152606480820135928401929092526084908101359183019190915290fd5b50336000818152600460209081526040808320604480356101a0890201908101358086529184528285206064820135808752908552838620608490920135865290845282852054958552600584528285209185529083528184209084529091529020541415611116565b60405163fc104ec960e01b81523360048083019190915235602480830191909152356044820152606490fd5b5060243560646101a083026044350101351415611051565b611716818385611ae3565b358015801561178f575b6117775760005b82811061173e57505061173990611ad4565b610ec7565b8161174a828688611ae3565b351461175e5761175990611ad4565b611727565b60405163350e9ad360e01b815260048101839052602490fd5b6024906040519063350e9ad360e01b82526004820152fd5b5033600052600a60205260406000208160005260205260ff60406000205416611720565b604051631fa74eff60e01b81526064356004820152602490fd5b50336000526009602052604060002060643560005260205260ff60406000205416610ec0565b60405163af7509a960e01b815233600482015260c4356024820152604490fd5b6040516339c4f63560e21b8152600490fd5b346101c45760a03660031901126101c4576020611858611843611a4a565b60843590606435906044359060243590611ca5565b604051908152f35b346101c45760003660031901126101c457611879611eed565b600080546001600160a01b0319811682556001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a3005b346101c45760003660031901126101c457602060405160018152f35b346101c45760403660031901126101c4576001600160a01b036118f6611a4a565b16600052600a6020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760203660031901126101c457600435600052600860205260206001600160401b0360406000205416604051908152f35b346101c45760003660031901126101c45760206040517f7d176e04f80e4c60917bbf81304af356dc3c9316698808f36eac4eff01a4e39e8152f35b346101c45760003660031901126101c457602060405162278d008152f35b346101c4576119be36611a60565b9160018060a01b031660005260026020526040600020906000526020526040600020906000526020526020604060002054604051908152f35b346101c45760203660031901126101c4576004359063ffffffff60e01b82168092036101c4576020916313ea5d7360e11b8114908115611a39575b5015158152f35b6301ffc9a760e01b14905083611a32565b600435906001600160a01b03821682036101c457565b60609060031901126101c4576004356001600160a01b03811681036101c457906024359060443590565b9181601f840112156101c4578235916001600160401b0383116101c4576020808501948460051b0101116101c457565b9060038210156114bd5752565b9060028210156114bd5752565b6000198114610a6b5760010190565b91908110156108855760051b0190565b60c081019081106001600160401b03821117611b0e57604052565b634e487b7160e01b600052604160045260246000fd5b606081019081106001600160401b03821117611b0e57604052565b60038210156114bd5752565b60028210156114bd5752565b909192604093845193611b6985611af3565b6000938486528460a06020978289820152828a820152826060820152826080820152015260018060a01b03168085526005865286852082865286528685208386528652868520548015908115611c78575b50611c475784526003855285842090845284528483209083528352838220908252825282902082519260019290611c2090611bf486611af3565b611c1184549360ff85161515885260ff8560081c16908801611b3f565b60ff8360101c16908601611b4b565b6001600160401b0390818160181c16606086015260581c166080840152015460a082015290565b5050505082818093945194611c5b86611af3565b81865285015283015280606083015280608083015260a082015290565b90508186526004875287862083875287528786208487528752878620858752875287862054141538611bba565b93919290926040519360208501957f7d176e04f80e4c60917bbf81304af356dc3c9316698808f36eac4eff01a4e39e875260018060a01b031660408601526060850152608084015260a083015260c082015260c0815260e081018181106001600160401b03821117611b0e5760405251902090565b9293909380158015611e7f575b611e4a578114611e44576001600160a01b0383166000818152600760209081526040808320888452825280832086845282528083208151919592949390600190611d7084611b24565b80548452015492858301956001600160401b0395868616885286898601968a1c1686528352600681528783208b84528152878320908984525284878320541692511494851595611e0f575b5050508215611e02575b5050611dd15750505050565b5163fc104ec960e01b81526001600160a01b0392909216600483015260248201929092526044810191909152606490fd5b5116421190503880611dc5565b519294509091831660010190838211611e3057508216141591388080611dbb565b634e487b7160e01b81526011600452602490fd5b50505050565b505060405163fc104ec960e01b81526001600160a01b0392909216600483015260248201929092526044810191909152606490fd5b508115611d27565b33600052600160205260ff6040600020541615611ea057565b604051637225debd60e11b8152336004820152602490fd5b3580151581036101c45790565b356001600160401b03811681036101c45790565b356001600160a01b03811681036101c45790565b6000546001600160a01b03163303611f0157565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd",
+    "sourceMap": "287:20179:41:-:0;;;;;;;2512:6:144;287:20179:41;;719:10:133;-1:-1:-1;;;;;;287:20179:41;;;;;;719:10:133;-1:-1:-1;;;;;287:20179:41;;;;2560:40:144;;2512:6;2560:40;287:20179:41;;;;;;;;;;"
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x608080604052600436101561001357600080fd5b60003560e01c90816301ffc9a7146119f757508063194dba81146119b05780632acb615f1461199257806335329e20146118b957806336346835146119575780634c310e0914611922578063549c84de146118d55780636233b32a146118b9578063715018a6146118605780637d9d849b1461182557806382e8f38314610dc657806383e3452a14610cee578063867137d314610ca15780638da5cb5b14610c7857806393623d2414610bf1578063a997295714610b6f578063d53343de14610255578063e05ac6da14610216578063e67d8006146101c95763f2fde38b146100fb57600080fd5b346101c45760203660031901126101c457610114611a4a565b61011c611eed565b6001600160a01b0390811690811561017057600054826bffffffffffffffffffffffff60a01b821617600055167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0600080a3005b60405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608490fd5b600080fd5b346101c45760403660031901126101c4576001600160a01b036101ea611a4a565b16600052600b6020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760203660031901126101c4576001600160a01b03610237611a4a565b166000526001602052602060ff604060002054166040519015158152f35b346101c45760e03660031901126101c45761026e611a4a565b6084356001600160401b0381116101c45761028d903690600401611a8a565b6001600160401b0360a435116101c45736602360a4350112156101c4576001600160401b0360a43560040135116101c45736602460c060a435600401350260a4350101116101c4576001600160401b0360c4351660c435036101c4576102f1611e87565b6001600160a01b038316158015610b5c575b8015610b52575b8015610b48575b8015610b3e575b610b0d57336001600160a01b03841603610b0d5760a435600401358103610ae9576001600160a01b038316600081815260026020908152604080832060243580855290835281842060443580865290845282852054868652600685528386208387528552838620828752855283862054968652600585528386209286529184528285209085529092529091205494916001600160401b03169081600187018711610a6b576001600160a01b038416600090815260056020908152604080832060243584528252808320604435845290915290206001880190556064358214610ab2576001600160401b038114610a815760010191816109005750506001600160401b0360c435166108dd575b6001600160a01b0382166000818152600660209081526040808320602435808552908352818420604435808652908452828520805467ffffffffffffffff19166001600160401b0398909816979097179096558484526002835281842081855283528184208685528352928190206064359081905590519081529192917f6f41e2a9e986cff4c1e2f2cc6b6d88cc3eca296af684d42342ab2fa0e1e1ae459190a460005b8281106104d157005b6104dc818486611ae3565b3590811561079f5760005b81811061089b575060a4356004013581101561088557610510602460c0830260a4350101611eb8565b15801561085d575b8015610834575b8015610812575b80156107ff575b61079f576003604460c0830260a43501013510156101c4576001604460c0830260a43501013514806107dc575b61079f57604460c0820260a43501013515806107b8575b61079f5760018060a01b0383166000526003602052604060002060243560005260205260406000206044356000526020526040600020826000526020526040600020916105dc6105ca602460c0850260a4350101611eb8565b849060ff801983541691151516179055565b8254926002606460c0850260a43501013510156101c45761079a936affffffffffffffff000000610616608460c0870260a4350101611ec5565b60181b1667ffffffffffffffff60581b61063860a4803560c089020101611ec5565b60581b169161ff00604460c0880260a43501013560081b169072ffffffffffffffffffffffffffffffffffff0019161762ff0000606460c0880260a43501013560101b161717178155600160c460c0850260a43501013591015560018060a01b038416600052600460205260406000206024356000526020526040600020604435600052602052604060002081600052602052600187016040600020556001600160401b036106f0608460c0850260a4350101611ec5565b8161070360a460c0870281350101611ec5565b9160405194855261072260208601604460c0890260a435010135611aba565b61073a60408601606460c0890260a435010135611ac7565b16606084015216608082015260c460c0830260a43501013560a082015260643560c082015260443590602435907f694c9293d1bd959f76c9e1b65a51ba1e6d29a3eb94adf848703760bbae6d1ff660e060018060a01b03881692a4611ad4565b6104c8565b60405163728f72d560e01b815260048101839052602490fd5b506001600160401b036107d4608460c0840260a4350101611ec5565b161515610571565b506001600160401b036107f8608460c0840260a4350101611ec5565b161561055a565b5060c460c0820260a4350101351561052d565b506001600160401b0361082d60a460c0840281350101611ec5565b1615610526565b506003604460c0830260a43501013510156101c4576002604460c0830260a4350101351461051f565b506002606460c0830260a43501013510156101c457606460c0820260a4350101351515610518565b634e487b7160e01b600052603260045260246000fd5b826108ab82878996989599611ae3565b35146108c4576108ba90611ad4565b94909391946104e7565b60405163cf64ab2360e01b815260048101869052602490fd5b6040516391bb4b5160e01b815260c4356001600160401b03166004820152602490fd5b60c4356001600160401b03166109ad575060018060a01b038316600052600760205260406000206024356000526020526040600020604435600052602052600060016040822082815501555b6040519060018252602082015260643560408201526001600160401b0360c43516606082015260018060a01b03831690604435907fda73b2c9b96438804749ea3e293405d4959dc8df0aa691dc894006e4c0dedbc8608060243592a4610424565b62278d0042014211610a6b5762278d0042016001600160401b0360c43516116108dd576040516109dc81611b24565b828152602081019182526001600160401b03600160408301928260c435168452818060a01b038816600052600760205260406000206024356000526020526040600020604435600052602052604060002090518155019251166fffffffffffffffff00000000000000008354925160401b16916fffffffffffffffffffffffffffffffff19161717905561094c565b634e487b7160e01b600052601160045260246000fd5b60405163fc104ec960e01b81526001600160a01b038516600482015260248035908201526044803590820152606490fd5b9150506001600160401b0360c4351615610424576040516391bb4b5160e01b815260c4356001600160401b03166004820152602490fd5b60449060405190631cd455e560e21b8252600482015260a435600401356024820152fd5b60405163fc104ec960e01b81526001600160a01b038416600482015260248035908201526044803590820152606490fd5b5060643515610318565b5060443515610311565b506024351561030a565b506001600160a01b038316331415610303565b346101c457610b7d36611a60565b9160018060a01b031660005260076020526040600020906000526020526040600020906000526020526060604060002060408051610bba81611b24565b60018354938483520154906001600160401b0380831692836020840152841c16928391015260405192835260208301526040820152f35b346101c45760803660031901126101c45760c0610c20610c0f611a4a565b606435906044359060243590611b57565b60a060405191805115158352610c3e60208201516020850190611aba565b610c5060408201516040850190611ac7565b6001600160401b038060608301511660608501526080820151166080840152015160a0820152f35b346101c45760003660031901126101c4576000546040516001600160a01b039091168152602090f35b346101c45760403660031901126101c4576001600160a01b03610cc2611a4a565b1660005260096020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760403660031901126101c457610d07611a4a565b602435801515908181036101c457610d1d611eed565b6001600160a01b038316928315610dad57819081610da3575b50610d8a577f88d85fc89c81edc05ac1e9204dc5a5a9b0ea1b7d9ca3baf010890ec51f5103f691610d81602092856000526001845260406000209060ff801983541691151516179055565b604051908152a2005b604051634de4b4bf60e01b815260048101849052602490fd5b90503b1584610d36565b604051634de4b4bf60e01b815260048101859052602490fd5b346101c45760e03660031901126101c4576001600160401b03604435116101c4573660236044350112156101c4576001600160401b0360443560040135116101c4573660246101a060443560040135026044350101116101c4576084356001600160401b0381116101c457610e3f903690600401611a8a565b90610e48611e87565b3360005260026020526040600020600435600052602052604060002060243560005260205260406000205490610e8760a4358360243560043533611d1a565b60c435156118135733600052600b602052604060002060c43560005260205260ff604060002054166117f35760643515159283806117cd575b6117b35760005b81811061170b575060005b604435600401358110611039575033600052600b602052604060002060c43560005260205260406000209060019460ff19928684825416179055610fd4575b60005b818110610f605785856040519182526020820152606435604082015260a4359033907f32821c46b022bd0995b50921248ed67b1d69a27b6c7afcb0202dcb1fcbbebb24606060c43592a4005b80610f6f610fcf928487611ae3565b3533600052600a6020526040600020816000526020526040600020888682541617905560405188815260a435602082015233917f23bb00045254ab08fcfb223713983797db786dc4692827878cb7cef34f395b06604060c43593a4611ad4565b610f14565b33600052600960205260406000206064356000526020526040600020858382541617905560405185815260a4356020820152339060c435907f4ae914c98ae10051092be8a5fecc1584bd19371f9b629bc8a75a747a7eb77a80604060643592a4610f11565b60043560446101a083028135010135148015906116f3575b6116c757336000526003602052604060002060446101a083028135010135600052602052604060002060646101a08302604435010135600052602052604060002060846101a0830260443501013560005260205260406000206001604051916110b983611af3565b6001600160401b03815460ff8116151585526110de60ff8260081c1660208701611b3f565b6110f160ff8260101c1660408701611b4b565b818160181c16606086015260581c166080840152015460a0820152805115801561165d575b61161a5760246101a08302604435010135158015611606575b80156115f2575b80156115c4575b80156115ae575b8015611597575b6114f657611176604480356101a085020160a481013591608482013591606481013591013533611ca5565b8060246101a085026044350101350361156e5750602081015160038110156114bd5760011480611540575b6114f657602081015160038110156114bd57158061151a575b6114f65760246101a0830260443501013560005260086020526001600160401b03604060002054166001600160401b0381810311610a6b576001600160401b0361120f6101446101a086026044350101611ec5565b166001600160401b0382810316106114d3576001600160401b0361123e6101446101a086026044350101611ec5565b1601906001600160401b038211610a6b57602081015160038110156114bd576001148061149e575b61145e57506044356101a083020160248101356000908152600860205260409020805467ffffffffffffffff19166001600160401b0384161790556114599291906112b49061014401611ec5565b6001600160401b036112d16101646101a086026044350101611ec5565b6040805160018152336020820152604480356101a089020160848101359383019390935260a480840135606084015295851660808301529390951660a08601526001600160401b0390911660c080860191909152923560e085015260c4356101008086019190915292936064820135928201359160240135907f82be7e1cfba45b84607ebae03dd739d908e1f7f47c467e76baabb4e64e53e8889061012090a461138560c46101a085026044350101611ed9565b9161139a60e46101a086026044350101611ed9565b6113af6101046101a087026044350101611ed9565b936113c56101246101a088026044350101611ed9565b60408051600181523360208201526001600160a01b03938416918101919091529282166060840152948116608083015290931660a08401526044356101a0850201610184810135918401919091526101a481013560e084015260a481013592608482013592602490920135917f68e7b9f9704974af05c6bcc158d3acea48dbc8d9ad579356b095b8955847db7b91a4611ad4565b610ed2565b606493506001600160401b03606081920151169160246101a060405195635c9a8f6b60e11b87520260443501013560048501521660248301526044820152fd5b506001600160401b036060820151166001600160401b03831611611266565b634e487b7160e01b600052602160045260246000fd5b604051633cc24c8760e01b815260246101a0850260443501810135600483015290fd5b60405163fc27079f60e01b81526044356101a0840201608401356004820152602490fd5b506001600160401b036115386101646101a085026044350101611ec5565b1615156111ba565b506115566101646101a084026044350101611ec5565b6001600160401b0380606084015116911614156111a1565b8260449160246101a0604051936328b0409560e01b855202843501013560048301526024820152fd5b50602081015160038110156114bd5760021461114b565b50604081015160028110156114bd571515611144565b506115da6101446101a084026044350101611ec5565b6001600160401b03806080840151169116141561113d565b5060a46101a0830260443501013515611136565b5060846101a083026044350101351561112f565b6040516339974ca360e01b8152336004820152604480356101a0850201808201356024840152606480820135928401929092526084908101359183019190915290fd5b50336000818152600460209081526040808320604480356101a0890201908101358086529184528285206064820135808752908552838620608490920135865290845282852054958552600584528285209185529083528184209084529091529020541415611116565b60405163fc104ec960e01b81523360048083019190915235602480830191909152356044820152606490fd5b5060243560646101a083026044350101351415611051565b611716818385611ae3565b358015801561178f575b6117775760005b82811061173e57505061173990611ad4565b610ec7565b8161174a828688611ae3565b351461175e5761175990611ad4565b611727565b60405163350e9ad360e01b815260048101839052602490fd5b6024906040519063350e9ad360e01b82526004820152fd5b5033600052600a60205260406000208160005260205260ff60406000205416611720565b604051631fa74eff60e01b81526064356004820152602490fd5b50336000526009602052604060002060643560005260205260ff60406000205416610ec0565b60405163af7509a960e01b815233600482015260c4356024820152604490fd5b6040516339c4f63560e21b8152600490fd5b346101c45760a03660031901126101c4576020611858611843611a4a565b60843590606435906044359060243590611ca5565b604051908152f35b346101c45760003660031901126101c457611879611eed565b600080546001600160a01b0319811682556001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a3005b346101c45760003660031901126101c457602060405160018152f35b346101c45760403660031901126101c4576001600160a01b036118f6611a4a565b16600052600a6020526040600020602435600052602052602060ff604060002054166040519015158152f35b346101c45760203660031901126101c457600435600052600860205260206001600160401b0360406000205416604051908152f35b346101c45760003660031901126101c45760206040517f7d176e04f80e4c60917bbf81304af356dc3c9316698808f36eac4eff01a4e39e8152f35b346101c45760003660031901126101c457602060405162278d008152f35b346101c4576119be36611a60565b9160018060a01b031660005260026020526040600020906000526020526040600020906000526020526020604060002054604051908152f35b346101c45760203660031901126101c4576004359063ffffffff60e01b82168092036101c4576020916313ea5d7360e11b8114908115611a39575b5015158152f35b6301ffc9a760e01b14905083611a32565b600435906001600160a01b03821682036101c457565b60609060031901126101c4576004356001600160a01b03811681036101c457906024359060443590565b9181601f840112156101c4578235916001600160401b0383116101c4576020808501948460051b0101116101c457565b9060038210156114bd5752565b9060028210156114bd5752565b6000198114610a6b5760010190565b91908110156108855760051b0190565b60c081019081106001600160401b03821117611b0e57604052565b634e487b7160e01b600052604160045260246000fd5b606081019081106001600160401b03821117611b0e57604052565b60038210156114bd5752565b60028210156114bd5752565b909192604093845193611b6985611af3565b6000938486528460a06020978289820152828a820152826060820152826080820152015260018060a01b03168085526005865286852082865286528685208386528652868520548015908115611c78575b50611c475784526003855285842090845284528483209083528352838220908252825282902082519260019290611c2090611bf486611af3565b611c1184549360ff85161515885260ff8560081c16908801611b3f565b60ff8360101c16908601611b4b565b6001600160401b0390818160181c16606086015260581c166080840152015460a082015290565b5050505082818093945194611c5b86611af3565b81865285015283015280606083015280608083015260a082015290565b90508186526004875287862083875287528786208487528752878620858752875287862054141538611bba565b93919290926040519360208501957f7d176e04f80e4c60917bbf81304af356dc3c9316698808f36eac4eff01a4e39e875260018060a01b031660408601526060850152608084015260a083015260c082015260c0815260e081018181106001600160401b03821117611b0e5760405251902090565b9293909380158015611e7f575b611e4a578114611e44576001600160a01b0383166000818152600760209081526040808320888452825280832086845282528083208151919592949390600190611d7084611b24565b80548452015492858301956001600160401b0395868616885286898601968a1c1686528352600681528783208b84528152878320908984525284878320541692511494851595611e0f575b5050508215611e02575b5050611dd15750505050565b5163fc104ec960e01b81526001600160a01b0392909216600483015260248201929092526044810191909152606490fd5b5116421190503880611dc5565b519294509091831660010190838211611e3057508216141591388080611dbb565b634e487b7160e01b81526011600452602490fd5b50505050565b505060405163fc104ec960e01b81526001600160a01b0392909216600483015260248201929092526044810191909152606490fd5b508115611d27565b33600052600160205260ff6040600020541615611ea057565b604051637225debd60e11b8152336004820152602490fd5b3580151581036101c45790565b356001600160401b03811681036101c45790565b356001600160a01b03811681036101c45790565b6000546001600160a01b03163303611f0157565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd",
+    "sourceMap": "287:20179:41:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;:::i;:::-;1057:62:144;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;2156:22:144;;287:20179:41;;;;;;;;;;;;;;2560:40:144;287:20179:41;2560:40:144;;287:20179:41;;;;-1:-1:-1;;;287:20179:41;;;;;;;;;;;;;;;;;-1:-1:-1;;;287:20179:41;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;;:::i;:::-;;;;9489:18;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;:::i;:::-;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;2986:2494;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;13959:21;:46;;;;287:20179;13959:67;;;;287:20179;13959:108;;;;287:20179;13959:136;;;;287:20179;13942:246;;3399:10;-1:-1:-1;;;;;287:20179:41;;3388:21;3384:109;;287:20179;;;;;3506:43;;3502:151;;-1:-1:-1;;;;;287:20179:41;;;;;;3692:25;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3785:20;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;3928:21;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;3928:21;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;4085:32;;287:20179;;-1:-1:-1;;;;;4137:34:41;;4133:130;;287:20179;;;4310:32;;;287:20179;;-1:-1:-1;;;;;287:20179:41;;;4362:99;;4306:475;-1:-1:-1;;;;;287:20179:41;;;;;;3785:20;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;3692:25;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5053:75;;287:20179;5053:75;287:20179;5159:21;;;;;;287:20179;5182:3;14533:17;;;;;:::i;:::-;287:20179;15787:23;;;15783:92;;287:20179;15904:9;;;;;;287:20179;;;;;;;;;;;16215:14;287:20179;;;;;;;;16215:14;:::i;:::-;16214:15;287:20179;;16214:62;;15884:165;16214:123;;;;15884:165;16214:154;;;;15884:165;16214:212;;;;15884:165;16197:303;;287:20179;;;;;;;;16513:14;287:20179;;;;;;;;;;;;;16513:14;287:20179;16513:39;:64;;;15884:165;16509:133;;287:20179;;;;;;;16513:14;287:20179;16655:37;:62;;;15884:165;16651:131;;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;3692:25;287:20179;;;;;;;;;;;;;5182:3;287:20179;;;;;;;;;;;;:::i;:::-;;;;-1:-1:-1;;;287:20179:41;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;16513:14;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;15490:16:41;287:20179;;;;;;;;15490:16;:::i;:::-;287:20179;15520:22;287:20179;;;;;;;;15520:22;:::i;:::-;287:20179;;;;;;;;;;;;;;;;;16513:14;287:20179;;:::i;:::-;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;15294:320;287:20179;;;;;;;;15294:320;;5182:3;:::i;:::-;5144:13;;16651:131;287:20179;;-1:-1:-1;;;16740:31:41;;287:20179;16740:31;;287:20179;;;;;16740:31;16655:62;287:20179;-1:-1:-1;;;;;16696:16:41;287:20179;;;;;;;16696:16;;:::i;:::-;287:20179;16696:21;;16655:62;;16513:64;287:20179;-1:-1:-1;;;;;16556:16:41;287:20179;;;;;;;16556:16;;:::i;:::-;287:20179;16556:21;16513:64;;16214:212;287:20179;;;;;;;;16388:24;287:20179;16388:38;16214:212;;:154;287:20179;-1:-1:-1;;;;;16341:22:41;287:20179;;;;;;;16341:22;;:::i;:::-;287:20179;16341:27;16214:154;;:123;287:20179;;;;;;;;;16296:14;287:20179;;;;;3692:25;287:20179;;;;;;;16296:14;287:20179;16296:41;16214:123;;:62;287:20179;3692:25;287:20179;;;;;;;16233:16;287:20179;;;;;;;;;;;;16233:16;287:20179;16233:43;;16214:62;;287:20179;;;;;;;;;;;;15915:3;15938:13;;;;;;;;;;:::i;:::-;287:20179;15938:26;15934:105;;15915:3;;;:::i;:::-;15889:13;;;;;;;15934:105;287:20179;;-1:-1:-1;;;15991:33:41;;287:20179;15991:33;;287:20179;;;;;15991:33;4362:99;287:20179;;-1:-1:-1;;;4412:30:41;;287:20179;;-1:-1:-1;;;;;287:20179:41;;4412:30;;287:20179;;;4412:30;4306:475;287:20179;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;11085:12;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;11043:520;287:20179;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;11577:213;287:20179;;;11577:213;;4306:475;;11043:520;287:20179;11177:15;287:20179;11177:15;287:20179;;;;11177:15;287:20179;-1:-1:-1;;;;;287:20179:41;;;11164:55;11160:131;;287:20179;;;;;:::i;:::-;;;;;11351:201;;287:20179;;;-1:-1:-1;;;;;287:20179:41;;11351:201;;287:20179;;;;;;;;;;;;;;;;11304:12;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;11043:520;;287:20179;;;;;;;;;;;;4133:130;287:20179;;-1:-1:-1;;;4198:50:41;;-1:-1:-1;;;;;287:20179:41;;;4198:50;;287:20179;;;;;;;;;;;;;;;;;4198:50;4081:799;287:20179;;;-1:-1:-1;;;;;287:20179:41;;;4797:83;4081:799;4797:83;287:20179;;-1:-1:-1;;;4839:30:41;;287:20179;;-1:-1:-1;;;;;287:20179:41;;4839:30;;287:20179;;;4839:30;3502:151;287:20179;;;;3572:70;;;;;;287:20179;3572:70;;287:20179;;;;;;;;;;3572:70;3384:109;287:20179;;-1:-1:-1;;;3432:50:41;;-1:-1:-1;;;;;287:20179:41;;;3432:50;;287:20179;;;;;;;;;;;;;;;;;4198:50;13959:136;287:20179;;;14071:24;13959:136;;:108;287:20179;;;14046:21;13959:108;;:67;287:20179;;;14009:17;13959:67;;:46;-1:-1:-1;;;;;;287:20179:41;;13995:10;13984:21;;13959:46;;287:20179;;;;;;;:::i;:::-;;;;;;;;;;9953:12;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;;:::i;:::-;;;;8901:18;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;:::i;:::-;;;;;;;;;;;;1057:62:144;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;2611:20;;2607:85;;2705:34;;;;;287:20179;2701:99;;;2854:40;287:20179;2809:30;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;2809:30;287:20179;;;;;2854:40;287:20179;2701:99;287:20179;;-1:-1:-1;;;2762:27:41;;287:20179;2762:27;;287:20179;;;;;2762:27;2705:34;2716:18;;;:23;2705:34;;;2607:85;287:20179;;-1:-1:-1;;;2654:27:41;;287:20179;2654:27;;287:20179;;;;;2654:27;287:20179;;;;;;-1:-1:-1;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;:::i;:::-;5571:2112;;;:::i;:::-;5951:10;287:20179;;5925:25;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;6069:15;287:20179;;;;;;;5951:10;6069:15;:::i;:::-;287:20179;;12811:27;12807:88;;5951:10;287:20179;;12908:18;287:20179;;;;;;;;;;;;;;;;;12904:138;;287:20179;;6166:29;;;;;6209:67;;287:20179;6205:150;;287:20179;13162:21;;;;;;6416:13;287:20179;6431:23;287:20179;;;;;6431:23;;;;5951:10;;287:20179;;12908:18;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;6875:258;;6411:392;287:20179;7162:21;;;;;;287:20179;;;;;;;;;;;;;;;;;;;5951:10;;287:20179;7467:209;287:20179;;;7467:209;;287:20179;7185:3;7224:13;;7185:3;7224:13;;;;:::i;:::-;287:20179;5951:10;287:20179;;7251:14;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5951:10;287:20179;7314:128;287:20179;;;7314:128;;7185:3;:::i;:::-;7147:13;;6875:258;5951:10;287:20179;;6911:18;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;5951:10;287:20179;;;;6984:138;287:20179;;;6984:138;;6875:258;;6456:3;287:20179;;;;;;;;;6550:24;287:20179;6550:40;;;:74;;;6456:3;6546:173;;5951:10;287:20179;;;;;;;;;;;;;;;6550:24;287:20179;;;;;;;;;;;;;;;17079:19;287:20179;;;;;;;;;;;;;;;17100:21;287:20179;;;;;;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;17149:345;;6456:3;17132:543;;287:20179;;;;;;;;;17701:34;:73;;;;6456:3;17701:129;;;;6456:3;17701:196;;;;6456:3;17701:259;;;;6456:3;17701:320;;;;6456:3;17684:424;;18144:197;287:20179;;;;;;;;18309:22;;287:20179;;;17100:21;;287:20179;;;17079:19;;287:20179;;6550:24;287:20179;5951:10;18144:197;:::i;:::-;287:20179;;;;;;;;;;18355:40;18351:141;;287:20179;;;;;;;;;;;;18505:39;:78;;;6456:3;18501:160;;287:20179;;;;;;;;;;18674:37;:61;;;6456:3;18670:143;;287:20179;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;-1:-1:-1;;;;;18927:21:41;;287:20179;;;;;;18927:21;;:::i;:::-;287:20179;-1:-1:-1;;;;;287:20179:41;;;;18893:55;18889:135;;-1:-1:-1;;;;;19066:21:41;18927;287:20179;;;;;;18927:21;19066;:::i;:::-;287:20179;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;19101:39;:70;;;6456:3;19097:176;;-1:-1:-1;287:20179:41;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;-1:-1:-1;;;;;287:20179:41;;;;;6456:3;;287:20179;;19889:21;;18927;;19889;:::i;:::-;-1:-1:-1;;;;;19946:15:41;;287:20179;;;;;;19946:15;;:::i;:::-;287:20179;;;;;;5951:10;287:20179;;;;;;;;;;;;17100:21;;287:20179;;;;;;;;;18309:22;;;287:20179;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;17079:19;;287:20179;;6550:24;;287:20179;;;;;;19622:405;;18927:21;;19622:405;20248:17;287:20179;;;;;;;20248:17;;:::i;:::-;287:20179;20279:21;;287:20179;;;;;;20279:21;;:::i;:::-;20314:22;;287:20179;;;;;;20314:22;;:::i;:::-;287:20179;20350:20;;287:20179;;;;;;20350:20;;:::i;:::-;287:20179;;;;;;5951:10;287:20179;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;20384:23;;;287:20179;;;;;;;;20421:26;;;287:20179;;;;;;18309:22;;287:20179;;;17100:21;;287:20179;;;;;;;;20042:415;;;6456:3;:::i;:::-;6416:13;;19097:176;287:20179;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;19194:68;;;;;;287:20179;;;;;;;19194:68;;287:20179;;;;;;;;;;19194:68;19101:70;287:20179;-1:-1:-1;;;;;287:20179:41;;;;;-1:-1:-1;;;;;287:20179:41;;19144:27;19101:70;;287:20179;;;;;;;;;;;;18889:135;287:20179;;-1:-1:-1;;;18971:42:41;;287:20179;;;;;;;;;;;18971:42;;287:20179;;18971:42;18670:143;287:20179;;-1:-1:-1;;;18758:44:41;;287:20179;;;;;;;17100:21;287:20179;;18758:44;;287:20179;;;18758:44;18674:61;287:20179;-1:-1:-1;;;;;18715:15:41;19946;287:20179;;;;;;18715:15;;:::i;:::-;287:20179;18715:20;;18674:61;;18505:78;287:20179;18548:15;19946;287:20179;;;;;;18548:15;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;18548:35;;18505:78;;18351:141;287:20179;;;;;;;18418:63;;;;;;287:20179;;;;;;;18418:63;;287:20179;;;;;18418:63;17701:320;287:20179;;;;;;;;;;;5925:25;17980:41;17701:320;;:259;287:20179;;;;;5925:25;287:20179;;;;;17917:43;;17701:259;;:196;287:20179;17850:21;18927;287:20179;;;;;;17850:21;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;17850:47;;17701:196;;:129;287:20179;;;;;;;;17794:22;287:20179;17794:36;17701:129;;:73;287:20179;;;;;;;;17100:21;287:20179;17739:35;17701:73;;17132:543;287:20179;;-1:-1:-1;;;17526:138:41;;5951:10;287:20179;17526:138;;287:20179;;;;;;;;6550:24;;;287:20179;;;;;;17079:19;;;287:20179;;;;;;;;;17100:21;;;287:20179;;;;;;;;;17526:138;17149:345;-1:-1:-1;5951:10:41;287:20179;;;;;;;;;;;;;;;;;;;;6550:24;;;287:20179;;;;;;;;;;;17079:19;;287:20179;;;;;;;;;;;17100:21;;;287:20179;;;;;;;;;;;;;17368:21;287:20179;;;;;;;;;;;;;;;;;;;;;;;17184:310;;17149:345;;6546:173;287:20179;;-1:-1:-1;;;6651:53:41;;5951:10;287:20179;6651:53;;;287:20179;;;;;;;;;;;;;;;;;;;;4198:50;6550:74;287:20179;;;;;;;;;;6594:19;287:20179;6594:30;;6550:74;;13185:3;13224:13;;;;;:::i;:::-;287:20179;13255:23;;:64;;;;13185:3;13251:145;;287:20179;13429:5;;;;;;13185:3;;;;;:::i;:::-;13147:13;;13436:3;13463:13;;;;;;:::i;:::-;287:20179;13463:26;13459:115;;13436:3;;;:::i;:::-;13414:13;;13459:115;287:20179;;-1:-1:-1;;;13520:35:41;;287:20179;13520:35;;287:20179;;;;;13520:35;13251:145;287:20179;;;;13346:35;;;;;;287:20179;13346:35;;287:20179;13346:35;13255:64;5951:10;;287:20179;;13282:14;287:20179;;;;;;;;;;;;;;;;13255:64;;6205:150;287:20179;;-1:-1:-1;;;6299:45:41;;287:20179;;;6299:45;;287:20179;;;6299:45;6209:67;5951:10;;287:20179;;6229:18;287:20179;;;;;;;;;;;;;;;;;6209:67;;12904:138;287:20179;;-1:-1:-1;;;12976:55:41;;5951:10;287:20179;12976:55;;287:20179;;;;;;;;;12976:55;12807:88;287:20179;;-1:-1:-1;;;12861:23:41;;287:20179;;12861:23;287:20179;;;;;;-1:-1:-1;;287:20179:41;;;;;;;;:::i;:::-;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;1057:62:144;;:::i;:::-;287:20179:41;;;-1:-1:-1;;;;;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;2560:40:144;287:20179:41;;2560:40:144;287:20179:41;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;397:1;287:20179;;;;;;;;;-1:-1:-1;;287:20179:41;;;;-1:-1:-1;;;;;287:20179:41;;:::i;:::-;;;;9193:14;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;;1684:55;287:20179;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;512:49;287:20179;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;454:9;287:20179;;;;;;;;;;:::i;:::-;;;;;;;;;;781:125;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;287:20179:41;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;2330:50:41;;;:106;;;;287:20179;;;;;;;2330:106;-1:-1:-1;;;938:40:134;;-1:-1:-1;2330:106:41;;;287:20179;;;;-1:-1:-1;;;;;287:20179:41;;;;;;:::o;:::-;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;:::o;:::-;;;;;;;;;:::o;:::-;-1:-1:-1;;287:20179:41;;;;;;;:::o;:::-;;;;;;;;;;;;:::o;:::-;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;:::o;:::-;;;;;;;;:::o;:::-;;;;;;;;:::o;7759:883::-;;;;287:20179;;;;;;;;:::i;:::-;-1:-1:-1;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;7999:21;287:20179;;;;;;;;;;;;;;;;;;;;;;8079:18;;:150;;;;;7759:883;8062:488;;;287:20179;;8566:26;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;:::i;:::-;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;;;;;;7759:883;:::o;8062:488::-;287:20179;;;;;;;;;;;;;;:::i;:::-;;;;8261:278;;287:20179;8261:278;;287:20179;8261:278;287:20179;8261:278;;287:20179;8261:278;287:20179;8261:278;;287:20179;;8261:278;;287:20179;8254:285;:::o;8079:150::-;287:20179;;;;;8117:32;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8117:112;;8079:150;;;10206:351;;;;;;287:20179;;10457:83;;;;287:20179;512:49;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;10457:83;;287:20179;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;10434:116;;10206:351;:::o;11803:921::-;;;;;12013:31;;:64;;;;11803:921;12009:152;;12174:36;;12170:73;;-1:-1:-1;;;;;287:20179:41;;12042:1;287:20179;;;12285:12;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;12042:1;287:20179;;;;;:::i;:::-;;;;;;;;;;;;-1:-1:-1;;;;;287:20179:41;;;;;;;;;;;;;;;;;;12364:20;287:20179;;;;;;;;;;;;;;;;;;;;;;;;;;12443:43;;;;:114;;;11803:921;12443:182;;;;;;;11803:921;12426:292;;;;11803:921;;;;:::o;12426:292::-;287:20179;-1:-1:-1;;;12657:50:41;;-1:-1:-1;;;;;287:20179:41;;;;12657:50;;;287:20179;;;;;;;;;;;;;;;;;4198:50;12443:182;287:20179;;12577:15;:48;;-1:-1:-1;12443:182:41;;;;:114;287:20179;;;-1:-1:-1;287:20179:41;;;;;;;;;;;;;;;12506:51;;12443:114;;;;;;287:20179;-1:-1:-1;;;287:20179:41;;;;;;;;12170:73;12226:7;;;;:::o;12009:152::-;-1:-1:-1;;287:20179:41;;-1:-1:-1;;;12100:50:41;;-1:-1:-1;;;;;287:20179:41;;;;12100:50;;;287:20179;;;;;;;;;;;;;;;;;4198:50;12013:64;12048:29;;;12013:64;;13610:160;13683:10;-1:-1:-1;287:20179:41;13670:12;287:20179;;;;-1:-1:-1;287:20179:41;;;13669:25;13665:99;;13610:160::o;13665:99::-;287:20179;;-1:-1:-1;;;13717:36:41;;13683:10;13717:36;;;287:20179;;;13717:36;287:20179;;;;;;;;;;:::o;:::-;;-1:-1:-1;;;;;287:20179:41;;;;;;;:::o;:::-;;-1:-1:-1;;;;;287:20179:41;;;;;;;:::o;1353:130:144:-;1267:6;287:20179:41;-1:-1:-1;;;;;287:20179:41;719:10:133;1416:23:144;287:20179:41;;1353:130:144:o;287:20179:41:-;;;;;;;;;;;;;;;;;;;;;;;;"
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "AuthorizationAlreadyConsumed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "projectedValue",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "cap",
+              "type": "uint256"
+            }
+          ],
+          "name": "CounterCapExceeded",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "counterIds",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "counterPolicies",
+              "type": "uint256"
+            }
+          ],
+          "name": "CounterPolicyLengthMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterPolicyMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterPolicyNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "suppliedValueKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedValueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterValueKeyMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CounterValueOverflow",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DuplicateCounterPolicy",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidCounterPolicy",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidLedgerWriter",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidPhasePolicy",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint64",
+              "name": "graceUntil",
+              "type": "uint64"
+            }
+          ],
+          "name": "InvalidPolicyGrace",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "NullifierAlreadyConsumed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "OperationRootAlreadyConsumed",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "OperationRootRequired",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedLedgerWriter",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "boundPolicyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerAuthorizationConsumed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "increment",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "newValue",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "cap",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "boundPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterConsumed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "valueKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "resolutionHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterConsumptionContext",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerCounterPolicyRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "boundPolicyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerNullifierConsumed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "currentPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "boundPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerOperationRootConsumed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "MintLedgerPhasePolicyRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "newPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "graceUntil",
+              "type": "uint64"
+            }
+          ],
+          "name": "MintLedgerPolicyGraceSet",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "MintLedgerWriterUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_POLICY_GRACE_SECONDS",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCHEMA_VERSION",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "VALUE_KEY_DOMAIN",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "valueKey",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "subjectKey",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "increment",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "cap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "resolutionHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintLedger.CounterConsumption[]",
+              "name": "consumptions",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "nullifiers",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "boundPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "consume",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterValue",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "deriveCounterValueKey",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isManagerAuthorizationUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isManagerNullifierUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isManagerOperationRootUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isStreamMintLedger",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "ledgerWriter",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "policyGrace",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "previousPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "previousPolicyRevision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "previousPolicyGraceUntil",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "counterIds",
+              "type": "bytes32[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "enabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterCapMode",
+                  "name": "capMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+                  "name": "deltaMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticIncrement",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintLedger.LedgerCounterPolicy[]",
+              "name": "counterPolicies",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint64",
+              "name": "graceUntil",
+              "type": "uint64"
+            }
+          ],
+          "name": "registerPhasePolicy",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "manager",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registeredCounterPolicy",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "enabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterCapMode",
+                  "name": "capMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+                  "name": "deltaMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticIncrement",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintLedger.LedgerCounterPolicy",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registeredPhasePolicyHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "writer",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "setLedgerWriter",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "owner()": {
+            "details": "Returns the address of the current owner."
+          },
+          "renounceOwnership()": {
+            "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+          },
+          "transferOwnership(address)": {
+            "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+          }
+        },
+        "stateVariables": {
+          "counterValue": {
+            "details": "Counter values are not reset by phase policy re-registration."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "AuthorizationAlreadyConsumed(bytes32)": [
+            {
+              "notice": "Reverts when an authorization ID has already been consumed."
+            }
+          ],
+          "CounterCapExceeded(bytes32,uint256,uint256)": [
+            {
+              "notice": "Reverts when a static counter increment would exceed its cap."
+            }
+          ],
+          "CounterPolicyLengthMismatch(uint256,uint256)": [
+            {
+              "notice": "Reverts when counter ID and counter policy arrays differ in length."
+            }
+          ],
+          "CounterPolicyMismatch(bytes32)": [
+            {
+              "notice": "Reverts when a consumed counter does not match its registered policy."
+            }
+          ],
+          "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)": [
+            {
+              "notice": "Reverts when a consumed counter has no registered policy."
+            }
+          ],
+          "CounterValueKeyMismatch(bytes32,bytes32)": [
+            {
+              "notice": "Reverts when a supplied value key does not match the ledger key derivation."
+            }
+          ],
+          "CounterValueOverflow(bytes32)": [
+            {
+              "notice": "Reverts when a counter increment would overflow uint64 storage."
+            }
+          ],
+          "DuplicateCounterPolicy(bytes32)": [
+            {
+              "notice": "Reverts when a phase policy repeats a counter ID."
+            }
+          ],
+          "InvalidCounterPolicy(bytes32)": [
+            {
+              "notice": "Reverts when a counter policy is invalid or unsupported for launch."
+            }
+          ],
+          "InvalidLedgerWriter(address)": [
+            {
+              "notice": "Reverts when the owner tries to configure an invalid writer."
+            }
+          ],
+          "InvalidPhasePolicy(address,uint256,bytes32)": [
+            {
+              "notice": "Reverts when a phase policy registration or lookup is invalid."
+            }
+          ],
+          "InvalidPolicyGrace(uint64)": [
+            {
+              "notice": "Reverts when a phase policy grace deadline is invalid."
+            }
+          ],
+          "NullifierAlreadyConsumed(bytes32)": [
+            {
+              "notice": "Reverts when a nullifier has already been consumed."
+            }
+          ],
+          "OperationRootAlreadyConsumed(address,bytes32)": [
+            {
+              "notice": "Reverts when a manager already consumed a batch operation root."
+            }
+          ],
+          "OperationRootRequired()": [
+            {
+              "notice": "Reverts when a batch operation root is zero."
+            }
+          ],
+          "UnauthorizedLedgerWriter(address)": [
+            {
+              "notice": "Reverts when a caller is not authorized to write ledger state."
+            }
+          ]
+        },
+        "events": {
+          "MintLedgerAuthorizationConsumed(uint16,bytes32,bytes32,address,bytes32)": {
+            "notice": "Emitted when an authorization ID is consumed."
+          },
+          "MintLedgerCounterConsumed(uint16,bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32,bytes32)": {
+            "notice": "Emitted when a registered counter value is incremented."
+          },
+          "MintLedgerCounterConsumptionContext(uint16,bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)": {
+            "notice": "Emitted with non-indexed context for reconstructing a counter increment."
+          },
+          "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)": {
+            "notice": "Emitted for each counter policy registered under a phase policy."
+          },
+          "MintLedgerNullifierConsumed(uint16,bytes32,bytes32,address,bytes32)": {
+            "notice": "Emitted when a manager consumes a nullifier."
+          },
+          "MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32,bytes32)": {
+            "notice": "Emitted exactly once when a manager consumes a batch operation root."
+          },
+          "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)": {
+            "notice": "Emitted when a manager registers a phase policy hash."
+          },
+          "MintLedgerPolicyGraceSet(uint16,uint256,bytes32,address,bytes32,bytes32,uint64)": {
+            "notice": "Emitted when a policy rotation records or clears predecessor grace."
+          },
+          "MintLedgerWriterUpdated(address,bool)": {
+            "notice": "Emitted when the owner enables or disables a ledger writer."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "consume(uint256,bytes32,(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)": {
+            "notice": "Consumes one manager-scoped operation root and its accounting facts."
+          },
+          "counterValue(bytes32)": {
+            "notice": "Returns the durable uint64 value for one ledger counter key."
+          },
+          "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)": {
+            "notice": "Derives the canonical value key for a manager counter subject."
+          },
+          "isManagerAuthorizationUsed(address,bytes32)": {
+            "notice": "Returns whether a manager has already consumed an authorization ID."
+          },
+          "isManagerNullifierUsed(address,bytes32)": {
+            "notice": "Returns whether a manager has already consumed a nullifier."
+          },
+          "isManagerOperationRootUsed(address,bytes32)": {
+            "notice": "Returns whether a manager has already consumed an operation root."
+          },
+          "isStreamMintLedger()": {
+            "notice": "Returns true for deployment validation."
+          },
+          "ledgerWriter(address)": {
+            "notice": "Returns whether an address may register and consume ledger state."
+          },
+          "policyGrace(address,uint256,bytes32)": {
+            "notice": "Returns the immediate predecessor grace tuple for a manager phase."
+          },
+          "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[],uint64)": {
+            "notice": "Registers the active static launch policy for a manager phase."
+          },
+          "registeredCounterPolicy(address,uint256,bytes32,bytes32)": {
+            "notice": "Returns the registered static policy for one counter."
+          },
+          "registeredPhasePolicyHash(address,uint256,bytes32)": {
+            "notice": "Returns the registered policy hash for a manager phase."
+          },
+          "setLedgerWriter(address,bool)": {
+            "notice": "Enables or disables an authorized ledger writer."
+          },
+          "supportsInterface(bytes4)": {
+            "notice": "Advertises the ledger interface required by Core satellite validation."
+          }
+        },
+        "notice": "Durable outside-Core accounting ledger for launch mint counters.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/domains/mint/StreamMintLedger.sol": "StreamMintLedger"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/domains/mint/StreamMintLedger.sol": {
+        "keccak256": "0x2d1e37e1a15a811631da26f742d0587c6dbdcf26f0b31bb3df832413d16d9083",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f2582d643b3eaf5554c97e80b70cc3e48b46d4e46b1e3a546041b6c418daaca5",
+          "dweb:/ipfs/QmNMeGsqFjZqYwix6Pt8gVzMdnJt3fUMkM733uJUGPmPr6"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/Context.sol": {
+        "keccak256": "0x2d9821ede311a3c16183811be8bdc666e88c69d9d50321e3dff025fe7630d373",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3719bc7fe267a79e84641b88901b10dbc58d27edaea65b7811d39ca7d2a3e409",
+          "dweb:/ipfs/QmRDDpaByM3MhWs61gXmfaxoygifCJhLvguEFDGahhWMfX"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/ERC165.sol": {
+        "keccak256": "0x0f6a4a48c9dd646ba70b603bb85bc293d9357275a280006a0703dc6a5c9daf95",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e6b5745548ef1305350ee5e7b283e105160e8db01614d7b18543817938046974",
+          "dweb:/ipfs/QmSRdBD3FZaPt7ZY2FSN9vSNBMab2sX3dtE9d3chLtjFtc"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/Ownable.sol": {
+        "keccak256": "0x1828e8b5bee74a80cf8bfa6d4235be9a8d50e4715170e36c7efd8ddc541af8ea",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://48887640226bc9029c99490fa2db6a4750172a8bee8e5749b64aa0e212232ac0",
+          "dweb:/ipfs/QmeZbu12yaNTVd2yab9H4Ait8sDGLVCk9KdJauReqfKXgv"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "MAX_POLICY_GRACE_SECONDS()": "2acb615f",
+    "SCHEMA_VERSION()": "6233b32a",
+    "VALUE_KEY_DOMAIN()": "36346835",
+    "consume(uint256,bytes32,(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)": "82e8f383",
+    "counterValue(bytes32)": "4c310e09",
+    "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)": "7d9d849b",
+    "isManagerAuthorizationUsed(address,bytes32)": "867137d3",
+    "isManagerNullifierUsed(address,bytes32)": "549c84de",
+    "isManagerOperationRootUsed(address,bytes32)": "e67d8006",
+    "isStreamMintLedger()": "35329e20",
+    "ledgerWriter(address)": "e05ac6da",
+    "owner()": "8da5cb5b",
+    "policyGrace(address,uint256,bytes32)": "a9972957",
+    "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[],uint64)": "d53343de",
+    "registeredCounterPolicy(address,uint256,bytes32,bytes32)": "93623d24",
+    "registeredPhasePolicyHash(address,uint256,bytes32)": "194dba81",
+    "renounceOwnership()": "715018a6",
+    "setLedgerWriter(address,bool)": "83e3452a",
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "transferOwnership(address)": "f2fde38b"
+  }
+}

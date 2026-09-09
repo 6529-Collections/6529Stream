@@ -1,0 +1,1672 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "planHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "commitGenesisPlan",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisInitialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "genesisPlanHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "roleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "governanceRootCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialTerminalFreezeVetoGuardians",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "systemManifestSatellite",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedInventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expectedInventoryLeafCount",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "triggerTarget",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "triggerSelector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "triggerCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "allowedActionClassMask",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+              "name": "expectedTriggers",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "pointerTypes",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "registries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedActionPolicyCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "callType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "valuePolicy",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "valueLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "valueSemanticsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "actionPolicies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct SystemManifestBootstrapBinding",
+          "name": "binding",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceCall[]",
+              "name": "calls",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "callDatas",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct GenesisBatch[]",
+          "name": "batches",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "hashGenesisPlan",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "roleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "governanceRootCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialTerminalFreezeVetoGuardians",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "systemManifestSatellite",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedInventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expectedInventoryLeafCount",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "triggerTarget",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "triggerSelector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "triggerCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "allowedActionClassMask",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+              "name": "expectedTriggers",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "pointerTypes",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "registries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedActionPolicyCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "callType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "valuePolicy",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "valueLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "valueSemanticsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "actionPolicies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct SystemManifestBootstrapBinding",
+          "name": "binding",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceCall[]",
+              "name": "calls",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "callDatas",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct GenesisBatch[]",
+          "name": "batches",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "initializeGenesis",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "roleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "governanceRootCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialTerminalFreezeVetoGuardians",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "systemManifestSatellite",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedInventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expectedInventoryLeafCount",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "triggerTarget",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "triggerSelector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "triggerCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "allowedActionClassMask",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+              "name": "expectedTriggers",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "pointerTypes",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "registries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedActionPolicyCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "callType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "valuePolicy",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "valueLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "valueSemanticsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "actionPolicies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct SystemManifestBootstrapBinding",
+          "name": "binding",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceCall[]",
+              "name": "calls",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "callDatas",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct GenesisBatch[]",
+          "name": "batches",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "prepareGenesis",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "planHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "batchCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "GenesisInitialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "planHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "authority",
+          "type": "address"
+        }
+      ],
+      "name": "GenesisPlanCommitted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "planHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "GenesisPrepared",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "GenesisAlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GenesisDidNotSeal",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GenesisPlanAlreadyCommitted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expected",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actual",
+          "type": "bytes32"
+        }
+      ],
+      "name": "GenesisPlanHashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GenesisPreparationAlreadyBound",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidGenesisPlan",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "GenesisAlreadyInitialized",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "GenesisDidNotSeal",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "GenesisPlanAlreadyCommitted",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GenesisPlanHashMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "GenesisPreparationAlreadyBound",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidGenesisPlan",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "planHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "batchCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "GenesisInitialized",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "planHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "authority",
+              "type": "address"
+            }
+          ],
+          "name": "GenesisPlanCommitted",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "planHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GenesisPrepared",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "planHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "commitGenesisPlan",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "genesisInitialized",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "genesisPlanHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "roleRegistry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "governanceRoot",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "governanceRootCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialTerminalFreezeVetoGuardians",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "core",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "systemManifestSatellite",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedInventoryStateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expectedInventoryLeafCount",
+                  "type": "uint64"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "triggerTarget",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "triggerSelector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "triggerCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "allowedActionClassMask",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+                  "name": "expectedTriggers",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "pointerTypes",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "registries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "actionPolicyCandidateProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedActionPolicyCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "actionClass",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetProfileHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "callType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "valuePolicy",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "valueLimit",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "valueSemanticsHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceActionPolicyEntry[]",
+                  "name": "actionPolicies",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapBinding",
+              "name": "binding",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "value",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "callDataHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "scopeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "oldValueHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "newValueHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceCall[]",
+                  "name": "calls",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "callDatas",
+                  "type": "bytes[]"
+                }
+              ],
+              "internalType": "struct GenesisBatch[]",
+              "name": "batches",
+              "type": "tuple[]"
+            }
+          ],
+          "name": "hashGenesisPlan",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "roleRegistry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "governanceRoot",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "governanceRootCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialTerminalFreezeVetoGuardians",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "core",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "systemManifestSatellite",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedInventoryStateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expectedInventoryLeafCount",
+                  "type": "uint64"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "triggerTarget",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "triggerSelector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "triggerCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "allowedActionClassMask",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+                  "name": "expectedTriggers",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "pointerTypes",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "registries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "actionPolicyCandidateProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedActionPolicyCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "actionClass",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetProfileHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "callType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "valuePolicy",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "valueLimit",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "valueSemanticsHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceActionPolicyEntry[]",
+                  "name": "actionPolicies",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapBinding",
+              "name": "binding",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "value",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "callDataHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "scopeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "oldValueHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "newValueHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceCall[]",
+                  "name": "calls",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "callDatas",
+                  "type": "bytes[]"
+                }
+              ],
+              "internalType": "struct GenesisBatch[]",
+              "name": "batches",
+              "type": "tuple[]"
+            }
+          ],
+          "name": "initializeGenesis",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "roleRegistry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "governanceRoot",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "governanceRootCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialTerminalFreezeVetoGuardians",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "core",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "systemManifestSatellite",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedInventoryStateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expectedInventoryLeafCount",
+                  "type": "uint64"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "triggerTarget",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "triggerSelector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "triggerCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "allowedActionClassMask",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+                  "name": "expectedTriggers",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "pointerTypes",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "registries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "actionPolicyCandidateProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedActionPolicyCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "actionClass",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetProfileHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "callType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "valuePolicy",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "valueLimit",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "valueSemanticsHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceActionPolicyEntry[]",
+                  "name": "actionPolicies",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapBinding",
+              "name": "binding",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "value",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "callDataHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "scopeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "oldValueHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "newValueHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceCall[]",
+                  "name": "calls",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "callDatas",
+                  "type": "bytes[]"
+                }
+              ],
+              "internalType": "struct GenesisBatch[]",
+              "name": "batches",
+              "type": "tuple[]"
+            }
+          ],
+          "name": "prepareGenesis",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "prepareGenesis((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": {
+            "details": "Uses the identical complete plan encoding. Preparation is durable;      failed initialization leaves it available for an exact-plan retry.      No ordinary pre-seal actions may run after the plan is committed."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "hashGenesisPlan((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": {
+            "notice": "Hash the exact ABI argument bytes for the corresponding initializer         call, domain-separated by this chain and Executor. Use the same         encoding for hashing and initialization (including any trailing bytes)."
+          },
+          "prepareGenesis((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": {
+            "notice": "Optionally bind the exact committed governance catalog/lifecycle         in a separate transaction before atomic product setup and sealing."
+          }
+        },
+        "notice": "One-time deployment initialization; ordinary governance keeps its delays.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/IStreamGenesisInitializer.sol": "IStreamGenesisInitializer"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/IStreamGenesisInitializer.sol": {
+        "keccak256": "0x8efb81ec32673dc18766fb9b889dd1c2488fb463f8d9880d641bb50e71dd020c",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://05a1be11fceae7fc8f51bd7c51d5f64323edf8af0c6603364743459f55caa768",
+          "dweb:/ipfs/QmNa1sFUFvmyxrwcEmeGaSFdLcB9soTHwQK3FK4NhThCkf"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol": {
+        "keccak256": "0xef9804cdfd0daf5ddc29fe0a7ad5f7f883c493944d98209b990863508c97d6c0",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://808cb52854d777ecf5d8ee5b042c79f9dcba28dda121a753accec5b5b69125b1",
+          "dweb:/ipfs/QmQwitTx6SHDFazQw22E8gdVRsUznKmDaV9qtqyB3a4iAb"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "commitGenesisPlan(bytes32)": "0dfde7d7",
+    "genesisInitialized()": "7ee7d452",
+    "genesisPlanHash()": "e9e08b91",
+    "hashGenesisPlan((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": "e609b1e8",
+    "initializeGenesis((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": "eccd8839",
+    "prepareGenesis((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]),(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])[])": "5cab6bda"
+  }
+}
