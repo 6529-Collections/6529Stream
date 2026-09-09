@@ -263,6 +263,23 @@ library StreamGovernanceBootstrap {
         );
     }
 
+    /// @notice Encode the existing action read ABI outside the Executor's
+    ///         permanent bytecode budget, including virtual expiry status.
+    function encodeGovernanceAction(GovernanceAction storage stored)
+        public
+        view
+        returns (bytes memory)
+    {
+        GovernanceAction memory action = stored;
+        if (
+            action.status == GovernanceActionStatus.SCHEDULED
+                && block.timestamp > action.expiresAfter
+        ) {
+            action.status = GovernanceActionStatus.EXPIRED;
+        }
+        return abi.encode(action);
+    }
+
     function governanceActionIdFromStored(
         GovernanceAction storage action,
         bytes32 callsHash,

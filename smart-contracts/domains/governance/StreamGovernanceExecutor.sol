@@ -577,14 +577,10 @@ contract StreamGovernanceExecutor is
         override
         returns (GovernanceAction memory)
     {
-        GovernanceAction memory action = _actions[actionId];
-        if (
-            action.status == GovernanceActionStatus.SCHEDULED
-                && block.timestamp > action.expiresAfter
-        ) {
-            action.status = GovernanceActionStatus.EXPIRED;
+        bytes memory encoded = StreamGovernanceBootstrap.encodeGovernanceAction(_actions[actionId]);
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
         }
-        return action;
     }
 
     /// @inheritdoc IStreamGovernanceExecutor

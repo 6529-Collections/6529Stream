@@ -5,11 +5,55 @@ import "./helpers/StreamGovernanceBootstrapHarness.sol";
 import "../smart-contracts/interfaces/stream/IStreamGenesisInitializer.sol";
 import "../script/current/StreamGenesisManifestPlan.sol";
 
+contract GenesisConfiguredTarget {
+    IStreamGovernanceExecutor private immutable executor;
+    uint256 public value;
+
+    constructor(IStreamGovernanceExecutor executor_) {
+        executor = executor_;
+    }
+
+    function configure(uint256 nextValue) external {
+        require(msg.sender == address(executor), "executor authority");
+        (
+            bool executing,
+            bytes32 actionId,
+            uint8 actionClass,
+            bytes32 scope,
+            bytes32 oldHash,
+            bytes32 newHash
+        ) = executor.currentAction();
+        require(executing && actionId != bytes32(0) && actionClass == 1, "actual governance action");
+        require(
+            scope == keccak256("genesis-product") && oldHash == keccak256(abi.encode(value))
+                && newHash == keccak256(abi.encode(nextValue)),
+            "exact transition"
+        );
+        value = nextValue;
+    }
+}
+
 /// @notice Isolates the one-time initializer against the existing bootstrap
 ///         fixture; current-stack tests separately use the actual Core/registry.
 contract StreamGenesisInitializerTest is StreamGovernanceBootstrapHarness {
     SystemManifestBootstrapBinding private _binding;
     uint256 private _unboundSnapshot;
+    GenesisConfiguredTarget private configuredTarget;
+
+    function _additionalActionPolicies(BootstrapArtifacts memory artifacts)
+        internal
+        override
+        returns (GovernanceActionPolicyEntry[] memory entries)
+    {
+        configuredTarget = new GenesisConfiguredTarget(artifacts.executor);
+        entries = new GovernanceActionPolicyEntry[](1);
+        entries[0] = _zeroPolicy(
+            1,
+            address(configuredTarget),
+            configuredTarget.configure.selector,
+            keccak256("GENESIS_PRODUCT")
+        );
+    }
 
     function _bindExecutorForFixture(
         StreamGovernanceExecutor executor,
@@ -199,5 +243,96 @@ contract StreamGenesisInitializerTest is StreamGovernanceBootstrapHarness {
         (address pointer, bytes32 manifestHash) =
             StreamGenesisManifestPlan.writePayload(bytes("{\"profile\":\"development\"}"));
         StreamGovernanceEvidence.verifyManifestPayload(pointer, manifestHash);
+    }
+
+    function testCommittedProductSetupUsesCatalogAndActualContextWithoutTailTrigger() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory seal) = _fixture();
+        GenesisBatch[] memory batches = new GenesisBatch[](2);
+        batches[0].actionClass = 1;
+        batches[0].calls = new GovernanceCall[](1);
+        batches[0].callDatas = new bytes[](1);
+        batches[0].callDatas[0] = abi.encodeCall(configuredTarget.configure, (77));
+        batches[0].calls[0] = GovernanceCall(
+            address(configuredTarget),
+            0,
+            configuredTarget.configure.selector,
+            keccak256(batches[0].callDatas[0]),
+            keccak256("genesis-product"),
+            keccak256(abi.encode(uint256(0))),
+            keccak256(abi.encode(uint256(77)))
+        );
+        batches[1] = seal[0];
+        _commit(artifacts, batches);
+        _initialize(artifacts, batches);
+        require(configuredTarget.value() == 77, "committed product configured");
+        require(
+            artifacts.executor.governanceNonce() == 2
+                && artifacts.executor.owner() == address(this),
+            "two real actions then final root"
+        );
+    }
+
+    function testOrdinaryPreSealSchedulingStillRejectsProductSetupOutsideTriggerSubset() public {
+        BootstrapArtifacts memory artifacts = _deployBoundBootstrap(address(this));
+        GovernanceActionRequest memory request = GovernanceActionRequest({
+            actionClass: 1,
+            target: address(configuredTarget),
+            value: 0,
+            selector: configuredTarget.configure.selector,
+            callData: abi.encodeCall(configuredTarget.configure, (77)),
+            scopeHash: keccak256("genesis-product"),
+            oldValueHash: keccak256(abi.encode(uint256(0))),
+            newValueHash: keccak256(abi.encode(uint256(77))),
+            notBefore: uint64(block.timestamp + 48 hours),
+            expiresAfter: uint64(block.timestamp + 9 days),
+            reasonHash: keccak256("test"),
+            reasonURI: "test",
+            manifestHash: artifacts.manifestHash
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.BootstrapActionNotPermitted.selector)
+        );
+        vm.prank(artifacts.bootstrapAuthority);
+        artifacts.executor.scheduleGovernanceAction(request);
+    }
+
+    function testActionReadPreservesDynamicABIAndVirtualExpiry() public {
+        (BootstrapArtifacts memory artifacts, GenesisBatch[] memory batches) = _fixture();
+        _commit(artifacts, batches);
+        _initialize(artifacts, batches);
+        GovernanceActionRequest memory request = GovernanceActionRequest({
+            actionClass: 1,
+            target: address(configuredTarget),
+            value: 0,
+            selector: configuredTarget.configure.selector,
+            callData: abi.encodeCall(configuredTarget.configure, (77)),
+            scopeHash: keccak256("genesis-product"),
+            oldValueHash: keccak256(abi.encode(uint256(0))),
+            newValueHash: keccak256(abi.encode(uint256(77))),
+            notBefore: uint64(block.timestamp + 48 hours),
+            expiresAfter: uint64(block.timestamp + 9 days),
+            reasonHash: keccak256("action-read"),
+            reasonURI: "ipfs://action-read/dynamic-uri",
+            manifestHash: artifacts.manifestHash
+        });
+        bytes32 actionId = artifacts.executor.scheduleGovernanceAction(request);
+        GovernanceAction memory action = artifacts.executor.governanceAction(actionId);
+        require(
+            action.status == GovernanceActionStatus.SCHEDULED
+                && action.target == address(configuredTarget),
+            "scheduled read"
+        );
+        require(
+            keccak256(bytes(action.reasonURI)) == keccak256(bytes(request.reasonURI))
+                && action.manifestHash == request.manifestHash,
+            "dynamic ABI fields"
+        );
+        vm.warp(uint256(request.expiresAfter) + 1);
+        action = artifacts.executor.governanceAction(actionId);
+        require(
+            action.status == GovernanceActionStatus.EXPIRED
+                && action.expiresAfter == request.expiresAfter,
+            "virtual expiry"
+        );
     }
 }
