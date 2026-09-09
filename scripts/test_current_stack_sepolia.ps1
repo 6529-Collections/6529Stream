@@ -6,15 +6,9 @@ $path=Join-Path $PSScriptRoot 'run-current-stack-sepolia.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw 'Sepolia helper syntax errors.'}
 # Load only pure receipt/recovery functions. No account files, RPC calls or signers run.
-$names=@('Uint','Mint-TokenId','Require-FreshDeployment','Validate-RecordedDeployment','Remaining-DeploymentGas')
+$names=@('Invoke-Tool','Cast','Uint','Mint-TokenId','Require-FreshDeployment','Validate-RecordedDeployment','Remaining-DeploymentGas')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
-}
-function Cast([string[]]$Arguments) {
-    $executable=(Get-Command cast -CommandType Application).Source
-    $result=& $executable @Arguments
-    if ($LASTEXITCODE -ne 0) {throw 'Local hashing failed.'}
-    return ($result -join '').Trim()
 }
 function Check([bool]$Condition,[string]$Label) {if (-not $Condition) {throw $Label}}
 function Reject([scriptblock]$Action,[string]$Label) {
@@ -22,6 +16,7 @@ function Reject([scriptblock]$Action,[string]$Label) {
     try {& $Action | Out-Null} catch {$rejected=$true}
     Check $rejected $Label
 }
+Check ((Cast @('keccak',('0x'+('00'*40000)))) -eq '0xc625f79680f7083b0bdaef0ba2e4e67b9132ea5edfcecefb31b2b5f3a5a9282e') 'Large calldata must hash through stdin without Windows argument truncation.'
 $sale='0x0000000000000000000000000000000000000001'
 $other='0x0000000000000000000000000000000000000002'
 $topic=Cast @('keccak','NativeSaleSettled(bytes32,bytes32,uint256,bytes32,bytes32,address,uint256)')

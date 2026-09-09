@@ -32,14 +32,21 @@ foreach ($account in @($deployer,$artist,$platform)) {
     }
 }
 
-function Invoke-Tool([string]$Program, [string[]]$Arguments) {
+function Invoke-Tool([string]$Program, [string[]]$Arguments, [AllowNull()][string]$StandardInput=$null) {
     # Keep captured errors private: RPC endpoints or signer arguments may be sensitive.
     $executable = (Get-Command $Program -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source
-    $captured = & $executable @Arguments 2>&1
+    $captured = if (-not $PSBoundParameters.ContainsKey('StandardInput')) { & $executable @Arguments 2>&1 }
+        else { $StandardInput | & $executable @Arguments 2>&1 }
     if ($LASTEXITCODE -ne 0) { throw "$Program failed; command output withheld." }
     return ($captured -join "`n").Trim()
 }
-function Cast([string[]]$Arguments) { return Invoke-Tool 'cast' $Arguments }
+function Cast([string[]]$Arguments) {
+    # Genesis calldata and deployed runtime exceed Windows' command-line limit.
+    if ($Arguments.Count -eq 2 -and $Arguments[0] -eq 'keccak') {
+        return Invoke-Tool 'cast' @('keccak') $Arguments[1]
+    }
+    return Invoke-Tool 'cast' $Arguments
+}
 function Rpc([string]$Method, [string[]]$Arguments = @()) {
     return (Cast (@('rpc',$Method) + $Arguments + @('--rpc-url',$RpcUrl))) | ConvertFrom-Json -AsHashtable
 }
