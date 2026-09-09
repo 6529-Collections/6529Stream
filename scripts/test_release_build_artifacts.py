@@ -6013,6 +6013,7 @@ class R4AuthoritativeEvidenceHistory:
         self.assertRegex(combined, r"(?m)^Ran 1 test in ")
         self.assertRegex(combined, r"(?m)^OK$")
         self.assertNotIn("Ran 121 tests", combined)
+        self.assertNotIn("Ran 124 tests", combined)
 
     def test_02_legacy_call_shapes_and_semantics_remain_available_at_v5(self) -> None:
         command = builder.forge_command(
@@ -19400,11 +19401,26 @@ class R11AuthoritativeEvidenceTests(
             )
             assert real_forge_text is not None
             assert real_solc_text is not None
-            real_forge = Path(real_forge_text).resolve(strict=True)
-            real_solc = Path(real_solc_text).resolve(strict=True)
+            installed_forge = Path(real_forge_text).resolve(strict=True)
+            installed_solc = Path(real_solc_text).resolve(strict=True)
             with tempfile.TemporaryDirectory(
                 prefix="r11-real-tool-journal-", dir=REPO_ROOT.parent,
             ) as temporary:
+                # Other workers may be executing the installed PE image, which
+                # independently prevents writable opens even after our lease
+                # closes. Use owned, byte-identical real tools to isolate the
+                # sharing assertion without replacing actual executable launch.
+                real_forge = Path(temporary) / "forge.exe"
+                real_solc = Path(temporary) / "solc.exe"
+                for installed, owned in (
+                    (installed_forge, real_forge), (installed_solc, real_solc),
+                ):
+                    shutil.copyfile(installed, owned)
+                    self.assertFalse(owned.samefile(installed))
+                    self.assertEqual(
+                        hashlib.sha256(owned.read_bytes()).digest(),
+                        hashlib.sha256(installed.read_bytes()).digest(),
+                    )
                 evidence = Path(temporary) / "evidence"
                 evidence.mkdir()
                 static = {
