@@ -7,6 +7,7 @@ import "../../interfaces/stream/IStreamSplitFactory.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "./StreamSaleSignatures.sol";
 
 /// @notice One signed native sale mints one NFT and funds its immutable split wallet atomically.
 /// @dev Both creator and platform approve the complete sale. The wallet is funded before
@@ -26,10 +27,6 @@ contract StreamFixedPriceSaleAdapter is
     bytes32 private constant NONCE_DOMAIN = keccak256("6529STREAM_NATIVE_SALE_NONCE_V1");
     bytes32 private constant NAME_HASH = keccak256("6529StreamFixedPriceSale");
     bytes32 private constant VERSION_HASH = keccak256("1");
-    uint256 private constant SECP256K1_HALF_ORDER =
-        0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0;
-    uint256 private constant CONTRACT_SIGNATURE_GAS = 100_000;
-    bytes4 private constant ERC1271_MAGIC = 0x1626ba7e;
 
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
@@ -219,44 +216,7 @@ contract StreamFixedPriceSaleAdapter is
         private
         view
     {
-        if (signer.code.length == 0) {
-            bytes32 r;
-            bytes32 s;
-            uint8 v;
-            if (signature.length == 65) {
-                assembly ("memory-safe") {
-                    r := calldataload(signature.offset)
-                    s := calldataload(add(signature.offset, 32))
-                    v := byte(0, calldataload(add(signature.offset, 64)))
-                }
-            } else if (signature.length == 64) {
-                bytes32 vs;
-                assembly ("memory-safe") {
-                    r := calldataload(signature.offset)
-                    vs := calldataload(add(signature.offset, 32))
-                }
-                s = vs & bytes32(type(uint256).max >> 1);
-                v = uint8(uint256(vs) >> 255) + 27;
-            } else {
-                revert InvalidSaleSignature(signer);
-            }
-            if (
-                uint256(s) > SECP256K1_HALF_ORDER || (v != 27 && v != 28)
-                    || ecrecover(digest, v, r, s) != signer
-            ) revert InvalidSaleSignature(signer);
-            return;
-        }
-        bytes memory payload = abi.encodeWithSelector(ERC1271_MAGIC, digest, signature);
-        bool ok;
-        uint256 result;
-        uint256 gasLimit = CONTRACT_SIGNATURE_GAS;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            ok := staticcall(gasLimit, signer, add(payload, 32), mload(payload), ptr, 32)
-            ok := and(ok, eq(returndatasize(), 32))
-            result := mload(ptr)
-        }
-        if (!ok || result != uint256(uint32(ERC1271_MAGIC)) << 224) {
+        if (!StreamSaleSignatures.isValid(signer, digest, signature)) {
             revert InvalidSaleSignature(signer);
         }
     }
