@@ -8,14 +8,21 @@ import {
 } from "./StreamCorePermanentTarget.t.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./mocks/MockStreamEntropyProvider.sol";
+import "./mocks/MockVRFCoordinatorV2Plus.sol";
+import "../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../smart-contracts/core/StreamCore.sol";
 import "../smart-contracts/core/StreamCoreExternalReads.sol";
 import "../smart-contracts/interfaces/stream/IStreamMintManager.sol";
 
+interface EntropyGasMeasurementVm {
+    function cool(address account) external;
+}
+
 /// @notice Domain tests use the real permanent Core; only external actors/registry are fixtures.
 contract StreamEntropyMetadataTest is CharacterizationTestBase {
+    event NativeVRFCallbackGasMeasured(uint256 gasUsed);
     bytes32 private constant MANAGER =
         0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2;
     bytes32 private constant ENTROPY =
@@ -49,9 +56,13 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         gasConfigs[1] = StreamCore.GasParameterGenesisConfig(
             0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7, 2910000, 1460000, 1
         );
+        // Metadata includes JSON escaping and Base64 HTML. This fixture grants 2m router gas;
+        // release sizing must measure the largest allowed artist script and token data separately.
         gasConfigs[2] = StreamCore.GasParameterGenesisConfig(
             0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93, 2000000, 250000, 1
         );
+        // Cold first registration writes coordinator-owned identity; Core's atomic mint must
+        // provide at least the measured registration envelope. This product fixture grants 200k.
         gasConfigs[3] = StreamCore.GasParameterGenesisConfig(
             0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17, 200000, 120000, 2
         );
@@ -302,6 +313,45 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         string memory json = router.tokenMetadataJSON(address(core), id);
         string memory animation = abi.decode(vm.parseJson(json, ".animation_url"), (string));
         require(bytes(animation).length > 100, "actual onchain HTML");
+    }
+
+    function testRealCoreNativeVRFRequestCallbackAndFinalMetadata() public {
+        MockVRFCoordinatorV2Plus upstream = new MockVRFCoordinatorV2Plus();
+        StreamEntropyProviderVRF vrf = new StreamEntropyProviderVRF(
+            StreamEntropyProviderVRF.Config({
+                coordinator: address(entropy),
+                authority: address(this),
+                vrfCoordinator: address(upstream),
+                subscriptionId: 1,
+                keyHash: keccak256("VRF key"),
+                requestConfirmations: 3,
+                callbackGasLimit: 500000,
+                maximumCallbackGasLimit: 2500000,
+                nativePayment: true
+            }),
+            MANIFEST,
+            "ipfs://local-vrf",
+            MANIFEST
+        );
+        entropy.configureCollection(1, address(vrf), keccak256("collection-salt"), true, 10);
+        uint256 tokenId = _mint();
+        entropy.requestEntropy(tokenId);
+        _assertState(tokenId, "pending");
+        // Simulate a later upstream callback transaction with cold accounts and storage slots.
+        EntropyGasMeasurementVm(address(vm)).cool(address(vrf));
+        EntropyGasMeasurementVm(address(vm)).cool(address(entropy));
+        EntropyGasMeasurementVm(address(vm)).cool(address(core));
+        (bool callbackSucceeded, uint256 gasUsed) = upstream.fulfill(1, 42);
+        require(callbackSucceeded, "actual provider callback budget");
+        _assertState(tokenId, "final");
+        (bytes32 seed, bool finalized) = entropy.tokenSeed(tokenId);
+        require(
+            finalized && seed != 0 && entropy.pendingRequestCount() == 0, "current Core finalized"
+        );
+        // The complete adapter persistence + coordinator + Core refresh callback must fit below
+        // two-thirds of 500k, reserving headroom. This is local evidence, not fork-repricing proof.
+        require(gasUsed < 333333, "VRF callback headroom");
+        emit NativeVRFCallbackGasMeasured(gasUsed);
     }
 
     function _mint() private returns (uint256 id) {
