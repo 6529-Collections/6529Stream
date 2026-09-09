@@ -9,6 +9,7 @@ import "../interfaces/stream/IStreamMetadataRouter.sol";
 import "../interfaces/stream/IStreamMintLedger.sol";
 import "../interfaces/stream/IStreamMintManager.sol";
 import "../interfaces/stream/IStreamModuleRegistry.sol";
+import "../interfaces/stream/IStreamRoyaltyResolver.sol";
 import "../interfaces/stream/IStreamSystemManifest.sol";
 import "./StreamCoreReadBuffer.sol";
 
@@ -152,7 +153,7 @@ library StreamCoreExternalReads {
             return (true, _MODULE_ARTWORK_FINALITY_RECOVERY, _INTERFACE_ARTWORK_FINALITY_RECOVERY);
         }
         if (pointerType == _POINTER_ROYALTY_RESOLVER) {
-            return (true, _MODULE_REVENUE_RESOLVER, bytes4(0));
+            return (true, _MODULE_REVENUE_RESOLVER, type(IStreamRoyaltyResolver).interfaceId);
         }
         if (pointerType == _POINTER_ENTROPY_COORDINATOR) {
             return (true, pointerType, type(IStreamEntropyCoordinator).interfaceId);

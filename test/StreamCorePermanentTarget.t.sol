@@ -671,7 +671,7 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         _expectInvalidPointerUpdate(_POINTER_METADATA_ROUTER, address(candidate));
     }
 
-    function testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled() public {
+    function testUnresolvedArtistInterfaceCannotBeInstalled() public {
         PermanentTargetMetadataRouter candidate = new PermanentTargetMetadataRouter();
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -682,18 +682,6 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
             address(_core),
             abi.encodeCall(
                 _core.updateSatellitePointer, (_POINTER_ARTIST_REGISTRY, address(candidate))
-            )
-        );
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                StreamCore.SatellitePointerInterfaceUnresolved.selector, _POINTER_ROYALTY_RESOLVER
-            )
-        );
-        _executor.execute(
-            address(_core),
-            abi.encodeCall(
-                _core.updateSatellitePointer, (_POINTER_ROYALTY_RESOLVER, address(candidate))
             )
         );
     }
