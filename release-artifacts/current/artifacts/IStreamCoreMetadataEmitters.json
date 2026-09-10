@@ -1,0 +1,300 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "emitBatchMetadataUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "emitContractURIUpdated",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "emitMetadataUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchMetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "MetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "StreamMetadataRefresh",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "BatchMetadataUpdate",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "MetadataUpdate",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "StreamMetadataRefresh",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitBatchMetadataUpdate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "emitContractURIUpdated",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitMetadataUpdate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "emitBatchMetadataUpdate(uint256,uint256,bytes32)": {
+            "notice": "Emits metadata invalidation for an inclusive token identifier range."
+          },
+          "emitContractURIUpdated()": {
+            "notice": "Emits the collection-level ERC-7572 invalidation from an authorized component."
+          },
+          "emitMetadataUpdate(uint256,bytes32)": {
+            "notice": "Emits a token metadata invalidation from an authorized metadata component."
+          }
+        },
+        "notice": "Authorized metadata invalidation events emitted from Core.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol": "IStreamCoreMetadataEmitters"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol": {
+        "keccak256": "0x3a6937f2ef05829c763bca8150cef1cbd38013667828df2a2c611003a2341a26",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://d536810a5f460d77b6a155d71c658353653dd74f7dffc45cfded637d2061c2c2",
+          "dweb:/ipfs/QmSYwHTWyDDhk2CbswKWYMRtE7xLzEaC8QAvAfbHTDeevv"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "emitBatchMetadataUpdate(uint256,uint256,bytes32)": "908c18bd",
+    "emitContractURIUpdated()": "7f377036",
+    "emitMetadataUpdate(uint256,bytes32)": "b826aa0c"
+  }
+}

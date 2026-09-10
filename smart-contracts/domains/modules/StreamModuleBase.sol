@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/ERC165.sol";
-import "../../interfaces/stream/IStreamModule.sol";
+import "../../interfaces/stream/modules/IStreamModule.sol";
 
 /// @notice Abstract adoption base for the canonical [LTA-MODULE-ID] module
 ///         identity surface (`docs/stream-long-term-architecture.md`).

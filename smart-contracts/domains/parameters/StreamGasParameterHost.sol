@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamGasParameterHost.sol";
-import "../../interfaces/stream/IStreamGovernedParameterAuthority.sol";
+import "../../interfaces/stream/parameters/IStreamGasParameterHost.sol";
+import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
 
 /// @notice Reusable launch-v1 Governed Gas Parameter host.
 /// @dev The parameter inventory is fixed during construction. Values may only

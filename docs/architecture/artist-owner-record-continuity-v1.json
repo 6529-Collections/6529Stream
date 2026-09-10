@@ -10,47 +10,47 @@
     {
       "id": "adr_0023",
       "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
-      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+      "sha256": "f2a894262aeeb35abf6d6bce591b7474cfbc17655591386223be6e7c706fea3b"
     },
     {
       "id": "owner_state_foundation",
       "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.json",
-      "sha256": "94fde0bdb326920a2528fbf0cb7f3f4923421915be53fadbb2aaf1c8e360ee91"
+      "sha256": "2b4841ab5544c78bc64c5dea088d104b248bc2e0c3fc34fb13573ace80987e5a"
     },
     {
       "id": "record_event_correction",
       "path": "docs/architecture/artist-record-event-reconstruction-correction-v1.json",
-      "sha256": "bbf4d6685bba7aa71309d41ea48c8a87c53fda058a46418788c5389d609d778a"
+      "sha256": "cbd235ecd06edf49f84a67d3130fa47fe99fcbab3d66431ba6edf2014dcdef7b"
     },
     {
       "id": "shared_mechanics",
       "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
-      "sha256": "a631aed2a423a5aebb83e709151abe77cc2c5cc78c9354943b64e4b7a6116206"
+      "sha256": "1e8da06698d400ec4e526507551fc163513721d57ca3233c83a92c70130e41da"
     },
     {
       "id": "semantic_owner_matrix",
       "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
-      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+      "sha256": "f76fc366a0a62e8c79ea064f2a1efc2f932ce6f3be86b8917ee7828dcb8ddf90"
     },
     {
       "id": "archive_v2_implementation",
       "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
-      "sha256": "1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778"
+      "sha256": "52cb15cd2f26c263b8a02b7c089f693f2148073c85b036a96b0de30a94ff8ffb"
     },
     {
       "id": "archive_v2_interface",
-      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
-      "sha256": "2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+      "path": "smart-contracts/interfaces/stream/artist/IStreamArtistArchiveV2.sol",
+      "sha256": "a85028dcf76714692c4904380b44fc757e19a22bf1c9e4d6bacd5068c2786133"
     },
     {
       "id": "registry_v2_implementation",
       "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
-      "sha256": "038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+      "sha256": "3df9ce6121e6aa19a9a2bc7775d5067233d477450fcacadd23cc982a0bb84758"
     },
     {
       "id": "registry_v2_interface",
-      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
-      "sha256": "6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+      "path": "smart-contracts/interfaces/stream/artist/IStreamArtistRegistryV2.sol",
+      "sha256": "5b3508e9100ebfefadfa4b5bccaf241f4d6ecd74133b9b5638add1f5620dd56f"
     }
   ],
   "selected_shape": {
@@ -432,5 +432,5 @@
     "deployment_authorized": false,
     "readiness_credit": false
   },
-  "semantic_digest": "sha256:541dff7e0ba5c0eb5273640b1ab3f6ef9d75a49a9b1b2d0194f6b538d14228e1"
+  "semantic_digest": "sha256:ec4fedf08dd4a4a8493b51933a50421beefac9741e290110d665ab43556bd2a4"
 }

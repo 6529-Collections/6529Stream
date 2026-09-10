@@ -24,13 +24,27 @@
       "maxItems": 7,
       "uniqueItems": true,
       "prefixItems": [
-        {"const": "scripts/generate_risk_register.py"},
-        {"const": "scripts/generate_release_notes.py"},
-        {"const": "scripts/generate_release_manifest.py"},
-        {"const": "scripts/generate_bytecode_release_proof.py"},
-        {"const": "scripts/generate_release_candidate_lockfile.py"},
-        {"const": "scripts/generate_release_checksums.py"},
-        {"const": "scripts/verify_release_artifacts.py"}
+        {
+          "const": "tools/security/generate_risk_register.py"
+        },
+        {
+          "const": "tools/release/generate_release_notes.py"
+        },
+        {
+          "const": "tools/release/generate_release_manifest.py"
+        },
+        {
+          "const": "tools/build/generate_bytecode_release_proof.py"
+        },
+        {
+          "const": "tools/release/generate_release_candidate_lockfile.py"
+        },
+        {
+          "const": "tools/release/generate_release_checksums.py"
+        },
+        {
+          "const": "tools/build/verify_release_artifacts.py"
+        }
       ],
       "items": false
     },
@@ -40,80 +54,906 @@
       "maxItems": 31,
       "uniqueItems": true,
       "prefixItems": [
-        {"const": "Crypto.Hash"},
-        {"const": "__future__"},
-        {"const": "argparse"},
-        {"const": "ast"},
-        {"const": "collections"},
-        {"const": "contextlib"},
-        {"const": "copy"},
-        {"const": "datetime"},
-        {"const": "eth_hash.auto"},
-        {"const": "filecmp"},
-        {"const": "hashlib"},
-        {"const": "importlib"},
-        {"const": "importlib.util"},
-        {"const": "io"},
-        {"const": "json"},
-        {"const": "jsonschema"},
-        {"const": "jsonschema.exceptions"},
-        {"const": "math"},
-        {"const": "os"},
-        {"const": "pathlib"},
-        {"const": "re"},
-        {"const": "shlex"},
-        {"const": "shutil"},
-        {"const": "stat"},
-        {"const": "subprocess"},
-        {"const": "sys"},
-        {"const": "tempfile"},
-        {"const": "types"},
-        {"const": "typing"},
-        {"const": "unicodedata"},
-        {"const": "unittest"}
+        {
+          "const": "Crypto.Hash"
+        },
+        {
+          "const": "__future__"
+        },
+        {
+          "const": "argparse"
+        },
+        {
+          "const": "ast"
+        },
+        {
+          "const": "collections"
+        },
+        {
+          "const": "contextlib"
+        },
+        {
+          "const": "copy"
+        },
+        {
+          "const": "datetime"
+        },
+        {
+          "const": "eth_hash.auto"
+        },
+        {
+          "const": "filecmp"
+        },
+        {
+          "const": "hashlib"
+        },
+        {
+          "const": "importlib"
+        },
+        {
+          "const": "importlib.util"
+        },
+        {
+          "const": "io"
+        },
+        {
+          "const": "json"
+        },
+        {
+          "const": "jsonschema"
+        },
+        {
+          "const": "jsonschema.exceptions"
+        },
+        {
+          "const": "math"
+        },
+        {
+          "const": "os"
+        },
+        {
+          "const": "pathlib"
+        },
+        {
+          "const": "re"
+        },
+        {
+          "const": "shlex"
+        },
+        {
+          "const": "shutil"
+        },
+        {
+          "const": "stat"
+        },
+        {
+          "const": "subprocess"
+        },
+        {
+          "const": "sys"
+        },
+        {
+          "const": "tempfile"
+        },
+        {
+          "const": "types"
+        },
+        {
+          "const": "typing"
+        },
+        {
+          "const": "unicodedata"
+        },
+        {
+          "const": "unittest"
+        }
       ],
       "items": false
     },
     "reviewed_paths": {
       "type": "array",
-      "minItems": 34,
-      "maxItems": 34,
+      "minItems": 42,
+      "maxItems": 42,
       "uniqueItems": true,
       "prefixItems": [
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_admin_ceremony_evidence.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_artist_semantic_owner_matrix.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_changelog.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_drop_authorization_signing_evidence.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governance_action_policy.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_identifiers.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_governed_parameter_inventory.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_non_local_release_evidence.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_public_beta_evidence.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_record_family_authorization.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_release_evidence_issue_links.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_release_signatures.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_risk_register.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_signer_custody_readiness.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/check_slither_baseline.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_bytecode_release_proof.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_candidate_lockfile.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_checksums.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_manifest.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_release_notes.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/generate_risk_register.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/no_secret_scanner.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/release_evidence_paths.py"}, "role": {"const": "runtime"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_admin_ceremony_evidence.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_artist_semantic_owner_matrix.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_bytecode_release_proof.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_changelog_check.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_drop_authorization_signing_evidence.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_non_local_release_evidence.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_record_family_authorization.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_release_notes.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_release_signatures.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/test_signer_custody_readiness.py"}, "role": {"const": "focused-test"}}},
-        {"allOf": [{"$ref": "#/$defs/reviewedPath"}], "required": ["path", "role"], "properties": {"path": {"const": "scripts/verify_release_artifacts.py"}, "role": {"const": "runtime"}}}
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/build/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/build/generate_bytecode_release_proof.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/build/test_bytecode_release_proof.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/build/verify_release_artifacts.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/deployment/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/deployment/check_admin_ceremony_evidence.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/deployment/test_admin_ceremony_evidence.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/docs/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/docs/check_changelog.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/docs/test_changelog_check.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/check_artist_semantic_owner_matrix.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/check_governance_action_policy.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/check_governed_parameter_identifiers.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/check_governed_parameter_inventory.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/check_record_family_authorization.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/test_artist_semantic_owner_matrix.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/protocol/test_record_family_authorization.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_drop_authorization_signing_evidence.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_non_local_release_evidence.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_public_beta_evidence.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_release_evidence_issue_links.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_release_signatures.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/check_signer_custody_readiness.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/generate_release_candidate_lockfile.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/generate_release_checksums.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/generate_release_manifest.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/generate_release_notes.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/release_evidence_paths.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/test_drop_authorization_signing_evidence.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/test_non_local_release_evidence.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/test_release_notes.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/test_release_signatures.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/release/test_signer_custody_readiness.py"
+            },
+            "role": {
+              "const": "focused-test"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/security/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/security/check_risk_register.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/security/check_slither_baseline.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/security/generate_risk_register.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/shared/__init__.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/reviewedPath"
+            }
+          ],
+          "required": [
+            "path",
+            "role"
+          ],
+          "properties": {
+            "path": {
+              "const": "tools/shared/no_secret_scanner.py"
+            },
+            "role": {
+              "const": "runtime"
+            }
+          }
+        }
       ],
       "items": false
     }
@@ -134,7 +974,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^scripts/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\\.py$"
+          "pattern": "^(?:scripts|tools)/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\\.py$"
         },
         "role": {
           "enum": [

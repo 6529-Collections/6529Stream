@@ -80,10 +80,10 @@ rotation drill, and per-drop cancellation drill all complete or validated.
 ## Local Verification Commands
 
 ```sh
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 make check
 ```
 

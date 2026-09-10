@@ -46,12 +46,12 @@
     "monitoring_status": "not_available_local",
     "runbook": {
       "path": "docs/signer-custody-readiness.md",
-      "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3"
+      "sha256": "sha256:ac5657504d4e39576f0606f625c34bc6ee5e8fda9d673c2c463f743d567d6a0d"
     },
     "alerting_reference": "TBD",
     "incident_response_runbook": {
       "path": "docs/incident-response.md",
-      "sha256": "sha256:5e1015c9ea08cb3f194f30e3b83e3a35d97d9a75393c319c31a3d8ec07a50ef6"
+      "sha256": "sha256:2004634d01135ccd3a6806109e59f420bc258d22c3e8afb9a70c1ea9b3605ecf"
     },
     "signer_service_integration_status": "not_available_local"
   },

@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.dependency-artifact-manifest.v1",
-  "generated_by": "scripts/generate_dependency_artifact_manifest.py:1",
+  "generated_by": "tools/protocol/generate_dependency_artifact_manifest.py:1",
   "source": {
     "output": "release-artifacts/latest/dependency-artifact-manifest.json",
     "descriptor_dir": "release-artifacts/dependencies",

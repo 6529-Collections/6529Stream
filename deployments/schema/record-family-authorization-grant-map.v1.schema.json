@@ -461,7 +461,7 @@
                   "const": "smart-contracts/domains/metadata/StreamCollectionMetadata.sol"
                 },
                 "interface_path": {
-                  "const": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol"
+                  "const": "smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol"
                 }
               }
             }
@@ -481,7 +481,7 @@
                   "const": "smart-contracts/domains/preservation/StreamPreservationRecords.sol"
                 },
                 "interface_path": {
-                  "const": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol"
+                  "const": "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol"
                 }
               }
             }

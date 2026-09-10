@@ -51,18 +51,18 @@ Current source references:
 - The repository has no proxy, beacon, UUPS, diamond, or delegatecall-based
   upgrade system in first-party contracts.
 - `smart-contracts/core/StreamCore.sol`,
-  `smart-contracts/domains/mint/StreamDrops.sol`,
-  `smart-contracts/domains/mint/StreamMinter.sol`,
-  `smart-contracts/domains/auctions/AuctionContract.sol`,
+  `smart-contracts/domains/mint/legacy/StreamDrops.sol`,
+  `smart-contracts/domains/mint/legacy/StreamMinter.sol`,
+  `smart-contracts/domains/auctions/legacy/AuctionContract.sol`,
   `smart-contracts/domains/access/StreamAdmins.sol`,
   `smart-contracts/domains/revenue/StreamCuratorsPool.sol`, and randomizer contracts use
   constructors and ordinary contract addresses.
 - `smart-contracts/core/StreamCore.sol#updateContracts` can change several
   downstream contract references, including minter, randomizer, dependency
   registry, and curators-pool references.
-- `smart-contracts/domains/mint/StreamMinter.sol#updateContracts` can change the core,
+- `smart-contracts/domains/mint/legacy/StreamMinter.sol#updateContracts` can change the core,
   drops, and admins references.
-- `smart-contracts/domains/mint/StreamDrops.sol#updateTDHsigner` can change the drop signer,
+- `smart-contracts/domains/mint/legacy/StreamDrops.sol#updateTDHsigner` can change the drop signer,
   but ADR 0001 and ADR 0004 require a fuller signer lifecycle before public
   beta.
 - `smart-contracts/domains/access/StreamAdmins.sol` inherits `Ownable`; ADR 0004 requires the
@@ -493,11 +493,11 @@ Deployment and release work must add tests or scripted checks for:
 Intended test and script targets:
 
 - `script/Deploy.s.sol`
-- `script/RehearseDeployment.s.sol`
+- `script/legacy/RehearseDeployment.s.sol`
 - `script/VerifyDeployment.s.sol`
 - `test/StreamDeployment.t.sol`
 - `test/StreamDeploymentFork.t.sol`
-- `test/StreamDeploymentManifest.t.sol`
+- `test/regression/legacy/protocol/StreamDeploymentManifest.t.sol`
 - `test/StreamReleaseArtifacts.t.sol`
 - `docs/deployment.md`
 

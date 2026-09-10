@@ -12,17 +12,17 @@
     {
       "id": "adr_0023",
       "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
-      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+      "sha256": "f2a894262aeeb35abf6d6bce591b7474cfbc17655591386223be6e7c706fea3b"
     },
     {
       "id": "coordinator_source_gate",
       "path": "docs/architecture/artist-operation-coordinator-source-acceptance-gate.md",
-      "sha256": "df2f039ee0a8991cba38da084d2e41158bb857cfa005d8fcad45b30d592b727a"
+      "sha256": "ac74b8b2c3f4fff9ff51b4bc66ed4eba20befecbdf08a05412760288209ca20f"
     },
     {
       "id": "semantic_owner_matrix",
       "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
-      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+      "sha256": "f76fc366a0a62e8c79ea064f2a1efc2f932ce6f3be86b8917ee7828dcb8ddf90"
     },
     {
       "id": "semantic_owner_matrix_schema",
@@ -31,18 +31,18 @@
     },
     {
       "id": "semantic_owner_matrix_checker",
-      "path": "scripts/check_artist_semantic_owner_matrix.py",
-      "sha256": "75be5171655556711282de41a3feb909b0a9fdded45c565f66597d984427152b"
+      "path": "tools/protocol/check_artist_semantic_owner_matrix.py",
+      "sha256": "1ef144c2a3fd2e09d3e75c45f3784ef051ec81f7c28bc92876237165fb6d9ad6"
     },
     {
       "id": "semantic_owner_matrix_tests",
-      "path": "scripts/test_artist_semantic_owner_matrix.py",
-      "sha256": "126269436e56b83f9e996b9b1e0961ebac08740a38a8e9789c70c302a8b0654f"
+      "path": "tools/protocol/test_artist_semantic_owner_matrix.py",
+      "sha256": "e9c5cd604fc76f1d982a97df5c2a12a139cf714241ace5f0b39c1c2c9c3c8218"
     },
     {
       "id": "shared_mechanics_packet",
       "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
-      "sha256": "a631aed2a423a5aebb83e709151abe77cc2c5cc78c9354943b64e4b7a6116206"
+      "sha256": "1e8da06698d400ec4e526507551fc163513721d57ca3233c83a92c70130e41da"
     },
     {
       "id": "shared_mechanics_schema",
@@ -51,33 +51,33 @@
     },
     {
       "id": "shared_mechanics_checker",
-      "path": "scripts/check_artist_operation_shared_mechanics_freeze.py",
-      "sha256": "d63f9e4193a9d8e382eaf994b69d4a5d1e3e5e402bb3d42c762f611e9eb77762"
+      "path": "tools/protocol/check_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "a2e0100707ac93b5373969032b1fd34273f31c67a5f6aea02b5ca99a776d19eb"
     },
     {
       "id": "shared_mechanics_tests",
-      "path": "scripts/test_artist_operation_shared_mechanics_freeze.py",
-      "sha256": "0dff4eefa8e110f36c17b08b24a38f557ef9893ef12ea2f8d5e00da7406da54f"
+      "path": "tools/protocol/test_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "b85c5fe3901869554eca5935f359b06c17f33a728fc49d6bac908fbfaaf3e5e7"
     },
     {
       "id": "archive_v2_implementation",
       "path": "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
-      "sha256": "1228ef5451258927b8141a842c437d4738f41fb66bbfff57e805919252552778"
+      "sha256": "52cb15cd2f26c263b8a02b7c089f693f2148073c85b036a96b0de30a94ff8ffb"
     },
     {
       "id": "archive_v2_interface",
-      "path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
-      "sha256": "2e488c13527383b63864eb484203e2fed6349def941043ca9435cc728a29a80e"
+      "path": "smart-contracts/interfaces/stream/artist/IStreamArtistArchiveV2.sol",
+      "sha256": "a85028dcf76714692c4904380b44fc757e19a22bf1c9e4d6bacd5068c2786133"
     },
     {
       "id": "registry_v2_implementation",
       "path": "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
-      "sha256": "038560c0a8811b7ed4a816d011813d9c529e16091bd646f153c63390578a2430"
+      "sha256": "3df9ce6121e6aa19a9a2bc7775d5067233d477450fcacadd23cc982a0bb84758"
     },
     {
       "id": "registry_v2_interface",
-      "path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
-      "sha256": "6b56d095a7abdde99967c18ebef1c089ef91e9cff1c5477c2c1cc5d601059a54"
+      "path": "smart-contracts/interfaces/stream/artist/IStreamArtistRegistryV2.sol",
+      "sha256": "5b3508e9100ebfefadfa4b5bccaf241f4d6ecd74133b9b5638add1f5620dd56f"
     }
   ],
   "selected_foundation": {

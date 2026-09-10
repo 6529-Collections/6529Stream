@@ -8,7 +8,7 @@
   "block_or_reference": "template-only audit report, remediation issue set, retest reference, or release note",
   "command_or_source_system": "template-only audit tracker, public report, remediation review, or reviewer source",
   "retained_path": "release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md",
-  "sha256": "sha256:9848ca4fc78967db6bd0030057c7690c7d9b31fe91e4dde973c2834df9d8901b",
+  "sha256": "sha256:7aeeabfbf50ca9567ed1fc533ebef62831d08a95fc9654e560a678a6a7525e56",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

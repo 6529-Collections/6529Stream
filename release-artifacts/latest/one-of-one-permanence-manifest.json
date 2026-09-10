@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1",
-  "generated_by": "scripts/generate_one_of_one_permanence_manifest.py:1",
+  "generated_by": "tools/protocol/generate_one_of_one_permanence_manifest.py:1",
   "source": {
     "output": "release-artifacts/latest/one-of-one-permanence-manifest.json",
     "descriptor_dir": "release-artifacts/permanence",
@@ -10,8 +10,8 @@
     {
       "descriptor": {
         "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-        "sha256": "sha256:d7d28ba99ae2b3772a8904bef970e77dae124273e443fcd888ae7f59393f14be",
-        "size_bytes": 8289,
+        "sha256": "sha256:3e5a004a30cd646ae6cc0f440827e58bcdae5edfd020c9b91bda6023338f30fe",
+        "size_bytes": 8418,
         "schema_version": "6529stream.one-of-one-permanence-package.v1"
       },
       "package_id": "one-of-one-permanence-template",

@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1",
-  "generated_by": "scripts/generate_one_of_one_provenance_manifest.py:1",
+  "generated_by": "tools/protocol/generate_one_of_one_provenance_manifest.py:1",
   "source": {
     "output": "release-artifacts/latest/one-of-one-provenance-manifest.json",
     "descriptor_dir": "release-artifacts/provenance",
@@ -10,7 +10,7 @@
     {
       "descriptor": {
         "path": "release-artifacts/provenance/one-of-one-provenance-template.provenance.json",
-        "sha256": "sha256:f40461466dea15345e710a353cd6a72d40fcb8a24af77eba201dc3d56af2644d",
+        "sha256": "sha256:0e68361f49f5269fd3b4249ea0a7d2a06f776093e94d134651d8b9e272e4ba69",
         "size_bytes": 6227,
         "schema_version": "6529stream.one-of-one-provenance-manifest.v1"
       },

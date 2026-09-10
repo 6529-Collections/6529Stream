@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamMintLedger.sol";
-import "../../interfaces/stream/IStreamMintManager.sol";
+import "../../interfaces/stream/mint/IStreamMintLedger.sol";
+import "../../interfaces/stream/mint/IStreamMintManager.sol";
 
 /// @notice Canonical batch-operation identity derivation for StreamMintManager.
 /// @dev Kept in a linked library so the manager remains below the EIP-170 runtime limit.

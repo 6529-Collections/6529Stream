@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.dependency-provenance-attestation.v1",
-  "generated_by": "scripts/generate_dependency_provenance_attestation.py:1",
+  "generated_by": "tools/protocol/generate_dependency_provenance_attestation.py:1",
   "release_status": {
     "project": "6529Stream",
     "status": "pre_audit_local_baseline",
@@ -19,21 +19,21 @@
     "output": "release-artifacts/latest/dependency-provenance-attestation.json",
     "dependency_artifact_manifest": {
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
-      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
-      "size_bytes": 1701
+      "sha256": "sha256:e0e218bc17d6b71db912fd30d1e7a5d7be637cd9c8a44c29362b8ed29bea6978",
+      "size_bytes": 1708
     },
     "descriptor_dir": "release-artifacts/dependencies",
     "descriptor_count": 1
   },
   "validation": {
     "commands": [
-      "python scripts/test_dependency_artifact_manifest.py",
-      "python scripts/generate_dependency_artifact_manifest.py --check",
-      "python scripts/test_dependency_provenance_attestation.py",
-      "python scripts/generate_dependency_provenance_attestation.py --check",
-      "python scripts/generate_release_manifest.py --check",
-      "python scripts/generate_release_checksums.py --check",
-      "python scripts/verify_release_artifacts.py"
+      "python -m tools.protocol.test_dependency_artifact_manifest",
+      "python -m tools.protocol.generate_dependency_artifact_manifest --check",
+      "python -m tools.protocol.test_dependency_provenance_attestation",
+      "python -m tools.protocol.generate_dependency_provenance_attestation --check",
+      "python -m tools.release.generate_release_manifest --check",
+      "python -m tools.release.generate_release_checksums --check",
+      "python -m tools.build.verify_release_artifacts"
     ],
     "no_secret_policy": "attestation input and output reject secret-shaped values"
   },

@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.custom-error-catalog.v1",
-  "generated_by": "scripts/generate_custom_error_catalog.py:1",
+  "generated_by": "tools/build/generate_custom_error_catalog.py:1",
   "source": {
     "protocol_surface_report": "release-artifacts/latest/protocol-surface-report.json",
     "output": "release-artifacts/latest/custom-error-catalog.json"
@@ -168,9 +168,9 @@
       "traceability": {
         "source_artifact": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -196,9 +196,9 @@
       "traceability": {
         "source_artifact": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -236,9 +236,9 @@
       "traceability": {
         "source_artifact": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -264,9 +264,9 @@
       "traceability": {
         "source_artifact": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -298,9 +298,9 @@
       "traceability": {
         "source_artifact": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -308,7 +308,7 @@
     {
       "id": "NextGenRandomizerRNG:EmptyRandomWords(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "EmptyRandomWords",
       "signature": "EmptyRandomWords(uint256)",
       "selector": "0xc488549d",
@@ -326,9 +326,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -336,7 +336,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomizerRequestReentrancy()",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomizerRequestReentrancy",
       "signature": "RandomizerRequestReentrancy()",
       "selector": "0x7a189929",
@@ -347,9 +347,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -357,7 +357,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomnessPostProcessingRetryLimitReached",
       "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "selector": "0x5e315374",
@@ -387,9 +387,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -397,7 +397,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestAlreadyExists(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomnessRequestAlreadyExists",
       "signature": "RandomnessRequestAlreadyExists(uint256)",
       "selector": "0xbc1cb82b",
@@ -415,9 +415,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -425,7 +425,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomnessRequestNotFailedPostProcessing",
       "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "selector": "0x8b6fdc0a",
@@ -449,9 +449,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -459,7 +459,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomnessRequestNotFulfilled",
       "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
       "selector": "0xfae276cd",
@@ -483,9 +483,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -493,7 +493,7 @@
     {
       "id": "NextGenRandomizerRNG:RandomnessRequestNotPending(uint256,uint8)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "RandomnessRequestNotPending",
       "signature": "RandomnessRequestNotPending(uint256,uint8)",
       "selector": "0x685e6fed",
@@ -517,9 +517,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -527,7 +527,7 @@
     {
       "id": "NextGenRandomizerRNG:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "StaleRandomnessRequest",
       "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "selector": "0x95d22d86",
@@ -569,9 +569,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -579,7 +579,7 @@
     {
       "id": "NextGenRandomizerRNG:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "TokenRandomnessRequestAlreadyExists",
       "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "selector": "0xa68fbeff",
@@ -603,9 +603,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -613,7 +613,7 @@
     {
       "id": "NextGenRandomizerRNG:UnknownRandomnessRequest(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "UnknownRandomnessRequest",
       "signature": "UnknownRandomnessRequest(uint256)",
       "selector": "0xab2112a6",
@@ -631,9 +631,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -641,7 +641,7 @@
     {
       "id": "NextGenRandomizerRNG:WrongRandomnessProvider(uint256,address,address)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "WrongRandomnessProvider",
       "signature": "WrongRandomnessProvider(uint256,address,address)",
       "selector": "0xc1ae599b",
@@ -671,9 +671,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -681,7 +681,7 @@
     {
       "id": "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "WrongRandomnessTokenCollection",
       "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "selector": "0xd6d556a3",
@@ -717,9 +717,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -727,7 +727,7 @@
     {
       "id": "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
       "contract": "NextGenRandomizerRNG",
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "name": "ZeroDerivedSeed",
       "signature": "ZeroDerivedSeed(uint256)",
       "selector": "0x490dd684",
@@ -745,9 +745,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -755,7 +755,7 @@
     {
       "id": "NextGenRandomizerVRF:EmptyRandomWords(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "EmptyRandomWords",
       "signature": "EmptyRandomWords(uint256)",
       "selector": "0xc488549d",
@@ -773,9 +773,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -783,7 +783,7 @@
     {
       "id": "NextGenRandomizerVRF:OnlyCoordinatorCanFulfill(address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "OnlyCoordinatorCanFulfill",
       "signature": "OnlyCoordinatorCanFulfill(address,address)",
       "selector": "0x1cf993f4",
@@ -807,8 +807,8 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -816,7 +816,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "RandomnessPostProcessingRetryLimitReached",
       "signature": "RandomnessPostProcessingRetryLimitReached(uint256,uint256,uint256)",
       "selector": "0x5e315374",
@@ -846,9 +846,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -856,7 +856,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestAlreadyExists(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "RandomnessRequestAlreadyExists",
       "signature": "RandomnessRequestAlreadyExists(uint256)",
       "selector": "0xbc1cb82b",
@@ -874,9 +874,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -884,7 +884,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "RandomnessRequestNotFailedPostProcessing",
       "signature": "RandomnessRequestNotFailedPostProcessing(uint256,uint8)",
       "selector": "0x8b6fdc0a",
@@ -908,9 +908,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -918,7 +918,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotFulfilled(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "RandomnessRequestNotFulfilled",
       "signature": "RandomnessRequestNotFulfilled(uint256,uint8)",
       "selector": "0xfae276cd",
@@ -942,9 +942,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -952,7 +952,7 @@
     {
       "id": "NextGenRandomizerVRF:RandomnessRequestNotPending(uint256,uint8)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "RandomnessRequestNotPending",
       "signature": "RandomnessRequestNotPending(uint256,uint8)",
       "selector": "0x685e6fed",
@@ -976,9 +976,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -986,7 +986,7 @@
     {
       "id": "NextGenRandomizerVRF:StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "StaleRandomnessRequest",
       "signature": "StaleRandomnessRequest(uint256,uint256,uint256,address,address)",
       "selector": "0x95d22d86",
@@ -1028,9 +1028,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1038,7 +1038,7 @@
     {
       "id": "NextGenRandomizerVRF:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "TokenRandomnessRequestAlreadyExists",
       "signature": "TokenRandomnessRequestAlreadyExists(uint256,uint256)",
       "selector": "0xa68fbeff",
@@ -1062,9 +1062,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1072,7 +1072,7 @@
     {
       "id": "NextGenRandomizerVRF:UnknownRandomnessRequest(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "UnknownRandomnessRequest",
       "signature": "UnknownRandomnessRequest(uint256)",
       "selector": "0xab2112a6",
@@ -1090,9 +1090,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1100,7 +1100,7 @@
     {
       "id": "NextGenRandomizerVRF:WrongRandomnessProvider(uint256,address,address)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "WrongRandomnessProvider",
       "signature": "WrongRandomnessProvider(uint256,address,address)",
       "selector": "0xc1ae599b",
@@ -1130,9 +1130,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1140,7 +1140,7 @@
     {
       "id": "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "WrongRandomnessTokenCollection",
       "signature": "WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
       "selector": "0xd6d556a3",
@@ -1176,9 +1176,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1186,7 +1186,7 @@
     {
       "id": "NextGenRandomizerVRF:ZeroDerivedSeed(uint256)",
       "contract": "NextGenRandomizerVRF",
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "name": "ZeroDerivedSeed",
       "signature": "ZeroDerivedSeed(uint256)",
       "selector": "0x490dd684",
@@ -1204,9 +1204,9 @@
       "traceability": {
         "source_artifact": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1232,10 +1232,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1267,10 +1267,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1314,10 +1314,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1361,10 +1361,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1396,10 +1396,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1431,10 +1431,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1466,9 +1466,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1500,10 +1500,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1529,9 +1529,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1557,10 +1557,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1586,10 +1586,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1608,10 +1608,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistArchiveV2.sol/StreamArtistArchiveV2.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistArchiveV2.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistArchiveV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1649,9 +1649,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistRegistryV2.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistRegistryV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1683,9 +1683,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistRegistryV2.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistRegistryV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1711,9 +1711,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistRegistryV2.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistRegistryV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1739,9 +1739,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamArtistRegistryV2.sol/StreamArtistRegistryV2.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamArtistRegistryV2.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/unit/artist/StreamArtistRegistryV2.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1779,7 +1779,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1805,7 +1805,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1843,7 +1843,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1869,7 +1869,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1877,7 +1877,7 @@
     {
       "id": "StreamAuctions:ReentrancyGuardReentrantCall()",
       "contract": "StreamAuctions",
-      "source": "smart-contracts/domains/auctions/AuctionContract.sol",
+      "source": "smart-contracts/domains/auctions/legacy/AuctionContract.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -1888,8 +1888,8 @@
       "traceability": {
         "source_artifact": "out-release/AuctionContract.sol/StreamAuctions.json",
         "tests": [
-          "test/StreamPaymentsInvariant.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1921,8 +1921,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1954,8 +1954,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -1981,10 +1981,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2010,10 +2010,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2045,10 +2045,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2080,10 +2080,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2115,9 +2115,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2136,9 +2136,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2170,8 +2170,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2209,8 +2209,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2229,9 +2229,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2269,10 +2269,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2298,8 +2298,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2318,8 +2318,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2345,9 +2345,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2379,9 +2379,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2407,10 +2407,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2436,9 +2436,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2457,9 +2457,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamPauseControls.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/protocol/StreamPauseControls.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2491,10 +2491,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2532,10 +2532,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2567,10 +2567,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCollectionMetadata.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2602,8 +2602,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2622,8 +2622,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2649,8 +2649,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2676,8 +2676,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2709,8 +2709,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2754,8 +2754,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2793,8 +2793,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2826,9 +2826,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2860,9 +2860,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2888,8 +2888,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2933,8 +2933,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2960,8 +2960,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2987,9 +2987,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3015,8 +3015,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3042,8 +3042,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3062,9 +3062,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3083,8 +3083,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3103,8 +3103,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3123,9 +3123,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManager.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManager.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3144,8 +3144,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
-          "test/StreamPauseControls.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/protocol/StreamPauseControls.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3171,8 +3171,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3198,9 +3198,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3226,8 +3226,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3253,9 +3253,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3274,9 +3274,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRandomizerLifecycle.t.sol",
-          "test/StreamRandomizerAdversarial.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol",
+          "test/unit/entropy/StreamRandomizerAdversarial.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3302,8 +3302,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3329,8 +3329,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3356,8 +3356,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3389,8 +3389,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3409,8 +3409,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3429,8 +3429,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3449,8 +3449,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3469,8 +3469,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3489,8 +3489,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3516,8 +3516,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3543,8 +3543,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3563,9 +3563,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3584,8 +3584,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3617,8 +3617,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3637,9 +3637,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3658,8 +3658,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3678,8 +3678,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3705,9 +3705,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamMintManagerCoreHooks.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/mint/StreamMintManagerCoreHooks.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3726,8 +3726,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3746,9 +3746,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManagerCoreHooks.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManagerCoreHooks.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3767,9 +3767,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManagerCoreHooks.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManagerCoreHooks.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3788,9 +3788,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManagerCoreHooks.t.sol"
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManagerCoreHooks.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3809,8 +3809,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3836,8 +3836,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3863,8 +3863,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3890,8 +3890,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3917,8 +3917,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3944,8 +3944,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3971,8 +3971,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCore.sol/StreamCore.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3991,8 +3991,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamCuratorsPool.sol/StreamCuratorsPool.json",
         "tests": [
-          "test/StreamPaymentsInvariant.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4000,7 +4000,7 @@
     {
       "id": "StreamDrops:ReentrancyGuardReentrantCall()",
       "contract": "StreamDrops",
-      "source": "smart-contracts/domains/mint/StreamDrops.sol",
+      "source": "smart-contracts/domains/mint/legacy/StreamDrops.sol",
       "name": "ReentrancyGuardReentrantCall",
       "signature": "ReentrancyGuardReentrantCall()",
       "selector": "0x3ee5aeb5",
@@ -4011,8 +4011,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamDrops.sol/StreamDrops.json",
         "tests": [
-          "test/StreamPaymentsInvariant.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4038,7 +4038,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4076,7 +4076,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4108,7 +4108,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4134,7 +4134,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4178,7 +4178,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4210,7 +4210,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4236,7 +4236,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4262,7 +4262,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4288,7 +4288,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4314,7 +4314,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4352,7 +4352,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4378,7 +4378,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4404,7 +4404,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4436,7 +4436,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4455,7 +4455,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4481,7 +4481,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
-          "test/StreamMintLedger.t.sol"
+          "test/unit/mint/StreamMintLedger.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4507,8 +4507,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4534,9 +4534,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManager.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManager.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4568,8 +4568,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4595,8 +4595,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4622,8 +4622,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4649,8 +4649,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4676,9 +4676,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManager.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/mint/StreamMintManager.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4704,8 +4704,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4737,8 +4737,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4776,8 +4776,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4796,8 +4796,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4829,8 +4829,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4862,8 +4862,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4901,8 +4901,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4934,8 +4934,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -4967,8 +4967,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5000,8 +5000,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5033,8 +5033,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5066,8 +5066,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5105,8 +5105,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5132,8 +5132,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5159,8 +5159,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5192,8 +5192,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5219,8 +5219,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5252,8 +5252,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5279,8 +5279,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5312,8 +5312,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5345,8 +5345,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5372,8 +5372,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5405,8 +5405,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5425,8 +5425,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5458,8 +5458,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5491,8 +5491,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5530,8 +5530,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5569,8 +5569,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5602,8 +5602,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5635,8 +5635,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5668,8 +5668,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5688,8 +5688,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5727,8 +5727,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5754,8 +5754,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5781,8 +5781,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5808,8 +5808,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5847,8 +5847,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5880,8 +5880,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
         "tests": [
-          "test/StreamMintManager.t.sol",
-          "test/StreamMintModuleRegistry.t.sol"
+          "test/regression/legacy/mint/StreamMintManager.t.sol",
+          "test/unit/mint/StreamMintModuleRegistry.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5907,10 +5907,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5936,10 +5936,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5971,9 +5971,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -5992,9 +5992,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6032,10 +6032,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6061,9 +6061,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6082,9 +6082,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6116,10 +6116,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6138,8 +6138,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6158,9 +6158,9 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamPauseControls.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/protocol/StreamPauseControls.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6192,10 +6192,10 @@
       "traceability": {
         "source_artifact": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
         "tests": [
-          "test/StreamMetadataCrossInvariants.t.sol",
-          "test/StreamMetadataUtf8.t.sol",
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamPreservationRecords.t.sol"
+          "test/regression/legacy/metadata/StreamMetadataCrossInvariants.t.sol",
+          "test/regression/legacy/metadata/StreamMetadataUtf8.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/preservation/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6227,7 +6227,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6259,7 +6259,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6291,7 +6291,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6335,7 +6335,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6397,7 +6397,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6429,7 +6429,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6455,7 +6455,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6481,7 +6481,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6507,7 +6507,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6539,7 +6539,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6577,7 +6577,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6609,7 +6609,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6628,7 +6628,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6654,7 +6654,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6680,8 +6680,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6707,7 +6707,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6739,7 +6739,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6771,7 +6771,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6797,7 +6797,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6823,7 +6823,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6842,7 +6842,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6868,7 +6868,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6894,7 +6894,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6920,7 +6920,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6946,8 +6946,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/regression/legacy/revenue/StreamRoyalty.t.sol",
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -6985,7 +6985,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7023,7 +7023,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7049,7 +7049,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7075,7 +7075,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7101,7 +7101,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
-          "test/StreamPrimarySaleSettlement.t.sol"
+          "test/unit/revenue/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7133,7 +7133,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7159,7 +7159,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7185,7 +7185,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7211,7 +7211,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7237,7 +7237,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7263,7 +7263,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7295,7 +7295,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7321,7 +7321,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7340,7 +7340,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7372,7 +7372,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7404,7 +7404,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7436,7 +7436,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7474,7 +7474,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7530,7 +7530,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7549,7 +7549,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7581,7 +7581,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7613,7 +7613,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7645,7 +7645,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7683,7 +7683,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7702,7 +7702,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7728,8 +7728,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7767,8 +7767,8 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamCoreCustomErrors.t.sol"
+          "test/regression/legacy/protocol/StreamCustomErrorNegative.t.sol",
+          "test/regression/legacy/core/StreamCoreCustomErrors.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7794,7 +7794,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -7813,7 +7813,7 @@
       "traceability": {
         "source_artifact": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
         "tests": [
-          "test/StreamSplitWallet.t.sol"
+          "test/unit/revenue/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

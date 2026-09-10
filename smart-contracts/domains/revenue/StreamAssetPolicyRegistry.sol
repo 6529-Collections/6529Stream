@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamAssetPolicyRegistry.sol";
+import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
 /// @notice Deployment-wide allowlist for approved standard ERC-20 split assets.

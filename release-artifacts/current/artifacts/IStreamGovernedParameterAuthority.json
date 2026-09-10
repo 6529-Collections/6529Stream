@@ -1,0 +1,181 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "currentAction",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "executing",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "actionClass",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "oldValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newValueHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isStreamGovernedParameterAuthority",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "currentAction",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isStreamGovernedParameterAuthority",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Hosts accept no caller-supplied action id. Every governed mutation is      callable only by the immutable authority and independently verifies      the six-return in-flight action context before writing. The executor      owns action-id derivation; hosts own the exact action class and per-call      scope/old/new state commitments.",
+        "kind": "dev",
+        "methods": {
+          "currentAction()": {
+            "details": "Selector: `0x546ea281`. Parameter hosts derive the event action id      and verify transition commitments exclusively from this context."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "currentAction()": {
+            "notice": "Governance-V2 per-call execution context. Outside an executing         target call all six returns are zero."
+          },
+          "isStreamGovernedParameterAuthority()": {
+            "notice": "Returns true for deployment-time wiring validation."
+          }
+        },
+        "notice": "Narrow target-side seam between Governed Gas/Time Parameter hosts         and the canonical Governance-V2 executor of ADR 0004         [GOV-ACTION-ID], as rebaselined by ADR 0017.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol": "IStreamGovernedParameterAuthority"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol": {
+        "keccak256": "0xa4da9a3124ea50216ddd15a5a17b6dcd3af5d0be9bca887236eb93e539bd15e0",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://db9c091b3b9967d52f752f3711388591b8c94fd872a2fb19c250a57e8daa726c",
+          "dweb:/ipfs/QmbwYvWWbiN9QZiv618mYsRfcK4fEBU4oNjvUWFfen4Z7d"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "currentAction()": "546ea281",
+    "isStreamGovernedParameterAuthority()": "8d96760d"
+  }
+}

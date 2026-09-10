@@ -1,18 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamSplitWallet.sol";
+import "../../interfaces/standards/IERC20.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
+
+import "../../interfaces/stream/revenue/IStreamSplitWallet.sol";
 import "../../vendor/openzeppelin/Math.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
-
-interface IERC20SplitAsset {
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-}
-
-interface IStreamSplitFactoryAssetPolicy {
-    function assetPolicyRegistry() external view returns (address);
-}
 
 /// @notice Pull-payment split wallet for one immutable split profile.
 contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
@@ -302,7 +296,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
     function _assetPolicyRegistryOrRevert(address asset) private view returns (address registry) {
         (bool success, bytes memory data) = factory.staticcall(
-            abi.encodeWithSelector(IStreamSplitFactoryAssetPolicy.assetPolicyRegistry.selector)
+            abi.encodeWithSelector(IStreamSplitFactory.assetPolicyRegistry.selector)
         );
         if (!success || data.length != 32) {
             revert AssetPolicyReadFailed(factory, asset);
@@ -338,7 +332,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
     function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {
         bool success;
-        uint256 selector = uint32(IERC20SplitAsset.balanceOf.selector);
+        uint256 selector = uint32(IERC20.balanceOf.selector);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))
@@ -363,7 +357,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
         bool success;
         uint256 transferResult;
-        uint256 selector = uint32(IERC20SplitAsset.transfer.selector);
+        uint256 selector = uint32(IERC20.transfer.selector);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))

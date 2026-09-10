@@ -262,14 +262,14 @@
       "contract_verification": "not_applicable",
       "constructor_args_retained": true,
       "commands": [
-        "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
+        "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
       ]
     },
     "release_artifacts": {
       "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
     },
     "rehearsal": {
-      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
+      "command": "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
       "anvil_passed": true,
       "fork_passed": false,
       "notes": "Local example only. Addresses are placeholders; use broadcast outputs and checksummed ABI hashes for a real deployment."

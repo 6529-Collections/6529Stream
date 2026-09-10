@@ -33,19 +33,19 @@
 - Role grant and revoke transactions: `registerAdmin 0x775a35fc939361eb2f7dbd6435986e6157efa60a00b1d076a4acf9e8fe1f80be; registerAdmin 0xacb997069c8f45637fbc67e4df966d430696f8474a3cd91ee35925518e9feae2; registerPauseGuardian 0x8fa139d8d8ff478388b1787c3a4065d3c3eaed259ac7a491f3d4041a78ab0718; registerUnpauseAdmin 0xf466ee7b1b6980f79ec5773225370ad0bbd6e41b07a820529379e7ae469db7af; registerSignerManager 0x8063c98b9464ae251345b10ecab3ba5a76ecab69e6d0678cbccd5948a5747dcf; temporary deployer admin revoke 0xcac002f3758289a9b818ccfa6a0a1a9d34db9ae175639b24bc3ed9869150d008`
 - Signer setup transactions: `StreamAdmins constructor signer 0x0000000000000000000000000000000000006532; registerSignerLifecycleTarget 0x2fb8c29f9e7076a61ee7ea0c040cc98cf4f47d99e4d777265ac59180a579071f`
 - Metadata and freeze ceremony: `DependencyRegistry.addDependencyWithProvenance 0xf90ed32a4825b130588cbc4e0c6c064ee4e90cbb18a47e5c608ea6c39a2c4a44; StreamCore.createCollection 0x708ceaefc0bde4f2c007aaca1a3cae1b774db73fd930d003b5b1d02ab525f781; StreamCore.setCollectionData 0xfac9e65453f91d3101885a13c36cf315f84bae10a94a45f40aeaf828e3bdfc84; StreamCore.addRandomizer 0xa50d5d3318a876fab84a2820e929dbc75248ba4cc25d131fbeb1a0a44674c416`
-- Auction ceremony: `local retained auction ceremony script/RehearseAuctionCeremony.s.sol plus deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json; fork deployment wires StreamDrops.updateAuctionContract in tx 0xffa0c60ac67fb510820b1089fa1d7a752576c9a25288719b742d5341d9f3534c`
-- Emergency controls ceremony: `StreamAdmins.updateEmergencyRecipient 0xa6f5f9a81090d71b7ddeb6d50947ad9c037ac1e5242688bd8ec48f178b868924; local retained emergency redeployment script/RehearseEmergencyRedeployment.s.sol remains the operational dry-run proof`
+- Auction ceremony: `local retained auction ceremony script/legacy/RehearseAuctionCeremony.s.sol plus deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json; fork deployment wires StreamDrops.updateAuctionContract in tx 0xffa0c60ac67fb510820b1089fa1d7a752576c9a25288719b742d5341d9f3534c`
+- Emergency controls ceremony: `StreamAdmins.updateEmergencyRecipient 0xa6f5f9a81090d71b7ddeb6d50947ad9c037ac1e5242688bd8ec48f178b868924; local retained emergency redeployment script/legacy/RehearseEmergencyRedeployment.s.sol remains the operational dry-run proof`
 
 ## Dry Runs And Monitoring
 
-- Dry-run mint evidence: `local retained ceremony evidence deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json records replacement fixed-price mint smoke through script/RehearseEmergencyRedeployment.s.sol`
-- Dry-run auction evidence: `local retained ceremony evidence deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json records signed auction drop, bid, settlement, withdrawal, and zero owed funds through script/RehearseAuctionCeremony.s.sol`
+- Dry-run mint evidence: `local retained ceremony evidence deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json records replacement fixed-price mint smoke through script/legacy/RehearseEmergencyRedeployment.s.sol`
+- Dry-run auction evidence: `local retained ceremony evidence deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json records signed auction drop, bid, settlement, withdrawal, and zero owed funds through script/legacy/RehearseAuctionCeremony.s.sol`
 - Monitoring handoff: `docs/monitoring.md and release-artifacts/evidence/fork-ceremony/fork-ceremony-post-state-views.json record admin, signer, pause, emergency, auction, and metadata state surfaces for operator dashboards`
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json`
+- Deployment manifest: `release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/deployment-manifest.json`
+- Address book: `release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/address-book.json`
 - Safe or multisig export: `release-artifacts/evidence/fork-ceremony/fork-ceremony-safe-multisig-export.json`
 - Explorer or fork transaction bundle: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json`
 - Post-state views: `release-artifacts/evidence/fork-ceremony/fork-ceremony-post-state-views.json`
@@ -69,13 +69,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_fork_ceremony_evidence.py
-python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending permanent-Core PR review; historical Codex autonomous maintainer second-pass review for PR #552" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed; permanent-Core PR review pending" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The permanent-Core metadata/router cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.deployment.test_fork_ceremony_evidence
+python -m tools.deployment.check_fork_ceremony_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending permanent-Core PR review; historical Codex autonomous maintainer second-pass review for PR #552" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed; permanent-Core PR review pending" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The permanent-Core metadata/router cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes
@@ -94,3 +94,8 @@ python scripts/generate_release_checksums.py --check
 - Public beta remains blocked on the incomplete rows listed in the generated
   public-beta blocker report, including external audit, deployment/testnet
   rehearsal review, verified address, and explorer verification evidence.
+
+Historical retention note: deployment references use byte-exact pre-reorganization
+`330ac1d4` snapshots. The command and receipts describe the original `a35c24a4`
+fork run; this pending review packet does not attest a new deployment or current
+bytecode. Current deployment examples are maintained separately.

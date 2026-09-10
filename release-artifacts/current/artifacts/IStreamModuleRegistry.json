@@ -1,0 +1,679 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedModuleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "expectedInterfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "isModuleEligible",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "moduleAt",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "moduleRecord",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "uint64",
+              "name": "registeredAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "statusUpdatedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamModuleRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleRegistryManifest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registrationChainHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "recordCount",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "moduleVersion",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "moduleGasLimit",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "deploymentManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "moduleManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "moduleManifestURI",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "recordChainHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StreamModuleRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ModuleRegistryStatus",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "reasonURI",
+          "type": "string"
+        }
+      ],
+      "name": "StreamModuleStatusChanged",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "recordChainHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamModuleRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "name": "StreamModuleStatusChanged",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isModuleEligible",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "moduleAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "moduleCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "moduleRecord",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "enum ModuleRegistryStatus",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleVersion",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "moduleGasLimit",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "runtimeCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "moduleManifestURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "registeredAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "statusUpdatedAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamModuleRecord",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "moduleRegistryManifest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "registrationChainHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "isModuleEligible(address,bytes32,bytes4)": {
+            "notice": "Returns true when `module` is `ACTIVE`, matches the expected         module type and interface ID, and its live codehash still         matches the registered runtime code hash."
+          },
+          "moduleRecord(address)": {
+            "notice": "Returns the stored record for `module` (zero record when unknown)."
+          },
+          "moduleRegistryManifest()": {
+            "notice": "Returns the registry's own manifest commitment."
+          }
+        },
+        "notice": "The single canonical module-registry surface of protocol v1         ([LTA-REGISTRY] requirement 1). Draft mint-layer names         (`IStreamMintModuleRegistry`, `MintModuleInfo`, `ModuleStatus`,         `isModuleActive`) are superseded aliases.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol": "IStreamModuleRegistry"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol": {
+        "keccak256": "0x6516e94fd48fbb7779bd237b6cdd3c6c79e116e122003296dac04e840ce02780",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3a07aad883fb4f663380554b7f426a9697e6e5e72a93fdb050bf3cade8423f0e",
+          "dweb:/ipfs/QmacRRimG1QhDrJ2qi5DcEMPoLj1GhC4cmWESqivNwGboU"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "isModuleEligible(address,bytes32,bytes4)": "5ffaf3d7",
+    "moduleAt(uint256)": "d216d296",
+    "moduleCount()": "334f7ac5",
+    "moduleRecord(address)": "2a6a8074",
+    "moduleRegistryManifest()": "056c746f",
+    "registrationChainHash()": "7e669031"
+  }
+}

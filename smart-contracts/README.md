@@ -23,12 +23,19 @@ you are integrating.
 | `vendor/` | Vendored dependencies; keep upstream identity and licensing intact |
 
 The deployable current Core is `core/StreamCore.sol`. The historical Core in
-`test/helpers/LegacyStreamCore.sol` exists to retain earlier regression tests.
+`test/regression/legacy/helpers/LegacyStreamCore.sol` exists to retain earlier regression tests.
 Use `test/current/` to prove combinations of the current contracts work
 together. Domain tests elsewhere may intentionally substitute neighboring
 contracts to isolate behavior.
 
 Keep protocol implementations in their domain, shared caller contracts in
-`interfaces/stream`, and deployment-only planning in `script/current`. Prefer
+`interfaces/stream/<domain>`, and deployment-only planning in `script/current`. Prefer
 one explicit interface per responsibility. New behavior belongs in satellites
 unless it must change token ownership, supply, or permanent identity.
+
+The previous mint, auction, and randomizer implementations are isolated in
+`domains/mint/legacy/`, `domains/auctions/legacy/`, and
+`integrations/randomizers/legacy/`. Their caller interfaces live under
+`interfaces/stream/legacy/`. Current mint-module compatibility is separately
+named `interfaces/stream/mint/compatibility/`; it does not replace the canonical
+module registry in a new deployment.

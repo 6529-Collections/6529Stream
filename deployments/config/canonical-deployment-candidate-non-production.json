@@ -10,12 +10,12 @@
   },
   "release_build": {
     "receipt_path": "out-release/release-build-manifest.json",
-    "receipt_sha256": "sha256:f3f20e3a7be9806eeb09954549936f7b8b1f54ee1067108a1f1cd17183273649",
-    "target_catalog_sha256": "sha256:e1f17b9063db451ef1ac2252ba1f2b89fa6e28821effff2fa323cde3004a7691",
+    "receipt_sha256": "sha256:a49425daf56853505b7ebc0a48ca91e36f0a3c9c6629fbeb33526ce0ebe7bd18",
+    "target_catalog_sha256": "sha256:c39e3451f0c448ed9c1c4a32b46502c17d6c9be0a1ff811f959629cdb8ce9faa",
     "config_path": "release-artifacts/contracts.json",
-    "config_sha256": "sha256:2b7532e6c8e2db57bc654b83fae59bf2ed0aae3977da227e7b106407af6a42c6",
+    "config_sha256": "sha256:de3c6c351e2fdc4bdd3055a4ef999d740d85fa253795fa12d3ab293c01e5a0ef",
     "foundry_config_path": "foundry.toml",
-    "foundry_config_sha256": "sha256:b316489c314feff2b627e9a84bdd93dccf26603d30b93c66dd66fe6efeabeb75"
+    "foundry_config_sha256": "sha256:da72c962bd2c89706b082a589862e22863b4b1db27dfc3651ba30b3892ed7c8f"
   },
   "instances": [
     {
@@ -27,7 +27,7 @@
         "name": "DependencyRegistry",
         "source": "smart-contracts/domains/dependencies/DependencyRegistry.sol",
         "artifact_relative_path": "DependencyRegistry.sol/DependencyRegistry.json",
-        "artifact_sha256": "sha256:5d56e4323cef9c094409a9c0798ec6064dbf8c6c95bdebb4f9add6f0610822e2"
+        "artifact_sha256": "sha256:438546997dbdf0425eadbfe870deb850f2dd68225a76b98e298a9e1e13623fda"
       },
       "depends_on": [],
       "constructor": {

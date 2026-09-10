@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.royalty-return-gas-buffer.v2",
-  "generated_by": "scripts/generate_royalty_return_gas_buffer.py:1",
+  "generated_by": "tools/protocol/generate_royalty_return_gas_buffer.py:1",
   "status": "as_built_permanent_core_source",
   "issue": 671,
   "compiler_profile": {
@@ -10,7 +10,7 @@
     "optimizer_runs": 200,
     "via_ir": true,
     "bytecode_hash": "none",
-    "snapshot_command": "forge snapshot --via-ir --match-path test/StreamRoyaltyReturnGasBuffer.t.sol --match-test testMeasure --snap release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap"
+    "snapshot_command": "forge snapshot --via-ir --match-path test/gas/StreamRoyaltyReturnGasBuffer.t.sol --match-test testMeasure --snap out/royalty-return-gas-buffer.snap"
   },
   "sources": [
     {
@@ -20,33 +20,33 @@
     },
     {
       "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-      "sha256": "sha256:535c6a381b5045bac997b83a7ddf1b8ff95f93454da40dc69898f32c8053baf9",
-      "size_bytes": 26116
+      "sha256": "sha256:feab282e3ed37b8ea1f94ef5e77d8e3bc0f168cf78c5db174af7c2e9c4aa07ca",
+      "size_bytes": 26195
     },
     {
       "path": "smart-contracts/core/StreamCore.sol",
-      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
-      "size_bytes": 49391
+      "sha256": "sha256:d51f54d048858fa5e2286153f74f1a9acec3dbed629f8f828ccd4c1d67010ccc",
+      "size_bytes": 49396
     },
     {
       "path": "smart-contracts/domains/parameters/StreamGasParameterHost.sol",
-      "sha256": "sha256:d63bbc51d3345816f4915899dbaad338766c9957ed2a7910e3e2499b00f87bb4",
-      "size_bytes": 11947
+      "sha256": "sha256:09932d1df58cd555e29ad43e7bc562a88da5bc4b8588b8207b4867cdb7ad1552",
+      "size_bytes": 11969
     },
     {
       "path": "test/helpers/StreamRoyaltyReturnGasBufferHarness.sol",
-      "sha256": "sha256:9db942d3a0bd25fa67c1e004798079420949ed3a4fd060490154306f2647bd92",
-      "size_bytes": 11313
+      "sha256": "sha256:6492de6fe2b41dccc58513a4e0122ec77e5d5644f02b709bb82b152b8c89fb69",
+      "size_bytes": 11324
     },
     {
-      "path": "test/StreamRoyaltyReturnGasBuffer.t.sol",
-      "sha256": "sha256:71d5e198e8f31c2752e32039539dbc37857b786ad54477e21087103870d5dfde",
-      "size_bytes": 16162
+      "path": "test/gas/StreamRoyaltyReturnGasBuffer.t.sol",
+      "sha256": "sha256:a0e6ff92520bc6350a64c9058cf1c38fdd2b69988de73f03c84ad4f36d9e3030",
+      "size_bytes": 16184
     },
     {
-      "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:cc2d423183cd30822e0132fba78056115d1dd476dc3ee05268b5f637ad170cf4",
-      "size_bytes": 33901
+      "path": "test/unit/core/StreamCorePermanentTarget.t.sol",
+      "sha256": "sha256:62d3dc8981205a080a2a8c0b9ce5133380a8f9c072c20b5dd801061627350ab3",
+      "size_bytes": 33989
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -93,6 +93,12 @@
     "failure_behavior": "event_free_fallback_return"
   },
   "measurements": {
+    "provenance": {
+      "kind": "retained_baseline_snapshot",
+      "retained_at_commit": "408c1b894f947fc0f8db34259f1c82ecd7e91439",
+      "benchmark_rerun_during_source_reorganization": false,
+      "refresh_scope": "current_source_bindings_and_reproduction_recipe_only"
+    },
     "snapshot_path": "release-artifacts/baselines/v0.1.0/royalty-return-gas-buffer.snap",
     "snapshot_sha256": "sha256:98df3a78da1f7a2822061af4e5332cb28743cdb54f02f3ec6f63fccf34cf3442",
     "boundary": {
@@ -219,8 +225,8 @@
     "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
       "path": "smart-contracts/core/StreamCore.sol",
-      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
-      "size_bytes": 49391
+      "sha256": "sha256:d51f54d048858fa5e2286153f74f1a9acec3dbed629f8f828ccd4c1d67010ccc",
+      "size_bytes": 49396
     },
     "stream_core_runtime_bytes": 18997,
     "stream_core_eip170_margin_bytes": 5579,
@@ -235,10 +241,11 @@
     ]
   },
   "limitations": [
+    "The numeric measurements are retained baseline snapshots and were not rerun during source reorganization; current source hashes and the scratch-output snapshot command are separate reproduction bindings.",
     "This artifact binds the conservative target-fixture measurements to the as-built permanent StreamCore source, linked via-IR runtime receipt, and actual Core metadata read boundaries.",
     "The reusable library owns no storage or mutation surface; the permanent Core reads one authenticated shared host row for royaltyInfo, tokenURI, and contractURI.",
     "Actual Core tokenURI and contractURI tests prove below/at/above routing, exact maximum bounded returndata, malformed/oversized fallback, and event-free return handling.",
-    "The royalty resolver pointer remains intentionally un-installable until issue #670 supplies the accepted exact interface and concrete target; the target fixture retains royaltyInfo threshold coverage.",
+    "The current royalty resolver interface and implementation are installable; these retained target-fixture measurements cover royaltyInfo parent completion and do not replace current resolver integration tests.",
     "Issue #656 must bind the exact deployment candidate, host instance, source verification, and deployed tuple.",
     "Issue #684 must add candidate-instance-bound cadence, fixed-stipend, reproduction, and reachable raise-chain evidence before production.",
     "The committed generic governed-parameter measurement and fixed-stipend fields remain incomplete and fail closed in production mode.",

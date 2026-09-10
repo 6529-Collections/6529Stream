@@ -1,0 +1,908 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ASSET_STATUS_ACTIVE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSET_STATUS_DEPRECATED",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSET_STATUS_INACTIVE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSET_STATUS_UNKNOWN",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSET_STATUS_UNSUPPORTED",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "assetPolicy",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "effectiveAt",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "assetPolicyEffectiveAt",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "assetPolicyHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "assetStatus",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "isAssetActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isStreamAssetPolicyRegistry",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setAssetStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "previousStatus",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "previousPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "AssetPolicyUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AssetPolicyUnchanged",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidAsset",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidAssetPolicyHash",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "InvalidAssetStatus",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x6080806040523461005b5760008054336001600160a01b0319821681178355916001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09080a361068790816100618239f35b600080fdfe6080604081815260048036101561001557600080fd5b600092833560e01c9081632d82f47b146105d457508063410ff0d8146103b65780636373ab9f1461037e578063715018a61461032157806376057d1a146102e557806381524ec8146102c95780638da5cb5b146102a157806399ce40d61461018d5780639ae3d73c14610285578063a2fa015714610246578063c4eda4b71461022a578063c9528b36146101c8578063e1472690146101ad578063efb1a4dc1461018d5763f2fde38b146100c857600080fd5b34610189576020366003190112610189576100e1610614565b906100ea61062f565b6001600160a01b0391821692831561013757505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b906020608492519162461bcd60e51b8352820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152fd5b8280fd5b5050346101a957816003193601126101a9576020905160018152f35b5080fd5b5050346101a957816003193601126101a95751908152602090f35b5050346101a95760203660031901126101a9576060916001600160a01b036101ee610614565b168152600160205260ff828220541691600260205267ffffffffffffffff81808420549360036020522054169181519384526020840152820152f35b5050346101a957816003193601126101a9576020905160028152f35b5050346101a95760203660031901126101a95760209160019060ff9083906001600160a01b03610274610614565b168152838652205416149051908152f35b5050346101a957816003193601126101a9576020905160038152f35b5050346101a957816003193601126101a957905490516001600160a01b039091168152602090f35b5090346101895782600319360112610189576020925051908152f35b5050346101a95760203660031901126101a95760209160ff9082906001600160a01b03610310610614565b168152600185522054169051908152f35b833461037b578060031936011261037b5761033a61062f565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b5050346101a95760203660031901126101a95760209181906001600160a01b036103a6610614565b1681526002845220549051908152f35b5034610189576060366003190112610189576103d0610614565b60243560ff8116938482036105d0576044356103ea61062f565b6001600160a01b0384169384156105b9578587116105a25786158080610599575b61056257158080610559575b610542578061053a575b610504578488526020906001825260ff848a2054169660028352848a205495898914806104fb575b6104c65750505084885260018152828820805460ff1916881790556002815282882082905560038152828820805467ffffffffffffffff19164267ffffffffffffffff16179055825193845283015233908201527fd47a9f3b84f5291e19cb6998543f12324e072f6f32456d4585ce2a3e7e7403ab90606090a480f35b85516368e66aaf60e11b81526001600160a01b0390931691830191825260ff1660208201526040810184905281906060010390fd5b50848714610449565b82516302a4323d60e11b81526001600160a01b0390911681870190815260ff851660208201526040810183905281906060010390fd5b508115610421565b83516337bce3c560e11b8152808801879052602490fd5b50813b15610417565b5082516302a4323d60e11b81526001600160a01b0390911681870190815260ff851660208201526040810183905281906060010390fd5b5082151561040b565b82516302fd5f3360e41b8152808701889052602490fd5b82516337bce3c560e11b8152808701869052602490fd5b8580fd5b849084346101895760203660031901126101895760209267ffffffffffffffff91906001600160a01b03610606610614565b168152600385522054168152f35b600435906001600160a01b038216820361062a57565b600080fd5b6000546001600160a01b0316330361064357565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd",
+    "sourceMap": "261:3424:55:-:0;;;;;;;2512:6:164;261:3424:55;;719:10:153;-1:-1:-1;;;;;;261:3424:55;;;;;;719:10:153;-1:-1:-1;;;;;261:3424:55;;;;2560:40:164;;2512:6;2560:40;261:3424:55;;;;;;;;;;"
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x6080604081815260048036101561001557600080fd5b600092833560e01c9081632d82f47b146105d457508063410ff0d8146103b65780636373ab9f1461037e578063715018a61461032157806376057d1a146102e557806381524ec8146102c95780638da5cb5b146102a157806399ce40d61461018d5780639ae3d73c14610285578063a2fa015714610246578063c4eda4b71461022a578063c9528b36146101c8578063e1472690146101ad578063efb1a4dc1461018d5763f2fde38b146100c857600080fd5b34610189576020366003190112610189576100e1610614565b906100ea61062f565b6001600160a01b0391821692831561013757505082546001600160a01b0319811683178455167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08380a380f35b906020608492519162461bcd60e51b8352820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152fd5b8280fd5b5050346101a957816003193601126101a9576020905160018152f35b5080fd5b5050346101a957816003193601126101a95751908152602090f35b5050346101a95760203660031901126101a9576060916001600160a01b036101ee610614565b168152600160205260ff828220541691600260205267ffffffffffffffff81808420549360036020522054169181519384526020840152820152f35b5050346101a957816003193601126101a9576020905160028152f35b5050346101a95760203660031901126101a95760209160019060ff9083906001600160a01b03610274610614565b168152838652205416149051908152f35b5050346101a957816003193601126101a9576020905160038152f35b5050346101a957816003193601126101a957905490516001600160a01b039091168152602090f35b5090346101895782600319360112610189576020925051908152f35b5050346101a95760203660031901126101a95760209160ff9082906001600160a01b03610310610614565b168152600185522054169051908152f35b833461037b578060031936011261037b5761033a61062f565b80546001600160a01b03198116825581906001600160a01b03167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e08280a380f35b80fd5b5050346101a95760203660031901126101a95760209181906001600160a01b036103a6610614565b1681526002845220549051908152f35b5034610189576060366003190112610189576103d0610614565b60243560ff8116938482036105d0576044356103ea61062f565b6001600160a01b0384169384156105b9578587116105a25786158080610599575b61056257158080610559575b610542578061053a575b610504578488526020906001825260ff848a2054169660028352848a205495898914806104fb575b6104c65750505084885260018152828820805460ff1916881790556002815282882082905560038152828820805467ffffffffffffffff19164267ffffffffffffffff16179055825193845283015233908201527fd47a9f3b84f5291e19cb6998543f12324e072f6f32456d4585ce2a3e7e7403ab90606090a480f35b85516368e66aaf60e11b81526001600160a01b0390931691830191825260ff1660208201526040810184905281906060010390fd5b50848714610449565b82516302a4323d60e11b81526001600160a01b0390911681870190815260ff851660208201526040810183905281906060010390fd5b508115610421565b83516337bce3c560e11b8152808801879052602490fd5b50813b15610417565b5082516302a4323d60e11b81526001600160a01b0390911681870190815260ff851660208201526040810183905281906060010390fd5b5082151561040b565b82516302fd5f3360e41b8152808701889052602490fd5b82516337bce3c560e11b8152808701869052602490fd5b8580fd5b849084346101895760203660031901126101895760209267ffffffffffffffff91906001600160a01b03610606610614565b168152600385522054168152f35b600435906001600160a01b038216820361062a57565b600080fd5b6000546001600160a01b0316330361064357565b606460405162461bcd60e51b815260206004820152602060248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e65726044820152fd",
+    "sourceMap": "261:3424:55:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;:::i;:::-;1057:62:164;;;:::i;:::-;-1:-1:-1;;;;;261:3424:55;;;;2156:22:164;;261:3424:55;;-1:-1:-1;;261:3424:55;;-1:-1:-1;;;;;;261:3424:55;;;;;;;2560:40:164;261:3424:55;;2560:40:164;261:3424:55;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;261:3424:55;;;;;;;;;;;;;;;;;;;;;;;;;;614:1;261:3424;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;-1:-1:-1;;;;;261:3424:55;;:::i;:::-;;;;;;;;;;;;;;2193:15;261:3424;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;769:1;261:3424;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;;;;;;;-1:-1:-1;;;;;261:3424:55;;:::i;:::-;;;;;;;;;;1846:41;261:3424;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;261:3424:55;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;;;;;-1:-1:-1;;;;;261:3424:55;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1057:62:164;;:::i;:::-;261:3424:55;;-1:-1:-1;;;;;;261:3424:55;;;;;;-1:-1:-1;;;;;261:3424:55;2560:40:164;261:3424:55;;2560:40:164;261:3424:55;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;;;-1:-1:-1;;;;;261:3424:55;;:::i;:::-;;;;1251:59;261:3424;;;;;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;:::i;:::-;;;;;;;;;;;;;;1057:62:164;;:::i;:::-;-1:-1:-1;;;;;261:3424:55;;;2466:19;;2462:76;;2551:33;;;2547:97;;2657:30;;;;:58;;261:3424;2653:145;;2811:30;;;:56;;261:3424;2807:113;;2933:58;;;261:3424;2929:145;;261:3424;;;;;;;;;;;;;;;3164:15;261:3424;;;;;;3200:24;;;;:60;;;261:3424;3196:145;;-1:-1:-1;;;261:3424:55;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;3164:15;261:3424;;;;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;3530:15;261:3424;;;;;;;;;;;;;3656:10;261:3424;;;;3561:115;;261:3424;;3561:115;261:3424;;3196:145;261:3424;;-1:-1:-1;;;3283:47:55;;-1:-1:-1;;;;;261:3424:55;;;3283:47;;;261:3424;;;;;;;;;;;;;;;;;;;3283:47;;;3200:60;3228:32;;;;3200:60;;2929:145;261:3424;;-1:-1:-1;;;3014:49:55;;-1:-1:-1;;;;;261:3424:55;;;3014:49;;;261:3424;;;;;;;;;;;;;;;;;;;;3283:47;;;2933:58;2967:24;;;2933:58;;2807:113;261:3424;;-1:-1:-1;;;2890:19:55;;;;;261:3424;;;;;2890:19;2811:56;2845:17;;;:22;2811:56;;2653:145;-1:-1:-1;261:3424:55;;-1:-1:-1;;;2738:49:55;;-1:-1:-1;;;;;261:3424:55;;;2738:49;;;261:3424;;;;;;;;;;;;;;;;;;;;3283:47;;;2657:58;2691:24;;;;2657:58;;2547:97;261:3424;;-1:-1:-1;;;2607:26:55;;;;;261:3424;;;;;2607:26;2462:76;261:3424;;-1:-1:-1;;;2508:19:55;;;;;261:3424;;;;;2508:19;261:3424;;;;;;;;;;;;;-1:-1:-1;;261:3424:55;;;;;;;;;-1:-1:-1;;;;;261:3424:55;;:::i;:::-;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;261:3424:55;;;;;;:::o;:::-;;;;1353:130:164;1267:6;261:3424:55;-1:-1:-1;;;;;261:3424:55;719:10:153;1416:23:164;261:3424:55;;1353:130:164:o;261:3424:55:-;;;;;;;;;;;;;;;;;;;;;;;;"
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "AssetPolicyUnchanged",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidAsset",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidAssetPolicyHash",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidAssetStatus",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "previousStatus",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "ASSET_STATUS_ACTIVE",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSET_STATUS_DEPRECATED",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSET_STATUS_INACTIVE",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSET_STATUS_UNKNOWN",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSET_STATUS_UNSUPPORTED",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicy",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "effectiveAt",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicyEffectiveAt",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetPolicyHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "assetStatus",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "isAssetActive",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isStreamAssetPolicyRegistry",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setAssetStatus",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "owner()": {
+            "details": "Returns the address of the current owner."
+          },
+          "renounceOwnership()": {
+            "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+          },
+          "transferOwnership(address)": {
+            "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "AssetPolicyUnchanged(address,uint8,bytes32)": [
+            {
+              "notice": "Reverts when a policy update would leave status and evidence unchanged."
+            }
+          ],
+          "InvalidAsset(address)": [
+            {
+              "notice": "Reverts when an asset address is zero or not a contract when a contract is required."
+            }
+          ],
+          "InvalidAssetPolicyHash(address,uint8,bytes32)": [
+            {
+              "notice": "Reverts when an asset policy hash is invalid for the requested status."
+            }
+          ],
+          "InvalidAssetStatus(uint8)": [
+            {
+              "notice": "Reverts when an unknown status value is supplied."
+            }
+          ]
+        },
+        "events": {
+          "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)": {
+            "notice": "Emitted when the deployment-wide asset policy for an ERC-20 changes."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "ASSET_STATUS_ACTIVE()": {
+            "notice": "Status for approved standard ERC-20 assets that may be synced and released."
+          },
+          "ASSET_STATUS_DEPRECATED()": {
+            "notice": "Status for previously approved assets that are disabled for sync and release."
+          },
+          "ASSET_STATUS_INACTIVE()": {
+            "notice": "Status for reviewed assets that are not currently accepted by split wallets."
+          },
+          "ASSET_STATUS_UNKNOWN()": {
+            "notice": "Default-deny status for unknown or cleared assets."
+          },
+          "ASSET_STATUS_UNSUPPORTED()": {
+            "notice": "Status for explicitly unsupported assets."
+          },
+          "assetPolicy(address)": {
+            "notice": "Returns the current status, evidence hash, and effective timestamp for an asset."
+          },
+          "assetPolicyEffectiveAt(address)": {
+            "notice": "Timestamp when the current policy status became effective."
+          },
+          "assetPolicyHash(address)": {
+            "notice": "Evidence hash for the current policy status by asset address."
+          },
+          "assetStatus(address)": {
+            "notice": "Current policy status by asset address."
+          },
+          "isAssetActive(address)": {
+            "notice": "Returns true when an asset is currently active for split-wallet sync and release."
+          },
+          "isStreamAssetPolicyRegistry()": {
+            "notice": "Returns true for the canonical 6529Stream asset policy registry."
+          },
+          "setAssetStatus(address,uint8,bytes32)": {
+            "notice": "Sets an asset policy status and evidence hash."
+          }
+        },
+        "notice": "Deployment-wide allowlist for approved standard ERC-20 split assets.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol": "StreamAssetPolicyRegistry"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol": {
+        "keccak256": "0x5d04fb964b79ad5aed92a93ed62a70254fc8f71aaa8fe575894f11270c5b54d1",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://8cbd01a25a9cb12904f8d3ba8ebb1312d93cfd5a6f607246af63d60b929ad161",
+          "dweb:/ipfs/QmXWmcsUyyBFqaqk2sKYNM6FP7op5wgYEhAd4UWe8uZZCM"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol": {
+        "keccak256": "0xe877f4dea83110ff91373b34ef2dfaad1bbf8ffc4af7a69784213c78b18bf6cf",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://21adc0a0b1740f0e4f1e91858ebeffb377c88707e3baab817e8bdf397a90b4d0",
+          "dweb:/ipfs/QmUgdkEbe3xyobfwRtHy2q4SWJNctoMdmh713N3KL7qsuS"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/Context.sol": {
+        "keccak256": "0x2d9821ede311a3c16183811be8bdc666e88c69d9d50321e3dff025fe7630d373",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3719bc7fe267a79e84641b88901b10dbc58d27edaea65b7811d39ca7d2a3e409",
+          "dweb:/ipfs/QmRDDpaByM3MhWs61gXmfaxoygifCJhLvguEFDGahhWMfX"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/Ownable.sol": {
+        "keccak256": "0x1828e8b5bee74a80cf8bfa6d4235be9a8d50e4715170e36c7efd8ddc541af8ea",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://48887640226bc9029c99490fa2db6a4750172a8bee8e5749b64aa0e212232ac0",
+          "dweb:/ipfs/QmeZbu12yaNTVd2yab9H4Ait8sDGLVCk9KdJauReqfKXgv"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "ASSET_STATUS_ACTIVE()": "efb1a4dc",
+    "ASSET_STATUS_DEPRECATED()": "9ae3d73c",
+    "ASSET_STATUS_INACTIVE()": "c4eda4b7",
+    "ASSET_STATUS_UNKNOWN()": "e1472690",
+    "ASSET_STATUS_UNSUPPORTED()": "81524ec8",
+    "assetPolicy(address)": "c9528b36",
+    "assetPolicyEffectiveAt(address)": "2d82f47b",
+    "assetPolicyHash(address)": "6373ab9f",
+    "assetStatus(address)": "76057d1a",
+    "isAssetActive(address)": "a2fa0157",
+    "isStreamAssetPolicyRegistry()": "99ce40d6",
+    "owner()": "8da5cb5b",
+    "renounceOwnership()": "715018a6",
+    "setAssetStatus(address,uint8,bytes32)": "410ff0d8",
+    "transferOwnership(address)": "f2fde38b"
+  }
+}

@@ -29,13 +29,13 @@ artifact generators in canonical order.
 | Gate | Result | Evidence |
 | --- | --- | --- |
 | Full ordinary repository gate | Passed | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed end to end in 3,948.2 seconds after the final operation-identity release-tail refresh; focused operation, gas, profile, vector, release-build, size, exact Slither, and standalone release-artifact gates also pass |
-| Production size build | Measured | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py`; the aggregate all-source size build is diagnostic only, and mutable runtime evidence is owned by [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json) |
+| Production size build | Measured | `python -m tools.build.build_release_artifacts` followed by `python -m tools.build.check_contract_size_budget`; the aggregate all-source size build is diagnostic only, and mutable runtime evidence is owned by [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json) |
 | `StreamCore` production headroom | Passes size requirement | The canonical proof passes the non-waivable 2,000-byte production minimum and approved 22,184-byte objective |
 | Genesis deployment profile | Blocked | The canonical profile has 37 entries and rejects probes, but the implementation catalog still must prove deployment-instance identity and fallback distinctness; issue #656 owns reconciliation |
-| Governed parameter inventory | Checked as-built source plus incomplete candidate facts; production blocked | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding policy, the permanent Core shared-buffer implementation, and its measured source/runtime evidence. Concrete #670 artist/revenue rows, candidate bindings, exhaustive consumer review, fixed-stipend compatibility, and instance-aware deployment facts remain open under #656/#684; `RISK-GOV-004` plus `python scripts/check_governed_parameter_inventory.py --require-complete` fail closed |
+| Governed parameter inventory | Checked as-built source plus incomplete candidate facts; production blocked | The schema-validated 22-GGP/3-GTP inventory pins exact 50-binding policy, the permanent Core shared-buffer implementation, and its measured source/runtime evidence. Concrete #670 artist/revenue rows, candidate bindings, exhaustive consumer review, fixed-stipend compatibility, and instance-aware deployment facts remain open under #656/#684; `RISK-GOV-004` plus `python -m tools.protocol.check_governed_parameter_inventory --require-complete` fail closed |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 44 retained production rows (4 High, 40 Medium): 30 remain Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24 pending dispositions), while 14 rows (2 High, 12 Medium) have focused False Positive dispositions; issue #658 owns the remaining remediation and reviewed disposition work |
 | Governance Executor native-value authority | Blocked | The issue #685 slice binds and revalidates a closed-world target/selector/value catalog and adds adversarial tests, but bounded assembly still makes the value-bearing call invisible to Slither. High open blocker `RISK-GOV-003` now requires exact #656-bound candidate deployment/rehearsal evidence and independent review under #658 |
-| Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
+| Slither exact drift automation | Implemented on `main` by PR #662 | `python -m tools.security.test_slither_baseline`, `python -m tools.security.check_slither_baseline --baseline-only`, and `python -m tools.security.check_slither_baseline --run-slither`; matching the baseline is not acceptance |
 | Production release mode | Blocked | External evidence, Core headroom, genesis and governed-parameter completeness, open Slither findings, and `RISK-GOV-003` must all fail closed before production release |
 
 The successful local gates are regression evidence only. They do not replace
@@ -84,7 +84,7 @@ rows are complete. Every production requirement is non-waivable:
 | #231 | `post_audit_remediation` |
 
 Do not close the linked tracker issues until
-`python scripts/check_release_evidence_issue_closure.py` passes. For live
+`python -m tools.release.check_release_evidence_issue_closure` passes. For live
 GitHub state, run `make release-evidence-live-issue-sync-check` with
 authenticated `gh` access.
 
@@ -97,7 +97,7 @@ Before any public beta or production-release claim:
    changing readiness claims.
 2. Run `make check` and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
    on the proposed candidate commit.
-3. Run `python scripts/check_slither_baseline.py --run-slither`; remediate or
+3. Run `python -m tools.security.check_slither_baseline --run-slither`; remediate or
    produce issue-linked reviewed proof for every first-party production
    High/Medium row. Baseline equality alone is not acceptance.
 4. Preserve the proof-backed `StreamCore` EIP-170 margin, land the two
@@ -111,7 +111,7 @@ Before any public beta or production-release claim:
    retain deployment and rehearsal reconciliation, and obtain independent
    review.
 5. Complete the public-beta evidence rows in the generated blocker report.
-6. Run `python scripts/check_release_mode.py --phase public-beta`; it must pass
+6. Run `python -m tools.release.check_release_mode --phase public-beta`; it must pass
    before production-release execution starts.
 7. Complete external audit remediation and regenerate affected release artifacts
    if audit work changes code, ABI, bytecode, manifests, or release evidence.
@@ -119,5 +119,5 @@ Before any public beta or production-release claim:
    broadcasts, address books, explorer verification, ceremony evidence,
    randomizer operations evidence, metadata-browser evidence, marketplace/indexer
    evidence, and post-audit remediation evidence.
-9. Run `python scripts/check_release_mode.py --phase production-release`; it must
+9. Run `python -m tools.release.check_release_mode --phase production-release`; it must
    pass before publishing a production release.

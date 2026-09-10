@@ -4,7 +4,7 @@
 
 | Item | Outcome | Gate | Status |
 | --- | --- | --- | --- |
-| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #739 / issue #738, branch `codex/current-stack-integration` |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #740 / issue #738, branch `codex/developer-experience-reorganization`; prior PR #739 merged |
 
 Status: historical full-v1 backlog. Current delivery priorities and lane
 ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
@@ -351,11 +351,11 @@ artifact is retained.
 
 Files likely touched:
 
-- `scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `scripts/test_testnet_deployment_rehearsal_evidence.py`
+- `tools/deployment/check_testnet_deployment_rehearsal_evidence.py`
+- `tools/deployment/test_testnet_deployment_rehearsal_evidence.py`
 - `release-artifacts/evidence/testnet-deployment-rehearsal/`
 - `release-artifacts/evidence/public-beta-templates/`
-- `scripts/generate_release_evidence_packet_index.py`
+- `tools/release/generate_release_evidence_packet_index.py`
 - `Makefile`
 - `scripts/check.sh`
 - `scripts/check.ps1`
@@ -383,20 +383,20 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/test_release_evidence_issue_backlog.py`
-- `python scripts/generate_release_evidence_issue_backlog.py --check`
-- `python scripts/test_release_evidence_issue_body_sync.py`
-- `python scripts/generate_release_evidence_issue_body_sync.py --check`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_release_readiness.py`
-- `python scripts/check_changelog.py`
+- `python -m tools.deployment.test_testnet_deployment_rehearsal_evidence`
+- `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.test_release_evidence_issue_backlog`
+- `python -m tools.release.generate_release_evidence_issue_backlog --check`
+- `python -m tools.release.test_release_evidence_issue_body_sync`
+- `python -m tools.release.generate_release_evidence_issue_body_sync --check`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.docs.check_changelog`
 - `git diff --check`
 
 Acceptance criteria:
@@ -433,7 +433,7 @@ Files likely touched:
 - `docs/deployment.md`
 - `docs/non-local-release-evidence.md`
 - `release-artifacts/evidence/testnet-deployment-rehearsal/`
-- `scripts/test_deployment_manifest.py`
+- `tools/deployment/test_deployment_manifest.py`
 
 Implementation steps:
 
@@ -449,9 +449,9 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_deployment_manifest.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
+- `python -m tools.deployment.test_deployment_manifest`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence`
 - `git diff --check`
 
 Acceptance criteria:
@@ -505,13 +505,13 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/generate_non_local_release_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence`
+- `python -m tools.release.generate_non_local_release_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 Acceptance criteria:
 
@@ -569,16 +569,16 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_broadcast_manifest_input.py`
-- `python scripts/generate_broadcast_manifest_input.py --check`
-- `python scripts/test_deployment_manifest.py`
-- `python scripts/generate_deployment_manifest.py --check`
-- `python scripts/test_address_books.py`
-- `python scripts/generate_address_books.py --check`
-- `python scripts/test_source_verification_inputs.py`
-- `python scripts/generate_source_verification_inputs.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.deployment.test_broadcast_manifest_input`
+- `python -m tools.deployment.generate_broadcast_manifest_input --check`
+- `python -m tools.deployment.test_deployment_manifest`
+- `python -m tools.deployment.generate_deployment_manifest --check`
+- `python -m tools.deployment.test_address_books`
+- `python -m tools.deployment.generate_address_books --check`
+- `python -m tools.build.test_source_verification_inputs`
+- `python -m tools.build.generate_source_verification_inputs --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 Acceptance criteria:
 
@@ -633,10 +633,10 @@ Required tests/checks:
 
 - New checker tests.
 - New checker.
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 Acceptance criteria:
 
@@ -790,8 +790,8 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/check_randomizer_operations.py`
-- `python scripts/check_rehearsal_metadata_browser_sandbox.py`
+- `python -m tools.deployment.check_randomizer_operations`
+- `python -m tools.deployment.check_rehearsal_metadata_browser_sandbox`
 - Non-local evidence checks.
 - Public beta evidence checks.
 - Release manifest/checksum checks.
@@ -825,10 +825,10 @@ Files likely touched:
 
 - `deployments/schema/admin-ceremony-evidence.schema.json`
 - `deployments/admin-ceremony/`
-- `scripts/check_admin_ceremony_evidence.py`
-- `scripts/test_admin_ceremony_evidence.py`
-- `scripts/generate_release_manifest.py`
-- `scripts/generate_release_checksums.py`
+- `tools/deployment/check_admin_ceremony_evidence.py`
+- `tools/deployment/test_admin_ceremony_evidence.py`
+- `tools/release/generate_release_manifest.py`
+- `tools/release/generate_release_checksums.py`
 - `docs/deployment.md`
 - `docs/signer-custody-readiness.md`
 - `docs/incident-response.md`
@@ -850,8 +850,8 @@ Required tests/checks:
 - New checker.
 - Release manifest/checksum checks.
 - Release readiness check.
-- `python scripts/test_admin_ceremony_evidence.py`
-- `python scripts/check_admin_ceremony_evidence.py`
+- `python -m tools.deployment.test_admin_ceremony_evidence`
+- `python -m tools.deployment.check_admin_ceremony_evidence`
 
 Acceptance criteria:
 
@@ -901,8 +901,8 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/check_admin_ceremony_evidence.py`
-- `python scripts/check_signer_custody_readiness.py`
+- `python -m tools.deployment.check_admin_ceremony_evidence`
+- `python -m tools.release.check_signer_custody_readiness`
 - Public beta evidence checks.
 - Release manifest/checksum checks.
 
@@ -947,9 +947,9 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_signer_custody_readiness.py`
-- `python scripts/check_signer_custody_readiness.py`
-- `python scripts/check_release_readiness.py`
+- `python -m tools.release.test_signer_custody_readiness`
+- `python -m tools.release.check_signer_custody_readiness`
+- `python -m tools.release.check_release_readiness`
 - blocker report checks.
 
 Acceptance criteria:
@@ -982,8 +982,8 @@ Files likely touched:
 
 - `docs/incident-response.md`
 - `release-artifacts/evidence/incident-drills/`
-- `scripts/check_incident_drill_evidence.py`
-- `scripts/test_incident_drill_evidence.py`
+- `tools/release/check_incident_drill_evidence.py`
+- `tools/release/test_incident_drill_evidence.py`
 
 Implementation steps:
 
@@ -997,8 +997,8 @@ Required tests/checks:
 
 - New checker tests.
 - New checker.
-- `python scripts/check_incident_response.py`
-- `python scripts/check_release_readiness.py`
+- `python -m tools.docs.check_incident_response`
+- `python -m tools.release.check_release_readiness`
 
 Acceptance criteria:
 
@@ -1073,7 +1073,7 @@ provider-specific randomness permutations.
 Files likely touched:
 
 - `test/helpers/ProtocolStateMachine.sol`
-- `test/StreamProtocolStateMachine.t.sol`
+- `test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol`
 - existing fixture/helpers
 - `docs/threat-model.md`
 - `ops/ROADMAP.md`
@@ -1090,9 +1090,9 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamProtocolStateMachine.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol -vvv`
 - `forge test -vvv`
-- `python scripts/check_changelog.py` if external behavior docs change.
+- `python -m tools.docs.check_changelog` if external behavior docs change.
 
 Acceptance criteria:
 
@@ -1126,7 +1126,7 @@ checks. Later ADV work should add fuzzed/randomizer-provider permutations.
 
 Files likely touched:
 
-- `test/StreamProtocolStateMachine.t.sol`
+- `test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol`
 - `test/README.md`
 - `docs/threat-model.md`
 - `ops/ROADMAP.md`
@@ -1148,8 +1148,8 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamProtocolStateMachine.t.sol -vvv`
-- `forge fmt --check test/StreamProtocolStateMachine.t.sol`
+- `forge test --match-path test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol -vvv`
+- `forge fmt --check test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol`
 - Full local gate before PR.
 
 Acceptance criteria:
@@ -1188,11 +1188,11 @@ compact-signature, malleability, and contract-signer permutations.
 
 Files likely touched:
 
-- `test/StreamSignerCompromiseFuzz.t.sol`
-- `test/StreamDropsEIP712.t.sol`
-- `test/StreamDropsERC1271.t.sol`
-- `test/StreamSignerAdmin.t.sol`
-- `test/StreamPauseControls.t.sol`
+- `test/regression/legacy/protocol/StreamSignerCompromiseFuzz.t.sol`
+- `test/unit/mint/StreamDropsEIP712.t.sol`
+- `test/unit/mint/StreamDropsERC1271.t.sol`
+- `test/unit/protocol/StreamSignerAdmin.t.sol`
+- `test/regression/legacy/protocol/StreamPauseControls.t.sol`
 - `test/README.md`
 - `ops/ROADMAP.md`
 - `ops/AUTONOMOUS_RUN.md`
@@ -1213,10 +1213,10 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamSignerCompromiseFuzz.t.sol -vvv`
-- `forge test --match-path test/StreamDropsEIP712.t.sol -vvv`
-- `forge test --match-path test/StreamDropsERC1271.t.sol -vvv`
-- `forge test --match-path test/StreamSignerAdmin.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamSignerCompromiseFuzz.t.sol -vvv`
+- `forge test --match-path test/unit/mint/StreamDropsEIP712.t.sol -vvv`
+- `forge test --match-path test/unit/mint/StreamDropsERC1271.t.sol -vvv`
+- `forge test --match-path test/unit/protocol/StreamSignerAdmin.t.sol -vvv`
 - `forge test -vvv`
 
 Acceptance criteria:
@@ -1259,9 +1259,9 @@ preservation, and owed-balance safety.
 
 Files likely touched:
 
-- `test/StreamPauseControls.t.sol`
-- `test/StreamAuctionPayments.t.sol`
-- `test/StreamPaymentsInvariant.t.sol`
+- `test/regression/legacy/protocol/StreamPauseControls.t.sol`
+- `test/regression/legacy/auctions/StreamAuctionPayments.t.sol`
+- `test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol`
 - `test/README.md`
 - `docs/incident-response.md`
 - `docs/auction-custody.md`
@@ -1284,9 +1284,9 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamPauseControls.t.sol -vvv`
-- `forge test --match-path test/StreamAuctionPayments.t.sol -vvv`
-- `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamPauseControls.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/auctions/StreamAuctionPayments.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol -vvv`
 - `forge test -vvv`
 
 Acceptance criteria:
@@ -1330,10 +1330,10 @@ credits.
 
 Files likely touched:
 
-- `test/StreamPaymentsInvariant.t.sol`
-- `test/StreamAuctionPayments.t.sol`
-- `test/StreamFixedPricePayments.t.sol`
-- `test/StreamCuratorsPool.t.sol`
+- `test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol`
+- `test/regression/legacy/auctions/StreamAuctionPayments.t.sol`
+- `test/regression/legacy/mint/StreamFixedPricePayments.t.sol`
+- `test/unit/revenue/StreamCuratorsPool.t.sol`
 - `docs/auction-custody.md`
 
 Implementation steps:
@@ -1347,11 +1347,11 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol -vvv`
 - Focused payment/emergency suite with `Stream(AuctionPayments|FixedPricePayments|CuratorsPool|EmergencyWithdraw|RandomizerPayments|PaymentsInvariant)Test`
-- `python scripts/check_randomizer_operations.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.deployment.check_randomizer_operations`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 - `scripts/check.ps1`
 
 Acceptance criteria:
@@ -1388,9 +1388,9 @@ Files likely touched:
 
 - `smart-contracts/domains/revenue/StreamSplitFactory.sol`
 - `smart-contracts/domains/revenue/StreamSplitWallet.sol`
-- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
-- `smart-contracts/interfaces/stream/IStreamSplitWallet.sol`
-- `test/StreamSplitWallet.t.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol`
+- `test/unit/revenue/StreamSplitWallet.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
 - `CHANGELOG.md`
@@ -1418,13 +1418,13 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge test --match-path test/unit/revenue/StreamSplitWallet.t.sol -vvv`
 - `forge build`
-- `python scripts/test_autonomous_state.py`
-- `python scripts/check_autonomous_state.py`
-- `python scripts/test_markdown_links.py`
-- `python scripts/check_markdown_links.py`
-- `python scripts/check_changelog.py`
+- `python -m tools.development.test_autonomous_state`
+- `python -m tools.development.check_autonomous_state`
+- `python -m tools.docs.test_markdown_links`
+- `python -m tools.docs.check_markdown_links`
+- `python -m tools.docs.check_changelog`
 - release artifact generator checks when release-covered docs or contracts
   change
 - `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
@@ -1461,12 +1461,12 @@ semantics.
 Files likely touched:
 
 - `smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol`
-- `smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol`
 - `smart-contracts/domains/revenue/StreamSplitFactory.sol`
 - `smart-contracts/domains/revenue/StreamSplitWallet.sol`
-- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
-- `smart-contracts/interfaces/stream/IStreamSplitWallet.sol`
-- `test/StreamSplitWallet.t.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol`
+- `test/unit/revenue/StreamSplitWallet.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
 - `CHANGELOG.md`
@@ -1493,13 +1493,13 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge test --match-path test/unit/revenue/StreamSplitWallet.t.sol -vvv`
 - `forge build`
-- `python scripts/test_autonomous_state.py`
-- `python scripts/check_autonomous_state.py`
-- `python scripts/test_markdown_links.py`
-- `python scripts/check_markdown_links.py`
-- `python scripts/check_changelog.py`
+- `python -m tools.development.test_autonomous_state`
+- `python -m tools.development.check_autonomous_state`
+- `python -m tools.docs.test_markdown_links`
+- `python -m tools.docs.check_markdown_links`
+- `python -m tools.docs.check_changelog`
 - release artifact generator checks when release-covered docs or contracts
   change
 - `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
@@ -1537,17 +1537,17 @@ fail-closed ERC-20 policy reads, official settlement events, and no
 
 Files likely touched:
 
-- `smart-contracts/interfaces/stream/IStreamRevenueResolver.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol`
 - `smart-contracts/domains/revenue/StreamRevenueResolver.sol`
-- `smart-contracts/interfaces/stream/IStreamPrimarySaleSettlement.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol`
 - `smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol`
 - `smart-contracts/domains/revenue/StreamSplitFactory.sol`
-- `smart-contracts/interfaces/stream/IStreamSplitFactory.sol`
-- `test/StreamPrimarySaleSettlement.t.sol`
+- `smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol`
+- `test/unit/revenue/StreamPrimarySaleSettlement.t.sol`
 - `docs/revenue-splits-and-royalties.md`
 - `docs/integrations/events-and-indexing.md`
 - `CHANGELOG.md`
-- `script/RehearseDeployment.s.sol`
+- `script/legacy/RehearseDeployment.s.sol`
 - deployment configs, manifests, address books, source verification inputs, and
   generated release artifacts
 - `ops/AUTONOMOUS_RUN.md`
@@ -1575,15 +1575,15 @@ Implementation steps:
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamPrimarySaleSettlement.t.sol -vvv`
-- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge test --match-path test/unit/revenue/StreamPrimarySaleSettlement.t.sol -vvv`
+- `forge test --match-path test/unit/revenue/StreamSplitWallet.t.sol -vvv`
 - `forge build`
 - `forge build --sizes --via-ir --skip test --skip script --force`
-- `python scripts/test_autonomous_state.py`
-- `python scripts/check_autonomous_state.py`
+- `python -m tools.development.test_autonomous_state`
+- `python -m tools.development.check_autonomous_state`
 - release artifact generator checks when release-covered docs or contracts
   change
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.check_changelog`
 - `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
 
@@ -1621,8 +1621,8 @@ this PR.
 Files likely touched:
 
 - `smart-contracts/core/StreamCore.sol`
-- `smart-contracts/interfaces/stream/IStreamCore.sol`
-- optional `smart-contracts/interfaces/stream/IStreamMintManager.sol`
+- `smart-contracts/interfaces/stream/core/IStreamCore.sol`
+- optional `smart-contracts/interfaces/stream/mint/IStreamMintManager.sol`
 - focused Core mint-manager hook tests
 - `docs/mint-policy-and-accounting.md`
 - `docs/launch-v1-target-architecture.md`
@@ -1652,15 +1652,15 @@ Implementation steps:
 Required tests/checks:
 
 - focused Core mint-manager hook tests
-- `forge test --match-path test/StreamMinterValidation.t.sol -vvv`
-- `forge test --match-path test/StreamMintAccounting.t.sol -vvv`
-- `forge test --match-path test/StreamDropsIntegrationCharacterization.t.sol -vvv`
-- `forge test --match-path test/StreamMinterEvents.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/mint/StreamMinterValidation.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/mint/StreamMintAccounting.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/mint/StreamDropsIntegrationCharacterization.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/mint/StreamMinterEvents.t.sol -vvv`
 - `forge build`
 - `forge build --sizes --via-ir --skip test --skip script --force`
-- `python scripts/check_contract_size_budget.py`
+- `python -m tools.build.check_contract_size_budget`
 - release artifact generator checks when ABI surfaces change
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.check_changelog`
 - `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
 
@@ -1702,15 +1702,15 @@ flow migration for later PRs.
 
 Files likely touched:
 
-- `smart-contracts/interfaces/stream/IStreamMintLedger.sol`
+- `smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol`
 - `smart-contracts/domains/mint/StreamMintLedger.sol`
-- `test/StreamMintLedger.t.sol`
+- `test/unit/mint/StreamMintLedger.t.sol`
 - release artifacts generated from `release-artifacts/contracts.json`
 - mint/accounting, launch, roadmap, backlog, and run-state docs
 
 Required tests/checks:
 
-- `forge test --match-path test/StreamMintLedger.t.sol -vvv`
+- `forge test --match-path test/unit/mint/StreamMintLedger.t.sol -vvv`
 - `forge build`
 - production size and release-artifact generator checks
 - changelog and Markdown checks
@@ -1997,8 +1997,8 @@ and any missing events/views/docs.
 
 Files likely touched:
 
-- `scripts/generate_protocol_surface_report.py`
-- `scripts/test_protocol_surface_report.py`
+- `tools/build/generate_protocol_surface_report.py`
+- `tools/build/test_protocol_surface_report.py`
 - `release-artifacts/latest/protocol-surface-report.json`
 - `docs/protocol-surface.md`
 - `release-artifacts/latest/release-manifest.json`
@@ -2056,8 +2056,8 @@ read-after-event calls.
 
 Files likely touched:
 
-- `smart-contracts/domains/mint/StreamMinter.sol`
-- `test/StreamMinterEvents.t.sol`
+- `smart-contracts/domains/mint/legacy/StreamMinter.sol`
+- `test/regression/legacy/mint/StreamMinterEvents.t.sol`
 - `release-artifacts/latest/event-topic-catalog.json`
 - generated release/deployment artifacts that pin ABI, runtime, topics, source
   verification, bytecode proof, manifests, and checksums
@@ -2080,7 +2080,7 @@ Required tests/checks:
 
 - Targeted Foundry tests.
 - Gas snapshot update/check.
-- `python scripts/generate_release_artifacts.py --check`
+- `python -m tools.build.generate_release_artifacts --check`
 - Protocol surface, source verification, bytecode proof, manifest, checksum,
   events/indexing, and auction-flow checks.
 - ABI compatibility check.
@@ -2118,8 +2118,8 @@ Files likely touched:
 
 - `release-artifacts/schema/release-signature-evidence.schema.json`
 - `release-artifacts/signatures/`
-- `scripts/check_release_signatures.py`
-- `scripts/test_release_signatures.py`
+- `tools/release/check_release_signatures.py`
+- `tools/release/test_release_signatures.py`
 - `docs/release-signatures.md`
 - `docs/release-policy.md`
 
@@ -2133,9 +2133,9 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_release_signatures.py`
-- `python scripts/check_release_signatures.py`
-- `python scripts/check_release_readiness.py`
+- `python -m tools.release.test_release_signatures`
+- `python -m tools.release.check_release_signatures`
+- `python -m tools.release.check_release_readiness`
 - Release manifest/checksum checks.
 
 Acceptance criteria:
@@ -2164,8 +2164,8 @@ for release candidate branches/tags.
 
 Files likely touched:
 
-- `scripts/check_signed_release_tag.py`
-- `scripts/test_signed_release_tag.py`
+- `tools/release/check_signed_release_tag.py`
+- `tools/release/test_signed_release_tag.py`
 - `docs/release-policy.md`
 - `docs/release-signatures.md`
 - `docs/release-readiness.md`
@@ -2219,8 +2219,8 @@ settings, bytecode hash, deployed address, chain ID, and release manifest.
 
 Files likely touched:
 
-- `scripts/generate_bytecode_release_proof.py`
-- `scripts/test_bytecode_release_proof.py`
+- `tools/build/generate_bytecode_release_proof.py`
+- `tools/build/test_bytecode_release_proof.py`
 - `release-artifacts/latest/`
 - `.github/workflows/ci.yml`
 - `Makefile`
@@ -2279,8 +2279,8 @@ integration assumptions.
 Files likely touched:
 
 - `docs/audit-package.md`
-- `scripts/check_audit_package.py`
-- `scripts/test_audit_package.py`
+- `tools/docs/check_audit_package.py`
+- `tools/docs/test_audit_package.py`
 - `release-artifacts/latest/release-manifest.json`
 - `release-artifacts/latest/bytecode-release-proof.json`
 - `release-artifacts/latest/SHA256SUMS`
@@ -2303,20 +2303,20 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_audit_package.py`
-- `python scripts/check_audit_package.py`
-- `python scripts/test_architecture_threat_model.py`
-- `python scripts/check_architecture_threat_model.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_audit_package.py scripts/test_audit_package.py`
+- `python -m tools.docs.test_audit_package`
+- `python -m tools.docs.check_audit_package`
+- `python -m tools.docs.test_architecture_threat_model`
+- `python -m tools.docs.check_architecture_threat_model`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/docs/check_audit_package.py tools/docs/test_audit_package.py`
 - `git diff --check`
 
 Acceptance criteria:
@@ -2354,17 +2354,17 @@ Files likely touched:
 
 - `release-artifacts/latest/risk-register.json`
 - `release-artifacts/schema/risk-register.schema.json`
-- `scripts/check_risk_register.py`
-- `scripts/generate_risk_register.py`
-- `scripts/test_risk_register.py`
+- `tools/security/check_risk_register.py`
+- `tools/security/generate_risk_register.py`
+- `tools/security/test_risk_register.py`
 - `docs/audit-package.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
-- `scripts/generate_release_manifest.py`
-- `scripts/test_release_manifest.py`
-- `scripts/generate_release_artifacts.py`
-- `scripts/test_release_artifacts.py`
-- `scripts/test_release_checksums.py`
+- `tools/release/generate_release_manifest.py`
+- `tools/release/test_release_manifest.py`
+- `tools/build/generate_release_artifacts.py`
+- `tools/build/test_release_artifacts.py`
+- `tools/release/test_release_checksums.py`
 - local/CI gate wiring
 - generated release manifest, bytecode proof, and checksum artifacts
 
@@ -2397,23 +2397,23 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_risk_register.py`
-- `python scripts/check_risk_register.py`
-- `python scripts/generate_risk_register.py --check`
-- `python scripts/test_audit_package.py`
-- `python scripts/check_audit_package.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_artifacts.py`
-- `python scripts/generate_release_artifacts.py --check`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_risk_register.py scripts/generate_risk_register.py scripts/test_risk_register.py`
+- `python -m tools.security.test_risk_register`
+- `python -m tools.security.check_risk_register`
+- `python -m tools.security.generate_risk_register --check`
+- `python -m tools.docs.test_audit_package`
+- `python -m tools.docs.check_audit_package`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.build.test_release_artifacts`
+- `python -m tools.build.generate_release_artifacts --check`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/security/check_risk_register.py tools/security/generate_risk_register.py tools/security/test_risk_register.py`
 - `git diff --check`
 
 Acceptance criteria:
@@ -2463,11 +2463,11 @@ Files likely touched:
 - `README.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, risk register, and checksum
   artifacts if docs or manifest inputs change
@@ -2493,21 +2493,21 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/test_risk_register.py`
-- `python scripts/check_risk_register.py`
-- `python scripts/generate_risk_register.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_integrations_readme.py scripts/test_integrations_readme.py`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.security.test_risk_register`
+- `python -m tools.security.check_risk_register`
+- `python -m tools.security.generate_risk_register --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/docs/check_integrations_readme.py tools/docs/test_integrations_readme.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2555,13 +2555,13 @@ Files likely touched:
 - `README.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
-- `scripts/check_contract_flows.py`
-- `scripts/test_contract_flows.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_contract_flows.py`
+- `tools/docs/test_contract_flows.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, risk register, and checksum
   artifacts if docs or manifest inputs change
@@ -2597,23 +2597,23 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_contract_flows.py`
-- `python scripts/check_contract_flows.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/test_risk_register.py`
-- `python scripts/check_risk_register.py`
-- `python scripts/generate_risk_register.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_contract_flows.py scripts/test_contract_flows.py`
+- `python -m tools.docs.test_contract_flows`
+- `python -m tools.docs.check_contract_flows`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.security.test_risk_register`
+- `python -m tools.security.check_risk_register`
+- `python -m tools.security.generate_risk_register --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/docs/check_contract_flows.py tools/docs/test_contract_flows.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2667,13 +2667,13 @@ Files likely touched:
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
 - `docs/auction-custody.md`
-- `scripts/check_auction_flows.py`
-- `scripts/test_auction_flows.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_auction_flows.py`
+- `tools/docs/test_auction_flows.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, risk register, and checksum
   artifacts if docs or manifest inputs change
@@ -2712,25 +2712,25 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_auction_flows.py`
-- `python scripts/check_auction_flows.py`
-- `python scripts/test_contract_flows.py`
-- `python scripts/check_contract_flows.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/test_risk_register.py`
-- `python scripts/check_risk_register.py`
-- `python scripts/generate_risk_register.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_auction_flows.py scripts/test_auction_flows.py`
+- `python -m tools.docs.test_auction_flows`
+- `python -m tools.docs.check_auction_flows`
+- `python -m tools.docs.test_contract_flows`
+- `python -m tools.docs.check_contract_flows`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.security.test_risk_register`
+- `python -m tools.security.check_risk_register`
+- `python -m tools.security.generate_risk_register --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/docs/check_auction_flows.py tools/docs/test_auction_flows.py`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2781,13 +2781,13 @@ Files likely touched:
 - `release-artifacts/README.md`
 - `docs/drop-authorization-signing.md`
 - `docs/signer-custody-readiness.md`
-- `scripts/check_wallet_signature_flows.py`
-- `scripts/test_wallet_signature_flows.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_wallet_signature_flows.py`
+- `tools/docs/test_wallet_signature_flows.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, and checksum artifacts if docs
   or manifest inputs change
@@ -2820,27 +2820,27 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_wallet_signature_flows.py`
-- `python scripts/check_wallet_signature_flows.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_drop_authorization_fixtures.py`
-- `python scripts/check_drop_authorization_fixtures.py`
-- `python scripts/test_drop_authorization_signing_evidence.py`
-- `python scripts/check_drop_authorization_signing_evidence.py`
-- `python scripts/test_signer_custody_readiness.py`
-- `python scripts/check_signer_custody_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
-- `forge test --match-path test/StreamDropsEIP712.t.sol`
-- `forge test --match-path test/StreamDropsERC1271.t.sol`
+- `python -m tools.docs.test_wallet_signature_flows`
+- `python -m tools.docs.check_wallet_signature_flows`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.protocol.test_drop_authorization_fixtures`
+- `python -m tools.protocol.check_drop_authorization_fixtures`
+- `python -m tools.release.test_drop_authorization_signing_evidence`
+- `python -m tools.release.check_drop_authorization_signing_evidence`
+- `python -m tools.release.test_signer_custody_readiness`
+- `python -m tools.release.check_signer_custody_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
+- `forge test --match-path test/unit/mint/StreamDropsEIP712.t.sol`
+- `forge test --match-path test/unit/mint/StreamDropsERC1271.t.sol`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2886,13 +2886,13 @@ Files likely touched:
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
 - `CHANGELOG.md`
-- `scripts/check_events_and_indexing.py`
-- `scripts/test_events_and_indexing.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_events_and_indexing.py`
+- `tools/docs/test_events_and_indexing.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, checksum artifacts, and risk
   register outputs if docs or manifest inputs change
@@ -2923,19 +2923,19 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_events_and_indexing.py`
-- `python scripts/check_events_and_indexing.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.test_events_and_indexing`
+- `python -m tools.docs.check_events_and_indexing`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -2983,31 +2983,31 @@ Files likely touched:
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
 - `CHANGELOG.md`
-- `scripts/check_metadata_rendering.py`
-- `scripts/test_metadata_rendering.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
+- `tools/docs/check_metadata_rendering.py`
+- `tools/docs/test_metadata_rendering.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
 - Makefile, Bash, PowerShell, and CI gate wiring
 - generated release manifest, bytecode proof, checksum artifacts, and risk
   register outputs if docs or manifest inputs change
 - `docs/metadata.md`
 - `test/fixtures/metadata/`
-- `test/StreamMetadataGolden.t.sol`
-- `test/StreamMetadataEvents.t.sol`
-- `test/StreamMetadataFreeze.t.sol`
-- `test/StreamCoreBurn.t.sol`
-- `test/StreamRandomizerLifecycle.t.sol`
-- `test/StreamRandomizerRetry.t.sol`
-- `test/StreamDependencyRegistry.t.sol`
-- `scripts/check_metadata_fixtures.py`
-- `scripts/test_metadata_fixtures.py`
-- `scripts/check_metadata_browser_sandbox.py`
-- `scripts/test_metadata_browser_sandbox.py`
-- `scripts/check_rehearsal_metadata_browser_sandbox.py`
-- `scripts/test_rehearsal_metadata_browser_sandbox.py`
+- `test/regression/legacy/metadata/StreamMetadataGolden.t.sol`
+- `test/regression/legacy/metadata/StreamMetadataEvents.t.sol`
+- `test/regression/legacy/metadata/StreamMetadataFreeze.t.sol`
+- `test/regression/legacy/core/StreamCoreBurn.t.sol`
+- `test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol`
+- `test/unit/entropy/StreamRandomizerRetry.t.sol`
+- `test/regression/legacy/dependencies/StreamDependencyRegistry.t.sol`
+- `tools/protocol/check_metadata_fixtures.py`
+- `tools/protocol/test_metadata_fixtures.py`
+- `tools/deployment/check_metadata_browser_sandbox.py`
+- `tools/deployment/test_metadata_browser_sandbox.py`
+- `tools/deployment/check_rehearsal_metadata_browser_sandbox.py`
+- `tools/deployment/test_rehearsal_metadata_browser_sandbox.py`
 - `release-artifacts/latest/event-topic-catalog.json`
 - `release-artifacts/latest/release-manifest.json`
 - `release-artifacts/latest/release-checksums.json`
@@ -3045,25 +3045,25 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_metadata_rendering.py`
-- `python scripts/check_metadata_rendering.py`
-- `python scripts/test_metadata_fixtures.py`
-- `python scripts/check_metadata_fixtures.py`
-- `python scripts/test_metadata_browser_sandbox.py`
-- `python scripts/check_metadata_browser_sandbox.py`
-- `python scripts/test_rehearsal_metadata_browser_sandbox.py`
-- `python scripts/check_rehearsal_metadata_browser_sandbox.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.test_metadata_rendering`
+- `python -m tools.docs.check_metadata_rendering`
+- `python -m tools.protocol.test_metadata_fixtures`
+- `python -m tools.protocol.check_metadata_fixtures`
+- `python -m tools.deployment.test_metadata_browser_sandbox`
+- `python -m tools.deployment.check_metadata_browser_sandbox`
+- `python -m tools.deployment.test_rehearsal_metadata_browser_sandbox`
+- `python -m tools.deployment.check_rehearsal_metadata_browser_sandbox`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
 - `git diff --check`.
 
 Acceptance criteria:
@@ -3107,8 +3107,8 @@ without adding a maintained app package or generated SDK.
 
 Files likely touched:
 
-- `docs/integrations/frontend-reference-architecture.md`
-- `docs/integrations/examples/react-viem.md`
+- `docs/reference/legacy-stack/integrations/frontend-reference-architecture.md`
+- `docs/reference/legacy-stack/integrations/examples/react-viem.md`
 - `docs/integrations/README.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
@@ -3116,14 +3116,14 @@ Files likely touched:
 - `Makefile`
 - `scripts/check.sh`
 - `scripts/check.ps1`
-- `scripts/check_react_next_reference.py`
-- `scripts/test_react_next_reference.py`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
-- `scripts/test_release_manifest.py`
+- `tools/docs/check_react_next_reference.py`
+- `tools/docs/test_react_next_reference.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
+- `tools/release/test_release_manifest.py`
 - `CHANGELOG.md`
 - `ops/AUTONOMOUS_RUN.md`
 - `ops/EXECUTION_BACKLOG.md`
@@ -3144,20 +3144,20 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python -m py_compile scripts/check_react_next_reference.py scripts/test_react_next_reference.py`
-- `python scripts/test_react_next_reference.py`
-- `python scripts/check_react_next_reference.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
+- `python -m py_compile tools/docs/check_react_next_reference.py tools/docs/test_react_next_reference.py`
+- `python -m tools.docs.test_react_next_reference`
+- `python -m tools.docs.check_react_next_reference`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
 - `make react-next-reference-check`
 - `bash -n scripts/check.sh`
 - PowerShell parser check for `scripts/check.ps1`.
@@ -3207,9 +3207,9 @@ recovery flows.
 
 Files likely touched:
 
-- `docs/integrations/mobile-walletconnect.md`
-- `scripts/check_mobile_walletconnect.py`
-- `scripts/test_mobile_walletconnect.py`
+- `docs/reference/legacy-stack/integrations/mobile-walletconnect.md`
+- `tools/docs/check_mobile_walletconnect.py`
+- `tools/docs/test_mobile_walletconnect.py`
 - integration, release-readiness, release-manifest, checksum, and CI wiring
 
 Implementation steps:
@@ -3223,12 +3223,12 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_mobile_walletconnect.py`.
-- `python scripts/check_mobile_walletconnect.py`.
-- `python scripts/test_integrations_readme.py`.
-- `python scripts/check_integrations_readme.py`.
-- `python scripts/test_release_readiness.py`.
-- `python scripts/check_release_readiness.py`.
+- `python -m tools.docs.test_mobile_walletconnect`.
+- `python -m tools.docs.check_mobile_walletconnect`.
+- `python -m tools.docs.test_integrations_readme`.
+- `python -m tools.docs.check_integrations_readme`.
+- `python -m tools.release.test_release_readiness`.
+- `python -m tools.release.check_release_readiness`.
 - Release manifest, bytecode proof, and checksum drift checks.
 - `git diff --check`.
 
@@ -3264,12 +3264,12 @@ patterns.
 
 Files likely touched:
 
-- `docs/integrations/electron-security-wallets.md`
+- `docs/reference/legacy-stack/integrations/electron-security-wallets.md`
 - `docs/integrations/README.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
-- `scripts/check_electron_security_wallets.py`
-- `scripts/test_electron_security_wallets.py`
+- `tools/docs/check_electron_security_wallets.py`
+- `tools/docs/test_electron_security_wallets.py`
 - integration, release-readiness, release-manifest, checksum, and CI wiring
 - `CHANGELOG.md`
 - `ops/AUTONOMOUS_RUN.md`
@@ -3297,19 +3297,19 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_electron_security_wallets.py`
-- `python scripts/check_electron_security_wallets.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.test_electron_security_wallets`
+- `python -m tools.docs.check_electron_security_wallets`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.docs.check_changelog`
 - `make electron-security-wallets-check`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
@@ -3353,18 +3353,18 @@ required confirmations, Safe transactions, events, monitoring, and runbooks.
 
 Files likely touched:
 
-- `docs/integrations/operator-admin-ui.md`
-- `scripts/check_operator_admin_ui.py`
-- `scripts/test_operator_admin_ui.py`
+- `docs/reference/legacy-stack/integrations/operator-admin-ui.md`
+- `tools/docs/check_operator_admin_ui.py`
+- `tools/docs/test_operator_admin_ui.py`
 - `docs/integrations/README.md`
 - `docs/release-readiness.md`
 - `release-artifacts/README.md`
-- `scripts/check_integrations_readme.py`
-- `scripts/test_integrations_readme.py`
-- `scripts/check_release_readiness.py`
-- `scripts/test_release_readiness.py`
-- `scripts/generate_release_manifest.py`
-- `scripts/test_release_manifest.py`
+- `tools/docs/check_integrations_readme.py`
+- `tools/docs/test_integrations_readme.py`
+- `tools/release/check_release_readiness.py`
+- `tools/release/test_release_readiness.py`
+- `tools/release/generate_release_manifest.py`
+- `tools/release/test_release_manifest.py`
 - `Makefile`
 - `scripts/check.sh`
 - `scripts/check.ps1`
@@ -3428,9 +3428,9 @@ Files touched:
 - `docs/integrations/README.md`
 - `smart-contracts/domains/metadata/StreamContractMetadata.sol`
 - `smart-contracts/interfaces/standards/IERC7572.sol`
-- `smart-contracts/interfaces/stream/IStreamContractMetadata.sol`
-- `test/StreamContractMetadata.t.sol`
-- `script/RehearseDeployment.s.sol`
+- `smart-contracts/interfaces/stream/metadata/IStreamContractMetadata.sol`
+- `test/regression/legacy/metadata/StreamContractMetadata.t.sol`
+- `script/legacy/RehearseDeployment.s.sol`
 - `deployments/` config, manifest, address-book, broadcast, and local evidence
   artifacts
 - `release-artifacts/contracts.json`
@@ -3457,19 +3457,19 @@ Implementation steps:
 Required tests/checks:
 
 - `forge test --match-path <contract-metadata-test-file> -vvv` if implemented
-- `forge test --match-path test/StreamContractMetadata.t.sol -vvv`
-- `forge test --match-path test/StreamDeploymentManifest.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/metadata/StreamContractMetadata.t.sol -vvv`
+- `forge test --match-path test/regression/legacy/protocol/StreamDeploymentManifest.t.sol -vvv`
 - `forge test -vvv`
 - `forge build --sizes --via-ir --skip test --skip script --force`
-- `python scripts/generate_release_artifacts.py --check`
-- `python scripts/generate_source_verification_inputs.py --check`
-- `python scripts/generate_deployment_manifest.py --check`
-- `python scripts/generate_address_books.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/check_ceremony_evidence.py`
-- `python scripts/check_randomizer_operations.py`
+- `python -m tools.build.generate_release_artifacts --check`
+- `python -m tools.build.generate_source_verification_inputs --check`
+- `python -m tools.deployment.generate_deployment_manifest --check`
+- `python -m tools.deployment.generate_address_books --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.deployment.check_ceremony_evidence`
+- `python -m tools.deployment.check_randomizer_operations`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - Markdown heading check
@@ -3500,7 +3500,7 @@ Acceptance criteria:
 Evidence artifacts:
 
 - ADR/design update.
-- `test/StreamContractMetadata.t.sol`
+- `test/regression/legacy/metadata/StreamContractMetadata.t.sol`
 - Interface/event catalog updates.
 - Deployment rehearsal, manifest, address-book, source verification,
   bytecode-proof, checksum, ceremony, and randomizer-operation local evidence
@@ -3541,9 +3541,9 @@ Files touched:
 - `release-artifacts/provenance/one-of-one-provenance-template.provenance.json`
 - `release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`
 - `release-artifacts/latest/one-of-one-provenance-manifest.json`
-- `scripts/check_one_of_one_provenance_manifest.py`
-- `scripts/generate_one_of_one_provenance_manifest.py`
-- `scripts/test_one_of_one_provenance_manifest.py`
+- `tools/protocol/check_one_of_one_provenance_manifest.py`
+- `tools/protocol/generate_one_of_one_provenance_manifest.py`
+- `tools/protocol/test_one_of_one_provenance_manifest.py`
 - local/CI gate wiring, release manifest/checksum generators, changelog, and
   run-state docs
 
@@ -3568,23 +3568,23 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_one_of_one_provenance_manifest.py`
-- `python scripts/check_one_of_one_provenance_manifest.py`
-- `python scripts/generate_one_of_one_provenance_manifest.py --check`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_metadata_rendering.py`
-- `python scripts/check_metadata_rendering.py`
-- `python scripts/test_events_and_indexing.py`
-- `python scripts/check_events_and_indexing.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/generate_release_artifacts.py --check`
-- `python scripts/check_changelog.py`
-- `python -m py_compile scripts/check_one_of_one_provenance_manifest.py scripts/generate_one_of_one_provenance_manifest.py scripts/test_one_of_one_provenance_manifest.py`
+- `python -m tools.protocol.test_one_of_one_provenance_manifest`
+- `python -m tools.protocol.check_one_of_one_provenance_manifest`
+- `python -m tools.protocol.generate_one_of_one_provenance_manifest --check`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.docs.test_metadata_rendering`
+- `python -m tools.docs.check_metadata_rendering`
+- `python -m tools.docs.test_events_and_indexing`
+- `python -m tools.docs.check_events_and_indexing`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.build.generate_release_artifacts --check`
+- `python -m tools.docs.check_changelog`
+- `python -m py_compile tools/protocol/check_one_of_one_provenance_manifest.py tools/protocol/generate_one_of_one_provenance_manifest.py tools/protocol/test_one_of_one_provenance_manifest.py`
 - `make check`
 - `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
 - Markdown heading scan
@@ -3666,21 +3666,21 @@ Implementation steps:
 
 Required tests/checks:
 
-- `python scripts/test_royalty_policy.py`
-- `python scripts/check_royalty_policy.py`
-- `python scripts/test_integrations_readme.py`
-- `python scripts/check_integrations_readme.py`
-- `python scripts/test_release_readiness.py`
-- `python scripts/check_release_readiness.py`
-- `python scripts/test_release_manifest.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/test_bytecode_release_proof.py`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/test_release_checksums.py`
-- `python scripts/generate_release_checksums.py --check`
-- `forge test --match-path test/StreamRoyalty.t.sol -vvv` if behavior changes
-- `python scripts/generate_release_artifacts.py --check` if ABI/events change
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.test_royalty_policy`
+- `python -m tools.docs.check_royalty_policy`
+- `python -m tools.docs.test_integrations_readme`
+- `python -m tools.docs.check_integrations_readme`
+- `python -m tools.release.test_release_readiness`
+- `python -m tools.release.check_release_readiness`
+- `python -m tools.release.test_release_manifest`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.test_bytecode_release_proof`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.test_release_checksums`
+- `python -m tools.release.generate_release_checksums --check`
+- `forge test --match-path test/regression/legacy/revenue/StreamRoyalty.t.sol -vvv` if behavior changes
+- `python -m tools.build.generate_release_artifacts --check` if ABI/events change
+- `python -m tools.docs.check_changelog`
 - `git diff --check`
 
 Acceptance criteria:
@@ -3698,7 +3698,7 @@ Acceptance criteria:
 Evidence artifacts:
 
 - `docs/royalty-policy.md` policy/design record.
-- `scripts/check_royalty_policy.py` and `scripts/test_royalty_policy.py`.
+- `tools/docs/check_royalty_policy.py` and `tools/docs/test_royalty_policy.py`.
 - Release/readiness integration links and generated artifact hashes.
 - Solidity tests if behavior changes.
 - Future marketplace evidence from `ONE-005`.
@@ -3768,8 +3768,8 @@ Required tests/checks:
 
 - Package checker unit tests
 - Package generator/checker `--check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 - Metadata fixture tests if fixtures change
 - `git diff --check`
 
@@ -3826,8 +3826,8 @@ Files likely touched:
 - `release-artifacts/evidence/public-beta-templates/`
 - `release-artifacts/evidence/production-release-templates/`
 - `release-artifacts/schema/`
-- `scripts/check_marketplace_indexer_evidence.py`
-- `scripts/test_marketplace_indexer_evidence.py`
+- `tools/release/check_marketplace_indexer_evidence.py`
+- `tools/release/test_marketplace_indexer_evidence.py`
 - generated release artifacts
 
 Implementation steps:
@@ -3854,10 +3854,10 @@ Required tests/checks:
 - Evidence checker committed-template validation
 - Evidence checker manifest-row validation for reviewed envelope and retained
   Markdown evidence
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 - `git diff --check`
 
 Acceptance criteria:
@@ -3922,7 +3922,7 @@ Implementation steps:
 
 Required tests/checks:
 
-- Production size command and `scripts/check_contract_size_budget.py`
+- Production size command and `tools/build/check_contract_size_budget.py`
   documentation check.
 - Markdown heading check.
 - `git diff --check`.
@@ -3965,8 +3965,8 @@ Files likely touched:
 - `docs/warning-dispositions.md`
 - `docs/release-readiness.md`
 - `docs/status.md`
-- `scripts/check_warning_dispositions.py`
-- `scripts/test_warning_dispositions.py`
+- `tools/security/check_warning_dispositions.py`
+- `tools/security/test_warning_dispositions.py`
 - `smart-contracts/` if warning burn-down changes code
 - `test/` if behavior-preserving warning fixes need regression coverage
 - CI/local gate scripts if a stricter warning policy is adopted
@@ -3989,15 +3989,15 @@ Required tests/checks:
 - `forge test -vvv`
 - `forge build --sizes --via-ir --skip test --skip script --force`
 - `forge doc --build`
-- `python scripts/test_warning_dispositions.py`
-- `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
-- `python scripts/generate_risk_register.py --check`
+- `python -m tools.security.test_warning_dispositions`
+- `python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
+- `python -m tools.security.generate_risk_register --check`
 - `make warning-dispositions-check`
 - `make check`
 - Slither baseline check if touched
-- `python scripts/check_changelog.py`
+- `python -m tools.docs.check_changelog`
 - `git diff --check`
 
 Acceptance criteria:
@@ -4034,8 +4034,8 @@ Files likely touched:
 - `docs/known-blockers.md`
 - `docs/integrations/README.md`
 - `CONTRIBUTING.md`
-- `scripts/check_readme.py`
-- `scripts/test_readme.py`
+- `tools/docs/check_readme.py`
+- `tools/docs/test_readme.py`
 - `Makefile`
 - `scripts/check.sh`
 - `scripts/check.ps1`
@@ -4053,9 +4053,9 @@ Required tests/checks:
 
 - Markdown heading check.
 - Root README maturity/navigation checker.
-- `python scripts/check_release_readiness.py` if docs are tracked.
-- `python scripts/test_readme.py`
-- `python scripts/check_readme.py`
+- `python -m tools.release.check_release_readiness` if docs are tracked.
+- `python -m tools.docs.test_readme`
+- `python -m tools.docs.check_readme`
 - `git diff --check`.
 
 Acceptance criteria:

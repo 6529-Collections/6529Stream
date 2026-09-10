@@ -8,7 +8,7 @@
   "block_or_reference": "template-only final audit report ID, public report URL, or auditor reference",
   "command_or_source_system": "template-only auditor portal, public report, or audit package review source",
   "retained_path": "release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md",
-  "sha256": "sha256:d575a626ce65eb1543dbefc67201025352dc981792fe4792fc73b3039d991ce7",
+  "sha256": "sha256:9b0bd248537b24132906718cf4a84b85f5b4d3bf1d58b3720ce4a84f59313807",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

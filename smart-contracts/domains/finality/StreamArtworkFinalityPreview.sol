@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamArtworkFinalityComponents.sol";
-import "../../interfaces/stream/IStreamCoreFinalityAdapter.sol";
-import "../../interfaces/stream/IStreamCoreFinalitySource.sol";
-import "../../interfaces/stream/IStreamFinalityGovernanceAuthority.sol";
-import "../../interfaces/stream/IStreamFinalityMetadataReads.sol";
-import "../../interfaces/stream/IStreamFinalitySanctionReads.sol";
+import "../../interfaces/stream/finality/IStreamArtworkFinalityComponents.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
+import "../../interfaces/stream/finality/IStreamFinalityGovernanceAuthority.sol";
+import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
+import "../../interfaces/stream/finality/IStreamFinalitySanctionReads.sol";
 import "./StreamArtworkFinalityRegistry.sol";
-import "./StreamArtworkFinalityTypes.sol";
+import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
 /// @notice The finality registry's preview surface: previewFinality per [LTA-FINALITY]
 ///         exposes every comparison finalization performs — plus the computed sanction

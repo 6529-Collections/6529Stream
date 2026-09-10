@@ -8,7 +8,7 @@
   "block_or_reference": "template-only checksum bundle, detached signature, signer fingerprint, or release reference",
   "command_or_source_system": "template-only signature verification command, signing ceremony transcript, or release CI source",
   "retained_path": "release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md",
-  "sha256": "sha256:f9e1ed7db68162db95366752ff1cfe1a2e32360afd22abbd8b89fa2b2da6f570",
+  "sha256": "sha256:fca178fb4444ab2791e7994be80310764235b5c177c7ba0139c231217c2ed392",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

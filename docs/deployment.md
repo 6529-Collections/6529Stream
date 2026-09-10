@@ -14,7 +14,7 @@ plan. Deployment manifests are mandatory release artifacts and follow ADR 0007.
 Run the local deployment rehearsal with:
 
 ```sh
-forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
+forge script script/legacy/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
 ```
 
 The suite runs the local deployment, auction ceremony, and emergency
@@ -52,12 +52,12 @@ coverage, the individual local rehearsal scripts remain runnable and are also
 exercised by the full local/CI check gate:
 
 ```sh
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
-forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
-forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
+forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/legacy/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
+forge script script/legacy/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
 ```
 
-`script/RehearseAuctionCeremony.s.sol` adds the local auction ceremony layer on
+`script/legacy/RehearseAuctionCeremony.s.sol` adds the local auction ceremony layer on
 top of the deployed stack. It configures a local deterministic randomizer,
 signs an auction drop with the configured EIP-712 signer, mints the auction
 drop, proves NFT custody is held by `StreamAuctions` while active, funds and
@@ -67,7 +67,7 @@ returned evidence is local Anvil evidence only; fork, testnet, and production
 broadcast ceremonies must still retain their own manifests and transaction
 evidence.
 
-`script/RehearseEmergencyRedeployment.s.sol` adds the local emergency
+`script/legacy/RehearseEmergencyRedeployment.s.sol` adds the local emergency
 redeployment layer required by ADR 0007. It deploys an impacted historical
 stack and a replacement stack with a distinct deployment version, proves the
 manifest hashes, drop EIP-712 domains, and core/drops/auction addresses differ,
@@ -81,8 +81,8 @@ evidence, verification evidence, and incident/runbook records.
 Run the local metadata browser rehearsal with:
 
 ```sh
-python scripts/test_rehearsal_metadata_browser_sandbox.py
-python scripts/check_rehearsal_metadata_browser_sandbox.py
+python -m tools.deployment.test_rehearsal_metadata_browser_sandbox
+python -m tools.deployment.check_rehearsal_metadata_browser_sandbox
 ```
 
 To retain deterministic local capture artifacts for review, write the browser
@@ -90,7 +90,7 @@ summary, generated `tokenURI`, and redacted transcript to an ignored or
 release-evidence staging directory:
 
 ```sh
-python scripts/check_rehearsal_metadata_browser_sandbox.py \
+python -m tools.deployment.check_rehearsal_metadata_browser_sandbox \
   --summary-json /tmp/metadata-browser-summary.json \
   --token-uri-output /tmp/metadata-browser-token-uri.txt \
   --transcript-output /tmp/metadata-browser-transcript.md
@@ -104,7 +104,7 @@ fetched from deployed fork/testnet contracts; it does not close
 manifest remains blocked until the retained draft is reviewed and linked:
 
 ```sh
-python scripts/generate_fork_metadata_browser_evidence_draft.py \
+python -m tools.release.generate_fork_metadata_browser_evidence_draft \
   --capture-summary-json /tmp/metadata-browser-summary.json \
   --token-uri-output /tmp/metadata-browser-token-uri.txt \
   --transcript-output /tmp/metadata-browser-transcript.md \
@@ -122,7 +122,7 @@ python scripts/generate_fork_metadata_browser_evidence_draft.py \
   --metadata-fetched-from-deployed-contract
 ```
 
-`script/RehearseMetadataBrowser.s.sol` builds on the deployment rehearsal by
+`script/legacy/RehearseMetadataBrowser.s.sol` builds on the deployment rehearsal by
 deploying the local stack, registering a deterministic metadata dependency,
 minting through the EIP-712 drop authorization path, finalizing token
 randomness/image/attribute inputs, and returning the generated on-chain
@@ -148,16 +148,16 @@ First produce `out-release/` with the canonical builder described in
 [`docs/tooling.md`](tooling.md). Then run:
 
 ```sh
-python scripts/test_materialize_canonical_deployment_plan.py
-python scripts/materialize_canonical_deployment_plan.py \
+python -m tools.deployment.test_materialize_canonical_deployment_plan
+python -m tools.deployment.materialize_canonical_deployment_plan \
   --candidate deployments/config/canonical-deployment-candidate-non-production.json \
   --output tmp/canonical-deployment-plan.json
-python scripts/materialize_canonical_deployment_plan.py \
+python -m tools.deployment.materialize_canonical_deployment_plan \
   --candidate deployments/config/canonical-deployment-candidate-non-production.json \
   --output tmp/canonical-deployment-plan.json \
   --check
-python scripts/test_execute_canonical_deployment_plan.py
-python scripts/execute_canonical_deployment_plan.py \
+python -m tools.deployment.test_execute_canonical_deployment_plan
+python -m tools.deployment.execute_canonical_deployment_plan \
   --mode anvil \
   --candidate deployments/config/canonical-deployment-candidate-non-production.json \
   --plan tmp/canonical-deployment-plan.json \
@@ -312,15 +312,15 @@ Preflight from a clean checkout:
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
 forge test -vvv
-python scripts/test_release_build_artifacts.py
-python scripts/build_release_artifacts.py
-python scripts/build_release_artifacts.py --check
-python scripts/generate_release_artifacts.py --check
-python scripts/generate_source_verification_inputs.py --check
-python scripts/test_deployment_manifest.py
-python scripts/check_testnet_deployment_rehearsal_evidence.py
-python scripts/test_sepolia_evidence_preflight.py
-python scripts/check_sepolia_evidence_preflight.py
+python -m tools.build.test_release_build_artifacts
+python -m tools.build.build_release_artifacts
+python -m tools.build.build_release_artifacts --check
+python -m tools.build.generate_release_artifacts --check
+python -m tools.build.generate_source_verification_inputs --check
+python -m tools.deployment.test_deployment_manifest
+python -m tools.deployment.check_testnet_deployment_rehearsal_evidence
+python -m tools.deployment.test_sepolia_evidence_preflight
+python -m tools.deployment.check_sepolia_evidence_preflight
 ```
 
 The first aggregate Forge command is a warning and whole-tree size diagnostic;
@@ -341,7 +341,7 @@ of required environment variable names. It never writes or prints the
 environment variable values:
 
 ```sh
-python scripts/check_sepolia_evidence_preflight.py \
+python -m tools.deployment.check_sepolia_evidence_preflight \
   --require-env \
   --output-json /tmp/sepolia-evidence-preflight.json
 ```
@@ -353,7 +353,7 @@ repository, and rerun the preflight before recording the deployment transcript.
 Broadcast the Sepolia rehearsal from the operator shell:
 
 ```sh
-forge script script/RehearseDeployment.s.sol:RehearseDeployment \
+forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment \
   --sig "runSepolia()" \
   --rpc-url "$SEPOLIA_RPC_URL" \
   --sender "$SEPOLIA_DEPLOYER_ADDRESS" \
@@ -367,7 +367,7 @@ The committed transcript must redact the RPC endpoint and any signer or API
 material. Retain the command as:
 
 ```sh
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir
+forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir
 ```
 
 Retain and sanitize the Foundry broadcast:
@@ -393,16 +393,16 @@ Retain and sanitize the Foundry broadcast:
    non-template config:
 
 ```sh
-python scripts/generate_broadcast_manifest_input.py \
+python -m tools.deployment.generate_broadcast_manifest_input \
   --template deployments/config/sepolia-6529stream-v0.1.0-001-reviewed.json \
   --broadcast deployments/broadcasts/sepolia-6529stream-v0.1.0-001-run-latest.json \
   --output deployments/config/sepolia-6529stream-v0.1.0-001-broadcast.json \
   --manifest-output deployments/examples/sepolia-6529stream-v0.1.0-001-broadcast.json
-python scripts/generate_deployment_manifest.py \
+python -m tools.deployment.generate_deployment_manifest \
   --config deployments/config/sepolia-6529stream-v0.1.0-001-broadcast.json
-python scripts/generate_address_books.py \
+python -m tools.deployment.generate_address_books \
   --manifest deployments/examples/sepolia-6529stream-v0.1.0-001-broadcast.json
-python scripts/generate_source_verification_inputs.py --check
+python -m tools.build.generate_source_verification_inputs --check
 ```
 
 Then replace the template fields in
@@ -422,9 +422,9 @@ or a copied reviewed artifact with:
 Validate and regenerate release evidence:
 
 ```sh
-python scripts/test_testnet_deployment_rehearsal_evidence.py
-python scripts/check_testnet_deployment_rehearsal_evidence.py
-python scripts/generate_non_local_release_evidence.py \
+python -m tools.deployment.test_testnet_deployment_rehearsal_evidence
+python -m tools.deployment.check_testnet_deployment_rehearsal_evidence
+python -m tools.release.generate_non_local_release_evidence \
   --template release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json \
   --retained-artifact release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md \
   --output release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-evidence.json \
@@ -437,13 +437,13 @@ python scripts/generate_non_local_release_evidence.py \
   --review-status pending_review \
   --source-git-commit "<40 hex commit>" \
   --source-ci-run "<CI run URL or operator transcript>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/generate_release_manifest.py
-python scripts/generate_release_checksums.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 Only after reviewer acceptance should the public-beta evidence row move from
@@ -482,7 +482,7 @@ satellite dependency-pointer change alters the rehearsal manifest hash.
 
 The first broadcast-ingestion baseline is generated from the sanitized Foundry
 fixture at `deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json`.
-`scripts/generate_broadcast_manifest_input.py` validates the fixture chain ID,
+`tools/deployment/generate_broadcast_manifest_input.py` validates the fixture chain ID,
 expected contract names, deployed addresses, transaction hashes, receipt
 success, duplicate deployments, missing deployments, unexpected deployments,
 and secret-like keys, then writes
@@ -507,34 +507,34 @@ only:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
-python scripts/test_release_build_artifacts.py
-python scripts/build_release_artifacts.py
-python scripts/build_release_artifacts.py --check
-python scripts/check_contract_size_budget.py
-python scripts/generate_release_artifacts.py
-python scripts/generate_release_artifacts.py --check
-python scripts/generate_protocol_surface_report.py
-python scripts/generate_protocol_surface_report.py --check
-python scripts/generate_source_verification_inputs.py
-python scripts/generate_source_verification_inputs.py --check
-python scripts/generate_broadcast_manifest_input.py
-python scripts/generate_broadcast_manifest_input.py --check
-python scripts/generate_deployment_manifest.py
-python scripts/generate_deployment_manifest.py --check
-python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
-python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
-python scripts/generate_address_books.py
-python scripts/generate_address_books.py --check
-python scripts/test_ceremony_evidence.py
-python scripts/check_ceremony_evidence.py
-python scripts/test_admin_ceremony_evidence.py
-python scripts/check_admin_ceremony_evidence.py
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
-python scripts/generate_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py
-python scripts/generate_release_checksums.py --check
+python -m tools.build.test_release_build_artifacts
+python -m tools.build.build_release_artifacts
+python -m tools.build.build_release_artifacts --check
+python -m tools.build.check_contract_size_budget
+python -m tools.build.generate_release_artifacts
+python -m tools.build.generate_release_artifacts --check
+python -m tools.build.generate_protocol_surface_report
+python -m tools.build.generate_protocol_surface_report --check
+python -m tools.build.generate_source_verification_inputs
+python -m tools.build.generate_source_verification_inputs --check
+python -m tools.deployment.generate_broadcast_manifest_input
+python -m tools.deployment.generate_broadcast_manifest_input --check
+python -m tools.deployment.generate_deployment_manifest
+python -m tools.deployment.generate_deployment_manifest --check
+python -m tools.deployment.generate_deployment_manifest --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
+python -m tools.deployment.generate_deployment_manifest --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
+python -m tools.deployment.generate_address_books
+python -m tools.deployment.generate_address_books --check
+python -m tools.deployment.test_ceremony_evidence
+python -m tools.deployment.check_ceremony_evidence
+python -m tools.deployment.test_admin_ceremony_evidence
+python -m tools.deployment.check_admin_ceremony_evidence
+python -m tools.deployment.test_randomizer_operations
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_checksums --check
 ```
 
 These generated artifacts do not prove that Forge broadcasts consume the same
@@ -623,8 +623,8 @@ release artifacts that bind a deployment version to:
 Validate the committed local evidence with:
 
 ```sh
-python scripts/test_ceremony_evidence.py
-python scripts/check_ceremony_evidence.py
+python -m tools.deployment.test_ceremony_evidence
+python -m tools.deployment.check_ceremony_evidence
 ```
 
 `deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json` is local
@@ -662,8 +662,8 @@ unreleased drop payloads.
 Validate admin ceremony evidence with:
 
 ```sh
-python scripts/test_admin_ceremony_evidence.py
-python scripts/check_admin_ceremony_evidence.py
+python -m tools.deployment.test_admin_ceremony_evidence
+python -m tools.deployment.check_admin_ceremony_evidence
 ```
 
 The release manifest catalogs checked admin ceremony evidence as a deployment
@@ -688,8 +688,8 @@ no-secret public release artifacts that bind a deployment version to:
 Validate the committed local evidence with:
 
 ```sh
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
+python -m tools.deployment.test_randomizer_operations
+python -m tools.deployment.check_randomizer_operations
 ```
 
 `deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json` is
@@ -711,12 +711,15 @@ Before a deployment can become public-beta eligible:
   resolve through the immutable record-family registry; only reserved broad
   lock administration retains the dedicated admin path.
 - Validate the record-family source and evidence package with
-  `python scripts/test_record_family_authorization.py` followed by
-  `python scripts/check_record_family_authorization.py`. The exact source
+  `python -m tools.protocol.test_record_family_authorization` followed by
+  `python -m tools.protocol.check_record_family_authorization`. The exact source
   catalog is
   `release-artifacts/record-family-authorization-source-catalog.json`; its
   schema is
   `release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json`.
+  This active catalog binds the `7b4ef22b` source checkpoint. The former
+  `f5c7164f` catalog remains unchanged under `release-artifacts/baselines/` as
+  `record-family-authorization-source-catalog-f5c7164f.json`.
   The retained historical inventory is
   `release-artifacts/record-family-authorization-inventory.json`; its schema is
   `release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`.

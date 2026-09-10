@@ -163,7 +163,7 @@ Recovery:
 - Retain the stuck-auction drill bundle with the checked template at
   [`release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md)
   and validate it with
-  `python scripts/check_stuck_auction_drill_evidence.py`. This template is not
+  `python -m tools.release.check_stuck_auction_drill_evidence`. This template is not
   completion evidence until the environment-specific artifact is reviewed and
   all placeholders are replaced.
 
@@ -207,7 +207,7 @@ Recovery:
 - Retain the failed-randomness drill bundle with the checked template at
   [`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md)
   and validate it with
-  `python scripts/check_failed_randomness_drill_evidence.py`. This template is
+  `python -m tools.release.check_failed_randomness_drill_evidence`. This template is
   not completion evidence until the environment-specific artifact is reviewed
   and all placeholders are replaced.
 
@@ -293,7 +293,7 @@ Recovery:
 - Retain the bad metadata/dependency drill bundle with the checked template at
   [`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md)
   and validate it with
-  `python scripts/check_bad_metadata_dependency_drill_evidence.py`. This
+  `python -m tools.protocol.check_bad_metadata_dependency_drill_evidence`. This
   template is not completion evidence until the environment-specific artifact
   is reviewed and all placeholders are replaced.
 
@@ -318,19 +318,19 @@ Immediate checks:
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-retained-artifact.txt).
 - Compare retained signing ceremony metadata with
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
-  and `python scripts/check_drop_authorization_signing_evidence.py`.
+  and `python -m tools.release.check_drop_authorization_signing_evidence`.
 - Compare retained signer custody readiness metadata with
   [`docs/signer-custody-readiness.md`](signer-custody-readiness.md),
   [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt),
-  and `python scripts/check_signer_custody_readiness.py`.
+  and `python -m tools.release.check_signer_custody_readiness`.
 - Compare retained deployment admin ceremony metadata with
   [`docs/deployment.md#admin-ceremony-evidence`](deployment.md#admin-ceremony-evidence),
   [`deployments/schema/admin-ceremony-evidence.schema.json`](../deployments/schema/admin-ceremony-evidence.schema.json),
   [`deployments/admin-ceremony/admin-ceremony-evidence-template.json`](../deployments/admin-ceremony/admin-ceremony-evidence-template.json),
   [`deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md`](../deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md),
-  and `python scripts/check_admin_ceremony_evidence.py`.
+  and `python -m tools.deployment.check_admin_ceremony_evidence`.
 - Confirm whether any payload has already been executed.
 - Preserve EIP-712 domain and signature validation evidence without committing
   unreleased payloads.
@@ -361,7 +361,7 @@ Recovery:
 - Retain the signer-compromise drill bundle with the checked template at
   [`release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md)
   and validate it with
-  `python scripts/check_signer_compromise_drill_evidence.py`. This template is
+  `python -m tools.release.check_signer_compromise_drill_evidence`. This template is
   not completion evidence until the environment-specific artifact is reviewed
   and all placeholders are replaced.
 - Update public communications with the new active signer state and any
@@ -456,35 +456,35 @@ monitoring, review, and redaction evidence.
 Run the incident-response checker directly:
 
 ```sh
-python scripts/test_incident_response.py
-python scripts/check_incident_response.py
-python scripts/test_incident_drill_evidence.py
-python scripts/check_incident_drill_evidence.py
-python scripts/test_signer_compromise_drill_evidence.py
-python scripts/check_signer_compromise_drill_evidence.py
-python scripts/test_stuck_auction_drill_evidence.py
-python scripts/check_stuck_auction_drill_evidence.py
-python scripts/test_failed_randomness_drill_evidence.py
-python scripts/check_failed_randomness_drill_evidence.py
-python scripts/test_bad_metadata_dependency_drill_evidence.py
-python scripts/check_bad_metadata_dependency_drill_evidence.py
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
+python -m tools.docs.test_incident_response
+python -m tools.docs.check_incident_response
+python -m tools.release.test_incident_drill_evidence
+python -m tools.release.check_incident_drill_evidence
+python -m tools.release.test_signer_compromise_drill_evidence
+python -m tools.release.check_signer_compromise_drill_evidence
+python -m tools.release.test_stuck_auction_drill_evidence
+python -m tools.release.check_stuck_auction_drill_evidence
+python -m tools.release.test_failed_randomness_drill_evidence
+python -m tools.release.check_failed_randomness_drill_evidence
+python -m tools.protocol.test_bad_metadata_dependency_drill_evidence
+python -m tools.protocol.check_bad_metadata_dependency_drill_evidence
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
 ```
 
 Run the release evidence checks after changing this runbook or linked
 governance docs:
 
 ```sh
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 Run the full local gate before merge:
@@ -504,26 +504,26 @@ changes.
 After editing this file, run:
 
 ```sh
-python scripts/test_incident_response.py
-python scripts/check_incident_response.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/test_incident_drill_evidence.py
-python scripts/check_incident_drill_evidence.py
-python scripts/test_signer_compromise_drill_evidence.py
-python scripts/check_signer_compromise_drill_evidence.py
-python scripts/test_stuck_auction_drill_evidence.py
-python scripts/check_stuck_auction_drill_evidence.py
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/generate_release_manifest.py
-python scripts/generate_release_checksums.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.docs.test_incident_response
+python -m tools.docs.check_incident_response
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.docs.test_audit_package
+python -m tools.docs.check_audit_package
+python -m tools.release.test_incident_drill_evidence
+python -m tools.release.check_incident_drill_evidence
+python -m tools.release.test_signer_compromise_drill_evidence
+python -m tools.release.check_signer_compromise_drill_evidence
+python -m tools.release.test_stuck_auction_drill_evidence
+python -m tools.release.check_stuck_auction_drill_evidence
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```

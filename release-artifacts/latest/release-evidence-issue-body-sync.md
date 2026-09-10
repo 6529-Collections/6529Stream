@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:63b96e9b1e379018062eedb75206945a6ce1d5fa2dab09ac4e7c46a3447374c9` |
+| Backlog SHA-256 | `sha256:515717f30c9c6a3f4d826692e19f38216ba572bbf303600b743da52803a09e54` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:e2d140a9d2a488459c113df14944f241c7c82faa2acbd450121b98d2f2500c41` |
 
@@ -27,30 +27,30 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 
 | Issue | Entry | Status | Body SHA-256 | Lines |
 | --- | --- | --- | --- | --- |
-| [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:681dd09e156b8949ea33717554e80bb2c5518e9504f827bc5a8fe1b7b5551292` | 55 |
-| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `pending` | `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942` | 55 |
-| [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:fb44ad23ca2db58f098e47f38ce6e799375e7ede3e390942ba363fb89572baaf` | 55 |
-| [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `pending` | `sha256:9131094b0c71399aa2a72d9c93655a9d2d586d0a1377caad7737666e38fdcc69` | 55 |
-| [#220](https://github.com/6529-Collections/6529Stream/issues/220) | `public-beta-fork-testnet-randomizer-operations-evidence` | `pending` | `sha256:fbe306fb56a884c07437467d57734c64e450246207b6fcff2775a2db7788292f` | 55 |
-| [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91` | 55 |
-| [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a` | 55 |
-| [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9` | 59 |
-| [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:ae61020e8e7f3c9e3a2f0bfdc3d5d053a997fbd328cba05ead33398bd67420bc` | 59 |
-| [#225](https://github.com/6529-Collections/6529Stream/issues/225) | `production-release-production-address-books` | `missing` | `sha256:64ace907f16d545eadd001e728b3f6670d60192dcd4dc5aba02bcb6f1ef2e652` | 55 |
-| [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b` | 53 |
-| [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:2e877b059041b6e4594f74dd74bea1f26e29f8976ca0cd5b5fbcaebb62087da1` | 55 |
-| [#228](https://github.com/6529-Collections/6529Stream/issues/228) | `production-release-live-ceremony-evidence` | `missing` | `sha256:5110e04dfe41aa083097f8d4f02348f4aa315ba130f411ac6289201ae3e0ff66` | 55 |
-| [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:64ac1a694a3933ea563e63c06d1353bdce9c016c40171024607961023164b920` | 55 |
-| [#473](https://github.com/6529-Collections/6529Stream/issues/473) | `production-release-live-metadata-browser-evidence` | `missing` | `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37` | 55 |
-| [#424](https://github.com/6529-Collections/6529Stream/issues/424) | `production-release-live-marketplace-indexer-evidence` | `missing` | `sha256:14590dddc45694c02f9ca3aae0b46517fb5ffbc5255693d9a6e15c86579b02bd` | 55 |
-| [#230](https://github.com/6529-Collections/6529Stream/issues/230) | `production-release-live-explorer-verification` | `missing` | `sha256:e96af7de5bfef51fbd630a22ee560d9c2eeaa04e149f1e16706c7023e6150829` | 55 |
-| [#231](https://github.com/6529-Collections/6529Stream/issues/231) | `production-release-post-audit-remediation` | `missing` | `sha256:05afd48c865225bb2c4346c78d8c4a3481bb7391c4b293699c6bf3cc38c91548` | 55 |
+| [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:c3a891f741fa31d06294c189a11c3e1d34a47424d1f768670b4d1d5d83cceb20` | 55 |
+| [#216](https://github.com/6529-Collections/6529Stream/issues/216) | `public-beta-fork-deployment-rehearsal` | `pending` | `sha256:7935b893e7e30048b3a819878257969096a7b837ee6809830a46a87cf361b10e` | 55 |
+| [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:f6e094b890cf00099dac73d9c63be0a9dc2ea56f99c7e9d2219600ab82dc25b9` | 55 |
+| [#219](https://github.com/6529-Collections/6529Stream/issues/219) | `public-beta-fork-testnet-ceremony-evidence` | `pending` | `sha256:bd2e95437d1b05d0a1536ad2f548c339b60c6bccf96545995f617630af3daa2c` | 55 |
+| [#220](https://github.com/6529-Collections/6529Stream/issues/220) | `public-beta-fork-testnet-randomizer-operations-evidence` | `pending` | `sha256:ebba63fd96fd8c87166120bb7ffc24b0323df410963e3288eb7d54c5029d8c55` | 55 |
+| [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:c6065e8074b716a8de4c6df0bfbb5353864c0e5d5d23e902f35dd7731f358059` | 55 |
+| [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:c5b44dc60275b4d1eb2e3b05d503e20da0200a0c7deecc4b2e9e105b5b14047c` | 55 |
+| [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:ea7ba9f7d9402e9b300b2e679242c4e0f5913c8240f465d67c49947873037efc` | 59 |
+| [#224](https://github.com/6529-Collections/6529Stream/issues/224) | `production-release-signed-git-tag` | `missing` | `sha256:ecc70eb18198c8163aa48ab2bf2676d9c9717c501e96daba2c6f6016e19f337c` | 59 |
+| [#225](https://github.com/6529-Collections/6529Stream/issues/225) | `production-release-production-address-books` | `missing` | `sha256:dd9039d7ae0044d05b015dd87f85019f336ee0de138f9239bdc8be2ae6e4e776` | 55 |
+| [#226](https://github.com/6529-Collections/6529Stream/issues/226) | `production-release-production-broadcast-retention` | `missing` | `sha256:4e92d8cb76d1d7f0515768bfe6e8888d1beec6cae97054c4abca74eb5f709e48` | 53 |
+| [#227](https://github.com/6529-Collections/6529Stream/issues/227) | `production-release-live-deployment-manifest` | `missing` | `sha256:902979a9d63d43e94e84f1b2ccc0c7a274b651b8577a279bcb11d6e1ff52326b` | 55 |
+| [#228](https://github.com/6529-Collections/6529Stream/issues/228) | `production-release-live-ceremony-evidence` | `missing` | `sha256:67afd996a30a633236201a894c26b98f33e0291b26d08d3976a202cc76b74179` | 55 |
+| [#229](https://github.com/6529-Collections/6529Stream/issues/229) | `production-release-live-randomizer-operations-evidence` | `missing` | `sha256:f3ec6570ec1eed9def751f84ac5c78d61c74e5b5e1b392edc2585261dd610b7e` | 55 |
+| [#473](https://github.com/6529-Collections/6529Stream/issues/473) | `production-release-live-metadata-browser-evidence` | `missing` | `sha256:0c87a06eb578d5ea7a4a77a67e0ad6f15198fbe734793ad9dfee2c35425f0886` | 55 |
+| [#424](https://github.com/6529-Collections/6529Stream/issues/424) | `production-release-live-marketplace-indexer-evidence` | `missing` | `sha256:6686af1e815654535a79654defc02c1701b2c5be42766f1751af253ec4d50a54` | 55 |
+| [#230](https://github.com/6529-Collections/6529Stream/issues/230) | `production-release-live-explorer-verification` | `missing` | `sha256:169d88ab00ef7aed6876bb0b4c7aad310dee3d3baff35e6d9c4550443332fb4e` | 55 |
+| [#231](https://github.com/6529-Collections/6529Stream/issues/231) | `production-release-post-audit-remediation` | `missing` | `sha256:86ac39d920c9402eeb8752badca9182ffd1c1c5d2fce6a1461126a7100732fbb` | 55 |
 
 ### #215 public-beta-external-audit-report
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/215
-- Body SHA-256: `sha256:681dd09e156b8949ea33717554e80bb2c5518e9504f827bc5a8fe1b7b5551292`
-- Source body SHA-256: `sha256:cf824fc276e5aa717656bf8d523721972e49b93eb1f6a3c7de63760f37e15192`
+- Body SHA-256: `sha256:c3a891f741fa31d06294c189a11c3e1d34a47424d1f768670b4d1d5d83cceb20`
+- Source body SHA-256: `sha256:dc092d0334df20584019e81afaa6c214719bd107e72f1a04f0026c33e63a6474`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-external-audit-report issue_number=215 -->
@@ -82,19 +82,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_external_audit_report_evidence.py`
-- `python scripts/check_external_audit_report_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_external_audit_report_evidence`
+- `python -m tools.release.check_external_audit_report_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -113,8 +113,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #216 public-beta-fork-deployment-rehearsal
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/216
-- Body SHA-256: `sha256:98af716d7afb46c78628b61b1292d7204a88a07b387f51dfbfa48349439a6942`
-- Source body SHA-256: `sha256:b4ff583c548e63fd3953576a82f1083469067a887c03d2658bdb0c300b2d5446`
+- Body SHA-256: `sha256:7935b893e7e30048b3a819878257969096a7b837ee6809830a46a87cf361b10e`
+- Source body SHA-256: `sha256:112e72d1b62639bc2e1ecc105a65fcbc81792d64cb631fbe4e1d12f5b7dec0f5`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-deployment-rehearsal issue_number=216 -->
@@ -146,19 +146,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_deployment_rehearsal_evidence.py`
-- `python scripts/check_fork_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_deployment_rehearsal_evidence`
+- `python -m tools.deployment.check_fork_deployment_rehearsal_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -177,8 +177,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #217 public-beta-testnet-deployment-rehearsal
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/217
-- Body SHA-256: `sha256:fb44ad23ca2db58f098e47f38ce6e799375e7ede3e390942ba363fb89572baaf`
-- Source body SHA-256: `sha256:f209c1944f1faa78d7155b3291768c29ad92735cd48dd25d731d777eb47dbdd2`
+- Body SHA-256: `sha256:f6e094b890cf00099dac73d9c63be0a9dc2ea56f99c7e9d2219600ab82dc25b9`
+- Source body SHA-256: `sha256:fa8857d1294d0140d68c370b2c90c33c571ce825601d5da41ec6b1bf6ac70346`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-testnet-deployment-rehearsal issue_number=217 -->
@@ -210,19 +210,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_testnet_deployment_rehearsal_evidence`
+- `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -241,8 +241,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #219 public-beta-fork-testnet-ceremony-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/219
-- Body SHA-256: `sha256:9131094b0c71399aa2a72d9c93655a9d2d586d0a1377caad7737666e38fdcc69`
-- Source body SHA-256: `sha256:c168828a3ea7f0323512c27cd6b54bf910549ee93779775ab46afdfd625178d3`
+- Body SHA-256: `sha256:bd2e95437d1b05d0a1536ad2f548c339b60c6bccf96545995f617630af3daa2c`
+- Source body SHA-256: `sha256:d8d07d19757f06ae73c55963cd49cf9b359d8159c52a52fd761b638e734951c0`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-testnet-ceremony-evidence issue_number=219 -->
@@ -274,19 +274,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_ceremony_evidence.py`
-- `python scripts/check_fork_ceremony_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_ceremony_evidence`
+- `python -m tools.deployment.check_fork_ceremony_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -305,8 +305,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #220 public-beta-fork-testnet-randomizer-operations-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/220
-- Body SHA-256: `sha256:fbe306fb56a884c07437467d57734c64e450246207b6fcff2775a2db7788292f`
-- Source body SHA-256: `sha256:5c86c3ae4a6bdc04e7eed6b4c20876cf4ca80c2c686093e84c0e50c1266ce69a`
+- Body SHA-256: `sha256:ebba63fd96fd8c87166120bb7ffc24b0323df410963e3288eb7d54c5029d8c55`
+- Source body SHA-256: `sha256:9a9cfeb1800e2dc067a1c76cd792486eb20c34f612f9d49a3bec1eaff210e09e`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-testnet-randomizer-operations-evidence issue_number=220 -->
@@ -338,19 +338,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_randomizer_operations_evidence.py`
-- `python scripts/check_fork_randomizer_operations_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_randomizer_operations_evidence`
+- `python -m tools.deployment.check_fork_randomizer_operations_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -369,8 +369,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #221 public-beta-verified-deployed-addresses
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/221
-- Body SHA-256: `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91`
-- Source body SHA-256: `sha256:857f3140b46fadc25d139081a6e2ee5d30177d31c16c36ff54b6b6d9e6e36faf`
+- Body SHA-256: `sha256:c6065e8074b716a8de4c6df0bfbb5353864c0e5d5d23e902f35dd7731f358059`
+- Source body SHA-256: `sha256:00ce86734cd60e46f13402039c598a461e0d93e38ee0f573b234164a06c39163`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-verified-deployed-addresses issue_number=221 -->
@@ -402,19 +402,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_verified_addresses.py`
-- `python scripts/check_public_beta_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_verified_addresses`
+- `python -m tools.release.check_public_beta_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -433,8 +433,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #222 public-beta-explorer-verification-status
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/222
-- Body SHA-256: `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a`
-- Source body SHA-256: `sha256:35af0247affb72edb4e0574470702c622a7bdf332d2066cb7e42947be582fe08`
+- Body SHA-256: `sha256:c5b44dc60275b4d1eb2e3b05d503e20da0200a0c7deecc4b2e9e105b5b14047c`
+- Source body SHA-256: `sha256:7190b18d11724003db5631704bfaa199b960218c0322aeff74e677e6dade6191`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-explorer-verification-status issue_number=222 -->
@@ -466,19 +466,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_verified_addresses.py`
-- `python scripts/check_public_beta_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_verified_addresses`
+- `python -m tools.release.check_public_beta_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -497,8 +497,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #223 production-release-production-signatures
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/223
-- Body SHA-256: `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9`
-- Source body SHA-256: `sha256:d2893a5ea2e846aa66a0652aad0ba8bcc11280deea49757f5ca79607df6fb81d`
+- Body SHA-256: `sha256:ea7ba9f7d9402e9b300b2e679242c4e0f5913c8240f465d67c49947873037efc`
+- Source body SHA-256: `sha256:3f5e87af47d2e4517c35424c23621c756aace14ea5027f46628f784e47aa27a1`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-production-signatures issue_number=223 -->
@@ -530,23 +530,23 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_release_signing_evidence.py`
-- `python scripts/check_production_release_signing_evidence.py`
-- `python scripts/test_release_signatures.py`
-- `python scripts/check_release_signatures.py`
-- `python scripts/test_signed_release_tag.py`
-- `python scripts/check_signed_release_tag.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_release_signing_evidence`
+- `python -m tools.release.check_production_release_signing_evidence`
+- `python -m tools.release.test_release_signatures`
+- `python -m tools.release.check_release_signatures`
+- `python -m tools.release.test_signed_release_tag`
+- `python -m tools.release.check_signed_release_tag`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -565,8 +565,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #224 production-release-signed-git-tag
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/224
-- Body SHA-256: `sha256:ae61020e8e7f3c9e3a2f0bfdc3d5d053a997fbd328cba05ead33398bd67420bc`
-- Source body SHA-256: `sha256:dda5815db2cbac884090541863fdae26809020ddf4ec8ca5eaa21a8ebcb91cfc`
+- Body SHA-256: `sha256:ecc70eb18198c8163aa48ab2bf2676d9c9717c501e96daba2c6f6016e19f337c`
+- Source body SHA-256: `sha256:506ba0112f41ac24218da0ddad1ebd2d562ef9a2fbf8ca468bbc1e092079541e`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-signed-git-tag issue_number=224 -->
@@ -598,23 +598,23 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_release_signing_evidence.py`
-- `python scripts/check_production_release_signing_evidence.py`
-- `python scripts/test_release_signatures.py`
-- `python scripts/check_release_signatures.py`
-- `python scripts/test_signed_release_tag.py`
-- `python scripts/check_signed_release_tag.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_release_signing_evidence`
+- `python -m tools.release.check_production_release_signing_evidence`
+- `python -m tools.release.test_release_signatures`
+- `python -m tools.release.check_release_signatures`
+- `python -m tools.release.test_signed_release_tag`
+- `python -m tools.release.check_signed_release_tag`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -633,8 +633,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #225 production-release-production-address-books
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/225
-- Body SHA-256: `sha256:64ace907f16d545eadd001e728b3f6670d60192dcd4dc5aba02bcb6f1ef2e652`
-- Source body SHA-256: `sha256:6227667e7eb8542f631d84fae656465f19d477264d74c46aacd1174f75102b43`
+- Body SHA-256: `sha256:dd9039d7ae0044d05b015dd87f85019f336ee0de138f9239bdc8be2ae6e4e776`
+- Source body SHA-256: `sha256:5718ffb8c6a063c95a2a7a025f0e98fde02f783768894a73c8fee243db318632`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-production-address-books issue_number=225 -->
@@ -666,19 +666,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_verified_addresses.py`
-- `python scripts/check_production_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_verified_addresses`
+- `python -m tools.release.check_production_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -697,8 +697,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #226 production-release-production-broadcast-retention
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/226
-- Body SHA-256: `sha256:99e825429e152fa065b78eae8511755389d69f7bcfbd04d64932d1a72093ec9b`
-- Source body SHA-256: `sha256:25c793cd395d4a6741eec8c4b31208edd4064ffdd3f9caf61ff8360a46b42cfd`
+- Body SHA-256: `sha256:4e92d8cb76d1d7f0515768bfe6e8888d1beec6cae97054c4abca74eb5f709e48`
+- Source body SHA-256: `sha256:2cdbed90498860662f0c50f26909f7d2845f1c9a259ba5fb1b2c5452b257912a`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-production-broadcast-retention issue_number=226 -->
@@ -730,17 +730,17 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -759,8 +759,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #227 production-release-live-deployment-manifest
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/227
-- Body SHA-256: `sha256:2e877b059041b6e4594f74dd74bea1f26e29f8976ca0cd5b5fbcaebb62087da1`
-- Source body SHA-256: `sha256:38bc71a71f0417b1ceabd0647d4d664f5f6b2e314e259ba162534edaefd22103`
+- Body SHA-256: `sha256:902979a9d63d43e94e84f1b2ccc0c7a274b651b8577a279bcb11d6e1ff52326b`
+- Source body SHA-256: `sha256:4a7bd498378162f783c53d8c517655c7a5f92dbb862164e18199c7451dd897a0`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-deployment-manifest issue_number=227 -->
@@ -792,19 +792,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_deployment_manifest_evidence.py`
-- `python scripts/check_live_deployment_manifest_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_live_deployment_manifest_evidence`
+- `python -m tools.release.check_live_deployment_manifest_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -823,8 +823,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #228 production-release-live-ceremony-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/228
-- Body SHA-256: `sha256:5110e04dfe41aa083097f8d4f02348f4aa315ba130f411ac6289201ae3e0ff66`
-- Source body SHA-256: `sha256:4b076b5d2318c25ac6f901356bb107fed8191b970daba05778a97fa5a9aad20c`
+- Body SHA-256: `sha256:67afd996a30a633236201a894c26b98f33e0291b26d08d3976a202cc76b74179`
+- Source body SHA-256: `sha256:0eb8ccb2066afac843d576a5a8b22ee1de91aa3f30941adb1db2bddc881a8fea`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-ceremony-evidence issue_number=228 -->
@@ -856,19 +856,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_ceremony_evidence.py`
-- `python scripts/check_live_ceremony_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_live_ceremony_evidence`
+- `python -m tools.deployment.check_live_ceremony_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -887,8 +887,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #229 production-release-live-randomizer-operations-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/229
-- Body SHA-256: `sha256:64ac1a694a3933ea563e63c06d1353bdce9c016c40171024607961023164b920`
-- Source body SHA-256: `sha256:716b337f0e534fee9377d0addebae01393c3e90b36ecc0ec5f97fe9d64c60320`
+- Body SHA-256: `sha256:f3ec6570ec1eed9def751f84ac5c78d61c74e5b5e1b392edc2585261dd610b7e`
+- Source body SHA-256: `sha256:d6422c52e011c28366b7a91b8aa95864e950a2b9a8a087b3c755ea1cfc0d3f82`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-randomizer-operations-evidence issue_number=229 -->
@@ -920,19 +920,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_randomizer_operations_evidence.py`
-- `python scripts/check_live_randomizer_operations_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_live_randomizer_operations_evidence`
+- `python -m tools.deployment.check_live_randomizer_operations_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -951,8 +951,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #473 production-release-live-metadata-browser-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/473
-- Body SHA-256: `sha256:5b904c50fb7735c1796ad81fb63e89def20eac15521a288e3548c23f64c00f37`
-- Source body SHA-256: `sha256:a3c025086f1dbc5441a28aacf02e7ef9aa409e83e23cf7add027d6bcdf257085`
+- Body SHA-256: `sha256:0c87a06eb578d5ea7a4a77a67e0ad6f15198fbe734793ad9dfee2c35425f0886`
+- Source body SHA-256: `sha256:41c3f3f512bb76e7012e5e7834ca8aa1445afab13cc9351a3f8cb51d4280e40a`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-metadata-browser-evidence issue_number=473 -->
@@ -984,19 +984,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_metadata_browser_evidence.py`
-- `python scripts/check_live_metadata_browser_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_live_metadata_browser_evidence`
+- `python -m tools.release.check_live_metadata_browser_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1015,8 +1015,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #424 production-release-live-marketplace-indexer-evidence
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/424
-- Body SHA-256: `sha256:14590dddc45694c02f9ca3aae0b46517fb5ffbc5255693d9a6e15c86579b02bd`
-- Source body SHA-256: `sha256:2afb27a6e7423db1daabda9327cf7fe567f03604de20d63771d5288f5d0fb818`
+- Body SHA-256: `sha256:6686af1e815654535a79654defc02c1701b2c5be42766f1751af253ec4d50a54`
+- Source body SHA-256: `sha256:b033d6f9ba5a79d0e5735b400b8453b785c2f7ba908438d91959361ec7363519`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-marketplace-indexer-evidence issue_number=424 -->
@@ -1048,19 +1048,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_marketplace_indexer_evidence.py`
-- `python scripts/check_marketplace_indexer_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_marketplace_indexer_evidence`
+- `python -m tools.release.check_marketplace_indexer_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1079,8 +1079,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #230 production-release-live-explorer-verification
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/230
-- Body SHA-256: `sha256:e96af7de5bfef51fbd630a22ee560d9c2eeaa04e149f1e16706c7023e6150829`
-- Source body SHA-256: `sha256:5530a680c50e8551e2ef53c7bf71da3fd1a8fddb0f7e1b2d6fa49e160daada65`
+- Body SHA-256: `sha256:169d88ab00ef7aed6876bb0b4c7aad310dee3d3baff35e6d9c4550443332fb4e`
+- Source body SHA-256: `sha256:dbc2338d85f1825c1e2a10743e0fb0f862920999e1ccf7213fb1a8a67d2460d0`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-live-explorer-verification issue_number=230 -->
@@ -1112,19 +1112,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_verified_addresses.py`
-- `python scripts/check_production_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_verified_addresses`
+- `python -m tools.release.check_production_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1143,8 +1143,8 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 ### #231 production-release-post-audit-remediation
 
 - Issue: https://github.com/6529-Collections/6529Stream/issues/231
-- Body SHA-256: `sha256:05afd48c865225bb2c4346c78d8c4a3481bb7391c4b293699c6bf3cc38c91548`
-- Source body SHA-256: `sha256:af4ff80ef64b2be0f6c2dc49056ec26a384e891c3a25c87c8dd7cfde89f1f8d7`
+- Body SHA-256: `sha256:86ac39d920c9402eeb8752badca9182ffd1c1c5d2fce6a1461126a7100732fbb`
+- Source body SHA-256: `sha256:ce68f93537c3f16fb41254628d304d2ead6b51347d5a023e60d852e69d38674f`
 
 ```markdown
 <!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=production-release-post-audit-remediation issue_number=231 -->
@@ -1176,19 +1176,19 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_post_audit_remediation_evidence.py`
-- `python scripts/check_post_audit_remediation_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_post_audit_remediation_evidence`
+- `python -m tools.release.check_post_audit_remediation_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1208,11 +1208,11 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 
 | Command |
 | --- |
-| `python scripts/test_release_evidence_issue_body_sync.py` |
-| `python scripts/generate_release_evidence_issue_body_sync.py --check` |
-| `python scripts/test_release_evidence_issue_bodies.py` |
-| `python scripts/check_release_evidence_issue_bodies.py` |
-| `python scripts/test_release_evidence_issue_links.py` |
-| `python scripts/check_release_evidence_issue_links.py` |
-| `python scripts/generate_release_manifest.py --check` |
-| `python scripts/generate_release_checksums.py --check` |
+| `python -m tools.release.test_release_evidence_issue_body_sync` |
+| `python -m tools.release.generate_release_evidence_issue_body_sync --check` |
+| `python -m tools.release.test_release_evidence_issue_bodies` |
+| `python -m tools.release.check_release_evidence_issue_bodies` |
+| `python -m tools.release.test_release_evidence_issue_links` |
+| `python -m tools.release.check_release_evidence_issue_links` |
+| `python -m tools.release.generate_release_manifest --check` |
+| `python -m tools.release.generate_release_checksums --check` |

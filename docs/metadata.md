@@ -273,9 +273,9 @@ contract must be accepted in a separate size-budget and integration decision.
 Until then, provenance is validated through the release artifact toolchain:
 
 ```text
-python scripts/test_one_of_one_provenance_manifest.py
-python scripts/check_one_of_one_provenance_manifest.py
-python scripts/generate_one_of_one_provenance_manifest.py --check
+python -m tools.protocol.test_one_of_one_provenance_manifest
+python -m tools.protocol.check_one_of_one_provenance_manifest
+python -m tools.protocol.generate_one_of_one_provenance_manifest --check
 ```
 
 ## Collector-Verifiable Permanence Packages
@@ -306,9 +306,9 @@ Until then, permanence packages are validated through the release artifact
 toolchain:
 
 ```text
-python scripts/test_one_of_one_permanence_package.py
-python scripts/check_one_of_one_permanence_package.py
-python scripts/generate_one_of_one_permanence_manifest.py --check
+python -m tools.protocol.test_one_of_one_permanence_package
+python -m tools.protocol.check_one_of_one_permanence_package
+python -m tools.protocol.generate_one_of_one_permanence_manifest --check
 ```
 
 ## Size Limits
@@ -355,7 +355,7 @@ values fail with `MetadataFieldInvalidUTF8(field)`.
 
 ## Golden Fixtures
 
-`test/StreamMetadataGolden.t.sol` compares live contract output against:
+`test/regression/legacy/metadata/StreamMetadataGolden.t.sol` compares live contract output against:
 
 - `test/fixtures/metadata/offchain-pending-token-uri.txt`
 - `test/fixtures/metadata/offchain-stale-token-uri.txt`
@@ -369,30 +369,30 @@ values fail with `MetadataFieldInvalidUTF8(field)`.
 The on-chain fixture names include the schema version so later schema migrations
 are reviewable and deliberate.
 
-`scripts/check_metadata_fixtures.py` validates these committed fixtures outside
+`tools/protocol/check_metadata_fixtures.py` validates these committed fixtures outside
 Foundry. The check strictly decodes base64 data URIs as UTF-8, parses on-chain
 metadata JSON, validates current content/script URI scheme policy, validates
 fixture attributes as `trait_type` / `value` string pairs, decodes the final
 `animation_url` HTML, and asserts the generated wrapper contains exactly one
 external library script and one inline generative script with no raw script tag
-breakout. `scripts/test_metadata_fixtures.py` covers the happy path, invalid
+breakout. `tools/protocol/test_metadata_fixtures.py` covers the happy path, invalid
 UTF-8 fixture payloads, semantic attribute-shape failures, and hostile wrapper
 regressions; both scripts run in `make check`, the platform check wrappers, and
 CI.
 
-`scripts/check_metadata_browser_sandbox.py` adds the browser-backed half of the
+`tools/deployment/check_metadata_browser_sandbox.py` adds the browser-backed half of the
 fixture gate. It opens the committed final on-chain `animation_url` in Chromium
 inside an `allow-scripts` sandboxed iframe, stubs the single expected external
 dependency URL, fails unexpected outbound HTTP(S) requests, captures page and
 console errors, asserts the current hash/token bootstrap values are available in
 the frame, and verifies parent-document access fails with `SecurityError`.
-`scripts/test_metadata_browser_sandbox.py` covers the harness and result
+`tools/deployment/test_metadata_browser_sandbox.py` covers the harness and result
 validation logic without launching a browser. Playwright is pinned in
 `requirements-tools.txt`; bootstrap scripts install Chromium for contributors,
 and CI installs the same toolchain before the metadata fixture safety job.
 
-`script/RehearseMetadataBrowser.s.sol` and
-`scripts/check_rehearsal_metadata_browser_sandbox.py` add the
+`script/legacy/RehearseMetadataBrowser.s.sol` and
+`tools/deployment/check_rehearsal_metadata_browser_sandbox.py` add the
 deployment-rehearsal-generated half of the browser gate. The rehearsal deploys
 the local non-production stack, registers a deterministic dependency,
 configures an executable draw script, mints a zero-price fixed-price drop using
@@ -524,14 +524,14 @@ Release-packaged dependency source files live under
 deployment version, dependency registry key, version, registry contract label,
 provenance string, source registration path, and repo-relative source files.
 
-`scripts/generate_dependency_artifact_manifest.py` validates those descriptors,
+`tools/protocol/generate_dependency_artifact_manifest.py` validates those descriptors,
 rejects missing files, malformed dependency keys, duplicate dependency
 identities, and paths outside `release-artifacts/dependencies/`, then emits
 `release-artifacts/latest/dependency-artifact-manifest.json` with SHA-256
 integrity records. The top-level release manifest includes that generated
 manifest, and `SHA256SUMS` covers both the generated output and the source
 descriptors/files. The first committed package covers the local Anvil rehearsal
-dependency registered by `script/RehearseDeployment.s.sol`.
+dependency registered by `script/legacy/RehearseDeployment.s.sol`.
 
 Production dependency changes must follow the
 [`Dependency Operations Runbook`](dependency-operations.md). The runbook covers

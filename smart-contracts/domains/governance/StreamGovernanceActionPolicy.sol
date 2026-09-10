@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
-import "../../interfaces/stream/IStreamGovernanceCatalog.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceCatalog.sol";
 
 /// @notice Closed-world Governance V2 action and native-value policy.
 /// @dev Genesis binds revision zero; delayed append-only extensions admit new

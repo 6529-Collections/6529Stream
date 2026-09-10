@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../vendor/openzeppelin/ERC721.sol";
 import "../vendor/openzeppelin/IERC165.sol";
-import "../interfaces/stream/IStreamCore.sol";
+import "../interfaces/stream/core/IStreamCore.sol";
 import "./StreamCoreReadBuffer.sol";
 import "./StreamCoreExternalReads.sol";
 import "../domains/metadata/StreamMetadataRenderer.sol";

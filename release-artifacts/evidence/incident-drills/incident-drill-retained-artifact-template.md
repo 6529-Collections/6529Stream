@@ -108,13 +108,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_incident_drill_evidence.py
-python scripts/check_incident_drill_evidence.py
-python scripts/test_incident_response.py
-python scripts/check_incident_response.py
-python scripts/check_release_readiness.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_incident_drill_evidence
+python -m tools.release.check_incident_drill_evidence
+python -m tools.docs.test_incident_response
+python -m tools.docs.check_incident_response
+python -m tools.release.check_release_readiness
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

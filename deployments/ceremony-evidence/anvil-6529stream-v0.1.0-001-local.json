@@ -23,16 +23,16 @@
   },
   "artifacts": {
     "deployment_manifest": {
-      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/examples/anvil-6529stream-v0.1.0-001.json",
       "sha256": "sha256:c9b3f926441d6bfcff0cf9a76e6b335aadf83eae10b0966853792039cf94de1b"
     },
     "deployment_manifest_canonical_sha256": "sha256:67db369f78160cb5c38cfdd39a7ae90167c6e9e04a1c5f5c607cd0cbe709117b",
     "address_book": {
-      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/address-books/anvil-6529stream-v0.1.0-001.json",
       "sha256": "sha256:acc9115787abd45cfadec4def4eddc18cb910385b789ee3b03eceda0088357e0"
     },
     "abi_checksums": {
-      "path": "release-artifacts/latest/abi-checksums.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/release-artifacts/latest/abi-checksums.json",
       "sha256": "sha256:f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd"
     },
     "release_checksum_bundle": {
@@ -47,7 +47,7 @@
       "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
       "evidence": [
         {
-          "path": "script/RehearseDeployment.s.sol",
+          "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseDeployment.s.sol.txt",
           "sha256": "sha256:640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1"
         }
       ],
@@ -57,7 +57,7 @@
       "status": "passed",
       "evidence": [
         {
-          "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+          "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/examples/anvil-6529stream-v0.1.0-001.json",
           "sha256": "sha256:c9b3f926441d6bfcff0cf9a76e6b335aadf83eae10b0966853792039cf94de1b"
         }
       ],
@@ -68,7 +68,7 @@
       "command": "python scripts/check_rehearsal_metadata_browser_sandbox.py",
       "evidence": [
         {
-          "path": "script/RehearseMetadataBrowser.s.sol",
+          "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseMetadataBrowser.s.sol.txt",
           "sha256": "sha256:84079b960916213a42e478d06b3b25156acc128fdf65924564f7ac8420ae62bd"
         }
       ],
@@ -79,7 +79,7 @@
       "command": "forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig \"run()\" --via-ir",
       "evidence": [
         {
-          "path": "script/RehearseAuctionCeremony.s.sol",
+          "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseAuctionCeremony.s.sol.txt",
           "sha256": "sha256:f9cb15d00f9188db5b8df3e4c52b780cd9bf206297ef6789e57a17caabc69f15"
         }
       ],
@@ -90,7 +90,7 @@
       "command": "forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig \"run()\" --via-ir",
       "evidence": [
         {
-          "path": "script/RehearseEmergencyRedeployment.s.sol",
+          "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseEmergencyRedeployment.s.sol.txt",
           "sha256": "sha256:79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917"
         }
       ],
@@ -105,17 +105,17 @@
   "retained_artifacts": [
     {
       "category": "deployment_manifest",
-      "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/examples/anvil-6529stream-v0.1.0-001.json",
       "sha256": "sha256:c9b3f926441d6bfcff0cf9a76e6b335aadf83eae10b0966853792039cf94de1b"
     },
     {
       "category": "address_book",
-      "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/address-books/anvil-6529stream-v0.1.0-001.json",
       "sha256": "sha256:acc9115787abd45cfadec4def4eddc18cb910385b789ee3b03eceda0088357e0"
     },
     {
       "category": "abi_checksums",
-      "path": "release-artifacts/latest/abi-checksums.json",
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/release-artifacts/latest/abi-checksums.json",
       "sha256": "sha256:f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd"
     }
   ],
@@ -129,5 +129,5 @@
       "unreleased_drop_payload"
     ]
   },
-  "operator_notes": "This is local Anvil evidence only. Fork, testnet, and production ceremony evidence must retain real broadcast manifests, verification submissions, and operator-reviewed incident/deprecation notes without private keys or RPC credentials."
+  "operator_notes": "Historical local-only record retained at 330ac1d4. File references now resolve to exact immutable input copies under release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4. The original envelope is retained there as well. Original hashes, placeholder source commit, commands and result statuses are unchanged; no current-source run or non-local review is claimed. This is local Anvil evidence only. Fork, testnet, and production ceremony evidence must retain real broadcast manifests, verification submissions, and operator-reviewed incident/deprecation notes without private keys or RPC credentials."
 }

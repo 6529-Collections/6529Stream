@@ -1,0 +1,322 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "blockCollectionBurns",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionBurnsBlocked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionBurnsBlockedAtBlock",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CollectionBurnsBlocked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        }
+      ],
+      "name": "StreamTokenBurned",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CollectionBurnsBlocked",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            }
+          ],
+          "name": "StreamTokenBurned",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "blockCollectionBurns",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "burn",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlocked",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlockedAtBlock",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "blockCollectionBurns(uint256)": {
+            "notice": "Permanently prevents future burns in a collection through governance."
+          },
+          "burn(uint256)": {
+            "notice": "Burns a token for its owner or approved operator unless burns or the collection are frozen."
+          },
+          "collectionBurnsBlocked(uint256)": {
+            "notice": "Returns whether the collection burn block has been set."
+          },
+          "collectionBurnsBlockedAtBlock(uint256)": {
+            "notice": "Returns the block number of the permanent burn block, or zero if unset."
+          }
+        },
+        "notice": "Token-owner burns and the permanent collection burn block.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": "IStreamCoreBurn"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": {
+        "keccak256": "0x7573906d25ad73af7885d7c6653e0f9ba2389034a2b3e90cda0b92d142e8976b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://7a4697efe627df212051c9496407c61e9a691fb4f1b7e91e706b59b8b9bc00e5",
+          "dweb:/ipfs/QmciDrhn2ng9aczDqy5NxsRww5xnmxu8roTpzprdYcrUJc"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "blockCollectionBurns(uint256)": "fcfc7b26",
+    "burn(uint256)": "42966c68",
+    "collectionBurnsBlocked(uint256)": "5923b379",
+    "collectionBurnsBlockedAtBlock(uint256)": "74a5ded9"
+  }
+}

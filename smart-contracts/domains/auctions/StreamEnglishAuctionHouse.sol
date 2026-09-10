@@ -1,21 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamEnglishAuctionHouse.sol";
-import "../../interfaces/stream/IStreamCore.sol";
-import "../../interfaces/stream/IStreamMintManager.sol";
-import "../../interfaces/stream/IStreamSplitFactory.sol";
-import "../../interfaces/stream/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/mint/IStreamMintReads.sol";
+
+import "../../interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/mint/IStreamMintManager.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
+import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC721Receiver.sol";
 import "../../vendor/openzeppelin/Math.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../mint/StreamSaleSignatures.sol";
-
-interface IStreamAuctionManagerBinding {
-    function core() external view returns (address);
-}
 
 /// @notice Current-Core English auctions with NFT custody, pull refunds and immutable sale splits.
 contract StreamEnglishAuctionHouse is
@@ -65,7 +63,7 @@ contract StreamEnglishAuctionHouse is
                     type(IStreamCollectionArtistRegistry).interfaceId
                 ) || artistRegistry_.supportsInterface(0xffffffff)
         ) revert InvalidAuctionConfiguration();
-        if (IStreamAuctionManagerBinding(address(mintManager_)).core() != address(core_)) {
+        if (address(IStreamMintReads(address(mintManager_)).core()) != address(core_)) {
             revert InvalidAuctionConfiguration();
         }
         core = core_;

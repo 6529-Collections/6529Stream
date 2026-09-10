@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.event-topic-catalog.v1",
-  "generated_by": "scripts/generate_release_artifacts.py:1",
+  "generated_by": "tools/build/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
     "foundry_out": "out-release"
@@ -6004,7 +6004,7 @@
       ]
     },
     "NextGenRandomizerRNG": {
-      "source": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
       "artifact_path": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
       "events": [
         {
@@ -6460,7 +6460,7 @@
       ]
     },
     "NextGenRandomizerVRF": {
-      "source": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "source": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
       "artifact_path": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
       "events": [
         {
@@ -7300,7 +7300,7 @@
       ]
     },
     "StreamAuctions": {
-      "source": "smart-contracts/domains/auctions/AuctionContract.sol",
+      "source": "smart-contracts/domains/auctions/legacy/AuctionContract.sol",
       "artifact_path": "out-release/AuctionContract.sol/StreamAuctions.json",
       "events": [
         {
@@ -9273,7 +9273,7 @@
       ]
     },
     "StreamDrops": {
-      "source": "smart-contracts/domains/mint/StreamDrops.sol",
+      "source": "smart-contracts/domains/mint/legacy/StreamDrops.sol",
       "artifact_path": "out-release/StreamDrops.sol/StreamDrops.json",
       "events": [
         {
@@ -11047,7 +11047,7 @@
       ]
     },
     "StreamMinter": {
-      "source": "smart-contracts/domains/mint/StreamMinter.sol",
+      "source": "smart-contracts/domains/mint/legacy/StreamMinter.sol",
       "artifact_path": "out-release/StreamMinter.sol/StreamMinter.json",
       "events": [
         {

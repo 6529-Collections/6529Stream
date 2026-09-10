@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamRevenueResolver.sol";
-import "../../interfaces/stream/IStreamAssetPolicyRegistry.sol";
-import "../../interfaces/stream/IStreamSplitFactory.sol";
+import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
+import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
 /// @notice Outside-Core resolver for primary revenue assignments and templates.

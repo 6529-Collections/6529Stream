@@ -1,0 +1,1102 @@
+{
+  "schema_version": "6529stream.solidity-source-layout.current.v1",
+  "source_root": "smart-contracts",
+  "historical_manifest": {
+    "path": "smart-contracts/source-layout.json",
+    "sha256": "a4a8be3df18da217e4efc3d4d09b151807bdc152125f524f1493dd39690d9f65"
+  },
+  "historical_equivalence_receipt": {
+    "path": "release-artifacts/evidence/solidity-layout-equivalence.json",
+    "sha256": "899a1ef7fa89bd762a5ea1860c906206cf30a89c19e28502dcb81e85fe82254b"
+  },
+  "policy": {
+    "allowed_top_level_directories": [
+      "compatibility",
+      "core",
+      "domains",
+      "integrations",
+      "interfaces",
+      "libraries",
+      "vendor"
+    ],
+    "abi_only_directory": "smart-contracts/interfaces/compatibility",
+    "concrete_compatibility_directory": "smart-contracts/compatibility",
+    "stale_path_policy": "Retired source paths are forbidden in active surfaces; exact historical evidence files are exempt only at their recorded SHA-256 identity."
+  },
+  "relocations": [
+    {
+      "old_path": "smart-contracts/domains/auctions/AuctionContract.sol",
+      "new_path": "smart-contracts/domains/auctions/legacy/AuctionContract.sol"
+    },
+    {
+      "old_path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol"
+    },
+    {
+      "old_path": "smart-contracts/domains/mint/StreamDrops.sol",
+      "new_path": "smart-contracts/domains/mint/legacy/StreamDrops.sol"
+    },
+    {
+      "old_path": "smart-contracts/domains/mint/StreamMinter.sol",
+      "new_path": "smart-contracts/domains/mint/legacy/StreamMinter.sol"
+    },
+    {
+      "old_path": "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
+      "new_path": "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol"
+    },
+    {
+      "old_path": "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
+      "new_path": "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol"
+    },
+    {
+      "old_path": "smart-contracts/integrations/randomizers/RandomizerVRF.sol",
+      "new_path": "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol"
+    },
+    {
+      "old_path": "smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol",
+      "new_path": "smart-contracts/integrations/randomizers/legacy/StreamRandomizerLifecycle.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IDependencyRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/dependencies/IDependencyRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IRandomizer.sol",
+      "new_path": "smart-contracts/interfaces/stream/legacy/entropy/IRandomizer.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IRandomizerLifecycle.sol",
+      "new_path": "smart-contracts/interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamAdmins.sol",
+      "new_path": "smart-contracts/interfaces/stream/access/IStreamAdmins.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamArtistArchiveV2.sol",
+      "new_path": "smart-contracts/interfaces/stream/artist/IStreamArtistArchiveV2.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamArtistRegistryV2.sol",
+      "new_path": "smart-contracts/interfaces/stream/artist/IStreamArtistRegistryV2.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamArtworkFinalityComponents.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityComponents.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamAssetPolicyRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamAuctions.sol",
+      "new_path": "smart-contracts/interfaces/stream/legacy/auctions/IStreamAuctions.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamCollectionArtistRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/artist/IStreamCollectionArtistRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol",
+      "new_path": "smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamContractMetadata.sol",
+      "new_path": "smart-contracts/interfaces/stream/metadata/IStreamContractMetadata.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamCore.sol",
+      "new_path": "smart-contracts/interfaces/stream/core/IStreamCore.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamCoreFinalityAdapter.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamCoreFinalityAdapter.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamCoreFinalitySource.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamCoreFinalitySource.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamDrops.sol",
+      "new_path": "smart-contracts/interfaces/stream/legacy/mint/IStreamDrops.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamEnglishAuctionHouse.sol",
+      "new_path": "smart-contracts/interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol",
+      "new_path": "smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamEntropyProvider.sol",
+      "new_path": "smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamEntropyView.sol",
+      "new_path": "smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamFinalityGovernanceAuthority.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamFinalityGovernanceAuthority.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamFinalityMetadataReads.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamFinalityMetadataReads.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamFinalitySanctionReads.sol",
+      "new_path": "smart-contracts/interfaces/stream/finality/IStreamFinalitySanctionReads.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamFixedPriceSaleAdapter.sol",
+      "new_path": "smart-contracts/interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamGasParameterHost.sol",
+      "new_path": "smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamGenesisInitializer.sol",
+      "new_path": "smart-contracts/interfaces/stream/governance/IStreamGenesisInitializer.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamGovernanceCatalog.sol",
+      "new_path": "smart-contracts/interfaces/stream/governance/IStreamGovernanceCatalog.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol",
+      "new_path": "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecutor.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol",
+      "new_path": "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMetadataRouter.sol",
+      "new_path": "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMintGate.sol",
+      "new_path": "smart-contracts/interfaces/stream/mint/IStreamMintGate.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMintLedger.sol",
+      "new_path": "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMintManager.sol",
+      "new_path": "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMintModuleRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamMinter.sol",
+      "new_path": "smart-contracts/interfaces/stream/legacy/mint/IStreamMinter.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamModule.sol",
+      "new_path": "smart-contracts/interfaces/stream/modules/IStreamModule.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamModuleRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamPreservationRecords.sol",
+      "new_path": "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamPrimarySaleSettlement.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol",
+      "new_path": "smart-contracts/interfaces/stream/records/IStreamRecordFamilyAuthorityProvider.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/records/IStreamRecordFamilyRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamRevenueResolver.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol",
+      "new_path": "smart-contracts/interfaces/stream/governance/IStreamRoleRegistry.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamRoyaltyResolver.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamRoyaltyResolver.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamSplitFactory.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamSplitWallet.sol",
+      "new_path": "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamSystemManifest.sol",
+      "new_path": "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol"
+    },
+    {
+      "old_path": "smart-contracts/interfaces/stream/IStreamTimeParameterHost.sol",
+      "new_path": "smart-contracts/interfaces/stream/parameters/IStreamTimeParameterHost.sol"
+    }
+  ],
+  "source_paths": [
+    "smart-contracts/compatibility/StreamArtistApprovals.sol",
+    "smart-contracts/core/StreamCore.sol",
+    "smart-contracts/core/StreamCoreExternalReads.sol",
+    "smart-contracts/core/StreamCoreReadBuffer.sol",
+    "smart-contracts/domains/access/StreamAdmins.sol",
+    "smart-contracts/domains/access/StreamPauseDomains.sol",
+    "smart-contracts/domains/artist/StreamArtistArchiveV2.sol",
+    "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
+    "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol",
+    "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+    "smart-contracts/domains/auctions/legacy/AuctionContract.sol",
+    "smart-contracts/domains/dependencies/DependencyRegistry.sol",
+    "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+    "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+    "smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol",
+    "smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol",
+    "smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol",
+    "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol",
+    "smart-contracts/domains/governance/StreamGovernanceActor.sol",
+    "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol",
+    "smart-contracts/domains/governance/StreamGovernanceEvidence.sol",
+    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+    "smart-contracts/domains/governance/StreamGovernanceManifest.sol",
+    "smart-contracts/domains/governance/StreamGovernancePolicy.sol",
+    "smart-contracts/domains/governance/StreamRoleRegistry.sol",
+    "smart-contracts/domains/governance/StreamRoles.sol",
+    "smart-contracts/domains/governance/StreamSystemManifest.sol",
+    "smart-contracts/domains/metadata/StreamCollectionMetadata.sol",
+    "smart-contracts/domains/metadata/StreamContractMetadata.sol",
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+    "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+    "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol",
+    "smart-contracts/domains/mint/StreamMintCoreExecutor.sol",
+    "smart-contracts/domains/mint/StreamMintGateValidator.sol",
+    "smart-contracts/domains/mint/StreamMintLedger.sol",
+    "smart-contracts/domains/mint/StreamMintManager.sol",
+    "smart-contracts/domains/mint/StreamMintModuleRegistry.sol",
+    "smart-contracts/domains/mint/StreamMintOperationIdentity.sol",
+    "smart-contracts/domains/mint/StreamSaleSignatures.sol",
+    "smart-contracts/domains/mint/legacy/StreamDrops.sol",
+    "smart-contracts/domains/mint/legacy/StreamMinter.sol",
+    "smart-contracts/domains/modules/StreamModuleBase.sol",
+    "smart-contracts/domains/modules/StreamModuleRegistry.sol",
+    "smart-contracts/domains/parameters/StreamGasParameterHost.sol",
+    "smart-contracts/domains/parameters/StreamGasParameterStore.sol",
+    "smart-contracts/domains/parameters/StreamTimeParameterHost.sol",
+    "smart-contracts/domains/parameters/StreamTimeParameterStore.sol",
+    "smart-contracts/domains/preservation/StreamPreservationRecords.sol",
+    "smart-contracts/domains/records/StreamRecordFamilyRegistry.sol",
+    "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol",
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
+    "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
+    "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
+    "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+    "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+    "smart-contracts/domains/revenue/StreamSplitWallet.sol",
+    "smart-contracts/integrations/arrng/ArrngConsumer.sol",
+    "smart-contracts/integrations/arrng/IArrngConsumer.sol",
+    "smart-contracts/integrations/arrng/IArrngController.sol",
+    "smart-contracts/integrations/chainlink/IVRFCoordinatorV2Plus.sol",
+    "smart-contracts/integrations/delegation/IDelegationManagementContract.sol",
+    "smart-contracts/integrations/delegation/NFTdelegation.sol",
+    "smart-contracts/integrations/nextgen/INextGenCore2.sol",
+    "smart-contracts/integrations/randomizers/IXRandoms.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
+    "smart-contracts/integrations/randomizers/legacy/StreamRandomizerLifecycle.sol",
+    "smart-contracts/interfaces/compatibility/IStreamCompatibility.sol",
+    "smart-contracts/interfaces/compatibility/IStreamLegacyCore.sol",
+    "smart-contracts/interfaces/standards/IERC1271.sol",
+    "smart-contracts/interfaces/standards/IERC20.sol",
+    "smart-contracts/interfaces/standards/IERC4906.sol",
+    "smart-contracts/interfaces/standards/IERC7572.sol",
+    "smart-contracts/interfaces/stream/access/IStreamAdmins.sol",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistArchiveV2.sol",
+    "smart-contracts/interfaces/stream/artist/IStreamArtistRegistryV2.sol",
+    "smart-contracts/interfaces/stream/artist/IStreamCollectionArtistRegistry.sol",
+    "smart-contracts/interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCore.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionManagement.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol",
+    "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol",
+    "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol",
+    "smart-contracts/interfaces/stream/dependencies/IDependencyRegistry.sol",
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol",
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol",
+    "smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityComponents.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamCoreFinalityAdapter.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamCoreFinalitySource.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalityGovernanceAuthority.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalityMetadataReads.sol",
+    "smart-contracts/interfaces/stream/finality/IStreamFinalitySanctionReads.sol",
+    "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGenesisInitializer.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGovernanceAdmin.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGovernanceCatalog.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecution.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecutor.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamGovernanceReads.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamRoleRegistry.sol",
+    "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol",
+    "smart-contracts/interfaces/stream/governance/StreamGovernanceTypes.sol",
+    "smart-contracts/interfaces/stream/legacy/auctions/IStreamAuctions.sol",
+    "smart-contracts/interfaces/stream/legacy/entropy/IRandomizer.sol",
+    "smart-contracts/interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol",
+    "smart-contracts/interfaces/stream/legacy/mint/IStreamDrops.sol",
+    "smart-contracts/interfaces/stream/legacy/mint/IStreamMinter.sol",
+    "smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol",
+    "smart-contracts/interfaces/stream/metadata/IStreamContractMetadata.sol",
+    "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintAdmin.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintExecution.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintGate.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol",
+    "smart-contracts/interfaces/stream/mint/IStreamMintReads.sol",
+    "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol",
+    "smart-contracts/interfaces/stream/modules/IStreamModule.sol",
+    "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol",
+    "smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol",
+    "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol",
+    "smart-contracts/interfaces/stream/parameters/IStreamTimeParameterHost.sol",
+    "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol",
+    "smart-contracts/interfaces/stream/records/IStreamRecordFamilyAuthorityProvider.sol",
+    "smart-contracts/interfaces/stream/records/IStreamRecordFamilyRegistry.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamRoyaltyResolver.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol",
+    "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol",
+    "smart-contracts/libraries/Bytes32Strings.sol",
+    "smart-contracts/libraries/SSTORE2.sol",
+    "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
+    "smart-contracts/vendor/chainlink/VRFCoordinatorV2Interface.sol",
+    "smart-contracts/vendor/openzeppelin/Address.sol",
+    "smart-contracts/vendor/openzeppelin/Base64.sol",
+    "smart-contracts/vendor/openzeppelin/Context.sol",
+    "smart-contracts/vendor/openzeppelin/ERC165.sol",
+    "smart-contracts/vendor/openzeppelin/ERC2981.sol",
+    "smart-contracts/vendor/openzeppelin/ERC721.sol",
+    "smart-contracts/vendor/openzeppelin/IERC165.sol",
+    "smart-contracts/vendor/openzeppelin/IERC2981.sol",
+    "smart-contracts/vendor/openzeppelin/IERC721.sol",
+    "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol",
+    "smart-contracts/vendor/openzeppelin/IERC721Receiver.sol",
+    "smart-contracts/vendor/openzeppelin/Math.sol",
+    "smart-contracts/vendor/openzeppelin/MerkleProof.sol",
+    "smart-contracts/vendor/openzeppelin/Ownable.sol",
+    "smart-contracts/vendor/openzeppelin/ReentrancyGuard.sol",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+    "smart-contracts/vendor/openzeppelin/Strings.sol"
+  ],
+  "frozen_evidence": [
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/DeployCurrentStack.json",
+      "sha256": "e462a60f43d51f868670a60e9b68957ca202d89edb9c3bade19d453d7bdc5548",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamAssetPolicyRegistry.json",
+      "sha256": "b412a26bce1dff6604d7f6e7008823f755fb87134624a6c515518bf78d428389",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamCollectionArtistRegistry.json",
+      "sha256": "8f4553518558b659f42f4a1d779aef2f3d730beed2c53d2a8f1966fde0bffde1",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamCore.json",
+      "sha256": "521ef16f738eb430e101922bfe6ac70bed355e44292acb0fcec699ea8489112a",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamEnglishAuctionHouse.json",
+      "sha256": "c96d4e66a0e0a383b3f5cd832d938afcee4116b2d3ea1bd95f71d30ccd99f88c",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamEntropyCoordinator.json",
+      "sha256": "826033bd4e08f6d8acb9bcd10876ac07a932625caeb3c521afc397077a6cad44",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamEntropyProvider.json",
+      "sha256": "565a19b7b372c62fea9980d41166ef30c684b24eaf1e3190b5684e976b79ea51",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamEntropyView.json",
+      "sha256": "04f2f22c35357b0b6bdf93bec91664d2570e553eff149a490dd69cb18b0a1a98",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamFixedPriceSaleAdapter.json",
+      "sha256": "e0ee142572a4f982ac0e00d2cfbd3db012c6e5e970d20005591404680496e0bc",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamGasParameterHost.json",
+      "sha256": "45f239012e361ac312dbec46524320dcc06b613493e20c6ede024ffbc24952ba",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamGenesisInitializer.json",
+      "sha256": "29c8e81753b4a36a8af92cb5f80583a65e8d4db4cc8e590213aefcb1ea3d576e",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamGovernanceCatalog.json",
+      "sha256": "e2216f638b1abe1cb32d43d5df90e2f308a51ecbdd91bba64e085926bdddaa64",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamGovernanceExecutor.json",
+      "sha256": "292b38d3a44d30ce8be5b741432e0167d3b693bd812653cadf1c38ae5e2bf44b",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamGovernedParameterAuthority.json",
+      "sha256": "732bbd62f94e0dc7e9cb89150747bf9a130e3a8c43c48c6e74fbe1461da4dd1f",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamMetadataRouter.json",
+      "sha256": "f941da97685bea13a74c1174cbed874511510c0797e536e8e9e101d56e78fe2d",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamMintGate.json",
+      "sha256": "d430cb3059a4710fb57b6e74ee5c573691dcc24bf0d0cb0bcdcd693dd0f8b832",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamMintLedger.json",
+      "sha256": "8cdd3202fb07dbe478c1de9abdf3b1a1d721a234013f2320aec04e4ecddc19f3",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamMintManager.json",
+      "sha256": "4a700a7f67b1cff33cdc6208e5388fc1f7495d90b859f11f380b66add32da252",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamMintModuleRegistry.json",
+      "sha256": "cdd2ceab4e7dcc3fb899acd707be9668e98676a29dae8989f003c9acb2752780",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamModule.json",
+      "sha256": "3baf7725cf9094adf20807ebb58a1b294d433462c657db90fbc65ee6f375f915",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamModuleRegistry.json",
+      "sha256": "607a6feb306aa141aaf6b60ca68770719de2d15beb311089f3995855fce66bdc",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamRoleRegistry.json",
+      "sha256": "2510845b3291f2b30e892b4449e11100e42a4d284fedeaebb36377e9bf1a9e70",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamRoyaltyResolver.json",
+      "sha256": "32a7042137ac48a06dfee5333e88520a348f954155ad0f8206243cf9ffed66ed",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamSplitFactory.json",
+      "sha256": "6f7182de0c6345688602f17d3703763538c647f8ce2f759bcc37b8acce5f9639",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamSplitWallet.json",
+      "sha256": "ab15de467868e9561048856bfcbba947460af02f8be5e02a135548f47eafe7b4",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/IStreamSystemManifest.json",
+      "sha256": "cc54913bdb88ae61cc4d2e107303a3e7eee2040e0f4ea6d0f2e8e571c88a7fcb",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamAssetPolicyRegistry.json",
+      "sha256": "1ba8230b7c084fb8a40e12de12232c9952dbd310de0a7cb1b74f0f14baf06b19",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamCollectionArtistRegistry.json",
+      "sha256": "30efafb45556a5f39a8477f7f9bc2b55881bbc42432cd23ce242796a417fa86a",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamCore.json",
+      "sha256": "f6fad7cde7a5831385279c16364ead269909a15071858142b10d59c35e4f0a19",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamCoreExternalReads.json",
+      "sha256": "e4319b6cf08daaecc70497c9675ba42627898601c52170f1e50890e59ceefb35",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamEnglishAuctionHouse.json",
+      "sha256": "3e4b27ee9d60f705ad59ee68980514590bdad7e71008fddf8b4531c22219ca0f",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamEntropyCoordinator.json",
+      "sha256": "7e87b0e5b372483ef80406aae5f50e64a0069ec8ffbd9e536d3c1460e10df8ee",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamEntropyProviderVRF.json",
+      "sha256": "4cd4f1e6e2f197259bf6ff6496b4766d33d7820d95d1b8e635c4a899bd35bfe2",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamFixedPriceSaleAdapter.json",
+      "sha256": "10925ad4268b1023f042c2e295806db7b1e9ff11803f3e18f0a8f8494b2910e2",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernanceActionPolicy.json",
+      "sha256": "ce27f81a201124db06feed818bc33ab5e74a1bd5127713189bc38be85522b1ed",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernanceBootstrap.json",
+      "sha256": "152f4a089e248aa62c3a05715e16f92020023d191314c0876c594e495520f3a6",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernanceEvidence.json",
+      "sha256": "8c47a99a5d310e34d2e8323b2acbf919465490ba826506e61c11680b46ed2d44",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernanceExecutor.json",
+      "sha256": "a8c06889f9d6da68b655339e8f89aa913e194e9567dfb135805beb9602984c73",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernanceManifest.json",
+      "sha256": "2fad19d16474e54d90ccd20c93f56e9f16ce3a600b0e7c71df6674726aa183ca",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamGovernancePolicy.json",
+      "sha256": "c97964a1245fc3de183d521a9d02121d987917375290649f7bc31ed03c810b84",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMetadataRenderer.json",
+      "sha256": "29e775dfc2effea69da6fab0d39627ebf4205864860ebe8beb34efdb8d18916a",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMetadataRouter.json",
+      "sha256": "f8cd74d3e01ecb47458ebbf8775485efa4ea48fb663e931296a840adf79f799a",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMintCoreExecutor.json",
+      "sha256": "4608efd6cf3b7936ea7656d63eb76ae68b1894e0dda24b50522ab1382c48d110",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMintGateValidator.json",
+      "sha256": "6799489a58df42a15bbf7d1dc0c573255a37a682115eb42b276d1692e97a8cd0",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMintLedger.json",
+      "sha256": "064367b758c2c5533145ed5dcda250001a79ec7049912bc1b08ef5d19da30644",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMintManager.json",
+      "sha256": "a6bc49c163fbb831dd8a97deadbe8b8bb95538facb1ed6c6a91ac60ec08b7c8a",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamMintOperationIdentity.json",
+      "sha256": "b666e5707b7e25f0f0969d36890bdf0c02b82cbb8e9ef816f2f49cc4e40f99d7",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamModuleRegistry.json",
+      "sha256": "93983b83faba2db45f59efb9cc5dd6849e2d41bc7b6732f8ad3b2dade21262bf",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamRoleRegistry.json",
+      "sha256": "84af14f49e01ce5c3e0bcd45d41a83ae6fc15dffbc12e5ed6c9e961d881381ec",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamRoyaltyResolver.json",
+      "sha256": "4249d1e01be09139db297ffc4bc407cb36512a985ae5397107ddd7ff53dd802b",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamSplitFactory.json",
+      "sha256": "a752bc233cfb3571b15f6f3de1a015325edc060e1f081255faca4ba9371483b1",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamSplitWallet.json",
+      "sha256": "949821f4c7cf98780ddf3440b66e445ad4cb289abf3e25b614ec5380c65a3645",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/artifacts/StreamSystemManifest.json",
+      "sha256": "e82bcf5e39847af9fb049dc711b3468d60376d39d65423f1cc1854a56785d0e2",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/compiler-input.json",
+      "sha256": "21c5d1c968ef194eb5e37647420cbdee06809b1ed56c098f945d2107245b83c5",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-09/compilation/manifest.json",
+      "sha256": "d3f992476ed2b7df4c6e26748a53a24f71ac7e746415a43472293bdb000df86c",
+      "purpose": "Historical deployed prototype and its exact compilation"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/DeployCurrentStack.json",
+      "sha256": "575e0c23af80fa26cc85d254c56949e93034fd63d2dbf31a33e63356e71cf7ff",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamAssetPolicyRegistry.json",
+      "sha256": "b412a26bce1dff6604d7f6e7008823f755fb87134624a6c515518bf78d428389",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamCollectionArtistRegistry.json",
+      "sha256": "8f4553518558b659f42f4a1d779aef2f3d730beed2c53d2a8f1966fde0bffde1",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamCore.json",
+      "sha256": "521ef16f738eb430e101922bfe6ac70bed355e44292acb0fcec699ea8489112a",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamEnglishAuctionHouse.json",
+      "sha256": "c96d4e66a0e0a383b3f5cd832d938afcee4116b2d3ea1bd95f71d30ccd99f88c",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamEntropyCoordinator.json",
+      "sha256": "826033bd4e08f6d8acb9bcd10876ac07a932625caeb3c521afc397077a6cad44",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamEntropyProvider.json",
+      "sha256": "565a19b7b372c62fea9980d41166ef30c684b24eaf1e3190b5684e976b79ea51",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamEntropyView.json",
+      "sha256": "04f2f22c35357b0b6bdf93bec91664d2570e553eff149a490dd69cb18b0a1a98",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamFixedPriceSaleAdapter.json",
+      "sha256": "e0ee142572a4f982ac0e00d2cfbd3db012c6e5e970d20005591404680496e0bc",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamGasParameterHost.json",
+      "sha256": "45f239012e361ac312dbec46524320dcc06b613493e20c6ede024ffbc24952ba",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamGenesisInitializer.json",
+      "sha256": "29c8e81753b4a36a8af92cb5f80583a65e8d4db4cc8e590213aefcb1ea3d576e",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamGovernanceCatalog.json",
+      "sha256": "e2216f638b1abe1cb32d43d5df90e2f308a51ecbdd91bba64e085926bdddaa64",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamGovernanceExecutor.json",
+      "sha256": "292b38d3a44d30ce8be5b741432e0167d3b693bd812653cadf1c38ae5e2bf44b",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamGovernedParameterAuthority.json",
+      "sha256": "732bbd62f94e0dc7e9cb89150747bf9a130e3a8c43c48c6e74fbe1461da4dd1f",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamMetadataRouter.json",
+      "sha256": "f941da97685bea13a74c1174cbed874511510c0797e536e8e9e101d56e78fe2d",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamMintGate.json",
+      "sha256": "d430cb3059a4710fb57b6e74ee5c573691dcc24bf0d0cb0bcdcd693dd0f8b832",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamMintLedger.json",
+      "sha256": "8cdd3202fb07dbe478c1de9abdf3b1a1d721a234013f2320aec04e4ecddc19f3",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamMintManager.json",
+      "sha256": "4a700a7f67b1cff33cdc6208e5388fc1f7495d90b859f11f380b66add32da252",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamMintModuleRegistry.json",
+      "sha256": "cdd2ceab4e7dcc3fb899acd707be9668e98676a29dae8989f003c9acb2752780",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamModule.json",
+      "sha256": "3baf7725cf9094adf20807ebb58a1b294d433462c657db90fbc65ee6f375f915",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamModuleRegistry.json",
+      "sha256": "607a6feb306aa141aaf6b60ca68770719de2d15beb311089f3995855fce66bdc",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamRoleRegistry.json",
+      "sha256": "2510845b3291f2b30e892b4449e11100e42a4d284fedeaebb36377e9bf1a9e70",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamRoyaltyResolver.json",
+      "sha256": "32a7042137ac48a06dfee5333e88520a348f954155ad0f8206243cf9ffed66ed",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamSplitFactory.json",
+      "sha256": "6f7182de0c6345688602f17d3703763538c647f8ce2f759bcc37b8acce5f9639",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamSplitWallet.json",
+      "sha256": "ab15de467868e9561048856bfcbba947460af02f8be5e02a135548f47eafe7b4",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/IStreamSystemManifest.json",
+      "sha256": "cc54913bdb88ae61cc4d2e107303a3e7eee2040e0f4ea6d0f2e8e571c88a7fcb",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamAssetPolicyRegistry.json",
+      "sha256": "1ba8230b7c084fb8a40e12de12232c9952dbd310de0a7cb1b74f0f14baf06b19",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamCollectionArtistRegistry.json",
+      "sha256": "29f52160f7e499a971f44df9a7ee1ce19acbf27f31fc5299400d0366c5a97550",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamCore.json",
+      "sha256": "f6fad7cde7a5831385279c16364ead269909a15071858142b10d59c35e4f0a19",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamCoreExternalReads.json",
+      "sha256": "e4319b6cf08daaecc70497c9675ba42627898601c52170f1e50890e59ceefb35",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamEnglishAuctionHouse.json",
+      "sha256": "3e4b27ee9d60f705ad59ee68980514590bdad7e71008fddf8b4531c22219ca0f",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamEntropyCoordinator.json",
+      "sha256": "990c75d2ba9e3ccb157a898409b75c7834a63a9a1a519ebbb3f59a004a051816",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamEntropyProviderVRF.json",
+      "sha256": "f301a9b2e95fe500439893ec7597d2483b76de5a537f088bc58198837859467d",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamFixedPriceSaleAdapter.json",
+      "sha256": "7eea6d1948eb9bbc5dd02a860753b380e24de1e99513faf012a31a7907618d4c",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernanceActionPolicy.json",
+      "sha256": "ce27f81a201124db06feed818bc33ab5e74a1bd5127713189bc38be85522b1ed",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernanceBootstrap.json",
+      "sha256": "152f4a089e248aa62c3a05715e16f92020023d191314c0876c594e495520f3a6",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernanceEvidence.json",
+      "sha256": "8c47a99a5d310e34d2e8323b2acbf919465490ba826506e61c11680b46ed2d44",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernanceExecutor.json",
+      "sha256": "9d6027c7d7bdc5e634442bc292aca666d43b6e121d73766508e06606e312ba43",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernanceManifest.json",
+      "sha256": "69438470724513ee654f5887d79eed353b77ba89a0414a30ae97980a706b47db",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamGovernancePolicy.json",
+      "sha256": "c97964a1245fc3de183d521a9d02121d987917375290649f7bc31ed03c810b84",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMetadataRenderer.json",
+      "sha256": "29e775dfc2effea69da6fab0d39627ebf4205864860ebe8beb34efdb8d18916a",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMetadataRouter.json",
+      "sha256": "cf479e02b65ed15aca7485760cbc12fa06412af194b375a3767c3fa0c38f4376",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMintCoreExecutor.json",
+      "sha256": "4608efd6cf3b7936ea7656d63eb76ae68b1894e0dda24b50522ab1382c48d110",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMintGateValidator.json",
+      "sha256": "6799489a58df42a15bbf7d1dc0c573255a37a682115eb42b276d1692e97a8cd0",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMintLedger.json",
+      "sha256": "064367b758c2c5533145ed5dcda250001a79ec7049912bc1b08ef5d19da30644",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMintManager.json",
+      "sha256": "41a87faff806325cc806f337941898dde61145deaa98c244a45d7ab5cdf98374",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamMintOperationIdentity.json",
+      "sha256": "b666e5707b7e25f0f0969d36890bdf0c02b82cbb8e9ef816f2f49cc4e40f99d7",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamModuleRegistry.json",
+      "sha256": "d364327e087b4688ae72797e256282815741da436b27e300dc5385261dde1bee",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamRoleRegistry.json",
+      "sha256": "84af14f49e01ce5c3e0bcd45d41a83ae6fc15dffbc12e5ed6c9e961d881381ec",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamRoyaltyResolver.json",
+      "sha256": "291c61f7d89f3b285c84b1da20ca29360cd48138889ab947dc63e634b59364c5",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamSplitFactory.json",
+      "sha256": "d8ec7bac4c3e6c767be8d5ab437fc792c07809c56ca429e868aef35aa70a0374",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamSplitWallet.json",
+      "sha256": "949821f4c7cf98780ddf3440b66e445ad4cb289abf3e25b614ec5380c65a3645",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/artifacts/StreamSystemManifest.json",
+      "sha256": "b0da9b8966e6c55f2a0207677e0b4882d3661bb8526367f31f85a0599c1ced3a",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/compiler-input.json",
+      "sha256": "a6b5de40106999537691ef53997de24d61e8800bea3d1d35820494f214e63c72",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "deployments/current/sepolia-current-rc-1/compilation/manifest.json",
+      "sha256": "ac68c2e440c3e4b56d1a78960894a0b1902f127fe89415daf7cfde757418d92c",
+      "purpose": "Historical prepared pre-reorganization RC compilation; not broadcast"
+    },
+    {
+      "path": "release-artifacts/baselines/pre-permanent-core/abi-surface.json",
+      "sha256": "5e1ca71b82108f6aa3e39fb891b68df9741a8c27d50011c3099702f7ac19b962",
+      "purpose": "Historical protocol baseline"
+    },
+    {
+      "path": "release-artifacts/baselines/record-family-authorization-source-catalog-f5c7164f.json",
+      "sha256": "ffafa7c4f543b6f0e3497709aa0462d408e81f254cdef25d630ffc847a66dc39",
+      "purpose": "Exact pre-reorganization source implementation catalog at f5c7164f; superseded active source catalog binds 7b4ef22b separately."
+    },
+    {
+      "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
+      "sha256": "06fbf04484b33b5fe86ecb1a6b35309790e15c229de91a2db421a6e1ef8fa61b",
+      "purpose": "Historical protocol baseline"
+    },
+    {
+      "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
+      "sha256": "1fce5b6eae4517a1d71a9621ca2835b8698f7c51ce2b3ae46c1a28d123e5440f",
+      "purpose": "Historical protocol baseline"
+    },
+    {
+      "path": "release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/address-book.json",
+      "sha256": "89ce751bf16c885d0ca6b6a9e8499653d4e2e435952ca8b719ce511c7c0eba6f",
+      "purpose": "Exact historical pre-reorganization fork deployment snapshot retained at 330ac1d4; pending review evidence, not current deployment proof."
+    },
+    {
+      "path": "release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/deployment-manifest.json",
+      "sha256": "ae9a3efc67041c4475edbe8f2584b1cf5a4abd3627bcf4a2a4c38289744b1343",
+      "purpose": "Exact historical pre-reorganization fork deployment snapshot retained at 330ac1d4; pending review evidence, not current deployment proof."
+    },
+    {
+      "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
+      "sha256": "c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
+      "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "acc9115787abd45cfadec4def4eddc18cb910385b789ee3b03eceda0088357e0",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "d8bc0cf1a38450041c32bc16997591e717c66bf7142615a4f1aa81014409ec8e",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "c9b3f926441d6bfcff0cf9a76e6b335aadf83eae10b0966853792039cf94de1b",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "5b6fe7d9a90a31ae00c04dcf90bf8d6f69ccf218d2a8c87559ed0aa483a1d9a6",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/docs/adr/0005-randomness.md.txt",
+      "sha256": "7f9950298c705b49524f683b2572e0f7b300df3aa84ea75c63ed5eefe9bf5b65",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/release-artifacts/latest/abi-checksums.json",
+      "sha256": "f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseAuctionCeremony.s.sol.txt",
+      "sha256": "f9cb15d00f9188db5b8df3e4c52b780cd9bf206297ef6789e57a17caabc69f15",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseDeployment.s.sol.txt",
+      "sha256": "640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseEmergencyRedeployment.s.sol.txt",
+      "sha256": "79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseMetadataBrowser.s.sol.txt",
+      "sha256": "84079b960916213a42e478d06b3b25156acc128fdf65924564f7ac8420ae62bd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamEmergencyWithdraw.t.sol.txt",
+      "sha256": "3a9a0ed60df626cd1a1bb53a9da12352ae085ce41e43ac0553b74cd5d07955bd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamPaymentsInvariant.t.sol.txt",
+      "sha256": "5aa9eddf5ab621dc762f8dd4264fed0fb19af22bbc67a21d026f775a67a57df7",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerAdversarial.t.sol.txt",
+      "sha256": "a2131f389b8e205835265be81db458c60ac1595e2bc94057d9d6ff957cf99e93",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerLifecycle.t.sol.txt",
+      "sha256": "726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerPayments.t.sol.txt",
+      "sha256": "89a30d666b42a9daf8b8ee34d09e0d53e96c5992e41500e1285ec84f568515ff",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerRetry.t.sol.txt",
+      "sha256": "30cb423465fa36784d3e488cc29b33f5e8a863842aa0f3d79fc7f5a0da029ef6",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
+      "sha256": "db88ca51f51b18c6a0409116830ac93a60a46c7c15a094311d199819988268af",
+      "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."
+    },
+    {
+      "path": "release-artifacts/record-family-authorization-inventory.json",
+      "sha256": "23aa0deac8b4b2b50c72322eea02bb6aa5026746cea46c8e9e216e5eb1d43aef",
+      "purpose": "Historical 063605ea fail-open planning inventory; its labels and source hashes are not current implementation proof."
+    },
+    {
+      "path": "test/fixtures/warning-dispositions/forge-size-output.txt",
+      "sha256": "e8efb57a57cc836512c422b4ec74faeca1eeade5e10b93d4cc08071219232cd4",
+      "purpose": "Retained historical compiler warning transcript; current warning baseline must use independently captured current output."
+    }
+  ]
+}

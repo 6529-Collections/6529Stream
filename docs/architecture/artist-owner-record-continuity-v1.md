@@ -4,7 +4,7 @@ Status: **Proposed, pre-audit, source-blocking**.
 
 This packet freezes one dependency of the modular artist-authority successor: how an exact retained semantic record hash is paired with an owner-local V2 commitment and folded into bounded owner history. It does not accept `owner_storage`, `owner_snapshots`, or `replay_keys`; authorize any owner or Coordinator source; define an entrypoint ABI; or provide deployment, audit, or readiness credit.
 
-The machine-readable authority is [artist-owner-record-continuity-v1.json](artist-owner-record-continuity-v1.json). Its independent checker and hostile suite are `scripts/check_artist_owner_record_continuity.py` and `scripts/test_artist_owner_record_continuity.py`.
+The machine-readable authority is [artist-owner-record-continuity-v1.json](artist-owner-record-continuity-v1.json). Its independent checker and hostile suite are `tools/protocol/check_artist_owner_record_continuity.py` and `tools/protocol/test_artist_owner_record_continuity.py`.
 
 ## Selected continuity shape
 

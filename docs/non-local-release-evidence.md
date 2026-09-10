@@ -89,9 +89,9 @@ Before closing or editing a linked public-beta or production tracker issue,
 compare live GitHub state with the committed evidence artifacts:
 
 ```bash
-python scripts/fetch_release_evidence_issue_snapshot.py --output tmp/release-evidence-live-issues.json
-python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-live-issues.json
-python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-live-issues.json
+python -m tools.release.fetch_release_evidence_issue_snapshot --output tmp/release-evidence-live-issues.json
+python -m tools.release.check_release_evidence_issue_bodies --live-json tmp/release-evidence-live-issues.json
+python -m tools.release.check_release_evidence_issue_closure --live-json tmp/release-evidence-live-issues.json
 ```
 
 The same live gate is available as `make release-evidence-live-issue-sync-check`.
@@ -113,8 +113,8 @@ and rejects public-beta-only IDs in that directory.
 Validate metadata with:
 
 ```sh
-python scripts/test_non_local_release_evidence.py
-python scripts/check_non_local_release_evidence.py
+python -m tools.release.test_non_local_release_evidence
+python -m tools.release.check_non_local_release_evidence
 ```
 
 The checker validates the public-beta requirement ID, environment, chain ID
@@ -128,19 +128,19 @@ are provenance drift, not formatting differences.
 
 ### Evidence Metadata Generator
 
-Use `scripts/generate_non_local_release_evidence.py` when a retained artifact
+Use `tools/release/generate_non_local_release_evidence.py` when a retained artifact
 already exists and the operator needs a metadata envelope that matches the
 canonical checker. The generator copies the requirement ID and redaction policy
 from a committed public-beta or production-release template, computes the
 retained artifact digest, sets `record_type: "evidence"`, and validates the
 result against the same checker rules before writing. Run
-`scripts/check_non_local_release_evidence.py` separately when you want an
+`tools/release/check_non_local_release_evidence.py` separately when you want an
 explicit verification pass.
 
 Example fork rehearsal draft:
 
 ```sh
-python scripts/generate_non_local_release_evidence.py \
+python -m tools.release.generate_non_local_release_evidence \
   --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json \
   --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-rehearsal.md \
   --output release-artifacts/evidence/fork-deployment-rehearsal/fork-rehearsal-evidence.json \
@@ -158,7 +158,7 @@ For `--command-or-source-system-from-retained`, the retained Markdown artifact
 must contain exactly one inline-code `Command` field such as:
 
 ```md
-- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_FORK_RPC --via-ir`
+- Command: `forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_FORK_RPC --via-ir`
 ```
 
 This file-backed mode keeps shell-significant quote characters out of the
@@ -171,7 +171,7 @@ review is complete. Use `--check` in follow-up PRs to prove the retained
 artifact hash and metadata fields have not drifted:
 
 ```sh
-python scripts/generate_non_local_release_evidence.py ... --check
+python -m tools.release.generate_non_local_release_evidence ... --check
 ```
 
 This helper does not create completion evidence by itself. A public-beta or
@@ -206,8 +206,8 @@ explorer verification.
 The retained artifact is checked separately from the JSON metadata envelope:
 
 ```sh
-python scripts/test_fork_deployment_rehearsal_evidence.py
-python scripts/check_fork_deployment_rehearsal_evidence.py
+python -m tools.deployment.test_fork_deployment_rehearsal_evidence
+python -m tools.deployment.check_fork_deployment_rehearsal_evidence
 ```
 
 The retained artifact can remain in `pending_review` only while a PR review is
@@ -240,8 +240,8 @@ redaction requirements before replacing this retained artifact template.
 Before broadcasting, run the checked no-secret preflight in the operator shell:
 
 ```sh
-python scripts/test_sepolia_evidence_preflight.py
-python scripts/check_sepolia_evidence_preflight.py --require-env --output-json /tmp/sepolia-evidence-preflight.json
+python -m tools.deployment.test_sepolia_evidence_preflight
+python -m tools.deployment.check_sepolia_evidence_preflight --require-env --output-json /tmp/sepolia-evidence-preflight.json
 ```
 
 The generated report records only prerequisite presence and redaction status.
@@ -251,8 +251,8 @@ signer-service credentials, raw signatures, or unreleased drop payloads.
 The retained artifact is checked separately from the JSON metadata envelope:
 
 ```sh
-python scripts/test_testnet_deployment_rehearsal_evidence.py
-python scripts/check_testnet_deployment_rehearsal_evidence.py
+python -m tools.deployment.test_testnet_deployment_rehearsal_evidence
+python -m tools.deployment.check_testnet_deployment_rehearsal_evidence
 ```
 
 For pending or reviewed testnet deployment evidence, retained transcript,
@@ -305,7 +305,7 @@ file with a matching digest and an independent review note.
    fields.
 6. Add the retained artifact to the appropriate repository directory.
 7. Generate a metadata envelope with
-   `scripts/generate_non_local_release_evidence.py`, or manually hash the
+   `tools/release/generate_non_local_release_evidence.py`, or manually hash the
    retained file and copy the same fields into a checked metadata document.
 8. Update the matching `public-beta-evidence.json` requirement row with the
    retained path and digest.
@@ -319,16 +319,16 @@ file with a matching digest and an independent review note.
 The required validation sequence is:
 
 ```sh
-python scripts/check_public_beta_evidence.py
-python scripts/test_non_local_release_evidence.py
-python scripts/check_non_local_release_evidence.py
-python scripts/test_fork_deployment_rehearsal_evidence.py
-python scripts/check_fork_deployment_rehearsal_evidence.py
-python scripts/check_release_readiness.py
-python scripts/generate_release_manifest.py
-python scripts/generate_release_checksums.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.test_non_local_release_evidence
+python -m tools.release.check_non_local_release_evidence
+python -m tools.deployment.test_fork_deployment_rehearsal_evidence
+python -m tools.deployment.check_fork_deployment_rehearsal_evidence
+python -m tools.release.check_release_readiness
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 Run `make check` or the documented platform equivalent before a release PR
@@ -359,8 +359,8 @@ Live deployment manifest evidence has a dedicated retained-artifact template at
 Before generating a non-local envelope for `live_deployment_manifest`, run:
 
 ```sh
-python scripts/test_live_deployment_manifest_evidence.py
-python scripts/check_live_deployment_manifest_evidence.py
+python -m tools.release.test_live_deployment_manifest_evidence
+python -m tools.release.check_live_deployment_manifest_evidence
 ```
 
 Future pending-review or reviewed live deployment-manifest references must be
@@ -385,8 +385,8 @@ Before generating non-local envelopes for `verified_deployed_addresses` or
 `explorer_verification_status`, run:
 
 ```sh
-python scripts/test_public_beta_verified_addresses.py
-python scripts/check_public_beta_verified_addresses.py
+python -m tools.release.test_public_beta_verified_addresses
+python -m tools.release.check_public_beta_verified_addresses
 ```
 
 Future pending-review or reviewed public-beta verified-addresses references
@@ -409,8 +409,8 @@ Before generating non-local envelopes for `production_address_books` or
 `live_explorer_verification`, run:
 
 ```sh
-python scripts/test_production_verified_addresses.py
-python scripts/check_production_verified_addresses.py
+python -m tools.release.test_production_verified_addresses
+python -m tools.release.check_production_verified_addresses
 ```
 
 Future pending-review or reviewed production verified-addresses references
@@ -448,13 +448,13 @@ at
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_generate_fork_metadata_browser_evidence_draft.py
-python scripts/test_fork_metadata_browser_evidence.py
-python scripts/check_fork_metadata_browser_evidence.py
+python -m tools.release.test_generate_fork_metadata_browser_evidence_draft
+python -m tools.release.test_fork_metadata_browser_evidence
+python -m tools.release.check_fork_metadata_browser_evidence
 ```
 
 If retained capture outputs were produced from deployed fork or testnet
-contracts, `scripts/generate_fork_metadata_browser_evidence_draft.py` can copy
+contracts, `tools/release/generate_fork_metadata_browser_evidence_draft.py` can copy
 the browser summary, generated `tokenURI`, and redacted transcript into a
 self-contained pending-review retained artifact bundle. The helper requires an
 explicit `--metadata-fetched-from-deployed-contract` assertion and writes
@@ -467,8 +467,8 @@ The live metadata-browser row has a dedicated retained-artifact template at
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_live_metadata_browser_evidence.py
-python scripts/check_live_metadata_browser_evidence.py
+python -m tools.release.test_live_metadata_browser_evidence
+python -m tools.release.check_live_metadata_browser_evidence
 ```
 
 The checker validates retained no-secret browser proof only. It does not fetch
@@ -508,8 +508,8 @@ release-evidence issue-link set until this PR's updated artifact set is
 reviewed. Before regenerating or replacing the non-local ceremony envelope, run:
 
 ```sh
-python scripts/test_fork_ceremony_evidence.py
-python scripts/check_fork_ceremony_evidence.py
+python -m tools.deployment.test_fork_ceremony_evidence
+python -m tools.deployment.check_fork_ceremony_evidence
 ```
 
 ### Live Ceremony Evidence
@@ -538,8 +538,8 @@ The live ceremony row has a dedicated retained-artifact template at
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_live_ceremony_evidence.py
-python scripts/check_live_ceremony_evidence.py
+python -m tools.deployment.test_live_ceremony_evidence
+python -m tools.deployment.check_live_ceremony_evidence
 ```
 
 The checker validates retained no-secret ceremony proof only. It does not
@@ -585,8 +585,8 @@ and
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
 ```
 
 The committed templates are not completion evidence. Issues #423 and #424
@@ -597,7 +597,7 @@ public-beta evidence manifest.
 Do not replace the reusable template files when retaining reviewed evidence.
 Instead, add a reviewed evidence envelope and link that envelope from the
 complete row in `release-artifacts/latest/public-beta-evidence.json`.
-`python scripts/check_marketplace_indexer_evidence.py` validates the template
+`python -m tools.release.check_marketplace_indexer_evidence` validates the template
 baseline and, for any completed marketplace/indexer row, follows the manifest
 reference to the reviewed envelope, verifies the retained Markdown hash, and
 then checks the retained Markdown coverage fields. A template envelope,
@@ -627,9 +627,9 @@ template at
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_fork_randomizer_operations_evidence.py
-python scripts/check_fork_randomizer_operations_evidence.py
-python scripts/check_randomizer_operations.py
+python -m tools.deployment.test_fork_randomizer_operations_evidence
+python -m tools.deployment.check_fork_randomizer_operations_evidence
+python -m tools.deployment.check_randomizer_operations
 ```
 
 The fork/testnet checker validates fork or testnet environments, positive
@@ -647,9 +647,9 @@ The live randomizer operations row has a dedicated retained-artifact template at
 Before generating the non-local metadata envelope, run:
 
 ```sh
-python scripts/test_live_randomizer_operations_evidence.py
-python scripts/check_live_randomizer_operations_evidence.py
-python scripts/check_randomizer_operations.py
+python -m tools.deployment.test_live_randomizer_operations_evidence
+python -m tools.deployment.check_live_randomizer_operations_evidence
+python -m tools.deployment.check_randomizer_operations
 ```
 
 The checker validates retained no-secret operations proof only. It does not
@@ -698,8 +698,8 @@ Before generating the non-local metadata envelope for `external_audit_report`,
 run:
 
 ```sh
-python scripts/test_external_audit_report_evidence.py
-python scripts/check_external_audit_report_evidence.py
+python -m tools.release.test_external_audit_report_evidence
+python -m tools.release.check_external_audit_report_evidence
 ```
 
 The committed template is not completion evidence. Issue #215 remains open and
@@ -714,8 +714,8 @@ Before generating the non-local metadata envelope for
 `post_audit_remediation`, run:
 
 ```sh
-python scripts/test_post_audit_remediation_evidence.py
-python scripts/check_post_audit_remediation_evidence.py
+python -m tools.release.test_post_audit_remediation_evidence
+python -m tools.release.check_post_audit_remediation_evidence
 ```
 
 The committed template is not completion evidence. Issue #231 remains open and
@@ -731,8 +731,8 @@ Before generating the non-local metadata envelope for
 `testnet_deployment_rehearsal`, run:
 
 ```sh
-python scripts/test_testnet_deployment_rehearsal_evidence.py
-python scripts/check_testnet_deployment_rehearsal_evidence.py
+python -m tools.deployment.test_testnet_deployment_rehearsal_evidence
+python -m tools.deployment.check_testnet_deployment_rehearsal_evidence
 ```
 
 The committed template is not completion evidence. Issue #217 remains open and
@@ -762,12 +762,12 @@ Before generating non-local evidence envelopes for `production_signatures` or
 `signed_git_tag`, run:
 
 ```sh
-python scripts/test_production_release_signing_evidence.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/test_release_signatures.py
-python scripts/check_release_signatures.py
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
+python -m tools.release.test_production_release_signing_evidence
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.release.test_release_signatures
+python -m tools.release.check_release_signatures
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
 ```
 
 The production release-signing checker validates retained no-secret signing
@@ -782,10 +782,10 @@ secret flags, bare 64-hex values, and secret-shaped retained content fail
 closed, except that the checksum bundle file itself may contain
 `sha256sum`-style bare digest lines because it is the exact file being signed.
 The referenced release-signature evidence JSON must also pass
-`scripts/check_release_signatures.py`, use a production or mainnet environment,
+`tools/release/check_release_signatures.py`, use a production or mainnet environment,
 and agree with the release version and commit recorded in the retained signing
 artifact. Strict signed-tag trust remains the responsibility of
-`scripts/check_signed_release_tag.py --mode release` during the actual release
+`tools/release/check_signed_release_tag.py --mode release` during the actual release
 ceremony.
 
 ## No-Secret Checklist

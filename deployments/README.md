@@ -55,19 +55,19 @@ baseline is generated under `release-artifacts/latest/` from the canonical
 target-isolated build with:
 
 ```sh
-python scripts/test_release_build_artifacts.py
-python scripts/build_release_artifacts.py
-python scripts/build_release_artifacts.py --check
-python scripts/generate_release_artifacts.py
-python scripts/generate_broadcast_manifest_input.py
-python scripts/generate_deployment_manifest.py
-python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
-python scripts/generate_address_books.py
-python scripts/test_ceremony_evidence.py
-python scripts/check_ceremony_evidence.py
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
-python scripts/generate_release_checksums.py
+python -m tools.build.test_release_build_artifacts
+python -m tools.build.build_release_artifacts
+python -m tools.build.build_release_artifacts --check
+python -m tools.build.generate_release_artifacts
+python -m tools.deployment.generate_broadcast_manifest_input
+python -m tools.deployment.generate_deployment_manifest
+python -m tools.deployment.generate_deployment_manifest --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
+python -m tools.deployment.generate_address_books
+python -m tools.deployment.test_ceremony_evidence
+python -m tools.deployment.check_ceremony_evidence
+python -m tools.deployment.test_randomizer_operations
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.generate_release_checksums
 ```
 
 The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
@@ -110,12 +110,15 @@ constructor arguments, admin ceremony details, and verification commands while
 retaining network/release metadata, the source manifest checksum, contract
 addresses, source paths, ABI hashes, runtime bytecode hashes, and verification
 status. Address-book JSON files are generated outputs; update the source
-manifest or release artifacts, then rerun `python scripts/generate_address_books.py`
+manifest or release artifacts, then rerun `python -m tools.deployment.generate_address_books`
 instead of editing address books by hand.
 
 Ceremony evidence bundles are retained under `deployments/ceremony-evidence/`
-and validated by `scripts/check_ceremony_evidence.py`. The committed local
-bundle is Anvil-only evidence. Fork, testnet, and production bundles must retain
+and validated by `tools/deployment/check_ceremony_evidence.py`. The committed local
+bundle is historical Anvil-only evidence. Its original inputs are retained in
+the [local snapshot](../release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/README.md);
+relocated references preserve the original hashes and result statuses. This
+does not report a current-source run. Fork, testnet, and production bundles must retain
 real broadcast manifests, address books, checksum references, source/explorer
 verification status, admin/signer/dependency/auction/emergency ceremony
 results, and operator notes without private keys, RPC URLs, API keys, mnemonics,
@@ -123,8 +126,9 @@ or unreleased drop payloads.
 
 Randomizer operations evidence bundles are retained under
 `deployments/randomizer-operations/` and validated by
-`scripts/check_randomizer_operations.py`. The committed local bundle is
-Anvil-only evidence. Fork, testnet, and production bundles must retain real VRF
+`tools/deployment/check_randomizer_operations.py`. The committed local bundle is
+historical Anvil-only evidence with the same snapshot boundary. Fork, testnet,
+and production bundles must retain real VRF
 and arRNG provider configuration, funding or billing proof, provider health,
 pending/stale/failed request state, migration controls, emergency controls, and
 operator notes without private keys, RPC URLs, API keys, mnemonics, provider
@@ -134,4 +138,4 @@ After broadcast, manifest, schema, config, address-book, ceremony evidence, or
 randomizer operations evidence outputs change, regenerate
 `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` with
-`python scripts/generate_release_checksums.py`.
+`python -m tools.release.generate_release_checksums`.

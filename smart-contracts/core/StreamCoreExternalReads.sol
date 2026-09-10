@@ -2,16 +2,16 @@
 pragma solidity ^0.8.19;
 
 import "../vendor/openzeppelin/IERC165.sol";
-import "../interfaces/stream/IStreamArtworkFinalityRegistry.sol";
-import "../interfaces/stream/IStreamCollectionMetadata.sol";
-import "../interfaces/stream/IStreamCollectionArtistRegistry.sol";
-import "../interfaces/stream/IStreamEntropyCoordinator.sol";
-import "../interfaces/stream/IStreamMetadataRouter.sol";
-import "../interfaces/stream/IStreamMintLedger.sol";
-import "../interfaces/stream/IStreamMintManager.sol";
-import "../interfaces/stream/IStreamModuleRegistry.sol";
-import "../interfaces/stream/IStreamRoyaltyResolver.sol";
-import "../interfaces/stream/IStreamSystemManifest.sol";
+import "../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
+import "../interfaces/stream/metadata/IStreamCollectionMetadata.sol";
+import "../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
+import "../interfaces/stream/metadata/IStreamMetadataRouter.sol";
+import "../interfaces/stream/mint/IStreamMintLedger.sol";
+import "../interfaces/stream/mint/IStreamMintManager.sol";
+import "../interfaces/stream/modules/IStreamModuleRegistry.sol";
+import "../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
+import "../interfaces/stream/governance/IStreamSystemManifest.sol";
 import "./StreamCoreReadBuffer.sol";
 
 enum StreamCoreValidationStatus {

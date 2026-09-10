@@ -262,14 +262,14 @@
       "contract_verification": "not_applicable",
       "constructor_args_retained": true,
       "commands": [
-        "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir"
+        "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir"
       ]
     },
     "release_artifacts": {
       "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
     },
     "rehearsal": {
-      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir",
+      "command": "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir",
       "anvil_passed": true,
       "fork_passed": true,
       "notes": "Public mainnet fork rehearsal at block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7. Broadcast was sent only to a local Anvil fork with placeholder addresses and no private production material."

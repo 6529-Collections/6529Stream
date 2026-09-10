@@ -1,0 +1,156 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "lastAllocatedCollectionId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastAllocatedTokenId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "lastAllocatedCollectionId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "lastAllocatedTokenId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "totalSupply",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "lastAllocatedCollectionId()": {
+            "notice": "Returns the highest collection identifier allocated by Core."
+          },
+          "lastAllocatedTokenId()": {
+            "notice": "Returns the current token allocation frontier; aborting a preparation can rewind it."
+          },
+          "totalSupply()": {
+            "notice": "Returns the live ERC-721 supply, excluding prepared and burned tokens."
+          }
+        },
+        "notice": "Global live supply and current allocation frontiers.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol": "IStreamCoreEnumeration"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol": {
+        "keccak256": "0x6427e30ccdc827854c8b16a0f7fa2012b2927cd0f50252376ee658c7d5a08183",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f8137db75162e63f6965d9a34b2d3e04063dfc36cece7194a235b804eb5b7056",
+          "dweb:/ipfs/QmewGGcXgqJQMLXb7RCw6u6YvD51Eu6CmiZYGuiXx8EyU4"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "lastAllocatedCollectionId()": "174a3aaf",
+    "lastAllocatedTokenId()": "254b22bc",
+    "totalSupply()": "18160ddd"
+  }
+}

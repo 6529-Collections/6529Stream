@@ -1,0 +1,464 @@
+#!/usr/bin/env python3
+"""Enforce release-mode evidence gates for public beta and production."""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from datetime import date
+from pathlib import Path
+from typing import Any
+
+from tools.release import check_public_beta_evidence as evidence_checker
+from tools.protocol import check_genesis_deployment_profile as genesis_profile_checker
+from tools.protocol import check_governed_parameter_inventory as governed_parameter_inventory_checker
+from tools.protocol import check_record_family_authorization as record_family_authorization_checker
+from tools.security import check_risk_register as risk_register_checker
+from tools.security import check_slither_baseline as slither_baseline_checker
+from tools.release import generate_release_checksums as release_checksum_policy
+
+
+DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
+DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
+DEFAULT_GENESIS_PROFILE = genesis_profile_checker.DEFAULT_PROFILE
+DEFAULT_CONTRACT_CONFIG = genesis_profile_checker.DEFAULT_CONTRACTS
+DEFAULT_GOVERNED_PARAMETER_INVENTORY = (
+    governed_parameter_inventory_checker.DEFAULT_INVENTORY
+)
+DEFAULT_RISK_REGISTER = risk_register_checker.DEFAULT_REGISTER
+DEFAULT_SLITHER_BASELINE = slither_baseline_checker.DEFAULT_BASELINE
+DEFAULT_SLITHER_MARKDOWN = slither_baseline_checker.DEFAULT_MARKDOWN
+DEFAULT_RELEASE_TOOL_CALL_POLICY = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_PATH
+)
+DEFAULT_RELEASE_TOOL_CALL_POLICY_SCHEMA = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH
+)
+PUBLIC_BETA_PHASE = evidence_checker.PUBLIC_BETA_PHASE
+PRODUCTION_PHASE = evidence_checker.PRODUCTION_PHASE
+
+ABI_CHECKSUMS_SCHEMA = "6529stream.abi-checksums.v1"
+STREAM_CORE_NAME = "StreamCore"
+STREAM_CORE_SOURCE = "smart-contracts/core/StreamCore.sol"
+EIP170_RUNTIME_LIMIT_BYTES = 24_576
+# Governing deployment rule: docs/launch-conformance-matrix.md (Genesis
+# Deployment Profile), docs/launch-v1-target-architecture.md (Core Hook Budget),
+# and https://github.com/6529-Collections/6529Stream/issues/654.
+PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES = 2_000
+PRODUCTION_CORE_HEADROOM_TRACKING = (
+    "docs/launch-conformance-matrix.md, docs/launch-v1-target-architecture.md, "
+    "and issue #654"
+)
+
+PHASE_ALIASES = {
+    "public-beta": PUBLIC_BETA_PHASE,
+    "public_beta": PUBLIC_BETA_PHASE,
+    "production-release": PRODUCTION_PHASE,
+    "production_release": PRODUCTION_PHASE,
+}
+PHASE_LABELS = {
+    PUBLIC_BETA_PHASE: "public beta",
+    PRODUCTION_PHASE: "production",
+}
+READY_REQUIREMENT_STATUSES = frozenset({"complete", "accepted_risk"})
+NON_WAIVABLE_REQUIREMENTS_BY_PHASE = {
+    PUBLIC_BETA_PHASE: frozenset({"external_audit_report"}),
+    PRODUCTION_PHASE: frozenset(evidence_checker.PRODUCTION_REQUIREMENTS),
+}
+
+
+class ReleaseModeError(RuntimeError):
+    """Raised when retained evidence is insufficient for release mode."""
+
+
+def normalize_phase(value: str) -> str:
+    """Normalize CLI phase aliases to manifest phase names."""
+    try:
+        return PHASE_ALIASES[value]
+    except KeyError as exc:
+        choices = ", ".join(sorted(PHASE_ALIASES))
+        raise ReleaseModeError(f"phase must be one of: {choices}") from exc
+
+
+def required_phases(phase: str) -> tuple[str, ...]:
+    """Return the manifest phases that must be ready for the release phase."""
+    if phase == PUBLIC_BETA_PHASE:
+        return (PUBLIC_BETA_PHASE,)
+    if phase == PRODUCTION_PHASE:
+        return (PUBLIC_BETA_PHASE, PRODUCTION_PHASE)
+    raise ReleaseModeError(f"unsupported phase: {phase}")
+
+
+def load_validated_evidence(path: Path, repo_root: Path) -> dict[str, Any]:
+    """Load and schema-validate the evidence manifest before release checks."""
+    evidence_path = path if path.is_absolute() else repo_root / path
+    data = evidence_checker.load_json(evidence_path)
+    evidence_checker.validate_evidence_document(data, repo_root, str(evidence_path))
+    return data
+
+
+def require_artifact_int(value: Any, path: str) -> int:
+    """Require an integer artifact field without accepting JSON booleans."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ReleaseModeError(f"{path} must be an integer")
+    return value
+
+
+def production_core_headroom_blocker(path: Path, repo_root: Path) -> str | None:
+    """Validate artifact-backed Core size and return a deployment blocker."""
+    artifact_path = path if path.is_absolute() else repo_root / path
+    data = evidence_checker.load_json(artifact_path)
+    artifact_label = str(artifact_path)
+    document = evidence_checker.require_dict(data, artifact_label)
+    if document.get("schema_version") != ABI_CHECKSUMS_SCHEMA:
+        raise ReleaseModeError(
+            f"{artifact_label}.schema_version must be {ABI_CHECKSUMS_SCHEMA!r}"
+        )
+
+    contracts = evidence_checker.require_dict(
+        document.get("contracts"), f"{artifact_label}.contracts"
+    )
+    core = evidence_checker.require_dict(
+        contracts.get(STREAM_CORE_NAME),
+        f"{artifact_label}.contracts.{STREAM_CORE_NAME}",
+    )
+    core_label = f"{artifact_label}.contracts.{STREAM_CORE_NAME}"
+    if core.get("source") != STREAM_CORE_SOURCE:
+        raise ReleaseModeError(
+            f"{core_label}.source must be {STREAM_CORE_SOURCE!r}"
+        )
+
+    runtime_size = require_artifact_int(
+        core.get("deployed_bytecode_size_bytes"),
+        f"{core_label}.deployed_bytecode_size_bytes",
+    )
+    runtime_limit = require_artifact_int(
+        core.get("eip170_runtime_limit_bytes"),
+        f"{core_label}.eip170_runtime_limit_bytes",
+    )
+    runtime_margin = require_artifact_int(
+        core.get("deployed_runtime_margin_bytes"),
+        f"{core_label}.deployed_runtime_margin_bytes",
+    )
+    if runtime_size < 0:
+        raise ReleaseModeError(
+            f"{core_label}.deployed_bytecode_size_bytes must be non-negative"
+        )
+    if runtime_limit != EIP170_RUNTIME_LIMIT_BYTES:
+        raise ReleaseModeError(
+            f"{core_label}.eip170_runtime_limit_bytes must be "
+            f"{EIP170_RUNTIME_LIMIT_BYTES}"
+        )
+    expected_margin = runtime_limit - runtime_size
+    if runtime_margin != expected_margin:
+        raise ReleaseModeError(
+            f"{core_label}.deployed_runtime_margin_bytes is {runtime_margin}, "
+            f"expected {expected_margin} from the EIP-170 limit and runtime size"
+        )
+    if runtime_margin < PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES:
+        return (
+            f"artifact-backed {STREAM_CORE_NAME} EIP-170 runtime margin is "
+            f"{runtime_margin} bytes, below the production deployment minimum "
+            f"of {PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES} bytes; see "
+            f"{PRODUCTION_CORE_HEADROOM_TRACKING}"
+        )
+    return None
+
+
+def slither_baseline_blockers(
+    baseline_path: Path,
+    markdown_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Validate the canonical baseline and return unresolved release blockers."""
+    resolved_baseline = (
+        baseline_path if baseline_path.is_absolute() else repo_root / baseline_path
+    )
+    resolved_markdown = (
+        markdown_path if markdown_path.is_absolute() else repo_root / markdown_path
+    )
+    baseline = slither_baseline_checker.validate_baseline(
+        repo_root,
+        resolved_baseline,
+        resolved_markdown,
+    )
+    open_rows = [row for row in baseline["findings"] if row["status"] == "Open"]
+    if not open_rows:
+        return []
+
+    counts = {impact: 0 for impact in slither_baseline_checker.IMPACTS}
+    for row in open_rows:
+        counts[row["impact"]] += 1
+    return [
+        "first-party production Slither baseline contains "
+        f"{len(open_rows)} Open High/Medium finding(s) "
+        f"(High={counts['High']}, Medium={counts['Medium']}); "
+        "matching the normalized baseline is not acceptance; see issue #658"
+    ]
+
+
+def governance_native_value_blockers(
+    register_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Return the fail-closed Governance Executor native-value blocker."""
+    resolved_register = (
+        register_path if register_path.is_absolute() else repo_root / register_path
+    )
+    register = risk_register_checker.validate_risk_register(repo_root, resolved_register)
+    risk = next(
+        row
+        for row in register["risks"]
+        if row["id"] == risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
+    )
+    if risk["status"] != "open_blocker":
+        return []
+    return [
+        f"{risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID} remains "
+        "open_blocker: Governance Executor proposal-selected native-value "
+        "authority requires closed-world target/selector/value policy, deployment "
+        "binding, and independent review; see issues #656 and #658"
+    ]
+
+
+def governed_parameter_completeness_blockers(
+    register_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Return the fail-closed production governed-parameter blocker."""
+    resolved_register = (
+        register_path if register_path.is_absolute() else repo_root / register_path
+    )
+    register = risk_register_checker.validate_risk_register(repo_root, resolved_register)
+    risk = next(
+        row
+        for row in register["risks"]
+        if row["id"]
+        == risk_register_checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID
+    )
+    if risk["status"] != "open_blocker":
+        return []
+    return [
+        f"{risk_register_checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID} remains "
+        "open_blocker: exact 22-GGP/3-GTP production hosts, genesis values, "
+        "immutable floors, sizing/cadence evidence, fixed-stipend compatibility, "
+        "and candidate bindings are incomplete; see issue #684"
+    ]
+
+
+def record_family_authorization_blockers(repo_root: Path) -> list[str]:
+    """Validate #690's canonical package and retain its hard release stop."""
+    return record_family_authorization_checker.completion_blockers(repo_root)
+
+
+def accepted_risk_blocker(
+    requirement: dict[str, Any], as_of: date
+) -> str | None:
+    """Return a blocker when an accepted-risk row is non-waivable or inactive."""
+    requirement_phase = requirement["phase"]
+    requirement_id = requirement["id"]
+    label = f"{requirement_phase}.{requirement_id}"
+    if requirement_id in NON_WAIVABLE_REQUIREMENTS_BY_PHASE[requirement_phase]:
+        return f"{label} is non-waivable and must be 'complete', not 'accepted_risk'"
+
+    risk_acceptance = requirement["risk_acceptance"]
+    accepted_at = date.fromisoformat(risk_acceptance["accepted_at"])
+    expires_at = date.fromisoformat(risk_acceptance["expires_at"])
+    if expires_at < accepted_at:
+        return (
+            f"{label} has an invalid risk-acceptance window: expires_at "
+            f"{expires_at.isoformat()!r} precedes accepted_at {accepted_at.isoformat()!r}"
+        )
+    if accepted_at > as_of:
+        return (
+            f"{label} risk acceptance is not active until {accepted_at.isoformat()!r}; "
+            f"release date is {as_of.isoformat()!r}"
+        )
+    if expires_at < as_of:
+        return (
+            f"{label} risk acceptance expired on {expires_at.isoformat()!r}; "
+            f"release date is {as_of.isoformat()!r}"
+        )
+    return None
+
+
+def release_mode_blockers(
+    data: dict[str, Any], phase: str, *, as_of: date | None = None
+) -> list[str]:
+    """Return human-readable blockers for the requested release mode."""
+    # Callers must run validate_evidence_document before using this helper; the
+    # direct indexing below depends on that schema and no-secret validation.
+    phases = required_phases(phase)
+    release_date = date.today() if as_of is None else as_of
+    blockers: list[str] = []
+
+    status = data["status"]
+    for required_phase in phases:
+        if status[required_phase] != "ready":
+            blockers.append(
+                f"status.{required_phase} is {status[required_phase]!r}, not 'ready'"
+            )
+
+    for requirement in data["requirements"]:
+        requirement_phase = requirement["phase"]
+        if requirement_phase not in phases:
+            continue
+        requirement_status = requirement["status"]
+        if requirement_status == "accepted_risk":
+            risk_blocker = accepted_risk_blocker(requirement, release_date)
+            if risk_blocker is not None:
+                blockers.append(risk_blocker)
+            continue
+        if requirement_status not in READY_REQUIREMENT_STATUSES:
+            blockers.append(
+                f"{requirement_phase}.{requirement['id']} is "
+                f"{requirement_status!r}, not 'complete' or 'accepted_risk'"
+            )
+
+    return blockers
+
+
+def validate_release_mode(
+    path: Path,
+    repo_root: Path,
+    phase: str,
+    *,
+    as_of: date | None = None,
+    abi_checksums: Path = DEFAULT_ABI_CHECKSUMS,
+    genesis_profile: Path = DEFAULT_GENESIS_PROFILE,
+    contract_config: Path = DEFAULT_CONTRACT_CONFIG,
+    governed_parameter_inventory: Path = DEFAULT_GOVERNED_PARAMETER_INVENTORY,
+    risk_register: Path = DEFAULT_RISK_REGISTER,
+    slither_baseline: Path = DEFAULT_SLITHER_BASELINE,
+    slither_markdown: Path = DEFAULT_SLITHER_MARKDOWN,
+) -> None:
+    """Require retained evidence to satisfy the selected release mode."""
+    normalized_phase = normalize_phase(phase)
+    release_checksum_policy.validate_release_tool_call_policy(repo_root)
+    data = load_validated_evidence(path, repo_root)
+    blockers = release_mode_blockers(data, normalized_phase, as_of=as_of)
+    blockers.extend(
+        slither_baseline_blockers(slither_baseline, slither_markdown, repo_root)
+    )
+    blockers.extend(governance_native_value_blockers(risk_register, repo_root))
+    blockers.extend(record_family_authorization_blockers(repo_root))
+    if normalized_phase == PRODUCTION_PHASE:
+        governed_parameter_inventory_checker.validate_inventory(
+            repo_root,
+            governed_parameter_inventory,
+            require_complete=True,
+        )
+        blockers.extend(
+            governed_parameter_completeness_blockers(risk_register, repo_root)
+        )
+        headroom_blocker = production_core_headroom_blocker(
+            abi_checksums, repo_root
+        )
+        if headroom_blocker is not None:
+            blockers.append(headroom_blocker)
+        blockers.extend(
+            "genesis deployment profile: " + blocker
+            for blocker in genesis_profile_checker.production_completeness_blockers(
+                genesis_profile, contract_config, repo_root
+            )
+        )
+    if blockers:
+        label = PHASE_LABELS[normalized_phase]
+        details = "\n".join(f"- {blocker}" for blocker in blockers)
+        raise ReleaseModeError(f"{label} release mode is blocked:\n{details}")
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument("--evidence", type=Path, default=DEFAULT_EVIDENCE)
+    parser.add_argument(
+        "--abi-checksums",
+        type=Path,
+        default=DEFAULT_ABI_CHECKSUMS,
+        help="Checksum-covered build artifact used for the production Core headroom gate.",
+    )
+    parser.add_argument(
+        "--phase",
+        choices=sorted(PHASE_ALIASES),
+        default="public-beta",
+        help="Release gate to enforce. Production release also requires public-beta readiness.",
+    )
+    parser.add_argument(
+        "--genesis-profile",
+        type=Path,
+        default=DEFAULT_GENESIS_PROFILE,
+        help="Canonical closed-world production deployment requirements.",
+    )
+    parser.add_argument(
+        "--contract-config",
+        type=Path,
+        default=DEFAULT_CONTRACT_CONFIG,
+        help="Current implementation catalog compared to the genesis profile.",
+    )
+    parser.add_argument(
+        "--governed-parameter-inventory",
+        type=Path,
+        default=DEFAULT_GOVERNED_PARAMETER_INVENTORY,
+        help=(
+            "Canonical governed-parameter inventory; production requires every "
+            "candidate binding and retained evidence row to be complete."
+        ),
+    )
+    parser.add_argument(
+        "--risk-register",
+        type=Path,
+        default=DEFAULT_RISK_REGISTER,
+        help="Canonical risk register carrying manual release blockers.",
+    )
+    parser.add_argument(
+        "--slither-baseline",
+        type=Path,
+        default=DEFAULT_SLITHER_BASELINE,
+        help="Canonical normalized first-party production High/Medium baseline.",
+    )
+    parser.add_argument(
+        "--slither-markdown",
+        type=Path,
+        default=DEFAULT_SLITHER_MARKDOWN,
+        help="Checked reviewer-facing mirror of the normalized Slither baseline.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the checker CLI."""
+    args = parse_args(sys.argv[1:] if argv is None else argv)
+    repo_root = args.repo_root.resolve()
+    try:
+        validate_release_mode(
+            args.evidence,
+            repo_root,
+            args.phase,
+            abi_checksums=args.abi_checksums,
+            genesis_profile=args.genesis_profile,
+            contract_config=args.contract_config,
+            governed_parameter_inventory=args.governed_parameter_inventory,
+            risk_register=args.risk_register,
+            slither_baseline=args.slither_baseline,
+            slither_markdown=args.slither_markdown,
+        )
+    except (
+        evidence_checker.PublicBetaEvidenceError,
+        genesis_profile_checker.GenesisProfileError,
+        governed_parameter_inventory_checker.GovernedParameterInventoryError,
+        record_family_authorization_checker.RecordFamilyAuthorizationError,
+        risk_register_checker.RiskRegisterError,
+        slither_baseline_checker.SlitherBaselineError,
+        release_checksum_policy.ChecksumError,
+        ReleaseModeError,
+    ) as exc:
+        print(f"release mode check failed: {exc}", file=sys.stderr)
+        return 1
+    print(f"release mode check passed for {args.phase}: {args.evidence}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

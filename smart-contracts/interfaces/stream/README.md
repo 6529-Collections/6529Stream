@@ -1,36 +1,74 @@
-# Public Stream interfaces
+# Stream contract interfaces
 
-These paths are the import surface for applications and other contracts. The
-table identifies the current working path; presence of another interface in
-this directory does not mean the full implementation is complete.
+Start with the interface for the operation you need. These caller contracts
+share addresses with their domain implementations; selecting an interface does
+not select a different contract or grant a caller additional authority.
 
-| Need | Interface | Primary implementation |
+| Operation | Import | Implementation |
 | --- | --- | --- |
-| Collections, token identity and mint hooks | [IStreamCore](IStreamCore.sol) | [StreamCore](../../core/StreamCore.sol) |
-| Signed fixed-price purchase | [IStreamFixedPriceSaleAdapter](IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
-| English auction bids and settlement | [IStreamEnglishAuctionHouse](IStreamEnglishAuctionHouse.sol) | [StreamEnglishAuctionHouse](../../domains/auctions/StreamEnglishAuctionHouse.sol) |
-| Collection artist acceptance and attribution | [IStreamCollectionArtistRegistry](IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol) |
-| Mint phases and execution | [IStreamMintManager](IStreamMintManager.sol) | [StreamMintManager](../../domains/mint/StreamMintManager.sol) |
-| Counters and consumed authorizations | [IStreamMintLedger](IStreamMintLedger.sol) | [StreamMintLedger](../../domains/mint/StreamMintLedger.sol) |
-| Optional mint eligibility | [IStreamMintGate](IStreamMintGate.sol) | Registered gate modules |
-| Module discovery and eligibility | [IStreamModuleRegistry](IStreamModuleRegistry.sol) | [StreamModuleRegistry](../../domains/modules/StreamModuleRegistry.sol) |
-| Entropy requests and callbacks | [IStreamEntropyCoordinator](IStreamEntropyCoordinator.sol) | [StreamEntropyCoordinator](../../domains/entropy/StreamEntropyCoordinator.sol) |
-| Entropy state and final seed | [IStreamEntropyView](IStreamEntropyView.sol) | The token's coordinator at mint |
-| External randomness adapter | [IStreamEntropyProvider](IStreamEntropyProvider.sol) | Provider adapters |
-| Metadata routing | [IStreamMetadataRouter](IStreamMetadataRouter.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol) |
-| Split creation and withdrawals | [IStreamSplitFactory](IStreamSplitFactory.sol), [IStreamSplitWallet](IStreamSplitWallet.sol) | [StreamSplitFactory](../../domains/revenue/StreamSplitFactory.sol) and its wallets |
-| ERC-2981 royalty receiver and rate | [IStreamRoyaltyResolver](IStreamRoyaltyResolver.sol) | [StreamRoyaltyResolver](../../domains/revenue/StreamRoyaltyResolver.sol), exposed through Core's `royaltyInfo` |
-| Governed changes | [IStreamGovernanceExecutor](IStreamGovernanceExecutor.sol) | [StreamGovernanceExecutor](../../domains/governance/StreamGovernanceExecutor.sol) |
-| One-time initialization | [IStreamGenesisInitializer](IStreamGenesisInitializer.sol) | The same governance executor |
-| Deployed system discovery | [IStreamSystemManifest](IStreamSystemManifest.sol) | [StreamSystemManifest](../../domains/governance/StreamSystemManifest.sol) |
+| Token ownership and complete permanent Core API | [core/IStreamCore.sol](core/IStreamCore.sol) | [StreamCore](../../core/StreamCore.sol) |
+| Paid fixed-price mint | [mint/IStreamFixedPriceSaleAdapter.sol](mint/IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
+| Mint execution, phase administration, and reads | [IStreamMintExecution](mint/IStreamMintExecution.sol), [IStreamMintAdmin](mint/IStreamMintAdmin.sol), [IStreamMintReads](mint/IStreamMintReads.sol) | [StreamMintManager](../../domains/mint/StreamMintManager.sol) |
+| Durable counters and replay protection | [mint/IStreamMintLedger.sol](mint/IStreamMintLedger.sol) | [StreamMintLedger](../../domains/mint/StreamMintLedger.sol) |
+| Optional eligibility gate | [mint/IStreamMintGate.sol](mint/IStreamMintGate.sol) | A registered gate module |
+| Auction custody, bidding, and settlement | [auctions/IStreamEnglishAuctionHouse.sol](auctions/IStreamEnglishAuctionHouse.sol) | [StreamEnglishAuctionHouse](../../domains/auctions/StreamEnglishAuctionHouse.sol) |
+| Artist nomination and acceptance | [artist/IStreamCollectionArtistRegistry.sol](artist/IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol) |
+| Entropy registration and requests | [entropy/IStreamEntropyCoordinator.sol](entropy/IStreamEntropyCoordinator.sol) | [StreamEntropyCoordinator](../../domains/entropy/StreamEntropyCoordinator.sol) |
+| Entropy status and final seed | [entropy/IStreamEntropyView.sol](entropy/IStreamEntropyView.sol) | The token's coordinator at mint |
+| External randomness provider | [entropy/IStreamEntropyProvider.sol](entropy/IStreamEntropyProvider.sol) | [StreamEntropyProviderVRF](../../domains/entropy/StreamEntropyProviderVRF.sol) |
+| Token metadata routing | [metadata/IStreamMetadataRouter.sol](metadata/IStreamMetadataRouter.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol) |
+| Immutable split profiles and withdrawals | [IStreamSplitFactory](revenue/IStreamSplitFactory.sol), [IStreamSplitWallet](revenue/IStreamSplitWallet.sol) | [StreamSplitFactory](../../domains/revenue/StreamSplitFactory.sol) and its wallets |
+| Royalty receiver and rate | [revenue/IStreamRoyaltyResolver.sol](revenue/IStreamRoyaltyResolver.sol) | [StreamRoyaltyResolver](../../domains/revenue/StreamRoyaltyResolver.sol), exposed through Core's ERC-2981 API |
+| Governance action lifecycle | [governance/IStreamGovernanceExecution.sol](governance/IStreamGovernanceExecution.sol) | [StreamGovernanceExecutor](../../domains/governance/StreamGovernanceExecutor.sol) |
+| Governed control-plane administration | [governance/IStreamGovernanceAdmin.sol](governance/IStreamGovernanceAdmin.sol) | The same Executor |
+| Governance state and current execution context | [governance/IStreamGovernanceReads.sol](governance/IStreamGovernanceReads.sol) | The same Executor |
+| One-time genesis and append-only catalog changes | [IStreamGenesisInitializer](governance/IStreamGenesisInitializer.sol), [IStreamGovernanceCatalog](governance/IStreamGovernanceCatalog.sol) | The same Executor, with each operation's distinct authority and timing rules |
+| Installed module eligibility | [modules/IStreamModuleRegistry.sol](modules/IStreamModuleRegistry.sol) | [StreamModuleRegistry](../../domains/modules/StreamModuleRegistry.sol) |
+| Published deployment inventory | [governance/IStreamSystemManifest.sol](governance/IStreamSystemManifest.sol) | [StreamSystemManifest](../../domains/governance/StreamSystemManifest.sol) |
 
-`IStreamMintModuleRegistry` is the older mint-only registry vocabulary. New
-deployments use `IStreamModuleRegistry`; the manager retains compatibility for
-the earlier regression suite. `IStreamDrops`, `IStreamMinter`, `IStreamAuctions`
-and the earlier randomizer interfaces describe the older sale/entropy stack.
-Do not combine their deployment scripts with the current Core by name alone.
+## Core capabilities
 
-The wider Artist V2 directory interfaces describe immutable component commitments. They
-do not by themselves implement the artist operations those components will
-own. Use the current deployment's installed module list and supported-flow
-tests when deciding which features an application can call.
+[IStreamCore](core/IStreamCore.sol) reexports its nine capability interfaces and
+[shared lifecycle types](core/StreamCoreTypes.sol). Import a capability directly
+when a contract needs only that responsibility:
+
+- [Collection reads](core/IStreamCoreCollectionView.sol) and [collection management](core/IStreamCoreCollectionManagement.sol).
+- [Token identity](core/IStreamCoreIdentity.sol) and [global enumeration](core/IStreamCoreEnumeration.sol).
+- [Manager mint hooks](core/IStreamCoreMint.sol) and [burn operations](core/IStreamCoreBurn.sol).
+- [Satellite pointers](core/IStreamCorePointers.sol), [gas parameters](core/IStreamCoreGasParameters.sol), and [metadata events](core/IStreamCoreMetadataEmitters.sol).
+
+## ABI and discovery compatibility
+
+[IStreamMintManager](mint/IStreamMintManager.sol) and
+[IStreamGovernanceExecutor](governance/IStreamGovernanceExecutor.sol) remain the
+original aggregate protocol APIs. IStreamMintReads also exposes the manager's
+existing Core, ledger, and registry deployment bindings, which are not part of
+the original aggregate discovery interface. Original function declarations remain on those
+interfaces because Solidity's `type(I).interfaceId` excludes inherited
+functions. Turning these aggregates into empty inheritance-only interfaces
+would silently change their existing discovery IDs.
+
+The Execution, Admin, and Reads interfaces are caller subsets. They do not add
+ERC165 claims to an implementation. Use the aggregate interface required by the
+module registry for discovery. Core capability extraction likewise does not
+change which interfaces Core advertises.
+
+Mint requests and policy types retain their `IStreamMintManager.TypeName` and
+`IStreamMintLedger.TypeName` ownership for existing Solidity callers.
+[StreamGovernanceTypes](governance/StreamGovernanceTypes.sol) owns governance
+records and is reexported by the aggregate. Events and custom errors remain
+with the existing aggregate or capability that originally owned them.
+
+## Additional and historical surfaces
+
+The `finality/`, `preservation/`, `records/`, `parameters/`, and additional
+artist/component interfaces describe their own domains. Presence in this map
+does not mean a component is installed in a deployment. Read the installed
+module inventory and supported-flow evidence before enabling a feature.
+
+The previous sale and randomness stack is explicitly under `legacy/mint/`,
+`legacy/auctions/`, and `legacy/entropy/`. Its requests are not interchangeable
+with the current paid-mint or entropy APIs. The old mint-only registry is under
+[mint/compatibility](mint/compatibility/IStreamMintModuleRegistry.sol); new
+systems use the canonical registry in `modules/`. The manager retains that
+older registry vocabulary only for compatibility.

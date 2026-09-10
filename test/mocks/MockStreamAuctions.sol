@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/interfaces/stream/IStreamAuctions.sol";
+import "../../smart-contracts/interfaces/stream/legacy/auctions/IStreamAuctions.sol";
 
 contract MockStreamAuctions is IStreamAuctions {
     bytes32 public lastDropId;

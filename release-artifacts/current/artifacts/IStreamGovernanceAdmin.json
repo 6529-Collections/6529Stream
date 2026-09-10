@@ -1,0 +1,725 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "roleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "governanceRootCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialTerminalFreezeVetoGuardians",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "systemManifestSatellite",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedInventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expectedInventoryLeafCount",
+              "type": "uint64"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "triggerTarget",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "triggerSelector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "triggerCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "allowedActionClassMask",
+                  "type": "uint8"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+              "name": "expectedTriggers",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "pointerTypes",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "registries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedActionPolicyCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "callType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "valuePolicy",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "valueLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "valueSemanticsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "actionPolicies",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct SystemManifestBootstrapBinding",
+          "name": "binding",
+          "type": "tuple"
+        }
+      ],
+      "name": "bindSystemManifestBootstrap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "registerCanceller",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bool",
+          "name": "freeze",
+          "type": "bool"
+        }
+      ],
+      "name": "registerFreezeSelector",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "registerProposer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "triggerTarget",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "triggerSelector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "uint8",
+          "name": "allowedActionClassMask",
+          "type": "uint8"
+        }
+      ],
+      "name": "registerSystemManifestTailTrigger",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newRoot",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedCodeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "rotateGovernanceRoot",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "sealSystemManifestBootstrap",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovedNativeReceiver",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bool",
+          "name": "tightening",
+          "type": "bool"
+        }
+      ],
+      "name": "setTighteningCall",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "roleRegistry",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "governanceRoot",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "governanceRootCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialTerminalFreezeVetoGuardians",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address",
+                  "name": "core",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "systemManifestSatellite",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedInventoryStateRoot",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expectedInventoryLeafCount",
+                  "type": "uint64"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "triggerTarget",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "triggerSelector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "triggerCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "allowedActionClassMask",
+                      "type": "uint8"
+                    }
+                  ],
+                  "internalType": "struct SystemManifestBootstrapTriggerExpectation[]",
+                  "name": "expectedTriggers",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "pointerTypes",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "registries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "actionPolicyCandidateProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedActionPolicyCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint8",
+                      "name": "actionClass",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "target",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes4",
+                      "name": "selector",
+                      "type": "bytes4"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetCodeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "targetProfileHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "callType",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint8",
+                      "name": "valuePolicy",
+                      "type": "uint8"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "valueLimit",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "valueSemanticsHash",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct GovernanceActionPolicyEntry[]",
+                  "name": "actionPolicies",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct SystemManifestBootstrapBinding",
+              "name": "binding",
+              "type": "tuple"
+            }
+          ],
+          "name": "bindSystemManifestBootstrap",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "registerCanceller",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bool",
+              "name": "freeze",
+              "type": "bool"
+            }
+          ],
+          "name": "registerFreezeSelector",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "registerProposer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "triggerTarget",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "triggerSelector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "uint8",
+              "name": "allowedActionClassMask",
+              "type": "uint8"
+            }
+          ],
+          "name": "registerSystemManifestTailTrigger",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "newRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "rotateGovernanceRoot",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "sealSystemManifestBootstrap",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovedNativeReceiver",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bool",
+              "name": "tightening",
+              "type": "bool"
+            }
+          ],
+          "name": "setTighteningCall",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI for the same Executor address. Discovery continues to use      IStreamGovernanceExecutor; this caller subset is not a new ERC165 claim.",
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]))": {
+            "notice": "Binds the one-way genesis authority, inventory, action policy, and manifest commitments."
+          },
+          "registerCanceller(address,bool)": {
+            "notice": "Enables or disables a canceller through a direction-checked Executor self-call."
+          },
+          "registerFreezeSelector(address,bytes4,bool)": {
+            "notice": "Registers or removes the terminal-freeze classification of a target selector."
+          },
+          "registerProposer(address,bool)": {
+            "notice": "Enables or disables a proposer through a direction-checked Executor self-call."
+          },
+          "registerSystemManifestTailTrigger(address,bytes4,uint8)": {
+            "notice": "Registers an exact target selector requiring an atomic manifest publication tail."
+          },
+          "rotateGovernanceRoot(address,bytes32)": {
+            "notice": "Replaces the governance root with a contract matching the expected runtime hash."
+          },
+          "sealSystemManifestBootstrap()": {
+            "notice": "Permanently seals the bound bootstrap after validating its live manifest state."
+          },
+          "setApprovedNativeReceiver(address,bool)": {
+            "notice": "Changes native-transfer receiver eligibility; catalog admission is still required."
+          },
+          "setTighteningCall(address,bytes4,bool)": {
+            "notice": "Changes whether an exact target selector is an admitted tightening operation."
+          }
+        },
+        "notice": "Governance-authorized control-plane changes and one-way bootstrap operations.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamGovernanceAdmin.sol": "IStreamGovernanceAdmin"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamGovernanceAdmin.sol": {
+        "keccak256": "0x1d193eaf34a90f0f07727aff0f5748ac9321f1e051cd5209b7bbe4460e5ad243",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://fdea5d841c8d91c28843f5d9dfb796c3b5fac39b2b7850170f05839c014d00d6",
+          "dweb:/ipfs/QmZ2Ssa3gjNF818RCKWKrVcE2oSHZWiUbh4SKgxnaB1YNf"
+        ]
+      },
+      "smart-contracts/interfaces/stream/governance/StreamGovernanceTypes.sol": {
+        "keccak256": "0x9573e8be7be5ecc5f563d14a29b90d6fdc5df99c79cec95b51354cf99396d844",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f7749caa2dde1c9b696bf8038e684014bcf9a7fa1d7e5cddf1afc7816533ecea",
+          "dweb:/ipfs/QmfGU7kBNHmuaBmHNTyQY1QjXVhvG6LpMPjs2hibUkidrJ"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[],bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[]))": "67e9ec44",
+    "registerCanceller(address,bool)": "cb585072",
+    "registerFreezeSelector(address,bytes4,bool)": "b1b73b69",
+    "registerProposer(address,bool)": "0794ec84",
+    "registerSystemManifestTailTrigger(address,bytes4,uint8)": "c64f0807",
+    "rotateGovernanceRoot(address,bytes32)": "46bf8975",
+    "sealSystemManifestBootstrap()": "bd1f39cd",
+    "setApprovedNativeReceiver(address,bool)": "31ac9e82",
+    "setTighteningCall(address,bytes4,bool)": "250885fb"
+  }
+}

@@ -67,13 +67,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_live_ceremony_evidence.py
-python scripts/check_live_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md --output release-artifacts/evidence/live-ceremony/live-ceremony-evidence.json --environment live --chain-id 1 --block-or-reference "<mainnet block, ceremony transcript, or deployment version>" --command-or-source-system "<safe export, explorer source, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.deployment.test_live_ceremony_evidence
+python -m tools.deployment.check_live_ceremony_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/live-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md --output release-artifacts/evidence/live-ceremony/live-ceremony-evidence.json --environment live --chain-id 1 --block-or-reference "<mainnet block, ceremony transcript, or deployment version>" --command-or-source-system "<safe export, explorer source, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

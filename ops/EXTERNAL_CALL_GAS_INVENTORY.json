@@ -41,7 +41,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeComponent",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -53,7 +53,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeDiscoveryWord",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -65,7 +65,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
       "site": "observeDiscoveryComponent",
       "kind": "yul-call",
       "operation": "staticcall",
@@ -242,7 +242,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
       "identifier": "DIAGNOSTIC_READ_PARENT_GAS_RESERVE",
       "value": 10000,
       "expected_count": 1,
@@ -252,7 +252,7 @@
       "disposition": "open-remediation-required"
     },
     {
-      "path": "smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol",
+      "path": "smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol",
       "identifier": "STRICT_READ_PARENT_GAS_RESERVE",
       "value": 100000,
       "expected_count": 1,

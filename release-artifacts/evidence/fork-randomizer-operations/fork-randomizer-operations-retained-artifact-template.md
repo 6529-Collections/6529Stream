@@ -55,8 +55,8 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:ae9a3efc67041c4475edbe8f2584b1cf5a4abd3627bcf4a2a4c38289744b1343`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:89ce751bf16c885d0ca6b6a9e8499653d4e2e435952ca8b719ce511c7c0eba6f`
+- Deployment manifest: `release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/deployment-manifest.json / sha256:ae9a3efc67041c4475edbe8f2584b1cf5a4abd3627bcf4a2a4c38289744b1343`
+- Address book: `release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/address-book.json / sha256:89ce751bf16c885d0ca6b6a9e8499653d4e2e435952ca8b719ce511c7c0eba6f`
 - Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:3b49b1d397ebfb047b313fb31ddaa5f810eb38e0b30bacc588ad2f05ab0f9955`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
@@ -82,14 +82,14 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_fork_randomizer_operations_evidence.py
-python scripts/check_fork_randomizer_operations_evidence.py
-python scripts/check_randomizer_operations.py deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending permanent-Core PR review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; permanent-Core PR review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The permanent-Core metadata/router cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.deployment.test_fork_randomizer_operations_evidence
+python -m tools.deployment.check_fork_randomizer_operations_evidence
+python -m tools.deployment.check_randomizer_operations deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system-from-retained --owner "Codex autonomous implementer" --reviewer "pending permanent-Core PR review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; permanent-Core PR review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The permanent-Core metadata/router cutover changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes
@@ -114,3 +114,8 @@ Current release reconciliation refreshes generated manifest, address-book, and
 ABI references only. The historical source commit, raw broadcast, provider
 placeholders, and observations remain unchanged. This pending record does not
 attest deployment or operation of the current stack.
+
+Historical retention note: the manifest and address book above are exact copies of
+the pre-reorganization `330ac1d4` files. The command and receipts describe the
+original `a35c24a4` fork run. Current deployment examples are maintained separately;
+this pending review packet does not attest a new deployment or current bytecode.

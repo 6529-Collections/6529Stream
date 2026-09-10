@@ -8,7 +8,12 @@ document conflicts with a specification home, the specification wins.
 
 6529Stream is pre-audit and not production-ready.
 
-The current Gate A smoke baseline proves:
+The working permanent-Core product is documented in [current stack](current-stack.md):
+signed native sales, English auctions, accepted attribution, split withdrawals,
+entropy and metadata. Use the [current developer commands](tooling.md) to exercise
+that implementation. Broader specification and release acceptance remain separate.
+
+The historical Gate A regression/evidence baseline records:
 
 - The checked fresh-contributor path in
   [`docs/first-30-minutes.md`](first-30-minutes.md) covers pinned tool
@@ -26,7 +31,7 @@ The current Gate A smoke baseline proves:
 - `forge build` runs against Solidity `0.8.19`.
 - `forge build --sizes --via-ir --skip test --skip script --force` remains an
   aggregate diagnostic and warning-collection build. Canonical release
-  bytecode instead comes from `python scripts/build_release_artifacts.py`,
+  bytecode instead comes from `python -m tools.build.build_release_artifacts`,
   which compiles each configured source and import closure in isolation,
   rejects test/script source units in configured targets, retained build-info
   compiler inputs, and artifact metadata, validates a deterministic
@@ -37,7 +42,7 @@ The current Gate A smoke baseline proves:
   failures to restore configured artifacts plus retained compiler inputs and
   the receipt to dedicated ignored `out-release/`. Ordinary Forge builds and
   scripts continue to use `out/`. `python
-  scripts/check_contract_size_budget.py` checks those canonical artifacts
+  tools/build/check_contract_size_budget.py` checks those canonical artifacts
   against EIP-170 and enforces the interim `StreamCore` development floor from
   `release-artifacts/contracts.json`. This closes the local release and
   verification evidence gap tracked by
@@ -118,24 +123,24 @@ The current Gate A smoke baseline proves:
   planning floor/genesis tuple in the governed inventory. Issues #656/#670/#684
   still block exact candidate,
   fixed-stipend, cadence, rehearsal, and independent-review evidence.
-- `python scripts/test_solidity_formatting.py` and
-  `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
+- `python -m tools.build.test_solidity_formatting` and
+  `python -m tools.build.check_solidity_formatting` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass
   `forge fmt --check`, and the raw all-files diagnostic is allowed to fail
   only for the 17 documented vendored/provenance formatting exemptions.
-- `python scripts/test_warning_dispositions.py`,
-  `python scripts/run_forge_size_log.py --log cache/forge-size.log`, and
-  `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log` enforce the checked warning
+- `python -m tools.security.test_warning_dispositions`,
+  `python -m tools.build.run_forge_size_log --log cache/forge-size.log`, and
+  `python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log` enforce the checked warning
   disposition baseline in
   [`docs/warning-dispositions.md`](warning-dispositions.md). That baseline
   records fixed NatSpec warning cleanup and accepted solc, documentation,
   linter, vendored, test-only, ABI-compatibility, and `StreamCore`
   size-tradeoff warning rows without treating warning quietness as protocol
   correctness proof.
-- `python scripts/test_natspec_coverage.py` and
-  `python scripts/check_natspec_coverage.py` enforce the checked NatSpec
+- `python -m tools.build.test_natspec_coverage` and
+  `python -m tools.build.check_natspec_coverage` enforce the checked NatSpec
   coverage baseline in [`docs/natspec-coverage.md`](natspec-coverage.md) and
-  `release-artifacts/baselines/v0.1.0/natspec-coverage.json`. The current
+  `release-artifacts/natspec-coverage.json`. The current
   baseline is a burn-down queue for missing release-surface NatSpec, not proof
   that API documentation is complete.
 - `forge test -vvv` executes real tests for admin guards, target-scoped
@@ -307,21 +312,21 @@ The current Gate A smoke baseline proves:
   final-supply timing, plus missing collection data rejection before final
   supply math and the compact `TokenNotMinted()` selector used by Core metadata
   views.
-  `scripts/test_metadata_fixtures.py` and
-  `scripts/check_metadata_fixtures.py` validate the committed metadata golden
+  `tools/protocol/test_metadata_fixtures.py` and
+  `tools/protocol/check_metadata_fixtures.py` validate the committed metadata golden
   fixtures outside Foundry by strictly decoding JSON and HTML data URIs,
   parsing metadata JSON, rejecting invalid UTF-8 fixture payloads, validating
   semantic attribute shape, checking current URI scheme policy, and asserting
   the generated final animation wrapper has exactly the expected script
   boundaries.
-  `scripts/test_metadata_browser_sandbox.py` and
-  `scripts/check_metadata_browser_sandbox.py` execute the committed final
+  `tools/deployment/test_metadata_browser_sandbox.py` and
+  `tools/deployment/check_metadata_browser_sandbox.py` execute the committed final
   on-chain animation fixture in Chromium inside a sandboxed iframe, serve the
   expected external dependency through a deterministic stub, fail unexpected
   outbound HTTP(S) requests, assert the bootstrap values, capture page/console
   errors, and prove parent-document access is blocked.
-  `scripts/test_rehearsal_metadata_browser_sandbox.py` and
-  `scripts/check_rehearsal_metadata_browser_sandbox.py` execute metadata
+  `tools/deployment/test_rehearsal_metadata_browser_sandbox.py` and
+  `tools/deployment/check_rehearsal_metadata_browser_sandbox.py` execute metadata
   generated by a local deployment rehearsal: the Forge script deploys the local
   stack, mints through the EIP-712 drop authorization path, finalizes
   randomness/image/attribute inputs, returns the generated on-chain `tokenURI`,
@@ -339,36 +344,36 @@ The current Gate A smoke baseline proves:
   drops, and auction addresses, Safe-rooted admin ceremony state on both
   deployments, temporary deployer-admin removal, and a replacement fixed-price
   mint smoke path. The suite-level test proves
-  `script/RehearseDeploymentSuite.s.sol` returns deployment, auction, and
+  `script/legacy/RehearseDeploymentSuite.s.sol` returns deployment, auction, and
   emergency result groups plus a combined suite hash.
-- `forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir`
+- `forge script script/legacy/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir`
   executes the three local rehearsal flows as an aggregate suite-level evidence
   command. The local/CI smoke gate also runs the three standalone `forge script`
   entrypoints, keeping the original script execution contexts automated while
   retaining one combined suite result for release-gate review.
-- `scripts/test_deployment_rehearsal_gate.py` and
-  `scripts/check_deployment_rehearsal_gate.py` statically guard the aggregate
+- `tools/deployment/test_deployment_rehearsal_gate.py` and
+  `tools/deployment/check_deployment_rehearsal_gate.py` statically guard the aggregate
   suite command, all three standalone rehearsal commands, and the CI retained
   log names across Make, Bash, PowerShell, and CI before the Forge rehearsal
   scripts execute. This is wiring-parity evidence for the local gate, not
   fork, testnet, or live deployment evidence.
-- `scripts/test_release_artifacts.py` and
-  `scripts/generate_release_artifacts.py --check` prove the committed
+- `tools/build/test_release_artifacts.py` and
+  `tools/build/generate_release_artifacts.py --check` prove the committed
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
   including ABI checksums, bytecode checksums, standard/custom interface IDs,
   and event topic catalog entries.
-- `scripts/test_protocol_surface_report.py` and
-  `scripts/generate_protocol_surface_report.py --check` prove the committed
+- `tools/build/test_protocol_surface_report.py` and
+  `tools/build/generate_protocol_surface_report.py --check` prove the committed
   `release-artifacts/latest/protocol-surface-report.json` matches the current
   production Foundry artifacts for functions, selectors, events, topic0 values,
   custom errors, ABI hashes, bytecode hashes, and runtime sizes.
-- `scripts/test_source_verification_inputs.py` and
-  `scripts/generate_source_verification_inputs.py --check` prove the committed
+- `tools/build/test_source_verification_inputs.py` and
+  `tools/build/generate_source_verification_inputs.py --check` prove the committed
   `release-artifacts/latest/source-verification-inputs.json` retains production
   contract source hashes, compiler settings, constructor ABI, bytecode/linking
   status, and verification command templates from the current Foundry artifacts.
-- `scripts/test_dependency_artifact_manifest.py` and
-  `scripts/generate_dependency_artifact_manifest.py --check` prove committed
+- `tools/protocol/test_dependency_artifact_manifest.py` and
+  `tools/protocol/generate_dependency_artifact_manifest.py --check` prove committed
   dependency artifact descriptors under `release-artifacts/dependencies/`
   resolve only to packaged dependency files, reject malformed keys and duplicate
   identities, and keep
@@ -377,81 +382,81 @@ The current Gate A smoke baseline proves:
   proposal, review, source packaging, registry registration, unfrozen
   collection repinning, deprecation, rollback by corrective version, frozen
   collection immutability, and source-retention evidence.
-- `scripts/test_abi_compatibility.py` and
-  `scripts/check_abi_compatibility.py --check` prove the current production
+- `tools/build/test_abi_compatibility.py` and
+  `tools/build/check_abi_compatibility.py --check` prove the current production
   contract and published interface ABI surfaces remain compatible with the
   committed `release-artifacts/baselines/v0.1.0/abi-surface.json` baseline.
   The first baseline fails on removed or changed functions, events, custom
   errors, constructors, fallback, or receive entries and reports additive
   entries as compatible.
-- `scripts/test_broadcast_manifest_input.py` and
-  `scripts/generate_broadcast_manifest_input.py --check` prove the sanitized
+- `tools/deployment/test_broadcast_manifest_input.py` and
+  `tools/deployment/generate_broadcast_manifest_input.py --check` prove the sanitized
   Foundry broadcast fixture maps exactly to the expected Anvil deployment
   contract set, chain ID, transaction hashes, successful receipts, and
   non-duplicate deployed addresses without committing secret-like keys.
-- `scripts/test_deployment_manifest.py` and
-  `scripts/generate_deployment_manifest.py --check` prove the local Anvil
+- `tools/deployment/test_deployment_manifest.py` and
+  `tools/deployment/generate_deployment_manifest.py --check` prove the local Anvil
   placeholder manifest is generated from committed inputs, references current
   ABI/runtime bytecode hashes, and carries a deterministic manifest checksum.
   The same generator also checks the sanitized broadcast-derived manifest input
   with `--config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json`.
-- `scripts/test_address_books.py` and
-  `scripts/generate_address_books.py --check` prove the generated local Anvil
+- `tools/deployment/test_address_books.py` and
+  `tools/deployment/generate_address_books.py --check` prove the generated local Anvil
   address books are compact, deterministic projections of the committed
   placeholder and broadcast-derived deployment manifests plus release artifact
   contract metadata.
-- `scripts/test_ceremony_evidence.py` and
-  `scripts/check_ceremony_evidence.py` prove the committed no-secret local
+- `tools/deployment/test_ceremony_evidence.py` and
+  `tools/deployment/check_ceremony_evidence.py` prove the committed no-secret local
   Anvil ceremony evidence bundle follows
   `deployments/schema/ceremony-evidence.schema.json`, references existing
   deployment manifests, address books, checksum inputs, rehearsal scripts, and
   verification status by SHA-256, rejects stale file hashes and secret-like
   keys, and reserves fork/testnet/live retained evidence contents for later
   Gate E ceremonies.
-- `scripts/test_release_manifest.py` and
-  `scripts/generate_release_manifest.py --check` prove the generated top-level
+- `tools/release/test_release_manifest.py` and
+  `tools/release/generate_release_manifest.py --check` prove the generated top-level
   release manifest ties the release artifact catalog, dependency artifact
   manifest, ABI compatibility baseline, deployment manifests, address books,
   ceremony evidence, public-beta evidence status, schemas, changelog,
   governance docs, and unavailable release-ceremony outputs together without
   drift.
-- `scripts/test_release_checksums.py` and
-  `scripts/generate_release_checksums.py --check` prove the committed
+- `tools/release/test_release_checksums.py` and
+  `tools/release/generate_release_checksums.py --check` prove the committed
   `release-artifacts/latest/SHA256SUMS` and
   `release-artifacts/latest/release-checksums.json` bundle covers the current
   release artifact, dependency artifact source, broadcast fixture, deployment
   manifest, address-book, config, schema, public-beta evidence status, and
   release-manifest files.
-- `scripts/test_markdown_links.py` and `scripts/check_markdown_links.py` prove
+- `tools/docs/test_markdown_links.py` and `tools/docs/check_markdown_links.py` prove
   the contributor, docs, ops, GitHub template, and release-artifact Markdown
   surfaces do not contain stale local file links, missing heading anchors,
   duplicate-anchor drift, repository escapes, or invalid line anchors.
-- `scripts/test_release_signatures.py` and
-  `scripts/check_release_signatures.py` prove the committed no-secret local
+- `tools/release/test_release_signatures.py` and
+  `tools/release/check_release_signatures.py` prove the committed no-secret local
   release signature evidence follows
   `release-artifacts/schema/release-signature-evidence.schema.json`, records
   the self-referential release manifest/checksum bundle boundary, rejects
   stale retained hashes, symlinked evidence refs, and secret-like values, and
   reserves production detached checksum signatures, signed Git tags, signer
   identity, and verification output for public release ceremonies.
-- `scripts/test_non_local_release_evidence.py`,
-  `scripts/check_non_local_release_evidence.py`,
-  `scripts/test_marketplace_indexer_evidence.py`, and
-  `scripts/check_marketplace_indexer_evidence.py` fail future reviewed
+- `tools/release/test_non_local_release_evidence.py`,
+  `tools/release/check_non_local_release_evidence.py`,
+  `tools/release/test_marketplace_indexer_evidence.py`, and
+  `tools/release/check_marketplace_indexer_evidence.py` fail future reviewed
   release evidence closed unless generic non-local retained artifacts,
   marketplace/indexer evidence envelopes, and retained Markdown references are
   ordinary repo-relative files, not symlinked files or files reached through
   symlinked directories.
-- `scripts/test_drop_authorization_signing_evidence.py` and
-  `scripts/check_drop_authorization_signing_evidence.py` prove the committed
+- `tools/release/test_drop_authorization_signing_evidence.py` and
+  `tools/release/check_drop_authorization_signing_evidence.py` prove the committed
   no-secret drop authorization signing evidence template follows
   `release-artifacts/schema/drop-authorization-signing-evidence.schema.json`,
   ties retained signing ceremony metadata to a generated unsigned EIP-712
   payload, validates domain/message/digest fields, signer epoch, reviewer and
   signature metadata, retained artifact hashes, and path boundaries, and keeps
   production signing evidence blocked until reviewed non-local evidence exists.
-- `scripts/test_signer_custody_readiness.py` and
-  `scripts/check_signer_custody_readiness.py` prove the committed no-secret
+- `tools/release/test_signer_custody_readiness.py` and
+  `tools/release/check_signer_custody_readiness.py` prove the committed no-secret
   signer custody readiness template follows
   `release-artifacts/schema/signer-custody-readiness.schema.json`, validates
   custody owner, signer manager, signer epoch source, signer-service class,
@@ -459,8 +464,8 @@ The current Gate A smoke baseline proves:
   references, reviewer metadata, retained artifact hashes, path boundaries, and
   no-secret policy, and keeps public-beta readiness blocked until reviewed
   non-local custody evidence exists.
-- `scripts/test_live_deployment_manifest_evidence.py` and
-  `scripts/check_live_deployment_manifest_evidence.py` prove the committed
+- `tools/release/test_live_deployment_manifest_evidence.py` and
+  `tools/release/check_live_deployment_manifest_evidence.py` prove the committed
   template for future `live_deployment_manifest` evidence is public-safe and
   fail future pending/reviewed evidence closed unless retained manifest files
   are live mainnet chain ID 1, have finalized nonzero contract addresses,
@@ -469,43 +474,43 @@ The current Gate A smoke baseline proves:
   directories and secret-shaped content, and match optional declared `sha256:`
   digests. Issue #227 remains open until real reviewed live manifest evidence
   is retained.
-- `scripts/test_live_metadata_browser_evidence.py`,
-  `scripts/check_live_metadata_browser_evidence.py`,
-  `scripts/test_production_broadcast_retention.py`, and
-  `scripts/check_production_broadcast_retention.py` share the retained-path
+- `tools/release/test_live_metadata_browser_evidence.py`,
+  `tools/release/check_live_metadata_browser_evidence.py`,
+  `tools/release/test_production_broadcast_retention.py`, and
+  `tools/release/check_production_broadcast_retention.py` share the retained-path
   resolver with the other release evidence checkers so future pending/reviewed
   live metadata-browser and production broadcast retention evidence cannot
   reference symlinked leaf files or files reached through symlinked
   directories. Issues #473 and #226 remain open until real reviewed evidence is
   retained.
-- `scripts/test_testnet_deployment_rehearsal_evidence.py` and
-  `scripts/check_testnet_deployment_rehearsal_evidence.py` fail future
+- `tools/deployment/test_testnet_deployment_rehearsal_evidence.py` and
+  `tools/deployment/check_testnet_deployment_rehearsal_evidence.py` fail future
   pending/reviewed Sepolia deployment rehearsal evidence closed unless retained
   transcript, broadcast, manifest, address-book, and gas/invariant files are
   ordinary repo-relative files, not symlinked files, and remain no-secret. Issue
   #217 remains open until real reviewed testnet deployment evidence is retained.
-- `scripts/test_public_beta_evidence.py` and
-  `scripts/check_public_beta_evidence.py` prove the committed no-secret
+- `tools/release/test_public_beta_evidence.py` and
+  `tools/release/check_public_beta_evidence.py` prove the committed no-secret
   public-beta evidence status follows
   `release-artifacts/schema/public-beta-evidence.schema.json`, keeps public
   beta and production release blocked while non-local audit, deployment,
   ceremony, randomizer, signature, signed tag, address, broadcast, and explorer
   evidence is missing, rejects stale retained hashes, rejects secret-like keys
   or values, and rejects ready claims while blockers remain.
-- `scripts/test_architecture_threat_model.py` and
-  `scripts/check_architecture_threat_model.py` prove
+- `tools/docs/test_architecture_threat_model.py` and
+  `tools/docs/check_architecture_threat_model.py` prove
   `docs/architecture.md` and `docs/threat-model.md` retain the current
   auditor-facing component map, role boundaries, value/custody flows, threat
   categories, residual risks, evidence links, and pre-audit/no-production-claim
   maturity language before the audit package and release manifest are checked.
-- `scripts/test_audit_package.py` and `scripts/check_audit_package.py` prove
+- `tools/docs/test_audit_package.py` and `tools/docs/check_audit_package.py` prove
   `docs/audit-package.md` remains a complete auditor-facing index over current
   maturity, scope, ADRs, invariants, the open Slither blocker, local deployment and
   release evidence, known blockers, accepted non-Slither local-baseline dispositions, and
   security reporting. The generated release manifest records the architecture,
   threat model, and audit package hashes as governance documents before the
   checksum bundle is refreshed.
-- `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
+- `tools/security/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
   dedicated pinned exact-drift analysis in CI. The current set is 44 retained
@@ -523,19 +528,19 @@ The current Gate A smoke baseline proves:
   under issue #658 until issue #656 supplies exact candidate bindings and the
   required deployment, rehearsal, monitoring, and independent-review evidence.
   The Governance V2 foundation remains pre-audit and not production-ready.
-- `scripts/test_release_readiness.py` and
-  `scripts/check_release_readiness.py` prove
+- `tools/release/test_release_readiness.py` and
+  `tools/release/check_release_readiness.py` prove
   `docs/release-readiness.md` remains a Gate G dashboard that separates
   passing local evidence from missing fork/testnet/live evidence, production
   signatures, signed Git tags, verified deployed addresses, explorer
   verification, external audit, and post-audit remediation blockers before the
   release manifest and checksum bundle are refreshed.
-- `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
+- `forge snapshot --match-path test/gas/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap` proves the committed
   local gas snapshot still matches the focused Gate D operations for
   fixed-price mint, auction bid, auction settlement, curator claim, final
   on-chain `tokenURI`, and dependency/script reads.
-- `scripts/test_changelog_check.py` and `scripts/check_changelog.py` prove
+- `tools/docs/test_changelog_check.py` and `tools/docs/check_changelog.py` prove
   release-impacting branch changes include a non-placeholder `Unreleased`
   changelog entry before they can pass the local/CI gate.
 - CI can run the same build/test smoke commands and publish logs.

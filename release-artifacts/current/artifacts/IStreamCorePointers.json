@@ -1,0 +1,416 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        }
+      ],
+      "name": "freezeSatellitePointer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSatellitePointer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "frozen",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "registryStatus",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "deploymentManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "newTarget",
+          "type": "address"
+        }
+      ],
+      "name": "updateSatellitePointer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CoreSatellitePointerFrozen",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newTarget",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldTarget",
+          "type": "address"
+        }
+      ],
+      "name": "CoreSatellitePointerUpdated",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CoreSatellitePointerFrozen",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "oldTarget",
+              "type": "address"
+            }
+          ],
+          "name": "CoreSatellitePointerUpdated",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "freezeSatellitePointer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getSatellitePointer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            }
+          ],
+          "name": "updateSatellitePointer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "freezeSatellitePointer(bytes32)": {
+            "notice": "Permanently freezes an installed satellite pointer through terminal governance."
+          },
+          "getSatellitePointer(bytes32)": {
+            "notice": "Returns the stored target, registry commitments, freeze state, and revision."
+          },
+          "updateSatellitePointer(bytes32,address)": {
+            "notice": "Replaces an unfrozen satellite after registry and governance-transition checks."
+          }
+        },
+        "notice": "Governed satellite pointers and their verified registry commitments.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": "IStreamCorePointers"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": {
+        "keccak256": "0x41f689d0317767abb933d3de8f54fc13002da9da8757242b925a2635e130cd79",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://253ee168d58ac6e651073bfe87744542298e1b7a1a6cfd7f9acae335994c5118",
+          "dweb:/ipfs/QmSmD8kqa95gZc5isNRAHP2MqWsm212XMEWeJUNs6WR9Jo"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "freezeSatellitePointer(bytes32)": "cdcdb71e",
+    "getSatellitePointer(bytes32)": "3528d53c",
+    "updateSatellitePointer(bytes32,address)": "ac1e5708"
+  }
+}

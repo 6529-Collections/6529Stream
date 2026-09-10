@@ -1424,7 +1424,7 @@
       "interface_pin": {
         "name": "IStreamRoleRegistry",
         "interface_id": "0xd77ee305",
-        "source_path": "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol",
+        "source_path": "smart-contracts/interfaces/stream/governance/IStreamRoleRegistry.sol",
         "source_sha256": "8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8",
         "status": "exact"
       },
@@ -1480,9 +1480,9 @@
       },
       "interface_pin": {
         "name": "IStreamCore",
-        "interface_id": "0x93740d3a",
-        "source_path": "smart-contracts/interfaces/stream/IStreamCore.sol",
-        "source_sha256": "082c59056a4073595d4a99bd2ae546db42c8b4b17570f9f70fc0f2c36a37ad71",
+        "interface_id": "0x00000000",
+        "source_path": "smart-contracts/interfaces/stream/core/IStreamCore.sol",
+        "source_sha256": "897997004aa06c03a43cceb96fc47eb07153dfbca14bd13fdbdf96be35bb951f",
         "status": "exact_but_artist_fact_subset_reconciliation_required"
       },
       "marker_pin": {
@@ -1538,7 +1538,7 @@
       "interface_pin": {
         "name": "IStreamGovernedParameterAuthority",
         "interface_id": "0xd9f8d48c",
-        "source_path": "smart-contracts/interfaces/stream/IStreamGovernedParameterAuthority.sol",
+        "source_path": "smart-contracts/interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol",
         "source_sha256": "d8e32f79e4dbb7a072c00efd112bdc7d9edce45e91026654d89c5c2ec3608731",
         "status": "exact_but_artist_action_scope_reconciliation_required"
       },
@@ -1595,8 +1595,8 @@
       "interface_pin": {
         "name": "IStreamArtworkFinalityRegistry",
         "interface_id": "0x47291ea1",
-        "source_path": "smart-contracts/interfaces/stream/IStreamArtworkFinalityRegistry.sol",
-        "source_sha256": "9dad200d56cd072f126a89925e5e86678e1323e8d0686de2b4df3b1a3de31352",
+        "source_path": "smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol",
+        "source_sha256": "826bfcf8ee17490294ff2e90067281544e92ab5a2ca08c13bffaf65639538677",
         "status": "exact_but_operation_22_reconciliation_required"
       },
       "marker_pin": {
@@ -1744,8 +1744,8 @@
       "relationship": "the reserved operation is exactly staticcall with address(<signer>).staticcall{gas: context.erc1271GasCap}; it is a stateless validation boundary only and StreamArtistIdentityAuthority remains the sole semantic signature/GGP owner",
       "owned_files_not_modified": [
         "ops/EXTERNAL_CALL_GAS_INVENTORY.json",
-        "scripts/check_external_call_gas_inventory.py",
-        "scripts/test_external_call_gas_inventory.py"
+        "tools/protocol/check_external_call_gas_inventory.py",
+        "tools/protocol/test_external_call_gas_inventory.py"
       ]
     }
   },

@@ -10,7 +10,7 @@
 
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamAdmins.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
 import "../../vendor/openzeppelin/MerkleProof.sol";
 import "../../integrations/delegation/IDelegationManagementContract.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";

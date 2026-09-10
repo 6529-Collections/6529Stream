@@ -1,5 +1,9 @@
 # Drop Authorization Signing
 
+> **Legacy signing schema.** `DropAuthorization` is for the earlier StreamDrops
+> stack. Current permanent-Core sales use [SaleAuthorization](integrations/wallets-and-signatures.md).
+> These schemas and signatures are not interchangeable.
+
 Baseline record — not a specification. This document describes as-built
 or operational state; the normative target is the specification set
 indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
@@ -15,12 +19,12 @@ unreleased drop payloads.
 ## Maturity And Scope
 
 The authoritative implementation is
-[`smart-contracts/domains/mint/StreamDrops.sol`](../smart-contracts/domains/mint/StreamDrops.sol). The
+[`smart-contracts/domains/mint/legacy/StreamDrops.sol`](../smart-contracts/domains/mint/legacy/StreamDrops.sol). The
 accepted protocol decision is
 [`docs/adr/0001-drop-authorization.md`](adr/0001-drop-authorization.md), and
 the target-state Solidity coverage lives in
-[`test/StreamDropsEIP712.t.sol`](../test/StreamDropsEIP712.t.sol),
-[`test/StreamDropsERC1271.t.sol`](../test/StreamDropsERC1271.t.sol), and
+[`test/unit/mint/StreamDropsEIP712.t.sol`](../test/unit/mint/StreamDropsEIP712.t.sol),
+[`test/unit/mint/StreamDropsERC1271.t.sol`](../test/unit/mint/StreamDropsERC1271.t.sol), and
 [`test/helpers/DropAuthTestHelper.sol`](../test/helpers/DropAuthTestHelper.sol).
 For app-facing wallet, Safe, WalletConnect, frontend preflight, and UX failure
 handling, use
@@ -116,7 +120,7 @@ Every fixture includes:
 ## Unsigned Payload Generator
 
 Use
-[`scripts/generate_drop_authorization_payload.py`](../scripts/generate_drop_authorization_payload.py)
+[`tools/protocol/generate_drop_authorization_payload.py`](../tools/protocol/generate_drop_authorization_payload.py)
 to produce canonical unsigned EIP-712 typed data from no-secret JSON input
 templates. The generator does not accept signing key material, does not sign,
 does not broadcast, and does not turn local evidence into production readiness.
@@ -134,13 +138,13 @@ The maintained local templates and generated unsigned outputs are:
 Check or regenerate the committed examples with:
 
 ```sh
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
 ```
 
 The generator regression tests live in
-[`scripts/test_drop_authorization_payload_generator.py`](../scripts/test_drop_authorization_payload_generator.py).
+[`tools/protocol/test_drop_authorization_payload_generator.py`](../tools/protocol/test_drop_authorization_payload_generator.py).
 
 For production use, replace the placeholder `chainId`, `verifyingContract`,
 `signer`, recipient, poster, nonce, salt, deadline, and sale fields in a
@@ -189,10 +193,10 @@ response links. That format is documented in
 Check the committed template with:
 
 ```sh
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
 ```
 
 ## Operator Signing Flow
@@ -298,7 +302,7 @@ contract sig`.
 The fixture
 [`erc1271-contract-signer.json`](../test/fixtures/drop-authorization/erc1271-contract-signer.json)
 uses the local mock signature bytes from
-[`test/StreamDropsERC1271.t.sol`](../test/StreamDropsERC1271.t.sol). It is a
+[`test/unit/mint/StreamDropsERC1271.t.sol`](../test/unit/mint/StreamDropsERC1271.t.sol). It is a
 contract-signer example, not an EOA signature.
 
 ## Failure Checklist
@@ -324,17 +328,17 @@ Before any production drop signing ceremony, verify:
 ## Local Verification Commands
 
 ```sh
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 make check
 ```
 

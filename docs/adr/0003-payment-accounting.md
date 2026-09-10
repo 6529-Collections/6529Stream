@@ -32,7 +32,7 @@ fixed-price `StreamDrops` ledger.
 | Blocks | [P0-PAY-001](https://github.com/6529-Collections/6529Stream/issues/25), [P0-PAY-002](https://github.com/6529-Collections/6529Stream/issues/26), [P0-PAY-003](https://github.com/6529-Collections/6529Stream/issues/27), [P0-PAY-004](https://github.com/6529-Collections/6529Stream/issues/28), [P0-PAY-005](https://github.com/6529-Collections/6529Stream/issues/29), [P0-PAY-006](https://github.com/6529-Collections/6529Stream/issues/30), [P0-PAY-007](https://github.com/6529-Collections/6529Stream/issues/31), [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8) |
 | Related issues | [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8), [P0-AUCT-002](https://github.com/6529-Collections/6529Stream/issues/12), [P0-AUCT-001](https://github.com/6529-Collections/6529Stream/issues/22) |
 | Related ADRs | [ADR 0001](0001-drop-authorization.md), [ADR 0002](0002-auction-custody.md) |
-| Affected contracts | `smart-contracts/domains/mint/StreamDrops.sol`, `smart-contracts/domains/auctions/AuctionContract.sol`, `smart-contracts/domains/revenue/StreamCuratorsPool.sol`, `smart-contracts/domains/mint/StreamMinter.sol`, `smart-contracts/integrations/randomizers/RandomizerRNG.sol` |
+| Affected contracts | `smart-contracts/domains/mint/legacy/StreamDrops.sol`, `smart-contracts/domains/auctions/legacy/AuctionContract.sol`, `smart-contracts/domains/revenue/StreamCuratorsPool.sol`, `smart-contracts/domains/mint/legacy/StreamMinter.sol`, `smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -57,13 +57,13 @@ Before public beta, the protocol needs to decide:
 
 Current source references:
 
-- `smart-contracts/domains/mint/StreamDrops.sol`: `mintDrop` mints fixed-price or auction
+- `smart-contracts/domains/mint/legacy/StreamDrops.sol`: `mintDrop` mints fixed-price or auction
   drops and stores drop metadata.
 - Before P0-PAY-003, fixed-price minting pushed ETH to the poster, payout
   address, and curators pool with low-level `call`. Target-state
   fixed-price minting now records poster, protocol, and curator-reserve credits
   in `StreamDrops` instead.
-- `smart-contracts/domains/auctions/AuctionContract.sol#L88-L139`: auction bidding credits the
+- `smart-contracts/domains/auctions/legacy/AuctionContract.sol#L88-L139`: auction bidding credits the
   previous highest bidder, tracks active highest-bid escrow, and exposes bidder
   credit withdrawals.
 - Before P0-AUCT-001, auction settlement marked the token claimed, decremented
@@ -75,7 +75,7 @@ Current source references:
   claimed and pushed ETH to the reward address. Target-state curator claims now
   validate the proof, mark the claim consumed, and record a withdrawable curator
   credit instead.
-- `smart-contracts/domains/auctions/AuctionContract.sol#L231-L254`: auction emergency withdrawal
+- `smart-contracts/domains/auctions/legacy/AuctionContract.sol#L231-L254`: auction emergency withdrawal
   is bounded by auction-local bidder credits and active bid escrow.
 - `StreamMinter.emergencyWithdraw` is now bounded by `emergencyWithdrawable()`;
   `totalOwed()` is zero because the minter has no payable business path.
@@ -92,8 +92,8 @@ Current source references:
 Current characterization tests intentionally pin some unsafe behavior as
 migration tripwires, but they are not target-state payment tests:
 
-- `test/StreamDropsCharacterization.t.sol`
-- `test/StreamDropsIntegrationCharacterization.t.sol`
+- `test/unit/mint/StreamDropsCharacterization.t.sol`
+- `test/regression/legacy/mint/StreamDropsIntegrationCharacterization.t.sol`
 
 ## Decision
 
@@ -570,12 +570,12 @@ P0 implementation must add tests for:
 Intended test files:
 
 - `test/StreamPayments.t.sol`
-- `test/StreamFixedPricePayments.t.sol`
-- `test/StreamPaymentsInvariant.t.sol`
-- `test/StreamAuctionPayments.t.sol`
-- `test/StreamCuratorsPool.t.sol`
-- `test/StreamRandomizerPayments.t.sol`
-- `test/StreamEmergencyWithdraw.t.sol`
+- `test/regression/legacy/mint/StreamFixedPricePayments.t.sol`
+- `test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol`
+- `test/regression/legacy/auctions/StreamAuctionPayments.t.sol`
+- `test/unit/revenue/StreamCuratorsPool.t.sol`
+- `test/unit/entropy/StreamRandomizerPayments.t.sol`
+- `test/unit/protocol/StreamEmergencyWithdraw.t.sol`
 
 Existing characterization tests must remain useful as pre-refactor evidence but
 must not be treated as target-state tests after the implementation lands.

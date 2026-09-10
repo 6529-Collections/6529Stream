@@ -24,9 +24,9 @@ The machine-readable permanence package model lives in:
 - [`release-artifacts/permanence/one-of-one-permanence-template.permanence.json`](../release-artifacts/permanence/one-of-one-permanence-template.permanence.json)
 - [`release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md`](../release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md)
 - [`release-artifacts/latest/one-of-one-permanence-manifest.json`](../release-artifacts/latest/one-of-one-permanence-manifest.json)
-- [`scripts/check_one_of_one_permanence_package.py`](../scripts/check_one_of_one_permanence_package.py)
-- [`scripts/generate_one_of_one_permanence_manifest.py`](../scripts/generate_one_of_one_permanence_manifest.py)
-- [`scripts/test_one_of_one_permanence_package.py`](../scripts/test_one_of_one_permanence_package.py)
+- [`tools/protocol/check_one_of_one_permanence_package.py`](../tools/protocol/check_one_of_one_permanence_package.py)
+- [`tools/protocol/generate_one_of_one_permanence_manifest.py`](../tools/protocol/generate_one_of_one_permanence_manifest.py)
+- [`tools/protocol/test_one_of_one_permanence_package.py`](../tools/protocol/test_one_of_one_permanence_package.py)
 
 The template is intentionally not completion evidence. The generated
 `latest/one-of-one-permanence-manifest.json` file catalogs checked permanence
@@ -139,9 +139,9 @@ content.
 
 Before a package can support a reviewed release claim:
 
-1. Run `python scripts/test_one_of_one_permanence_package.py`.
-2. Run `python scripts/check_one_of_one_permanence_package.py`.
-3. Run `python scripts/generate_one_of_one_permanence_manifest.py --check`.
+1. Run `python -m tools.protocol.test_one_of_one_permanence_package`.
+2. Run `python -m tools.protocol.check_one_of_one_permanence_package`.
+3. Run `python -m tools.protocol.generate_one_of_one_permanence_manifest --check`.
 4. Regenerate and check `release-artifacts/latest/release-manifest.json`.
 5. Regenerate and check the bytecode release proof and checksum bundle.
 6. Retain non-local browser, marketplace, and indexer evidence separately if

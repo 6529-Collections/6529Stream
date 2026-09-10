@@ -71,19 +71,19 @@ No reviewed production evidence rows are complete in the committed baseline.
 
 | Evidence Family | Command |
 | --- | --- |
-| Evidence status manifest | `python scripts/test_public_beta_evidence.py` |
-| Evidence status manifest | `python scripts/check_public_beta_evidence.py` |
-| Production release blocker report | `python scripts/test_production_release_blocker_report.py` |
-| Production release blocker report | `python scripts/generate_production_release_blocker_report.py --check` |
-| Non-local release evidence | `python scripts/test_non_local_release_evidence.py` |
-| Non-local release evidence | `python scripts/check_non_local_release_evidence.py` |
-| Release signatures | `python scripts/test_release_signatures.py` |
-| Release signatures | `python scripts/check_release_signatures.py` |
-| Signer custody readiness evidence | `python scripts/test_signer_custody_readiness.py` |
-| Signer custody readiness evidence | `python scripts/check_signer_custody_readiness.py` |
-| Marketplace/indexer evidence | `python scripts/test_marketplace_indexer_evidence.py` |
-| Marketplace/indexer evidence | `python scripts/check_marketplace_indexer_evidence.py` |
-| Release manifest | `python scripts/test_release_manifest.py` |
-| Release manifest | `python scripts/generate_release_manifest.py --check` |
-| Release checksums | `python scripts/test_release_checksums.py` |
-| Release checksums | `python scripts/generate_release_checksums.py --check` |
+| Evidence status manifest | `python -m tools.release.test_public_beta_evidence` |
+| Evidence status manifest | `python -m tools.release.check_public_beta_evidence` |
+| Production release blocker report | `python -m tools.release.test_production_release_blocker_report` |
+| Production release blocker report | `python -m tools.release.generate_production_release_blocker_report --check` |
+| Non-local release evidence | `python -m tools.release.test_non_local_release_evidence` |
+| Non-local release evidence | `python -m tools.release.check_non_local_release_evidence` |
+| Release signatures | `python -m tools.release.test_release_signatures` |
+| Release signatures | `python -m tools.release.check_release_signatures` |
+| Signer custody readiness evidence | `python -m tools.release.test_signer_custody_readiness` |
+| Signer custody readiness evidence | `python -m tools.release.check_signer_custody_readiness` |
+| Marketplace/indexer evidence | `python -m tools.release.test_marketplace_indexer_evidence` |
+| Marketplace/indexer evidence | `python -m tools.release.check_marketplace_indexer_evidence` |
+| Release manifest | `python -m tools.release.test_release_manifest` |
+| Release manifest | `python -m tools.release.generate_release_manifest --check` |
+| Release checksums | `python -m tools.release.test_release_checksums` |
+| Release checksums | `python -m tools.release.generate_release_checksums --check` |

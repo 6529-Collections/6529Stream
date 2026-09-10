@@ -8,7 +8,7 @@
   "block_or_reference": "template-only live provider epoch, request health reference, or deployment version",
   "command_or_source_system": "template-only randomizer provider source, operations transcript, monitoring source, or reviewer source",
   "retained_path": "release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md",
-  "sha256": "sha256:bf14b51dbdd19f35cf17dab928182ecd36940b338dd3d780c9be9387d2168669",
+  "sha256": "sha256:ce6a8002212713e9f8b7e9901b3ad081ed4af01d90f82e511b6b736dcfcfa0bc",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

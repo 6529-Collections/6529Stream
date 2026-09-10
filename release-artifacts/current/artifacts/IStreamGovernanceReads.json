@@ -1,0 +1,2345 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "approvedNativeReceiverConfig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stateHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "cancellerConfig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stateHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentAction",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "executing",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "actionClass",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "oldValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newValueHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "freezeSelectorConfig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "freeze",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "targetCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stateHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "governanceAction",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum GovernanceActionStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "callHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "notBefore",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expiresAfter",
+              "type": "uint64"
+            },
+            {
+              "internalType": "address",
+              "name": "proposer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "canceller",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "vetoer",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GovernanceAction",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceRootState",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "governanceRoot",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedNativeReceiver",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isCanceller",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "isFreezeSelector",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isProposer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "isTighteningCall",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "liveTerminalFreezeActionAt",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "vetoDeadline",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "liveTerminalFreezeActionCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "actionClass",
+          "type": "uint8"
+        }
+      ],
+      "name": "minimumDelay",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingScheduledActionCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "proposerConfig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stateHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "callDataKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "publishedCallData",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "pointer",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "scheduledCallData",
+      "outputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "",
+          "type": "bytes[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "scheduledCallDataPointer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "triggerTarget",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "triggerSelector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "systemManifestBatchTailRule",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "registered",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "triggerCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "allowedActionClassMask",
+          "type": "uint8"
+        },
+        {
+          "internalType": "address",
+          "name": "tailTarget",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "tailSelector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "tailCodeHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemManifestBootstrapState",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "bound",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isSealed",
+          "type": "bool"
+        },
+        {
+          "internalType": "address",
+          "name": "roleRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "roleRegistryCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "governanceRoot",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "governanceRootCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "governanceRootRevision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "initialGuardianSetHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "initialGuardianCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "terminalFreezeVetoMutationChain",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "terminalFreezeVetoMutationRevision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "address",
+          "name": "core",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "coreCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "systemManifestSatellite",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "systemManifestSatelliteCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "triggerSetHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "triggerCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedTriggerSetHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expectedTriggerCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedInventoryStateRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expectedInventoryLeafCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "inventoryStateRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "inventoryLeafCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "genesisBootstrapAuthority",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "sealedPayloadPointer",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionPolicyCandidateProfileHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actionPolicyCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actionPolicyEntryCount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "systemManifestTailTriggerAt",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "triggerTarget",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "triggerSelector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "triggerCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "allowedActionClassMask",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemManifestTailTriggerChainHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "recordCount",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "systemManifestTailTriggerCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cursor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "limit",
+          "type": "uint256"
+        }
+      ],
+      "name": "terminalFreezeActionPage",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "actionIds",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "uint64[]",
+          "name": "vetoDeadlines",
+          "type": "uint64[]"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nextCursor",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "terminalFreezeGuardianConfigCommitment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "commitment",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "terminalFreezeLiveActionCaps",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "totalCap",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonRootCap",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "perNonRootProposerCap",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "proposer",
+          "type": "address"
+        }
+      ],
+      "name": "terminalFreezeLiveActionUsage",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "totalMemberships",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "nonRootMemberships",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "proposerMemberships",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "terminalFreezeVetoGuardian",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "guardian",
+          "type": "address"
+        },
+        {
+          "internalType": "uint64",
+          "name": "vetoDeadline",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "terminalFreezeVetoGuardianSet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "roleRegistryAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopedRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopedHolderCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "globalRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "globalHolderCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "vetoDeadline",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "terminalFreezeVetoRole",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "tighteningCallConfig",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "tightening",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "targetCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "stateHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "approvedNativeReceiverConfig",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stateHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "cancellerConfig",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stateHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "currentAction",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "executing",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "freezeSelectorConfig",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "freeze",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "targetCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stateHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "governanceAction",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "enum GovernanceActionStatus",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "notBefore",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expiresAfter",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "address",
+                  "name": "proposer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "executor",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "canceller",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "vetoer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "reasonHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "reasonURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "manifestHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceAction",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "governanceNonce",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "governanceRootState",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedNativeReceiver",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "isCanceller",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isFreezeSelector",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "isProposer",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isTighteningCall",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "liveTerminalFreezeActionAt",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "liveTerminalFreezeActionCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "minimumDelay",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "pendingScheduledActionCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "proposerConfig",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stateHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "callDataKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "publishedCallData",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scheduledCallData",
+          "outputs": [
+            {
+              "internalType": "bytes[]",
+              "name": "",
+              "type": "bytes[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scheduledCallDataPointer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "triggerTarget",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "triggerSelector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "systemManifestBatchTailRule",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "registered",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "triggerCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "allowedActionClassMask",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "tailTarget",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "tailSelector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tailCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "systemManifestBootstrapState",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "bound",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isSealed",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "roleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "roleRegistryCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "governanceRoot",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "governanceRootCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "governanceRootRevision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "initialGuardianSetHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "initialGuardianCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "terminalFreezeVetoMutationChain",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "terminalFreezeVetoMutationRevision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "address",
+              "name": "core",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "coreCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "systemManifestSatellite",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "systemManifestSatelliteCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "triggerSetHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "triggerCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedTriggerSetHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expectedTriggerCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedInventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expectedInventoryLeafCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "inventoryStateRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "inventoryLeafCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "genesisBootstrapAuthority",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "sealedPayloadPointer",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCandidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actionPolicyCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "actionPolicyEntryCount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "systemManifestTailTriggerAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "triggerTarget",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "triggerSelector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "triggerCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "allowedActionClassMask",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "systemManifestTailTriggerChainHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "systemManifestTailTriggerCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "cursor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "limit",
+              "type": "uint256"
+            }
+          ],
+          "name": "terminalFreezeActionPage",
+          "outputs": [
+            {
+              "internalType": "bytes32[]",
+              "name": "actionIds",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "uint64[]",
+              "name": "vetoDeadlines",
+              "type": "uint64[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nextCursor",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeGuardianConfigCommitment",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "commitment",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "terminalFreezeLiveActionCaps",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "totalCap",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonRootCap",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "perNonRootProposerCap",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "proposer",
+              "type": "address"
+            }
+          ],
+          "name": "terminalFreezeLiveActionUsage",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "totalMemberships",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonRootMemberships",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "proposerMemberships",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeVetoGuardian",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "guardian",
+              "type": "address"
+            },
+            {
+              "internalType": "uint64",
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeVetoGuardianSet",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "roleRegistryAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopedRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopedHolderCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "globalRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "globalHolderCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "vetoDeadline",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "terminalFreezeVetoRole",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            }
+          ],
+          "name": "tighteningCallConfig",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "tightening",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "targetCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "stateHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI for the same Executor address. Discovery continues to use      IStreamGovernanceExecutor; this caller subset is not a new ERC165 claim.",
+        "kind": "dev",
+        "methods": {
+          "liveTerminalFreezeActionAt(bytes32,uint256)": {
+            "details": "Indices densely enumerate only pre-deadline actions in the backing      set's deterministic order; elapsed entries are skipped without a      state mutation."
+          },
+          "liveTerminalFreezeActionCount(bytes32)": {
+            "details": "Actions remain in the O(1) mutation index until a terminal state      transition, but this view excludes them as soon as their veto deadline      is reached."
+          },
+          "terminalFreezeActionPage(bytes32,uint256,uint256)": {
+            "details": "Entries may be elapsed until permissionless pruning runs; compare      each deadline with the current block timestamp."
+          },
+          "terminalFreezeLiveActionUsage(bytes32,address)": {
+            "details": "Usage includes elapsed memberships until bounded pruning runs."
+          },
+          "terminalFreezeVetoGuardian(bytes32)": {
+            "details": "Terminal-freeze batches are indexed once under every distinct     `GovernanceCall.scopeHash`, never under the V2 action aggregate.     Per-scope and global holders are additive veto authorities. The     address is nonzero only when their deduplicated union has exactly one     member; otherwise `guardian` is the zero-address sentinel. Use     `terminalFreezeVetoGuardianSet` plus RoleRegistry enumeration for the     complete set. `vetoDeadline` is zero when the scope has no     live (scheduled, pre-`notBefore`) terminal-freeze action. Because a     scope may have several live actions, use     `liveTerminalFreezeActionCount`/`liveTerminalFreezeActionAt` to     enumerate them all; this read never hides a live action behind a     later-scheduled decoy."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "approvedNativeReceiverConfig(address)": {
+            "notice": "Returns receiver admission, its revision, and committed state hash."
+          },
+          "cancellerConfig(address)": {
+            "notice": "Returns canceller admission, its revision, and committed state hash."
+          },
+          "currentAction()": {
+            "notice": "Returns the in-flight action context during batch execution so         governed targets can verify the executing action class."
+          },
+          "freezeSelectorConfig(address,bytes4)": {
+            "notice": "Returns terminal-freeze classification and pinned code/state commitments."
+          },
+          "governanceAction(bytes32)": {
+            "notice": "Returns the stored action; while `SCHEDULED` and past         `expiresAfter`, the returned status is virtually `EXPIRED`."
+          },
+          "governanceNonce()": {
+            "notice": "Returns the next nonce consumed by scheduling."
+          },
+          "governanceRootState()": {
+            "notice": "Returns the current root, its pinned runtime hash, and authority revision."
+          },
+          "isApprovedNativeReceiver(address)": {
+            "notice": "Returns whether the receiver is admitted for native transfers."
+          },
+          "isCanceller(address)": {
+            "notice": "Returns whether the address currently has explicit canceller admission."
+          },
+          "isFreezeSelector(address,bytes4)": {
+            "notice": "Returns whether the target selector is registered as terminal freeze."
+          },
+          "isProposer(address)": {
+            "notice": "Returns whether the address currently has explicit proposer admission."
+          },
+          "isTighteningCall(address,bytes4)": {
+            "notice": "Returns whether the target selector is registered as tightening."
+          },
+          "liveTerminalFreezeActionAt(bytes32,uint256)": {
+            "notice": "Returns the `index`-th live terminal-freeze action for         `scopeHash` and its veto deadline (`notBefore`)."
+          },
+          "liveTerminalFreezeActionCount(bytes32)": {
+            "notice": "Returns the number of live (scheduled, pre-`notBefore`)         terminal-freeze actions affecting target scope `scopeHash`."
+          },
+          "minimumDelay(uint8)": {
+            "notice": "Returns the launch-pinned minimum delay for `actionClass`."
+          },
+          "pendingScheduledActionCount()": {
+            "notice": "Returns the number of actions still stored as scheduled."
+          },
+          "proposerConfig(address)": {
+            "notice": "Returns proposer admission, its revision, and committed state hash."
+          },
+          "publishedCallData(bytes32)": {
+            "notice": "Returns the published SSTORE2 pointer for a calldata key, or         the zero address when unpublished."
+          },
+          "scheduledCallData(bytes32)": {
+            "notice": "Reads back the exact scheduled calldata preimages for `actionId`."
+          },
+          "scheduledCallDataPointer(bytes32)": {
+            "notice": "Returns the SSTORE2 pointer holding the scheduled calldata         preimages for `actionId` ([LTA-PAYLOAD-DISCOVERY] typed pointer)."
+          },
+          "systemManifestBatchTailRule(address,bytes4)": {
+            "notice": "Returns the exact publication-tail requirement for a target selector."
+          },
+          "systemManifestBootstrapState()": {
+            "notice": "Returns bootstrap identity, seal status, inventory, and current catalog commitments."
+          },
+          "systemManifestTailTriggerAt(uint256)": {
+            "notice": "Returns the manifest trigger at a zero-based registry index."
+          },
+          "systemManifestTailTriggerChainHash()": {
+            "notice": "Returns the append-only trigger commitment and number of committed records."
+          },
+          "systemManifestTailTriggerCount()": {
+            "notice": "Returns the number of registered manifest publication triggers."
+          },
+          "terminalFreezeActionPage(bytes32,uint256,uint256)": {
+            "notice": "Returns one bounded page of raw veto-discovery memberships."
+          },
+          "terminalFreezeGuardianConfigCommitment(bytes32)": {
+            "notice": "Returns the guardian-set commitment captured for a scheduled action."
+          },
+          "terminalFreezeLiveActionCaps()": {
+            "notice": "Returns the total, shared non-root, and per-non-root-proposer         caps for open terminal-freeze memberships in one scope."
+          },
+          "terminalFreezeLiveActionUsage(bytes32,address)": {
+            "notice": "Returns raw capacity usage for one scope and non-root proposer."
+          },
+          "terminalFreezeVetoGuardian(bytes32)": {
+            "notice": "Returns a target-transition scope's sole effective veto guardian         and the deadline of its EARLIEST live terminal-freeze action."
+          },
+          "terminalFreezeVetoGuardianSet(bytes32)": {
+            "notice": "Returns the exact RoleRegistry enumeration recipe for every         additive veto guardian effective for a scope."
+          },
+          "terminalFreezeVetoRole(bytes32)": {
+            "notice": "Per-scope veto role constant:         `keccak256(abi.encode(ROLE_TERMINAL_FREEZE_VETO, scopeHash))`."
+          },
+          "tighteningCallConfig(address,bytes4)": {
+            "notice": "Returns the target selector classification and pinned code/state commitments."
+          }
+        },
+        "notice": "Action, authority, execution-context, manifest, and terminal-veto discovery.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamGovernanceReads.sol": "IStreamGovernanceReads"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamGovernanceReads.sol": {
+        "keccak256": "0x07cd463786b1251c70c598a55c373775131f1f7a7e5790f3ceb7aed1a207da6e",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://651fd95ed043029fb0260b1183e883e6fb41d35b748e170beb11802246ba9dab",
+          "dweb:/ipfs/QmcccpSQcEkEhMVmSesM11of9G79TE49dNavkfkVhFPYqc"
+        ]
+      },
+      "smart-contracts/interfaces/stream/governance/StreamGovernanceTypes.sol": {
+        "keccak256": "0x9573e8be7be5ecc5f563d14a29b90d6fdc5df99c79cec95b51354cf99396d844",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f7749caa2dde1c9b696bf8038e684014bcf9a7fa1d7e5cddf1afc7816533ecea",
+          "dweb:/ipfs/QmfGU7kBNHmuaBmHNTyQY1QjXVhvG6LpMPjs2hibUkidrJ"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "approvedNativeReceiverConfig(address)": "8688cbd7",
+    "cancellerConfig(address)": "6322bbe5",
+    "currentAction()": "546ea281",
+    "freezeSelectorConfig(address,bytes4)": "a2bd6690",
+    "governanceAction(bytes32)": "5ecd50c9",
+    "governanceNonce()": "d9be832c",
+    "governanceRootState()": "6b4e85f3",
+    "isApprovedNativeReceiver(address)": "2010260f",
+    "isCanceller(address)": "b426475e",
+    "isFreezeSelector(address,bytes4)": "dfcca064",
+    "isProposer(address)": "74ec29a0",
+    "isTighteningCall(address,bytes4)": "01b1b9b0",
+    "liveTerminalFreezeActionAt(bytes32,uint256)": "2d3e4e28",
+    "liveTerminalFreezeActionCount(bytes32)": "b806c467",
+    "minimumDelay(uint8)": "89000972",
+    "pendingScheduledActionCount()": "20662991",
+    "proposerConfig(address)": "27a7802b",
+    "publishedCallData(bytes32)": "95a2b189",
+    "scheduledCallData(bytes32)": "72a3c7b8",
+    "scheduledCallDataPointer(bytes32)": "38f8ce24",
+    "systemManifestBatchTailRule(address,bytes4)": "ffd6babe",
+    "systemManifestBootstrapState()": "8a2d979b",
+    "systemManifestTailTriggerAt(uint256)": "d83d70b6",
+    "systemManifestTailTriggerChainHash()": "a05cac72",
+    "systemManifestTailTriggerCount()": "eee99df8",
+    "terminalFreezeActionPage(bytes32,uint256,uint256)": "c8b276ba",
+    "terminalFreezeGuardianConfigCommitment(bytes32)": "d0477f1f",
+    "terminalFreezeLiveActionCaps()": "1b630d16",
+    "terminalFreezeLiveActionUsage(bytes32,address)": "481eae00",
+    "terminalFreezeVetoGuardian(bytes32)": "e6f22dba",
+    "terminalFreezeVetoGuardianSet(bytes32)": "2b33c302",
+    "terminalFreezeVetoRole(bytes32)": "ce900170",
+    "tighteningCallConfig(address,bytes4)": "4f6eff63"
+  }
+}

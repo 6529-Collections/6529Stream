@@ -1,0 +1,468 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "expectedRevision",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedOldCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedNewCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "targetCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "targetProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "callType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "valuePolicy",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "valueLimit",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "valueSemanticsHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GovernanceActionPolicyEntry[]",
+          "name": "additions",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "extendGovernanceActionPolicy",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceActionPolicyState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "candidateProfileHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "catalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "entryCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "oldCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldEntryCount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newEntryCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "GovernanceActionPolicyExtended",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "key",
+          "type": "bytes32"
+        }
+      ],
+      "name": "GovernanceCatalogDuplicateEntry",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GovernanceCatalogExtensionComposition",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "additions",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "total",
+          "type": "uint256"
+        }
+      ],
+      "name": "GovernanceCatalogExtensionSize",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint64",
+          "name": "expected",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "actual",
+          "type": "uint64"
+        }
+      ],
+      "name": "GovernanceCatalogRevisionMismatch",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "key",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceCatalogDuplicateEntry",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "GovernanceCatalogExtensionComposition",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "additions",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "total",
+              "type": "uint256"
+            }
+          ],
+          "name": "GovernanceCatalogExtensionSize",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint64",
+              "name": "expected",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "actual",
+              "type": "uint64"
+            }
+          ],
+          "name": "GovernanceCatalogRevisionMismatch",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "oldCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "newCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldEntryCount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newEntryCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "GovernanceActionPolicyExtended",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint64",
+              "name": "expectedRevision",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedOldCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedNewCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "targetProfileHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "callType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "valuePolicy",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "valueLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "valueSemanticsHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionPolicyEntry[]",
+              "name": "additions",
+              "type": "tuple[]"
+            }
+          ],
+          "name": "extendGovernanceActionPolicy",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "governanceActionPolicyState",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "candidateProfileHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "catalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "entryCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "The genesis catalog is revision zero. Existing entries cannot be edited      or removed. An extension invalidates actions scheduled under older roots.",
+        "kind": "dev",
+        "methods": {
+          "extendGovernanceActionPolicy(uint64,bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])": {
+            "details": "Entries sort by keccak256(abi.encode(actionClass,target,selector)).      Requires a sealed Executor and an ordinary root-proposed class-3      batch consisting exactly of this call then manifest publication."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "extendGovernanceActionPolicy(uint64,bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])": {
+            "notice": "Append 1–64 entries, with a total catalog limit of 1,024."
+          }
+        },
+        "notice": "Delayed, append-only extensions of the exact-target governance catalog.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamGovernanceCatalog.sol": "IStreamGovernanceCatalog"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamGovernanceCatalog.sol": {
+        "keccak256": "0x9af905f48b8e808791f365703e4e22fcb9e6421820eb430a9654d1b73fe9f36f",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://a214cb70bb362705b2ac3c060b9326517aa7df354140ea95e0bcd994efb2377e",
+          "dweb:/ipfs/QmR1vPdH9o4knmb4Ceic86MvH2MStvSaLMdsPk8cYCt643"
+        ]
+      },
+      "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecutor.sol": {
+        "keccak256": "0xc50eca84dc5cff338ba34b29913fb39026703b03412b3de49b3d7e4127027d36",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1748a13e69d741ea4e2c8628d86cf58f488686572b07ea3dcc0468a6b7f23c6a",
+          "dweb:/ipfs/QmY4cPDx4SaFwCfYxzSYBLE8RZ8x5huAZN9gyMTLynvn7o"
+        ]
+      },
+      "smart-contracts/interfaces/stream/governance/StreamGovernanceTypes.sol": {
+        "keccak256": "0x9573e8be7be5ecc5f563d14a29b90d6fdc5df99c79cec95b51354cf99396d844",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f7749caa2dde1c9b696bf8038e684014bcf9a7fa1d7e5cddf1afc7816533ecea",
+          "dweb:/ipfs/QmfGU7kBNHmuaBmHNTyQY1QjXVhvG6LpMPjs2hibUkidrJ"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "extendGovernanceActionPolicy(uint64,bytes32,bytes32,(uint8,address,bytes4,bytes32,bytes32,uint8,uint8,uint256,bytes32)[])": "9ad52a32",
+    "governanceActionPolicyState()": "62326130"
+  }
+}

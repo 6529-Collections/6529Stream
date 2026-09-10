@@ -29,11 +29,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:ab502ed9426158847fb041a362a518a5bda3a21dda6f57e6a2460fe5937ab929"
+          "sha256": "sha256:fecf6783d7bdd75c524ab03c4c95d860ef998fa10b9d153cf7eb90604ac6dc1b"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork deployment rehearsal artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork deployment rehearsal artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention keeps the original command/receipts and byte-exact pre-reorganization manifest/address-book snapshots; no new run or review is claimed."
     },
     {
       "id": "testnet_deployment_rehearsal",
@@ -80,11 +80,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-          "sha256": "sha256:e480f7d3529bd1e70b92b2fdeef9760d7c35e4242918c25ffa7e563a8d0c4454"
+          "sha256": "sha256:d4aa3eec8d6f57a5b1a27f4e9f135da5573a7176852649dae404f59a98184ddf"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the permanent-Core metadata/router deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the permanent-Core metadata/router deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention preserves historical command/receipts and exact pre-reorganization deployment snapshots; no new execution or review is claimed."
     },
     {
       "id": "fork_testnet_randomizer_operations_evidence",
@@ -94,11 +94,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:2f6f0acf91fafbffd22fbff9407633765c359f7e490c661c6f15dd220746d3e0"
+          "sha256": "sha256:85698bddf1f253a7bababd58ca7cf633920cb5ea850c35e90acd89b80efefa82"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork randomizer operations artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork randomizer operations artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention keeps the original command/receipts and byte-exact pre-reorganization manifest/address-book snapshots; no new run or review is claimed."
     },
     {
       "id": "verified_deployed_addresses",

@@ -3,7 +3,7 @@
   "template_notice": "Template only. Copy this file to a non-template Sepolia config after a real reviewed broadcast replaces every placeholder address, transaction reference, and command transcript. Do not commit RPC endpoint values, signing secrets, API tokens, raw signatures, or unreleased drop payloads.",
   "operator_runbook": "docs/deployment.md#sepolia-deployment-rehearsal-runbook",
   "operator_inputs": {
-    "script_entrypoint": "script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\"",
+    "script_entrypoint": "script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\"",
     "required_environment_variables": [
       {
         "name": "SEPOLIA_RPC_URL",
@@ -344,14 +344,14 @@
       "contract_verification": "not_started",
       "constructor_args_retained": false,
       "commands": [
-        "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --broadcast --verify --via-ir"
+        "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --broadcast --verify --via-ir"
       ]
     },
     "release_artifacts": {
       "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
     },
     "rehearsal": {
-      "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir",
+      "command": "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"runSepolia()\" --rpc-url <redacted> --sender <deployer> <approved Foundry signer flags redacted> --broadcast --verify --via-ir",
       "anvil_passed": false,
       "fork_passed": false,
       "testnet_passed": false,

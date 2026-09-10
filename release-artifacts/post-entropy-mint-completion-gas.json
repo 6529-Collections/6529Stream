@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.post-entropy-mint-completion-gas.v2",
-  "generated_by": "scripts/generate_post_entropy_completion_gas.py:1",
+  "generated_by": "tools/protocol/generate_post_entropy_completion_gas.py:1",
   "status": "as_built_permanent_core_source",
   "issue": 672,
   "compiler_profile": {
@@ -10,13 +10,13 @@
     "optimizer_runs": 200,
     "via_ir": true,
     "bytecode_hash": "none",
-    "snapshot_command": "forge snapshot --via-ir --match-path test/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --snap release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap"
+    "snapshot_command": "forge snapshot --via-ir --match-path test/gas/StreamPostEntropyCompletionGas.t.sol --match-test testMeasureWorstCaseEoaPostCoordinatorTail --snap out/post-entropy-completion-gas.snap"
   },
   "sources": [
     {
-      "path": "test/StreamPostEntropyCompletionGas.t.sol",
-      "sha256": "sha256:7b37c85b5c2b864a68666a049e3be5bd025dcb4510aa899123f951919ed1fbc8",
-      "size_bytes": 7927
+      "path": "test/gas/StreamPostEntropyCompletionGas.t.sol",
+      "sha256": "sha256:b0e95c57240c850c854239a573b3b904232d381ada19e98df8c7ffb9734239b0",
+      "size_bytes": 7948
     },
     {
       "path": "test/helpers/StreamPostEntropyCompletionGasHarness.sol",
@@ -25,8 +25,8 @@
     },
     {
       "path": "smart-contracts/core/StreamCore.sol",
-      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
-      "size_bytes": 49391
+      "sha256": "sha256:d51f54d048858fa5e2286153f74f1a9acec3dbed629f8f828ccd4c1d67010ccc",
+      "size_bytes": 49396
     },
     {
       "path": "smart-contracts/core/StreamCoreReadBuffer.sol",
@@ -34,27 +34,33 @@
       "size_bytes": 2714
     },
     {
-      "path": "test/StreamCorePermanentTarget.t.sol",
-      "sha256": "sha256:cc2d423183cd30822e0132fba78056115d1dd476dc3ee05268b5f637ad170cf4",
-      "size_bytes": 33901
+      "path": "test/unit/core/StreamCorePermanentTarget.t.sol",
+      "sha256": "sha256:62d3dc8981205a080a2a8c0b9ce5133380a8f9c072c20b5dd801061627350ab3",
+      "size_bytes": 33989
     },
     {
       "path": "docs/stream-entropy-coordinator.md",
-      "sha256": "sha256:50a46c7801a676becf4455f14cbc27dbfc6f5b7d7d0aa38e1d1a9cf22684296e",
-      "size_bytes": 168198
+      "sha256": "sha256:aecdb4cea03313e27b28f1178220a15698182b35ee19dde214df5428a265f817",
+      "size_bytes": 168212
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:0cf3649f262ad55c476ab5c484387c9626c45439553d8d50b2132470c3930320",
-      "size_bytes": 138136
+      "sha256": "sha256:5ea8d10346e707fa224d537ea249b63053d8ce3a3f5660724f97342e5221ea76",
+      "size_bytes": 138153
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:5f3b45605b109a6d92eefce643272dedb42f7da857047e0b8bcf095a8db0b9ea",
-      "size_bytes": 161618
+      "sha256": "sha256:ba0e0206fe8bc17d7d1192cda2b9d030ae0b702f7f943d11d1b13a6cafe065c2",
+      "size_bytes": 161626
     }
   ],
   "measurement": {
+    "provenance": {
+      "kind": "retained_baseline_snapshot",
+      "retained_at_commit": "49fa5438f7ac905a979c54320e3aea43c11db3ed",
+      "benchmark_rerun_during_source_reorganization": false,
+      "refresh_scope": "current_source_bindings_and_reproduction_recipe_only"
+    },
     "snapshot_path": "release-artifacts/baselines/v0.1.0/post-entropy-completion-gas.snap",
     "snapshot_sha256": "sha256:3ead043138bb24c4de8900fa890c3a7f439cfb174ddcdf9b04b22aa53f632f7b",
     "snapshot_test": "StreamPostEntropyCompletionGasTest:testMeasureWorstCaseEoaPostCoordinatorTail()",
@@ -110,8 +116,8 @@
     "implementation_status": "as_built_permanent_core_source",
     "stream_core_source": {
       "path": "smart-contracts/core/StreamCore.sol",
-      "sha256": "sha256:9a05187b81f1a48d88585841b98cea2bc5c48503a39eaffcb065e7ab093bb464",
-      "size_bytes": 49391
+      "sha256": "sha256:d51f54d048858fa5e2286153f74f1a9acec3dbed629f8f828ccd4c1d67010ccc",
+      "size_bytes": 49396
     },
     "stream_core_runtime_bytes": 18997,
     "stream_core_eip170_margin_bytes": 5579,
@@ -127,9 +133,10 @@
     ]
   },
   "limitations": [
+    "The numeric measurements are retained baseline snapshots and were not rerun during source reorganization; current source hashes and the scratch-output snapshot command are separate reproduction bindings.",
     "This artifact binds the measured EOA tail to the as-built permanent StreamCore source, its linked via-IR runtime receipt, and an executable exact-boundary/full-stipend regression test.",
     "The fixed reserve covers the measured EOA-recipient completion tail; contract-recipient callback gas remains caller-supplied and unbounded.",
-    "The exact deployment instance and the two unresolved artist/revenue pointer rows remain blocked by issues #656 and #670.",
+    "This generic completion measurement does not establish deployment-instance or artist/royalty integration evidence; those require their own current-stack tests and deployment readbacks.",
     "The governed-parameter candidate binding remains incomplete under issue #684.",
     "This artifact makes no production-readiness or deployment claim."
   ]

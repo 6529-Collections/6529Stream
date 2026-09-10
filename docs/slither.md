@@ -28,15 +28,15 @@ constructor closures; normal Foundry regression tests remain independent.
 The capture's exact source commit, timestamp, input hashes, native exit, and
 raw output digest are recorded in `ops/SLITHER_BASELINE.json`.
 
-The checked compiler inputs contain all 143 production source files, with
+The checked compiler inputs contain all 162 production source files, with
 contents verified against the source tree and compiler output for every file.
-They contain no test or script source. Slither reports 179 analyzed contracts
-across its compilation units (164 unique compiler contract outputs), using
+They contain no test or script source. Slither reports 183 analyzed contracts
+across its compilation units (166 unique compiler contract outputs), using
 101 detectors. This captures all production targets without optimizing the
 large deployment/test constructors merely to analyze production code.
 
-The unfiltered production run contains 784 findings: 5 High, 49 Medium,
-102 Low, 620 Informational, and 8 Optimization. Its High/Medium split is:
+The unfiltered production run contains 783 findings: 5 High, 49 Medium,
+102 Low, 619 Informational, and 8 Optimization. Its High/Medium split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
@@ -46,18 +46,25 @@ The unfiltered production run contains 784 findings: 5 High, 49 Medium,
 | Script (excluded from this scan) | 0 | 0 | 0 |
 | Other | 0 | 0 | 0 |
 
-The current-stack refresh retains the 30 existing Open findings and both
-reviewed split-wallet equality dispositions. Two Core read findings have
-updated line anchors with unchanged dispositions. Twelve new findings have
-source-traced, detector-specific False Positive dispositions covering JSON
-formatting, explicit default locals, deliberately omitted tuple fields,
-provider funding, guarded callbacks, and signed auction value flow. These
-findings remain in exact drift comparison; none is suppressed or removed.
-The capture includes the separate registered-scope authorization correction;
-its five focused regressions passed in normal and IR compiler modes. The
-detector dispositions do not serve as proof of that separate authority boundary.
-Focused regression sources are cited per row. Broader authority, integration,
-and audit review remains independent of those detector-specific conclusions.
+The reorganization capture is bound to source/config checkpoint
+`7b4ef22b052419e88d56cf7f207a7a7738dba7a7`. Compiler inputs contain exactly the
+162 production sources at that commit, with matching contents and compiler output
+for every source. Both compiler groups use Solidity 0.8.19; their explicit IR and
+non-IR profiles are retained in the build inputs.
+
+All 44 first-party High/Medium findings match the preceding baseline's detector,
+confidence and semantic elements after the reviewed path map and line-anchor
+changes. Each primary finding's source span also has identical non-comment Solidity
+tokens. The 30 Open and 14 False Positive dispositions are unchanged; no finding was
+silently suppressed or promoted to accepted status. Required source/test citations
+follow the relocated files and current line anchors.
+
+The existing detector-specific dispositions cover JSON formatting, deliberate
+sentinels/default locals, omitted tuple fields, guarded callbacks and signed value
+flow. They do not attest every possible defect in those functions or replace the
+separate registered-scope authorization regression, full integration tests and
+independent audit. Raw informational counts can change with source/interface
+organization without changing the exact High/Medium gate.
 
 Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
 bombs, but makes its proposal-selected native-value authority invisible to
@@ -97,7 +104,7 @@ make slither-baseline-metadata-check
 
 The Bash and PowerShell check wrappers run the same two commands directly. The
 target runs the checker tests and then
-`scripts/check_slither_baseline.py --baseline-only`. It validates the tracked
+`python -m tools.security.check_slither_baseline --baseline-only`. It validates the tracked
 normalized baseline, provenance, counts, and disposition metadata without
 launching Slither. Keeping this path analyzer-free makes the ordinary aggregate
 check fast and deterministic.
@@ -111,7 +118,7 @@ make slither-baseline-check
 ```
 
 The complete target first runs the fast metadata gate, then invokes
-`scripts/check_slither_baseline.py --run-slither` with the pinned toolchain and
+`python -m tools.security.check_slither_baseline --run-slither` with the pinned toolchain and
 compares the normalized first-party High and Medium rows with the tracked
 baseline. The live command omits `--foundry-compile-all`: tests and scripts are
 not analyzer targets, while every production source is compiled. New rows and
@@ -165,14 +172,14 @@ Medium row:
    detector JSON in an operating-system temporary directory instead:
 
    ```bash
-   python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-slither-json> --fail-none
+   python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-slither-json> --fail-none
    ```
 
 2. Produce a deterministic, non-gating candidate report without weakening or
    overwriting the canonical baseline:
 
    ```bash
-   python scripts/check_slither_baseline.py --candidate-slither-json <temp-slither-json> --candidate-output <temp-candidate-json>
+   python -m tools.security.check_slither_baseline --candidate-slither-json <temp-slither-json> --candidate-output <temp-candidate-json>
    ```
 
    The `6529stream.slither-normalized-candidate.v1` output contains semantic
@@ -189,7 +196,7 @@ Medium row:
    Markdown mirror:
 
    ```bash
-   python scripts/check_slither_baseline.py --render-markdown
+   python -m tools.security.check_slither_baseline --render-markdown
    ```
 
 6. Rerun the focused tests, metadata gate, and full live gate.

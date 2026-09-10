@@ -1,0 +1,516 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialRecipients",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "beneficiaries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "tokenData",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "mintCommitments",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "resolverData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintBatch",
+          "name": "batch",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "gateData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executePreparedMint",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "operationIds",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialRecipients",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "beneficiaries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "tokenData",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "mintCommitments",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "resolverData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintBatch",
+          "name": "batch",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "gateData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeSingleStepMint",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "tokenIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "operationIds",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialRecipients",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "beneficiaries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "tokenData",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "mintCommitments",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "resolverData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "executePreparedMint",
+          "outputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "tokenIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialRecipients",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "beneficiaries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "tokenData",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "mintCommitments",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "resolverData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "executeSingleStepMint",
+          "outputs": [
+            {
+              "internalType": "uint256[]",
+              "name": "tokenIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI at the manager address. Use IStreamMintManager for ERC165      discovery and canonical nested request types; subset IDs are not advertised.",
+        "kind": "dev",
+        "methods": {
+          "executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "details": "Uses the same phase authorization and atomicity rules as executeSingleStepMint.",
+            "params": {
+              "batch": "Canonical manager request and expected phase-policy commitment.",
+              "gateData": "Opaque verification bytes interpreted by the configured phase gate."
+            },
+            "returns": {
+              "operationIds": "Ordered per-token operation identities.",
+              "operationRoot": "Commitment binding the complete normalized mint operation.",
+              "tokenIds": "Globally allocated Core token identifiers in request order."
+            }
+          },
+          "executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "details": "The caller must be an authorized executor for the phase. Any downstream failure      reverts all token allocation, ledger consumption, and replay-state changes.",
+            "params": {
+              "batch": "Canonical manager request; parallel token arrays must have matching lengths.",
+              "gateData": "Opaque verification bytes interpreted by the configured phase gate."
+            },
+            "returns": {
+              "operationIds": "Ordered per-token operation identities.",
+              "operationRoot": "Commitment binding the complete normalized mint operation.",
+              "tokenIds": "Globally allocated Core token identifiers in request order."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "notice": "Executes the prepared Core manager path atomically."
+          },
+          "executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "notice": "Executes the immediate Core manager path atomically."
+          }
+        },
+        "notice": "Atomic immediate and prepared token mint execution through the manager.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/mint/IStreamMintExecution.sol": "IStreamMintExecution"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/mint/IStreamMintExecution.sol": {
+        "keccak256": "0xeee96a8d521ed86a9b1405712160cc21629c48c429dd3046df076c1a64da40e3",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://2661fa26ea509bcbf637b3ff532595c1e364e1c833488631d90faa615475d42c",
+          "dweb:/ipfs/QmSBxEExzNPP85iYFhZvrXdnbaL24CcwusdceYC6xNRwWh"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol": {
+        "keccak256": "0xdc4436195f131e3132813a8dba6b440e379c78480c88a69847080642b2f0d3fa",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://094d2ea7f54998f9317cafd72d46390eb710040f4f5f101cc89e89411b234ad2",
+          "dweb:/ipfs/Qmed4WwaxJzEwvtyh5s7k2gBJnFDqyfq2WEPJkBdSAtKNA"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol": {
+        "keccak256": "0x334079e7024d83c9313a781fc85d9e49438a9c4634d023f9477a9f3c31e3b576",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://531387a5003283f7695ea8aa75bcebbfc4da3ad1ed4711dbea135ecbb35d49b7",
+          "dweb:/ipfs/QmPUU2W1W5BAnhmg9MSkaPmcMEXD41dQTaBJBWgnpHVqXH"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": "c9281e5b",
+    "executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": "286cd1d1"
+  }
+}

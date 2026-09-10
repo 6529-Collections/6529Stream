@@ -3,8 +3,8 @@ pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
-import "../../interfaces/stream/IStreamModuleRegistry.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 
 /// @notice Canonical protocol-v1 module registry implementing
 ///         `docs/stream-long-term-architecture.md` [LTA-REGISTRY].

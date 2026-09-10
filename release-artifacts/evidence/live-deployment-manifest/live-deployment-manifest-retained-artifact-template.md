@@ -53,13 +53,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_live_deployment_manifest_evidence.py
-python scripts/check_live_deployment_manifest_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json --retained-artifact release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md --output release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, deployment version, or manifest reference>" --command-or-source-system "<operator transcript or manifest generator source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_live_deployment_manifest_evidence
+python -m tools.release.check_live_deployment_manifest_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/live-deployment-manifest-template.json --retained-artifact release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md --output release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, deployment version, or manifest reference>" --command-or-source-system "<operator transcript or manifest generator source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

@@ -189,7 +189,7 @@
         "0x100000000000000000000000000000000000000d"
       ],
       "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "bytecode_hash": "sha256:c5de2cfdc43bbdbfccd2dad6056b526f3626152d8cf8caa0f207eb8949c841d7",
+      "bytecode_hash": "sha256:e00513c6b49d2cc94b7d51713435cb32490e2da837a0f6eeb08c98066ea32f74",
       "verification_status": "not_applicable"
     },
     "StreamMintLedger": {
@@ -279,11 +279,11 @@
     "contract_verification": "not_applicable",
     "constructor_args_retained": true,
     "commands": [
-      "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
+      "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir"
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:c55be2ddc7b9df0b155cda9461af9edc35f7b4677d3d0f3e507a2608a8057336",
+    "manifest_sha256": "sha256:bdcf10f3558cfc8a7b6a8057fb8075abc6c452f41eae88cf50fdf766ec6e1204",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -308,7 +308,7 @@
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },
   "rehearsal": {
-    "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
+    "command": "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --via-ir",
     "anvil_passed": true,
     "fork_passed": false,
     "notes": "Generated from a sanitized Foundry broadcast fixture. The fixture contains public deployment evidence only; it is not a live production broadcast."

@@ -14,24 +14,24 @@ It is derived from the production contract set in
 the canonical isolated Foundry artifacts under ignored `out-release/` after:
 
 ```sh
-python scripts/test_release_build_artifacts.py
-python scripts/build_release_artifacts.py
-python scripts/build_release_artifacts.py --check
-python scripts/generate_release_artifacts.py
-python scripts/generate_protocol_surface_report.py
-python scripts/generate_custom_error_catalog.py
-python scripts/check_natspec_coverage.py
+python -m tools.build.test_release_build_artifacts
+python -m tools.build.build_release_artifacts
+python -m tools.build.build_release_artifacts --check
+python -m tools.build.generate_release_artifacts
+python -m tools.build.generate_protocol_surface_report
+python -m tools.build.generate_custom_error_catalog
+python -m tools.build.check_natspec_coverage
 ```
 
 Check the committed report without rewriting it with:
 
 ```sh
-python scripts/test_protocol_surface_report.py
-python scripts/generate_protocol_surface_report.py --check
-python scripts/test_custom_error_catalog.py
-python scripts/generate_custom_error_catalog.py --check
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
+python -m tools.build.test_protocol_surface_report
+python -m tools.build.generate_protocol_surface_report --check
+python -m tools.build.test_custom_error_catalog
+python -m tools.build.generate_custom_error_catalog --check
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
 ```
 
 The canonical local gate also runs those commands through `make check`,

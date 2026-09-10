@@ -12,7 +12,7 @@
     {
       "id": "adr_0023",
       "path": "docs/adr/0023-modular-artist-authority-domain-ownership.md",
-      "sha256": "b3a7f322518aeb63638572486292be511f67202e09db58471ac867eb3fa8c113"
+      "sha256": "f2a894262aeeb35abf6d6bce591b7474cfbc17655591386223be6e7c706fea3b"
     },
     {
       "id": "normative_artist_authority",
@@ -22,7 +22,7 @@
     {
       "id": "semantic_owner_matrix",
       "path": "docs/architecture/artist-semantic-owner-matrix-v2.json",
-      "sha256": "bc4b55c68c504ee7d74965d7fa0d1edbe6de816e567e076442781b81232320a2"
+      "sha256": "f76fc366a0a62e8c79ea064f2a1efc2f932ce6f3be86b8917ee7828dcb8ddf90"
     },
     {
       "id": "semantic_owner_matrix_schema",
@@ -31,13 +31,13 @@
     },
     {
       "id": "semantic_owner_matrix_checker",
-      "path": "scripts/check_artist_semantic_owner_matrix.py",
-      "sha256": "c4422d011017233ce03d9ec0b77086ae861b03f2709e234d25c19aa97c117a6f"
+      "path": "tools/protocol/check_artist_semantic_owner_matrix.py",
+      "sha256": "1ef144c2a3fd2e09d3e75c45f3784ef051ec81f7c28bc92876237165fb6d9ad6"
     },
     {
       "id": "semantic_owner_matrix_tests",
-      "path": "scripts/test_artist_semantic_owner_matrix.py",
-      "sha256": "fa01b66182f08757236dd4c27f4440e77628d6e999e4ffeccba3a3875eec4b81"
+      "path": "tools/protocol/test_artist_semantic_owner_matrix.py",
+      "sha256": "e9c5cd604fc76f1d982a97df5c2a12a139cf714241ace5f0b39c1c2c9c3c8218"
     },
     {
       "id": "operation_matrix",
@@ -52,7 +52,7 @@
     {
       "id": "owner_state_foundation",
       "path": "docs/architecture/artist-owner-state-mechanics-foundation-v1.json",
-      "sha256": "94fde0bdb326920a2528fbf0cb7f3f4923421915be53fadbb2aaf1c8e360ee91"
+      "sha256": "2b4841ab5544c78bc64c5dea088d104b248bc2e0c3fc34fb13573ace80987e5a"
     },
     {
       "id": "owner_state_foundation_schema",
@@ -61,18 +61,18 @@
     },
     {
       "id": "owner_state_foundation_checker",
-      "path": "scripts/check_artist_owner_state_mechanics_foundation.py",
-      "sha256": "5bad1e64621a27d7a179022eec83100bb6485371fc877108902b139874307295"
+      "path": "tools/protocol/check_artist_owner_state_mechanics_foundation.py",
+      "sha256": "08127852479571d9a59d325cd0bb36ab702b463667dfa6243b7cad40828ae082"
     },
     {
       "id": "owner_state_foundation_tests",
-      "path": "scripts/test_artist_owner_state_mechanics_foundation.py",
-      "sha256": "2accd9005158e7dea176a0f421fb921762a56a3c42fb315829a49c4a16d11692"
+      "path": "tools/protocol/test_artist_owner_state_mechanics_foundation.py",
+      "sha256": "d167f408164c5e8ae8b74036b6c69afa6ed0d5d93d530be495304b00d9a6f8cd"
     },
     {
       "id": "shared_mechanics_packet",
       "path": "docs/architecture/artist-operation-shared-mechanics-freeze-v1.json",
-      "sha256": "a631aed2a423a5aebb83e709151abe77cc2c5cc78c9354943b64e4b7a6116206"
+      "sha256": "1e8da06698d400ec4e526507551fc163513721d57ca3233c83a92c70130e41da"
     },
     {
       "id": "shared_mechanics_schema",
@@ -81,13 +81,13 @@
     },
     {
       "id": "shared_mechanics_checker",
-      "path": "scripts/check_artist_operation_shared_mechanics_freeze.py",
-      "sha256": "d63f9e4193a9d8e382eaf994b69d4a5d1e3e5e402bb3d42c762f611e9eb77762"
+      "path": "tools/protocol/check_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "a2e0100707ac93b5373969032b1fd34273f31c67a5f6aea02b5ca99a776d19eb"
     },
     {
       "id": "shared_mechanics_tests",
-      "path": "scripts/test_artist_operation_shared_mechanics_freeze.py",
-      "sha256": "0dff4eefa8e110f36c17b08b24a38f557ef9893ef12ea2f8d5e00da7406da54f"
+      "path": "tools/protocol/test_artist_operation_shared_mechanics_freeze.py",
+      "sha256": "b85c5fe3901869554eca5935f359b06c17f33a728fc49d6bac908fbfaaf3e5e7"
     }
   ],
   "selected_shape": {
@@ -10513,5 +10513,5 @@
     "deployment_authorized": false,
     "readiness_credit": false
   },
-  "semantic_digest": "sha256:9390779a1f9c620b66bdeef8e41aa3b2e02de15fc704250384f7fa614c8bf794"
+  "semantic_digest": "sha256:79c1b37397ebd21aede8b08f48f893cd409b1dfa33b01838745fc847423e61b7"
 }

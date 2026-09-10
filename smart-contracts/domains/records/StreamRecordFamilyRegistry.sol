@@ -2,9 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/ERC165.sol";
-import "../../interfaces/stream/IStreamAdmins.sol";
-import "../../interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol";
-import "../../interfaces/stream/IStreamRecordFamilyRegistry.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
+import "../../interfaces/stream/records/IStreamRecordFamilyAuthorityProvider.sol";
+import "../../interfaces/stream/records/IStreamRecordFamilyRegistry.sol";
 import "../metadata/StreamMetadataRenderer.sol";
 
 /// @notice Closed-world record-type classifier and live family-authority resolver.

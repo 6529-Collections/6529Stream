@@ -189,7 +189,7 @@
         "0x000000000000000000000000000000000000000d"
       ],
       "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "bytecode_hash": "sha256:c5de2cfdc43bbdbfccd2dad6056b526f3626152d8cf8caa0f207eb8949c841d7",
+      "bytecode_hash": "sha256:e00513c6b49d2cc94b7d51713435cb32490e2da837a0f6eeb08c98066ea32f74",
       "verification_status": "not_applicable"
     },
     "StreamMintLedger": {
@@ -279,11 +279,11 @@
     "contract_verification": "not_applicable",
     "constructor_args_retained": true,
     "commands": [
-      "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir"
+      "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir"
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:c2522b9d38106bf7e751e260d3206af9a1a358d30ce6bb1d6dab476dc869b7e3",
+    "manifest_sha256": "sha256:af784d1946f3c8748637cce90f7966f633f9437abfa6c6271423d7c2b572a707",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -308,7 +308,7 @@
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },
   "rehearsal": {
-    "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir",
+    "command": "forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir",
     "anvil_passed": true,
     "fork_passed": true,
     "notes": "Public mainnet fork rehearsal at block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7. Broadcast was sent only to a local Anvil fork with placeholder addresses and no private production material."

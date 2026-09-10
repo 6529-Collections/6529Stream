@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.release-artifact-manifest.v1",
-  "generated_by": "scripts/generate_release_artifacts.py:1",
+  "generated_by": "tools/build/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
     "foundry_out": "out-release"
@@ -8,15 +8,15 @@
   "artifacts": {
     "abi-checksums.json": {
       "path": "abi-checksums.json",
-      "sha256": "sha256:f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd"
+      "sha256": "sha256:397fd8c2c24381063c9e320431c37c1884b066717dbb6dd78ee4f24ce30ab90c"
     },
     "event-topic-catalog.json": {
       "path": "event-topic-catalog.json",
-      "sha256": "sha256:9e7fddcb0c226f93dca62446ee0cf18509de62c917dab7c2cb2a6e0a51980555"
+      "sha256": "sha256:89200a1980a9c1117f41ad408d766d947b2bd499727e092bdc9fc012b1e11fcf"
     },
     "interface-ids.json": {
       "path": "interface-ids.json",
-      "sha256": "sha256:1b0ab646b3c32ffe518b549ddd10d443f11bbfcaafe53559d271dbde7e8479f1"
+      "sha256": "sha256:1b895365b559295b25b4ac0fdf7c79de35ad6f3f1eaf81f4bd7a224fc1cf3eda"
     }
   }
 }

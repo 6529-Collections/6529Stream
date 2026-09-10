@@ -1,0 +1,3745 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "abortPreparedMintFromManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "blockCollectionBurns",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionBurnsBlocked",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionBurnsBlockedAtBlock",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionFreezeStatus",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionHasMaxSupply",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionMaxSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionMintedEver",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionNextSerial",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionStatus",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectionSupplyMode",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "initialRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintCommitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completePreparedMintFromManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "coordinatorAtMint",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "supplyMode",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "hasMaxSupply",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxSupply",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "initialStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "createCollection",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "emitBatchMetadataUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "emitContractURIUpdated",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "emitMetadataUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "freezeCollection",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        }
+      ],
+      "name": "freezeSatellitePointer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "gasParameterInfo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "floor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "failureClass",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getSatellitePointer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "codeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "frozen",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "registryStatus",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "moduleManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "deploymentManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastAllocatedCollectionId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastAllocatedTokenId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "initialRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "tokenData_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintCommitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "mintFromManager",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingPreparedMintTokenId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "tokenData_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "prepareMintFromManager",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "preparedMint",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StreamPreparedMintRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "raiseGasParameter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "salePrice",
+          "type": "uint256"
+        }
+      ],
+      "name": "royaltyInfo",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "royaltyAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newMaxSupply",
+          "type": "uint256"
+        }
+      ],
+      "name": "setCollectionMaxSupply",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "setCollectionStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenCollectionIdentity",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "mappingExists",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "burned",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenData",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenLifecycle",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "totalSupplyOfCollection",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "newTarget",
+          "type": "address"
+        }
+      ],
+      "name": "updateSatellitePointer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchMetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CollectionBurnsBlocked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CollectionFrozen",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [],
+      "name": "ContractURIUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "CoreSatellitePointerFrozen",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "pointerType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newTarget",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldTarget",
+          "type": "address"
+        }
+      ],
+      "name": "CoreSatellitePointerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "host",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "floor",
+          "type": "uint256"
+        }
+      ],
+      "name": "GasParameterUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "MetadataUpdate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "supplyMode",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "hasMaxSupply",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "maxSupply",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "initialStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "StreamCollectionCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldMaxSupply",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newMaxSupply",
+          "type": "uint256"
+        }
+      ],
+      "name": "StreamCollectionMaxSupplyUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "oldStatus",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "newStatus",
+          "type": "uint8"
+        }
+      ],
+      "name": "StreamCollectionStatusUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "fromTokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "toTokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "StreamMetadataRefresh",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        }
+      ],
+      "name": "StreamTokenBurned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenCollectionRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenCollectionRegistrationReverted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "approved",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Approval",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "ApprovalForAll",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "BatchMetadataUpdate",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CollectionBurnsBlocked",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CollectionFrozen",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [],
+          "name": "ContractURIUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "CoreSatellitePointerFrozen",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "oldTarget",
+              "type": "address"
+            }
+          ],
+          "name": "CoreSatellitePointerUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "MetadataUpdate",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "supplyMode",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "hasMaxSupply",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "maxSupply",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "initialStatus",
+              "type": "uint8"
+            }
+          ],
+          "name": "StreamCollectionCreated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldMaxSupply",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newMaxSupply",
+              "type": "uint256"
+            }
+          ],
+          "name": "StreamCollectionMaxSupplyUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "oldStatus",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "newStatus",
+              "type": "uint8"
+            }
+          ],
+          "name": "StreamCollectionStatusUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "StreamMetadataRefresh",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            }
+          ],
+          "name": "StreamTokenBurned",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenCollectionRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenCollectionRegistrationReverted",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "Transfer",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "abortPreparedMintFromManager",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "approve",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "name": "balanceOf",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "balance",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "blockCollectionBurns",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "burn",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlocked",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionBurnsBlockedAtBlock",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionExists",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionFreezeStatus",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionHasMaxSupply",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMaxSupply",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionMintedEver",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionNextSerial",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionStatus",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "collectionSupplyMode",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "completePreparedMintFromManager",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "contractURI",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "coordinatorAtMint",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "supplyMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "hasMaxSupply",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxSupply",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "initialStatus",
+              "type": "uint8"
+            }
+          ],
+          "name": "createCollection",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "fromTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "toTokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitBatchMetadataUpdate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "emitContractURIUpdated",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "emitMetadataUpdate",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "freezeCollection",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "freezeSatellitePointer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameterInfo",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "getApproved",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            }
+          ],
+          "name": "getSatellitePointer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "codeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "registryStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            }
+          ],
+          "name": "isApprovedForAll",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "lastAllocatedCollectionId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "lastAllocatedTokenId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData_",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "mintFromManager",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "name",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "ownerOf",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "pendingPreparedMintTokenId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData_",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "prepareMintFromManager",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "preparedMint",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "exists",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "operationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct StreamPreparedMintRecord",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "raiseGasParameter",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "salePrice",
+              "type": "uint256"
+            }
+          ],
+          "name": "royaltyInfo",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "royaltyAmount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "name": "safeTransferFrom",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "operator",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "approved",
+              "type": "bool"
+            }
+          ],
+          "name": "setApprovalForAll",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "newMaxSupply",
+              "type": "uint256"
+            }
+          ],
+          "name": "setCollectionMaxSupply",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "setCollectionStatus",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "symbol",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenCollectionIdentity",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenData",
+          "outputs": [
+            {
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenLifecycle",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenURI",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "totalSupply",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "totalSupplyOfCollection",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "transferFrom",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "pointerType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "newTarget",
+              "type": "address"
+            }
+          ],
+          "name": "updateSatellitePointer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "This aggregate declares no functions of its own. Its ERC165 ID and every      capability ID retain the original inheritance and selector arithmetic.",
+        "events": {
+          "Approval(address,address,uint256)": {
+            "details": "Emitted when `owner` enables `approved` to manage the `tokenId` token."
+          },
+          "ApprovalForAll(address,address,bool)": {
+            "details": "Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets."
+          },
+          "Transfer(address,address,uint256)": {
+            "details": "Emitted when `tokenId` token is transferred from `from` to `to`."
+          }
+        },
+        "kind": "dev",
+        "methods": {
+          "abortPreparedMintFromManager(uint256,bytes32)": {
+            "details": "The installed caller must differ from the preparing manager. The exact      token/operation match is required; abort removes its identity/data and      rewinds the global token and collection serial allocation frontiers."
+          },
+          "approve(address,uint256)": {
+            "details": "Gives permission to `to` to transfer `tokenId` token to another account. The approval is cleared when the token is transferred. Only a single account can be approved at a time, so approving the zero address clears previous approvals. Requirements: - The caller must own the token or be an approved operator. - `tokenId` must exist. Emits an {Approval} event."
+          },
+          "balanceOf(address)": {
+            "details": "Returns the number of tokens in ``owner``'s account."
+          },
+          "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": {
+            "details": "The caller, tokenId, and operationId must match the pending preparation.",
+            "params": {
+              "initialRecipient": "Address receiving the completed token and safe-receiver callback.",
+              "mintCommitment": "Per-token commitment supplied at completion."
+            }
+          },
+          "gasParameterInfo(bytes32)": {
+            "params": {
+              "parameterId": "Domain-defined identifier for the bounded external call."
+            },
+            "returns": {
+              "failureClass": "Protocol failure-behavior classification for this call.",
+              "floor": "Permanent lower bound in gas units.",
+              "revision": "Monotonic configuration revision.",
+              "value": "Current call budget in gas units."
+            }
+          },
+          "getApproved(uint256)": {
+            "details": "Returns the account approved for `tokenId` token. Requirements: - `tokenId` must exist."
+          },
+          "isApprovedForAll(address,address)": {
+            "details": "Returns if the `operator` is allowed to manage all of the assets of `owner`. See {setApprovalForAll}"
+          },
+          "mintFromManager(uint256,address,bytes,bytes32,bytes32)": {
+            "details": "Only the installed manager may call; receiver rejection rolls back the entire mint.",
+            "params": {
+              "collectionId": "Existing collection receiving the new token.",
+              "initialRecipient": "Address receiving the ERC-721 token and its safe-receiver callback.",
+              "mintCommitment": "Per-token commitment passed to the entropy registration boundary.",
+              "tokenDataHash": "keccak256 of tokenData_.",
+              "tokenData_": "Artwork bytes whose exact encoding is committed by tokenDataHash."
+            },
+            "returns": {
+              "collectionSerial": "Collection-local serial assigned to this token.",
+              "tokenId": "Globally allocated token identifier."
+            }
+          },
+          "name()": {
+            "details": "Returns the token collection name."
+          },
+          "ownerOf(uint256)": {
+            "details": "Returns the owner of the `tokenId` token. Requirements: - `tokenId` must exist."
+          },
+          "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": {
+            "details": "Only the installed manager may call; at most one prepared token exists at a time.",
+            "params": {
+              "operationId": "Nonzero identity repeated at completion or by a replacement manager during abort."
+            }
+          },
+          "raiseGasParameter(bytes32,uint256)": {
+            "details": "Requires the exact governed transition; callers cannot use this to lower a budget.",
+            "params": {
+              "newValue": "Requested call budget in gas units."
+            }
+          },
+          "royaltyInfo(uint256,uint256)": {
+            "details": "Returns how much royalty is owed and to whom, based on a sale price that may be denominated in any unit of exchange. The royalty amount is denominated and should be paid in that same unit of exchange."
+          },
+          "safeTransferFrom(address,address,uint256)": {
+            "details": "Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients are aware of the ERC721 protocol to prevent tokens from being forever locked. Requirements: - `from` cannot be the zero address. - `to` cannot be the zero address. - `tokenId` token must exist and be owned by `from`. - If the caller is not `from`, it must have been allowed to move this token by either {approve} or {setApprovalForAll}. - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer. Emits a {Transfer} event."
+          },
+          "safeTransferFrom(address,address,uint256,bytes)": {
+            "details": "Safely transfers `tokenId` token from `from` to `to`. Requirements: - `from` cannot be the zero address. - `to` cannot be the zero address. - `tokenId` token must exist and be owned by `from`. - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}. - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer. Emits a {Transfer} event."
+          },
+          "setApprovalForAll(address,bool)": {
+            "details": "Approve or remove `operator` as an operator for the caller. Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller. Requirements: - The `operator` cannot be the caller. Emits an {ApprovalForAll} event."
+          },
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          },
+          "symbol()": {
+            "details": "Returns the token collection symbol."
+          },
+          "tokenURI(uint256)": {
+            "details": "Returns the Uniform Resource Identifier (URI) for `tokenId` token."
+          },
+          "transferFrom(address,address,uint256)": {
+            "details": "Transfers `tokenId` token from `from` to `to`. WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721 or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must understand this adds an external call which potentially creates a reentrancy vulnerability. Requirements: - `from` cannot be the zero address. - `to` cannot be the zero address. - `tokenId` token must be owned by `from`. - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}. Emits a {Transfer} event."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "abortPreparedMintFromManager(uint256,bytes32)": {
+            "notice": "Aborts a pending preparation through the installed replacement manager."
+          },
+          "blockCollectionBurns(uint256)": {
+            "notice": "Permanently prevents future burns in a collection through governance."
+          },
+          "burn(uint256)": {
+            "notice": "Burns a token for its owner or approved operator unless burns or the collection are frozen."
+          },
+          "collectionBurnsBlocked(uint256)": {
+            "notice": "Returns whether the collection burn block has been set."
+          },
+          "collectionBurnsBlockedAtBlock(uint256)": {
+            "notice": "Returns the block number of the permanent burn block, or zero if unset."
+          },
+          "collectionExists(uint256)": {
+            "notice": "Returns whether the collection identifier has been allocated."
+          },
+          "collectionFreezeStatus(uint256)": {
+            "notice": "Returns whether collection configuration has been permanently frozen."
+          },
+          "collectionHasMaxSupply(uint256)": {
+            "notice": "Returns whether a finite maximum applies to this collection."
+          },
+          "collectionMaxSupply(uint256)": {
+            "notice": "Returns the configured lifetime mint cap in tokens."
+          },
+          "collectionMintedEver(uint256)": {
+            "notice": "Returns the number of completed mints; burns do not reduce this count."
+          },
+          "collectionNextSerial(uint256)": {
+            "notice": "Returns the next collection-local serial available for allocation."
+          },
+          "collectionStatus(uint256)": {
+            "notice": "Returns the current collection lifecycle/status code."
+          },
+          "collectionSupplyMode(uint256)": {
+            "notice": "Returns the collection supply-mode code fixed at creation."
+          },
+          "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": {
+            "notice": "Completes the manager operation that owns the prepared token."
+          },
+          "coordinatorAtMint(uint256)": {
+            "notice": "Returns the entropy coordinator bound at mint completion, or zero before completion."
+          },
+          "createCollection(uint8,bool,uint256,uint8)": {
+            "notice": "Creates a collection through an authorized governance action."
+          },
+          "emitBatchMetadataUpdate(uint256,uint256,bytes32)": {
+            "notice": "Emits metadata invalidation for an inclusive token identifier range."
+          },
+          "emitContractURIUpdated()": {
+            "notice": "Emits the collection-level ERC-7572 invalidation from an authorized component."
+          },
+          "emitMetadataUpdate(uint256,bytes32)": {
+            "notice": "Emits a token metadata invalidation from an authorized metadata component."
+          },
+          "freezeCollection(uint256)": {
+            "notice": "Permanently freezes collection configuration through terminal governance."
+          },
+          "freezeSatellitePointer(bytes32)": {
+            "notice": "Permanently freezes an installed satellite pointer through terminal governance."
+          },
+          "gasParameterInfo(bytes32)": {
+            "notice": "Returns the configured call budget and its lower bound in gas units."
+          },
+          "getSatellitePointer(bytes32)": {
+            "notice": "Returns the stored target, registry commitments, freeze state, and revision."
+          },
+          "lastAllocatedCollectionId()": {
+            "notice": "Returns the highest collection identifier allocated by Core."
+          },
+          "lastAllocatedTokenId()": {
+            "notice": "Returns the current token allocation frontier; aborting a preparation can rewind it."
+          },
+          "mintFromManager(uint256,address,bytes,bytes32,bytes32)": {
+            "notice": "Allocates and safely mints a token for the installed mint manager."
+          },
+          "pendingPreparedMintTokenId()": {
+            "notice": "Returns the singleton pending token identifier, or zero when none exists."
+          },
+          "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": {
+            "notice": "Reserves the singleton prepared token without completing its ERC-721 mint."
+          },
+          "preparedMint(uint256)": {
+            "notice": "Returns the public pending-operation record for a token."
+          },
+          "raiseGasParameter(bytes32,uint256)": {
+            "notice": "Raises a governed external-call budget without lowering its current value or floor."
+          },
+          "setCollectionMaxSupply(uint256,uint256)": {
+            "notice": "Applies a governed change to the collection lifetime mint cap."
+          },
+          "setCollectionStatus(uint256,uint8)": {
+            "notice": "Applies the governed lifecycle transition for a collection."
+          },
+          "tokenCollectionIdentity(uint256)": {
+            "notice": "Returns the permanent collection mapping, serial, and burn flag for a token."
+          },
+          "tokenData(uint256)": {
+            "notice": "Returns the token artwork data stored by the mint operation."
+          },
+          "tokenLifecycle(uint256)": {
+            "notice": "Returns UNKNOWN=0, PREPARED_INCOMPLETE=1, MINTED=2, or BURNED=3."
+          },
+          "totalSupply()": {
+            "notice": "Returns the live ERC-721 supply, excluding prepared and burned tokens."
+          },
+          "totalSupplyOfCollection(uint256)": {
+            "notice": "Returns the collection live token count, excluding burned tokens."
+          },
+          "updateSatellitePointer(bytes32,address)": {
+            "notice": "Replaces an unfrozen satellite after registry and governance-transition checks."
+          }
+        },
+        "notice": "Complete permanent StreamCore API; capabilities remain separately importable.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCore.sol": "IStreamCore"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/standards/IERC7572.sol": {
+        "keccak256": "0x815f8122b984a4ae5593e49464ff3a80fee96c86da7566cb15b9c1e8accb655b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://a3449caa1c13b4a4e232eaaabc8c91d529e704894223831d32732157c2571c96",
+          "dweb:/ipfs/QmRXi692uqvqj7nMJwcRGdC4Y3zKV8QjCWfYE6QfCw9Js6"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCore.sol": {
+        "keccak256": "0xb28dd68ea50bf59296d5d8ce05145d2ce419e900c8a20dd029a70f783a35c5cb",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://34ced37128905c5213e7c26539b3d72057e7b404d87ea9f93039068eef733e6b",
+          "dweb:/ipfs/QmQFNVZzKqrfnSJFuNYYPYdxVM9ha25YYxGj49h4rVjghd"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": {
+        "keccak256": "0x7573906d25ad73af7885d7c6653e0f9ba2389034a2b3e90cda0b92d142e8976b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://7a4697efe627df212051c9496407c61e9a691fb4f1b7e91e706b59b8b9bc00e5",
+          "dweb:/ipfs/QmciDrhn2ng9aczDqy5NxsRww5xnmxu8roTpzprdYcrUJc"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreCollectionManagement.sol": {
+        "keccak256": "0x669418d474dca76833d6428f47abdd7d2140f99563b0128787b6c6a984184ce5",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://8e4ae01c6514c6ca0c0376ee08bb3848e061909016d800793bee46ca1b685df9",
+          "dweb:/ipfs/QmcheVPWBzFQj76s9MiFXwYqmEnfmmW6NeZGwJrgb8sgUH"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol": {
+        "keccak256": "0xc6b46969527d2c5146106138586e9700857f0a83d9065587f9eca1f7fe7c6560",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://888c054ea33f88260ec76d36e697c9462e7b445aac440d989427482f30320c17",
+          "dweb:/ipfs/QmXsjmt6BBbVChvrxAcTKpYrHRR8oxqcd6AtGaFNCwfHET"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol": {
+        "keccak256": "0x6427e30ccdc827854c8b16a0f7fa2012b2927cd0f50252376ee658c7d5a08183",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f8137db75162e63f6965d9a34b2d3e04063dfc36cece7194a235b804eb5b7056",
+          "dweb:/ipfs/QmewGGcXgqJQMLXb7RCw6u6YvD51Eu6CmiZYGuiXx8EyU4"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol": {
+        "keccak256": "0xf8429a05994ad571fd72e70203fb642028a3270661c20ae41741a144e3308889",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b3191cf83b0b1d76677a10a56ca8d7efe225fda0b4a882ad08e88b001dbc9f47",
+          "dweb:/ipfs/QmUuFomWv5gfByZGwe2G1NMJMKfvK8XgfvWVTAD5rRfxKL"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": {
+        "keccak256": "0x710958fbeae0efa716f445630f8f4bcb963f826546bdcbc54ff646ee9a20da62",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://60f09cd3894bdcc3cb6f547acacafb2dc5ef10717e5b6e5fe00ebd15b518d808",
+          "dweb:/ipfs/QmTbt2EjzgEo3o63H5Bf6bFSoPpTL7CEyYM59iuHu8XE4e"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol": {
+        "keccak256": "0x3a6937f2ef05829c763bca8150cef1cbd38013667828df2a2c611003a2341a26",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://d536810a5f460d77b6a155d71c658353653dd74f7dffc45cfded637d2061c2c2",
+          "dweb:/ipfs/QmSYwHTWyDDhk2CbswKWYMRtE7xLzEaC8QAvAfbHTDeevv"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": {
+        "keccak256": "0x17eda017b0bdff553f0f28671ea2e3957583c3dab5363a366c6b56a8472e5e03",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1ac287b96afffb3aa0fab790b90ed922e1f81f564e74d7836c9e986cdd423de8",
+          "dweb:/ipfs/Qmaas7p6Kpxzu9oGPbGkmCfUoRax46ALxNSvtxrJg1ZPBM"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": {
+        "keccak256": "0x41f689d0317767abb933d3de8f54fc13002da9da8757242b925a2635e130cd79",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://253ee168d58ac6e651073bfe87744542298e1b7a1a6cfd7f9acae335994c5118",
+          "dweb:/ipfs/QmSmD8kqa95gZc5isNRAHP2MqWsm212XMEWeJUNs6WR9Jo"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol": {
+        "keccak256": "0xda7dcfb09a364ed19b904ba56a341c1c0af80648fdeab54c4d0866f3e7de20ac",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ec2ce519990a65835bbfb67f312577d50f220723a99626f8fd42264309bdf919",
+          "dweb:/ipfs/QmPcMWtiJVKHX4gPhaUPE3QfirCyY5bgwYGekRF8Qw5MrQ"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC2981.sol": {
+        "keccak256": "0x6bead664473e3954487f80da3fcca7d4793d125c87fe708968ab806638a3eeda",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://6abe68e9fbb292fc8abb261649377825831830e44ac9125f860647b63e561895",
+          "dweb:/ipfs/QmZpWpiVx3pa6gQ4zapRp8mKnFUz9b1mMNTabbN4xepvSy"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC721.sol": {
+        "keccak256": "0x9abd6072a984ac217daf3ab14a47822b5042b4203499c349e38d460b11d3253b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://4ad9f735077d7c9a7abdc3e5711be994a5f39af2e57c8f7309264941b786915b",
+          "dweb:/ipfs/QmNgyLpFYb6jTXyBumhQcnrj7f2WWKqcgFEhkejzrscGvb"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol": {
+        "keccak256": "0x770bb92d2bb1a0c7857e4c3a6e2295cd6adf4854aafb1467c5d881965645a381",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ad3686f5926e6ec6c8714f713f8dc180962e94c85f63527972be8663fb6b4f1b",
+          "dweb:/ipfs/QmVsrqQopTPwAicXW8pCkoWqbF5w1b56kR2JQxDRRdJNtF"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "abortPreparedMintFromManager(uint256,bytes32)": "d9251657",
+    "approve(address,uint256)": "095ea7b3",
+    "balanceOf(address)": "70a08231",
+    "blockCollectionBurns(uint256)": "fcfc7b26",
+    "burn(uint256)": "42966c68",
+    "collectionBurnsBlocked(uint256)": "5923b379",
+    "collectionBurnsBlockedAtBlock(uint256)": "74a5ded9",
+    "collectionExists(uint256)": "185153c3",
+    "collectionFreezeStatus(uint256)": "2ed330f7",
+    "collectionHasMaxSupply(uint256)": "36180788",
+    "collectionMaxSupply(uint256)": "43567a66",
+    "collectionMintedEver(uint256)": "d1b08e67",
+    "collectionNextSerial(uint256)": "382f4a13",
+    "collectionStatus(uint256)": "1ea5ea29",
+    "collectionSupplyMode(uint256)": "61f2d35c",
+    "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": "abf5d45f",
+    "contractURI()": "e8a3d485",
+    "coordinatorAtMint(uint256)": "d1bc8cc2",
+    "createCollection(uint8,bool,uint256,uint8)": "d960e9e5",
+    "emitBatchMetadataUpdate(uint256,uint256,bytes32)": "908c18bd",
+    "emitContractURIUpdated()": "7f377036",
+    "emitMetadataUpdate(uint256,bytes32)": "b826aa0c",
+    "freezeCollection(uint256)": "bcc405d0",
+    "freezeSatellitePointer(bytes32)": "cdcdb71e",
+    "gasParameterInfo(bytes32)": "ec2ef90a",
+    "getApproved(uint256)": "081812fc",
+    "getSatellitePointer(bytes32)": "3528d53c",
+    "isApprovedForAll(address,address)": "e985e9c5",
+    "lastAllocatedCollectionId()": "174a3aaf",
+    "lastAllocatedTokenId()": "254b22bc",
+    "mintFromManager(uint256,address,bytes,bytes32,bytes32)": "c4e32ca9",
+    "name()": "06fdde03",
+    "ownerOf(uint256)": "6352211e",
+    "pendingPreparedMintTokenId()": "a767d50e",
+    "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": "67c6528b",
+    "preparedMint(uint256)": "06d25065",
+    "raiseGasParameter(bytes32,uint256)": "5c0df7da",
+    "royaltyInfo(uint256,uint256)": "2a55205a",
+    "safeTransferFrom(address,address,uint256)": "42842e0e",
+    "safeTransferFrom(address,address,uint256,bytes)": "b88d4fde",
+    "setApprovalForAll(address,bool)": "a22cb465",
+    "setCollectionMaxSupply(uint256,uint256)": "9700e1db",
+    "setCollectionStatus(uint256,uint8)": "68abd161",
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "symbol()": "95d89b41",
+    "tokenCollectionIdentity(uint256)": "a6b638c9",
+    "tokenData(uint256)": "b4b5b48f",
+    "tokenLifecycle(uint256)": "8c46d901",
+    "tokenURI(uint256)": "c87b56dd",
+    "totalSupply()": "18160ddd",
+    "totalSupplyOfCollection(uint256)": "f18332dd",
+    "transferFrom(address,address,uint256)": "23b872dd",
+    "updateSatellitePointer(bytes32,address)": "ac1e5708"
+  }
+}

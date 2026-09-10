@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamAdmins.sol";
-import "../../interfaces/stream/IStreamCollectionMetadata.sol";
-import "../../interfaces/stream/IStreamCore.sol";
-import "../../interfaces/stream/IStreamRecordFamilyRegistry.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
+import "../../interfaces/stream/metadata/IStreamCollectionMetadata.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/records/IStreamRecordFamilyRegistry.sol";
 import "./StreamMetadataRenderer.sol";
 import "../access/StreamPauseDomains.sol";
 import "../records/StreamRecordFamilyRegistry.sol";

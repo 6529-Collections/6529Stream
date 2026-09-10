@@ -1,0 +1,547 @@
+#!/usr/bin/env python3
+"""Validate the warning-disposition release baseline."""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+
+DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
+
+EXPECTED_SOLC_WARNINGS = {
+    (
+        "5667",
+        "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+        "returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)",
+    ),
+    (
+        "5667",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+    ),
+    (
+        "5667",
+        "test/regression/legacy/helpers/LegacyStreamCore.sol",
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
+    ),
+    (
+        "2018",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
+        "function isRandomizerContract() external view returns (bool) {",
+    ),
+    (
+        "2018",
+        "test/regression/legacy/helpers/LegacyStreamCore.sol",
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
+    ),
+    (
+        "2018",
+        "smart-contracts/domains/mint/legacy/StreamMinter.sol",
+        "function isMinterContract() external view returns (bool) {",
+    ),
+}
+
+REQUIRED_SOLC_LOG_MARKERS = (
+    "Compiler run successful",
+    "Solc 0.8.19 finished",
+)
+
+REQUIRED_HEADINGS = [
+    (1, "Warning Dispositions"),
+    (2, "Maturity And Scope"),
+    (2, "Current Warning Baseline"),
+    (2, "Fixed In This Pass"),
+    (2, "Accepted Solc Warning Dispositions"),
+    (2, "Accepted Documentation And Linter Dispositions"),
+    (2, "Size And ABI Policy"),
+    (2, "Validation Commands"),
+    (2, "Maintenance"),
+]
+
+REQUIRED_PHRASES = [
+    "ONE-007",
+    "pre-audit",
+    "not production-ready",
+    "not a security claim",
+    "local baseline",
+    "first-party warning noise",
+    "ABI-neutral",
+    "bytecode-neutral",
+    "reviewed disposition",
+    "NATSPEC-INVALID-FIRST-PARTY-HEADERS",
+    "SOLC-UNUSED-RANDOMIZER-SALT-NXT",
+    "SOLC-UNUSED-RANDOMIZER-SALT-RNG",
+    "SOLC-UNUSED-RANDOMIZER-SALT-VRF",
+    "SOLC-TEST-UNUSED-LEGACY-ROYALTY-TOKENID",
+    "SOLC-UNUSED-EXECUTOR-ENCODED-PAGE-RETURNS",
+    "SOLC-PURE-RANDOMIZER-NXT",
+    "SOLC-PURE-RANDOMIZER-RNG",
+    "SOLC-PURE-RANDOMIZER-VRF",
+    "SOLC-PURE-MINTER-MARKER",
+    "SOLC-TEST-PURE-LEGACY-ROYALTY",
+    "SOLC-TEST-SELFDESTRUCT-HELPERS",
+    "DOC-MDBOOK-VRF-HTML",
+    "LINT-VENDORED-SIGNEDMATH-TYPECAST",
+    "LINT-VENDORED-MATH-SHIFT",
+    "LINT-BLOCK-TIMESTAMP-AUCTION",
+    "LINT-BLOCK-TIMESTAMP-DROPS",
+    "LINT-BLOCK-TIMESTAMP-MINTER",
+    "LINT-BLOCK-TIMESTAMP-MINT-MANAGER",
+    "LINT-BLOCK-TIMESTAMP-TEST-HELPER",
+    "accepted-abi-compatibility",
+    "accepted-size-tradeoff",
+    "accepted-protocol-time-window",
+    "accepted-vendored-provenance",
+    "accepted-vendored-prose",
+    "accepted-test-only",
+    "satellite-first policy",
+    "StreamCore",
+    "EIP-170",
+]
+
+REQUIRED_COMMANDS = [
+    "python -m tools.security.test_warning_dispositions",
+    "python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log",
+    "python -m tools.build.run_forge_size_log --log cache/forge-size.log",
+    "forge doc --build",
+    "python -m tools.release.test_release_manifest",
+    "python -m tools.release.generate_release_manifest --check",
+    "python -m tools.release.test_release_checksums",
+    "python -m tools.release.generate_release_checksums --check",
+    "make check",
+    "powershell -ExecutionPolicy Bypass -File scripts\\check.ps1",
+]
+
+REQUIRED_LINK_TARGETS = [
+    "docs/tooling.md",
+    "docs/audit-package.md",
+    "docs/release-readiness.md",
+    "docs/status.md",
+    "docs/slither.md",
+    "docs/architecture.md",
+    "docs/vendored-libraries.md",
+    "ops/SLITHER_BASELINE.md",
+    "ops/EXECUTION_BACKLOG.md",
+    "release-artifacts/latest/risk-register.json",
+    "release-artifacts/latest/bytecode-release-proof.json",
+    "smart-contracts/domains/auctions/legacy/AuctionContract.sol",
+    "smart-contracts/domains/dependencies/DependencyRegistry.sol",
+    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+    "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol",
+    "test/unit/governance/StreamGovernanceExecutor.t.sol",
+    "smart-contracts/integrations/delegation/NFTdelegation.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol",
+    "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol",
+    "smart-contracts/domains/access/StreamAdmins.sol",
+    "smart-contracts/core/StreamCore.sol",
+    "smart-contracts/domains/revenue/StreamCuratorsPool.sol",
+    "smart-contracts/domains/mint/legacy/StreamDrops.sol",
+    "smart-contracts/domains/mint/legacy/StreamMinter.sol",
+    "smart-contracts/domains/mint/StreamMintManager.sol",
+    "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
+    "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol",
+    "smart-contracts/vendor/openzeppelin/Math.sol",
+    "test/regression/legacy/auctions/StreamAuctionPayments.t.sol",
+    "test/unit/revenue/StreamCuratorsPool.t.sol",
+    "test/unit/protocol/StreamEmergencyWithdraw.t.sol",
+    "test/regression/legacy/mint/StreamFixedPricePayments.t.sol",
+    "test/unit/entropy/StreamRandomizerPayments.t.sol",
+    "test/regression/legacy/helpers/LegacyStreamCore.sol",
+    "test/helpers/ProtocolStateMachine.sol",
+]
+
+INVALID_NATSPEC_TAGS = (
+    "@title:",
+    "@date:",
+    "@version:",
+    "@author:",
+    "@notes:",
+    "@contributors:",
+)
+
+SOURCE_MARKERS = {
+    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol": [
+        "function terminalFreezeActionPage(bytes32 scopeHash, uint256 cursor, uint256 limit)",
+        "returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)",
+        "StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(",
+        'assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }',
+    ],
+    "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol": [
+        "function encodeTerminalFreezeActionPage(",
+        "return abi.encode(ids, deadlines, next);",
+    ],
+    "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol": [
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+        "function isRandomizerContract() external view returns (bool)",
+    ],
+    "smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol": [
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+        "function isRandomizerContract() external view returns (bool)",
+    ],
+    "smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol": [
+        "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
+        "function isRandomizerContract() external view returns (bool)",
+    ],
+    "smart-contracts/core/StreamCore.sol": [
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)",
+    ],
+    "smart-contracts/domains/mint/legacy/StreamMinter.sol": [
+        "function isMinterContract() external view returns (bool)",
+        "block.timestamp",
+    ],
+    "smart-contracts/domains/mint/StreamMintManager.sol": ["block.timestamp"],
+    "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol": [
+        "constructor(<other arguments>, address _vrfCoordinator, address _link)",
+        "<initialization with other arguments goes here>",
+    ],
+    "smart-contracts/vendor/openzeppelin/SignedMath.sol": ["library SignedMath"],
+    "smart-contracts/vendor/openzeppelin/Math.sol": ["library Math"],
+    "smart-contracts/domains/auctions/legacy/AuctionContract.sol": ["block.timestamp"],
+    "smart-contracts/domains/mint/legacy/StreamDrops.sol": ["block.timestamp"],
+    "test/helpers/ProtocolStateMachine.sol": ["block.timestamp"],
+    "test/regression/legacy/auctions/StreamAuctionPayments.t.sol": ["selfdestruct(target);"],
+    "test/unit/revenue/StreamCuratorsPool.t.sol": ["selfdestruct(target);"],
+    "test/unit/protocol/StreamEmergencyWithdraw.t.sol": ["selfdestruct(target);"],
+    "test/regression/legacy/mint/StreamFixedPricePayments.t.sol": ["selfdestruct(target);"],
+    "test/unit/entropy/StreamRandomizerPayments.t.sol": ["selfdestruct(target);"],
+    "test/regression/legacy/helpers/LegacyStreamCore.sol": [
+        "function royaltyInfo(uint256 tokenId, uint256 salePrice)"
+    ],
+}
+
+HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
+LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+SOLC_WARNING_RE = re.compile(r"Warning \((?P<code>[0-9]+)\):")
+SOLC_SOURCE_RE = re.compile(
+    r"-->\s+(?P<path>.+):(?P<line>[0-9]+):(?P<column>[0-9]+):?\s*$"
+)
+SOLC_SOURCE_EXCERPT_RE = re.compile(r"^\s*[0-9]+\s+\|\s+(?P<source>.+?)\s*$")
+
+
+class WarningDispositionError(ValueError):
+    """Raised when the warning-disposition baseline is incomplete."""
+
+
+def normalize_repo_path(path: Path, repo_root: Path) -> str:
+    """Return a repository-relative POSIX path or reject path escapes."""
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError as exc:
+        raise WarningDispositionError(f"linked path escapes repository: {path}") from exc
+
+
+def normalize_whitespace(text: str) -> str:
+    """Collapse whitespace for resilient source and Markdown comparisons."""
+    return re.sub(r"\s+", " ", text)
+
+
+def markdown_headings(text: str) -> set[tuple[int, str]]:
+    """Extract Markdown headings as level/title pairs."""
+    headings = set()
+    for match in HEADING_RE.finditer(text):
+        level = len(match.group(1))
+        title = match.group(2).strip().rstrip("#").strip()
+        headings.add((level, title))
+    return headings
+
+
+def normalized_link_target(raw_target: str) -> str | None:
+    """Return a local Markdown link path without anchors or query strings."""
+    target = raw_target.strip()
+    if not target or target.startswith("#"):
+        return None
+    if "://" in target or target.startswith("mailto:"):
+        return None
+
+    path_part = target.split("#", 1)[0].split("?", 1)[0]
+    return path_part or None
+
+
+def label_looks_like_repo_path(label: str) -> bool:
+    """Return true when a link label should match its resolved repo path."""
+    normalized = label.strip().strip("`")
+    return "/" in normalized or "\\" in normalized
+
+
+def linked_repo_paths(repo_root: Path, document_path: Path, text: str) -> set[str]:
+    """Collect existing repository-relative file links from Markdown text."""
+    links = set()
+    missing = []
+    for match in LINK_RE.finditer(text):
+        label = match.group(1).strip().strip("`")
+        target = normalized_link_target(match.group(2))
+        if target is None:
+            continue
+
+        target_path = Path(target)
+        if not target_path.is_absolute():
+            target_path = document_path.parent / target_path
+
+        resolved = target_path.resolve()
+        normalized = normalize_repo_path(resolved, repo_root)
+        if not resolved.exists():
+            missing.append(normalized)
+            continue
+        if label_looks_like_repo_path(label) and label.replace("\\", "/") != normalized:
+            raise WarningDispositionError(f"link label `{label}` points to `{normalized}`")
+        links.add(normalized)
+
+    if missing:
+        raise WarningDispositionError(
+            "warning disposition doc links to missing files: "
+            + ", ".join(sorted(set(missing)))
+        )
+    return links
+
+
+def missing_phrases(text: str, phrases: list[str]) -> list[str]:
+    """Return required phrases not found after whitespace normalization."""
+    normalized_text = normalize_whitespace(text)
+    return [
+        phrase
+        for phrase in phrases
+        if normalize_whitespace(phrase) not in normalized_text
+    ]
+
+
+def validate_no_invalid_natspec_tags(repo_root: Path) -> None:
+    """Reject legacy colon-suffixed NatSpec tags in Solidity sources."""
+    contracts_dir = repo_root / "smart-contracts"
+    if not contracts_dir.is_dir():
+        return
+
+    violations = []
+    for path in sorted(contracts_dir.rglob("*.sol")):
+        relative = path.resolve().relative_to(repo_root.resolve()).as_posix()
+        if relative.startswith("smart-contracts/lib/"):
+            continue
+        text = path.read_text(encoding="utf-8")
+        for tag in INVALID_NATSPEC_TAGS:
+            if tag in text:
+                violations.append(f"{relative}: {tag}")
+
+    if violations:
+        raise WarningDispositionError(
+            "invalid NatSpec header tags remain: " + ", ".join(violations)
+        )
+
+
+def validate_source_markers(repo_root: Path) -> None:
+    """Ensure accepted warning rows still match the source surface."""
+    missing = []
+    for relative, snippets in SOURCE_MARKERS.items():
+        source_path = repo_root / relative
+        if not source_path.is_file():
+            missing.append(f"{relative}: missing file")
+            continue
+        source = normalize_whitespace(source_path.read_text(encoding="utf-8"))
+        for snippet in snippets:
+            if normalize_whitespace(snippet) not in source:
+                missing.append(f"{relative}: {snippet}")
+
+    if missing:
+        raise WarningDispositionError(
+            "warning disposition source markers drifted: " + ", ".join(missing)
+        )
+
+
+def normalize_solidity_warning_path(raw_path: str) -> str:
+    """Normalize a Solidity warning source path to repository POSIX form."""
+    return raw_path.strip().replace("\\", "/")
+
+
+def parse_solc_warnings(log_text: str) -> set[tuple[str, str, str]]:
+    """Extract solc warning code, source path, and source excerpt from forge output."""
+    warnings = set()
+    pending_code: str | None = None
+    pending_path: str | None = None
+    for line in log_text.splitlines():
+        warning_match = SOLC_WARNING_RE.search(line)
+        if warning_match:
+            pending_code = warning_match.group("code")
+            pending_path = None
+            continue
+        if pending_code is None:
+            continue
+        if pending_path is None:
+            source_match = SOLC_SOURCE_RE.search(line)
+            if not source_match:
+                continue
+            pending_path = normalize_solidity_warning_path(source_match.group("path"))
+            continue
+
+        source_excerpt_match = SOLC_SOURCE_EXCERPT_RE.match(line)
+        if not source_excerpt_match:
+            continue
+        warnings.add(
+            (
+                pending_code,
+                pending_path,
+                normalize_whitespace(source_excerpt_match.group("source")).strip(),
+            )
+        )
+        pending_code = None
+        pending_path = None
+    return warnings
+
+
+def format_solc_warning(warning: tuple[str, str, str]) -> str:
+    """Render a compact solc warning identifier."""
+    code, path, source_excerpt = warning
+    return f"Warning({code}) {path} :: {source_excerpt}"
+
+
+def validate_solc_warning_log(log_path: Path) -> None:
+    """Validate live forge output against the reviewed solc warning baseline."""
+    if not log_path.is_file():
+        raise WarningDispositionError(
+            "missing solc warning log: "
+            f"{log_path}; run python -m tools.build.run_forge_size_log --log {log_path} first"
+        )
+
+    log_text = log_path.read_text(encoding="utf-8")
+    missing_markers = [
+        marker for marker in REQUIRED_SOLC_LOG_MARKERS if marker not in log_text
+    ]
+    if missing_markers:
+        raise WarningDispositionError(
+            "solc warning log is incomplete or not successful; missing marker(s): "
+            + ", ".join(missing_markers)
+            + f"; run python -m tools.build.run_forge_size_log --log {log_path} first"
+        )
+
+    actual = parse_solc_warnings(log_text)
+    missing = sorted(EXPECTED_SOLC_WARNINGS - actual)
+    unexpected = sorted(actual - EXPECTED_SOLC_WARNINGS)
+    if missing or unexpected:
+        parts = []
+        if missing:
+            parts.append(
+                "missing expected warning(s): "
+                + ", ".join(format_solc_warning(warning) for warning in missing)
+            )
+        if unexpected:
+            parts.append(
+                "unexpected warning(s): "
+                + ", ".join(format_solc_warning(warning) for warning in unexpected)
+            )
+        raise WarningDispositionError("solc warning baseline drifted; " + "; ".join(parts))
+
+
+def validate_warning_dispositions(repo_root: Path, document_path: Path) -> None:
+    """Validate the warning-disposition document and source anchors."""
+    if not document_path.is_file():
+        relative = normalize_repo_path(document_path, repo_root)
+        raise WarningDispositionError(f"missing warning disposition doc: {relative}")
+
+    text = document_path.read_text(encoding="utf-8")
+    headings = markdown_headings(text)
+    missing_headings = [
+        f"{'#' * level} {title}"
+        for level, title in REQUIRED_HEADINGS
+        if (level, title) not in headings
+    ]
+    if missing_headings:
+        raise WarningDispositionError(
+            "warning disposition doc is missing required headings: "
+            + ", ".join(missing_headings)
+        )
+
+    missing_required_phrases = missing_phrases(text, REQUIRED_PHRASES)
+    if missing_required_phrases:
+        raise WarningDispositionError(
+            "warning disposition doc is missing required content: "
+            + ", ".join(missing_required_phrases)
+        )
+
+    command_lines = {line.strip() for line in text.splitlines()}
+    missing_commands = [
+        command for command in REQUIRED_COMMANDS if command not in command_lines
+    ]
+    if missing_commands:
+        raise WarningDispositionError(
+            "warning disposition doc is missing required commands: "
+            + ", ".join(missing_commands)
+        )
+
+    links = linked_repo_paths(repo_root, document_path, text)
+    missing_links = [
+        target for target in REQUIRED_LINK_TARGETS if target not in links
+    ]
+    if missing_links:
+        raise WarningDispositionError(
+            "warning disposition doc is missing required links: "
+            + ", ".join(missing_links)
+        )
+
+    validate_no_invalid_natspec_tags(repo_root)
+    validate_source_markers(repo_root)
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    """Parse warning-disposition checker options."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--warning-dispositions",
+        type=Path,
+        default=DEFAULT_WARNING_DISPOSITIONS,
+    )
+    parser.add_argument(
+        "--solc-warnings-log",
+        type=Path,
+        help="Optional forge build output log to compare with the accepted warning baseline.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the warning-disposition checker CLI."""
+    args = parse_args(sys.argv[1:] if argv is None else argv)
+    repo_root = args.repo_root.resolve()
+    document_path = args.warning_dispositions
+    if not document_path.is_absolute():
+        document_path = repo_root / document_path
+    solc_warnings_log = args.solc_warnings_log
+    if solc_warnings_log is not None and not solc_warnings_log.is_absolute():
+        solc_warnings_log = repo_root / solc_warnings_log
+
+    try:
+        validate_warning_dispositions(repo_root, document_path.resolve())
+        if solc_warnings_log is not None:
+            validate_solc_warning_log(solc_warnings_log.resolve())
+    except WarningDispositionError as exc:
+        print(f"warning disposition check failed: {exc}", file=sys.stderr)
+        return 1
+
+    print("warning disposition baseline is current")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

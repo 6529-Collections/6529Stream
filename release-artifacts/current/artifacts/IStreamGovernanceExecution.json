@@ -1,0 +1,822 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelGovernanceAction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes",
+          "name": "callData",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeGovernanceAction",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "callDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GovernanceCall[]",
+          "name": "calls",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "callDatas",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "executeGovernanceBatch",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "materializeExpiredAction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "pruneElapsedTerminalFreezeActions",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "prunedCount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "callDatas",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "publishGovernanceCallData",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "pointer",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "notBefore",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expiresAfter",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GovernanceActionRequest",
+          "name": "request",
+          "type": "tuple"
+        }
+      ],
+      "name": "scheduleGovernanceAction",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "actionClass",
+          "type": "uint8"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "target",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "selector",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "callDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct GovernanceCall[]",
+          "name": "calls",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "oldValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newValueHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "notBefore",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint64",
+          "name": "expiresAfter",
+          "type": "uint64"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "reasonURI",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "scheduleGovernanceBatch",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "vetoTerminalFreeze",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "cancelGovernanceAction",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "callData",
+              "type": "bytes"
+            }
+          ],
+          "name": "executeGovernanceAction",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceCall[]",
+              "name": "calls",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "callDatas",
+              "type": "bytes[]"
+            }
+          ],
+          "name": "executeGovernanceBatch",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "materializeExpiredAction",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "pruneElapsedTerminalFreezeActions",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "prunedCount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes[]",
+              "name": "callDatas",
+              "type": "bytes[]"
+            }
+          ],
+          "name": "publishGovernanceCallData",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "pointer",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint8",
+                  "name": "actionClass",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "callData",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "notBefore",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "expiresAfter",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "reasonHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "reasonURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "manifestHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceActionRequest",
+              "name": "request",
+              "type": "tuple"
+            }
+          ],
+          "name": "scheduleGovernanceAction",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "target",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "value",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "selector",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "callDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "scopeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "oldValueHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "newValueHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct GovernanceCall[]",
+              "name": "calls",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "oldValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newValueHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "notBefore",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "expiresAfter",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scheduleGovernanceBatch",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "vetoTerminalFreeze",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI for the same Executor address. Discovery continues to use      IStreamGovernanceExecutor; this caller subset is not a new ERC165 claim.",
+        "kind": "dev",
+        "methods": {
+          "publishGovernanceCallData(bytes[])": {
+            "details": "Permissionless and content-addressed: the key is     `keccak256(abi.encodePacked(keccak256(callDatas[0]), ...))`, so a     published blob can never disagree with the `callDataHash` entries of     a batch that resolves to it. Republishing an existing set is     idempotent. Scheduling requires the batch's preimages to be     published so the stored action record carries the pointer for the     full open-to-execute window."
+          },
+          "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)": {
+            "details": "Reverts with `CallDataNotPublished` unless the exact calldata     preimages for `calls` were published via `publishGovernanceCallData`     (same transaction is fine); the stored action record then carries     the SSTORE2 pointer ([GOV-BATCH] rule 5)."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "cancelGovernanceAction(bytes32,bytes32)": {
+            "notice": "Cancels a scheduled action before execution."
+          },
+          "executeGovernanceAction(bytes32,bytes)": {
+            "notice": "Single-call execution wrapper over the stored first-call fields."
+          },
+          "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])": {
+            "notice": "Executes a scheduled batch; atomic, payable-value pinned         (`msg.value == sum(calls[].value)`), permissionless after         `notBefore` ([GOV-BATCH] rules 1-2)."
+          },
+          "materializeExpiredAction(bytes32)": {
+            "notice": "Materializes `EXPIRED` for a scheduled action past `expiresAfter`."
+          },
+          "pruneElapsedTerminalFreezeActions(bytes32)": {
+            "notice": "Permissionlessly removes memberships whose veto deadline has         elapsed. This does not mutate action status or pending counts."
+          },
+          "publishGovernanceCallData(bytes[])": {
+            "notice": "Publishes the exact ordered calldata preimages for a batch as an         SSTORE2 blob ([GOV-BATCH] rule 5; ADR 0013 decision U5)."
+          },
+          "scheduleGovernanceAction((uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32))": {
+            "notice": "Single-call wrapper producing a byte-identical action ID to the         equivalent one-call batch."
+          },
+          "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)": {
+            "notice": "Schedules a batch of calls as one atomic governance action         ([GOV-ACTION-ID] explicit batch ABI; ADR 0011 decision R10)."
+          },
+          "vetoTerminalFreeze(bytes32,bytes32)": {
+            "notice": "Vetoes a scheduled terminal-freeze action before its veto         deadline. A global holder or a holder for any distinct affected         per-call scope may veto the whole atomic batch."
+          }
+        },
+        "notice": "Publish, schedule, execute, and terminate atomic governance actions.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecution.sol": "IStreamGovernanceExecution"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamGovernanceExecution.sol": {
+        "keccak256": "0x4e2d414c99f45b156d6e90509f21155c48479f5167d63016a431efd600564729",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://8af2eb2e978b5266da62a1a4f82b82b202a24c6f885ca7523aae19ff336a41e8",
+          "dweb:/ipfs/QmSfeGmcyVQ18ADuL36jcCZ2SPaSSC9YZHnVVwcLL2WLoV"
+        ]
+      },
+      "smart-contracts/interfaces/stream/governance/StreamGovernanceTypes.sol": {
+        "keccak256": "0x9573e8be7be5ecc5f563d14a29b90d6fdc5df99c79cec95b51354cf99396d844",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f7749caa2dde1c9b696bf8038e684014bcf9a7fa1d7e5cddf1afc7816533ecea",
+          "dweb:/ipfs/QmfGU7kBNHmuaBmHNTyQY1QjXVhvG6LpMPjs2hibUkidrJ"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "cancelGovernanceAction(bytes32,bytes32)": "e2a10db5",
+    "executeGovernanceAction(bytes32,bytes)": "ed8259ec",
+    "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])": "2eccc33e",
+    "materializeExpiredAction(bytes32)": "2098cfe6",
+    "pruneElapsedTerminalFreezeActions(bytes32)": "ace3628e",
+    "publishGovernanceCallData(bytes[])": "5447021f",
+    "scheduleGovernanceAction((uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32))": "d1699cf2",
+    "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)": "9c954144",
+    "vetoTerminalFreeze(bytes32,bytes32)": "2d1585ec"
+  }
+}
