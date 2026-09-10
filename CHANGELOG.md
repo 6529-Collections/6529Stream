@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a TypeScript client with retained current ABIs, typed contract calls,
+  EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.
+- Added repeatable local product scenarios covering a second artist, native and
+  ERC-20 purchases, auction bidding/refunds/settlement and state-export publication.
+- Added credential-free Sepolia status and transaction recovery that preserves
+  the exact signed intent across interrupted runs, plus explicit entropy and
+  metadata delivery retries.
+
 - Added current-stack ERC-20 fixed-price sales with payer-bound intents,
   canonical primary-policy commitments, exact allowance settlement and atomic
   Core minting. Supported primary assignments use fixed collection/default profiles.

@@ -7,6 +7,8 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |
+| Onboard another artist and exercise sales and auctions | [Executable product scenarios](product-demo.md) |
 | Buy one NFT with native ETH | [Fixed-price purchase](contract-flows.md) |
 | Buy with an ERC-20 and payer consent | [ERC-20 sales](erc20-sales.md) |
 | Discover, publish or challenge a state export | [State exports](state-exports.md) |

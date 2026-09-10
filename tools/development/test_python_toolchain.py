@@ -51,7 +51,7 @@ steps:
 
 
 def valid_multi_job_ci_workflow() -> str:
-    """Return four isolated pinned toolchain jobs accepted for CI."""
+    """Return four pinned Python jobs and the independent client job."""
 
     return f"""\
 jobs:
@@ -104,6 +104,14 @@ jobs:
           {checker.LOCK_INSTALL_COMMAND}
           {checker.PIP_CHECK_COMMAND}
           {checker.PLAYWRIGHT_INSTALL_COMMAND}
+  stream-client:
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+      - run: |
+          npm --prefix packages/stream-client ci --ignore-scripts
+          npm --prefix packages/stream-client test
 """
 
 
