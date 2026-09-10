@@ -89,6 +89,57 @@ class GovernanceActionPolicyCheckerTest(unittest.TestCase):
                             changed if target == "scheduling" else scheduling,
                         )
 
+    def test_policy_validation_cannot_follow_literal_failing_guard(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        for target in ("scheduling", "execution"):
+            source = scheduling if target == "scheduling" else executor
+            call = self._policy_call(source)
+            for termination in (
+                "require(false);", "assert(false);",
+                'require(false, "reason");', "require /* reason */ (false);",
+                "require((false));", "assert(((false)));",
+                "{ require(false); }", "{ { assert(false); } }",
+                "unchecked { require(false); }",
+            ):
+                with self.subTest(target=target, termination=termination):
+                    changed = source.replace(call, termination + "\n" + call)
+                    with self.assertRaisesRegex(ValueError, "literal failing guard"):
+                        checker.validate_policy_call_path(
+                            executor if target == "scheduling" else changed,
+                            changed if target == "scheduling" else scheduling,
+                        )
+
+    def test_schedule_delegation_cannot_follow_literal_failing_guard(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        delegation = "StreamGovernanceScheduling.Prepared memory prepared ="
+        for termination in ("require(false);", "assert(false);"):
+            with self.subTest(termination=termination):
+                changed = executor.replace(delegation, termination + " " + delegation)
+                with self.assertRaisesRegex(ValueError, "schedule delegation"):
+                    checker.validate_policy_call_path(changed, scheduling)
+
+    def test_nonfailing_conditional_and_masked_guards_remain_allowed(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        for target in ("scheduling", "execution"):
+            source = scheduling if target == "scheduling" else executor
+            call = self._policy_call(source)
+            for prefix in (
+                "require(true);", "assert(true);", "require(falseFlag);",
+                "require(false == false);", "assert((false) == false);",
+                "if (false) require(false);", "if (false) { assert(false); }",
+                "{ if (false) require(false); }", "/* require(false); */",
+                'string memory note = "assert(false);";',
+            ):
+                with self.subTest(target=target, prefix=prefix):
+                    changed = source.replace(call, prefix + "\n" + call)
+                    checker.validate_policy_call_path(
+                        executor if target == "scheduling" else changed,
+                        changed if target == "scheduling" else scheduling,
+                    )
+
     def test_schedule_delegation_cannot_follow_unconditional_revert(self) -> None:
         executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
         scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")

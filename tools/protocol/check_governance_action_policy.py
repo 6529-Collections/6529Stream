@@ -303,6 +303,15 @@ def validate_policy_call_path(executor_source: str, scheduling_source: str) -> N
             not any(re.match(r"\s*revert\b", statement) for statement in statements[:call_index]),
             "policy validation path: unconditional revert before policy validation",
         )
+        # Literal false guards also terminate this unconditional path. This is
+        # deliberately not a general Solidity constant-expression evaluator.
+        require(
+            not any(re.fullmatch(
+                r"\s*(?:require|assert)\s*\(\s*(?:\(\s*)*false"
+                r"(?:\s*\))*\s*(?:,[^;]*)?\)\s*;\s*", statement
+            ) for statement in statements[:call_index]),
+            "policy validation path: literal failing guard before policy validation",
+        )
     require(not any(re.search(r"\b(return|assembly)\b", body)
                     for body in (schedule_body, prepare_body, execute_body)),
             "policy validation path: early return or assembly bypass")
