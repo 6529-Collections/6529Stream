@@ -1,0 +1,2291 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "emergencyRecipient",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "globalRoleMutationState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "baseRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "grantScopedRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasAnyTerminalFreezeVetoRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isKnownRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isRoleManager",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isRoleRedundant",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "baseRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isScopableRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "registerRoleManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "resolveRole",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "baseRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "revokeScopedRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "roleGrantClass",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "roleHolderAt",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "roleHolderCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "roleManagerConfigMutationState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "roleMutationState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "roleRedundancy",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "holderCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "contractHolderCount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "baseRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "scopedRole",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "baseRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "scopedRoleMutationState",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "terminalFreezeVetoMembershipCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "configChainHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "configRevision",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleManagerUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "granted",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "roleChainHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "roleRevision",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "globalChainHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "globalRevision",
+          "type": "uint64"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleMutationCommitted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "grantClass",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StreamRoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "grantClass",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StreamRoleRevoked",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "holderCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "AmbiguousRoleResolution",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "DirectRoleRegistryOwnershipMutationDisabled",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "conflictingRole",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "DisjointRoleConflict",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "GovernanceIdentityRoleOverlap",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "governanceExecutor",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidGovernanceExecutor",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "actor",
+          "type": "address"
+        }
+      ],
+      "name": "RoleActorNotAuthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "RoleAlreadyGranted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "expectedClass",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "actualClass",
+          "type": "uint8"
+        }
+      ],
+      "name": "RoleGovernanceActionClassMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoleGovernanceActionIdZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RoleGovernanceActionNotExecuting",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expectedHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actualHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleGovernanceNewStateHashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expectedHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actualHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleGovernanceOldStateHashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expectedHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actualHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleGovernanceScopeHashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "RoleHolderIndexOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "RoleManagerConfigNoOp",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleMutationRevisionOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "RoleNotGranted",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleUnresolved",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "holderCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TerminalFreezeVetoGuardianCap",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "TerminalFreezeVetoGuardianDelegatedEOA",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "holderCount",
+          "type": "uint256"
+        }
+      ],
+      "name": "TerminalFreezeVetoGuardianFloor",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "holder",
+          "type": "address"
+        }
+      ],
+      "name": "TerminalFreezeVetoGuardianMustHaveCode",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnknownRole",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ZeroRoleHolder",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "AmbiguousRoleResolution",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "DirectRoleRegistryOwnershipMutationDisabled",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "conflictingRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "DisjointRoleConflict",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "GovernanceIdentityRoleOverlap",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidGovernanceExecutor",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            }
+          ],
+          "name": "RoleActorNotAuthorized",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "RoleAlreadyGranted",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "expectedClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "actualClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "RoleGovernanceActionClassMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "RoleGovernanceActionIdZero",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "RoleGovernanceActionNotExecuting",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceNewStateHashMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceOldStateHashMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "expectedHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actualHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleGovernanceScopeHashMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "RoleHolderIndexOutOfBounds",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "RoleManagerConfigNoOp",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleMutationRevisionOverflow",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "RoleNotGranted",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleUnresolved",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianCap",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianDelegatedEOA",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianFloor",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "TerminalFreezeVetoGuardianMustHaveCode",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownRole",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ZeroRoleHolder",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "configChainHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "configRevision",
+              "type": "uint64"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleManagerUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "granted",
+              "type": "bool"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "roleChainHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "roleRevision",
+              "type": "uint64"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "globalChainHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "globalRevision",
+              "type": "uint64"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "RoleMutationCommitted",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleGranted",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "grantClass",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "actor",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamRoleRevoked",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "emergencyRecipient",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "globalRoleMutationState",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "grantRole",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "grantScopedRole",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasAnyTerminalFreezeVetoRole",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "hasRole",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isKnownRole",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "isRoleManager",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isRoleRedundant",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isScopableRole",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            }
+          ],
+          "name": "registerRoleManager",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolveRole",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "revokeRole",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "holder",
+              "type": "address"
+            }
+          ],
+          "name": "revokeScopedRole",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleGrantClass",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "roleHolderAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleHolderCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "roleManagerConfigMutationState",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleMutationState",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            }
+          ],
+          "name": "roleRedundancy",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "holderCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "contractHolderCount",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scopedRole",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "baseRole",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "scopedRoleMutationState",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "role",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "terminalFreezeVetoMembershipCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Long-lived authorities are `bytes32` role references resolved through     this registry at call time, never raw stored addresses (ADR 0013     decision U5). Root-class roles are granted and revoked only by the     permanently owning governance Executor; operational-class roles are also     grantable by registered role managers. Role-redundancy semantics for     the [GOV-WINDOWS] rule 2 emergency assumption are exposed as views so     conformance-matrix gates can verify them onchain.",
+        "events": {
+          "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)": {
+            "details": "`roleChainHash` is scoped to `role`; `globalChainHash` commits to      every grant/revoke across the registry. Both counters are      monotonic, so a holder set that returns A -> B -> A remains      distinguishable from the original A state."
+          }
+        },
+        "kind": "dev",
+        "methods": {
+          "emergencyRecipient()": {
+            "details": "Never a stored raw address (ADR 0004 [GOV-ROLES]; ADR 0013 decision U5)."
+          },
+          "grantScopedRole(bytes32,bytes32,address)": {
+            "details": "Keeps the vocabulary closed at the base level while supporting the     additive per-scope designation of ADR 0004 [GOV-WINDOWS] (for     example per-scope terminal-freeze veto guardians). Authority follows     the base role's grant class. Reverts `UnknownRole` when `baseRole`     is not scopable."
+          },
+          "isRoleRedundant(bytes32)": {
+            "details": "Necessary but not sufficient. This gate cannot establish that the     holders are independently controlled; that remains a ceremony/     off-chain obligation ([GOV-MATERIAL]; [LTA-GUARDIAN] rule 8). A     `true` result is a floor, not a proof of redundancy."
+          },
+          "registerRoleManager(address,bool)": {
+            "details": "Enablement is delayed class 1. Disabling an existing manager is      immediate tightening class 0 and uses the account-scoped config      chain so the manager cannot censor its own removal."
+          },
+          "roleManagerConfigMutationState(address)": {
+            "details": "This state is intentionally independent from manager-controlled      operational-role and global audit mutations, so a compromised      manager cannot stale its own root-initiated removal."
+          },
+          "roleRedundancy(bytes32)": {
+            "details": "The contract-holder count is a necessary-but-insufficient onchain     proxy for redundancy: it cannot prove the holders are independently     controlled. The exact EIP-7702 designation is rejected on grant and     excluded if observed later, while true independent control remains a     ceremony/off-chain governance obligation ([GOV-MATERIAL];     [LTA-GUARDIAN] rule 8)."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "AmbiguousRoleResolution(bytes32,uint256)": [
+            {
+              "notice": "Reverts when single-address resolution meets multiple holders."
+            }
+          ],
+          "DisjointRoleConflict(bytes32,bytes32,address)": [
+            {
+              "notice": "Reverts when a grant would violate a pinned role-disjointness rule         ([GOV-WINDOWS] rule 3: pause guardians cannot unpause and         unpause holders cannot pause)."
+            }
+          ],
+          "RoleActorNotAuthorized(bytes32,address)": [
+            {
+              "notice": "Reverts when the caller may not grant or revoke the role class."
+            }
+          ],
+          "RoleAlreadyGranted(bytes32,address)": [
+            {
+              "notice": "Reverts when granting a role the holder already has."
+            }
+          ],
+          "RoleGovernanceActionClassMismatch(uint8,uint8)": [
+            {
+              "notice": "Reverts when an Executor-owned mutation is not delayed class 1."
+            }
+          ],
+          "RoleGovernanceActionIdZero()": [
+            {
+              "notice": "Reverts when the active Executor context exposes no action id."
+            }
+          ],
+          "RoleGovernanceActionNotExecuting()": [
+            {
+              "notice": "Reverts when an Executor-owned mutation is not the active         target call of a Governance V2 batch."
+            }
+          ],
+          "RoleGovernanceNewStateHashMismatch(bytes32,bytes32)": [
+            {
+              "notice": "Reverts when the complete post-mutation role state is not committed."
+            }
+          ],
+          "RoleGovernanceOldStateHashMismatch(bytes32,bytes32)": [
+            {
+              "notice": "Reverts when the live pre-mutation role state is not committed."
+            }
+          ],
+          "RoleGovernanceScopeHashMismatch(bytes32,bytes32)": [
+            {
+              "notice": "Reverts when the per-call role/config scope is not exact."
+            }
+          ],
+          "RoleHolderIndexOutOfBounds(bytes32,uint256)": [
+            {
+              "notice": "Reverts when a holder enumeration index is out of bounds."
+            }
+          ],
+          "RoleManagerConfigNoOp(address,bool)": [
+            {
+              "notice": "Reverts when a RoleManager configuration write changes nothing."
+            }
+          ],
+          "RoleMutationRevisionOverflow(bytes32)": [
+            {
+              "notice": "Reverts if a role's append-only mutation counter can no longer advance."
+            }
+          ],
+          "RoleNotGranted(bytes32,address)": [
+            {
+              "notice": "Reverts when revoking a role the holder does not have."
+            }
+          ],
+          "RoleUnresolved(bytes32)": [
+            {
+              "notice": "Reverts when resolving a role with no current holder."
+            }
+          ],
+          "UnknownRole(bytes32)": [
+            {
+              "notice": "Reverts when a role constant is outside the pinned [GOV-ROLES] vocabulary."
+            }
+          ],
+          "ZeroRoleHolder(bytes32)": [
+            {
+              "notice": "Reverts on zero-address holders and role managers."
+            }
+          ]
+        },
+        "events": {
+          "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)": {
+            "notice": "Emitted for every successful role-holder mutation."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "emergencyRecipient()": {
+            "notice": "Resolves `ROLE_EMERGENCY_RECIPIENT` through the registry."
+          },
+          "globalRoleMutationState()": {
+            "notice": "Returns the append-only aggregate of every role grant/revoke."
+          },
+          "grantRole(bytes32,address)": {
+            "notice": "Grants `role` to `holder` under the role's grant class rules."
+          },
+          "grantScopedRole(bytes32,bytes32,address)": {
+            "notice": "Grants a per-scope instance of a scopable base role         (`scopedRole(baseRole, scopeHash)`) to `holder`."
+          },
+          "hasAnyTerminalFreezeVetoRole(address)": {
+            "notice": "Returns true when `account` holds the global terminal-veto role         or any derived per-scope instance of it."
+          },
+          "hasRole(bytes32,address)": {
+            "notice": "Returns true when `account` currently holds `role`."
+          },
+          "isKnownRole(bytes32)": {
+            "notice": "Returns true when `role` is in the pinned [GOV-ROLES] vocabulary."
+          },
+          "isRoleManager(address)": {
+            "notice": "Returns true when `account` is a registered role manager."
+          },
+          "isRoleRedundant(bytes32)": {
+            "notice": "Returns true when `role` satisfies the onchain proxy for the         [GOV-WINDOWS] rule 2 emergency-holder floor: at least two         holders, all of which expose deployed code at observation time         and none of which carries the exact EIP-7702 delegation         designation."
+          },
+          "isScopableRole(bytes32)": {
+            "notice": "Returns true when `baseRole` may be granted per-scope."
+          },
+          "registerRoleManager(address,bool)": {
+            "notice": "Enables or disables an operational-role manager through the         exact Governance V2 transition committed for `account`."
+          },
+          "resolveRole(bytes32)": {
+            "notice": "Resolves `role` to its single current holder; reverts when the         role has zero or multiple holders."
+          },
+          "revokeRole(bytes32,address)": {
+            "notice": "Revokes `role` from `holder` under the role's grant class rules."
+          },
+          "revokeScopedRole(bytes32,bytes32,address)": {
+            "notice": "Revokes a per-scope instance of a scopable base role from `holder`."
+          },
+          "roleGrantClass(bytes32)": {
+            "notice": "Returns the pinned grant class for `role`         (1 = root, 2 = operational); reverts for unknown roles."
+          },
+          "roleHolderAt(bytes32,uint256)": {
+            "notice": "Returns the holder of `role` at `index` (unordered enumeration)."
+          },
+          "roleHolderCount(bytes32)": {
+            "notice": "Returns the number of current holders of `role`."
+          },
+          "roleManagerConfigMutationState(address)": {
+            "notice": "Returns the manager-address-scoped exact governance mutation         chain and revision used to schedule manager enable/disable."
+          },
+          "roleMutationState(bytes32)": {
+            "notice": "Returns the append-only mutation chain and revision for an         exact role key. The role key may be either a base role or a         derived scoped role returned by `scopedRole`."
+          },
+          "roleRedundancy(bytes32)": {
+            "notice": "Returns the holder count and the count of non-EIP-7702 holders         with deployed code observed at call time, for [GOV-WINDOWS]         rule 2 redundancy gates."
+          },
+          "scopedRole(bytes32,bytes32)": {
+            "notice": "Returns the derived per-scope role key         `keccak256(abi.encode(baseRole, scopeHash))`."
+          },
+          "scopedRoleMutationState(bytes32,bytes32)": {
+            "notice": "Returns the append-only mutation state for a derived scoped role."
+          },
+          "supportsInterface(bytes4)": {
+            "notice": "ERC-165 identity used by executor-first bootstrap binding."
+          },
+          "terminalFreezeVetoMembershipCount(address)": {
+            "notice": "Returns the exact number of global plus scoped terminal-veto         memberships currently held by `account`."
+          }
+        },
+        "notice": "Role-resolution registry for the ADR 0004 [GOV-ROLES] vocabulary.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol": "IStreamRoleRegistry"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/IStreamRoleRegistry.sol": {
+        "keccak256": "0x1d8d519d7e6bb677ea60a95494d00e90bcbfd7608c8bc47ce13b3641f6ee43d2",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3e8b2f6221eb07e7cbab845f46abb6a2f737ce6249275df840e9c7686845774e",
+          "dweb:/ipfs/QmUhcS72sUDKYeH9bMoU6zyrPGb6SUsusQdQo6PXGWhcTe"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "emergencyRecipient()": "be9ee11f",
+    "globalRoleMutationState()": "b101db25",
+    "grantRole(bytes32,address)": "2f2ff15d",
+    "grantScopedRole(bytes32,bytes32,address)": "4c5ceedb",
+    "hasAnyTerminalFreezeVetoRole(address)": "3d8e51dc",
+    "hasRole(bytes32,address)": "91d14854",
+    "isKnownRole(bytes32)": "1ace0f58",
+    "isRoleManager(address)": "2d524393",
+    "isRoleRedundant(bytes32)": "858295eb",
+    "isScopableRole(bytes32)": "caddbbcd",
+    "registerRoleManager(address,bool)": "148fed8e",
+    "resolveRole(bytes32)": "ac4da548",
+    "revokeRole(bytes32,address)": "d547741f",
+    "revokeScopedRole(bytes32,bytes32,address)": "2862c0f1",
+    "roleGrantClass(bytes32)": "c9b94660",
+    "roleHolderAt(bytes32,uint256)": "eef41635",
+    "roleHolderCount(bytes32)": "c4e1d117",
+    "roleManagerConfigMutationState(address)": "903c49a7",
+    "roleMutationState(bytes32)": "cdd5744a",
+    "roleRedundancy(bytes32)": "d5aa1650",
+    "scopedRole(bytes32,bytes32)": "8a28138f",
+    "scopedRoleMutationState(bytes32,bytes32)": "36333342",
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "terminalFreezeVetoMembershipCount(address)": "fce20261"
+  }
+}

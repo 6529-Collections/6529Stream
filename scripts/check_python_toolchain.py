@@ -147,15 +147,19 @@ COMMON_APPROVED_INSTALL_LINES = {
     SOLC_SELECT_INSTALL_COMMAND,
 }
 WORKFLOW_APPROVED_INSTALL_LINES = {
-    CI_WORKFLOW_PATH: {"- name: Install browser test tooling"},
+    CI_WORKFLOW_PATH: {
+        "- name: Install browser test tooling",
+        'if "$foundryup" --install 1.7.1; then',
+    },
     RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
 }
 WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
-    CI_WORKFLOW_PATH: 3,
+    CI_WORKFLOW_PATH: 4,
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_PYTHON_VERSIONS = {
     CI_WORKFLOW_PATH: (
+        PYTHON_VERSION,
         WINDOWS_PYTHON_VERSION,
         PYTHON_VERSION,
         PYTHON_VERSION,
@@ -167,11 +171,16 @@ WORKFLOW_SOLC_SELECT_COUNTS = {
     RELEASE_WORKFLOW_PATH: 1,
 }
 WORKFLOW_EXPECTED_JOB_NAMES = {
-    CI_WORKFLOW_PATH: {"windows-wrapper", "slither-baseline", "foundry"},
+    CI_WORKFLOW_PATH: {"current-stack", "windows-wrapper", "slither-baseline", "foundry"},
     RELEASE_WORKFLOW_PATH: {"release-mode"},
 }
 WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
     CI_WORKFLOW_PATH: {
+        "current-stack": {
+            "python_version": PYTHON_VERSION,
+            "playwright": 0,
+            "solc_select": 0,
+        },
         "windows-wrapper": {
             "python_version": WINDOWS_PYTHON_VERSION,
             "playwright": 0,
@@ -529,7 +538,9 @@ def check_workflow(path: Path, text: str) -> list[str]:
 
     logical_text = normalize_shell_continuations(text)
     shell_text = normalize_shell_tokens(text)
-    for logical_line_number, raw_line in enumerate(shell_text.splitlines(), start=1):
+    for logical_line_number, (raw_line, original_line) in enumerate(
+        zip(shell_text.splitlines(), logical_text.splitlines()), start=1
+    ):
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue
@@ -537,7 +548,7 @@ def check_workflow(path: Path, text: str) -> list[str]:
         if (
             logical_name_key is None
             and "install" in stripped.casefold()
-            and stripped not in approved_install_lines
+            and original_line.strip() not in approved_install_lines
         ):
             errors.append(
                 f"{path}:logical-line-{logical_line_number} unapproved install line "

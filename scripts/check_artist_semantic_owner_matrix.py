@@ -20,6 +20,9 @@ SOURCE_PATH = Path(
 )
 ARCHIVE_SOURCE_PATH = Path("smart-contracts/domains/artist/StreamArtistArchiveV2.sol")
 REGISTRY_SOURCE_PATH = Path("smart-contracts/domains/artist/StreamArtistRegistryV2.sol")
+CURRENT_REGISTRY_SOURCE_PATH = Path(
+    "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol"
+)
 MATRIX_SCHEMA = "6529stream.artist-semantic-owner-matrix.v2"
 MATRIX_STATUS = "PROPOSED_ARCHITECTURE_ONLY"
 MATRIX_MATURITY = "pre_audit_implementation_blocked"
@@ -378,8 +381,15 @@ def _check_source_requirements(root: Path, matrix: dict[str, Any]) -> None:
     observed_artist_sources = sorted(
         path.relative_to(root).as_posix() for path in artist_root.rglob("*.sol")
     )
+    # The current Core-bound collection registry is a separate, minimal product
+    # path. Its presence does not implement or authorize any V2 matrix operation.
     expected_artist_sources = sorted(
-        (ARCHIVE_SOURCE_PATH.as_posix(), REGISTRY_SOURCE_PATH.as_posix())
+        path.as_posix()
+        for path in (
+            ARCHIVE_SOURCE_PATH,
+            REGISTRY_SOURCE_PATH,
+            CURRENT_REGISTRY_SOURCE_PATH,
+        )
     )
     if observed_artist_sources != expected_artist_sources:
         raise MatrixError(

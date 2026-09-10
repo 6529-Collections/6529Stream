@@ -47,7 +47,7 @@ REQUIRED_PHRASES = [
     "no per-collection override",
     "authenticated royalty resolver pointer",
     "fails soft to `(address(0), 0)`",
-    "concrete #670 royalty interface row",
+    "typed `IStreamRoyaltyResolver` interface",
     "royalty disclosure, not payment enforcement",
     "No production-readiness claim depends on marketplaces honoring royalties",
     "permissionless-transfer composability",
@@ -84,14 +84,14 @@ REQUIRED_SECTION_PHRASES = {
         "no per-collection override",
         "authenticated royalty resolver pointer",
         "fails soft to `(address(0), 0)`",
-        "concrete #670 royalty interface row",
+        "typed `IStreamRoyaltyResolver` interface",
     ],
     "Governance And Change Policy": [
         "Changing the default royalty receiver",
-        "Changing `690 basis points`",
+        "governance executor",
         "Adding per-token override support",
-        "Adding per-collection override support",
-        "Adding a satellite royalty policy contract",
+        "collection royalty settings",
+        "freeze",
         "Adding royalty enforcement",
     ],
     "Enforcement Boundary": [
@@ -161,6 +161,8 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/vendor/openzeppelin/ERC2981.sol",
     "test/StreamRoyalty.t.sol",
     "test/StreamCorePermanentTarget.t.sol",
+    "test/StreamRoyaltyResolver.t.sol",
+    "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
 ]
 
 SOURCE_CONSTANT_ASSERTIONS = {
@@ -185,8 +187,13 @@ SOURCE_CONSTANT_ASSERTIONS = {
         "testDefaultRoyaltyIsFixedAt690BasisPoints",
     ],
     "test/StreamCorePermanentTarget.t.sol": [
-        "testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled",
         "_POINTER_ROYALTY_RESOLVER",
+    ],
+    "test/StreamRoyaltyResolver.t.sol": [
+        "testActualCoreInstallsTypedResolverAndDisclosesCollectionSplit",
+        "testCollectionFreezeSnapshotsInheritedTermsBeforeDefaultChanges",
+        "testCoreFailsSoftForResolverFaultsAndMalformedResponses",
+        "testCoreRequiresPublishedRoyaltyInterfaceBeforePointerInstall",
     ],
 }
 

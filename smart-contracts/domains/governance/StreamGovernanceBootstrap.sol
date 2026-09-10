@@ -2,10 +2,12 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/IStreamGenesisInitializer.sol";
 import "../../interfaces/stream/IStreamModuleRegistry.sol";
 import "../../interfaces/stream/IStreamRoleRegistry.sol";
 import "../../libraries/SSTORE2.sol";
 import "./StreamRoles.sol";
+import "./StreamGovernanceActionPolicy.sol";
 
 /// @notice Linked, stateless validation library for the governance executor's
 ///         one-way manifest bootstrap. Public functions execute by DELEGATECALL,
@@ -26,6 +28,7 @@ library StreamGovernanceBootstrap {
     uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
     uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
     uint16 private constant SCHEMA_VERSION = 1;
+    uint256 private constant MAX_GOVERNANCE_REVERT_DATA_BYTES = 4_096;
 
     error InvalidSystemManifestBootstrap();
     error InvalidManifestTail();
@@ -68,6 +71,9 @@ library StreamGovernanceBootstrap {
         mapping(bytes32 => bool) terminalActionUsesRootCapacity;
         mapping(bytes32 => uint256) terminalNonRootLiveCount;
         mapping(bytes32 => mapping(address => uint256)) terminalProposerLiveCount;
+        // True only inside the Executor's exact-plan atomic initializer. Ordinary
+        // pre-seal actions retain the manifest-trigger-only subset below.
+        bool committedGenesisActive;
     }
 
     struct ActionIdentity {
@@ -83,6 +89,16 @@ library StreamGovernanceBootstrap {
         bytes32 manifestHash;
     }
 
+    struct ExecutionValidationContext {
+        bytes32 actionId;
+        uint256 nonce;
+        address callDataPointer;
+        bytes32 scheduledCatalogHash;
+        address roleRegistry;
+        address systemManifestSatellite;
+        bytes4 sealSelector;
+    }
+
     struct ScheduleContext {
         uint8 actionClass;
         bytes32 scopeHash;
@@ -93,6 +109,145 @@ library StreamGovernanceBootstrap {
         bytes32 reasonHash;
         string reasonURI;
         bytes32 manifestHash;
+    }
+
+    /// @notice Prepare one committed genesis batch using ordinary publication
+    ///         and batch-transition domains. The Executor owns the one-shot guard.
+    function prepareGenesisBatch(
+        PolicyState storage state,
+        GenesisBatch memory batch,
+        bytes32 planHash,
+        bytes32 manifestHash
+    ) public returns (ScheduleContext memory ctx) {
+        publishCallData(state, batch.callDatas);
+        (ctx.scopeHash, ctx.oldValueHash, ctx.newValueHash) =
+            deriveBatchTransitionHashes(batch.calls, governanceCallsHash(batch.calls));
+        ctx.actionClass = batch.actionClass;
+        ctx.notBefore = uint64(block.timestamp);
+        ctx.expiresAfter = uint64(block.timestamp + 7 days);
+        ctx.reasonHash = planHash;
+        ctx.reasonURI = "genesis";
+        ctx.manifestHash = manifestHash;
+    }
+
+    function executeCall(
+        PolicyState storage state,
+        bytes32 actionId,
+        uint256 callIndex,
+        GovernanceCall memory call_,
+        bytes memory callData
+    ) public {
+        if (callData.length == 0) {
+            if (call_.target.code.length == 0 && !state.approvedNativeReceivers[call_.target]) {
+                revert IStreamGovernanceExecutor.NativeReceiverNotApproved(call_.target);
+            }
+        } else if (call_.target.code.length == 0) {
+            revert IStreamGovernanceExecutor.TargetHasNoCode(callIndex, call_.target);
+        }
+        address target = call_.target;
+        uint256 value = call_.value;
+        bool success;
+        uint256 returnDataBytes;
+        assembly ("memory-safe") {
+            // Successful governed calls have no return-value contract. Use a
+            // zero-sized output buffer so a target cannot force the Executor
+            // to allocate or copy an unbounded success payload.
+            success := call(gas(), target, value, add(callData, 0x20), mload(callData), 0x00, 0x00)
+            returnDataBytes := returndatasize()
+        }
+        if (success) return;
+        if (returnDataBytes == 0) {
+            revert IStreamGovernanceExecutor.GovernanceCallFailed(actionId, callIndex);
+        }
+        if (returnDataBytes > MAX_GOVERNANCE_REVERT_DATA_BYTES) {
+            revert IStreamGovernanceExecutor.GovernanceCallReturndataTooLarge(
+                actionId, callIndex, returnDataBytes, MAX_GOVERNANCE_REVERT_DATA_BYTES
+            );
+        }
+        assembly ("memory-safe") {
+            let returnData := mload(0x40)
+            returndatacopy(returnData, 0x00, returnDataBytes)
+            revert(returnData, returnDataBytes)
+        }
+    }
+
+    function validateExecution(
+        PolicyState storage state,
+        StreamGovernanceActionPolicy.State storage actionPolicy,
+        GovernanceAction storage action,
+        ExecutionValidationContext memory ctx,
+        GovernanceCall[] memory calls,
+        bytes[] memory callDatas
+    )
+        public
+        view
+        returns (uint256 totalValue, bytes[] memory scheduledCallDatas, bytes32 currentCatalogHash)
+    {
+        bytes32 actionId = ctx.actionId;
+        if (action.status == GovernanceActionStatus.NONE) {
+            revert IStreamGovernanceExecutor.GovernanceActionUnknown(actionId);
+        }
+        if (action.status != GovernanceActionStatus.SCHEDULED) {
+            revert IStreamGovernanceExecutor.GovernanceActionNotScheduled(actionId);
+        }
+        if (block.timestamp < action.notBefore) {
+            revert IStreamGovernanceExecutor.GovernanceActionNotExecutable(
+                actionId, action.notBefore
+            );
+        }
+        if (block.timestamp > action.expiresAfter) {
+            revert IStreamGovernanceExecutor.GovernanceActionExpiredWindow(
+                actionId, action.expiresAfter
+            );
+        }
+        // Defense in depth: records with a retired or unknown class can never
+        // cross the execution boundary, even if storage or imported state is
+        // corrupted outside the ordinary scheduling path.
+        validateActionClass(action.actionClass);
+
+        // [GOV-BATCH] rule 1: recompute callsHash and actionId from the
+        // supplied batch and require both to match the stored action.
+        bytes32 callsHash = governanceCallsHash(calls);
+        if (callsHash != action.callHash) {
+            revert IStreamGovernanceExecutor.CallsHashMismatch(actionId);
+        }
+        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
+            deriveBatchTransitionHashes(calls, callsHash);
+        if (
+            derivedScopeHash != action.scopeHash || derivedOldValueHash != action.oldValueHash
+                || derivedNewValueHash != action.newValueHash
+        ) {
+            revert IStreamGovernanceExecutor.ActionIdMismatch(actionId);
+        }
+        if (governanceActionIdFromStored(action, callsHash, ctx.nonce) != actionId) {
+            revert IStreamGovernanceExecutor.ActionIdMismatch(actionId);
+        }
+        scheduledCallDatas = readCanonicalCallDatas(ctx.callDataPointer);
+        if (callDatas.length != calls.length || scheduledCallDatas.length != calls.length) {
+            revert IStreamGovernanceExecutor.CallDataCountMismatch(calls.length, callDatas.length);
+        }
+        if (!actionPolicy.bound) revert IStreamGovernanceExecutor.GovernanceActionPolicyNotBound();
+        currentCatalogHash = actionPolicy.catalogHash;
+        bytes32 scheduledCatalogHash = ctx.scheduledCatalogHash;
+        if (scheduledCatalogHash != currentCatalogHash) {
+            revert IStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(
+                actionId, scheduledCatalogHash, currentCatalogHash
+            );
+        }
+        totalValue = validateCalls(
+            state,
+            ctx.roleRegistry,
+            ctx.systemManifestSatellite,
+            action.actionClass,
+            calls,
+            scheduledCallDatas,
+            ctx.sealSelector
+        );
+        for (uint256 i = 0; i < calls.length; i++) {
+            if (!bytesEqual(callDatas[i], scheduledCallDatas[i])) {
+                revert IStreamGovernanceExecutor.ScheduledCallDataMismatch(i);
+            }
+        }
     }
 
     function governanceActionId(ActionIdentity memory identity) public view returns (bytes32) {
@@ -106,6 +261,34 @@ library StreamGovernanceBootstrap {
                 abi.encode(identity)
             )
         );
+    }
+
+    /// @notice Encode the existing action read ABI outside the Executor's
+    ///         permanent bytecode budget, including virtual expiry status.
+    function encodeTerminalFreezeActionPage(
+        PolicyState storage state,
+        bytes32 scopeHash,
+        uint256 cursor,
+        uint256 limit
+    ) public view returns (bytes memory) {
+        (bytes32[] memory ids, uint64[] memory deadlines, uint256 next) =
+            terminalFreezeActionPage(state, scopeHash, cursor, limit);
+        return abi.encode(ids, deadlines, next);
+    }
+
+    function encodeGovernanceAction(GovernanceAction storage stored)
+        public
+        view
+        returns (bytes memory)
+    {
+        GovernanceAction memory action = stored;
+        if (
+            action.status == GovernanceActionStatus.SCHEDULED
+                && block.timestamp > action.expiresAfter
+        ) {
+            action.status = GovernanceActionStatus.EXPIRED;
+        }
+        return abi.encode(action);
     }
 
     function governanceActionIdFromStored(
@@ -1156,6 +1339,22 @@ library StreamGovernanceBootstrap {
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
             if (
+                call_.target == address(this)
+                    && call_.selector
+                        == IStreamGovernanceCatalog.extendGovernanceActionPolicy.selector
+            ) {
+                if (
+                    bootstrapScoped || calls.length != 2 || i != 0 || actionClass != 3
+                        || call_.value != 0
+                ) {
+                    revert IStreamGovernanceCatalog.GovernanceCatalogExtensionComposition();
+                }
+                // Catalog revision is a built-in tail trigger. It cannot be
+                // disabled or registered later under a different action mask.
+                hasTrigger = true;
+                triggerCount += 1;
+            }
+            if (
                 call_.target == address(this) && call_.selector == registerTailSelector
                     && (calls.length != 1 || actionClass != 2)
             ) revert IStreamGovernanceExecutor.ManifestTailTriggerRegistrationNotIsolated();
@@ -1198,8 +1397,9 @@ library StreamGovernanceBootstrap {
                 return;
             }
             if (
-                tailCount != 0 || !hasTrigger || triggerCount != calls.length
-                    || _hasNonzeroValue(calls)
+                tailCount != 0
+                    || (!state.committedGenesisActive
+                        && (!hasTrigger || triggerCount != calls.length)) || _hasNonzeroValue(calls)
             ) {
                 revert IStreamGovernanceExecutor.BootstrapActionNotPermitted();
             }
@@ -1227,12 +1427,31 @@ library StreamGovernanceBootstrap {
         }
     }
 
-    function bytesEqual(bytes memory left, bytes memory right) public pure returns (bool) {
+    function bytesEqual(bytes memory left, bytes memory right) public pure returns (bool equal) {
         if (left.length != right.length) return false;
-        for (uint256 i = 0; i < left.length; i++) {
-            if (left[i] != right[i]) return false;
+        // Compare exact bytes in words. The final partial word masks padding;
+        // byte-by-byte Solidity indexing otherwise dominates large genesis calls.
+        assembly ("memory-safe") {
+            let length := mload(left)
+            let l := add(left, 0x20)
+            let r := add(right, 0x20)
+            let end := add(l, and(length, not(31)))
+            equal := 1
+            for { } lt(l, end) {
+                l := add(l, 0x20)
+                r := add(r, 0x20)
+            } {
+                if iszero(eq(mload(l), mload(r))) {
+                    equal := 0
+                    break
+                }
+            }
+            let remainder := and(length, 31)
+            if and(equal, iszero(iszero(remainder))) {
+                let shift := mul(sub(32, remainder), 8)
+                equal := eq(shr(shift, mload(l)), shr(shift, mload(r)))
+            }
         }
-        return true;
     }
 
     function _isEip7702DelegatedEOA(address account) private view returns (bool delegated) {

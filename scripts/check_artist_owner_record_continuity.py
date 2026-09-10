@@ -33,7 +33,7 @@ SCHEMA_ID = "https://6529.io/schemas/artist-owner-record-continuity-v1.schema.js
 EVALUATED_COMMIT = "501d63499f97586ff9fd5128ec63e9c8489eea1f"
 EVALUATED_TREE = "75cacef8a99201b33ae17a7987ac34201bef305f"
 SCHEMA_SHA256 = "2c665c57e677e266eb139ad3fb9aeaa63b83f0e3204ed59d10d964052f7dfac5"
-SEMANTIC_DIGEST = "sha256:d146f6454951437e579cf4a9fa109a3c8c185d1cd3ece279dac522a027d5d6dd"
+SEMANTIC_DIGEST = "sha256:541dff7e0ba5c0eb5273640b1ab3f6ef9d75a49a9b1b2d0194f6b538d14228e1"
 
 EXPECTED_AUTHORITY_BINDINGS = (
     (
@@ -49,7 +49,7 @@ EXPECTED_AUTHORITY_BINDINGS = (
     (
         "record_event_correction",
         "docs/architecture/artist-record-event-reconstruction-correction-v1.json",
-        "e6df09205c1bfd7a4a74301c794d8d67cbd68fa8c1b2f6f97ecb06046ac853af",
+        "bbf4d6685bba7aa71309d41ea48c8a87c53fda058a46418788c5389d609d778a",
     ),
     (
         "shared_mechanics",

@@ -119,6 +119,12 @@ HISTORICAL_SIZE_BLOCK_END = "<!-- historical-streamcore-size:end -->"
 AUTONOMOUS_CURRENT_RUN_HEADING = "\n## Current Run Notes"
 AUTONOMOUS_PACKAGING_HEADING = "\n## Packaging Notes"
 AUTONOMOUS_ACTIVE_END = "\n## PR Queue"
+AUTONOMOUS_DELIVERY_STATE_TITLE = "# 6529Stream Delivery State\n"
+AUTONOMOUS_DELIVERY_STATE_HEADINGS = (
+    "\n## Current Repository State\n",
+    "\n## Target\n",
+    "\n## Integration baseline\n",
+)
 ISSUE_LINKS_PATH = issue_links_checker.DEFAULT_ISSUE_LINKS.as_posix()
 ISSUE_BACKLOG_PATH = issue_links_checker.DEFAULT_BACKLOG.as_posix()
 
@@ -1027,6 +1033,15 @@ def _strip_historical_size_blocks(relative_path: Path, text: str) -> str:
 def _live_size_scan_text(relative_path: Path, text: str) -> str:
     scan_text = text
     if relative_path == Path("ops/AUTONOMOUS_RUN.md"):
+        if text.startswith(AUTONOMOUS_DELIVERY_STATE_TITLE):
+            # The compact delivery state has no historical appendix. Scan every
+            # line, so this format cannot hide stale measurements behind a cutoff.
+            for heading in AUTONOMOUS_DELIVERY_STATE_HEADINGS:
+                if text.count(heading) != 1:
+                    raise checker.RiskRegisterError(
+                        f"delivery state must contain exactly one heading {heading.strip()!r}"
+                    )
+            return text
         for heading in (
             AUTONOMOUS_CURRENT_RUN_HEADING,
             AUTONOMOUS_PACKAGING_HEADING,

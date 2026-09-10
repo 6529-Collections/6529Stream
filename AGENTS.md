@@ -5,6 +5,30 @@ instruction surface, not a project overview. The README explains what
 6529Stream is; this guide explains how an agent should make changes without
 damaging release evidence, security posture, or reviewer trust.
 
+## Active Delivery Mode
+
+The owner authorized autonomous implementation and delivery on 9 September
+2026. The immediate target is a working current-stack contract system and a
+clear developer-facing repository, followed by a frozen tested release
+candidate and testnet launch. [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)
+owns current assignments and progress; older roadmap sequencing is historical
+input where it conflicts with that active state.
+
+- One integrator owns technical decisions, integration, and delivery. Builders
+  work on independent domains in parallel and hand over coherent commits.
+- Integrate and demonstrate real contract flows frequently. A passing test
+  against `LegacyStreamCore` does not prove the current Core integration.
+- During implementation, run compilation, focused behavioral tests, and the
+  current-stack integration tests. Run the broad validation and release
+  evidence pass after the supported implementation stabilizes.
+- Do not serialize independent implementation behind individual PRs or repeat
+  full artifact generation for every development commit.
+- Resolve ordinary implementation choices without asking the owner. Keep
+  authorization, replay, payment accounting, and callback behavior covered by
+  focused tests as those features are built.
+- Keep supported behavior and remaining work explicit. A working testnet
+  version does not imply completion of every full-v1 promise or an audit.
+
 ## Mission And Boundaries
 
 - Treat 6529Stream as a serious pre-audit smart-contract protocol that is not
@@ -60,6 +84,9 @@ git branch --show-current
   and the Solidity formatting policy in [docs/tooling.md](docs/tooling.md).
 - Do not edit generated release artifacts by hand. Use the generator scripts and
   commit the deterministic outputs only when the changed inputs require it.
+- Read and write text with explicit UTF-8 on Windows; use byte copies when
+  preserving exact source files. After integrating generated artifacts, run
+  their generators' check mode against the integration checkout's inputs.
 - Do not mark scaffold, template, or placeholder evidence as reviewed or
   complete.
 - Do not close, resolve, or mark tracker issues complete unless the merged

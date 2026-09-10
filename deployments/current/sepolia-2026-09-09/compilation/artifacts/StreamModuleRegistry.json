@@ -1,0 +1,2025 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IStreamGovernanceExecutor",
+          "name": "governanceExecutor_",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash_",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI_",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_MODULE_MANIFEST_URI_BYTES",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MODULE_REGISTRATION_RECORD_TYPE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MODULE_REGISTRATION_SCOPE_KEY",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCHEMA_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_REGISTRATION_RECORD_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_REGISTRATION_SCOPE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_REGISTRATION_STATE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_STATUS_SCOPE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_MODULE_STATUS_STATE_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "STREAM_RECORD_CHAIN_V1",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "governanceExecutor",
+      "outputs": [
+        {
+          "internalType": "contract IStreamGovernanceExecutor",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expectedModuleType",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "expectedInterfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "isModuleEligible",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "moduleAt",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "moduleRecord",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "uint64",
+              "name": "registeredAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "statusUpdatedAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct StreamModuleRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleRegistryManifest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedRuntimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct StreamModuleRegistration",
+          "name": "registration",
+          "type": "tuple"
+        }
+      ],
+      "name": "registerModule",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registrationChainHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "chainHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "recordCount",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        }
+      ],
+      "name": "setModuleRegistryManifest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ModuleRegistryStatus",
+          "name": "newStatus",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "reasonURI",
+          "type": "string"
+        }
+      ],
+      "name": "setModuleStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "moduleVersion",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "moduleGasLimit",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "deploymentManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "moduleManifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "moduleManifestURI",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "recordChainHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StreamModuleRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        }
+      ],
+      "name": "StreamModuleRegistryManifestUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "moduleType",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum ModuleRegistryStatus",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "reasonURI",
+          "type": "string"
+        }
+      ],
+      "name": "StreamModuleStatusChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "EIP7702DelegatedModule",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        }
+      ],
+      "name": "EmptyURI",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "GovernanceTransitionContextMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "governanceExecutor",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidGovernanceExecutor",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidModule",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidModuleRecord",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidRegistryManifestHash",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "enum ModuleRegistryStatus",
+          "name": "current",
+          "type": "uint8"
+        },
+        {
+          "internalType": "enum ModuleRegistryStatus",
+          "name": "requested",
+          "type": "uint8"
+        }
+      ],
+      "name": "InvalidStatusTransition",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidUTF8",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "ModuleAlreadyRegistered",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "expected",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actual",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ModuleCodehashMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "ModuleIndexOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "ModuleInterfaceUnsupported",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "module",
+          "type": "address"
+        }
+      ],
+      "name": "ModuleNotRegistered",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoExecutingGovernanceAction",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "NotGovernanceExecutor",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "moduleCount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint64",
+          "name": "recordCount",
+          "type": "uint64"
+        }
+      ],
+      "name": "RegistryInvariantViolation",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RegistryManifestNoOp",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "RegistryRevisionOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "RegistryTimestampOverflow",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "field",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "name": "URITooLong",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "actual",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "expected",
+          "type": "bytes4"
+        }
+      ],
+      "name": "UnexpectedGovernanceSelector",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "actionClass",
+          "type": "uint8"
+        }
+      ],
+      "name": "WrongGovernanceActionClass",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroGovernanceActionId",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroGovernanceExecutor",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x60a0604081815234620005365762002ed680380380916200002182866200053b565b8439820190606083830312620005365782516001600160a01b03811692909190838303620005365760209485810151948382015160018060401b039283821162000536570196601f9184838a011215620005365788518481116200037b57865199601f199662000098838701891686018d6200053b565b828c528483830101116200053657839060005b838110620005215750506000918b01015280156200051057803b158015620004fe575b8015620004b1575b6200049a575086156200048a5787518015620004645761080080821162000432575050808801968189518a0101966001985b80898110156200042157805160001a916080908184101562000133575b5050600191505b0162000108565b909160f49081851160c28610176200040b57600101938c8510156200040b57845160001a9160c0958587851603620003dc5760e090818410620003cb5750821460a084101660ed8314609f85111617620003f45760028401908e821015620003dc578587835160001a1603620003dc5760f091828410620003cb5750609090608f851190841416931091141617620003b757600301918a831015620003b757825160001a1603620001e75780388062000125565b5091939597509193955060005b15620003915760805260045585519283116200037b576005938454600181811c9116801562000370575b838210146200035a5783811162000314575b5081928411600114620002ac57505081929394600092620002a0575b50508160011b916000199060031b1c19161790555b600680546001600160401b03191660011790555161292890816200058e8239608051818181610304015281816107f2015281816108ba0152610e7a0152f35b0151905038806200024c565b6000858152828120918516979193925b888210620002fb57505083600195969710620002e1575b505050811b01905562000261565b015160001960f88460031b161c19169055388080620002d3565b80600185968294968601518155019501930190620002bc565b856000528260002084808701881c82019285881062000350575b01871c01905b81811062000343575062000230565b6000815560010162000334565b925081926200032e565b634e487b7160e01b600052602260045260246000fd5b90607f16906200021e565b634e487b7160e01b600052604160045260246000fd5b86516370558e9760e11b815260008051602062002eb68339815191526004820152602490fd5b5050509193959750919395506000620001f4565b95505050505050600191506200012c565b505050505050509193959750919395506000620001f4565b5050505050509193959750919395506000620001f4565b50505050509193959750919395506000620001f4565b5050919395979092949650620001f4565b60649250865191633df4b60b60e01b835260008051602062002eb6833981519152600484015260248301526044820152fd5b8551632a8e8c9b60e21b815260008051602062002eb68339815191526004820152602490fd5b84516278d91d60e61b8152600490fd5b602490865190633f87b3a360e01b82526004820152fd5b50855163546ea28160e01b8382019081526004825281880190868211838310176200037b5760009283928a525190845afa3d81620004f2575b5015620000d6565b60c091501438620004ea565b506200050a816200055f565b620000ce565b855163de880d0160e01b8152600490fd5b818101830151818e01840152859201620000ab565b600080fd5b601f909101601f19168101906001600160401b038211908210176200037b57604052565b6017813b0362000587576000806003923c6000516001600160e81b03191661ef0160f01b1490565b5060009056fe608080604052600436101561001357600080fd5b6000358060e01c91826301ffc9a714611f9c57508163056c746f14611f3d578163270d587714611f025781632a6a807414611d0a578163334f7ac514611cec57816340904c9414611cb157816348b0dc7114611c765781634d0bb2d81461084f5781635ffaf3d714611b8557816361ad9ccc14611b4a5781636233b32a14611b2e57816377bfa48d14610e245781637b2c2d6f14610de95781637ba46615146108545781637d02b9941461084f5781637e669031146108215781638fc98386146107dc57816396a6e18b146102905750806398eb7b9114610274578063b1e5a00014610239578063b589f1ca146101fe578063cb07c004146101c3578063d216d296146101695763f78a17c71461012957600080fd5b346101645760003660031901126101645760206040517f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a8152f35b600080fd5b34610164576020366003190112610164576004356001548110156101ab57610192602091612266565b905460405160039290921b1c6001600160a01b03168152f35b60249060405190631a0d08d360e31b82526004820152fd5b346101645760003660031901126101645760206040517f5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b8152f35b346101645760003660031901126101645760206040517f6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e231398152f35b346101645760003660031901126101645760206040517f5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a2748152f35b3461016457600036600319011261016457602060405160008152f35b34610164576080366003190112610164576102a961202f565b906024600481351015610164576064356001600160401b038111610164576102d590369060040161206f565b92600060606040516102e681612113565b828152602081018390526040810183905201526001600160a01b03907f0000000000000000000000000000000000000000000000000000000000000000821690338290036107c5576001600160e01b0319166396a6e18b60e01b6369591e7560e01b82016107a857505060c06004916040519283809263546ea28160e01b82525afa801561079c57600091600092600093600091600093600095610730575b501561071e571561070c5760ff6040519461039f86612113565b16845260208401526040830152606082015281861660005260006020526040600020908154600460ff821610156106f75760ff8116156106de5785351580156106d1575b610698576103fa6103f53689886121bd565b6127c2565b156106615761040986356125fa565b60ff806104178185166125fa565b169116111561065a5760005b60ff808451169116810361064357506001600160401b03600884015460801c16916001600160401b0383146106315761045b83612203565b926001546001600160401b038111801561061c575b6105f1579361058a87946105486001958c8f966105427fb1490d6692c28578c63246ec2b183af70c175f77fd6adafc657d558417aa20569f9d9b6105d19f9c6105ec9e9a610511916040519060208201927f104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e3192484524660408401523060608401521660808201526080815261050381612165565b5190209360ff89168c612544565b8161053c8b8d61053460025495866001600160401b03600354169889928c612460565b983590612544565b85612460565b9261240e565b610550612622565b9060ff8a35169060ff1916178455600884019067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b60088201805467ffffffffffffffff60801b191660809290921b67ffffffffffffffff60801b16919091179055015460405160018152909890958695602087019035612045565b604435604086015260806060860152169560808401916122b3565b0390a3005b60035460405163198b268b60e01b815260048101929092526001600160401b03166024820152604490fd5b50806001600160401b03600354161415610470565b604051638d88e2f360e01b8152600490fd5b869060405190633aaf0bb360e21b82526004820152fd5b6001610423565b6040516370558e9760e11b81527f9689eb5f9da89431dad56282f54663fc6ce3726babf69e1239cc447e01bea91f60048201528690fd5b876106cf876106c4606494886040519563ae79470160e01b875216600486015260ff8386019116612045565b604483019035612045565bfd5b5060ff81168635146103e3565b60405163b7f8845560e01b815284891660048201528690fd5b85634e487b7160e01b60005260216004526000fd5b604051633947df0f60e21b8152600490fd5b604051635c22b64960e11b8152600490fd5b9550505050505060c0813d8211610794575b8161074f60c0938361219c565b8101031261016457805180151581036101645760208201519060408301519260ff84168403610164576060810151608082015160a0909201519391929091908b610385565b3d9150610742565b6040513d6000823e3d90fd5b604492508560405192631471927f60e21b84526004840152820152fd5b60405163bb30e3a560e01b81523360048201528590fd5b34610164576000366003190112610164576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b346101645760003660031901126101645760406002546001600160401b036003541682519182526020820152f35b612052565b34610164576040366003190112610164576001600160401b03602480358281116101645761088690369060040161206f565b90916040519061089582612113565b6000825260209460008684015260006040840152600060608094015260018060a01b037f00000000000000000000000000000000000000000000000000000000000000001696873303610dd2576001600160e01b031916637ba4661560e01b63845b99eb60e01b8201610db557505060c0600496976040519788809263546ea28160e01b82525afa95861561079c57600096600091600092600099600092600094610d4c575b501561071e571561070c5760ff6040519361095585612113565b16988984528a840152604083015284820152600196878103610d355750600435928315610d24576109873687896121bd565b80518015610ced5761080090818111610cab5750506109a5906127c2565b15610c76576109b53687896121bd565b898151910120600454908186149081610c50575b50610c3e5783600654169284841461063157610a6791610a506109eb86612203565b958d604051908101907f5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b8252466040820152308c8201528b8152610a2e81612113565b5190209260405190610a4a82610a43816122d4565b038361219c565b846124d2565b9061054286610a60368d8f6121bd565b8a846124d2565b83600455828611610c2a57506005610a7f815461222c565b601f8111610bc6575b506000601f8711600114610b1b57917fb33356717ed7eda1d9a5a34115c5ee7aea790c441dae3abdb853c6e712ce472499989795939187610b0b989694600091610b10575b50600019600388901b1c1916868a1b1790555b166001600160401b0319600654161760065560405196879687528601528060408601528401916122b3565b0390a1005b90508701358c610acd565b601f19871690826000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db09160005b818110610bb15750917fb33356717ed7eda1d9a5a34115c5ee7aea790c441dae3abdb853c6e712ce47249b9a999795939189610b0b9a98969410610b97575b50508886811b019055610ae0565b880135600019600389901b60f8161c191690558b80610b89565b8a8301358455928b0192918c01918c01610b4a565b816000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db0601f8801831c8101918b8910610c20575b601f01831c019089905b828110610c14575050610a88565b60008155018990610c06565b9091508190610bfc565b634e487b7160e01b60009081526041600452fd5b604051637a683aff60e01b8152600490fd5b9050604051610c6981610c62816122d4565b038261219c565b8b8151910120148b6109c9565b6040516370558e9760e11b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d6004820152fd5b604051633df4b60b60e01b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d600482015293840152604483015250606490fd5b604051632a8e8c9b60e21b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d60048201528390fd5b6040516278d91d60e61b8152600490fd5b839060405190633aaf0bb360e21b82526004820152fd5b9a50505050505060c0863d8211610dad575b81610d6b60c0938361219c565b810103126101645785518015158103610164578787015160408801519160ff83168303610164578886015160808a015160a0909a01519099909290918c61093b565b3d9150610d5e565b604492508360405192631471927f60e21b84526004840152820152fd5b60405163bb30e3a560e01b81523360048201528390fd5b346101645760003660031901126101645760206040517f56b932358b954432d90215500220c298b827585e665440926c2b6e2f2afbb0b48152f35b3461016457600319602036820112610164576001600160401b03600435116101645761012090600435360301126101645760006060604051610e6581612113565b828152602081018390526040810183905201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03169033829003611b16576001600160e01b0319166377bfa48d60e01b6388405b7360e01b8201611af85760405163546ea28160e01b815260c081600481875afa801561079c57600090600092600093600093600092600094611a8b575b501561071e571561070c5760ff60405194610f1886612113565b169283855260208501526040840152606083015260018103611a735750610f4360043560040161209c565b6001600160a01b038116158015611a6a575b611a4857610f6281612901565b611a26576001600160a01b03811660009081526020819052604090205460ff166004811015611a10576119ee57602460043501351580156119e0575b80156119d2575b80156119c4575b80156119b6575b8015611997575b8015611977575b61195557610fe4610fdd610104600435016004356004016120c5565b36916121bd565b8051801561191d576108008082116118d9575050611001906127c2565b156118a157803f9160a46004350135808403611871575061102f6110296064600435016120b0565b8361264e565b1561183257600154916001600160401b038311801561181d575b6117f1576001600160401b0380841614610631576002549161106f60043560040161209c565b61107d6064600435016120b0565b604051917f4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a668490869602084015260018060a01b0316604083015260246004350135606083015263ffffffff60e01b1660808201526044600435013560a08201528560c082015260c4600435013560e082015260e4600435013561010082015261010081526111078161212e565b6020815191012060405160208101917f0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa16098352466040830152306060830152600060808301527f56b932358b954432d90215500220c298b827585e665440926c2b6e2f2afbb0b460a08301528560c083015260e08201526001600160401b038616610100820152610100815261119b8161212e565b5190209260405160208101907f5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274825246604082015230606082015260018060a01b0385166080820152608081526111f181612165565b519020906040518060208101106001600160401b036020830111176116fd578060206000920160405252600080206040519060006020830152600060408301526000606083015260006080830152600060a0830152600060c0830152600060e083015260006101008301526101208201526000610140820152610140815261127881612180565b6020815191012090604051917f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a60208401528360408401526000606084015260808301528660a083015260c08201526001600160401b03861660e0820152600061010082015261010081526112ec8161212e565b60208151910120906113026064600435016120b0565b61131060846004350161221b565b63ffffffff61132d610fdd610104600435016004356004016120c5565b602081519101209160405193600160208601526024600435013560408601526044600435013560608601528260e01b1660808501521660a08301528860c083015260c4600435013560e083015260e46004350135610100830152610120820152600161014082015261014081526113a381612180565b602081519101206001870187116117db57611445946001600160401b036113cb818a16612203565b604051937f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a602086015285604086015260016060860152608085015260018a0160a08501528860c08501521660e083015260018060a01b031661010082015261010081526114388161212e565b602081519101209261240e565b61145360043560040161209c565b9161145c612622565b60018060a01b03841660005260006020526040600020600160ff198254161781556024600435013560018201556044600435013560028201556114a36064600435016120b0565b600382015467ffffffff000000006114bf60846004350161221b565b60201b169160e01c906001600160401b0319161717600382015585600482015560c46004350135600582015560e46004350135600682015561150c610104600435016004356004016120c5565b906001600160401b0382116116fd57611528600784015461222c565b601f8111611794575b50600090601f831160011461171e5791806115a69492600894600092611713575b50508160011b916000199060031b1c19161760078201555b0180546fffffffffffffffffffffffffffffffff19166001600160401b0384161760409390931b67ffffffffffffffff60401b16929092178255565b805467ffffffffffffffff60801b1916600160801b17905560015490680100000000000000008210156116fd576001600160401b03611618916115f0846001849601600155612266565b81546001600160a01b0389811660039390931b92831b921b1916179055600285905516612203565b166001600160401b031960035416176003557f67c428b6b4301b178ee6e1eb0aa10bf141d91b060de2ba30a8a48d5a30c148dc6116596064600435016120b0565b6116d161166a60846004350161221b565b95611680610104600435016004356004016120c5565b909163ffffffff6040519960018b526044600435013560208c01521660408a0152606089015260c46004350135608089015260e4600435013560a089015261010060c08901526101008801916122b3565b60e08601939093526001600160e01b0319169360043560240135936001600160a01b03169281900390a4005b634e487b7160e01b600052604160045260246000fd5b013590508a80611552565b6007840160005260206000209160005b601f198516811061177c5750926115a6949260019260089583601f19811610611762575b505050811b01600782015561156a565b0135600019600384901b60f8161c191690558a8080611752565b9092602060018192868601358155019401910161172e565b600784016000526020600020601f840160051c8101602085106117d4575b601f830160051c820181106117c8575050611531565b600081556001016117b2565b50806117b2565b634e487b7160e01b600052601160045260246000fd5b60035460405163198b268b60e01b8152600481018590526001600160401b039091166024820152604490fd5b50826001600160401b03600354161415611049565b6044826118436064600435016120b0565b6040516350d4d0a360e01b81526001600160a01b0390921660048301526001600160e01b0319166024820152fd5b604051630de33a4b60e11b81526001600160a01b0390931660048401526024830152506044810191909152606490fd5b6040516370558e9760e11b81527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c6004820152602490fd5b6064925060405191633df4b60b60e01b83527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c600484015260248301526044820152fd5b604051632a8e8c9b60e21b81527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c6004820152602490fd5b604051635c1fa23f60e01b81526001600160a01b039091166004820152602490fd5b506001600160e01b0319806119906004356064016120b0565b1614610fc1565b506001600160e01b03196119af6004356064016120b0565b1615610fba565b5060e4600435013515610fb3565b5060c4600435013515610fac565b5060a4600435013515610fa5565b506044600435013515610f9e565b6040516317322ee960e01b81526001600160a01b039091166004820152602490fd5b634e487b7160e01b600052602160045260246000fd5b604051634e35c50f60e11b81526001600160a01b039091166004820152602490fd5b604051635c93ff2f60e11b81526001600160a01b039091166004820152602490fd5b50803b15610f55565b60249060405190633aaf0bb360e21b82526004820152fd5b9550505050505060c0813d60c011611af0575b81611aab60c0938361219c565b8101031261016457805190811515820361016457602081015160408201519260ff84168403610164576060830151608084015160a09094015190939092909186610efe565b3d9150611a9e565b6044925060405191631471927f60e21b835260048301526024820152fd5b60405163bb30e3a560e01b8152336004820152602490fd5b3461016457600036600319011261016457602060405160018152f35b346101645760003660031901126101645760206040517f2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c628152f35b3461016457606036600319011261016457611b9e61202f565b6001600160e01b031960443581811692838203610164576001600160a01b0381166000908152602081905260409020805460ff16946004861015611a10576001602096149485611c66575b85611c53575b505083611c48575b83611c36575b83611c27575b5082611c16575b50506040519015158152f35b611c20925061264e565b8280611c0a565b60040154813f14925084611c03565b9250611c4181612901565b1592611bfd565b813b15159350611bf7565b600383015460e01b161493508580611bef565b6001830154602435149550611be9565b346101645760003660031901126101645760206040517f0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa16098152f35b346101645760003660031901126101645760206040517f4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a6684908698152f35b34610164576000366003190112610164576020600154604051908152f35b3461016457602036600319011261016457611d2361202f565b6000610160604051611d34816120f7565b8281528260208201528260408201528260608201528260808201528260a08201528260c08201528260e082015260606101008201528261012082015282610140820152015260018060a01b03166000526000602052604060002060405190611d9b826120f7565b60ff8154166004811015611a10576001600160401b03916008918452600181015460208501526002810154604085015263ffffffff60038201548160e01b8160e01b16606087015260201c166080850152600481015460a0850152600581015460c0850152600681015460e0850152604051611e1e81610c628160078601612378565b6101008501520154818116610120840152818160401c1661014084015260801c16610160820152604051809160208252611e5c602083018251612045565b602081015160408301526040810151606083015263ffffffff60e01b606082015116608083015263ffffffff60808201511660a083015260a081015160c083015260c081015160e083015260e08101516101008301526101008101516001600160401b03610160611edc61018093846101208801526101a0870190611fef565b938261012082015116610140870152826101408201511682870152015116908301520390f35b346101645760003660031901126101645760206040517f104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e319248152f35b34610164576000366003190112610164576004546001600160401b03600654169060405191611f7683611f6f816122d4565b038461219c565b611f926040519384938452606060208501526060840190611fef565b9060408301520390f35b34610164576020366003190112610164576004359063ffffffff60e01b8216809203610164576020916377e19fd760e11b8114908115611fde575b5015158152f35b6301ffc9a760e01b14905083611fd7565b919082519283825260005b84811061201b575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201611ffa565b600435906001600160a01b038216820361016457565b906004821015611a105752565b346101645760003660031901126101645760206040516108008152f35b9181601f84011215610164578235916001600160401b038311610164576020838186019501011161016457565b356001600160a01b03811681036101645790565b356001600160e01b0319811681036101645790565b903590601e198136030182121561016457018035906001600160401b0382116101645760200191813603831361016457565b61018081019081106001600160401b038211176116fd57604052565b608081019081106001600160401b038211176116fd57604052565b61012081019081106001600160401b038211176116fd57604052565b606081019081106001600160401b038211176116fd57604052565b60a081019081106001600160401b038211176116fd57604052565b61016081019081106001600160401b038211176116fd57604052565b90601f801991011681019081106001600160401b038211176116fd57604052565b9291926001600160401b0382116116fd57604051916121e6601f8201601f19166020018461219c565b829481845281830111610164578281602093846000960137010152565b9060016001600160401b03809316019182116117db57565b3563ffffffff811681036101645790565b90600182811c9216801561225c575b602083101461224657565b634e487b7160e01b600052602260045260246000fd5b91607f169161223b565b60015481101561229d5760016000527fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf60190600090565b634e487b7160e01b600052603260045260246000fd5b908060209392818452848401376000828201840152601f01601f1916010190565b600554600092916122e48261222c565b8082529160019081811690811561235b575060011461230257505050565b9192935060056000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db0916000925b84841061234357505060209250010190565b80546020858501810191909152909301928101612331565b915050602093945060ff929192191683830152151560051b010190565b90600092918054916123898361222c565b9182825260019384811690816000146123eb57506001146123ab575b50505050565b90919394506000526020928360002092846000945b8386106123d75750505050010190388080806123a5565b8054858701830152940193859082016123c0565b9294505050602093945060ff191683830152151560051b010190388080806123a5565b60208101519091148015939290612451575b508215612442575b505061243057565b6040516306420b7360e41b8152600490fd5b60600151141590503880612428565b60408201511415925038612420565b93919290926040519360208501957f6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139875260408601526060850152608084015260a08301526001600160401b0380911660c083015260c0825260e0820190828210908211176116fd5760405251902090565b929091602081519101206040519260208401947f2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c6286526040850152606084015260808301526001600160401b0380911660a083015260a0825260c0820190828210908211176116fd5760405251902090565b90916004831015611a10576001820154916002810154906003810154600482015463ffffffff600584015492600761258b600687015496610c626040518094819301612378565b60208151910120956040519860ff60208b019b168b5260408a015260608901528160e01b8160e01b16608089015260201c1660a087015260c086015260e08501526101008401526101208301526001600160401b0361014091168183015281526125f481612180565b51902090565b6004811015611a10576001811461261c5760021461261757600290565b600190565b50600090565b6001600160401b0380421161263657421690565b60405163056f614360e31b8152426004820152602490fd5b604080516301ffc9a760e01b60208083018281526024808501849052808552909691959361267b8161214a565b6000809881925190875afa96863d148089166127b4575b886127ac575b50876127a1575b5086612730575b866126b5575b50505050505090565b9091929380959650519186830193845263ffffffff60e01b168183015281526126dd8161214a565b6000928392839251915afa92803d1492838516612724575b5050908261271c575b5081612711575b503880808080806126ac565b600191501438612705565b9150386126fe565b5191823e5138806126f5565b84518681018481526001600160e01b0319828401528282529197506127548161214a565b6000809281925190875afa90863d14808316612793575b8261278b575b5081612780575b5015956126a6565b600191501438612778565b915038612771565b9087875191823e519061276b565b60011496503861269f565b975038612698565b9087875191823e5190612692565b6020808201918051010160019283925b80838210156128f9579085918151600090811a91608090818410156127fd575b505050505b016127d2565b91939092945060f49081861160c28710176128ec57890194878610156128ec578551851a9160c09685888516036128cf578b60e0918285106128c0575050821460a084101660ed8314609f851116176128de576002840190898210156128cf5785888351891a16036128cf578b60f0928385106128c0575050609090608f8511908414169310911416176128b55760030192858410156128b5578351831a16036128ac579081808088946127f2565b93505092505090565b505093505092505090565b975097505050505050506127f7565b50505050505093505092505090565b505050505093505092505090565b5050505093505092505090565b505091925050565b6017813b0361261c576000806003923c6000516001600160e81b03191661ef0160f01b14905679c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d",
+    "sourceMap": "566:28033:48:-:0;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;-1:-1:-1;566:28033:48;;;;;;;;-1:-1:-1;566:28033:48;;;;;4462:22;;4458:59;;4544:20;;:25;:61;;;;566:28033;4544:116;;;;566:28033;4527:211;;4751:27;;;4747:69;;1916:5;;25804:11;;25781:58;;1916:5;25853:16;;;25849:63;;25927:17;;566:28033;;;26069:2193;;;;;;;;566:28033;26069:2193;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;566:28033;26069:2193;;;;;;;;;;;;;;;;;;;;566:28033;26069:2193;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;566:28033;26069:2193;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;25926:18;25922:49;;26069:2193;4965:40;5015:29;1916:5;;;;;;;;5054:27;1916:5;;;566:28033;1916:5;;;;;;;;;26069:2193;1916:5;;;;;;;;;;;26069:2193;1916:5;;;;;;566:28033;;;1916:5;;;;;;-1:-1:-1;1916:5:48;;;;;;;566:28033;1916:5;;;;;;;;;;;;;;5091:21;1916:5;;-1:-1:-1;;;;;;1916:5:48;566:28033;1916:5;;;566:28033;;;;;;;26069:2193;566:28033;;;;;;;;;;;;;;;;;;;;;1916:5;;;;-1:-1:-1;1916:5:48;;;;;-1:-1:-1;1916:5:48;;;;;;;;;;;;;;;;;;;;;;566:28033;1916:5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;566:28033;1916:5;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1916:5:48;;-1:-1:-1;1916:5:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;1916:5:48;;566:28033;1916:5;;;;;;;;;;;566:28033;;;-1:-1:-1;1916:5:48;;5015:29;1916:5;;-1:-1:-1;1916:5:48;;;;;;;;;566:28033;;;-1:-1:-1;566:28033:48;;5015:29;566:28033;;-1:-1:-1;566:28033:48;25922:49;566:28033;;-1:-1:-1;;;25953:18:48;;-1:-1:-1;;;;;;;;;;;25953:18:48;;;566:28033;;;25953:18;26069:2193;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;566:28033;26069:2193;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;;-1:-1:-1;26069:2193:48;;;;;;;;;;;;;;;;25849:63;566:28033;;;;;25878:34;;;;;;-1:-1:-1;;;;;;;;;;;25878:34:48;;;566:28033;;;;;;;;;25878:34;25781:58;566:28033;;-1:-1:-1;;;25824:15:48;;-1:-1:-1;;;;;;;;;;;25824:15:48;;;566:28033;;;25824:15;4747:69;566:28033;;-1:-1:-1;;;4787:29:48;;;;;4527:211;566:28033;;;;4692:35;;;;;;;;;566:28033;4692:35;4544:116;-1:-1:-1;566:28033:48;;-1:-1:-1;;;25226:59:48;;;;;;;;;566:28033;;;;;;;;;;;;;-1:-1:-1;566:28033:48;;;;;25345:172;;;;;;25533:31;;;4544:116;4625:35;;4544:116;;25533:31;25558:6;25544:20;;;25533:31;;;4544:61;4573:32;;;;:::i;:::-;4544:61;;4458:59;566:28033;;-1:-1:-1;;;4493:24:48;;;;;566:28033;;;;;;;;;;;;;;;;;;;-1:-1:-1;566:28033:48;;;;;;;-1:-1:-1;;566:28033:48;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;:::o;28274:323::-;28398:2;28375:19;;:25;28371:43;;-1:-1:-1;28447:109:48;;;;-1:-1:-1;28447:109:48;-1:-1:-1;;;;;;566:28033:48;-1:-1:-1;;;28572:18:48;;28274:323::o;28371:43::-;28402:12;28409:5;28402:12;:::o"
+  },
+  "deployedBytecode": {
+    "immutableReferences": {
+      "75916": [
+        {
+          "length": 32,
+          "start": 772
+        },
+        {
+          "length": 32,
+          "start": 2034
+        },
+        {
+          "length": 32,
+          "start": 2234
+        },
+        {
+          "length": 32,
+          "start": 3706
+        }
+      ]
+    },
+    "linkReferences": {},
+    "object": "0x608080604052600436101561001357600080fd5b6000358060e01c91826301ffc9a714611f9c57508163056c746f14611f3d578163270d587714611f025781632a6a807414611d0a578163334f7ac514611cec57816340904c9414611cb157816348b0dc7114611c765781634d0bb2d81461084f5781635ffaf3d714611b8557816361ad9ccc14611b4a5781636233b32a14611b2e57816377bfa48d14610e245781637b2c2d6f14610de95781637ba46615146108545781637d02b9941461084f5781637e669031146108215781638fc98386146107dc57816396a6e18b146102905750806398eb7b9114610274578063b1e5a00014610239578063b589f1ca146101fe578063cb07c004146101c3578063d216d296146101695763f78a17c71461012957600080fd5b346101645760003660031901126101645760206040517f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a8152f35b600080fd5b34610164576020366003190112610164576004356001548110156101ab57610192602091612266565b905460405160039290921b1c6001600160a01b03168152f35b60249060405190631a0d08d360e31b82526004820152fd5b346101645760003660031901126101645760206040517f5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b8152f35b346101645760003660031901126101645760206040517f6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e231398152f35b346101645760003660031901126101645760206040517f5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a2748152f35b3461016457600036600319011261016457602060405160008152f35b34610164576080366003190112610164576102a961202f565b906024600481351015610164576064356001600160401b038111610164576102d590369060040161206f565b92600060606040516102e681612113565b828152602081018390526040810183905201526001600160a01b03907f0000000000000000000000000000000000000000000000000000000000000000821690338290036107c5576001600160e01b0319166396a6e18b60e01b6369591e7560e01b82016107a857505060c06004916040519283809263546ea28160e01b82525afa801561079c57600091600092600093600091600093600095610730575b501561071e571561070c5760ff6040519461039f86612113565b16845260208401526040830152606082015281861660005260006020526040600020908154600460ff821610156106f75760ff8116156106de5785351580156106d1575b610698576103fa6103f53689886121bd565b6127c2565b156106615761040986356125fa565b60ff806104178185166125fa565b169116111561065a5760005b60ff808451169116810361064357506001600160401b03600884015460801c16916001600160401b0383146106315761045b83612203565b926001546001600160401b038111801561061c575b6105f1579361058a87946105486001958c8f966105427fb1490d6692c28578c63246ec2b183af70c175f77fd6adafc657d558417aa20569f9d9b6105d19f9c6105ec9e9a610511916040519060208201927f104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e3192484524660408401523060608401521660808201526080815261050381612165565b5190209360ff89168c612544565b8161053c8b8d61053460025495866001600160401b03600354169889928c612460565b983590612544565b85612460565b9261240e565b610550612622565b9060ff8a35169060ff1916178455600884019067ffffffffffffffff60401b82549160401b169067ffffffffffffffff60401b1916179055565b60088201805467ffffffffffffffff60801b191660809290921b67ffffffffffffffff60801b16919091179055015460405160018152909890958695602087019035612045565b604435604086015260806060860152169560808401916122b3565b0390a3005b60035460405163198b268b60e01b815260048101929092526001600160401b03166024820152604490fd5b50806001600160401b03600354161415610470565b604051638d88e2f360e01b8152600490fd5b869060405190633aaf0bb360e21b82526004820152fd5b6001610423565b6040516370558e9760e11b81527f9689eb5f9da89431dad56282f54663fc6ce3726babf69e1239cc447e01bea91f60048201528690fd5b876106cf876106c4606494886040519563ae79470160e01b875216600486015260ff8386019116612045565b604483019035612045565bfd5b5060ff81168635146103e3565b60405163b7f8845560e01b815284891660048201528690fd5b85634e487b7160e01b60005260216004526000fd5b604051633947df0f60e21b8152600490fd5b604051635c22b64960e11b8152600490fd5b9550505050505060c0813d8211610794575b8161074f60c0938361219c565b8101031261016457805180151581036101645760208201519060408301519260ff84168403610164576060810151608082015160a0909201519391929091908b610385565b3d9150610742565b6040513d6000823e3d90fd5b604492508560405192631471927f60e21b84526004840152820152fd5b60405163bb30e3a560e01b81523360048201528590fd5b34610164576000366003190112610164576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b346101645760003660031901126101645760406002546001600160401b036003541682519182526020820152f35b612052565b34610164576040366003190112610164576001600160401b03602480358281116101645761088690369060040161206f565b90916040519061089582612113565b6000825260209460008684015260006040840152600060608094015260018060a01b037f00000000000000000000000000000000000000000000000000000000000000001696873303610dd2576001600160e01b031916637ba4661560e01b63845b99eb60e01b8201610db557505060c0600496976040519788809263546ea28160e01b82525afa95861561079c57600096600091600092600099600092600094610d4c575b501561071e571561070c5760ff6040519361095585612113565b16988984528a840152604083015284820152600196878103610d355750600435928315610d24576109873687896121bd565b80518015610ced5761080090818111610cab5750506109a5906127c2565b15610c76576109b53687896121bd565b898151910120600454908186149081610c50575b50610c3e5783600654169284841461063157610a6791610a506109eb86612203565b958d604051908101907f5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b8252466040820152308c8201528b8152610a2e81612113565b5190209260405190610a4a82610a43816122d4565b038361219c565b846124d2565b9061054286610a60368d8f6121bd565b8a846124d2565b83600455828611610c2a57506005610a7f815461222c565b601f8111610bc6575b506000601f8711600114610b1b57917fb33356717ed7eda1d9a5a34115c5ee7aea790c441dae3abdb853c6e712ce472499989795939187610b0b989694600091610b10575b50600019600388901b1c1916868a1b1790555b166001600160401b0319600654161760065560405196879687528601528060408601528401916122b3565b0390a1005b90508701358c610acd565b601f19871690826000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db09160005b818110610bb15750917fb33356717ed7eda1d9a5a34115c5ee7aea790c441dae3abdb853c6e712ce47249b9a999795939189610b0b9a98969410610b97575b50508886811b019055610ae0565b880135600019600389901b60f8161c191690558b80610b89565b8a8301358455928b0192918c01918c01610b4a565b816000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db0601f8801831c8101918b8910610c20575b601f01831c019089905b828110610c14575050610a88565b60008155018990610c06565b9091508190610bfc565b634e487b7160e01b60009081526041600452fd5b604051637a683aff60e01b8152600490fd5b9050604051610c6981610c62816122d4565b038261219c565b8b8151910120148b6109c9565b6040516370558e9760e11b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d6004820152fd5b604051633df4b60b60e01b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d600482015293840152604483015250606490fd5b604051632a8e8c9b60e21b81527f79c98be93a3112ed12e76d680e13013e49dbc896bb7cfce471498c108c2cd36d60048201528390fd5b6040516278d91d60e61b8152600490fd5b839060405190633aaf0bb360e21b82526004820152fd5b9a50505050505060c0863d8211610dad575b81610d6b60c0938361219c565b810103126101645785518015158103610164578787015160408801519160ff83168303610164578886015160808a015160a0909a01519099909290918c61093b565b3d9150610d5e565b604492508360405192631471927f60e21b84526004840152820152fd5b60405163bb30e3a560e01b81523360048201528390fd5b346101645760003660031901126101645760206040517f56b932358b954432d90215500220c298b827585e665440926c2b6e2f2afbb0b48152f35b3461016457600319602036820112610164576001600160401b03600435116101645761012090600435360301126101645760006060604051610e6581612113565b828152602081018390526040810183905201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03169033829003611b16576001600160e01b0319166377bfa48d60e01b6388405b7360e01b8201611af85760405163546ea28160e01b815260c081600481875afa801561079c57600090600092600093600093600092600094611a8b575b501561071e571561070c5760ff60405194610f1886612113565b169283855260208501526040840152606083015260018103611a735750610f4360043560040161209c565b6001600160a01b038116158015611a6a575b611a4857610f6281612901565b611a26576001600160a01b03811660009081526020819052604090205460ff166004811015611a10576119ee57602460043501351580156119e0575b80156119d2575b80156119c4575b80156119b6575b8015611997575b8015611977575b61195557610fe4610fdd610104600435016004356004016120c5565b36916121bd565b8051801561191d576108008082116118d9575050611001906127c2565b156118a157803f9160a46004350135808403611871575061102f6110296064600435016120b0565b8361264e565b1561183257600154916001600160401b038311801561181d575b6117f1576001600160401b0380841614610631576002549161106f60043560040161209c565b61107d6064600435016120b0565b604051917f4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a668490869602084015260018060a01b0316604083015260246004350135606083015263ffffffff60e01b1660808201526044600435013560a08201528560c082015260c4600435013560e082015260e4600435013561010082015261010081526111078161212e565b6020815191012060405160208101917f0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa16098352466040830152306060830152600060808301527f56b932358b954432d90215500220c298b827585e665440926c2b6e2f2afbb0b460a08301528560c083015260e08201526001600160401b038616610100820152610100815261119b8161212e565b5190209260405160208101907f5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274825246604082015230606082015260018060a01b0385166080820152608081526111f181612165565b519020906040518060208101106001600160401b036020830111176116fd578060206000920160405252600080206040519060006020830152600060408301526000606083015260006080830152600060a0830152600060c0830152600060e083015260006101008301526101208201526000610140820152610140815261127881612180565b6020815191012090604051917f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a60208401528360408401526000606084015260808301528660a083015260c08201526001600160401b03861660e0820152600061010082015261010081526112ec8161212e565b60208151910120906113026064600435016120b0565b61131060846004350161221b565b63ffffffff61132d610fdd610104600435016004356004016120c5565b602081519101209160405193600160208601526024600435013560408601526044600435013560608601528260e01b1660808501521660a08301528860c083015260c4600435013560e083015260e46004350135610100830152610120820152600161014082015261014081526113a381612180565b602081519101206001870187116117db57611445946001600160401b036113cb818a16612203565b604051937f93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a602086015285604086015260016060860152608085015260018a0160a08501528860c08501521660e083015260018060a01b031661010082015261010081526114388161212e565b602081519101209261240e565b61145360043560040161209c565b9161145c612622565b60018060a01b03841660005260006020526040600020600160ff198254161781556024600435013560018201556044600435013560028201556114a36064600435016120b0565b600382015467ffffffff000000006114bf60846004350161221b565b60201b169160e01c906001600160401b0319161717600382015585600482015560c46004350135600582015560e46004350135600682015561150c610104600435016004356004016120c5565b906001600160401b0382116116fd57611528600784015461222c565b601f8111611794575b50600090601f831160011461171e5791806115a69492600894600092611713575b50508160011b916000199060031b1c19161760078201555b0180546fffffffffffffffffffffffffffffffff19166001600160401b0384161760409390931b67ffffffffffffffff60401b16929092178255565b805467ffffffffffffffff60801b1916600160801b17905560015490680100000000000000008210156116fd576001600160401b03611618916115f0846001849601600155612266565b81546001600160a01b0389811660039390931b92831b921b1916179055600285905516612203565b166001600160401b031960035416176003557f67c428b6b4301b178ee6e1eb0aa10bf141d91b060de2ba30a8a48d5a30c148dc6116596064600435016120b0565b6116d161166a60846004350161221b565b95611680610104600435016004356004016120c5565b909163ffffffff6040519960018b526044600435013560208c01521660408a0152606089015260c46004350135608089015260e4600435013560a089015261010060c08901526101008801916122b3565b60e08601939093526001600160e01b0319169360043560240135936001600160a01b03169281900390a4005b634e487b7160e01b600052604160045260246000fd5b013590508a80611552565b6007840160005260206000209160005b601f198516811061177c5750926115a6949260019260089583601f19811610611762575b505050811b01600782015561156a565b0135600019600384901b60f8161c191690558a8080611752565b9092602060018192868601358155019401910161172e565b600784016000526020600020601f840160051c8101602085106117d4575b601f830160051c820181106117c8575050611531565b600081556001016117b2565b50806117b2565b634e487b7160e01b600052601160045260246000fd5b60035460405163198b268b60e01b8152600481018590526001600160401b039091166024820152604490fd5b50826001600160401b03600354161415611049565b6044826118436064600435016120b0565b6040516350d4d0a360e01b81526001600160a01b0390921660048301526001600160e01b0319166024820152fd5b604051630de33a4b60e11b81526001600160a01b0390931660048401526024830152506044810191909152606490fd5b6040516370558e9760e11b81527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c6004820152602490fd5b6064925060405191633df4b60b60e01b83527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c600484015260248301526044820152fd5b604051632a8e8c9b60e21b81527f34eba76d96d8d1d9562f133f89923833451dfaefbbbb179c8b01191549fec54c6004820152602490fd5b604051635c1fa23f60e01b81526001600160a01b039091166004820152602490fd5b506001600160e01b0319806119906004356064016120b0565b1614610fc1565b506001600160e01b03196119af6004356064016120b0565b1615610fba565b5060e4600435013515610fb3565b5060c4600435013515610fac565b5060a4600435013515610fa5565b506044600435013515610f9e565b6040516317322ee960e01b81526001600160a01b039091166004820152602490fd5b634e487b7160e01b600052602160045260246000fd5b604051634e35c50f60e11b81526001600160a01b039091166004820152602490fd5b604051635c93ff2f60e11b81526001600160a01b039091166004820152602490fd5b50803b15610f55565b60249060405190633aaf0bb360e21b82526004820152fd5b9550505050505060c0813d60c011611af0575b81611aab60c0938361219c565b8101031261016457805190811515820361016457602081015160408201519260ff84168403610164576060830151608084015160a09094015190939092909186610efe565b3d9150611a9e565b6044925060405191631471927f60e21b835260048301526024820152fd5b60405163bb30e3a560e01b8152336004820152602490fd5b3461016457600036600319011261016457602060405160018152f35b346101645760003660031901126101645760206040517f2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c628152f35b3461016457606036600319011261016457611b9e61202f565b6001600160e01b031960443581811692838203610164576001600160a01b0381166000908152602081905260409020805460ff16946004861015611a10576001602096149485611c66575b85611c53575b505083611c48575b83611c36575b83611c27575b5082611c16575b50506040519015158152f35b611c20925061264e565b8280611c0a565b60040154813f14925084611c03565b9250611c4181612901565b1592611bfd565b813b15159350611bf7565b600383015460e01b161493508580611bef565b6001830154602435149550611be9565b346101645760003660031901126101645760206040517f0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa16098152f35b346101645760003660031901126101645760206040517f4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a6684908698152f35b34610164576000366003190112610164576020600154604051908152f35b3461016457602036600319011261016457611d2361202f565b6000610160604051611d34816120f7565b8281528260208201528260408201528260608201528260808201528260a08201528260c08201528260e082015260606101008201528261012082015282610140820152015260018060a01b03166000526000602052604060002060405190611d9b826120f7565b60ff8154166004811015611a10576001600160401b03916008918452600181015460208501526002810154604085015263ffffffff60038201548160e01b8160e01b16606087015260201c166080850152600481015460a0850152600581015460c0850152600681015460e0850152604051611e1e81610c628160078601612378565b6101008501520154818116610120840152818160401c1661014084015260801c16610160820152604051809160208252611e5c602083018251612045565b602081015160408301526040810151606083015263ffffffff60e01b606082015116608083015263ffffffff60808201511660a083015260a081015160c083015260c081015160e083015260e08101516101008301526101008101516001600160401b03610160611edc61018093846101208801526101a0870190611fef565b938261012082015116610140870152826101408201511682870152015116908301520390f35b346101645760003660031901126101645760206040517f104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e319248152f35b34610164576000366003190112610164576004546001600160401b03600654169060405191611f7683611f6f816122d4565b038461219c565b611f926040519384938452606060208501526060840190611fef565b9060408301520390f35b34610164576020366003190112610164576004359063ffffffff60e01b8216809203610164576020916377e19fd760e11b8114908115611fde575b5015158152f35b6301ffc9a760e01b14905083611fd7565b919082519283825260005b84811061201b575050826000602080949584010152601f8019910116010190565b602081830181015184830182015201611ffa565b600435906001600160a01b038216820361016457565b906004821015611a105752565b346101645760003660031901126101645760206040516108008152f35b9181601f84011215610164578235916001600160401b038311610164576020838186019501011161016457565b356001600160a01b03811681036101645790565b356001600160e01b0319811681036101645790565b903590601e198136030182121561016457018035906001600160401b0382116101645760200191813603831361016457565b61018081019081106001600160401b038211176116fd57604052565b608081019081106001600160401b038211176116fd57604052565b61012081019081106001600160401b038211176116fd57604052565b606081019081106001600160401b038211176116fd57604052565b60a081019081106001600160401b038211176116fd57604052565b61016081019081106001600160401b038211176116fd57604052565b90601f801991011681019081106001600160401b038211176116fd57604052565b9291926001600160401b0382116116fd57604051916121e6601f8201601f19166020018461219c565b829481845281830111610164578281602093846000960137010152565b9060016001600160401b03809316019182116117db57565b3563ffffffff811681036101645790565b90600182811c9216801561225c575b602083101461224657565b634e487b7160e01b600052602260045260246000fd5b91607f169161223b565b60015481101561229d5760016000527fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf60190600090565b634e487b7160e01b600052603260045260246000fd5b908060209392818452848401376000828201840152601f01601f1916010190565b600554600092916122e48261222c565b8082529160019081811690811561235b575060011461230257505050565b9192935060056000527f036b6384b5eca791c62761152d0c79bb0604c104a5fb6f4eb0703f3154bb3db0916000925b84841061234357505060209250010190565b80546020858501810191909152909301928101612331565b915050602093945060ff929192191683830152151560051b010190565b90600092918054916123898361222c565b9182825260019384811690816000146123eb57506001146123ab575b50505050565b90919394506000526020928360002092846000945b8386106123d75750505050010190388080806123a5565b8054858701830152940193859082016123c0565b9294505050602093945060ff191683830152151560051b010190388080806123a5565b60208101519091148015939290612451575b508215612442575b505061243057565b6040516306420b7360e41b8152600490fd5b60600151141590503880612428565b60408201511415925038612420565b93919290926040519360208501957f6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139875260408601526060850152608084015260a08301526001600160401b0380911660c083015260c0825260e0820190828210908211176116fd5760405251902090565b929091602081519101206040519260208401947f2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c6286526040850152606084015260808301526001600160401b0380911660a083015260a0825260c0820190828210908211176116fd5760405251902090565b90916004831015611a10576001820154916002810154906003810154600482015463ffffffff600584015492600761258b600687015496610c626040518094819301612378565b60208151910120956040519860ff60208b019b168b5260408a015260608901528160e01b8160e01b16608089015260201c1660a087015260c086015260e08501526101008401526101208301526001600160401b0361014091168183015281526125f481612180565b51902090565b6004811015611a10576001811461261c5760021461261757600290565b600190565b50600090565b6001600160401b0380421161263657421690565b60405163056f614360e31b8152426004820152602490fd5b604080516301ffc9a760e01b60208083018281526024808501849052808552909691959361267b8161214a565b6000809881925190875afa96863d148089166127b4575b886127ac575b50876127a1575b5086612730575b866126b5575b50505050505090565b9091929380959650519186830193845263ffffffff60e01b168183015281526126dd8161214a565b6000928392839251915afa92803d1492838516612724575b5050908261271c575b5081612711575b503880808080806126ac565b600191501438612705565b9150386126fe565b5191823e5138806126f5565b84518681018481526001600160e01b0319828401528282529197506127548161214a565b6000809281925190875afa90863d14808316612793575b8261278b575b5081612780575b5015956126a6565b600191501438612778565b915038612771565b9087875191823e519061276b565b60011496503861269f565b975038612698565b9087875191823e5190612692565b6020808201918051010160019283925b80838210156128f9579085918151600090811a91608090818410156127fd575b505050505b016127d2565b91939092945060f49081861160c28710176128ec57890194878610156128ec578551851a9160c09685888516036128cf578b60e0918285106128c0575050821460a084101660ed8314609f851116176128de576002840190898210156128cf5785888351891a16036128cf578b60f0928385106128c0575050609090608f8511908414169310911416176128b55760030192858410156128b5578351831a16036128ac579081808088946127f2565b93505092505090565b505093505092505090565b975097505050505050506127f7565b50505050505093505092505090565b505050505093505092505090565b5050505093505092505090565b505091925050565b6017813b0361261c576000806003923c6000516001600160e81b03191661ef0160f01b149056",
+    "sourceMap": "566:28033:48:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1217:52;566:28033;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;14958:24;;;14954:66;;15037:15;566:28033;15037:15;;:::i;:::-;566:28033;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;14954:66;566:28033;;;;14991:29;;;;;;566:28033;14991:29;;566:28033;14991:29;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1582:57;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1455:46;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1089:52;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;:::i;:::-;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;:::i;:::-;;;;;;2029:30;;;:::i;:::-;566:28033;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;15677:18;566:28033;;;15655:10;:41;;;15651:112;;-1:-1:-1;;;;;;15776:7:48;-1:-1:-1;;;;;;15776:27:48;;15772:120;;566:28033;;16102:34;566:28033;;;;3083:1:106;;;;;;;16102:34:48;;;;;;;;566:28033;;;;;;;;;;;16102:34;;;566:28033;16150:10;;16146:52;;16212:22;16208:59;;566:28033;;;2029:30;;;;:::i;:::-;566:28033;;;;16287:185;;566:28033;;16287:185;;566:28033;;16287:185;;566:28033;;;;;3083:1:106;566:28033:48;;3083:1:106;566:28033:48;;3083:1:106;;;;566:28033:48;;;;;;;;;;;10226:41;10222:81;;566:28033;;10317:41;:67;;;;566:28033;10313:158;;10485:23;2029:30;566:28033;2029:30;;;:::i;:::-;10485:23;:::i;:::-;10484:24;10480:74;;10587:22;566:28033;;10587:22;:::i;:::-;566:28033;;10612:22;566:28033;;;10612:22;:::i;:::-;566:28033;;;10587:47;:174;;;566:28033;10587:174;566:28033;;;;;;;10775:36;;10771:121;;10905:15;-1:-1:-1;;;;;10905:15:48;;;3032:1:106;566:28033:48;3032:1:106;566:28033:48;10905:35;-1:-1:-1;;;;;10905:35:48;;10901:74;;11006:19;;;:::i;:::-;566:28033;;;-1:-1:-1;;;;;17560:24:48;;:61;;;;10587:174;17556:158;;566:28033;11818:41;566:28033;;11702:12;566:28033;;;;;11412:220;11913:124;566:28033;;;3032:1:106;566:28033:48;;3032:1:106;566:28033:48;;11208:58;566:28033;;;18105:88;566:28033;18105:88;;566:28033;1339:46;566:28033;;18155:13;566:28033;;;;18179:4;566:28033;;;;;;;;;;18105:88;;;;;:::i;:::-;566:28033;18082:121;;566:28033;;;;11208:58;;:::i;:::-;2029:30;11465:54;2029:30;;11155:224;11309:22;2029:30;3032:1:106;;-1:-1:-1;;;;;566:28033:48;3032:1:106;566:28033:48;11155:224;;;;;:::i;:::-;566:28033;;11465:54;;:::i;:::-;11412:220;;:::i;:::-;11702:12;;:::i;:::-;11752:21;;:::i;:::-;566:28033;;;;;;;;;;;;10905:15;;;566:28033;-1:-1:-1;;;566:28033:48;;;;;;;-1:-1:-1;;;566:28033:48;;;;;;11818:41;10905:15;;;566:28033;;-1:-1:-1;;;;566:28033:48;;;;;;-1:-1:-1;;;566:28033:48;;;;;;;11976:17;2029:30;566:28033;;-1:-1:-1;566:28033:48;;2029:30;;566:28033;;;;;3032:1:106;;;566:28033:48;3032:1:106;:::i;:::-;566:28033:48;;;3032:1:106;;566:28033:48;;;3032:1:106;;;566:28033:48;3032:1:106;566:28033:48;3032:1:106;;;;:::i;:::-;11913:124:48;;;566:28033;17556:158;566:28033;3032:1:106;566:28033:48;;-1:-1:-1;;;17644:59:48;;566:28033;17644:59;;566:28033;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;17644:59;17560:61;3032:1:106;;-1:-1:-1;;;;;566:28033:48;3032:1:106;566:28033:48;17588:33;;17560:61;;10901:74;566:28033;;-1:-1:-1;;;10949:26:48;;566:28033;;10949:26;10771:121;566:28033;;;;5513:47;;;;10834;;566:28033;10834:47;;3083:1:106;10834:47:48;10587:174;566:28033;10587:174;;10480:74;566:28033;;-1:-1:-1;;;10517:37:48;;2211:28;566:28033;10517:37;;566:28033;;;10517:37;10313:158;566:28033;;;;;;;;;10407:53;;;;;;566:28033;;10407:53;;566:28033;;;;;;;;:::i;:::-;;;;;;;:::i;:::-;10407:53;10317:67;566:28033;;;;;;10362:22;10317:67;;10222:81;566:28033;;-1:-1:-1;;;10276:27:48;;566:28033;;;;10276:27;;566:28033;;;10276:27;566:28033;;;;;;;;;;;;16208:59;566:28033;;-1:-1:-1;;;16243:24:48;;566:28033;;16243:24;16146:52;566:28033;;-1:-1:-1;;;16169:29:48;;566:28033;;16169:29;16102:34;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;16102:34;;;;;;;-1:-1:-1;16102:34:48;;;566:28033;;;;;;;;;15772:120;566:28033;;;;;;15826:55;;;;;;566:28033;15826:55;;566:28033;;;;15826:55;15651:112;566:28033;;-1:-1:-1;;;15719:33:48;;15655:10;566:28033;15719:33;;566:28033;;;15719:33;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;3894:61;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;15223:22;2029:30;-1:-1:-1;;;;;566:28033:48;3032:1:106;566:28033:48;;;;;;;;;;;;;:::i;:::-;;;;;;-1:-1:-1;;566:28033:48;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;;:::i;:::-;;;;;2029:30;;;;:::i;:::-;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;15677:18;566:28033;15655:10;;;:41;15651:112;;-1:-1:-1;;;;;;15776:7:48;-1:-1:-1;;;;;;15776:27:48;;15772:120;;566:28033;;16102:34;566:28033;;;;;3083:1:106;;;;;;;16102:34:48;;;;;;;;;566:28033;;;;;;;;;;;16102:34;;;566:28033;16150:10;;16146:52;;16212:22;16208:59;;566:28033;;;2029:30;;;;:::i;:::-;566:28033;;;;;16287:185;;;566:28033;;16287:185;;566:28033;16287:185;;;566:28033;;12393:70;;;;12389:155;;566:28033;;;12557:26;;;12553:68;;2029:30;566:28033;2029:30;;;:::i;:::-;566:28033;;25804:11;;25781:58;;1840:5;25853:16;;;;25849:63;;25927:17;;;;;:::i;:::-;25926:18;25922:49;;2121:32;566:28033;2121:32;;;:::i;:::-;566:28033;;;2121:32;;12794:29;566:28033;2029:30;12837:29;;;;:82;;;;566:28033;12833:142;;;3032:1:106;12988:17:48;3032:1:106;566:28033:48;12988:37;;;;12984:76;;13493:12;13091:21;13216:85;13091:21;;;:::i;:::-;566:28033;;;;18325:121;;;566:28033;1582:57;566:28033;;18403:13;566:28033;;;;18427:4;566:28033;;;;18325:121;;;;;;:::i;:::-;566:28033;18302:154;;566:28033;;;2121:32;;;;;;:::i;:::-;;;;:::i;:::-;13216:85;;:::i;:::-;566:28033;13346:77;566:28033;2029:30;566:28033;;;2029:30;:::i;:::-;13346:77;;;:::i;13493:12::-;566:28033;;;;;;;;13269:12;;566:28033;;;;:::i;:::-;;;;;;;;;;;;;;;;;13637:78;566:28033;;;;;;;2121:32;566:28033;;;;;;;;-1:-1:-1;;;566:28033:48;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;12988:17;566:28033;;;12988:17;566:28033;;;;;;;;2121:32;;566:28033;2121:32;566:28033;2121:32;;;;;;;:::i;:::-;13637:78;;;566:28033;;;;;;;;;;;22117:377;;566:28033;;;;;;;;;;;;;;;;;13637:78;566:28033;;;;;;;;2121:32;566:28033;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;566:28033:48;;;;;-1:-1:-1;;;566:28033:48;2029:30;;;;566:28033;2029:30;;12833:142;566:28033;;-1:-1:-1;;;12942:22:48;;566:28033;;12942:22;12837:82;566:28033;;;;2121:32;;;;;:::i;:::-;;;;:::i;:::-;566:28033;;;2121:32;;12889:30;12870:49;12837:82;;;25922:49;566:28033;;-1:-1:-1;;;25953:18:48;;2121:32;566:28033;25953:18;;566:28033;25953:18;25849:63;566:28033;;-1:-1:-1;;;25878:34:48;;2121:32;566:28033;25878:34;;566:28033;;;;;;;;;-1:-1:-1;566:28033:48;;25878:34;25781:58;566:28033;;-1:-1:-1;;;25824:15:48;;2121:32;566:28033;25824:15;;566:28033;;;25824:15;12553:68;566:28033;;-1:-1:-1;;;12592:29:48;;566:28033;;12592:29;12389:155;566:28033;;;;5513:47;;;;12486;;566:28033;12486:47;;3083:1:106;12486:47:48;16102:34;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;16102:34;;;;;;-1:-1:-1;16102:34:48;;15772:120;566:28033;;;;;;15826:55;;;;;;566:28033;15826:55;;566:28033;;;;15826:55;15651:112;566:28033;;-1:-1:-1;;;15719:33:48;;15655:10;566:28033;15719:33;;566:28033;;;15719:33;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;;917:32;566:28033;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;;;;;;2029:30;;;:::i;:::-;566:28033;;;;;;;;;;;;;;;;;15677:18;-1:-1:-1;;;;;566:28033:48;;15655:10;:41;;;15651:112;;-1:-1:-1;;;;;;15776:7:48;-1:-1:-1;;;;;;15776:27:48;;15772:120;;566:28033;;-1:-1:-1;;;16102:34:48;;;566:28033;;;;16102:34;;;;;;566:28033;;;;;;;;;;;16102:34;;;566:28033;16150:10;;16146:52;;16212:22;16208:59;;566:28033;;;2029:30;;;;:::i;:::-;566:28033;;;;;;16287:185;;566:28033;;16287:185;;566:28033;;16287:185;;566:28033;;5420:70;;5416:155;;566:28033;5598:19;566:28033;;;;5598:19;:::i;:::-;-1:-1:-1;;;;;566:28033:48;;5631:20;:47;;;;566:28033;5627:81;;5722:30;;;:::i;:::-;5718:73;;-1:-1:-1;;;;;566:28033:48;;;3083:1:106;;;566:28033:48;3083:1:106;;;566:28033:48;3083:1:106;;;566:28033:48;;;;;;;;5801:124;;5951:23;566:28033;;5951:23;3083:1:106;5951:37:48;:81;;;;566:28033;5951:151;;;;566:28033;5951:220;;;;566:28033;5951:285;;;;566:28033;5951:342;;;;566:28033;5951:408;;;;566:28033;5934:495;;2029:30;6468;;566:28033;;6468:30;566:28033;;;;6468:30;:::i;:::-;566:28033;2029:30;;:::i;:::-;566:28033;;25804:11;;25781:58;;1840:5;25853:16;;;25849:63;;25927:17;;;;;:::i;:::-;25926:18;25922:49;;6646:15;;566:28033;6694:36;566:28033;;6694:36;3083:1:106;6675:55:48;;;6671:208;;566:28033;6893:58;6926:24;;566:28033;;6926:24;;:::i;:::-;6893:58;;:::i;:::-;6892:59;6888:157;;566:28033;;17052:24;-1:-1:-1;;;;;17052:24:48;;:61;;;;566:28033;17048:158;;-1:-1:-1;;;;;566:28033:48;;;17377:25;17373:64;;7156:22;2029:30;566:28033;22199:19;566:28033;;;;22199:19;:::i;:::-;22277:24;6926;566:28033;;6926:24;22277;:::i;:::-;566:28033;;22117:377;706:53;566:28033;22117:377;;566:28033;;;;;;;;;;;5951:23;566:28033;;5951:23;3083:1:106;566:28033:48;;;;;;;;;;;;22319:26;566:28033;;22319:26;3083:1:106;566:28033:48;;;;;16102:34;566:28033;;;22396:35;566:28033;;22396:35;3083:1:106;566:28033:48;;;;22449:31;566:28033;;22449:31;3083:1:106;6468:30:48;566:28033;;;6468:30;22117:377;;;;;:::i;:::-;566:28033;;;22117:377;;22094:410;566:28033;;;22544:318;;566:28033;814:39;566:28033;;22620:13;566:28033;;;;22660:4;566:28033;;;;;;;;;917:32;566:28033;;;;;16102:34;566:28033;;;;;;;-1:-1:-1;;;;;566:28033:48;;6468:30;566:28033;;;6468:30;22544:318;;;;;:::i;:::-;566:28033;22521:351;;566:28033;;;;17845:124;;566:28033;1089:52;566:28033;;22620:13;566:28033;;;;22660:4;566:28033;;;;;;;;;;;;;;;;17845:124;;;;;:::i;:::-;566:28033;17822:157;;566:28033;;;2029:30;566:28033;2029:30;;;-1:-1:-1;;;;;566:28033:48;2029:30;;;;;;;566:28033;;2029:30;;566:28033;2029:30;566:28033;;20400:20;;566:28033;;20125:336;566:28033;;20125:336;;3083:1:106;566:28033:48;;;;;;;;;;;;;;;;;;;;;16102:34;566:28033;;;;;;;;;6468:30;566:28033;;;;;;;;;;;;;20125:336;;;;;:::i;:::-;566:28033;;;20125:336;;20102:369;566:28033;;;18778:281;1217:52;566:28033;18778:281;;566:28033;;;;;;;;;;;;;;;;;;;;16102:34;566:28033;;;-1:-1:-1;;;;;566:28033:48;;;;;;;6468:30;566:28033;;;6468:30;18778:281;;;;;:::i;:::-;566:28033;;;18778:281;;18755:314;566:28033;20853:24;6926;566:28033;;6926:24;20853;:::i;:::-;20895:27;;566:28033;;20895:27;;:::i;:::-;566:28033;2121:32;21091:30;6468;566:28033;;6468:30;566:28033;;;;21091:30;:::i;2121:32::-;566:28033;;;2121:32;;21075:48;566:28033;;;20688:476;566:28033;;20688:476;;3083:1:106;5951:23:48;566:28033;;5951:23;3083:1:106;566:28033:48;;;;22319:26;566:28033;;22319:26;3083:1:106;566:28033:48;;;;;;;;;;;;;;;;;;16102:34;566:28033;;;22396:35;566:28033;;22396:35;3083:1:106;566:28033:48;;;;22449:31;566:28033;;22449:31;3083:1:106;6468:30:48;566:28033;;;;;;;;;;;;;20688:476;;;;;:::i;:::-;566:28033;;;20688:476;;20665:509;566:28033;2029:30;;;;;;7958:12;566:28033;-1:-1:-1;;;;;7843:15:48;566:28033;;;7843:15;:::i;:::-;566:28033;;18778:281;1217:52;566:28033;18778:281;;566:28033;;;;;;;;;;;;;;;;2029:30;;566:28033;;;;;16102:34;566:28033;;;;;;;;;;;;;;6468:30;566:28033;;;6468:30;18778:281;;;;;:::i;:::-;566:28033;;;18778:281;;18755:314;7958:12;;:::i;:::-;8287:19;566:28033;;;;8287:19;:::i;:::-;8342:21;;;:::i;:::-;566:28033;;;;;;;;3083:1:106;566:28033:48;;3083:1:106;566:28033:48;;3083:1:106;566:28033:48;;;;;;;;;5951:23;566:28033;;5951:23;3083:1:106;566:28033:48;8488:17;;566:28033;22319:26;566:28033;;22319:26;3083:1:106;7156:22:48;8541:20;;566:28033;8621:24;6926;566:28033;;6926:24;8621;:::i;:::-;566:28033;8600:18;;566:28033;;8679:27;20895;566:28033;;20895:27;8679;:::i;:::-;566:28033;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;8600:18;;566:28033;8716:22;566:28033;8716:22;;566:28033;22396:35;566:28033;;22396:35;3083:1:106;8766:29:48;;;566:28033;22449:31;566:28033;;22449:31;3083:1:106;8843:25:48;;;566:28033;8939:30;6468;566:28033;;6468:30;566:28033;;;;8939:30;:::i;:::-;566:28033;-1:-1:-1;;;;;566:28033:48;;;;;8912:24;;;566:28033;;:::i;:::-;;;;;;;;;;;;;;;;;;;9027:41;566:28033;;8979:19;566:28033;;;;;;;;;;;;;;;;;;;;;8912:24;;;566:28033;;8979:19;566:28033;;-1:-1:-1;;566:28033:48;-1:-1:-1;;;;;566:28033:48;;;;;;;;-1:-1:-1;;;566:28033:48;;;;;;;;9027:41;566:28033;;-1:-1:-1;;;;566:28033:48;-1:-1:-1;;;566:28033:48;;;;;;;;;;;;-1:-1:-1;;;;;9213:15:48;566:28033;;;;;;;;;;:::i;:::-;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;;;;;7156:22;566:28033;;;;9213:15;:::i;:::-;566:28033;-1:-1:-1;;;;;566:28033:48;;;;;;;9244:429;9365:24;6926;566:28033;;6926:24;9365;:::i;:::-;566:28033;9443:27;20895;566:28033;;20895:27;9443;:::i;:::-;566:28033;9607:30;6468;566:28033;;6468:30;566:28033;;;;9607:30;:::i;:::-;566:28033;;;;;;;;;22319:26;566:28033;;22319:26;3083:1:106;566:28033:48;;;;;;;;;;;;;22396:35;566:28033;;22396:35;3083:1:106;566:28033:48;;;;22449:31;566:28033;;22449:31;3083:1:106;566:28033:48;;;;6468:30;16102:34;566:28033;;;6468:30;566:28033;;;;:::i;:::-;;;;;;;;-1:-1:-1;;;;;;566:28033:48;;;;5951:23;;3083:1:106;;-1:-1:-1;;;;;566:28033:48;;9244:429;;;;;566:28033;;;;;;2029:30;;566:28033;2029:30;5951:23;566:28033;2029:30;566:28033;;;;-1:-1:-1;566:28033:48;;;;;8912:24;;;566:28033;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;22117:377;;9027:41;22117:377;;566:28033;22117:377;8979:19;22117:377;;;;566:28033;;;;;;;;;;;;8912:24;;;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8912:24;;;566:28033;;;;;;;;8766:29;566:28033;;;;;;;;;;;;8766:29;566:28033;;;;;;;;;;;;;;;;;;;;-1:-1:-1;566:28033:48;;;2029:30;566:28033;;;;2029:30;;566:28033;2029:30;5951:23;566:28033;2029:30;17048:158;566:28033;3032:1:106;566:28033:48;;-1:-1:-1;;;17136:59:48;;566:28033;17136:59;;566:28033;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;17644:59;17052:61;3032:1:106;;-1:-1:-1;;;;;566:28033:48;3032:1:106;566:28033:48;17080:33;;17052:61;;6888:157;2029:30;566:28033;7009:24;6926;566:28033;;6926:24;7009;:::i;:::-;566:28033;;-1:-1:-1;;;6974:60:48;;-1:-1:-1;;;;;566:28033:48;;;;6974:60;;566:28033;-1:-1:-1;;;;;;566:28033:48;5951:23;2029:30;;566:28033;6974:60;6671:208;566:28033;;-1:-1:-1;;;6753:115:48;;-1:-1:-1;;;;;566:28033:48;;;;6753:115;;566:28033;5951:23;2029:30;;566:28033;-1:-1:-1;2029:30:48;;;566:28033;;;;2029:30;;6753:115;25922:49;566:28033;;-1:-1:-1;;;25953:18:48;;2029:30;566:28033;25953:18;;566:28033;5951:23;;25953:18;25849:63;566:28033;;;;;25878:34;;;;;;2029:30;566:28033;25878:34;;566:28033;5951:23;566:28033;;;;;;;25878:34;25781:58;566:28033;;-1:-1:-1;;;25824:15:48;;2029:30;566:28033;25824:15;;566:28033;5951:23;;25824:15;5934:495;566:28033;;-1:-1:-1;;;6391:27:48;;-1:-1:-1;;;;;566:28033:48;;;;6391:27;;566:28033;5951:23;;6391:27;5951:408;-1:-1:-1;;;;;;;566:28033:48;6313:24;566:28033;;6313:24;;;:::i;:::-;566:28033;6313:46;5951:408;;:342;-1:-1:-1;;;;;;;6256:24:48;566:28033;;6256:24;;;:::i;:::-;566:28033;6256:37;5951:342;;:285;566:28033;6191:31;566:28033;;6191:31;3083:1:106;6191:45:48;5951:285;;:220;566:28033;6122:35;566:28033;;6122:35;3083:1:106;6122:49:48;5951:220;;:151;566:28033;6052:36;566:28033;;6052:36;3083:1:106;6052:50:48;5951:151;;:81;566:28033;5992:26;566:28033;;5992:26;3083:1:106;5992:40:48;5951:81;;5801:124;566:28033;;-1:-1:-1;;;5883:31:48;;-1:-1:-1;;;;;566:28033:48;;;;5883:31;;566:28033;;;5883:31;566:28033;;;;;;;;;;;;5718:73;566:28033;;-1:-1:-1;;;5761:30:48;;-1:-1:-1;;;;;566:28033:48;;;;5761:30;;566:28033;;;5761:30;5627:81;566:28033;;-1:-1:-1;;;5687:21:48;;-1:-1:-1;;;;;566:28033:48;;;;5687:21;;566:28033;;;5687:21;5631:47;5655:18;;;:23;5631:47;;5416:155;3083:1:106;566:28033:48;;;5513:47;;;;;;566:28033;5513:47;;3083:1:106;5513:47:48;16102:34;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;16102:34;;;;;;-1:-1:-1;16102:34:48;;15772:120;566:28033;;;;;15826:55;;;;;;566:28033;15826:55;;566:28033;;;;;15826:55;15651:112;566:28033;;-1:-1:-1;;;15719:33:48;;15655:10;566:28033;15719:33;;566:28033;;;15719:33;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1967:1;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1720:57;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;:::i;:::-;-1:-1:-1;;;;;;566:28033:48;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;3083:1:106;;;566:28033:48;3083:1:106;;;566:28033:48;3083:1:106;;;;566:28033:48;;;;;;;;;;;14152:44;;:99;;;;566:28033;14152:144;;;566:28033;14152:182;;;;;566:28033;14152:217;;;566:28033;14152:274;;;566:28033;14152:343;;;;566:28033;;;;;;;;;;;14152:343;14442:53;;;;:::i;:::-;14152:343;;;;:274;566:28033;14404:22;2029:30;14385:15;;:41;;-1:-1:-1;14152:274:48;;;:217;14339:30;;;;;:::i;:::-;14338:31;14152:217;;;:182;14312:18;;:22;;;-1:-1:-1;14152:182:48;;:144;566:28033;14255:18;;566:28033;;3083:1:106;566:28033:48;14255:41;;-1:-1:-1;14152:144:48;;;;:99;566:28033;14212:17;;2029:30;566:28033;;14212:39;;-1:-1:-1;14152:99:48;;566:28033;;;;;;-1:-1:-1;;566:28033:48;;;;;;;814:39;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;706:53;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;14835:8;566:28033;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;:::i;:::-;;;;;2029:30;;;:::i;:::-;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3083:1:106;566:28033:48;;3083:1:106;566:28033:48;;3083:1:106;566:28033:48;;2029:30;;;;:::i;:::-;566:28033;3083:1:106;;566:28033:48;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;2029:30;566:28033;;;;;;;2029:30;566:28033;;;;;;;;;;;;3083:1:106;566:28033:48;3083:1:106;566:28033:48;;;;;;;;;;;;;;;2029:30;566:28033;;;;;;;2029:30;566:28033;;;;;;;2029:30;566:28033;;;;;;2121:32;566:28033;2121:32;566:28033;;;;2121:32;:::i;:::-;566:28033;;;;;3032:1:106;566:28033:48;;;;;;;;;;;;;;;;;3032:1:106;566:28033:48;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1339:46;566:28033;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;2029:30;-1:-1:-1;;;;;14723:17:48;3032:1:106;566:28033:48;;;;2121:32;;;;;;:::i;:::-;;;;:::i;:::-;566:28033;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;-1:-1:-1;;566:28033:48;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;15385:54:48;;;:106;;;;566:28033;;;;;;;15385:106;-1:-1:-1;;;938:40:134;;-1:-1:-1;15385:106:48;;;566:28033;;;;;;;;;;;;;;;;;;;;;;;;;;;;22117:377;;;566:28033;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;:::o;:::-;;;;;;;;;:::o;:::-;;;;;;-1:-1:-1;;566:28033:48;;;;;;;1840:5;566:28033;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;;;;;;;;:::o;3083:1:106:-;;-1:-1:-1;;;;;566:28033:48;;;;;;3083:1:106;:::o;:::-;;-1:-1:-1;;;;;;566:28033:48;;;;;;3083:1:106;:::o;:::-;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;3083:1:106;;;;;;;;;;;;;;:::o;2029:30:48:-;566:28033;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;566:28033;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;566:28033;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;566:28033;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;6694:36;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;566:28033;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;;22117:377;;;566:28033;;;2029:30;;;;;-1:-1:-1;;;;;2029:30:48;;;;;;;:::o;:::-;;;;-1:-1:-1;;;;;2029:30:48;;;;566:28033;;;2029:30;22117:377;566:28033;;-1:-1:-1;;566:28033:48;2029:30;;566:28033;2029:30;:::i;:::-;;;;;;;;;;;;;;;;;-1:-1:-1;2029:30:48;;;;;;:::o;:::-;;566:28033;-1:-1:-1;;;;;566:28033:48;;;2029:30;;;;;;:::o;566:28033::-;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;3083:1:106;566:28033:48;;;;;;3083:1:106;-1:-1:-1;566:28033:48;;;;-1:-1:-1;566:28033:48;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;2029:30;-1:-1:-1;2029:30:48;;;;;;22117:377;566:28033;-1:-1:-1;;566:28033:48;;;;:::o;2121:32::-;14709:12;2121:32;;;;;;;:::i;:::-;566:28033;;;;2121:32;;;;;;;;;;566:28033;2121:32;566:28033;;;2121:32;;;:::o;:::-;566:28033;;;;14709:12;-1:-1:-1;566:28033:48;;2121:32;-1:-1:-1;2121:32:48;;;;;;;;;566:28033;2121:32;;;;;:::o;:::-;;;566:28033;2121:32;;;;;;;;;;;;;;;;;;566:28033;;;;;;;;;;;;2121:32;566:28033;;;2121:32;;;14709:12;2121:32;;;;:::o;:::-;;;;;;;;;;;:::i;:::-;566:28033;;;;2121:32;;;;;;;;;;;566:28033;2121:32;566:28033;;;2121:32;;;;;:::o;:::-;566:28033;;;;;-1:-1:-1;566:28033:48;;;;-1:-1:-1;566:28033:48;2121:32;;-1:-1:-1;2121:32:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;566:28033;;;;;;;;;;;2121:32;566:28033;;;2121:32;;;;;;;;;;;;;;16485:426;16699:17;;;566:28033;16699:30;;;;;;16485:426;;16699:70;;16485:426;16699:126;;;;;16485:426;16682:223;;;;16485:426::o;16682:223::-;566:28033;;-1:-1:-1;;;16857:37:48;;;;;16699:126;16789:20;;566:28033;16789:36;;;-1:-1:-1;16699:126:48;;;;:70;16733:20;;;566:28033;16733:36;;;-1:-1:-1;16699:70:48;;;19082:468;;;;;;566:28033;;19323:210;;;;566:28033;1455:46;566:28033;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;19323:210;;566:28033;2029:30;;;;;;;;;;;;566:28033;2029:30;566:28033;19300:243;;19082:468;:::o;19556:459::-;;;;2121:32;566:28033;;2121:32;;19929:29;566:28033;;19786:212;2121:32;19786:212;;566:28033;1720:57;566:28033;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;;19786:212;;566:28033;2029:30;;;;;;;;;;;;566:28033;2029:30;566:28033;19763:245;;19556:459;:::o;21187:650::-;;;566:28033;;;;;;21460:17;;;2029:30;21495:20;;;;2029:30;21533:18;;;;566:28033;;21608:22;;2029:30;566:28033;21648:29;;;2029:30;21695:25;21754:24;2121:32;21695:25;;;2029:30;566:28033;2121:32;566:28033;;21754:24;;;;;2121:32;:::i;:::-;566:28033;;;2121:32;;21738:42;566:28033;;;21401:419;566:28033;;21401:419;;566:28033;;3083:1:106;;566:28033:48;;;;;;;;;;;3083:1:106;566:28033:48;3083:1:106;566:28033:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;566:28033:48;;;;;;;21401:419;;;;;:::i;:::-;566:28033;21378:452;;21187:650;:::o;22885:230::-;566:28033;;;;;;22988:27;22978:37;;22974:51;;23049:31;23039:41;23035:55;;23049:31;22885:230;:::o;23035:55::-;22988:27;23082:8;:::o;22974:51::-;23017:8;-1:-1:-1;23017:8:48;:::o;23121:391::-;-1:-1:-1;;;;;23229:15:48;;23258:28;23254:77;;23229:15;566:28033;23121:391;:::o;23254:77::-;566:28033;;-1:-1:-1;;;23295:36:48;;23229:15;23295:36;;;566:28033;;;23295:36;23518:854;566:28033;;;-1:-1:-1;;;24545:56:48;;;;;;;;;;;566:28033;;;24545:56;;;;;;;;;566:28033;24545:56;:::i;:::-;-1:-1:-1;24682:363:48;;;;;;;;;;;;;;;;;;23518:854;25061:27;;;23518:854;25061:39;;;;23518:854;24182:124;;;;23518:854;24182:183;;;23518:854;24175:190;;;;;;23518:854;:::o;24182:183::-;566:28033;;;;;;;;;24545:56;;;;;;;566:28033;;;;24545:56;;;566:28033;24545:56;;;;;:::i;:::-;-1:-1:-1;24682:363:48;;;;;;;;;;;;;;;;;;;24182:183;25061:27;;;;;;24182:183;25061:39;;;;24182:183;;;;;;;;;;25061:39;25099:1;25092:8;;;25061:39;;;:27;;-1:-1:-1;25061:27:48;;;24682:363;;;;;;;;;;24182:124;566:28033;;24545:56;;;;;;-1:-1:-1;;;;;;24545:56:48;;;566:28033;24545:56;;;566:28033;;-1:-1:-1;24545:56:48;566:28033;24545:56;:::i;:::-;-1:-1:-1;24682:363:48;;;;;;;;;;;;;;;;;;24182:124;25061:27;;;24182:124;25061:39;;;;24182:124;24255:51;;24182:124;;;25061:39;25099:1;25092:8;;;25061:39;;;:27;;-1:-1:-1;25061:27:48;;;24682:363;;;;;;;;;;;;25061:39;25099:1;25092:8;;-1:-1:-1;25061:39:48;;;:27;;-1:-1:-1;25061:27:48;;;24682:363;;;;;;;;;;;;25984:2284;26069:2193;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;26069:2193:48;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;25984:2284::o;26069:2193::-;;;;;;;;;;25984:2284::o;26069:2193::-;;;;;;;;;;;;;;;;;;;;;;;;;;;25984:2284::o;26069:2193::-;;;;;;;;;;;;;25984:2284::o;26069:2193::-;;;;;;;;;;;;25984:2284::o;26069:2193::-;;;;;;;25984:2284::o;28274:323::-;28398:2;28375:19;;:25;28371:43;;-1:-1:-1;28447:109:48;;;;-1:-1:-1;28447:109:48;-1:-1:-1;;;;;;566:28033:48;-1:-1:-1;;;28572:18:48;;28274:323::o"
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "governanceExecutor_",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash_",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI_",
+              "type": "string"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "EIP7702DelegatedModule",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "field",
+              "type": "bytes32"
+            }
+          ],
+          "name": "EmptyURI",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "GovernanceTransitionContextMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "governanceExecutor",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidGovernanceExecutor",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidModule",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidModuleRecord",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidRegistryManifestHash",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "current",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "requested",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidStatusTransition",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "field",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidUTF8",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "ModuleAlreadyRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ModuleCodehashMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "ModuleIndexOutOfBounds",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "ModuleInterfaceUnsupported",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "ModuleNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "NoExecutingGovernanceAction",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "NotGovernanceExecutor",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "moduleCount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint64",
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "name": "RegistryInvariantViolation",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "RegistryManifestNoOp",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "RegistryRevisionOverflow",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "name": "RegistryTimestampOverflow",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "field",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "actual",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maximum",
+              "type": "uint256"
+            }
+          ],
+          "name": "URITooLong",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "actual",
+              "type": "bytes4"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "expected",
+              "type": "bytes4"
+            }
+          ],
+          "name": "UnexpectedGovernanceSelector",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "actionClass",
+              "type": "uint8"
+            }
+          ],
+          "name": "WrongGovernanceActionClass",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "ZeroGovernanceActionId",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "ZeroGovernanceExecutor",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleVersion",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "moduleGasLimit",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "deploymentManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "moduleManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "moduleManifestURI",
+              "type": "string"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "recordChainHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamModuleRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "StreamModuleRegistryManifestUpdated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "moduleType",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "name": "StreamModuleStatusChanged",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_MODULE_MANIFEST_URI_BYTES",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "MODULE_REGISTRATION_RECORD_TYPE",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "MODULE_REGISTRATION_SCOPE_KEY",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCHEMA_VERSION",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_REGISTRATION_RECORD_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_REGISTRATION_SCOPE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_REGISTRATION_STATE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_STATUS_SCOPE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_MODULE_STATUS_STATE_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "STREAM_RECORD_CHAIN_V1",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "governanceExecutor",
+          "outputs": [
+            {
+              "internalType": "contract IStreamGovernanceExecutor",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedModuleType",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes4",
+              "name": "expectedInterfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "isModuleEligible",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "moduleAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "moduleCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            }
+          ],
+          "name": "moduleRecord",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "enum ModuleRegistryStatus",
+                  "name": "status",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleVersion",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "moduleGasLimit",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "runtimeCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "moduleManifestURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "registeredAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "statusUpdatedAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "revision",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct StreamModuleRecord",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "moduleRegistryManifest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "module",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleType",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleVersion",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes4",
+                  "name": "interfaceId",
+                  "type": "bytes4"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "moduleGasLimit",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedRuntimeCodeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "deploymentManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "moduleManifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "moduleManifestURI",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct StreamModuleRegistration",
+              "name": "registration",
+              "type": "tuple"
+            }
+          ],
+          "name": "registerModule",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "registrationChainHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "chainHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "recordCount",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "setModuleRegistryManifest",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "module",
+              "type": "address"
+            },
+            {
+              "internalType": "enum ModuleRegistryStatus",
+              "name": "newStatus",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "name": "setModuleStatus",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Every writer verifies the executor's V2 per-call transition context.      There is no direct-authority or selector-only authorization fallback.",
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "See {IERC165-supportsInterface}."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "isModuleEligible(address,bytes32,bytes4)": {
+            "notice": "Returns true when `module` is `ACTIVE`, matches the expected         module type and interface ID, and its live codehash still         matches the registered runtime code hash."
+          },
+          "moduleRecord(address)": {
+            "notice": "Returns the stored record for `module` (zero record when unknown)."
+          },
+          "moduleRegistryManifest()": {
+            "notice": "Returns the registry's own manifest commitment."
+          },
+          "registerModule((address,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string))": {
+            "notice": "Registers a new module through an exact class-1 V2 transition."
+          },
+          "setModuleRegistryManifest(bytes32,string)": {
+            "notice": "Updates the registry manifest through an exact class-1 V2         transition."
+          },
+          "setModuleStatus(address,uint8,bytes32,string)": {
+            "notice": "Changes status through an exact class-0 tightening or class-1         loosening V2 transition."
+          }
+        },
+        "notice": "Canonical protocol-v1 module registry implementing         `docs/stream-long-term-architecture.md` [LTA-REGISTRY].",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/domains/modules/StreamModuleRegistry.sol": "StreamModuleRegistry"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/domains/modules/StreamModuleRegistry.sol": {
+        "keccak256": "0x160fc57d9d9659dd0d8eec6dfd0e74a5d97b71acfdb742b824042fc8f2c810d1",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://61b3b4ef127f7e76417832c216266392edc8ac3810130e3ad71c411b1b5ae4bd",
+          "dweb:/ipfs/QmUUcTxuy5PkRRY21zm4dzqQRVXWms8voSTL82WiWB5tE5"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol": {
+        "keccak256": "0xef9804cdfd0daf5ddc29fe0a7ad5f7f883c493944d98209b990863508c97d6c0",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://808cb52854d777ecf5d8ee5b042c79f9dcba28dda121a753accec5b5b69125b1",
+          "dweb:/ipfs/QmQwitTx6SHDFazQw22E8gdVRsUznKmDaV9qtqyB3a4iAb"
+        ]
+      },
+      "smart-contracts/interfaces/stream/IStreamModuleRegistry.sol": {
+        "keccak256": "0x6516e94fd48fbb7779bd237b6cdd3c6c79e116e122003296dac04e840ce02780",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://3a07aad883fb4f663380554b7f426a9697e6e5e72a93fdb050bf3cade8423f0e",
+          "dweb:/ipfs/QmacRRimG1QhDrJ2qi5DcEMPoLj1GhC4cmWESqivNwGboU"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/ERC165.sol": {
+        "keccak256": "0x0f6a4a48c9dd646ba70b603bb85bc293d9357275a280006a0703dc6a5c9daf95",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e6b5745548ef1305350ee5e7b283e105160e8db01614d7b18543817938046974",
+          "dweb:/ipfs/QmSRdBD3FZaPt7ZY2FSN9vSNBMab2sX3dtE9d3chLtjFtc"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "MAX_MODULE_MANIFEST_URI_BYTES()": "4d0bb2d8",
+    "MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES()": "7d02b994",
+    "MODULE_REGISTRATION_RECORD_TYPE()": "7b2c2d6f",
+    "MODULE_REGISTRATION_SCOPE_KEY()": "98eb7b91",
+    "SCHEMA_VERSION()": "6233b32a",
+    "STREAM_MODULE_REGISTRATION_RECORD_V1()": "40904c94",
+    "STREAM_MODULE_REGISTRATION_SCOPE_V1()": "b1e5a000",
+    "STREAM_MODULE_REGISTRATION_STATE_V1()": "f78a17c7",
+    "STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1()": "cb07c004",
+    "STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1()": "61ad9ccc",
+    "STREAM_MODULE_STATUS_SCOPE_V1()": "270d5877",
+    "STREAM_MODULE_STATUS_STATE_V1()": "b589f1ca",
+    "STREAM_RECORD_CHAIN_V1()": "48b0dc71",
+    "governanceExecutor()": "8fc98386",
+    "isModuleEligible(address,bytes32,bytes4)": "5ffaf3d7",
+    "moduleAt(uint256)": "d216d296",
+    "moduleCount()": "334f7ac5",
+    "moduleRecord(address)": "2a6a8074",
+    "moduleRegistryManifest()": "056c746f",
+    "registerModule((address,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string))": "77bfa48d",
+    "registrationChainHash()": "7e669031",
+    "setModuleRegistryManifest(bytes32,string)": "7ba46615",
+    "setModuleStatus(address,uint8,bytes32,string)": "96a6e18b",
+    "supportsInterface(bytes4)": "01ffc9a7"
+  }
+}

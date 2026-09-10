@@ -4959,6 +4959,26 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 self.assertIn(dependency, makefile)
         self.assertNotIn(".NOTPARALLEL", makefile)
 
+    def _assert_default_wrapper_order(
+        self, text: str, expected_commands: list[str], *, powershell: bool
+    ) -> None:
+        if powershell:
+            # CurrentStack is a separate early-return path and does not consume
+            # the target-isolated historical release build. Keep every command
+            # before and after that guarded block in the default-path check.
+            branch = re.search(r"(?ms)^if \(\$CurrentStack\) \{\n.*?^\}\n", text)
+            self.assertIsNotNone(branch, "missing CurrentStack guard")
+            assert branch is not None
+            self.assertTrue(branch.group().endswith("\n    return\n}\n"),
+                            "CurrentStack must return before the default path")
+            text = text[:branch.start()] + text[branch.end():]
+        lines = [line.strip() for line in text.splitlines()]
+        positions = []
+        for command in expected_commands:
+            self.assertEqual(lines.count(command), 1, command)
+            positions.append(lines.index(command))
+        self.assertEqual(positions, sorted(positions))
+
     def test_check_wrappers_order_release_builder_before_all_consumers(self) -> None:
         wrapper_commands = {
             "PowerShell": (
@@ -5001,15 +5021,25 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
 
         for wrapper_name, (path, expected_commands) in wrapper_commands.items():
             with self.subTest(wrapper=wrapper_name):
-                lines = [
-                    line.strip()
-                    for line in path.read_text(encoding="utf-8").splitlines()
-                ]
-                positions: list[int] = []
-                for command in expected_commands:
-                    self.assertEqual(lines.count(command), 1, command)
-                    positions.append(lines.index(command))
-                self.assertEqual(positions, sorted(positions))
+                self._assert_default_wrapper_order(
+                    path.read_text(encoding="utf-8"), expected_commands,
+                    powershell=wrapper_name == "PowerShell",
+                )
+
+    def test_default_wrapper_order_rejects_consumer_before_builder(self) -> None:
+        text = "if ($CurrentStack) {\n    consume\n    return\n}\nconsume\nbuild\n"
+        with self.assertRaises(AssertionError):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
+
+    def test_default_wrapper_order_rejects_duplicate_consumer_outside_guard(self) -> None:
+        text = "consume\nif ($CurrentStack) {\n    return\n}\nbuild\nconsume\n"
+        with self.assertRaises(AssertionError):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
+
+    def test_default_wrapper_order_rejects_current_path_fallthrough(self) -> None:
+        text = "if ($CurrentStack) {\n    consume\n}\nbuild\nconsume\n"
+        with self.assertRaisesRegex(AssertionError, "must return"):
+            self._assert_default_wrapper_order(text, ["build", "consume"], powershell=True)
 
     def test_release_generator_rejects_post_build_artifact_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -5983,6 +6013,7 @@ class R4AuthoritativeEvidenceHistory:
         self.assertRegex(combined, r"(?m)^Ran 1 test in ")
         self.assertRegex(combined, r"(?m)^OK$")
         self.assertNotIn("Ran 121 tests", combined)
+        self.assertNotIn("Ran 124 tests", combined)
 
     def test_02_legacy_call_shapes_and_semantics_remain_available_at_v5(self) -> None:
         command = builder.forge_command(
@@ -13253,7 +13284,7 @@ class R11AuthoritativeEvidenceTests(
         self.assertNotIn("advapi32", builder_source.casefold())
 
     def test_r11_35_discovery_manifest_preserves_every_r4_case_once(self) -> None:
-        # These counts prove the complete suite partition; 37, 34, 50, and 121
+        # These counts prove the complete suite partition; 40, 34, 50, and 124
         # must move together when a test method is added or removed.
         legacy = {
             name for name, value in ReleaseBuildArtifactTests.__dict__.items()
@@ -13267,7 +13298,7 @@ class R11AuthoritativeEvidenceTests(
             name for name, value in R11AuthoritativeEvidenceTests.__dict__.items()
             if name.startswith("test_") and callable(value)
         }
-        self.assertEqual(len(legacy), 37)
+        self.assertEqual(len(legacy), 40)
         self.assertEqual(len(inherited), 34)
         self.assertEqual(
             inherited,
@@ -13281,7 +13312,7 @@ class R11AuthoritativeEvidenceTests(
         self.assertEqual(legacy & inherited, set())
         self.assertEqual(legacy & amendments, set())
         self.assertEqual(inherited & amendments, set())
-        self.assertEqual(len(legacy | inherited | amendments), 121)
+        self.assertEqual(len(legacy | inherited | amendments), 124)
         amendment_ids = {
             int(match.group(1))
             for name in amendments
@@ -13304,7 +13335,7 @@ class R11AuthoritativeEvidenceTests(
         normal_discovery = unittest.defaultTestLoader.loadTestsFromModule(
             sys.modules[__name__],
         )
-        self.assertEqual(normal_discovery.countTestCases(), 121)
+        self.assertEqual(normal_discovery.countTestCases(), 124)
         self.assertFalse(
             os.environ.get(R4_HERMETIC_CHILD_ENV) == "1"
             and os.environ.get(R4_HERMETIC_CHILD_CWD_ENV) == os.getcwd()
@@ -19370,11 +19401,26 @@ class R11AuthoritativeEvidenceTests(
             )
             assert real_forge_text is not None
             assert real_solc_text is not None
-            real_forge = Path(real_forge_text).resolve(strict=True)
-            real_solc = Path(real_solc_text).resolve(strict=True)
+            installed_forge = Path(real_forge_text).resolve(strict=True)
+            installed_solc = Path(real_solc_text).resolve(strict=True)
             with tempfile.TemporaryDirectory(
                 prefix="r11-real-tool-journal-", dir=REPO_ROOT.parent,
             ) as temporary:
+                # Other workers may be executing the installed PE image, which
+                # independently prevents writable opens even after our lease
+                # closes. Use owned, byte-identical real tools to isolate the
+                # sharing assertion without replacing actual executable launch.
+                real_forge = Path(temporary) / "forge.exe"
+                real_solc = Path(temporary) / "solc.exe"
+                for installed, owned in (
+                    (installed_forge, real_forge), (installed_solc, real_solc),
+                ):
+                    shutil.copyfile(installed, owned)
+                    self.assertFalse(owned.samefile(installed))
+                    self.assertEqual(
+                        hashlib.sha256(owned.read_bytes()).digest(),
+                        hashlib.sha256(installed.read_bytes()).digest(),
+                    )
                 evidence = Path(temporary) / "evidence"
                 evidence.mkdir()
                 static = {

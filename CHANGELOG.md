@@ -5,7 +5,56 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+### Added
+
+- Integrated the current Core with signed native fixed-price sales, English
+  auctions, canonical mint accounting, immutable split wallets and royalty
+  resolution. Sales and auctions require the accepted collection artist and
+  platform to sign the exact transaction terms.
+- Added collection artist nomination and relayed acceptance, a current entropy
+  coordinator with a VRF v2.5 adapter, and metadata rendering from the token's
+  original coordinator. Wider artist lifecycle and payment modes remain future work.
+- Added committed one-time genesis initialization, real system discovery and
+  current-stack tests covering paid mint, auction custody/refunds, withdrawals,
+  metadata, transfer/burn, receiver rollback and delayed governance rotation.
+  Normal governance delays remain after genesis. The stack is deployed on
+  Sepolia with a successful paid mint; the real randomness callback and final
+  demonstration are pending subscription funding. This is a development
+  deployment, not an audit or production release.
+
 ### Changed
+
+- Retry the complete pinned Foundry installer after transient attestation-service
+  failures without bypassing verification. Reconcile reviewed release-tool source
+  bindings and make the output-directory-swap regression deterministic on Windows.
+- Retain the Executor pagination ABI return names with a narrowly checked
+  warning disposition for its existing encoded-tuple forwarding implementation.
+- Validate maximum-content metadata against the configured 12 million router
+  gas budget and require the complete URI through a bounded 16 million gas
+  Core read. Refresh the full default compilation's measured gas snapshots
+  within unchanged release ceilings, and preserve exact UTF-8 release notes.
+  Rebind the non-production materialization fixture to the verified canonical
+  build and reconcile the documented NatSpec coverage count without adding
+  accepted documentation exclusions.
+- Increase native Foundry installer retries for transient download failures,
+  including attestations, while preserving pinned versions and verification.
+- Keep token and registered-scope entropy subjects distinct when requesting
+  randomness; the regression covers unchanged token inputs and both lifecycles.
+- Scope the live Slither gate to all production Solidity sources, excluding
+  expensive test and script constructor closures. Refresh exact source/capture
+  provenance and retain reviewed detector-specific dispositions without
+  suppressing findings or changing audit readiness.
+- Added current contract/interface navigation and replaced the stale autonomous
+  run log with a concise integration and delivery record.
+- Allow the sealed current-stack Executor to admit replacement satellite
+  administration through root-proposed, 48-hour-delayed append-only catalog
+  extensions. Exact target/code/value policies remain immutable per entry;
+  extensions publish the SystemManifest atomically and invalidate actions
+  scheduled under older catalog roots. Core and its authority binding are unchanged.
+- Permit optional preparation of the exact committed genesis binding before
+  atomic product initialization and sealing. Ordinary actions cannot run between
+  preparation and initialization; a failed initialization can retry the same
+  plan. Compare governance calldata in exact words to reduce validation gas.
 
 - Updated the pinned Foundry toolchain action to use its native installer on
   Linux and Windows. CI now checks changelog coverage before tool installation

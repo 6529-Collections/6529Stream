@@ -32,12 +32,12 @@
     {
       "id": "semantic_owner_matrix_checker",
       "path": "scripts/check_artist_semantic_owner_matrix.py",
-      "sha256": "75be5171655556711282de41a3feb909b0a9fdded45c565f66597d984427152b"
+      "sha256": "c4422d011017233ce03d9ec0b77086ae861b03f2709e234d25c19aa97c117a6f"
     },
     {
       "id": "semantic_owner_matrix_tests",
       "path": "scripts/test_artist_semantic_owner_matrix.py",
-      "sha256": "126269436e56b83f9e996b9b1e0961ebac08740a38a8e9789c70c302a8b0654f"
+      "sha256": "fa01b66182f08757236dd4c27f4440e77628d6e999e4ffeccba3a3875eec4b81"
     },
     {
       "id": "operation_matrix",
@@ -10513,5 +10513,5 @@
     "deployment_authorized": false,
     "readiness_credit": false
   },
-  "semantic_digest": "sha256:1928243d0e87c2da60e07ff2c2c43d260cb26be2aa321fbc1de10a301a5cd084"
+  "semantic_digest": "sha256:9390779a1f9c620b66bdeef8e41aa3b2e02de15fc704250384f7fa614c8bf794"
 }

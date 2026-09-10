@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -33,6 +34,47 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseArtifactTests(unittest.TestCase):
+    def test_current_deployment_contracts_are_release_targets(self) -> None:
+        root = SCRIPT_PATH.parent.parent
+        config = json.loads((root / "release-artifacts/current-contracts.json").read_text())
+        configured = {entry["name"] for entry in config["contracts"]}
+        deployment = "\n".join(path.read_text() for path in (root / "script/current").glob("*.sol"))
+        deployed = set(re.findall(r"\bnew\s+(Stream[A-Za-z0-9_]+)\s*\(", deployment))
+        deployed.update(re.findall(r"\btype\s*\(\s*(Stream[A-Za-z0-9_]+)\s*\)\s*\.creationCode", deployment))
+
+        self.assertTrue(deployed, "current deployment must identify concrete contract targets")
+        self.assertEqual(deployed - configured, set())
+        self.assertIn("StreamSplitWallet", configured)
+        self.assertNotIn("DevelopmentEntropyProvider", configured)
+        self.assertTrue(
+            all(entry["source"].startswith("smart-contracts/") for entry in config["contracts"])
+        )
+
+    def test_current_semantic_interface_ids_exclude_only_inherited_methods(self) -> None:
+        root = SCRIPT_PATH.parent.parent
+        config = json.loads((root / "release-artifacts/current-contracts.json").read_text())
+        interfaces = {entry["name"]: entry for entry in config["interfaces"]}
+        # Solidity 0.8.19 type(I).interfaceId constants, independently compiled.
+        # RoleRegistry declares supportsInterface itself; the other ERC165
+        # interfaces inherit it, so XORing every ABI function is incorrect.
+        canonical = {
+            "IStreamCollectionArtistRegistry": "0xddc81fc2",
+            "IStreamEnglishAuctionHouse": "0x37ee10c1",
+            "IStreamEntropyCoordinator": "0x979b977f",
+            "IStreamEntropyProvider": "0x9cd4388e",
+            "IStreamEntropyView": "0xaae88feb",
+            "IStreamFixedPriceSaleAdapter": "0x4fca852d",
+            "IStreamMetadataRouter": "0x222d4427",
+            "IStreamMintGate": "0xa4285bba",
+            "IStreamMintModuleRegistry": "0x4f47d0e6",
+            "IStreamRoleRegistry": "0xd77ee305",
+            "IStreamRoyaltyResolver": "0xaa4a9cc6",
+            "IStreamSystemManifest": "0x37660ede",
+        }
+        for name, interface_id in canonical.items():
+            with self.subTest(interface=name):
+                self.assertEqual(interfaces[name].get("interface_id"), interface_id)
+
     def test_bytecode_hash_counts_solidity_link_placeholders_for_size(self) -> None:
         unlinked = "0x60__$a64266b5966c542c29758651cb19f2deb4$__61"
 

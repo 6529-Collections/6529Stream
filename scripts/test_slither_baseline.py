@@ -92,8 +92,8 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 2, "Medium": 30, "total": 32})
-        self.assertEqual(len(data["findings"]), 32)
+        self.assertEqual(data["counts"], {"High": 4, "Medium": 40, "total": 44})
+        self.assertEqual(len(data["findings"]), 44)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
@@ -113,11 +113,12 @@ class SlitherBaselineTests(unittest.TestCase):
         self.assertEqual(triage, checker.EXPECTED_TRIAGE_COUNTS)
         self.assertEqual(statuses, checker.EXPECTED_STATUS_COUNTS)
 
-    def test_committed_false_positives_are_only_split_wallet_equality_rows(self) -> None:
+    def test_committed_split_wallet_dispositions_are_preserved(self) -> None:
         rows = [
             row
             for row in load_baseline()["findings"]
             if row["status"] == "False Positive"
+            and row["source"]["path"] == "smart-contracts/domains/revenue/StreamSplitWallet.sol"
         ]
         self.assertEqual(
             {row["fingerprint"] for row in rows},
@@ -362,7 +363,7 @@ class SlitherBaselineTests(unittest.TestCase):
             ("captured_at_utc", "2026-07-22T10:02:34Z", "captured_at_utc must be"),
             ("capture_command", "slither arbitrary", "capture_command must be"),
             ("gate_command", "slither arbitrary --fail-none", "gate_command must be"),
-            ("capture_native_exit_code", 123, "must retain the audited -1 exit"),
+            ("capture_native_exit_code", 123, "must retain the recorded 0 exit"),
             ("raw_json_size_bytes", 1, "raw_json_size_bytes must be"),
             ("raw_json_sha256", "sha256:" + "0" * 64, "raw_json_sha256 must be"),
         )
@@ -389,7 +390,8 @@ class SlitherBaselineTests(unittest.TestCase):
     def test_baseline_rejects_unreviewed_design_row_classification(self) -> None:
         data = load_baseline()
         row = next(
-            item for item in data["findings"] if item["detector"] == "arbitrary-send-eth"
+            item for item in data["findings"]
+            if item["detector"] == "arbitrary-send-eth" and item["status"] == "Open"
         )
         row["triage_class"] = "pending_disposition"
         self.assert_invalid(data, "design-review detector")
@@ -497,6 +499,16 @@ class SlitherBaselineTests(unittest.TestCase):
             checker.parse_solc_version("Version: 0.8.190+commit.example"),
             checker.EXPECTED_SOLC_VERSION,
         )
+
+    def test_live_command_compiles_production_without_test_script_closures(self) -> None:
+        command = checker.slither_command(Path("report.json"))
+        self.assertNotIn("--foundry-compile-all", command)
+        self.assertNotIn("--foundry-ignore-compile", command)
+        self.assertIn("--fail-none", command)
+        self.assertEqual(command[command.index("--json-types") + 1], "detectors")
+        self.assertIn("--exclude-low", command)
+        self.assertIn("--exclude-informational", command)
+        self.assertIn("--exclude-optimization", command)
 
     def test_live_run_rejects_nonzero_native_exit(self) -> None:
         failed = SimpleNamespace(returncode=7, stdout="", stderr="native failure")

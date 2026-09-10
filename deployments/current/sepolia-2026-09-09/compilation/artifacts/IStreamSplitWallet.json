@@ -1,0 +1,1879 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "SHARE_DENOMINATOR_PPM",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "accountReleased",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "aggregateSharePpm",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "assetObservationInitialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "assetPolicyRegistry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "entriesHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "entry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "entryCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "factory",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId_",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "entriesHash_",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataURIHash_",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+          "name": "entries_",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "accounts_",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint32[]",
+          "name": "aggregateSharePpm_",
+          "type": "uint32[]"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "lastObservedReceived",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "metadataURIHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "observedReceived",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "profileId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "releasable",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address payable",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "release",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "roundingDust",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "syncAsset",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "totalReleased",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "uniqueAccount",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "uniqueAccountCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "AssetObservationInitialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "previousObservedReceived",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "AssetSynced",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalReleased",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC20Released",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "totalReleased",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "NativeReleased",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "name": "AssetNotActive",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "AssetPolicyReadFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "ERC20BalanceReadFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC20TransferFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expectedWalletBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actualWalletBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expectedRecipientBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actualRecipientBalance",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC20TransferInvariantBroken",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInitializationInput",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "expectedObservedReceived",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "actualObservedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "NativeReceiptInvariantBroken",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "NativeTransferFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "NoReleasableFunds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "previousObservedReceived",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "name": "ObservedReceiptsDecreased",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "UnauthorizedInitializer",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "UnauthorizedReleaseRecipient",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "UnsupportedAsset",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroRecipient",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "AlreadyInitialized",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "name": "AssetNotActive",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyReadFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "ERC20BalanceReadFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20TransferFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expectedWalletBalance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "actualWalletBalance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expectedRecipientBalance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "actualRecipientBalance",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20TransferInvariantBroken",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidInitializationInput",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "expectedObservedReceived",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "actualObservedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "NativeReceiptInvariantBroken",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "NativeTransferFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "NoReleasableFunds",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "previousObservedReceived",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "observedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "ObservedReceiptsDecreased",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedInitializer",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "name": "UnauthorizedReleaseRecipient",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "UnsupportedAsset",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "ZeroRecipient",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "observedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "AssetObservationInitialized",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "previousObservedReceived",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "observedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "AssetSynced",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "totalReleased",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "observedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20Released",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "totalReleased",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "observedReceived",
+              "type": "uint256"
+            }
+          ],
+          "name": "NativeReleased",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "SHARE_DENOMINATOR_PPM",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "accountReleased",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "aggregateSharePpm",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "assetObservationInitialized",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "assetPolicyRegistry",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "entriesHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "entry",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "entryCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "factory",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId_",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "entriesHash_",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataURIHash_",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sharePpm",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "labelId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+              "name": "entries_",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "accounts_",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint32[]",
+              "name": "aggregateSharePpm_",
+              "type": "uint32[]"
+            }
+          ],
+          "name": "initialize",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "initialized",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "lastObservedReceived",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "metadataURIHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "observedReceived",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "profileId",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "releasable",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "address payable",
+              "name": "recipient",
+              "type": "address"
+            }
+          ],
+          "name": "release",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "roundingDust",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "syncAsset",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "totalReleased",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "uniqueAccount",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "uniqueAccountCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "lastObservedReceived(address)": {
+            "details": "For ERC-20s, a decrease means the asset is unsupported until the balance recovers      to the high-water mark or a later adapter/recovery path handles that asset."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "AlreadyInitialized()": [
+            {
+              "notice": "Reverts when initialization is attempted more than once."
+            }
+          ],
+          "AssetNotActive(address,uint8)": [
+            {
+              "notice": "Reverts when an ERC-20 asset is not currently active."
+            }
+          ],
+          "AssetPolicyReadFailed(address,address)": [
+            {
+              "notice": "Reverts when the factory-pinned asset policy registry cannot be read."
+            }
+          ],
+          "ERC20BalanceReadFailed(address,address)": [
+            {
+              "notice": "Reverts when an ERC-20 balance cannot be read."
+            }
+          ],
+          "ERC20TransferFailed(address,address,uint256)": [
+            {
+              "notice": "Reverts when an ERC-20 transfer fails or returns false."
+            }
+          ],
+          "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)": [
+            {
+              "notice": "Reverts when an ERC-20 release does not debit and credit the exact amount."
+            }
+          ],
+          "InvalidInitializationInput()": [
+            {
+              "notice": "Reverts when factory-provided initialization data is inconsistent."
+            }
+          ],
+          "NativeReceiptInvariantBroken(uint256,uint256)": [
+            {
+              "notice": "Reverts when a native transfer succeeds but cumulative receipt accounting changes."
+            }
+          ],
+          "NativeTransferFailed(address,uint256)": [
+            {
+              "notice": "Reverts when a native transfer fails."
+            }
+          ],
+          "NoReleasableFunds(address,address)": [
+            {
+              "notice": "Reverts when an account has no currently releasable funds."
+            }
+          ],
+          "ObservedReceiptsDecreased(address,uint256,uint256)": [
+            {
+              "notice": "Reverts when cumulative receipts fall below the last observed high-water mark."
+            }
+          ],
+          "UnauthorizedInitializer(address)": [
+            {
+              "notice": "Reverts when a non-factory caller attempts initialization."
+            }
+          ],
+          "UnauthorizedReleaseRecipient(address,address,address)": [
+            {
+              "notice": "Reverts when a non-account caller tries to release to an alternate recipient."
+            }
+          ],
+          "UnsupportedAsset(address)": [
+            {
+              "notice": "Reverts when an asset is not supported by this wallet version."
+            }
+          ],
+          "ZeroRecipient()": [
+            {
+              "notice": "Reverts when a release recipient is the zero address."
+            }
+          ]
+        },
+        "events": {
+          "AssetObservationInitialized(bytes32,address,uint256)": {
+            "notice": "Emitted on the first explicit observation for an asset."
+          },
+          "AssetSynced(bytes32,address,uint256,uint256)": {
+            "notice": "Emitted on later explicit observations for an asset."
+          },
+          "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)": {
+            "notice": "Emitted after an approved ERC-20 is released through the pull-payment flow."
+          },
+          "NativeReleased(bytes32,address,address,uint256,uint256,uint256)": {
+            "notice": "Emitted after native ETH is released through the pull-payment flow."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "SHARE_DENOMINATOR_PPM()": {
+            "notice": "Parts-per-million share denominator."
+          },
+          "accountReleased(address,address)": {
+            "notice": "Amount already released for an account and asset."
+          },
+          "aggregateSharePpm(address)": {
+            "notice": "Aggregate parts-per-million share for an account."
+          },
+          "assetObservationInitialized(address)": {
+            "notice": "Whether an explicit observation has been initialized for an asset."
+          },
+          "assetPolicyRegistry()": {
+            "notice": "Deployment-wide asset policy registry pinned by the factory."
+          },
+          "entriesHash()": {
+            "notice": "Canonical split entry hash."
+          },
+          "entry(uint256)": {
+            "notice": "Returns one canonical label-level entry by index."
+          },
+          "entryCount()": {
+            "notice": "Number of canonical label-level entries."
+          },
+          "factory()": {
+            "notice": "Factory that deployed and initialized this wallet."
+          },
+          "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])": {
+            "notice": "Initializes the wallet profile and aggregate shares."
+          },
+          "initialized()": {
+            "notice": "Whether the wallet has been initialized."
+          },
+          "lastObservedReceived(address)": {
+            "notice": "Last cumulative receipts value recorded by sync or release."
+          },
+          "metadataURIHash()": {
+            "notice": "Off-chain metadata URI hash for the profile."
+          },
+          "observedReceived(address)": {
+            "notice": "Cumulative observed receipts for an asset."
+          },
+          "profileId()": {
+            "notice": "Split profile identifier bound to this wallet."
+          },
+          "releasable(address,address)": {
+            "notice": "Currently releasable amount for an account and asset."
+          },
+          "release(address,address,address)": {
+            "notice": "Releases funds for an account to an authorized recipient."
+          },
+          "roundingDust(address)": {
+            "notice": "Native dust not currently releasable because of integer division."
+          },
+          "syncAsset(address)": {
+            "notice": "Emits or updates the explicit observation for an asset."
+          },
+          "totalReleased(address)": {
+            "notice": "Total amount already released for an asset."
+          },
+          "uniqueAccount(uint256)": {
+            "notice": "Returns one unique account and aggregate share by index."
+          },
+          "uniqueAccountCount()": {
+            "notice": "Number of unique accounts after share aggregation."
+          }
+        },
+        "notice": "Interface for immutable split-wallet receipt and release accounting.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/IStreamSplitWallet.sol": "IStreamSplitWallet"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/IStreamSplitWallet.sol": {
+        "keccak256": "0xee002101da7ca6a334d4c4ebf4ca1a2b7e6628b1aba18a11361806c0db12cb64",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b7abee91ca6f30024cedee8374791f31c7d09c63a80288ed54d7c2fec29d8329",
+          "dweb:/ipfs/QmeGaE5ng9241X9EG2tSj5oSXXgTE94jSQkokpzvGAJf2u"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "SHARE_DENOMINATOR_PPM()": "6e41b376",
+    "accountReleased(address,address)": "6a028dd0",
+    "aggregateSharePpm(address)": "d1311021",
+    "assetObservationInitialized(address)": "5caa3696",
+    "assetPolicyRegistry()": "decadc35",
+    "entriesHash()": "c8c9c6c5",
+    "entry(uint256)": "e2095c07",
+    "entryCount()": "0cbb0f83",
+    "factory()": "c45a0155",
+    "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])": "d913ec54",
+    "initialized()": "158ef93e",
+    "lastObservedReceived(address)": "2ffcf929",
+    "metadataURIHash()": "b0aa5ff4",
+    "observedReceived(address)": "ee11f328",
+    "profileId()": "08386eba",
+    "releasable(address,address)": "c45ac050",
+    "release(address,address,address)": "15dc07d7",
+    "roundingDust(address)": "1c8db92d",
+    "syncAsset(address)": "833a782a",
+    "totalReleased(address)": "d79779b2",
+    "uniqueAccount(uint256)": "a9bdd39a",
+    "uniqueAccountCount()": "3e6f2291"
+  }
+}

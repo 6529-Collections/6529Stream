@@ -1,22 +1,22 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "baf459c1f29ec6ee9bfdac81006c8cc71b83d982",
-    "captured_at_utc": "2026-08-09T19:48:03Z",
+    "analyzed_commit": "ba4bcedeaecf90f2b81a1d764e48c7c64250bce2",
+    "captured_at_utc": "2026-09-09T23:25:48Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
     "solc_select_version": "1.2.0",
     "foundry_version": "1.7.1",
-    "capture_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>",
-    "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
-    "capture_native_exit_code": -1,
+    "capture_command": "python -m slither . --config-file slither.config.json --json-types detectors --json <temp-file> --fail-none",
+    "gate_command": "python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
+    "capture_native_exit_code": 0,
     "capture_json_success": true,
-    "raw_json_size_bytes": 339619039,
-    "raw_json_sha256": "sha256:038a857f2210bf977186db786d050664413aee6029fae7b64dd935e4e86de823",
-    "solidity_tree_sha256": "sha256:38a82ebfdac82fdaadd55a68aca93b7c0558a6cf26d0a420ed2b6b3736b64660",
+    "raw_json_size_bytes": 35670229,
+    "raw_json_sha256": "sha256:f6cf2b94d04ec5e0b758a69cdbc041f589b06fdc08afe92294df010700d1b7aa",
+    "solidity_tree_sha256": "sha256:6843b4ee87da0c8d7ba558f689572fd94308034e919debe675b1ab1f540da475",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
-    "foundry_config_sha256": "sha256:c0d8c914a3189641807ff1c334941d4758922230a7f963fbb3ad59cc3bc3cc56",
+    "foundry_config_sha256": "sha256:b316489c314feff2b627e9a84bdd93dccf26603d30b93c66dd66fe6efeabeb75",
     "requirements_tools_sha256": "sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2"
   },
   "scope": {
@@ -36,18 +36,18 @@
     "classification_rule": "classify by the primary Slither source element; unknown smart-contracts paths fail closed as first-party production"
   },
   "capture_counts": {
-    "High": 49,
-    "Medium": 847,
-    "Low": 1269,
-    "Informational": 1035,
-    "Optimization": 42,
-    "total": 3242
+    "High": 5,
+    "Medium": 49,
+    "Low": 102,
+    "Informational": 620,
+    "Optimization": 8,
+    "total": 784
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
-      "High": 2,
-      "Medium": 30,
-      "total": 32
+      "High": 4,
+      "Medium": 40,
+      "total": 44
     },
     "vendored": {
       "High": 1,
@@ -55,14 +55,14 @@
       "total": 10
     },
     "test": {
-      "High": 46,
-      "Medium": 801,
-      "total": 847
+      "High": 0,
+      "Medium": 0,
+      "total": 0
     },
     "script": {
       "High": 0,
-      "Medium": 7,
-      "total": 7
+      "Medium": 0,
+      "total": 0
     },
     "other": {
       "High": 0,
@@ -71,11 +71,56 @@
     }
   },
   "counts": {
-    "High": 2,
-    "Medium": 30,
-    "total": 32
+    "High": 4,
+    "Medium": 40,
+    "total": 44
   },
   "findings": [
+    {
+      "fingerprint": "sha256:900d917a61d091a4a8f954fe5365102a15106abb840a323d27c2cf85ed369574",
+      "detector": "arbitrary-send-eth",
+      "impact": "High",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+        "start_line": 426,
+        "end_line": 429,
+        "element_type": "function",
+        "name": "_sendNative",
+        "signature": "_sendNative(address,uint256)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 426,
+          "end_line": 429,
+          "element_type": "function",
+          "name": "_sendNative",
+          "signature": "_sendNative(address,uint256)"
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 427,
+          "end_line": 427,
+          "element_type": "node",
+          "name": "(ok,None) = recipient.call{value: amount}()",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: this private send helper has only settlement and refund callers. Settlement pays the factory wallet selected by the artist/platform-signed profile using exactly the credited highest bid after consuming escrow. Refunds spend only msg.sender credit, which is zeroed before calling that claimant's chosen destination. Both callers are nonReentrant and failed sends revert accounting.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:272-296,327-334,426-429 restrict recipient/value provenance to the signed split or the caller's own refund balance.",
+        "test/StreamEnglishAuctionHouse.t.sol:testSettlementPaysSplitBeforeReceiverAndCanWithdrawShares and testRejectingRefundPreservesCreditAndPauseLeavesExitsAvailable; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting."
+      ],
+      "gate": "Gate C / Gate F"
+    },
     {
       "fingerprint": "sha256:a59c896abc11cc61ac8816c118dc998260b9125955bf69fd8343093c099d4000",
       "detector": "arbitrary-send-eth",
@@ -119,6 +164,51 @@
         "Trace recipient and amount provenance through the revenue resolver and document every trust boundary.",
         "Add adversarial recipient, value, rollback, and double-settlement tests.",
         "Record independent reviewer disposition under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:aef938f5062ac42e374f624993d051197e723c2a8fec3e250cf7bb0abdc26527",
+      "detector": "encode-packed-collision",
+      "impact": "High",
+      "confidence": "High",
+      "source": {
+        "path": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+        "start_line": 174,
+        "end_line": 193,
+        "element_type": "function",
+        "name": "tokenMetadataJSON",
+        "signature": "tokenMetadataJSON(address,uint256)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+          "start_line": 174,
+          "end_line": 193,
+          "element_type": "function",
+          "name": "tokenMetadataJSON",
+          "signature": "tokenMetadataJSON(address,uint256)"
+        },
+        {
+          "path": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+          "start_line": 183,
+          "end_line": 192,
+          "element_type": "node",
+          "name": "string(abi.encodePacked({,_identityJSON(metadata,facts.collectionId,facts.serial),_propertiesJSON(facts,onchainAnimation),_artistJSON(facts.collectionId),animationField,}))",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: packed concatenation builds a JSON response, not a signature, authentication digest, uniqueness key, or structured commitment. Variable-length fields need no hash-domain separation in this output-only formatting path. Identity text is prepared and escaped; animation bytes use prepared URI or Base64 encoding.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/metadata/StreamMetadataRouter.sol:174-193 returns the constructed JSON and never hashes it for authorization.",
+        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testMaximumTokenDataScriptAndEscapedIdentityFitCoreResponse exercise response construction and parsing."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -177,14 +267,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:edf827a84d0271101e6dd4b62c43766284e49da1d75a452f7d9f19beffb24c75",
+      "fingerprint": "sha256:b9903133978a29be394c5cb04785d81d9dad4c28254422b5942bd0f30d2cf25d",
       "detector": "divide-before-multiply",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-        "start_line": 449,
-        "end_line": 487,
+        "start_line": 451,
+        "end_line": 489,
         "element_type": "function",
         "name": "resolveRoyalty",
         "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
@@ -192,16 +282,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-          "start_line": 449,
-          "end_line": 487,
+          "start_line": 451,
+          "end_line": 489,
           "element_type": "function",
           "name": "resolveRoyalty",
           "signature": "resolveRoyalty(address,uint256,uint256,bytes,uint256)"
         },
         {
           "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-          "start_line": 484,
-          "end_line": 485,
+          "start_line": 486,
+          "end_line": 487,
           "element_type": "node",
           "name": "royaltyAmount = (salePrice / _ROYALTY_DENOMINATOR) * bps + ((salePrice % _ROYALTY_DENOMINATOR) * bps) / _ROYALTY_DENOMINATOR",
           "signature": ""
@@ -364,6 +454,59 @@
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:d5db840a8561e523cb094750792434338a7e13227bed077e2879bea87dd9bb0e",
+      "detector": "locked-ether",
+      "impact": "Medium",
+      "confidence": "High",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+        "start_line": 15,
+        "end_line": 339,
+        "element_type": "contract",
+        "name": "StreamEntropyProviderVRF",
+        "signature": ""
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "start_line": 15,
+          "end_line": 339,
+          "element_type": "contract",
+          "name": "StreamEntropyProviderVRF",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "start_line": 190,
+          "end_line": 230,
+          "element_type": "function",
+          "name": "requestEntropy",
+          "signature": "requestEntropy(bytes32,bytes)"
+        },
+        {
+          "path": "smart-contracts/interfaces/stream/IStreamEntropyProvider.sol",
+          "start_line": 22,
+          "end_line": 25,
+          "element_type": "function",
+          "name": "requestEntropy",
+          "signature": "requestEntropy(bytes32,bytes)"
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive for accepted user funds: the payable provider ABI is required by the shared interface, but requestEntropy rejects every nonzero msg.value and there is no receive or fallback entry point. The Chainlink subscription funds requests externally. Forced unsolicited native dust has no withdrawal path and is outside accepted payment accounting.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-198 authenticates the coordinator and rejects nonzero msg.value.",
+        "test/StreamEntropyProviderVRF.t.sol:testUnauthorizedRequestsPaymentsAndUnknownCallbacks covers payment rejection and unauthorized calls."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
       "fingerprint": "sha256:afd0bbb880a69cee91f1fd900bcd36694464b780f0f7e7c92971ee3a0546a629",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
@@ -486,6 +629,309 @@
         "Document the prepared-mint callback graph and the state committed or cleared before each external call.",
         "Retain adversarial callback reentry, replacement-manager abort, duplicate completion, and atomic rollback tests.",
         "Record independent reviewer disposition before changing this row."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:a38a7583f5405a62ef7d4eef85304c1ecccf26dc8aa914837e6a8e937663155c",
+      "detector": "reentrancy-no-eth",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+        "start_line": 135,
+        "end_line": 157,
+        "element_type": "function",
+        "name": "createAuction",
+        "signature": "createAuction(IStreamEnglishAuctionHouse.AuctionAuthorization,bytes,bytes,bytes)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 135,
+          "end_line": 157,
+          "element_type": "function",
+          "name": "createAuction",
+          "signature": "createAuction(IStreamEnglishAuctionHouse.AuctionAuthorization,bytes,bytes,bytes)"
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 154,
+          "end_line": 154,
+          "element_type": "node",
+          "name": "(tokenId,operationRoot) = _mintAuctionToken(authorization,tokenData,digest,id)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 155,
+          "end_line": 155,
+          "element_type": "node",
+          "name": "_storeAuction(tokenId,authorization,wallet)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 196,
+          "end_line": 196,
+          "element_type": "node",
+          "name": "(tokenIds,operationRoot,operationIds) = mintManager.executeSingleStepMint(batch,)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 401,
+          "end_line": 401,
+          "element_type": "node",
+          "name": "created.artist = item.artist",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 402,
+          "end_line": 402,
+          "element_type": "node",
+          "name": "created.wallet = wallet",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 403,
+          "end_line": 403,
+          "element_type": "node",
+          "name": "created.profileId = item.profileId",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 404,
+          "end_line": 404,
+          "element_type": "node",
+          "name": "created.reservePrice = item.reservePrice",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 405,
+          "end_line": 405,
+          "element_type": "node",
+          "name": "created.startTime = item.startTime",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 406,
+          "end_line": 406,
+          "element_type": "node",
+          "name": "created.endTime = item.endTime",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 407,
+          "end_line": 407,
+          "element_type": "node",
+          "name": "created.extensionWindow = item.extensionWindow",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 408,
+          "end_line": 408,
+          "element_type": "node",
+          "name": "created.minBidIncrementBps = item.minBidIncrementBps",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 409,
+          "end_line": 409,
+          "element_type": "node",
+          "name": "created.deliveryRecipient = item.artist",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: createAuction holds the nonReentrant guard, consumes the signed authorization nonce before the manager interaction, and verifies actual Core custody plus returned token IDs before storing the auction. All auction mutations share the guard. The mint receiver callback is view-only and requires the exact Core, a mint from zero, and the active mint window.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:135-157,194-211,345-355 prevents callback mutation or replay while _storeAuction follows the manager call.",
+        "test/StreamEnglishAuctionHouse.t.sol:testSignedCreationCustodiesActualCoreNFTAndConsumesReplay and testEntropyFailureRollsBackAuctionNonceAndMint; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting cover custody, nonce, and rollback boundaries."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:463682f7db607f961a97c32fc5bf4dfc2c4d10eaf048b75645214b1400d8140c",
+      "detector": "reentrancy-no-eth",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+        "start_line": 190,
+        "end_line": 230,
+        "element_type": "function",
+        "name": "requestEntropy",
+        "signature": "requestEntropy(bytes32,bytes)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "start_line": 190,
+          "end_line": 230,
+          "element_type": "function",
+          "name": "requestEntropy",
+          "signature": "requestEntropy(bytes32,bytes)"
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "start_line": 201,
+          "end_line": 211,
+          "element_type": "node",
+          "name": "providerRequestId = IVRFCoordinatorV2Plus(vrfCoordinatorAddress).requestRandomWords(IVRFCoordinatorV2Plus.RandomWordsRequest({keyHash:keyHash,subId:subscriptionId,requestConfirmations:requestConfirmations,callbackGasLimit:callbackGas,numWords:NUM_WORDS,extraArgs:abi.encodeWithSelector(_EXTRA_ARGS_V1_TAG,nativePayment)}))",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "start_line": 215,
+          "end_line": 215,
+          "element_type": "node",
+          "name": "keyToVrfRequest[requestKey] = providerRequestId",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: requestEntropy, fulfillment, and retained-result retry share the nonReentrant guard. A synchronous upstream callback cannot enter fulfillment while the request is being established. The upstream request ID must be known before the binding is stored; unknown or duplicate IDs cannot install a result. The immutable Chainlink coordinator remains an explicit trusted dependency.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-230,244-269 guards request, fulfillment, and retry; the detector cross-function target keyToVrfRequest is a view getter.",
+        "test/StreamEntropyProviderVRF.t.sol:testV25RequestIdentityAuthenticationAndDuplicateCallback and testRevertOutOfGasAndMalformedResponseRetainIdenticalRandomness cover identity and retry boundaries."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:1ca71fbaad2d1b620db0b3bbc8029457d948629762de46e4663b4713fc1fa8f8",
+      "detector": "reentrancy-no-eth",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+        "start_line": 168,
+        "end_line": 195,
+        "element_type": "function",
+        "name": "initializeGenesis",
+        "signature": "initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 168,
+          "end_line": 195,
+          "element_type": "function",
+          "name": "initializeGenesis",
+          "signature": "initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])"
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 181,
+          "end_line": 181,
+          "element_type": "node",
+          "name": "_bindSystemManifestBootstrap(binding)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 189,
+          "end_line": 189,
+          "element_type": "node",
+          "name": "actionId = _schedule(ctx,batch.calls)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 189,
+          "end_line": 189,
+          "element_type": "node",
+          "name": "actionId = _schedule(ctx,batch.calls)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 190,
+          "end_line": 190,
+          "element_type": "node",
+          "name": "_execute(actionId,batch.calls,batch.callDatas)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 193,
+          "end_line": 193,
+          "element_type": "node",
+          "name": "_policy.committedGenesisActive = false",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 957,
+          "end_line": 967,
+          "element_type": "node",
+          "name": "StreamGovernanceManifest.bind(_manifest,_policy,_actionPolicy,binding,StreamGovernanceManifest.BindContext({genesisBootstrapAuthority:genesisBootstrapAuthority,governanceNonce:_nonce,pendingScheduledActionCount:_pendingScheduledActionCount}))",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 1122,
+          "end_line": 1122,
+          "element_type": "node",
+          "name": "_nonce = nonceUsed + 1",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 1149,
+          "end_line": 1149,
+          "element_type": "node",
+          "name": "_pendingScheduledActionCount += 1",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "start_line": 1425,
+          "end_line": 1425,
+          "element_type": "node",
+          "name": "_pendingScheduledActionCount -= 1",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceManifest.sol",
+          "start_line": 175,
+          "end_line": 175,
+          "element_type": "node",
+          "name": "state.roleRegistry.grantRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO,guardian)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: initializeGenesis is nonReentrant, accepts only the immutable bootstrap authority and exact committed plan, and consumes genesisInitialized before interactions. Each action becomes EXECUTED before target calls; nested scheduling is blocked while executing. Self-only per-call transition contexts protect governed mutations. Completion requires sealing and no pending actions; failure reverts the full initialization.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:138-147,168-195,1048,1384 checks immutable authority/plan and guards one-shot scheduling and execution.",
+        "test/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized product stack."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -684,6 +1130,43 @@
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:2332b7c9ba07b8db27049f44cc5490f36591adb61caee18dcaef9efa6780d4f4",
+      "detector": "uninitialized-local",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+        "start_line": 443,
+        "end_line": 443,
+        "element_type": "variable",
+        "name": "inputs",
+        "signature": ""
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 443,
+          "end_line": 443,
+          "element_type": "variable",
+          "name": "inputs",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: all 14 fields of the memory SeedInputs struct are explicitly assigned before abi.encode(inputs). No uninitialized field is included in the seed.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:54-69 defines the 14 fields; lines 443-458 assign all of them before encoding.",
+        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testScopeEntropySharesLifecycleButNotTokenIdentity exercise token-specific and scope-shared entropy identity."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
       "fingerprint": "sha256:93f367e6b7e0199550024fb13abea6d47a4ae37b703d53fadc8e099aa1f4603e",
       "detector": "uninitialized-local",
       "impact": "Medium",
@@ -794,6 +1277,43 @@
         "Trace assignment and use on every branch, including early return and revert paths.",
         "Add focused tests for the default-valued path and every explicitly assigned path.",
         "Record independent reviewer disposition or make initialization explicit under issue #658."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:fc1a024fdaf1a8287d8c4683ecd0c573064132b5f810bd25f64fe0d0be532747",
+      "detector": "uninitialized-local",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol",
+        "start_line": 170,
+        "end_line": 170,
+        "element_type": "variable",
+        "name": "priorKey",
+        "signature": ""
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol",
+          "start_line": 170,
+          "end_line": 170,
+          "element_type": "variable",
+          "name": "priorKey",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: the first iteration never reads priorKey because i != 0 short-circuits the comparison. Every later iteration reads the key assigned by the preceding iteration; the zero default is not used as an ordering bound.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:170-184 checks i != 0 before the only read and assigns priorKey on each iteration.",
+        "test/StreamGovernanceCatalog.t.sol:testExtensionBoundsAndSortingAreEnforced exercises first, duplicate, and unsorted additions; testMaximumExtensionAndManifestURIFitPublicationEnvelope covers the 64-entry bound."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -950,6 +1470,43 @@
       "gate": "Gate C / Gate F"
     },
     {
+      "fingerprint": "sha256:16b4ed44ecb2c2c09f2e92bb7ca8bd3dbf53133e7b4b4afc66541a82f3226bdf",
+      "detector": "uninitialized-local",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+        "start_line": 108,
+        "end_line": 108,
+        "element_type": "variable",
+        "name": "wallet",
+        "signature": ""
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+          "start_line": 108,
+          "end_line": 108,
+          "element_type": "variable",
+          "name": "wallet",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: Solidity initializes the local address to zero, which is the intended receiver for an explicitly zero royalty. Nonzero rates require an existing split profile and assign the factory wallet before storage is updated.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:101-120 validates the rate/profile equivalence, initializes nonzero receivers from the immutable factory, and intentionally stores address(0) for a zero rate.",
+        "test/StreamRoyaltyResolver.t.sol:testExplicitZeroOverridesDefaultAndMaximumPriceNeverOverflows asserts zero receiver and amount; testOnlyExecutorCanConfigureAndInvalidProfilesRatesOrCollectionsFail rejects invalid rate/profile combinations."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
       "fingerprint": "sha256:96b2fc5e39111caabbb92fc50055ad92c86dcc04abee7ca5d4024bb7c7244679",
       "detector": "unused-return",
       "impact": "Medium",
@@ -998,14 +1555,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:11c37b46f20a622512e1e094b420316f8b26c8800b404ab6066eabb70929fa9b",
+      "fingerprint": "sha256:82900c8419182b5f914650a67313ce2479a82a982c490615d1af638da5399724",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-        "start_line": 431,
-        "end_line": 445,
+        "start_line": 433,
+        "end_line": 447,
         "element_type": "function",
         "name": "boundedRouterString",
         "signature": "boundedRouterString(address,bytes,uint256,uint256)"
@@ -1013,16 +1570,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-          "start_line": 431,
-          "end_line": 445,
+          "start_line": 433,
+          "end_line": 447,
           "element_type": "function",
           "name": "boundedRouterString",
           "signature": "boundedRouterString(address,bytes,uint256,uint256)"
         },
         {
           "path": "smart-contracts/core/StreamCoreExternalReads.sol",
-          "start_line": 444,
-          "end_line": 444,
+          "start_line": 446,
+          "end_line": 446,
           "element_type": "node",
           "name": "StreamCoreReadBuffer.decodeRequiredString(data)",
           "signature": ""
@@ -1042,6 +1599,141 @@
         "Retain exact success, malformed, oversized, reverting, maximum-returndata, and full-gas-budget router tests.",
         "Verify the compiled ABI and Core-observed status/string tuple match the decoder result.",
         "Record independent reviewer disposition before changing this row."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:1ecd27a8fd3013b339548b2154f60b16c25854fcb9db37e7a158076601a3ccb8",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+        "start_line": 237,
+        "end_line": 257,
+        "element_type": "function",
+        "name": "onTokenMinted",
+        "signature": "onTokenMinted(uint256,uint256,address,bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 237,
+          "end_line": 257,
+          "element_type": "function",
+          "name": "onTokenMinted",
+          "signature": "onTokenMinted(uint256,uint256,address,bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 244,
+          "end_line": 245,
+          "element_type": "node",
+          "name": "(exists,actualCollection,None,burned) = core.tokenCollectionIdentity(tokenId)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: the omitted collection serial is not part of registration policy or seed identity. Only the immutable Core may call, and token existence, burn state, collection ID, recipient, coordinator-at-mint, and duplicate registration are checked. The globally unique tokenId binds the seed.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:237-257 validates the returned identity fields needed by registration while intentionally omitting collection serial.",
+        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata, testUnauthorizedCallbackAndReplayCannotChangeSeed, and testScopeEntropySharesLifecycleButNotTokenIdentity cover registration and seed identity."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:073a297b8db17b6ffb0911e2eb9847e981aa4f6671cef45c532f200ec430c4ef",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+        "start_line": 487,
+        "end_line": 500,
+        "element_type": "function",
+        "name": "markRequestStale",
+        "signature": "markRequestStale(bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 487,
+          "end_line": 500,
+          "element_type": "function",
+          "name": "markRequestStale",
+          "signature": "markRequestStale(bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 496,
+          "end_line": 497,
+          "element_type": "node",
+          "name": "(None,boundKey,None,received,None) = IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: provider status, raw hash, and delivered flag are intentionally unused. Authorized transition, requested state, elapsed timeout, exact bound request key, and absence of received randomness are the necessary stale predicates. Retained output prevents marking stale regardless of delivery status.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:487-500 enforces timeout, exact request binding, and !rawRandomnessReceived.",
+        "test/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover no-reroll and retained-output rejection."
+      ],
+      "gate": "Gate C / Gate F"
+    },
+    {
+      "fingerprint": "sha256:bef2d82ca6e7f0836c3201fb2e44f29762a83549f1b8d8d2af414b32fdc1b90d",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+        "start_line": 503,
+        "end_line": 514,
+        "element_type": "function",
+        "name": "markRequestFailed",
+        "signature": "markRequestFailed(bytes32)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 503,
+          "end_line": 514,
+          "element_type": "function",
+          "name": "markRequestFailed",
+          "signature": "markRequestFailed(bytes32)"
+        },
+        {
+          "path": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "start_line": 507,
+          "end_line": 508,
+          "element_type": "node",
+          "name": "(status,boundKey,None,received,None) = IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId)",
+          "signature": ""
+        }
+      ],
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "rationale": "False positive: the transition requires the provider status to be TERMINAL_FAILED, the exact bound request key, and no received randomness. Under these predicates the omitted raw hash and delivered flag cannot authorize a transition or change the retained-output policy.",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658"
+      ],
+      "required_proof": [
+        "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:503-514 checks exact terminal failure and rejects retained randomness.",
+        "test/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover terminal and retained-result behavior."
       ],
       "gate": "Gate C / Gate F"
     },

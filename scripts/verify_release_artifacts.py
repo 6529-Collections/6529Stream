@@ -510,15 +510,15 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         128_549,
     ),
     Path("scripts/check_slither_baseline.py"): (
-        "ff688fdeab7ddb1c33596a8aaddf6af93cb3aa3c29c563fb16987c714828478c",
-        49_512,
+        "77dbd34317af8828cc7dcd3f4cdd789776d96b22865ddc2315386edfb7a4fb17",
+        49_634,
     ),
 }
 GIT_ATTRIBUTES_PATH = ".gitattributes"
 GIT_BINARY_SNIFF_BYTES = 8_000
-CANONICAL_COVERED_PATH_COUNT = 299
+CANONICAL_COVERED_PATH_COUNT = 301
 CANONICAL_COVERED_PATHS_SHA256 = (
-    "5ca078dab8957bb5cede1d5c121b872c59eb616cc17e103d34f1cc563d90f2d7"
+    "7c60e452447a70bca1eb09e2fbb48143d18f68903495c4c694e9a92e6dd1b03d"
 )
 RISK_SIZE_CHECKER_PATH = Path("scripts/check_contract_size_budget.py")
 

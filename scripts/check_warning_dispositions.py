@@ -14,6 +14,11 @@ DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
 EXPECTED_SOLC_WARNINGS = {
     (
         "5667",
+        "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+        "returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)",
+    ),
+    (
+        "5667",
         "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
     ),
@@ -91,6 +96,7 @@ REQUIRED_PHRASES = [
     "SOLC-UNUSED-RANDOMIZER-SALT-RNG",
     "SOLC-UNUSED-RANDOMIZER-SALT-VRF",
     "SOLC-TEST-UNUSED-LEGACY-ROYALTY-TOKENID",
+    "SOLC-UNUSED-EXECUTOR-ENCODED-PAGE-RETURNS",
     "SOLC-PURE-RANDOMIZER-NXT",
     "SOLC-PURE-RANDOMIZER-RNG",
     "SOLC-PURE-RANDOMIZER-VRF",
@@ -143,6 +149,9 @@ REQUIRED_LINK_TARGETS = [
     "release-artifacts/latest/bytecode-release-proof.json",
     "smart-contracts/domains/auctions/AuctionContract.sol",
     "smart-contracts/domains/dependencies/DependencyRegistry.sol",
+    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+    "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol",
+    "test/StreamGovernanceExecutor.t.sol",
     "smart-contracts/integrations/delegation/NFTdelegation.sol",
     "smart-contracts/integrations/randomizers/RandomizerNXT.sol",
     "smart-contracts/integrations/randomizers/RandomizerRNG.sol",
@@ -176,6 +185,16 @@ INVALID_NATSPEC_TAGS = (
 )
 
 SOURCE_MARKERS = {
+    "smart-contracts/domains/governance/StreamGovernanceExecutor.sol": [
+        "function terminalFreezeActionPage(bytes32 scopeHash, uint256 cursor, uint256 limit)",
+        "returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)",
+        "StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(",
+        'assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }',
+    ],
+    "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol": [
+        "function encodeTerminalFreezeActionPage(",
+        "return abi.encode(ids, deadlines, next);",
+    ],
     "smart-contracts/integrations/randomizers/RandomizerNXT.sol": [
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
         "function isRandomizerContract() external view returns (bool)",

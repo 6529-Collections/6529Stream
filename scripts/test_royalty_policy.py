@@ -88,9 +88,13 @@ contract StreamRoyaltyTest {
                 """
 contract StreamCorePermanentTargetTest {
     bytes32 private constant _POINTER_ROYALTY_RESOLVER = bytes32(uint256(1));
-    function testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled() public {}
 }
 """,
+            )
+        elif relative == "test/StreamRoyaltyResolver.t.sol":
+            write_text(
+                root / relative,
+                "\n".join(checker.SOURCE_CONSTANT_ASSERTIONS[relative]),
             )
         else:
             write_text(root / relative, f"seed for {relative}\n")
@@ -129,8 +133,7 @@ royaltyInfo(), supportsInterface(0x2a55205a), fixed default royalty, 690 basis
 points, 0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377, 10,000, no runtime
 royalty setters, no per-token override, and no per-collection override are
 named. The permanent target uses an authenticated royalty resolver pointer,
-fails soft to `(address(0), 0)`, and leaves the concrete #670 royalty interface
-row unresolved.
+fails soft to `(address(0), 0)`, and installs the typed `IStreamRoyaltyResolver` interface.
 
 ## Royalty Philosophy
 
@@ -145,6 +148,7 @@ Changing the default royalty receiver, Changing `690 basis points`, Adding
 per-token override support, Adding per-collection override support, Adding a
 satellite royalty policy contract, and Adding royalty enforcement are named.
 changed royalty behavior is a breaking change.
+The governance executor manages collection royalty settings and their freeze.
 
 ## Enforcement Boundary
 

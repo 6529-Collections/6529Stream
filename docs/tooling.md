@@ -101,6 +101,21 @@ checksum binding and PR review remain the controls for arbitrary command changes
 
 ## Local Checks
 
+For the supported current stack, run `make current-stack-check`, or on Windows:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1 -CurrentStack
+```
+
+This selects the `current` Foundry profile: global via-IR compilation with the
+same Solidity 0.8.19, optimizer 200, Paris and metadata settings as the canonical
+release build. It compiles the contracts and current deployment scripts, runs
+the cross-domain tests in `test/current`, and checks release target coverage,
+formatting, source layout and the permanent Core ABI. Outputs remain under
+ignored `out/current` and `cache/current`. The default profile and full release
+checks retain their historical scope. This focused command does not regenerate
+release evidence or replace the broader domain and release validation.
+
 Fresh contributors should start with
 [`first-30-minutes.md`](first-30-minutes.md). That checked guide explains the
 minimal setup path, `forge` not being on `PATH`, Windows wrapper usage, known
@@ -1657,8 +1672,11 @@ accepts the policy as authority to redefine its own scope. Manifest, lockfile,
 checksum, offline-verifier, and both release-mode paths fail closed on missing,
 substituted, stale, or semantically invalid policy/schema bytes.
 
-The revised canonical projection contains exactly 299 configured roots,
-expanding to exactly 475 covered-file entries in each checksum index. The Windows
+The revised canonical projection contains exactly 301 configured roots,
+expanding to exactly 477 covered-file entries in each checksum index. The current
+collection artist registry and its interface are explicit roots so the immutable
+verifier sees the same artist source inventory as the working checkout. This
+does not authorize the unimplemented V2 artist suite. The Windows
 CI wrapper policy test is an exact covered root so its native builder-authority
 wiring cannot drift outside the release checksum bundle. The twelve
 record-family source-semantic inputs above account for twelve exact roots and
@@ -1894,7 +1912,7 @@ missing inventory all fail.
 
 The canonical inventory is
 [`ops/EXTERNAL_CALL_GAS_INVENTORY.json`](../ops/EXTERNAL_CALL_GAS_INVENTORY.json).
-Its finality, minting, and revenue rows are temporary open remediation work
+Its finality, minting, revenue, and entropy rows are temporary open remediation work
 tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
 call-row taxonomy reserves `artist-authority` under the controlling
@@ -2048,6 +2066,40 @@ Slither and `solc-select` tool environment. Foundry itself is downloaded from
 the pinned release asset and verified with SHA256 before extraction.
 
 ## Release Artifacts
+
+The current candidate is separate from the historical engineering artifact
+baseline in `latest`. Its reviewed targets are in
+`release-artifacts/current-contracts.json`. After validating the selected
+current build, export it without recompiling:
+
+```bash
+python scripts/generate_current_stack_artifacts.py
+python scripts/generate_current_stack_artifacts.py --check
+```
+
+The exporter reads `out/current` by default; `--foundry-out` selects the actual
+output used for a deployment rehearsal. It requires complete build-info and
+checks that every selected ABI and bytecode object, including the deployment
+script, belongs to one globally-via-IR compiler input with the pinned settings.
+It rejects stale sources, mismatched outputs and runtime size violations. The
+separate `release-artifacts/current` bundle retains that exact compiler input,
+source hashes, ABIs, bytecode, recursively linked library targets, link references
+and immutable references. These
+are compilation facts: constructor arguments, deployed library addresses and
+actual on-chain runtime hashes still need deployment evidence.
+
+The current CI job runs concurrently with the historical Foundry job. Its
+profile excludes historical test and script bytecode while compiling the
+actual current deployment closure. It exports the selected build as a CI
+artifact. The single-controller `StreamGovernanceActor` remains a
+development/testnet authority template; the local `DevelopmentEntropyProvider`
+is not an exported deployable target. Explicit semantic interface IDs use
+Solidity `type(I).interfaceId`; a full ABI selector XOR also includes inherited
+methods and may differ.
+
+The historical generator sequence below still maintains the default
+engineering checks. Its target-isolated bytecode must not be substituted for
+the exact current deployment compilation, even when ABI and source match.
 
 After changing any production contract ABI or event surface, optionally run the
 aggregate diagnostic, then build the canonical target-isolated artifacts and
@@ -2322,20 +2374,23 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 32 retained findings: 2 High and 30 Medium.
-Thirty remain Open and two Medium `StreamSplitWallet` `incorrect-equality`
-rows have focused, source-traced False Positive dispositions. The
-compact normalized JSON lives at
-[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
-classifications, rationales, and open proof requirements or disposition
-evidence in
-[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
-at source commit `baf459c1f29ec6ee9bfdac81006c8cc71b83d982` on
-`2026-08-09T19:48:03Z` records 3,242 findings: 49 High, 847 Medium, 1,269 Low,
-1,035 Informational, and 42 Optimization. Its High/Medium scope totals are
-first-party production `2/30/32`, vendored `1/9/10`, test `46/801/847`, script
-`0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
-is never committed.
+The current checked baseline retains 44 findings: 4 High and 40 Medium.
+Thirty remain Open and 14 have reviewed, detector-specific False Positive
+dispositions. The compact normalized JSON lives at
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with source-traced
+rationales and focused regression references in
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
+
+The live gate uses Crytic Compile's production-only Foundry mode: every
+`smart-contracts/**/*.sol` input is compiled, while `test/` and `script/`
+constructor closures are excluded. It omits `--foundry-compile-all` and retains
+the exact first-party High/Medium comparison. The current unfiltered
+production capture contains 784 results (5 High, 49 Medium, 102 Low,
+620 Informational, 8 Optimization), including all 143 production source files.
+High/Medium scope totals are production `4/40/44`, vendored `1/9/10`, and zero
+for excluded test/script scopes and other sources. Exact source commit,
+capture time, tool versions, and raw digest remain in the canonical baseline.
+Raw Slither JSON is temporary analyzer output and is never committed.
 After a production-source edit intentionally stales the strict provenance hash,
 use the diagnostic `--candidate-slither-json` plus `--candidate-output` mode to
 materialize semantic identities and scope counts in an OS temporary directory

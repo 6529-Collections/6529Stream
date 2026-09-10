@@ -1,6 +1,6 @@
 #Requires -Version 5.1
 [CmdletBinding()]
-param()
+param([switch]$CurrentStack)
 
 $ErrorActionPreference = "Stop"
 
@@ -69,6 +69,26 @@ $pythonPath = "Invoke-CheckedPython"
 $pythonArgs = @()
 
 & (Join-Path $PSScriptRoot "test_windows_check_helpers.ps1")
+if ($CurrentStack) {
+    $previousFoundryProfile = [Environment]::GetEnvironmentVariable("FOUNDRY_PROFILE")
+    try {
+        $env:FOUNDRY_PROFILE = "current"
+        forge build
+        forge test -vvv
+        & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
+        & $pythonPath @pythonArgs "scripts\test_current_stack_artifacts.py"
+        & $pythonPath @pythonArgs "scripts\test_current_stack_deployment_verification.py"
+        & $pythonPath @pythonArgs "scripts\test_current_stack_observations.py"
+        & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
+        & $pythonPath @pythonArgs "scripts\check_solidity_source_layout.py"
+        & $pythonPath @pythonArgs "scripts\check_abi_compatibility.py" "--target-only"
+    }
+    finally {
+        [Environment]::SetEnvironmentVariable("FOUNDRY_PROFILE", $previousFoundryProfile)
+    }
+    return
+}
+
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap

@@ -1,0 +1,317 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "streamModuleCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleDeploymentManifestHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleInterfaceId",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleManifest",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "uri",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleSchemaHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleSupersedes",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleType",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamModuleVersion",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "streamModuleCodeHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleDeploymentManifestHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleInterfaceId",
+          "outputs": [
+            {
+              "internalType": "bytes4",
+              "name": "",
+              "type": "bytes4"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleManifest",
+          "outputs": [
+            {
+              "internalType": "string",
+              "name": "uri",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "hash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleSchemaHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleSupersedes",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleType",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamModuleVersion",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "The `stream` prefix keeps these selectors unambiguous in ABIs and     explorers over decades; the eight selectors are golden-tested. The     draft four-function `streamModuleFamily()` variant is superseded.",
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "streamModuleCodeHash()": {
+            "notice": "The module's own runtime code hash."
+          },
+          "streamModuleDeploymentManifestHash()": {
+            "notice": "Deployment manifest commitment recorded for this deployment."
+          },
+          "streamModuleInterfaceId()": {
+            "notice": "Primary ERC-165 interface ID the module serves."
+          },
+          "streamModuleManifest()": {
+            "notice": "Module manifest URI and content commitment."
+          },
+          "streamModuleSchemaHash()": {
+            "notice": "Schema commitment for the module's stored/served data shapes."
+          },
+          "streamModuleSupersedes()": {
+            "notice": "Immediate predecessor in the same module family, or the zero         address for a first-generation module."
+          },
+          "streamModuleType()": {
+            "notice": "Canonical module type constant (for example         `keccak256(\"STREAM_RENDERER\")`)."
+          },
+          "streamModuleVersion()": {
+            "notice": "Module version identifier within its family."
+          }
+        },
+        "notice": "Canonical module identity surface every satellite family must         expose, pinned by `docs/stream-long-term-architecture.md`         [LTA-MODULE-ID] (ADR 0009 decision 3).",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/IStreamModule.sol": "IStreamModule"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/IStreamModule.sol": {
+        "keccak256": "0xa46f260cccc13b18337b7cf131e0c2e0cb456a67775e4751a25fa49205862433",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://889e756af073b73ca197fcdfd836984e74e16fac9265db23f622c2d07d3bc9bc",
+          "dweb:/ipfs/QmTyR89aqMfNiZhJYxAmTZj6wM3X7PZZvTfm1hKtU6GR9f"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "streamModuleCodeHash()": "331c288c",
+    "streamModuleDeploymentManifestHash()": "665e0a0b",
+    "streamModuleInterfaceId()": "1e414a33",
+    "streamModuleManifest()": "0294a858",
+    "streamModuleSchemaHash()": "dbff3398",
+    "streamModuleSupersedes()": "28746186",
+    "streamModuleType()": "3cc00767",
+    "streamModuleVersion()": "99d8b2df"
+  }
+}

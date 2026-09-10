@@ -4,11 +4,13 @@ pragma solidity ^0.8.19;
 import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/IStreamArtworkFinalityRegistry.sol";
 import "../interfaces/stream/IStreamCollectionMetadata.sol";
+import "../interfaces/stream/IStreamCollectionArtistRegistry.sol";
 import "../interfaces/stream/IStreamEntropyCoordinator.sol";
 import "../interfaces/stream/IStreamMetadataRouter.sol";
 import "../interfaces/stream/IStreamMintLedger.sol";
 import "../interfaces/stream/IStreamMintManager.sol";
 import "../interfaces/stream/IStreamModuleRegistry.sol";
+import "../interfaces/stream/IStreamRoyaltyResolver.sol";
 import "../interfaces/stream/IStreamSystemManifest.sol";
 import "./StreamCoreReadBuffer.sol";
 
@@ -146,13 +148,13 @@ library StreamCoreExternalReads {
             return (true, pointerType, type(IStreamMetadataRouter).interfaceId);
         }
         if (pointerType == _POINTER_ARTIST_REGISTRY) {
-            return (true, pointerType, bytes4(0));
+            return (true, pointerType, type(IStreamCollectionArtistRegistry).interfaceId);
         }
         if (pointerType == _POINTER_ARTWORK_FINALITY_RECOVERY) {
             return (true, _MODULE_ARTWORK_FINALITY_RECOVERY, _INTERFACE_ARTWORK_FINALITY_RECOVERY);
         }
         if (pointerType == _POINTER_ROYALTY_RESOLVER) {
-            return (true, _MODULE_REVENUE_RESOLVER, bytes4(0));
+            return (true, _MODULE_REVENUE_RESOLVER, type(IStreamRoyaltyResolver).interfaceId);
         }
         if (pointerType == _POINTER_ENTROPY_COORDINATOR) {
             return (true, pointerType, type(IStreamEntropyCoordinator).interfaceId);

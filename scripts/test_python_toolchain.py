@@ -47,10 +47,21 @@ steps:
 
 
 def valid_multi_job_ci_workflow() -> str:
-    """Return three isolated pinned toolchain jobs accepted for CI."""
+    """Return four isolated pinned toolchain jobs accepted for CI."""
 
     return f"""\
 jobs:
+  current-stack:
+    steps:
+      - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
+        with:
+          python-version: "{checker.PYTHON_VERSION}"
+      - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}
+        with:
+          version: {checker.FOUNDRY_VERSION}
+      - run: |
+          {checker.LOCK_INSTALL_COMMAND}
+          {checker.PIP_CHECK_COMMAND}
   windows-wrapper:
     steps:
       - uses: actions/setup-python@{checker.SETUP_PYTHON_SHA}
@@ -202,7 +213,7 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
-    def test_three_isolated_ci_toolchain_jobs_pass(self) -> None:
+    def test_four_isolated_ci_toolchain_jobs_pass(self) -> None:
         """Each CI job independently installs the same pinned environment."""
 
         self.assertEqual(
@@ -277,6 +288,33 @@ class PythonToolchainTests(unittest.TestCase):
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
         self.assertTrue(any("unapproved install line" in error for error in errors))
+
+    def test_ci_accepts_exact_verified_foundry_retry(self) -> None:
+        """The existing attested native installer may retry its pinned version in CI."""
+        workflow = valid_multi_job_ci_workflow().replace(
+            checker.PIP_CHECK_COMMAND,
+            checker.PIP_CHECK_COMMAND + '\n          if "$foundryup" --install 1.7.1; then\n            exit 0\n          fi',
+            1,
+        )
+        self.assertEqual(checker.check_workflow(checker.CI_WORKFLOW_PATH, workflow), [])
+
+    def test_foundry_retry_allowance_is_ci_and_exact_version_only(self) -> None:
+        """Other workflows, versions and verification-bypass flags remain rejected."""
+        command = 'if "$foundryup" --install 1.7.1; then'
+        cases = [
+            (Path("workflow.yml"), valid_workflow(), command),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", '--in""stall')),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", "--in\\stall")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", "--in\\\n          stall")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace("1.7.1", "1.7.2")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace("; then", " --force; then")),
+        ]
+        for path, source, retry in cases:
+            with self.subTest(path=path, retry=retry):
+                workflow = source.replace(checker.PIP_CHECK_COMMAND, checker.PIP_CHECK_COMMAND + "\n          " + retry, 1)
+                errors = checker.check_workflow(path, workflow)
+                self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_workflow_rejects_additional_bare_pip_install(self) -> None:
         """A bare pip install cannot coexist with the canonical command."""

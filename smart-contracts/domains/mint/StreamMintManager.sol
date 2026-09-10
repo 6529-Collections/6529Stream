@@ -7,12 +7,13 @@ import "../../interfaces/stream/IStreamMintManager.sol";
 import "../../interfaces/stream/IStreamMintModuleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCoreExecutor.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
-contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
+contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC165 {
     /// @notice Domain separator for active phase policy hashes.
     bytes32 public constant POLICY_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_POLICY_V1");
     /// @notice Domain separator for phase configuration hashes.
@@ -69,7 +70,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     /// @notice StreamMintLedger dependency that enforces phase counter consumption.
     IStreamMintLedger public immutable mintLedger;
     /// @notice Registry dependency that approves optional mint gate modules.
-    IStreamMintModuleRegistry public immutable moduleRegistry;
+    IERC165 public immutable moduleRegistry;
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public override nextOperationNonce;
 
@@ -101,11 +102,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
 
-    constructor(
-        IStreamCore core_,
-        IStreamMintLedger mintLedger_,
-        IStreamMintModuleRegistry moduleRegistry_
-    ) {
+    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_) {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
@@ -128,14 +125,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             revert InvalidMintLedgerContract(address(mintLedger_));
         }
 
-        if (address(moduleRegistry_).code.length == 0) {
-            revert InvalidMintModuleRegistry(address(moduleRegistry_));
-        }
-        try moduleRegistry_.isStreamMintModuleRegistry() returns (bool ok) {
-            if (!ok) {
-                revert InvalidMintModuleRegistry(address(moduleRegistry_));
-            }
-        } catch {
+        if (!StreamMintGateValidator.isSupportedRegistry(moduleRegistry_)) {
             revert InvalidMintModuleRegistry(address(moduleRegistry_));
         }
 
@@ -147,6 +137,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     /// @notice Returns true for deployment validation.
     function isStreamMintManager() external pure override returns (bool) {
         return true;
+    }
+
+    /// @notice Advertises the manager interface required by Core satellite validation.
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return
+            interfaceId == type(IStreamMintManager).interfaceId
+                || super.supportsInterface(interfaceId);
     }
 
     /// @notice Configures and registers a launch-static phase policy.

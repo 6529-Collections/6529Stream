@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/IStreamGenesisInitializer.sol";
 import "../../interfaces/stream/IStreamGovernedParameterAuthority.sol";
 import "../../interfaces/stream/IStreamRoleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
@@ -24,11 +25,12 @@ import "./StreamGovernancePolicy.sol";
 ///     isolated governed self-call with a direction-sensitive action class.
 contract StreamGovernanceExecutor is
     IStreamGovernanceExecutor,
+    IStreamGenesisInitializer,
+    IStreamGovernanceCatalog,
     IStreamGovernedParameterAuthority,
     Ownable,
     ReentrancyGuard
 {
-    uint256 private constant MAX_GOVERNANCE_REVERT_DATA_BYTES = 4_096;
     uint256 private constant MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 64;
     uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
     uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
@@ -85,6 +87,11 @@ contract StreamGovernanceExecutor is
     uint256 private _currentBatchLength;
     uint256 private _currentCallIndex;
 
+    bytes32 public override genesisPlanHash;
+    bool public override genesisInitialized;
+
+    bytes32 private constant GENESIS_PLAN_V1 = keccak256("6529STREAM_GENESIS_PLAN_V1");
+
     function _checkOwner() internal view override {
         if (!_manifest.isSealed) revert SystemManifestBootstrapNotSealed();
         super._checkOwner();
@@ -96,6 +103,95 @@ contract StreamGovernanceExecutor is
             revert InvalidGenesisBootstrapAuthority(genesisBootstrapAuthority_);
         }
         genesisBootstrapAuthority = genesisBootstrapAuthority_;
+    }
+
+    /// @notice Commit the exact initialization once, after all target code exists.
+    /// @dev The commitment includes this chain and Executor. Keeping it out of
+    ///      constructor bytecode avoids a self-reference through target codehashes.
+    function commitGenesisPlan(bytes32 planHash) external override nonReentrant {
+        if (msg.sender != genesisBootstrapAuthority) {
+            revert GenesisBootstrapActorRequired(msg.sender);
+        }
+        if (genesisPlanHash != bytes32(0)) revert GenesisPlanAlreadyCommitted();
+        if (planHash == bytes32(0) || _manifest.bound || _nonce != 0) {
+            revert InvalidGenesisPlan();
+        }
+        genesisPlanHash = planHash;
+        emit GenesisPlanCommitted(planHash, msg.sender);
+    }
+
+    function hashGenesisPlan(SystemManifestBootstrapBinding calldata, GenesisBatch[] calldata)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _genesisPlanHash(msg.data[4:]);
+    }
+
+    /// @dev The plan entry points have identical ABI argument types. Commit their
+    ///      exact argument bytes, including any trailing bytes, without embedding
+    ///      a second large nested-struct encoder in the permanent Executor.
+    function _genesisPlanHash(bytes calldata encodedPlan) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(GENESIS_PLAN_V1, block.chainid, address(this), keccak256(encodedPlan))
+        );
+    }
+
+    function _requireCommittedGenesisPlan(uint256 batchCount) private view {
+        if (msg.sender != genesisBootstrapAuthority) {
+            revert GenesisBootstrapActorRequired(msg.sender);
+        }
+        if (genesisInitialized || _manifest.isSealed) revert GenesisAlreadyInitialized();
+        if (genesisPlanHash == bytes32(0) || batchCount == 0) revert InvalidGenesisPlan();
+        bytes32 actual = _genesisPlanHash(msg.data[4:]);
+        if (actual != genesisPlanHash) revert GenesisPlanHashMismatch(genesisPlanHash, actual);
+    }
+
+    /// @inheritdoc IStreamGenesisInitializer
+    function prepareGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external override nonReentrant {
+        _requireCommittedGenesisPlan(batches.length);
+        if (_manifest.bound) revert GenesisPreparationAlreadyBound();
+        _bindSystemManifestBootstrap(binding);
+        emit GenesisPrepared(genesisPlanHash);
+    }
+
+    /// @notice Initialize and seal the real stack in one transaction.
+    /// @dev Only these committed genesis batches execute immediately. They retain
+    ///      ordinary action classes, calldata publication, per-call transition
+    ///      contexts, action policy, replay protection and final inventory checks.
+    ///      Product initialization never partially persists: the final batch
+    ///      must seal. An optional prior preparation remains available on retry.
+    function initializeGenesis(
+        SystemManifestBootstrapBinding calldata binding,
+        GenesisBatch[] calldata batches
+    ) external override nonReentrant {
+        _requireCommittedGenesisPlan(batches.length);
+        if (block.timestamp > type(uint64).max - 7 days) {
+            revert GovernanceTimestampOverflow(block.timestamp);
+        }
+
+        // Consume before interacting. Reverts roll back this transaction; a
+        // previously prepared binding remains available for the same-plan retry.
+        genesisInitialized = true;
+        _policy.committedGenesisActive = true;
+        if (!_manifest.bound) _bindSystemManifestBootstrap(binding);
+        for (uint256 i; i < batches.length; ++i) {
+            if (_manifest.isSealed) revert GenesisAlreadyInitialized();
+            GenesisBatch memory batch = batches[i];
+            StreamGovernanceBootstrap.ScheduleContext memory ctx =
+                StreamGovernanceBootstrap.prepareGenesisBatch(
+                    _policy, batch, genesisPlanHash, binding.expectedManifestHash
+                );
+            bytes32 actionId = _schedule(ctx, batch.calls);
+            _execute(actionId, batch.calls, batch.callDatas);
+        }
+        if (!_manifest.isSealed || _pendingScheduledActionCount != 0) revert GenesisDidNotSeal();
+        _policy.committedGenesisActive = false;
+        emit GenesisInitialized(genesisPlanHash, batches.length);
     }
 
     /// @dev Ownership is part of the versioned governance state machine. The
@@ -497,14 +593,10 @@ contract StreamGovernanceExecutor is
         override
         returns (GovernanceAction memory)
     {
-        GovernanceAction memory action = _actions[actionId];
-        if (
-            action.status == GovernanceActionStatus.SCHEDULED
-                && block.timestamp > action.expiresAfter
-        ) {
-            action.status = GovernanceActionStatus.EXPIRED;
+        bytes memory encoded = StreamGovernanceBootstrap.encodeGovernanceAction(_actions[actionId]);
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
         }
-        return action;
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -631,8 +723,12 @@ contract StreamGovernanceExecutor is
         override
         returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)
     {
-        (actionIds, vetoDeadlines, nextCursor) =
-            StreamGovernanceBootstrap.terminalFreezeActionPage(_policy, scopeHash, cursor, limit);
+        bytes memory encoded = StreamGovernanceBootstrap.encodeTerminalFreezeActionPage(
+            _policy, scopeHash, cursor, limit
+        );
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
+        }
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -806,12 +902,58 @@ contract StreamGovernanceExecutor is
         recordCount = uint64(_policy.tailEntries.length);
     }
 
+    /// @inheritdoc IStreamGovernanceCatalog
+    function extendGovernanceActionPolicy(
+        uint64 expectedRevision,
+        bytes32 expectedOldCatalogHash,
+        bytes32 expectedNewCatalogHash,
+        GovernanceActionPolicyEntry[] calldata additions
+    ) external override {
+        _requireSelfCall(StreamGovernanceActionClasses.POINTER_REPLACEMENT);
+        StreamGovernanceManifest.extendActionPolicy(
+            _manifest,
+            _actionPolicy,
+            expectedRevision,
+            expectedOldCatalogHash,
+            expectedNewCatalogHash,
+            additions,
+            _currentScopeHash,
+            _currentOldValueHash,
+            _currentNewValueHash
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceCatalog
+    function governanceActionPolicyState()
+        external
+        view
+        override
+        returns (
+            bytes32 candidateProfileHash,
+            bytes32 catalogHash,
+            uint256 entryCount,
+            uint64 revision
+        )
+    {
+        return (
+            _actionPolicy.candidateProfileHash,
+            _actionPolicy.catalogHash,
+            _actionPolicy.entries.length,
+            _actionPolicy.revision
+        );
+    }
+
     /// @inheritdoc IStreamGovernanceExecutor
     function bindSystemManifestBootstrap(SystemManifestBootstrapBinding calldata binding)
         external
         override
         nonReentrant
     {
+        if (genesisPlanHash != bytes32(0)) revert GenesisPlanAlreadyCommitted();
+        _bindSystemManifestBootstrap(binding);
+    }
+
+    function _bindSystemManifestBootstrap(SystemManifestBootstrapBinding calldata binding) private {
         StreamGovernanceManifest.bind(
             _manifest,
             _policy,
@@ -904,6 +1046,7 @@ contract StreamGovernanceExecutor is
         GovernanceCall[] memory calls
     ) private returns (bytes32 actionId) {
         if (_executing) revert GovernanceSchedulingDuringExecution();
+        if (genesisPlanHash != bytes32(0) && !genesisInitialized) revert InvalidGenesisPlan();
         bool bootstrapAuthority =
             _manifest.bound && !_manifest.isSealed && msg.sender == genesisBootstrapAuthority;
         bool privilegedProposer = bootstrapAuthority || msg.sender == owner();
@@ -941,7 +1084,15 @@ contract StreamGovernanceExecutor is
         if (ctx.newValueHash != derivedNewValueHash) {
             revert BatchNewValueHashMismatch(derivedNewValueHash, ctx.newValueHash);
         }
-        _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
+        // This state exists only inside the non-reentrant atomic initializer;
+        // successful initialization seals, and a failed initialization rolls back.
+        if (genesisInitialized && !_manifest.isSealed) {
+            if (!bootstrapAuthority) {
+                revert InvalidGenesisPlan();
+            }
+        } else {
+            _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
+        }
         uint256 nonceUsed = _nonce;
         actionId = _computeActionId(ctx, callsHash, nonceUsed);
         _validateManifestTailComposition(
@@ -1174,62 +1325,22 @@ contract StreamGovernanceExecutor is
     {
         uint256 startBalance = address(this).balance;
         GovernanceAction storage action = _actions[actionId];
-        if (action.status == GovernanceActionStatus.NONE) {
-            revert GovernanceActionUnknown(actionId);
-        }
-        if (action.status != GovernanceActionStatus.SCHEDULED) {
-            revert GovernanceActionNotScheduled(actionId);
-        }
-        if (block.timestamp < action.notBefore) {
-            revert GovernanceActionNotExecutable(actionId, action.notBefore);
-        }
-        if (block.timestamp > action.expiresAfter) {
-            revert GovernanceActionExpiredWindow(actionId, action.expiresAfter);
-        }
-        // Defense in depth: records with a retired or unknown class can never
-        // cross the execution boundary, even if storage or imported state is
-        // corrupted outside the ordinary scheduling path.
-        StreamGovernanceBootstrap.validateActionClass(action.actionClass);
-
-        // [GOV-BATCH] rule 1: recompute callsHash and actionId from the
-        // supplied batch and require both to match the stored action.
-        bytes32 callsHash = _callsHash(calls);
-        if (callsHash != action.callHash) {
-            revert CallsHashMismatch(actionId);
-        }
-        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
-            _deriveBatchTransitionHashes(calls, callsHash);
-        if (
-            derivedScopeHash != action.scopeHash || derivedOldValueHash != action.oldValueHash
-                || derivedNewValueHash != action.newValueHash
-        ) {
-            revert ActionIdMismatch(actionId);
-        }
-        if (
-            StreamGovernanceBootstrap.governanceActionIdFromStored(
-                    action, callsHash, _actionNonces[actionId]
-                ) != actionId
-        ) {
-            revert ActionIdMismatch(actionId);
-        }
-        bytes[] memory scheduledCallDatas = _readCanonicalCallDatas(_callDataPointers[actionId]);
-        if (callDatas.length != calls.length || scheduledCallDatas.length != calls.length) {
-            revert CallDataCountMismatch(calls.length, callDatas.length);
-        }
-        if (!_actionPolicy.bound) revert GovernanceActionPolicyNotBound();
-        bytes32 currentCatalogHash = _actionPolicy.catalogHash;
-        bytes32 scheduledCatalogHash = _actionPolicyCatalogHashes[actionId];
-        if (scheduledCatalogHash != currentCatalogHash) {
-            revert GovernanceActionPolicySnapshotMismatch(
-                actionId, scheduledCatalogHash, currentCatalogHash
-            );
-        }
-        uint256 totalValue = _validateCalls(action.actionClass, calls, scheduledCallDatas);
-        for (uint256 i = 0; i < calls.length; i++) {
-            if (!_bytesEqual(callDatas[i], scheduledCallDatas[i])) {
-                revert ScheduledCallDataMismatch(i);
-            }
-        }
+        (uint256 totalValue, bytes[] memory scheduledCallDatas, bytes32 currentCatalogHash) = StreamGovernanceBootstrap.validateExecution(
+            _policy,
+            _actionPolicy,
+            action,
+            StreamGovernanceBootstrap.ExecutionValidationContext({
+                actionId: actionId,
+                nonce: _actionNonces[actionId],
+                callDataPointer: _callDataPointers[actionId],
+                scheduledCatalogHash: _actionPolicyCatalogHashes[actionId],
+                roleRegistry: address(_manifest.roleRegistry),
+                systemManifestSatellite: _manifest.systemManifestSatellite,
+                sealSelector: this.sealSystemManifestBootstrap.selector
+            }),
+            calls,
+            callDatas
+        );
         bool bootstrapSeal = !_manifest.isSealed && calls.length == 2
             && calls[0].target == address(this)
             && calls[0].selector == this.sealSystemManifestBootstrap.selector;
@@ -1288,7 +1399,7 @@ contract StreamGovernanceExecutor is
             _currentScopeHash = calls[i].scopeHash;
             _currentOldValueHash = calls[i].oldValueHash;
             _currentNewValueHash = calls[i].newValueHash;
-            _executeCall(actionId, i, calls[i], callDatas[i]);
+            StreamGovernanceBootstrap.executeCall(_policy, actionId, i, calls[i], callDatas[i]);
             _currentScopeHash = bytes32(0);
             _currentOldValueHash = bytes32(0);
             _currentNewValueHash = bytes32(0);
@@ -1337,44 +1448,6 @@ contract StreamGovernanceExecutor is
         emit GovernanceActionPolicyValidated(
             SCHEMA_VERSION, actionId, 2, _actionPolicy.candidateProfileHash, currentCatalogHash
         );
-    }
-
-    function _executeCall(
-        bytes32 actionId,
-        uint256 callIndex,
-        GovernanceCall memory call_,
-        bytes memory callData
-    ) private {
-        if (callData.length == 0) {
-            if (call_.target.code.length == 0 && !_policy.approvedNativeReceivers[call_.target]) {
-                revert NativeReceiverNotApproved(call_.target);
-            }
-        } else if (call_.target.code.length == 0) {
-            revert TargetHasNoCode(callIndex, call_.target);
-        }
-        address target = call_.target;
-        uint256 value = call_.value;
-        bool success;
-        uint256 returnDataBytes;
-        assembly ("memory-safe") {
-            // Successful governed calls have no return-value contract. Use a
-            // zero-sized output buffer so a target cannot force the Executor
-            // to allocate or copy an unbounded success payload.
-            success := call(gas(), target, value, add(callData, 0x20), mload(callData), 0x00, 0x00)
-            returnDataBytes := returndatasize()
-        }
-        if (success) return;
-        if (returnDataBytes == 0) revert GovernanceCallFailed(actionId, callIndex);
-        if (returnDataBytes > MAX_GOVERNANCE_REVERT_DATA_BYTES) {
-            revert GovernanceCallReturndataTooLarge(
-                actionId, callIndex, returnDataBytes, MAX_GOVERNANCE_REVERT_DATA_BYTES
-            );
-        }
-        assembly ("memory-safe") {
-            let returnData := mload(0x40)
-            returndatacopy(returnData, 0x00, returnDataBytes)
-            revert(returnData, returnDataBytes)
-        }
     }
 
     function _validateCalls(

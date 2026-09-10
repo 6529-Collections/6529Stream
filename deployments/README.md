@@ -1,5 +1,9 @@
 # Deployment Artifacts
 
+The active implementation's retained Sepolia compilation and launch observations
+are under [current/sepolia-2026-09-09](current/sepolia-2026-09-09/README.md).
+The manifests below retain the broader release process and historical examples.
+
 Deployment manifests are canonical release artifacts for public 6529Stream
 deployments. A manifest binds contract addresses, constructor inputs, toolchain
 versions, ABI hashes, verification inputs, admin ceremony decisions, and

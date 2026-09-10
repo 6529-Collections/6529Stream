@@ -41,3 +41,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,
 non-goals, and accepted risks.
+
+[ADR 0024: Append-only governance catalog evolution](0024-append-only-governance-catalog.md)
+is accepted for the current pre-genesis implementation. It permits delayed,
+root-proposed exact-target extensions without changing existing catalog entries.

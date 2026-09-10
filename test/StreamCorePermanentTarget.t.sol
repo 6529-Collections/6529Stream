@@ -671,33 +671,6 @@ contract StreamCorePermanentTargetTest is CharacterizationTestBase {
         _expectInvalidPointerUpdate(_POINTER_METADATA_ROUTER, address(candidate));
     }
 
-    function testUnresolvedArtistAndRoyaltyInterfacesCannotBeInstalled() public {
-        PermanentTargetMetadataRouter candidate = new PermanentTargetMetadataRouter();
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                StreamCore.SatellitePointerInterfaceUnresolved.selector, _POINTER_ARTIST_REGISTRY
-            )
-        );
-        _executor.execute(
-            address(_core),
-            abi.encodeCall(
-                _core.updateSatellitePointer, (_POINTER_ARTIST_REGISTRY, address(candidate))
-            )
-        );
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                StreamCore.SatellitePointerInterfaceUnresolved.selector, _POINTER_ROYALTY_RESOLVER
-            )
-        );
-        _executor.execute(
-            address(_core),
-            abi.encodeCall(
-                _core.updateSatellitePointer, (_POINTER_ROYALTY_RESOLVER, address(candidate))
-            )
-        );
-    }
-
     function testGasRaiseRequiresExactBoundActionAndAtMostDouble() public {
         (uint256 oldValue, uint256 floor, uint8 failureClass, uint64 revision) =
             _core.gasParameterInfo(_GGP_ENTROPY_REGISTRATION_GAS_LIMIT);

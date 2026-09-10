@@ -1856,6 +1856,9 @@ The policy entries are sorted by
 bind, and are capped at 1,024 entries. That ceiling accommodates all 128
 bootstrap triggers under every pre-seal action class plus the fixed governance
 surfaces while retaining an explicit bound on schedule/execution revalidation.
+For the current pre-genesis implementation, [ADR 0024](0024-append-only-governance-catalog.md)
+supersedes the fixed catalog membership rule below: existing entries remain
+immutable, while root-proposed class-3 extensions may append exact-target entries.
 The catalog uses these domains:
 
 ```solidity

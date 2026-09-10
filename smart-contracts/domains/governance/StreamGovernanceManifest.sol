@@ -395,6 +395,36 @@ library StreamGovernanceManifest {
         );
     }
 
+    function extendActionPolicy(
+        LifecycleState storage state,
+        StreamGovernanceActionPolicy.State storage actionPolicy,
+        uint64 expectedRevision,
+        bytes32 expectedOldCatalogHash,
+        bytes32 expectedNewCatalogHash,
+        GovernanceActionPolicyEntry[] calldata additions,
+        bytes32 currentScopeHash,
+        bytes32 currentOldValueHash,
+        bytes32 currentNewValueHash
+    ) public {
+        if (!state.isSealed) {
+            revert IStreamGovernanceExecutor.SystemManifestBootstrapNotSealed();
+        }
+        StreamGovernanceActionPolicy.extend(
+            actionPolicy,
+            expectedRevision,
+            expectedOldCatalogHash,
+            expectedNewCatalogHash,
+            additions,
+            currentScopeHash,
+            currentOldValueHash,
+            currentNewValueHash
+        );
+        // These are the current policy commitments read by scheduling/execution;
+        // the original genesis commitment remains in its binding and seal events.
+        state.actionPolicyCatalogHash = actionPolicy.catalogHash;
+        state.actionPolicyEntryCount = actionPolicy.entries.length;
+    }
+
     function validateManifestTailComposition(
         StreamGovernanceBootstrap.PolicyState storage policy,
         StreamGovernancePolicy.AdminState storage admin,
