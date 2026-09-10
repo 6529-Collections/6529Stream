@@ -330,7 +330,7 @@ production Slither baseline and its Markdown mirror. Open High/Medium findings
 are technical blockers outside the evidence-manifest requirement rows and
 cannot be waived by marking an external-evidence row `accepted_risk`. The
 current 30 Open rows (2 High and 28 Medium) remain blockers under issue #658;
-14 other retained rows have reviewed False Positive dispositions. An exact live
+15 other retained rows have reviewed False Positive dispositions. An exact live
 baseline match proves inventory consistency, not acceptance. The separate High
 open blocker `RISK-GOV-003` preserves the Governance Executor's
 proposal-selected native-value authority after bounded assembly made that call

@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "7b4ef22b052419e88d56cf7f207a7a7738dba7a7",
-    "captured_at_utc": "2026-09-10T15:04:05Z",
+    "analyzed_commit": "db8e31ed886faa838a9dc83926d8bad869ce549b",
+    "captured_at_utc": "2026-09-10T19:32:07Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,11 +12,11 @@
     "gate_command": "python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 0,
     "capture_json_success": true,
-    "raw_json_size_bytes": 35734817,
-    "raw_json_sha256": "sha256:7260359bea13d719f00ef7241fb530dc386a9360a733196e088ddabb9fa74dc6",
-    "solidity_tree_sha256": "sha256:e9f4026750c661cba51ebcbfc781330643e2df6e3bc092196ec97859b4163153",
+    "raw_json_size_bytes": 35335555,
+    "raw_json_sha256": "sha256:059ed9c73c7a75cf39d31dc12c51570a61d111371cf1a5c88d2b4e60aa2831ac",
+    "solidity_tree_sha256": "sha256:0897290bac4ba9bb826d0cb873bc9068fd88ddc39e6e5314fe4f385bb0b264ab",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
-    "foundry_config_sha256": "sha256:da72c962bd2c89706b082a589862e22863b4b1db27dfc3651ba30b3892ed7c8f",
+    "foundry_config_sha256": "sha256:e1018ca7758fd0b49f329437ee9162e1a9fb6c43ed5fb5b2eb0f98800f3b3c26",
     "requirements_tools_sha256": "sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2"
   },
   "scope": {
@@ -37,17 +37,17 @@
   },
   "capture_counts": {
     "High": 5,
-    "Medium": 49,
-    "Low": 102,
-    "Informational": 619,
+    "Medium": 50,
+    "Low": 106,
+    "Informational": 627,
     "Optimization": 8,
-    "total": 783
+    "total": 796
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
       "High": 4,
-      "Medium": 40,
-      "total": 44
+      "Medium": 41,
+      "total": 45
     },
     "vendored": {
       "High": 1,
@@ -72,8 +72,8 @@
   },
   "counts": {
     "High": 4,
-    "Medium": 40,
-    "total": 44
+    "Medium": 41,
+    "total": 45
   },
   "findings": [
     {
@@ -819,14 +819,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:1ca71fbaad2d1b620db0b3bbc8029457d948629762de46e4663b4713fc1fa8f8",
+      "fingerprint": "sha256:da5b8287fc9627d35172174bf6997f4796c11e3699090687b3b9e771b5bf469c",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-        "start_line": 168,
-        "end_line": 195,
+        "start_line": 261,
+        "end_line": 288,
         "element_type": "function",
         "name": "initializeGenesis",
         "signature": "initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])"
@@ -834,80 +834,80 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 168,
-          "end_line": 195,
+          "start_line": 261,
+          "end_line": 288,
           "element_type": "function",
           "name": "initializeGenesis",
           "signature": "initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])"
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 181,
-          "end_line": 181,
+          "start_line": 274,
+          "end_line": 274,
           "element_type": "node",
           "name": "_bindSystemManifestBootstrap(binding)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 189,
-          "end_line": 189,
+          "start_line": 282,
+          "end_line": 282,
           "element_type": "node",
           "name": "actionId = _schedule(ctx,batch.calls)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 189,
-          "end_line": 189,
+          "start_line": 282,
+          "end_line": 282,
           "element_type": "node",
           "name": "actionId = _schedule(ctx,batch.calls)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 190,
-          "end_line": 190,
+          "start_line": 283,
+          "end_line": 283,
           "element_type": "node",
           "name": "_execute(actionId,batch.calls,batch.callDatas)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 193,
-          "end_line": 193,
+          "start_line": 286,
+          "end_line": 286,
           "element_type": "node",
           "name": "_policy.committedGenesisActive = false",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 957,
-          "end_line": 967,
+          "start_line": 1050,
+          "end_line": 1060,
           "element_type": "node",
           "name": "StreamGovernanceManifest.bind(_manifest,_policy,_actionPolicy,binding,StreamGovernanceManifest.BindContext({genesisBootstrapAuthority:genesisBootstrapAuthority,governanceNonce:_nonce,pendingScheduledActionCount:_pendingScheduledActionCount}))",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 1122,
-          "end_line": 1122,
+          "start_line": 1161,
+          "end_line": 1161,
           "element_type": "node",
           "name": "_nonce = nonceUsed + 1",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 1149,
-          "end_line": 1149,
+          "start_line": 1169,
+          "end_line": 1169,
           "element_type": "node",
           "name": "_pendingScheduledActionCount += 1",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "start_line": 1425,
-          "end_line": 1425,
+          "start_line": 1451,
+          "end_line": 1451,
           "element_type": "node",
           "name": "_pendingScheduledActionCount -= 1",
           "signature": ""
@@ -924,14 +924,15 @@
       "source_kind": "first_party_production",
       "status": "False Positive",
       "triage_class": "false_positive",
-      "rationale": "False positive: initializeGenesis is nonReentrant, accepts only the immutable bootstrap authority and exact committed plan, and consumes genesisInitialized before interactions. Each action becomes EXECUTED before target calls; nested scheduling is blocked while executing. Self-only per-call transition contexts protect governed mutations. Completion requires sealing and no pending actions; failure reverts the full initialization.",
+      "rationale": "False positive: initializeGenesis remains nonReentrant, accepts only the immutable bootstrap authority and exact committed plan, and consumes genesisInitialized before interactions. The bound RoleRegistry grant does not call guardians. Scheduling validation now runs in a linked library with the same executing/preseal authority checks; the Executor retains nonce and pending counters. Actions become EXECUTED before target calls, self-only transition contexts protect mutations, and completion requires sealing with no pending actions. Failure reverts the complete initialization.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:138-147,168-195,1048,1384 checks immutable authority/plan and guards one-shot scheduling and execution.",
-        "test/unit/governance/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized product stack."
+        "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:234-242,261-288,1137-1170,1411-1428,1451 retains exact authority/plan, shared reentrancy guard, one-shot consumption, and execution-before-call state.",
+        "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:39-61,91-100 preserves execution exclusion, bootstrap actor and pending-action restrictions, and ordinary post-seal timing.",
+        "test/unit/governance/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized stack."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -2196,6 +2197,53 @@
         "Record independent reviewer disposition under issue #658."
       ],
       "gate": "Gate C / Gate F"
+    },
+    {
+      "source_kind": "first_party_production",
+      "status": "False Positive",
+      "triage_class": "false_positive",
+      "owner": "Protocol maintainers and independent security reviewers",
+      "issues": [
+        "https://github.com/6529-Collections/6529Stream/issues/658",
+        "https://github.com/6529-Collections/6529Stream/issues/656"
+      ],
+      "gate": "Gate C / Gate F",
+      "rationale": "False positive: the authenticated, code-hash-bound Core returns its stored ten-field satellite tuple. Publisher authority deliberately checks only the current target, its runtime code hash, GOVERNANCE_LAYER module type and canonical publisher interface. Frozen state, registry address, stored registry status, manifest hashes and revision are not authorization inputs. This is current-pointer binding, not a check or claim of live registry eligibility. All writers reject governance execution. Publish/supersede separately require the live bound role; challenge remains permissionless.",
+      "required_proof": [
+        "smart-contracts/domains/governance/StreamStateExport.sol:54-88,126-145 authenticates Core, selects the exact pointer identity fields and separately enforces publication/supersession role authority.",
+        "smart-contracts/core/StreamCore.sol:629-658 returns the stored pointer tuple; omitted stored metadata does not represent a live registry lookup.",
+        "test/current/StreamCurrentStateExport.t.sol:testPointerReplacementDisablesAllOldWritesAndPreservesHistory and testBoundCoreAndRoleRegistryCodeDriftRejectPublication verify pointer replacement and bound-code failures; testPublishChallengeSupersedeExactReceiptsAndImmutableHistory and testLiveRoleRemovalRegrantAndNoImplicitGovernanceAuthority cover actual role and permissionless challenge behavior."
+      ],
+      "fingerprint": "sha256:eb21a7aea8646776d2baf8f62f7255ba6b3858fda9e3274124828e24f54a11cc",
+      "detector": "unused-return",
+      "impact": "Medium",
+      "confidence": "Medium",
+      "source": {
+        "path": "smart-contracts/domains/governance/StreamStateExport.sol",
+        "start_line": 126,
+        "end_line": 145,
+        "element_type": "function",
+        "name": "_requireActivePublisher",
+        "signature": "_requireActivePublisher(StreamGovernanceManifest.LifecycleState)"
+      },
+      "semantic_elements": [
+        {
+          "path": "smart-contracts/domains/governance/StreamStateExport.sol",
+          "start_line": 126,
+          "end_line": 145,
+          "element_type": "function",
+          "name": "_requireActivePublisher",
+          "signature": "_requireActivePublisher(StreamGovernanceManifest.LifecycleState)"
+        },
+        {
+          "path": "smart-contracts/domains/governance/StreamStateExport.sol",
+          "start_line": 136,
+          "end_line": 137,
+          "element_type": "node",
+          "name": "(target,codeHash,None,moduleType,interfaceId,None,None,None,None,None) = IStreamCorePointers(manifest.core).getSatellitePointer(POINTER_TYPE)",
+          "signature": ""
+        }
+      ]
     },
     {
       "fingerprint": "sha256:ae9693d96fc7705912fd10bb62d124086943fcac1316299e0942da9b4e454cfa",

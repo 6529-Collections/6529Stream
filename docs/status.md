@@ -513,10 +513,10 @@ The historical Gate A regression/evidence baseline records:
 - `tools/security/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
-  dedicated pinned exact-drift analysis in CI. The current set is 44 retained
-  rows (4 High, 40 Medium): 30 remain Open (2 High, 28 Medium), comprising zero
+  dedicated pinned exact-drift analysis in CI. The current set is 45 retained
+  rows (4 High, 41 Medium): 30 remain Open (2 High, 28 Medium), comprising zero
   confirmed gaps, six design-review rows, and 24 pending dispositions.
-  Fourteen rows have narrow False Positive dispositions (2 High, 12 Medium),
+  Fifteen rows have narrow False Positive dispositions (2 High, 13 Medium),
   including the two previously reviewed `StreamSplitWallet` equality rows. The remaining Open set is a release
   blocker and the dispositions do not promote maturity.
   Bounded assembly made the Governance Executor's proposal-selected

@@ -1,8 +1,8 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-High/Medium baseline. The current inventory retains 44 findings: 4 High and
-40 Medium. Thirty remain Open, and 14 have detector-specific False Positive
+High/Medium baseline. The current inventory retains 45 findings: 4 High and
+41 Medium. Thirty remain Open, and 15 have detector-specific False Positive
 dispositions. Matching this inventory is not an audit or a readiness claim.
 
 Slither is a direct pin in `requirements-tools.txt` and is transitively
@@ -28,36 +28,43 @@ constructor closures; normal Foundry regression tests remain independent.
 The capture's exact source commit, timestamp, input hashes, native exit, and
 raw output digest are recorded in `ops/SLITHER_BASELINE.json`.
 
-The checked compiler inputs contain all 162 production source files, with
+The checked compiler inputs contain all 171 production source files, with
 contents verified against the source tree and compiler output for every file.
-They contain no test or script source. Slither reports 183 analyzed contracts
-across its compilation units (166 unique compiler contract outputs), using
+They contain no test or script source. Slither reports 203 analyzed contracts
+across its compilation units (175 unique compiler contract outputs), using
 101 detectors. This captures all production targets without optimizing the
 large deployment/test constructors merely to analyze production code.
 
-The unfiltered production run contains 783 findings: 5 High, 49 Medium,
-102 Low, 619 Informational, and 8 Optimization. Its High/Medium split is:
+The unfiltered production run contains 796 findings: 5 High, 50 Medium,
+106 Low, 627 Informational, and 8 Optimization. Its High/Medium split is:
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| First-party production | 4 | 40 | 44 |
+| First-party production | 4 | 41 | 45 |
 | Vendored | 1 | 9 | 10 |
 | Test (excluded from this scan) | 0 | 0 | 0 |
 | Script (excluded from this scan) | 0 | 0 | 0 |
 | Other | 0 | 0 | 0 |
 
-The reorganization capture is bound to source/config checkpoint
-`7b4ef22b052419e88d56cf7f207a7a7738dba7a7`. Compiler inputs contain exactly the
-162 production sources at that commit, with matching contents and compiler output
-for every source. Both compiler groups use Solidity 0.8.19; their explicit IR and
-non-IR profiles are retained in the build inputs.
+The current capture is bound to source/config checkpoint
+`db8e31ed886faa838a9dc83926d8bad869ce549b`. Its two compiler groups use Solidity
+0.8.19 with the configured IR/non-IR split; their union includes exactly the
+171 production sources, with matching contents and compiler output for every file.
 
-All 44 first-party High/Medium findings match the preceding baseline's detector,
-confidence and semantic elements after the reviewed path map and line-anchor
-changes. Each primary finding's source span also has identical non-comment Solidity
-tokens. The 30 Open and 14 False Positive dispositions are unchanged; no finding was
-silently suppressed or promoted to accepted status. Required source/test citations
-follow the relocated files and current line anchors.
+Compared with the preceding reorganization capture at
+`7b4ef22b052419e88d56cf7f207a7a7738dba7a7`, 43 High/Medium identities are unchanged.
+The guarded `initializeGenesis` reentrancy row has a new semantic fingerprint
+following extraction of scheduling validation; its detector-specific False
+Positive disposition was reviewed again. One new `unused-return` row covers
+`StreamStateExport._requireActivePublisher`: the helper intentionally selects
+the authenticated Core's stored pointer identity fields. Its disposition proves
+current-pointer binding, without claiming a live registry-status check.
+
+The 30 Open rows remain Open. There are now 15 reviewed False Positive rows;
+no suppression was added. The preceding raw capture and its provenance remain
+historical evidence; this refresh does not relabel or overwrite that capture.
+Current source/test citations and the two new dispositions are in the normalized
+JSON and its deterministic Markdown mirror.
 
 The existing detector-specific dispositions cover JSON formatting, deliberate
 sentinels/default locals, omitted tuple fields, guarded callbacks and signed value

@@ -92,8 +92,8 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 4, "Medium": 40, "total": 44})
-        self.assertEqual(len(data["findings"]), 44)
+        self.assertEqual(data["counts"], {"High": 4, "Medium": 41, "total": 45})
+        self.assertEqual(len(data["findings"]), 45)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
@@ -140,6 +140,24 @@ class SlitherBaselineTests(unittest.TestCase):
                     for item in row["required_proof"]
                 )
             )
+
+    def test_current_publisher_and_genesis_dispositions_are_scoped(self) -> None:
+        """Retain only the two reviewed identities, including the pointer-only boundary."""
+        rows = {row["fingerprint"]: row for row in load_baseline()["findings"]}
+        genesis = rows["sha256:da5b8287fc9627d35172174bf6997f4796c11e3699090687b3b9e771b5bf469c"]
+        publisher = rows["sha256:eb21a7aea8646776d2baf8f62f7255ba6b3858fda9e3274124828e24f54a11cc"]
+        self.assertNotIn("sha256:1ca71fbaad2d1b620db0b3bbc8029457d948629762de46e4663b4713fc1fa8f8", rows)
+        for row in (genesis, publisher):
+            self.assertEqual(row["status"], "False Positive")
+            self.assertEqual(row["triage_class"], "false_positive")
+        self.assertEqual(genesis["detector"], "reentrancy-no-eth")
+        self.assertIn("nonReentrant", genesis["rationale"])
+        self.assertTrue(any("StreamGovernanceScheduling.sol" in proof for proof in genesis["required_proof"]))
+        self.assertEqual(publisher["detector"], "unused-return")
+        self.assertEqual(publisher["source"]["name"], "_requireActivePublisher")
+        self.assertIn("not a check or claim of live registry eligibility", publisher["rationale"])
+        self.assertTrue(any("testPointerReplacementDisablesAllOldWritesAndPreservesHistory" in proof
+                            for proof in publisher["required_proof"]))
 
     def test_cli_requires_one_explicit_mode(self) -> None:
         with redirect_stderr(StringIO()):

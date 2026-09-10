@@ -3,27 +3,27 @@
 This is the current first-party production High/Medium Slither inventory.
 Passing the drift gate means the inventory matches the analyzed source; it does
 not accept any finding, complete a security audit, or make the protocol ready for
-public beta or production. 30 current rows remain `Open` and 14 have reviewed dispositions under issue #658.
+public beta or production. 30 current rows remain `Open` and 15 have reviewed dispositions under issue #658.
 
 ## Capture Provenance
 
 | Field | Value |
 | --- | --- |
-| Analyzed commit | `7b4ef22b052419e88d56cf7f207a7a7738dba7a7` |
-| Captured at | `2026-09-10T15:04:05Z` |
+| Analyzed commit | `db8e31ed886faa838a9dc83926d8bad869ce549b` |
+| Captured at | `2026-09-10T19:32:07Z` |
 | Slither | `0.11.5` |
 | crytic-compile | `0.3.11` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
 | Foundry | `1.7.1` |
-| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:e9f4026750c661cba51ebcbfc781330643e2df6e3bc092196ec97859b4163153` |
+| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:0897290bac4ba9bb826d0cb873bc9068fd88ddc39e6e5314fe4f385bb0b264ab` |
 | Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
-| Foundry config | `sha256:da72c962bd2c89706b082a589862e22863b4b1db27dfc3651ba30b3892ed7c8f` |
+| Foundry config | `sha256:e1018ca7758fd0b49f329437ee9162e1a9fb6c43ed5fb5b2eb0f98800f3b3c26` |
 | Current gate tool requirements | `sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2` |
 | Capture command | `python -m slither . --config-file slither.config.json --json-types detectors --json <temp-file> --fail-none` |
 | Gate command | `python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
-| Capture process | Native exit `0`; JSON `success=true`; `35734817` bytes |
-| Raw JSON SHA-256 | `sha256:7260359bea13d719f00ef7241fb530dc386a9360a733196e088ddabb9fa74dc6` |
+| Capture process | Native exit `0`; JSON `success=true`; `35335555` bytes |
+| Raw JSON SHA-256 | `sha256:059ed9c73c7a75cf39d31dc12c51570a61d111371cf1a5c88d2b4e60aa2831ac` |
 
 The default Slither process exit is non-zero while findings exist. The checked
 gate uses `--fail-none`, then independently requires native success, JSON
@@ -34,11 +34,11 @@ gate uses `--fail-none`, then independently requires native success, JSON
 | Impact | Count |
 | --- | ---: |
 | High | 5 |
-| Medium | 49 |
-| Low | 102 |
-| Informational | 619 |
+| Medium | 50 |
+| Low | 106 |
+| Informational | 627 |
 | Optimization | 8 |
-| Total | 783 |
+| Total | 796 |
 
 ## High/Medium Scope Separation
 
@@ -48,7 +48,7 @@ compiles every smart-contracts source and excludes test/script constructor closu
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| first party production | 4 | 40 | 44 |
+| first party production | 4 | 41 | 45 |
 | vendored | 1 | 9 | 10 |
 | test | 0 | 0 | 0 |
 | script | 0 | 0 | 0 |
@@ -74,7 +74,7 @@ by `tools/security/check_slither_baseline.py --baseline-only`.
 | `sha256:5fd90b161a2bc44edd49f1adcd7b7cf9e6aeef8617717c02d742a9bf108348f2` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/core/StreamCore.sol:555-579 `completePreparedMintFromManager(uint256,address,bytes32,bytes32)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#654](https://github.com/6529-Collections/6529Stream/issues/654), [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Prepared-mint completion calls the entropy coordinator and ERC-721 receiver before clearing the completion guard. Pending identity is cleared first and rollback is atomic, but the complete callback ordering remains review-sensitive; the row is not accepted or suppressed. | Document the prepared-mint callback graph and the state committed or cleared before each external call.<br>Retain adversarial callback reentry, replacement-manager abort, duplicate completion, and atomic rollback tests.<br>Record independent reviewer disposition before changing this row. | Gate C / Gate F |
 | `sha256:08cb157b0142cd5701213ef2472413cb0baac0c536119ded26d7de3e65a9d017` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:133-155 `createAuction(IStreamEnglishAuctionHouse.AuctionAuthorization,bytes,bytes,bytes)` | `False Positive` | `false_positive` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | False positive: createAuction holds the nonReentrant guard, consumes the signed authorization nonce before the manager interaction, and verifies actual Core custody plus returned token IDs before storing the auction. All auction mutations share the guard. The mint receiver callback is view-only and requires the exact Core, a mint from zero, and the active mint window. | smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:133-155,192-209,343-353 prevents callback mutation or replay while _storeAuction follows the manager call.<br>test/unit/auctions/StreamEnglishAuctionHouse.t.sol:testSignedCreationCustodiesActualCoreNFTAndConsumesReplay and testEntropyFailureRollsBackAuctionNonceAndMint; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting cover custody, nonce, and rollback boundaries. | Gate C / Gate F |
 | `sha256:463682f7db607f961a97c32fc5bf4dfc2c4d10eaf048b75645214b1400d8140c` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-230 `requestEntropy(bytes32,bytes)` | `False Positive` | `false_positive` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | False positive: requestEntropy, fulfillment, and retained-result retry share the nonReentrant guard. A synchronous upstream callback cannot enter fulfillment while the request is being established. The upstream request ID must be known before the binding is stored; unknown or duplicate IDs cannot install a result. The immutable Chainlink coordinator remains an explicit trusted dependency. | smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-230,244-269 guards request, fulfillment, and retry; the detector cross-function target keyToVrfRequest is a view getter.<br>test/unit/entropy/StreamEntropyProviderVRF.t.sol:testV25RequestIdentityAuthenticationAndDuplicateCallback and testRevertOutOfGasAndMalformedResponseRetainIdenticalRandomness cover identity and retry boundaries. | Gate C / Gate F |
-| `sha256:1ca71fbaad2d1b620db0b3bbc8029457d948629762de46e4663b4713fc1fa8f8` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/governance/StreamGovernanceExecutor.sol:168-195 `initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])` | `False Positive` | `false_positive` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | False positive: initializeGenesis is nonReentrant, accepts only the immutable bootstrap authority and exact committed plan, and consumes genesisInitialized before interactions. Each action becomes EXECUTED before target calls; nested scheduling is blocked while executing. Self-only per-call transition contexts protect governed mutations. Completion requires sealing and no pending actions; failure reverts the full initialization. | smart-contracts/domains/governance/StreamGovernanceExecutor.sol:138-147,168-195,1048,1384 checks immutable authority/plan and guards one-shot scheduling and execution.<br>test/unit/governance/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized product stack. | Gate C / Gate F |
+| `sha256:da5b8287fc9627d35172174bf6997f4796c11e3699090687b3b9e771b5bf469c` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/governance/StreamGovernanceExecutor.sol:261-288 `initializeGenesis(SystemManifestBootstrapBinding,GenesisBatch[])` | `False Positive` | `false_positive` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | False positive: initializeGenesis remains nonReentrant, accepts only the immutable bootstrap authority and exact committed plan, and consumes genesisInitialized before interactions. The bound RoleRegistry grant does not call guardians. Scheduling validation now runs in a linked library with the same executing/preseal authority checks; the Executor retains nonce and pending counters. Actions become EXECUTED before target calls, self-only transition contexts protect mutations, and completion requires sealing with no pending actions. Failure reverts the complete initialization. | smart-contracts/domains/governance/StreamGovernanceExecutor.sol:234-242,261-288,1137-1170,1411-1428,1451 retains exact authority/plan, shared reentrancy guard, one-shot consumption, and execution-before-call state.<br>smart-contracts/domains/governance/StreamGovernanceScheduling.sol:39-61,91-100 preserves execution exclusion, bootstrap actor and pending-action restrictions, and ordinary post-seal timing.<br>test/unit/governance/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized stack. | Gate C / Gate F |
 | `sha256:32fc7052ecfe04d924c98e3afe915c7891452ad52fbe4ed155b34ea7b97c6513` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:93-118 `settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in native primary-sale resolver/payment interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for hostile resolver/recipient reentry, double settlement, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:013da58b37b877db67596a1843adfa8cdb59b95b29a01a7e6a95eda26e78e986` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:121-141 `settleERC20PrimarySale(IStreamPrimarySaleSettlement.PrimarySale,address)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in ERC-20 primary-sale resolver/token interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for hostile resolver/token reentry, non-standard token behavior, double settlement, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:d5d986854faa79962646b165329cf6d1fc0676e5af610750333435a60cc1b555` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/domains/revenue/StreamSplitFactory.sol:213-252 `_deployWallet(bytes32)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in split-wallet deployment and initialization ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for partial initialization, callback reentry, duplicate deployment, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
@@ -103,6 +103,7 @@ by `tools/security/check_slither_baseline.py --baseline-only`.
 | `sha256:d064f8a068d20cb136fc385b8f3ebf64ed83cd0be78759a9dd47e9d8f0a30ac9` | Medium | `unused-return` | Medium | smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1103-1121 `_verifyContentRoot(StreamFinalityScope,uint256,bool)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1103 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:d67d7ccb83bc61dfb42ddeb5ec375990301936f80774e26c50ee82d60e40baab` | Medium | `unused-return` | Medium | smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1207-1219 `_sanctionVerification(StreamFinalityScope,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1207 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:e7b1700546d8fd3bc27ce9cb11e465bca65d1b724da7a5ea1591ad3f59341bb3` | Medium | `unused-return` | Medium | smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1861-1871 `_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol:1861 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:eb21a7aea8646776d2baf8f62f7255ba6b3858fda9e3274124828e24f54a11cc` | Medium | `unused-return` | Medium | smart-contracts/domains/governance/StreamStateExport.sol:126-145 `_requireActivePublisher(StreamGovernanceManifest.LifecycleState)` | `False Positive` | `false_positive` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658), [#656](https://github.com/6529-Collections/6529Stream/issues/656) | False positive: the authenticated, code-hash-bound Core returns its stored ten-field satellite tuple. Publisher authority deliberately checks only the current target, its runtime code hash, GOVERNANCE_LAYER module type and canonical publisher interface. Frozen state, registry address, stored registry status, manifest hashes and revision are not authorization inputs. This is current-pointer binding, not a check or claim of live registry eligibility. All writers reject governance execution. Publish/supersede separately require the live bound role; challenge remains permissionless. | smart-contracts/domains/governance/StreamStateExport.sol:54-88,126-145 authenticates Core, selects the exact pointer identity fields and separately enforces publication/supersession role authority.<br>smart-contracts/core/StreamCore.sol:629-658 returns the stored pointer tuple; omitted stored metadata does not represent a live registry lookup.<br>test/current/StreamCurrentStateExport.t.sol:testPointerReplacementDisablesAllOldWritesAndPreservesHistory and testBoundCoreAndRoleRegistryCodeDriftRejectPublication verify pointer replacement and bound-code failures; testPublishChallengeSupersedeExactReceiptsAndImmutableHistory and testLiveRoleRemovalRegrantAndNoImplicitGovernanceAuthority cover actual role and permissionless challenge behavior. | Gate C / Gate F |
 | `sha256:ae9693d96fc7705912fd10bb62d124086943fcac1316299e0942da9b4e454cfa` | Medium | `unused-return` | Medium | smart-contracts/domains/mint/legacy/StreamMinter.sol:177-180 `_collectionTotalSupply(uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/domains/mint/legacy/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:01d2efb6d47a0e62da5145d1797d84e0c46f1f415fd4f6b2846e0cc5b2a7012c` | Medium | `unused-return` | Medium | smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:205-255 `_resolveSale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol:209 _resolveSale. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 
@@ -111,8 +112,8 @@ by `tools/security/check_slither_baseline.py --baseline-only`.
 | Status | Rows |
 | --- | ---: |
 | `Open` | 30 |
-| `False Positive` | 14 |
-| Total | 44 |
+| `False Positive` | 15 |
+| Total | 45 |
 
 ## Triage Counts
 
@@ -121,8 +122,8 @@ by `tools/security/check_slither_baseline.py --baseline-only`.
 | `confirmed_gap` | 0 |
 | `design_review` | 6 |
 | `pending_disposition` | 24 |
-| `false_positive` | 14 |
-| Total | 44 |
+| `false_positive` | 15 |
+| Total | 45 |
 
 ## Triage Boundary
 

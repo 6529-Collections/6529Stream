@@ -144,10 +144,10 @@ Static-analysis review inputs:
 - [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
   normalized first-party production high/medium finding set;
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
-  mirror. The 44 retained rows comprise 4 High and 40 Medium findings: 30 remain
+  mirror. The 45 retained rows comprise 4 High and 41 Medium findings: 30 remain
   Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24
-  pending dispositions). Fourteen rows have source-traced False Positive
-  dispositions (2 High, 12 Medium), including the two previously reviewed
+  pending dispositions). Fifteen rows have source-traced False Positive
+  dispositions (2 High, 13 Medium), including the two previously reviewed
   `StreamSplitWallet` equality rows. Those dispositions do not waive any Open
   row or promote protocol maturity.
 - The bounded assembly call in `StreamGovernanceExecutor` makes its
@@ -300,8 +300,8 @@ status lives in
 Local evidence and accepted non-Slither dispositions are separate from
 unresolved production blockers:
 
-- The normalized first-party production Slither inventory retains 44 rows:
-  30 remain Open and 14 have focused False Positive dispositions. The live
+- The normalized first-party production Slither inventory retains 45 rows:
+  30 remain Open and 15 have focused False Positive dispositions. The live
   scan compiles every production source and excludes test/script compilation;
   vendored findings remain outside the normalized first-party set. Separate
   historical test/script diagnostics are outside that release-blocking set; they are not used to accept or suppress
