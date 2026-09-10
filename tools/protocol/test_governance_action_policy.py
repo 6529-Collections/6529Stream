@@ -18,6 +18,78 @@ class GovernanceActionPolicyCheckerTest(unittest.TestCase):
     def test_repository_policy_passes(self) -> None:
         checker.check(copy.deepcopy(self.policy))
 
+    def test_current_schedule_and_execution_policy_paths_pass(self) -> None:
+        checker.validate_policy_call_path(
+            checker.EXECUTOR_PATH.read_text(encoding="utf-8"),
+            checker.SCHEDULING_PATH.read_text(encoding="utf-8"),
+        )
+
+    def test_schedule_delegation_requires_real_import_and_bound_inputs(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        for before, after in (
+            ('import "./StreamGovernanceScheduling.sol";',
+             '// import "./StreamGovernanceScheduling.sol";'),
+            ('import "./StreamGovernanceScheduling.sol";', 'import "./OtherScheduling.sol";'),
+            ("StreamGovernanceScheduling.prepare(", "OtherScheduling.prepare("),
+            ("executing: _executing", "executing: false"),
+            ("StreamGovernanceScheduling.Prepared memory prepared =",
+             "_nonce += 1; StreamGovernanceScheduling.Prepared memory prepared ="),
+            ("StreamGovernanceScheduling.Prepared memory prepared =",
+             "{ _nonce += 1; } StreamGovernanceScheduling.Prepared memory prepared ="),
+            ("StreamGovernanceScheduling.Prepared memory prepared =",
+             "if (ctx.actionClass == 1) { _nonce += 1; } StreamGovernanceScheduling.Prepared memory prepared ="),
+        ):
+            with self.subTest(before=before, after=after):
+                self.assertIn(before, executor)
+                with self.assertRaisesRegex(ValueError, "policy validation path"):
+                    checker.validate_policy_call_path(executor.replace(before, after), scheduling)
+
+    @staticmethod
+    def _policy_call(source: str) -> str:
+        start = source.index("StreamGovernanceActionPolicy.validateCalls(")
+        return source[start:source.index(");", start) + 2]
+
+    def test_scheduling_policy_validation_cannot_be_missing_conditional_or_bypassed(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        call = self._policy_call(scheduling)
+        for replacement in (
+            "", "/* " + call + " */", "if (false) " + call,
+            "if (false) { " + call + " }", "return prepared; " + call,
+            call.replace("ctx.actionClass", "uint8(0)"),
+            call.replace("manifest.actionPolicyCatalogHash", "bytes32(0)"),
+        ):
+            with self.subTest(replacement=replacement):
+                with self.assertRaisesRegex(ValueError, "policy validation path"):
+                    checker.validate_policy_call_path(executor, scheduling.replace(call, replacement))
+
+    def test_other_function_cannot_supply_scheduling_validation(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        call = self._policy_call(scheduling)
+        moved = scheduling.replace(call, "") + "\nfunction unrelated() public { " + call + " }\n"
+        with self.assertRaisesRegex(ValueError, "scheduling policy validation"):
+            checker.validate_policy_call_path(executor, moved)
+
+    def test_execution_policy_validation_retains_exact_arguments_and_order(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        call = self._policy_call(executor)
+        for replacement in (
+            "", "/* " + call + " */", "if (false) { " + call + " }",
+            call.replace("scheduledCallDatas", "callDatas"),
+            call.replace("_manifest.actionPolicyEntryCount", "uint256(0)"),
+            "return; " + call,
+        ):
+            with self.subTest(replacement=replacement):
+                with self.assertRaisesRegex(ValueError, "policy validation path"):
+                    checker.validate_policy_call_path(executor.replace(call, replacement), scheduling)
+        effect = "action.status = GovernanceActionStatus.EXECUTED;"
+        late = executor.replace(call, "").replace(effect, effect + "\n" + call)
+        with self.assertRaisesRegex(ValueError, "execution policy validation before effects"):
+            checker.validate_policy_call_path(late, scheduling)
+
     def test_catalog_snapshot_delegation_cannot_omit_saved_hash_or_validation(self) -> None:
         executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
         bootstrap = checker.BOOTSTRAP_PATH.read_text(encoding="utf-8")

@@ -11,6 +11,11 @@ from pathlib import Path
 import jsonschema
 from eth_hash.auto import keccak
 
+from tools.protocol.check_external_call_gas_inventory import (
+    mask_comments_and_strings,
+    matching_closing_brace,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "release-artifacts" / "governance-action-policy.json"
 SCHEMA_PATH = (
@@ -35,6 +40,7 @@ MANIFEST_PATH = (
 BOOTSTRAP_PATH = (
     ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceBootstrap.sol"
 )
+SCHEDULING_PATH = EXECUTOR_PATH.with_name("StreamGovernanceScheduling.sol")
 
 EXPECTED_ACTION_CLASSES = {
     0: "IMMEDIATE_TIGHTENING",
@@ -135,6 +141,79 @@ def validate_catalog_snapshot_source(executor_source: str, bootstrap_source: str
         and "revertIStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(" in bootstrap,
         "scheduled catalog snapshot check",
     )
+
+
+def _function_body(source: str, name: str) -> str:
+    """Read one real function body, excluding comment/string lookalikes."""
+    masked = mask_comments_and_strings(source)
+    matches = list(re.finditer(r"\bfunction\s+" + re.escape(name) + r"\s*\(", masked))
+    require(len(matches) == 1, f"policy validation path: unique {name} function")
+    opening = masked.find("{", matches[0].end())
+    semicolon = masked.find(";", matches[0].end())
+    require(opening >= 0 and (semicolon < 0 or opening < semicolon),
+            f"policy validation path: {name} body")
+    closing = matching_closing_brace(masked, opening)
+    require(closing is not None, f"policy validation path: {name} closing brace")
+    return masked[opening + 1:closing]
+
+
+def _top_level_statements(body: str) -> list[str]:
+    """Select unconditional statement spellings, including any unbraced if prefix."""
+    statements = []
+    depth = parens = start = 0
+    for index, char in enumerate(body):
+        if char == "(":
+            parens += 1
+        elif char == ")":
+            parens -= 1
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0 and parens == 0:
+                start = index + 1
+        elif char == ";" and depth == 0 and parens == 0:
+            statements.append(re.sub(r"\s+", "", body[start:index + 1]))
+            start = index + 1
+    return statements
+
+
+def validate_policy_call_path(executor_source: str, scheduling_source: str) -> None:
+    """Bind scheduling's library route and execution's separate policy validation."""
+    masked = mask_comments_and_strings(executor_source)
+    imports = list(re.finditer(r'import\s+"\./StreamGovernanceScheduling\.sol"\s*;', executor_source))
+    require(any(masked[m.start():m.start() + 6] == "import" for m in imports),
+            "policy validation path: scheduling source import")
+    schedule_body = _function_body(executor_source, "_schedule")
+    prepare_body = _function_body(scheduling_source, "prepare")
+    execute_body = _function_body(executor_source, "_execute")
+    prepare = _top_level_statements(prepare_body)
+    execute = _top_level_statements(execute_body)
+    expected_delegation = """StreamGovernanceScheduling.Prepared memory prepared =
+        StreamGovernanceScheduling.prepare(_admin, _policy, _actionPolicy, _manifest,
+            StreamGovernanceScheduling.Runtime({owner: owner(),
+                bootstrapAuthority: genesisBootstrapAuthority, nonce: _nonce,
+                pendingCount: _pendingScheduledActionCount, executing: _executing,
+                genesisPlanHash: genesisPlanHash, genesisInitialized: genesisInitialized}),
+            ctx, calls);"""
+    require(re.sub(r"\s+", "", schedule_body).startswith(re.sub(r"\s+", "", expected_delegation)),
+            "policy validation path: schedule delegation and bound arguments")
+    expected_prepare = """StreamGovernanceActionPolicy.validateCalls(actionPolicy,
+        manifest.actionPolicyCandidateProfileHash, manifest.actionPolicyCatalogHash,
+        manifest.actionPolicyEntryCount, ctx.actionClass, calls, callDatas);"""
+    require(prepare.count(re.sub(r"\s+", "", expected_prepare)) == 1,
+            "policy validation path: scheduling policy validation")
+    expected_execute = """StreamGovernanceActionPolicy.validateCalls(_actionPolicy,
+        _manifest.actionPolicyCandidateProfileHash, _manifest.actionPolicyCatalogHash,
+        _manifest.actionPolicyEntryCount, action.actionClass, calls, scheduledCallDatas);"""
+    execution_call = re.sub(r"\s+", "", expected_execute)
+    executed = "action.status=GovernanceActionStatus.EXECUTED;"
+    require(execute.count(execution_call) == 1 and executed in execute
+            and execute.index(execution_call) < execute.index(executed),
+            "policy validation path: execution policy validation before effects")
+    require(not any(re.search(r"\b(return|assembly)\b", body)
+                    for body in (schedule_body, prepare_body, execute_body)),
+            "policy validation path: early return or assembly bypass")
 
 
 def _uint_word(value: int) -> bytes:
@@ -420,11 +499,8 @@ def check(policy: dict) -> None:
     executor_source = EXECUTOR_PATH.read_text(encoding="utf-8")
     policy_source = POLICY_LIBRARY_PATH.read_text(encoding="utf-8")
     manifest_source = MANIFEST_PATH.read_text(encoding="utf-8")
-    require(
-        executor_source.count("StreamGovernanceActionPolicy.validateCalls(") >= 2
-        and "function validateCalls(" in policy_source,
-        "executor must validate at schedule and execution",
-    )
+    validate_policy_call_path(executor_source, SCHEDULING_PATH.read_text(encoding="utf-8"))
+    _function_body(policy_source, "validateCalls")
     validate_catalog_snapshot_source(
         executor_source, BOOTSTRAP_PATH.read_text(encoding="utf-8")
     )
