@@ -34,9 +34,32 @@ jobs:
           python-version: "3.12.13"
 
       - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
         uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
 
       - name: Install pinned Python toolchain
         shell: bash
@@ -89,9 +112,32 @@ jobs:
           python-version: "3.12.10"
 
       - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
         uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
 
       - name: Install pinned Solc toolchain
         shell: powershell
@@ -171,9 +217,32 @@ jobs:
           python-version: "3.12.13"
 
       - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
         uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
 
       - name: Install pinned Slither toolchain
         shell: bash
@@ -229,9 +298,32 @@ jobs:
           fi
 
       - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
         uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
         with:
           version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
 
       - name: Repository hygiene
         shell: bash
