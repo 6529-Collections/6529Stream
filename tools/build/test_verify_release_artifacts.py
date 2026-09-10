@@ -1047,7 +1047,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_bytes(
                 runtime_root,
                 runtime_root.read_bytes()
-                + b"\nimport test_changelog_check\n",
+                + b"\nfrom tools.docs import test_changelog_check\n",
             )
             seed_release_tool_policy_tree(root)
             refresh_checksum_indexes(root)
@@ -2195,6 +2195,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         dependency_name = "tools.protocol.check_governed_parameter_identifiers"
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
+            write_text(root / "tools/__init__.py", "")
+            write_text(root / "tools/protocol/__init__.py", "")
             write_text(
                 root / "tools/protocol/check_governed_parameter_identifiers.py",
                 "VALUE = 'snapshot'\n",
