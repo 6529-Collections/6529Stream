@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamFixedPriceSaleAdapter.sol";
-import "../../interfaces/stream/IStreamMintManager.sol";
-import "../../interfaces/stream/IStreamSplitFactory.sol";
-import "../../interfaces/stream/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol";
+import "../../interfaces/stream/mint/IStreamMintManager.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
+import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";

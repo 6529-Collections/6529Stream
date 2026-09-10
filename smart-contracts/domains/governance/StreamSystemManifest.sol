@@ -1,28 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
-import "../../interfaces/stream/IStreamSystemManifest.sol";
-import "./StreamGovernanceEvidence.sol";
+import "../../interfaces/stream/core/IStreamCorePointers.sol";
 
-interface IStreamSystemManifestCore {
-    function getSatellitePointer(bytes32 pointerType)
-        external
-        view
-        returns (
-            address target,
-            bytes32 codeHash,
-            bool frozen,
-            bytes32 moduleType,
-            bytes4 interfaceId,
-            address registry,
-            uint8 registryStatus,
-            bytes32 moduleManifestHash,
-            bytes32 deploymentManifestHash,
-            uint64 revision
-        );
-}
+import "../../vendor/openzeppelin/IERC165.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceReads.sol";
+import "../../interfaces/stream/governance/IStreamSystemManifest.sol";
+import "./StreamGovernanceEvidence.sol";
 
 /// @notice Permanent, state-only aggregate and append-only onchain payload
 ///         history for Stream deployment discovery.
@@ -365,7 +349,7 @@ contract StreamSystemManifest is IStreamSystemManifest {
             bytes32 scopeHash,
             bytes32 oldValueHash,
             bytes32 newValueHash
-        ) = IStreamGovernanceExecutor(governanceExecutor).currentAction();
+        ) = IStreamGovernanceReads(governanceExecutor).currentAction();
         if (!executing || actionId == bytes32(0)) revert NoExecutingGovernanceAction();
         if (actionClass > REPLACEMENT_ACTION_CLASS) {
             revert InvalidGovernanceActionClass(actionClass);
@@ -479,7 +463,7 @@ contract StreamSystemManifest is IStreamSystemManifest {
             facts.moduleManifestHash,
             facts.deploymentManifestHash,
             facts.revision
-        ) = IStreamSystemManifestCore(core).getSatellitePointer(pointerType);
+        ) = IStreamCorePointers(core).getSatellitePointer(pointerType);
         // Discovery describes the installed stack. Uninstalled product satellites
         // are zero addresses, rather than placeholder contracts. The canonical
         // registry and this frozen publication pointer are always required.

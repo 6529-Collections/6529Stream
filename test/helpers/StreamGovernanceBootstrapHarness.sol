@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/interfaces/stream/IStreamGovernanceExecutor.sol";
-import "../../smart-contracts/interfaces/stream/IStreamModuleRegistry.sol";
+import "../../smart-contracts/interfaces/stream/governance/IStreamGovernanceExecutor.sol";
+import "../../smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../smart-contracts/libraries/SSTORE2.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceBootstrap.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceEvidence.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
-import "./CharacterizationTestBase.sol";
+import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 
 contract StreamGovernanceBootstrapTriggerMock {
     uint256 public value;

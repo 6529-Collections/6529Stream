@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamSplitFactory.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "./StreamSplitWallet.sol";
 
 /// @notice Creates immutable split profiles and their deterministic native split wallets.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamArtistArchiveV2.sol";
+import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import "../../libraries/SSTORE2.sol";
 
 /// @notice Append-only evidence archive for the proposed artist-authority successor.

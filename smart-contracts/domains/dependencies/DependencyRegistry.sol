@@ -10,7 +10,7 @@
 
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamAdmins.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
 import "../metadata/StreamMetadataRenderer.sol";
 
 contract DependencyRegistry {

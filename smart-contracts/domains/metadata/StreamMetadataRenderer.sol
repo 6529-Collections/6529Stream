@@ -3,9 +3,9 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/Base64.sol";
-import "../../interfaces/stream/IDependencyRegistry.sol";
-import "../../interfaces/stream/IStreamAdmins.sol";
-import "../../interfaces/stream/IRandomizerLifecycle.sol";
+import "../../interfaces/stream/dependencies/IDependencyRegistry.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
+import "../../interfaces/stream/legacy/entropy/IRandomizerLifecycle.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 
 library StreamMetadataRenderer {

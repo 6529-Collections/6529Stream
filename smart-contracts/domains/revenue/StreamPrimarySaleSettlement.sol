@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamAssetPolicyRegistry.sol";
-import "../../interfaces/stream/IStreamPrimarySaleSettlement.sol";
-import "../../interfaces/stream/IStreamSplitFactory.sol";
+import "../../interfaces/standards/IERC20.sol";
+
+import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
+import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
-
-interface IERC20PrimarySettlementAsset {
-    function balanceOf(address account) external view returns (uint256);
-    function transfer(address recipient, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-}
 
 /// @notice Outside-Core adapter for recording official primary-sale settlement evidence.
 contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, ReentrancyGuard {
@@ -470,7 +466,7 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
 
     function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {
         bool success;
-        uint256 selector = uint32(IERC20PrimarySettlementAsset.balanceOf.selector);
+        uint256 selector = uint32(IERC20.balanceOf.selector);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))
@@ -528,7 +524,7 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
     function _callTransferFrom(address asset, address from, address to, uint256 amount) private {
         bool success;
         uint256 transferResult;
-        uint256 selector = uint32(IERC20PrimarySettlementAsset.transferFrom.selector);
+        uint256 selector = uint32(IERC20.transferFrom.selector);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))
@@ -550,7 +546,7 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
     function _callTransfer(address asset, address to, uint256 amount) private {
         bool success;
         uint256 transferResult;
-        uint256 selector = uint32(IERC20PrimarySettlementAsset.transfer.selector);
+        uint256 selector = uint32(IERC20.transfer.selector);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))

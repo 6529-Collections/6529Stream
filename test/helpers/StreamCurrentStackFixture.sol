@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./CharacterizationTestBase.sol";
+import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";

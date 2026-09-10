@@ -2,10 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamCoreFinalityAdapter.sol";
-import "../../interfaces/stream/IStreamCoreFinalitySource.sol";
-import "../../interfaces/stream/IStreamFinalityMetadataReads.sol";
-import "./StreamArtworkFinalityTypes.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
+import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
+import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
 /// @notice Immutable read-only composition boundary for artwork-finality Core facts.
 /// @dev Keeps aggregate finality reads out of StreamCore while binding the exact Core and

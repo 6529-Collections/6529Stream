@@ -5,9 +5,9 @@ pragma solidity ^0.8.19;
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
 import "../../interfaces/standards/IERC7572.sol";
-import "../../interfaces/stream/IStreamAdmins.sol";
+import "../../interfaces/stream/access/IStreamAdmins.sol";
 import "../../interfaces/compatibility/IStreamCompatibility.sol";
-import "../../interfaces/stream/IStreamContractMetadata.sol";
+import "../../interfaces/stream/metadata/IStreamContractMetadata.sol";
 import "./StreamMetadataRenderer.sol";
 import "../access/StreamPauseDomains.sol";
 

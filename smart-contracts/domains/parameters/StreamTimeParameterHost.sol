@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamGovernedParameterAuthority.sol";
-import "../../interfaces/stream/IStreamTimeParameterHost.sol";
+import "../../interfaces/stream/parameters/IStreamGovernedParameterAuthority.sol";
+import "../../interfaces/stream/parameters/IStreamTimeParameterHost.sol";
 
 /// @notice Reusable launch-v1 Governed Time Parameter host.
 /// @dev The parameter inventory is fixed during construction. Values may only

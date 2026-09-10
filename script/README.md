@@ -1,50 +1,35 @@
-# Deployment Scripts
+# Deployment and rehearsal scripts
 
-Foundry deployment and rehearsal scripts live in this directory.
+Start with [the current stack demo](current/README.md). It deploys permanent Core,
+governance, registry and product modules, seals genesis, then exercises paid
+minting, entropy, metadata, split withdrawals and transfer on local Anvil.
 
-Current scripts:
-
-- `RehearseDeployment.s.sol`: deploys and wires a local non-production
-  6529Stream stack, creates a sample collection, configures sample admin
-  ceremony state, revokes the temporary deployment admin, and transfers Ownable
-  control to the configured Safe placeholder. It also exposes `runSepolia()`,
-  which reads public Sepolia rehearsal addresses from environment variables and
-  refuses to run unless `block.chainid` is Sepolia `11155111`.
-- `RehearseMetadataBrowser.s.sol`: builds on the local stack, registers a
-  deterministic metadata dependency, mints through the EIP-712 drop
-  authorization path, finalizes token metadata inputs, and returns generated
-  on-chain metadata evidence for the browser sandbox checker.
-- `RehearseAuctionCeremony.s.sol`: builds on the local stack, signs and mints
-  an auction drop through EIP-712 authorization, bids, settles, withdraws
-  poster/protocol/curator proceeds, and returns local accounting evidence.
-- `RehearseEmergencyRedeployment.s.sol`: deploys an impacted local stack and a
-  replacement stack with a distinct deployment version, proves immutable
-  redeployment evidence, confirms the admin ceremony on both stacks, and mints a
-  fixed-price smoke token on the replacement deployment.
-
-Run the local rehearsal with:
-
-```bash
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
-forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
-forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
+```text
+anvil --port 8547 --chain-id 31337
 ```
 
-Run the local metadata browser rehearsal with:
+In another shell at the repository root:
 
-```bash
-python scripts/test_rehearsal_metadata_browser_sandbox.py
-python scripts/check_rehearsal_metadata_browser_sandbox.py
+```powershell
+pwsh -NoProfile -File scripts/run-current-stack.ps1 -RpcUrl http://127.0.0.1:8547
 ```
 
-This is an Anvil/local simulation gate, not a production broadcast. Gate E still
-requires fork/testnet dry runs, production metadata browser evidence, real
-manifest generation from broadcast outputs, contract verification inputs, ABI
-checksums, retained live-ceremony evidence, and retained live emergency
-redeployment evidence before public beta.
+The helper uses Anvil's public unlocked accounts on loopback. Its local provider is
+explicitly insecure development randomness. For configured Sepolia/VRF and signer
+requirements read the [current guide](current/README.md); the local example is not
+a production deployment recipe.
 
-For Sepolia, use the no-secret template at
-`deployments/config/sepolia-6529stream-v0.1.0-001.template.json` and the
-runbook in `docs/deployment.md#sepolia-deployment-rehearsal-runbook`. Retained
-command transcripts must redact RPC endpoint values, signing material, API
-tokens, and unreleased drop payloads before they are committed.
+| Directory | Purpose |
+| --- | --- |
+| `current/` | Current deployment, exact genesis plans and development-only helpers |
+| `legacy/` | Historical deployment, auction ceremony, browser and emergency rehearsals |
+
+Legacy rehearsals remain regression/evidence tools. They use an earlier Core and
+satellite arrangement; their addresses, constructors and authorization schemas do
+not apply to permanent Core. See [historical architecture](../docs/reference/legacy-stack/architecture.md).
+
+Compiler profile, linked libraries and creation bytecode determine deployment
+identity. Keep each broadcast paired with its exact compiler export; simulation
+alone is not a receipt. Keep secrets out of committed evidence. Follow
+[deployment records](../deployments/README.md), [tooling](../docs/tooling.md) and
+[release readiness](../docs/release-readiness.md).

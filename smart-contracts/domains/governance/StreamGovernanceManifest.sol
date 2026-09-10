@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamGovernanceExecutor.sol";
-import "../../interfaces/stream/IStreamModuleRegistry.sol";
-import "../../interfaces/stream/IStreamRoleRegistry.sol";
+import "../../interfaces/stream/governance/IStreamGovernanceExecutor.sol";
+import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
+import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "./StreamGovernanceBootstrap.sol";
 import "./StreamGovernanceActionPolicy.sol";
 import "./StreamGovernanceEvidence.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/interfaces/stream/IRandomizer.sol";
+import "../../smart-contracts/interfaces/stream/legacy/entropy/IRandomizer.sol";
 import "../../smart-contracts/interfaces/compatibility/IStreamLegacyCore.sol";
 
 contract ImmediateRandomizer is IRandomizer {

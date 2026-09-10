@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamMintModuleRegistry.sol";
+import "../../interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
 /// @notice Boring allowlist registry for StreamMintManager gates and future modules.

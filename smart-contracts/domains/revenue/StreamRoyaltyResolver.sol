@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamRoyaltyResolver.sol";
-import "../../interfaces/stream/IStreamCore.sol";
-import "../../interfaces/stream/IStreamSplitFactory.sol";
+import "../../interfaces/stream/revenue/IStreamRoyaltyResolver.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 

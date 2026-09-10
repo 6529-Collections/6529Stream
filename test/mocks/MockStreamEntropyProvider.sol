@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/interfaces/stream/IStreamEntropyProvider.sol";
-import "../../smart-contracts/interfaces/stream/IStreamEntropyCoordinator.sol";
+import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol";
+import "../../smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../../smart-contracts/vendor/openzeppelin/ERC165.sol";
 
 /// @notice LOCAL TEST ONLY: anyone can supply deterministic test randomness or simulate outages.

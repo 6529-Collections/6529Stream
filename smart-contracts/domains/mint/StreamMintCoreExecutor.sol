@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamCore.sol";
-import "../../interfaces/stream/IStreamMintManager.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/mint/IStreamMintManager.sol";
 
 /// @notice Core token execution and token-level event emission for StreamMintManager.
 /// @dev Library calls execute by delegatecall, so events retain the manager as their emitter.

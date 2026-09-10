@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamArtworkFinalityComponents.sol";
-import "../../interfaces/stream/IStreamArtworkFinalityRegistry.sol";
+import "../../interfaces/stream/finality/IStreamArtworkFinalityComponents.sol";
+import "../../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
 import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamCoreFinalityAdapter.sol";
-import "../../interfaces/stream/IStreamCoreFinalitySource.sol";
-import "../../interfaces/stream/IStreamFinalityGovernanceAuthority.sol";
-import "../../interfaces/stream/IStreamFinalityMetadataReads.sol";
-import "../../interfaces/stream/IStreamFinalitySanctionReads.sol";
-import "./StreamArtworkFinalityTypes.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
+import "../../interfaces/stream/finality/IStreamFinalityGovernanceAuthority.sol";
+import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
+import "../../interfaces/stream/finality/IStreamFinalitySanctionReads.sol";
+import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
 /// @notice Five-scope artwork finality registry with the single governed terminal-freeze path.
 /// @dev Implements [LTA-FINALITY] collection and scoped finality (all five scopes ship at

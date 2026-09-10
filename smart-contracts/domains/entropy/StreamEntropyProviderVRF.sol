@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamEntropyProvider.sol";
-import "../../interfaces/stream/IStreamEntropyCoordinator.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyProvider.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../../integrations/chainlink/IVRFCoordinatorV2Plus.sol";
 import "../../vendor/chainlink/VRFConsumerBaseV2.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";

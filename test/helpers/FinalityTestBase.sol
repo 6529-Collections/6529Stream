@@ -3,10 +3,10 @@ pragma solidity ^0.8.19;
 
 import "../../smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol";
 import "../../smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol";
-import "../../smart-contracts/domains/finality/StreamArtworkFinalityTypes.sol";
+import "../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 import "../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
 import "./Assertions.sol";
-import "./CharacterizationTestBase.sol";
+import "../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "./FinalityMocks.sol";
 
 /// @notice Shared harness for the artwork finality registry tests: deploys the registry and

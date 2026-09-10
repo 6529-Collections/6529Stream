@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/stream/IStreamArtistRegistryV2.sol";
+import "../../interfaces/stream/artist/IStreamArtistRegistryV2.sol";
 
 /// @notice Constructor-fixed typed directory for the proposed artist-authority successor.
 /// @dev This contract performs no dependency calls and has no runtime storage-write path. Its

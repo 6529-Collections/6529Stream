@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/domains/auctions/AuctionContract.sol";
-import "../../smart-contracts/domains/mint/StreamDrops.sol";
+import "../../smart-contracts/domains/auctions/legacy/AuctionContract.sol";
+import "../../smart-contracts/domains/mint/legacy/StreamDrops.sol";
 import "../../smart-contracts/domains/access/StreamPauseDomains.sol";
 import "./Assertions.sol";
 import "./DropAuthTestHelper.sol";
-import "./StreamFixture.sol";
+import "../regression/legacy/helpers/StreamFixture.sol";
 
 abstract contract ProtocolStateMachine is DropAuthTestHelper, StreamFixture {
     using Assertions for address;

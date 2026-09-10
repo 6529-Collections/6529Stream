@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../StreamCorePermanentTarget.t.sol";
+import "../unit/core/StreamCorePermanentTarget.t.sol";
 import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";

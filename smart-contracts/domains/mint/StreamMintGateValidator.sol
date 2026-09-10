@@ -2,10 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "../../vendor/openzeppelin/IERC165.sol";
-import "../../interfaces/stream/IStreamMintGate.sol";
-import "../../interfaces/stream/IStreamMintManager.sol";
-import "../../interfaces/stream/IStreamMintModuleRegistry.sol";
-import "../../interfaces/stream/IStreamModuleRegistry.sol";
+import "../../interfaces/stream/mint/IStreamMintGate.sol";
+import "../../interfaces/stream/mint/IStreamMintManager.sol";
+import "../../interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol";
+import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "./StreamMintOperationIdentity.sol";
 
 /// @notice Closed-world gate configuration and request validation for StreamMintManager.

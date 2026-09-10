@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../smart-contracts/vendor/openzeppelin/Base64.sol";
-import "../../smart-contracts/interfaces/stream/IStreamGasParameterHost.sol";
+import "../../smart-contracts/interfaces/stream/parameters/IStreamGasParameterHost.sol";
 import "../../smart-contracts/vendor/openzeppelin/Math.sol";
 import "../../smart-contracts/core/StreamCoreReadBuffer.sol";
 import "../../smart-contracts/domains/parameters/StreamGasParameterHost.sol";
