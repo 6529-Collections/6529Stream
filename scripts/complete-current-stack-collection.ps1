@@ -108,13 +108,29 @@ function Read-CompletionAt([string]$Module,[string]$Name,[string[]]$Values=@()) 
     return ,@($decoded)
 }
 function Export-CollectorPackage {
-    Require-CompletionReady;Require-CompletionFrozen
     $package=if($CollectorDirectory){[IO.Path]::GetFullPath($CollectorDirectory)}else{Join-Path $OutputDirectory 'collector-package'}
     if (Test-Path -LiteralPath (Join-Path $package 'manifest.json')) {
-        & node (Join-Path $completionScriptRoot 'verify_current_stack_collector.mjs') $package
+        $collection=Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $package 'collection.json')|ConvertFrom-Json -AsHashtable
+        if ([string]$collection.chainId -ne '31337' -or $collection.core -ine $addresses.core -or
+            [string]$collection.collectionId -cne [string]$script:state.collectionId) {throw 'Retained collector package belongs to another chain, Core or collection.'}
+        if ($BlockNumber -and [string]$collection.blockNumber -cne $BlockNumber) {throw 'Retained collector package differs from the requested block.'}
+        if (-not $script:state.Contains('collectorPackage')) {Require-CompletionReady;Require-CompletionFrozen}
+        $actualHash=(Get-FileHash -LiteralPath (Join-Path $package 'manifest.json') -Algorithm SHA256).Hash.ToLowerInvariant()
+        $expectedHash=if($script:state.Contains('collectorPackage')){$script:state.collectorPackage.manifestSha256}else{$actualHash}
+        if ($expectedHash -cne $actualHash) {throw 'Retained collector package differs from the checkpoint manifest hash.'}
+        & node (Join-Path $completionScriptRoot 'verify_current_stack_collector.mjs') $package --expected-manifest-sha256 $expectedHash
         if ($LASTEXITCODE -ne 0) {throw 'Retained collector package verification failed.'}
+        # Recover a completed package after a checkpoint interruption, or retain
+        # its exact content identity when the same package was moved elsewhere.
+        # Historical packages do not require current custody/pointers to match.
+        if ($script:state.Contains('collectorPackage') -and $script:state.collectorPackage.path -cne $package) {
+            if (-not $script:state.Contains('collectorPackageHistory')) {$script:state.collectorPackageHistory=@()}
+            $script:state.collectorPackageHistory+=@($script:state.collectorPackage)
+        }
+        $script:state.collectorPackage=@{path=$package;blockNumber=[string]$collection.blockNumber;blockHash=$collection.blockHash;manifestSha256=$actualHash};Save-ScenarioState
         return
     }
+    Require-CompletionReady;Require-CompletionFrozen
     New-Item -ItemType Directory -Path $package -Force|Out-Null
     $captureBlock=if($BlockNumber){Scenario-Hex (Scenario-UInt $BlockNumber)}else{Invoke-ScenarioRpc 'eth_blockNumber'};$header=Invoke-ScenarioRpc 'eth_getBlockByNumber' @($captureBlock,$false)
     $script:observations=@()

@@ -49,12 +49,51 @@ $sandbox=Join-Path ([IO.Path]::GetTempPath()) ('stream-completion-'+[guid]::NewG
 $OutputDirectory=$sandbox;$CollectorDirectory='';$completionScriptRoot=$PSScriptRoot
 try {
     $null=New-Item -ItemType Directory -Path (Join-Path $sandbox 'collector-package')
-    [IO.File]::WriteAllText((Join-Path $sandbox 'collector-package/manifest.json'),'{}')
-    function Require-CompletionReady {}
-    function Require-CompletionFrozen {}
-    function node([string]$Program,[string]$Package) {$script:invokedVerifier=$Program;$global:LASTEXITCODE=0}
+    $manifestPath=Join-Path $sandbox 'collector-package/manifest.json'
+    $collectionPath=Join-Path $sandbox 'collector-package/collection.json'
+    [IO.File]::WriteAllText($manifestPath,'{}')
+    $manifestHash=(Get-FileHash -LiteralPath $manifestPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    $collection=@{chainId='31337';core=$addresses.core;collectionId='2';blockNumber='375';blockHash=('0x'+('a'*64))}
+    function Write-CollectionFixture {[IO.File]::WriteAllText($collectionPath,($collection|ConvertTo-Json))}
+    Write-CollectionFixture
+    $script:state=@{collectionId='2'};$BlockNumber=''
+    $script:readyCalls=0;$script:frozenCalls=0;$script:allowReady=$true;$script:saveCalls=0;$script:verifyExit=0;$script:verifyCalls=0
+    function Require-CompletionReady {$script:readyCalls++;if(-not $script:allowReady){throw 'live readiness required'}}
+    function Require-CompletionFrozen {$script:frozenCalls++}
+    function Save-ScenarioState {$script:saveCalls++}
+    function node([string]$Program,[string]$Package,[string]$ExpectedFlag,[string]$ExpectedHash) {
+        $script:invokedVerifier=$Program;$script:invokedExpected=@($ExpectedFlag,$ExpectedHash);$script:verifyCalls++;$global:LASTEXITCODE=$script:verifyExit
+    }
     Export-CollectorPackage
     Check ($script:invokedVerifier -eq (Join-Path $PSScriptRoot 'verify_current_stack_collector.mjs')) 'Existing packages use the repository-owned verifier, never a package executable.'
+    Check ($script:invokedExpected[0] -eq '--expected-manifest-sha256' -and $script:invokedExpected[1] -ceq $manifestHash) 'Verifier receives the exact expected manifest hash.'
+    Check ($script:readyCalls -eq 1 -and $script:frozenCalls -eq 1 -and $script:saveCalls -eq 1) 'Checkpoint-free recovery retains live readiness and freeze checks before adoption.'
+    Check ($script:state.collectorPackage.manifestSha256 -ceq $manifestHash -and $script:state.collectorPackage.blockNumber -eq '375') 'Recovered checkpoint binds verified manifest and block.'
+    $script:allowReady=$false;$BlockNumber='375'
+    Export-CollectorPackage
+    Check ($script:readyCalls -eq 1 -and $script:frozenCalls -eq 1) 'A hash-bound historical package remains usable after current mutable state changes.'
+    $script:state.collectorPackage.path='D:/prior-location/collector-package'
+    Export-CollectorPackage
+    Check ($script:state.collectorPackage.path -eq (Join-Path $sandbox 'collector-package') -and $script:state.collectorPackageHistory.Count -eq 1) 'Moving the exact package preserves content identity and prior location.'
+    $BlockNumber='374'
+    Reject {Export-CollectorPackage} 'requested block'
+    $BlockNumber='375'
+    foreach ($mutation in @(@{key='chainId';value='11155111'},@{key='core';value='0x0000000000000000000000000000000000009999'},@{key='collectionId';value='999'})) {
+        $old=$collection[$mutation.key];$collection[$mutation.key]=$mutation.value;Write-CollectionFixture
+        Reject {Export-CollectorPackage} 'another chain, Core or collection'
+        $collection[$mutation.key]=$old;Write-CollectionFixture
+    }
+    $script:state.collectorPackage.manifestSha256='0'*64
+    $callsBefore=$script:verifyCalls
+    Reject {Export-CollectorPackage} 'checkpoint manifest hash'
+    Check ($script:verifyCalls -eq $callsBefore) 'Swapped checkpoint digest is rejected before invoking verifier or saving.'
+    $script:state.collectorPackage.manifestSha256=$manifestHash
+    $script:verifyExit=1;$savesBefore=$script:saveCalls
+    Reject {Export-CollectorPackage} 'verification failed'
+    Check ($script:saveCalls -eq $savesBefore) 'Verifier failure cannot update the checkpoint.'
+    $script:verifyExit=0;$script:state=@{collectionId='2'}
+    Reject {Export-CollectorPackage} 'live readiness required'
+    Check (-not $script:state.Contains('collectorPackage')) 'No-checkpoint adoption cannot bypass prior live readiness.'
 } finally {
     $resolved=[IO.Path]::GetFullPath($sandbox);$temp=[IO.Path]::GetFullPath([IO.Path]::GetTempPath())
     if (-not $resolved.StartsWith($temp,[StringComparison]::OrdinalIgnoreCase)) {throw 'Temporary test cleanup escaped its parent.'}
