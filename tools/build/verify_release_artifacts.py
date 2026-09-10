@@ -524,7 +524,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         129_908,
     ),
     Path("tools/security/check_slither_baseline.py"): (
-        "5c05ea6621e60a584e1ea9727884178598120e68c9306fd4cfae0b269cf6b375",
+        "f9f9ba30d144b05769f16f80ebff26216c99b62cb09c06b1acf5ac25ced37e5a",
         49_634,
     ),
 }
