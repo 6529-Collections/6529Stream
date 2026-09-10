@@ -1,7 +1,7 @@
 {
   "compilation_unit": "one complete globally-via-IR Foundry compiler input containing the current deployment script and all selected targets",
   "compiler_input": "compiler-input.json",
-  "compiler_input_sha256": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0",
+  "compiler_input_sha256": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
   "compiler_version": "0.8.19+commit.7dd6d404",
   "files": {
     "artifacts/DeployCurrentStack.json": "sha256:fe90faf99340b28aba296a9b457f4adb4eb0d3658825be2179f8b49f1d498d90",
@@ -90,7 +90,7 @@
     "artifacts/StreamSplitWallet.json": "sha256:adb4754ce851cad4876af17bed5a48b30703c359a47c6e16de87bb736d202125",
     "artifacts/StreamStateExport.json": "sha256:032d3ebf16541c785f60d7b37793757d8c145eceec1c75560b49ae6a292f4212",
     "artifacts/StreamSystemManifest.json": "sha256:f1c7ed66cb13743cc1f956366f2b4d707042bdb3dc0a5412018c14e8d41a4ef0",
-    "compiler-input.json": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0"
+    "compiler-input.json": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f"
   },
   "generated_by": "tools/deployment/generate_current_stack_artifacts.py:1",
   "generator_sha256": "sha256:7201ed89e1a26f5be499a277263a45b94a766ae2b444b6cad66756cf4f077fe0",
@@ -838,42 +838,6 @@
     "smart-contracts/vendor/openzeppelin/Strings.sol": {
       "bytes": 2771,
       "sha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
-    },
-    "test/current/StreamCurrentStack.t.sol": {
-      "bytes": 12544,
-      "sha256": "sha256:48d28c3cd872a3734ce3c28043fa9d32bb26bd0cf8efca3fc528dc250526d2c9"
-    },
-    "test/current/StreamCurrentStackAdversarial.t.sol": {
-      "bytes": 18992,
-      "sha256": "sha256:ffaaa04428373a9bc9d9085f8c9c902fe9e233963838ebdf70043dab2ec0813e"
-    },
-    "test/current/StreamCurrentStackCatalog.t.sol": {
-      "bytes": 7989,
-      "sha256": "sha256:2a0fda33a62d37734e2f1a53c06e0e7f6ffe2d5846b0bc5bf4401275a25f21a0"
-    },
-    "test/current/StreamCurrentStackERC20.t.sol": {
-      "bytes": 15501,
-      "sha256": "sha256:5a39c416b5c5d46d220591117540e75facecf5a95ea4549aff3b8be914df60a2"
-    },
-    "test/current/StreamCurrentStateExport.t.sol": {
-      "bytes": 25777,
-      "sha256": "sha256:7edbc4034b9e7d7a209a366e1d0a5a46de00e56589b517aa15d9f621ae8c596d"
-    },
-    "test/helpers/StreamCurrentStackFixture.sol": {
-      "bytes": 29412,
-      "sha256": "sha256:910bc4b69e110cb7b0f82a16c66cbafbe17659942d19b1e66f62b6240fbe72da"
-    },
-    "test/mocks/MockStreamEntropyProvider.sol": {
-      "bytes": 4149,
-      "sha256": "sha256:1cabf44a2954442ebe43203553198a68aa340c4a5cd70e3583bccbdd98ab3f8e"
-    },
-    "test/mocks/MockStreamPaymentToken.sol": {
-      "bytes": 3010,
-      "sha256": "sha256:d3f1fa93c3c204024be3a5e6ddb8e3868132845f8894022d3a1f2cfd857e497e"
-    },
-    "test/regression/legacy/helpers/CharacterizationTestBase.sol": {
-      "bytes": 1804,
-      "sha256": "sha256:7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7"
     }
   },
   "targets": [
