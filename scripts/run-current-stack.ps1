@@ -7,6 +7,7 @@ param(
     [ValidateRange(100,150)][int]$DeploymentGasEstimateMultiplier = 115,
     [switch]$DeployOnly,
     [switch]$DemonstrateOnly,
+    [switch]$RequireExtendedStack,
     [string]$MockVrfCoordinator
 )
 
@@ -73,13 +74,18 @@ try {
         if (@($broadcast.receipts | Where-Object { $_.status -notin @('0x1','1',1) }).Count -ne 0) { throw 'A deployment receipt failed.' }
         $addresses = [ordered]@{}
         $names = [ordered]@{
-            core='StreamCore'; executor='StreamGovernanceExecutor'; governanceRoot='StreamGovernanceActor'
+            core='StreamCore'; executor='StreamGovernanceExecutor'
             registry='StreamModuleRegistry'; manifest='StreamSystemManifest'; manager='StreamMintManager'
             ledger='StreamMintLedger'; sale='StreamFixedPriceSaleAdapter'; auction='StreamEnglishAuctionHouse'
             factory='StreamSplitFactory'; entropy='StreamEntropyCoordinator'; metadata='StreamMetadataRouter'
             royalty='StreamRoyaltyResolver'; artistRegistry='StreamCollectionArtistRegistry'; provider='DevelopmentEntropyProvider'
         }
         foreach ($item in $names.GetEnumerator()) { $addresses[$item.Key] = Get-DeploymentAddress $broadcast $item.Value }
+        $extensions=@{erc20Sale='StreamERC20FixedPriceSaleAdapter';primaryRevenueResolver='StreamRevenueResolver'}
+        foreach ($item in $extensions.GetEnumerator()) {
+            $address=Get-DeploymentAddress $broadcast $item.Value -Optional
+            if ($address) {$addresses[$item.Key]=$address}
+        }
         $addresses.governanceRoot = (Read-Contract $addresses.executor 'governanceRootState()(address,bytes32,uint64)')[0]
         $addresses.roleRegistry = Read-Value $addresses.executor 'roleRegistry()(address)'
         $addresses.assetPolicyRegistry = Read-Value $addresses.factory 'assetPolicyRegistry()(address)'
@@ -94,12 +100,22 @@ try {
         $result.deployer=$deployer;$result.protocol=$protocol;$result.addresses=$addresses;$result.profile=$profile
         $result.demoReceipts=[ordered]@{}
         Write-PublicResult $result
-        if ($DeployOnly) { Write-Output (Join-Path $OutputDirectory 'current-stack.json'); return }
     } else {
         $result=Get-Content -Raw -LiteralPath (Join-Path $OutputDirectory 'current-stack.json') | ConvertFrom-Json -AsHashtable
         if ($result.state -ne 'deployed' -or $result.chainId -ne 31337 -or $result.deployer -ine $deployer) { throw 'Demonstration requires a local deployment with no previous mint attempt.' }
         $addresses=$result.addresses;$profile=$result.profile
     }
+    if ($RequireExtendedStack -and (-not $addresses.Contains('erc20Sale') -or -not $addresses.Contains('primaryRevenueResolver'))) {throw 'The extended stack requires ERC20 sale and primary revenue resolver deployments.'}
+    $publisherType=Invoke-Cast @('keccak','STATE_EXPORT_PUBLISHER')
+    $publisher=Read-Contract $addresses.core 'getSatellitePointer(bytes32)(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)' @($publisherType)
+    if ($publisher[0] -ne '0x0000000000000000000000000000000000000000') {
+        if ($publisher[0] -ine $addresses.executor -or $publisher[3] -ine $publisherType -or $publisher[5] -ine $addresses.registry -or $publisher[6] -ne 1) {throw 'State export publisher pointer is not the active registered Executor.'}
+        if (-not (Read-Value $addresses.executor 'supportsInterface(bytes4)(bool)' @($publisher[4]))) {throw 'Publisher interface is not supported by its target.'}
+        $addresses.stateExportPublisher=$publisher[0]
+        $result.publisherPointer=$publisher
+    } elseif ($RequireExtendedStack) {throw 'The extended stack requires its active state export publisher pointer.'}
+    Write-PublicResult $result
+    if ($DeployOnly) { Write-Output (Join-Path $OutputDirectory 'current-stack.json'); return }
     if ($MockVrfCoordinator) {
         if ((Read-Value $addresses.provider 'vrfCoordinatorAddress()(address)') -ine $MockVrfCoordinator) { throw 'VRF adapter upstream differs from the explicit local mock.' }
         $result.developmentEntropy=$false

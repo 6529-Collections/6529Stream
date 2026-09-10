@@ -5,7 +5,7 @@ $path=Join-Path $PSScriptRoot 'current-stack-local-functions.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw ($parseErrors | Out-String)}
 # Exercise receipt identity and recovery guards without RPC, accounts or transactions.
-$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime')
+$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime','Get-DeploymentAddress')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -26,6 +26,12 @@ Assert-ArtifactRuntime $artifact '0x60ff6000'
 Reject {Assert-ArtifactRuntime $artifact '0x60ff6001'} 'Only compiler-declared immutable bytes may differ.'
 $sale='0x0000000000000000000000000000000000000001'
 $other='0x0000000000000000000000000000000000000002'
+$deployment=@{transactions=@(@{contractName='CurrentSale';transactionType='CREATE';contractAddress=$sale})}
+Check ((Get-DeploymentAddress $deployment 'CurrentSale') -eq $sale) 'Deployment address must use its named CREATE receipt.'
+Check ($null -eq (Get-DeploymentAddress $deployment 'LaterModule' -Optional)) 'Retained older deployments may omit a later module.'
+Reject {Get-DeploymentAddress $deployment 'LaterModule'} 'Required module cannot be absent.'
+$deployment.transactions+=@{contractName='CurrentSale';transactionType='CREATE';contractAddress=$other}
+Reject {Get-DeploymentAddress $deployment 'CurrentSale' -Optional} 'Optional module still rejects duplicate deployments.'
 $topic=Invoke-Cast @('keccak','NativeSaleSettled(bytes32,bytes32,uint256,bytes32,bytes32,address,uint256)')
 $event=@{address=$sale;topics=@($topic,'0x00','0x00','0x2a');data='0x'}
 Check ((Get-MintedTokenId @{logs=@($event)} $sale) -eq '42') 'Mint must bind its receipt token.'

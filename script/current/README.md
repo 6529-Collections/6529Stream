@@ -50,6 +50,11 @@ asserts a nonzero final seed, stored and delivered provider result, Core's
 `MetadataUpdate` event, no pending metadata notification, both 90/10 withdrawals,
 and the NFT's final owner. `-DemonstrateOnly` completes a previously successful
 `-DeployOnly` run; it rejects an already attempted mint.
+For the extended deployment, pass `-RequireExtendedStack`: the local demonstration
+then requires both the ERC20 sale and primary revenue resolver addresses plus an
+active registered Executor at Core's state export publisher pointer. Older pinned
+baseline deployments remain readable without that flag. Both local and Sepolia
+address maps retain the newer contracts when their creation receipts exist.
 
 `DevelopmentEntropyProvider` accepts controller-supplied values. **These are not
 secure randomness.** Its constructor rejects every chain except 31337. The local

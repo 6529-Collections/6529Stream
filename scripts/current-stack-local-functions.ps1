@@ -67,9 +67,10 @@ function Send-LocalTransaction(
     return $result
 }
 
-function Get-DeploymentAddress([object]$Broadcast, [string]$Name) {
+function Get-DeploymentAddress([object]$Broadcast, [string]$Name, [switch]$Optional) {
     $matches = @($Broadcast.transactions | Where-Object { $_.contractName -eq $Name -and $_.transactionType -eq 'CREATE' })
-    if ($matches.Count -eq 0) { throw "No deployment receipt for $Name" }
+    if ($matches.Count -eq 0 -and $Optional) { return $null }
+    if ($matches.Count -ne 1) { throw "Expected exactly one deployment receipt for $Name" }
     return $matches[0].contractAddress
 }
 

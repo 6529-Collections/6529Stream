@@ -354,6 +354,12 @@ try {
             if ($tx.Count -ne 1) {throw "Missing deployment receipt for $key."}
             $completedAddresses[$key]=$tx[0].contractAddress
         }
+        $optionalNames=@{erc20Sale='StreamERC20FixedPriceSaleAdapter';primaryRevenueResolver='StreamRevenueResolver'}
+        foreach ($key in $optionalNames.Keys) {
+            $tx=@($run.transactions | Where-Object {$_.contractName -eq $optionalNames[$key] -and $_.transactionType -eq 'CREATE'})
+            if ($tx.Count -gt 1) {throw "Ambiguous deployment receipt for $key."}
+            if ($tx.Count -eq 1) {$completedAddresses[$key]=$tx[0].contractAddress}
+        }
         foreach ($receipt in $run.receipts) {
             if ($receipt.status -notin @('0x1','1',1)) {throw 'A deployment transaction reverted; inspect its receipt before recovery.'}
         }
