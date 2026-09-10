@@ -10,7 +10,9 @@ dist/
 /build/
 out/
 out-release/
+out-diagnostics/
 cache/
+cache-diagnostics/
 broadcast/
 .release-build-*/
 tmp/canonical-deployment-plan.json

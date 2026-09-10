@@ -3174,6 +3174,81 @@ class FakeForge:
 
 
 class ReleaseBuildArtifactTests(unittest.TestCase):
+    def test_forced_size_diagnostic_preserves_default_and_current_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            sentinels = ("out/default.json", "out/current/current.json", "cache/default.json", "cache/current/current.json")
+            for relative in (*sentinels, "out-diagnostics/stale.json", "cache-diagnostics/stale.json"):
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("retained", encoding="utf-8")
+
+            def fake_forge(command: list[str], **_kwargs: Any) -> Mock:
+                self.assertEqual(command[:3], ["forge", "build", "--sizes"])
+                self.assertIn("--force", command)
+                self.assertIn("--via-ir", command)
+                self.assertEqual([command[i + 1] for i, item in enumerate(command) if item == "--skip"], ["test", "script"])
+                for option, expected in (("--out", "out-diagnostics"), ("--cache-path", "cache-diagnostics")):
+                    self.assertEqual(command[command.index(option) + 1], expected)
+                    target = root / expected
+                    shutil.rmtree(target)
+                    target.mkdir()
+                    (target / "fresh.json").write_text("fresh diagnostic", encoding="utf-8")
+                return Mock(stdout=iter(["Compiler run successful\n"]), wait=Mock(return_value=0))
+
+            previous = Path.cwd()
+            try:
+                os.chdir(root)
+                with patch.object(size_log.subprocess, "Popen", side_effect=fake_forge), redirect_stdout(StringIO()):
+                    self.assertEqual(size_log.run_with_log(root / "cache/forge-size.log"), 0)
+            finally:
+                os.chdir(previous)
+            for relative in sentinels:
+                self.assertEqual((root / relative).read_text(encoding="utf-8"), "retained")
+            self.assertEqual((root / "cache/forge-size.log").read_text(encoding="utf-8"), "Compiler run successful\n")
+            self.assertFalse((root / "out-diagnostics/stale.json").exists())
+            self.assertFalse((root / "cache-diagnostics/stale.json").exists())
+
+    def test_size_diagnostic_rejects_redirected_output_before_starting_forge(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            # A non-directory target must also fail before log deletion or Popen.
+            (root / "out-diagnostics").write_text("retained non-directory", encoding="utf-8")
+            log = root / "retained.log"
+            log.write_text("prior evidence", encoding="utf-8")
+            previous = Path.cwd()
+            try:
+                os.chdir(root)
+                with patch.object(size_log.subprocess, "Popen") as process:
+                    with self.assertRaisesRegex(ValueError, "unlinked directory"):
+                        size_log.run_with_log(log)
+                    process.assert_not_called()
+            finally:
+                os.chdir(previous)
+            self.assertEqual(log.read_text(encoding="utf-8"), "prior evidence")
+
+    def test_size_diagnostic_rejects_link_to_default_outputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            original = root / "out"
+            original.mkdir()
+            sentinel = original / "retained.json"
+            sentinel.write_text("default compiler evidence", encoding="utf-8")
+            try:
+                (root / "out-diagnostics").symlink_to(original, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"Creating a directory symlink is unavailable: {exc}")
+            previous = Path.cwd()
+            try:
+                os.chdir(root)
+                with patch.object(size_log.subprocess, "Popen") as process:
+                    with self.assertRaisesRegex(ValueError, "unlinked directory"):
+                        size_log.run_with_log(root / "diagnostic.log")
+                    process.assert_not_called()
+            finally:
+                os.chdir(previous)
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "default compiler evidence")
+
     def test_aggregate_size_log_accepts_only_exact_test_helper_overflow(self) -> None:
         expected = "\n".join(
             [

@@ -29,7 +29,7 @@ The historical Gate A regression/evidence baseline records:
   breaking-change approval references before review.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
-- `forge build --sizes --via-ir --skip test --skip script --force` remains an
+- `forge build --sizes --via-ir --skip test --skip script --force --out out-diagnostics --cache-path cache-diagnostics` remains an
   aggregate diagnostic and warning-collection build. Canonical release
   bytecode instead comes from `python -m tools.build.build_release_artifacts`,
   which compiles each configured source and import closure in isolation,
