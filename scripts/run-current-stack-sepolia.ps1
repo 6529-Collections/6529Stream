@@ -185,6 +185,20 @@ function Remaining-DeploymentGas([object]$Run) {
     return $remaining
 }
 
+function Checked-UnsignedDeploymentGas([object]$Run) {
+    $rows=@($Run.transactions)
+    if ($rows.Count -eq 0) {throw 'Unsigned deployment plan is empty; no deployment was signed.'}
+    $total=[bigint]0
+    for ($index=0;$index -lt $rows.Count;$index++) {
+        $row=$rows[$index];$gas=Uint $row.transaction.gas
+        if ($gas -le 0 -or $gas -gt $transactionGasCap) {
+            throw "Unsigned deployment transaction $index ($($row.contractName): $($row.function)) has gas limit $gas; the cap is $transactionGasCap at multiplier $DeploymentGasEstimateMultiplier%. No deployment was signed. Review a lower -DeploymentGasEstimateMultiplier and rerun preflight; limits are never reduced automatically."
+        }
+        $total+=$gas
+    }
+    return $total
+}
+
 Push-Location $repoRoot
 try {
     if ((Uint (Cast @('chain-id','--rpc-url',$RpcUrl))) -ne 11155111) { throw 'Sepolia RPC required.' }
@@ -314,12 +328,7 @@ try {
             $null = Invoke-Tool 'forge' $forgeArguments
             $dryRunFile = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/11155111/dry-run/run-latest.json'
             $dryRun = Get-Content -Raw -LiteralPath $dryRunFile | ConvertFrom-Json -AsHashtable
-            $estimatedTotal = [bigint]0
-            foreach ($tx in $dryRun.transactions) {
-                $gas = Uint $tx.transaction.gas
-                if ($gas -gt $transactionGasCap) {throw 'Deployment transaction exceeds Sepolia gas cap.'}
-                $estimatedTotal += $gas
-            }
+            $estimatedTotal = Checked-UnsignedDeploymentGas $dryRun
             $expectedGas = [bigint]::Divide(($estimatedTotal*100+$DeploymentGasEstimateMultiplier-1),$DeploymentGasEstimateMultiplier)+3000000
             if ([bigint]::Divide(($expectedGas*$expectedFee*110+99),100)+(Uint $MintPriceWei) -gt $balance) {
                 throw 'Exact deployment simulation exceeds the complete-flow funding budget.'

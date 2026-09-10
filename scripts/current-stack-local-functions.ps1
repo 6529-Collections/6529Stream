@@ -51,10 +51,32 @@ function Get-EntropyRequest([object]$Receipt, [string]$Entropy, [string]$TokenId
     return [ordered]@{requestKey=$event.topics[1];scopeId=$event.topics[3];providerRequestId=[string]$decoded[1]}
 }
 
-function Require-FreshLocalRun([string]$StatePath, [string]$BroadcastPath) {
-    if ((Test-Path -LiteralPath $StatePath) -or (Test-Path -LiteralPath $BroadcastPath)) {
+function Require-FreshLocalRun([string]$StatePath, [string]$BroadcastPath, [string]$DryRunPath) {
+    if ((Test-Path -LiteralPath $StatePath) -or (Test-Path -LiteralPath $BroadcastPath) -or
+        ($DryRunPath -and (Test-Path -LiteralPath $DryRunPath))) {
         throw 'Existing local deployment evidence must be retained; use fresh output and broadcast directories.'
     }
+}
+
+function Assert-LocalDeploymentPlan([object]$Plan,[string]$Sender,[bigint]$FirstNonce,[int]$Multiplier) {
+    $rows=@($Plan.transactions)
+    if ($rows.Count -eq 0 -or @($Plan.receipts).Count -ne 0 -or @($Plan.pending).Count -ne 0) {
+        throw 'Expected a complete unsigned deployment plan with no receipts or pending transactions.'
+    }
+    $total=[bigint]0;$maximum=[bigint]0
+    for ($index=0;$index -lt $rows.Count;$index++) {
+        $row=$rows[$index];$tx=$row.transaction
+        if ($tx.from -ine $Sender -or (Convert-UInt $tx.chainId) -ne 31337 -or
+            (Convert-UInt $tx.nonce) -ne ($FirstNonce+$index)) {
+            throw "Unsigned deployment transaction $index has an unexpected sender, chain or nonce; no deployment was broadcast."
+        }
+        $gas=Convert-UInt $tx.gas
+        if ($gas -le 0 -or $gas -gt 16777216) {
+            throw "Unsigned deployment transaction $index ($($row.contractName): $($row.function)) has gas limit $gas; the cap is 16777216 at multiplier $Multiplier%. No deployment was broadcast. Review a lower -DeploymentGasEstimateMultiplier and rerun with fresh output/broadcast directories; limits are never reduced automatically."
+        }
+        $total+=$gas;$maximum=[bigint]::Max($maximum,$gas)
+    }
+    return [ordered]@{transactionCount=$rows.Count;firstNonce=$FirstNonce.ToString();totalGasLimit=$total.ToString();maximumGasLimit=$maximum.ToString();gasEstimateMultiplier=$Multiplier}
 }
 
 function Send-LocalTransaction(

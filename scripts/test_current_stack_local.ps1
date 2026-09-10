@@ -5,7 +5,7 @@ $path=Join-Path $PSScriptRoot 'current-stack-local-functions.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw ($parseErrors | Out-String)}
 # Exercise receipt identity and recovery guards without RPC, accounts or transactions.
-$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime','Get-DeploymentAddress','Assert-ExtendedPublisherPointer')
+$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime','Get-DeploymentAddress','Assert-ExtendedPublisherPointer','Assert-LocalDeploymentPlan')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -26,6 +26,59 @@ Assert-ArtifactRuntime $artifact '0x60ff6000'
 Reject {Assert-ArtifactRuntime $artifact '0x60ff6001'} 'Only compiler-declared immutable bytes may differ.'
 $sale='0x0000000000000000000000000000000000000001'
 $other='0x0000000000000000000000000000000000000002'
+$unsigned=@{receipts=@();pending=@();transactions=@(
+    @{contractName='First';function='configure()';transaction=@{from=$sale;chainId='0x7a69';nonce='0x7';gas='0x5208'}},
+    @{contractName='Executor';function='initializeGenesis()';transaction=@{from=$sale;chainId='0x7a69';nonce='0x8';gas='0x1000000'}}
+)}
+$checked=Assert-LocalDeploymentPlan $unsigned $sale 7 115
+Check ($checked.transactionCount -eq 2 -and $checked.maximumGasLimit -eq '16777216') 'An exact-cap complete plan must pass.'
+$unsigned.transactions[1].transaction.nonce='0x9'
+Reject {Assert-LocalDeploymentPlan $unsigned $sale 7 115} 'A late nonce gap must fail before broadcast.'
+$unsigned.transactions[1].transaction.nonce='0x8'
+$unsigned.transactions[1].transaction.from=$other
+Reject {Assert-LocalDeploymentPlan $unsigned $sale 7 115} 'A late sender substitution must fail before broadcast.'
+$unsigned.transactions[1].transaction.from=$sale
+$unsigned.transactions[1].transaction.gas='0x1000001'
+Reject {Assert-LocalDeploymentPlan $unsigned $sale 7 115} 'A final over-cap transaction must reject the entire plan.'
+Reject {Assert-LocalDeploymentPlan @{transactions=@();receipts=@();pending=@()} $sale 7 115} 'An empty plan cannot pass.'
+# Execute the actual local runner with mocked Forge/RPC boundaries. Only the final
+# plan row exceeds the cap: neither the broadcast call nor its checkpoint may run.
+$localProbe=Join-Path ([IO.Path]::GetTempPath()) ('stream-plan-test-'+[guid]::NewGuid().ToString())
+$global:currentStackPlanProbe=@{plan=$unsigned;calls=@()}
+foreach ($row in $global:currentStackPlanProbe.plan.transactions) {$row.transaction.from='0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'}
+try {
+    function Invoke-RestMethod([string]$Uri,[string]$Method,[string]$ContentType,[string]$Body) {
+        $request=$Body | ConvertFrom-Json
+        $value=switch ($request.method) {
+            'eth_chainId' {'0x7a69'}
+            'eth_accounts' {,@('0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266')}
+            'eth_getTransactionCount' {'0x7'}
+            default {throw "Unexpected RPC in unsigned-plan regression: $($request.method)"}
+        }
+        return @{result=$value}
+    }
+    function forge {
+        $global:currentStackPlanProbe.calls+=,@($args)
+        if ('--broadcast' -in $args) {throw 'Regression reached an unauthorized broadcast boundary.'}
+        $destination=Join-Path $env:FOUNDRY_BROADCAST 'DeployCurrentStack.s.sol/31337/dry-run/run-latest.json'
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+        $global:currentStackPlanProbe.plan | ConvertTo-Json -Depth 20 | Set-Content -Encoding UTF8 -LiteralPath $destination
+        $global:LASTEXITCODE=0
+    }
+    $failure=$null
+    try {& (Join-Path $PSScriptRoot 'run-current-stack.ps1') -OutputDirectory $localProbe -DeployOnly} catch {$failure=$_.Exception.Message}
+    Check ($failure -like '*transaction 1*initializeGenesis()*16777217*115%*DeploymentGasEstimateMultiplier*') "A late cap error must identify the transaction and adjustable multiplier. Observed: $failure"
+    Check ($global:currentStackPlanProbe.calls.Count -eq 1 -and '--broadcast' -notin $global:currentStackPlanProbe.calls[0]) 'The actual runner must stop after its unsigned Forge call.'
+    Check (-not (Test-Path -LiteralPath (Join-Path $localProbe 'current-stack.json'))) 'Rejected unsigned plans must not write a deployment-started checkpoint.'
+} finally {
+    Remove-Item Function:forge,Function:Invoke-RestMethod -ErrorAction SilentlyContinue
+    Remove-Variable -Name currentStackPlanProbe -Scope Global
+    if (Test-Path -LiteralPath $localProbe) {
+        $resolved=(Resolve-Path -LiteralPath $localProbe).Path
+        if ($resolved -ne [IO.Path]::GetFullPath($localProbe) -or -not $resolved.StartsWith([IO.Path]::GetTempPath(),[StringComparison]::OrdinalIgnoreCase)) {throw 'Unexpected regression cleanup path.'}
+        Remove-Item -LiteralPath $resolved -Recurse -Force
+    }
+}
 $hash='0x'+('11'*32)
 $moduleType='0xa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e'
 $pointerAbi='address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64'
@@ -67,6 +120,7 @@ try {
     Remove-Item -LiteralPath $statePath
     '{}' | Set-Content -LiteralPath $broadcastPath -Encoding utf8
     Reject {Require-FreshLocalRun $statePath $broadcastPath} 'Existing broadcast receipts must block a new deployment.'
+    Reject {Require-FreshLocalRun $statePath ($broadcastPath+'.missing') $broadcastPath} 'A retained unsigned plan must not be silently overwritten.'
 } finally {
     Remove-Item -LiteralPath $statePath,$broadcastPath -ErrorAction SilentlyContinue
 }

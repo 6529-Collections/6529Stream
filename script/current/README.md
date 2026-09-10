@@ -41,8 +41,20 @@ and transfers the NFT. Public addresses and receipts are saved to
 after deployment or `-OutputDirectory` to choose a fresh evidence directory.
 Compilation, cache, and broadcast outputs default to separate subdirectories of
 that directory; all three can be supplied explicitly. An existing deployment
-checkpoint or broadcast file blocks an accidental fresh deployment. Keep a failed
+checkpoint, unsigned plan or broadcast file blocks an accidental fresh deployment. Keep a failed
 run for diagnosis and use a fresh directory for a new local deployment.
+
+Before writing a deployment checkpoint or broadcasting, the local runner simulates
+the complete plan with the same Forge arguments, checks every transaction against
+the 16,777,216 gas cap, and verifies the source commit, sender, chain and sequential
+nonces. Sepolia also checks its complete unsigned plan before signing. A late
+over-cap transaction therefore stops the whole deployment before its first
+transaction. The error identifies the transaction, limit and selected
+`-DeploymentGasEstimateMultiplier`; review any lower multiplier explicitly and
+rerun. Neither runner reduces limits or disables the cap automatically. Simulation
+is a preflight observation: another transaction or state change before broadcast
+can still invalidate it. Preserve partial receipts if a later broadcast fails;
+Sepolia's `ResumeDeploy` retains its existing checkpoint and nonce checks.
 
 The helper checks the accepted artist, decodes the token and entropy request from
 their own receipts, and requires the callback to be mined after the request. It

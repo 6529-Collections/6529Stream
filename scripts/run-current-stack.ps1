@@ -40,8 +40,9 @@ foreach ($name in @('ArtifactDirectory','CacheDirectory','BroadcastDirectory')) 
     Set-Variable -Name $name -Value ([IO.Path]::GetFullPath($value))
 }
 $broadcastPath = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/31337/run-latest.json'
+$dryRunPath = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/31337/dry-run/run-latest.json'
 if ($DeployOnly -and $DemonstrateOnly) { throw 'DeployOnly and DemonstrateOnly are mutually exclusive.' }
-if (-not $DemonstrateOnly) { Require-FreshLocalRun (Join-Path $OutputDirectory 'current-stack.json') $broadcastPath }
+if (-not $DemonstrateOnly) { Require-FreshLocalRun (Join-Path $OutputDirectory 'current-stack.json') $broadcastPath $dryRunPath }
 Push-Location $repoRoot
 $savedDeployer = $env:STREAM_DEPLOYER
 $savedTreasury = $env:STREAM_PROTOCOL_TREASURY
@@ -58,19 +59,37 @@ try {
     $env:STREAM_PLATFORM_SIGNER = $deployer
     if (-not $DemonstrateOnly) {
         $skip = @('--skip','test')
+        $sourceCommit=((& git rev-parse HEAD) -join '').Trim()
+        if ($LASTEXITCODE -ne 0 -or $sourceCommit -notmatch '^[0-9a-f]{40}$') {throw 'Cannot bind the unsigned deployment to a source commit.'}
+        $firstNonce=Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'latest'))
+        $forgeArguments=@('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
+            '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
+            '--rpc-url',$RpcUrl,'--sender',$deployer,'--slow',
+            '--gas-estimate-multiplier',$DeploymentGasEstimateMultiplier.ToString()
+        )
+        & forge @forgeArguments
+        if ($LASTEXITCODE -ne 0) { throw 'Current-stack unsigned deployment simulation failed; no deployment was broadcast.' }
+        $currentCommit=((& git rev-parse HEAD) -join '').Trim()
+        if ($LASTEXITCODE -ne 0 -or $currentCommit -ne $sourceCommit) {throw 'Source commit changed during planning; no deployment was broadcast.'}
+        $dryRun=Get-Content -Raw -Encoding UTF8 -LiteralPath $dryRunPath | ConvertFrom-Json -AsHashtable
+        $plan=Assert-LocalDeploymentPlan $dryRun $deployer $firstNonce $DeploymentGasEstimateMultiplier
+        if ((Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'latest'))) -ne $firstNonce -or
+            (Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'pending'))) -ne $firstNonce) {
+            throw 'Deployer nonce changed during planning; no deployment was broadcast.'
+        }
+        $plan.unsignedPlan=$dryRunPath
+        $plan.unsignedPlanSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $dryRunPath).Hash.ToLowerInvariant()
         $result = [ordered]@{
             schema='6529stream.current-local-demo.v1';state='deployment-started';chainId=31337;rpcUrl=$RpcUrl
-            sourceCommit=((& git rev-parse HEAD) -join '').Trim();compilerProfile='current'
+            sourceCommit=$sourceCommit;compilerProfile='current';deploymentPlan=$plan
             artifactDirectory=$ArtifactDirectory;cacheDirectory=$CacheDirectory;broadcastReceipts=$broadcastPath
         }
         Write-PublicResult $result
-        & forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack @skip `
-            --via-ir --build-info --isolate --out $ArtifactDirectory --cache-path $CacheDirectory `
-            --rpc-url $RpcUrl --sender $deployer --unlocked --broadcast --slow `
-            --gas-estimate-multiplier $DeploymentGasEstimateMultiplier
+        & forge @forgeArguments --unlocked --broadcast
         if ($LASTEXITCODE -ne 0) { throw 'Current-stack deployment failed.' }
 
         $broadcast = Get-Content -Raw -LiteralPath $broadcastPath | ConvertFrom-Json
+        if (@($broadcast.receipts).Count -ne @($broadcast.transactions).Count) {throw 'Deployment receipts are incomplete; retain the checkpoint and recover the existing attempt.'}
         if (@($broadcast.receipts | Where-Object { $_.status -notin @('0x1','1',1) }).Count -ne 0) { throw 'A deployment receipt failed.' }
         $addresses = [ordered]@{}
         $names = [ordered]@{
