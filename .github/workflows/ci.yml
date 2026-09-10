@@ -84,15 +84,27 @@ jobs:
             out/current
             cache/current
           key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v1-${{ steps.current_compiler_inputs.outputs.digest }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v1-
 
       - name: Build current compilation
         id: current_build
         shell: bash
+        env:
+          CACHE_MATCHED_KEY: ${{ steps.current_compiler_cache.outputs.cache-matched-key }}
+          CACHE_EXACT_HIT: ${{ steps.current_compiler_cache.outputs.cache-hit }}
         run: |
-          set -o pipefail
+          set -euo pipefail
           mkdir -p ci-logs
           FOUNDRY_PROFILE=current forge build 2>&1 | tee ci-logs/current-stack-build.log
-          python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate
+          if ! python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate 2>&1 | tee ci-logs/current-stack-export.log; then
+            if [ -z "$CACHE_MATCHED_KEY" ] || [ "$CACHE_EXACT_HIT" = "true" ]; then
+              exit 1
+            fi
+            # An incremental fallback may leave build-info from multiple compiler inputs.
+            FOUNDRY_PROFILE=current forge build --force 2>&1 | tee -a ci-logs/current-stack-build.log
+            python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate 2>&1 | tee -a ci-logs/current-stack-export.log
+          fi
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
 
       - name: Save current compiler outputs
@@ -121,6 +133,7 @@ jobs:
           path: |
             ci-logs/current-stack.log
             ci-logs/current-stack-build.log
+            ci-logs/current-stack-export.log
             ci-logs/current-candidate
           if-no-files-found: error
           retention-days: 14
@@ -694,6 +707,8 @@ jobs:
             out
             cache
           key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v1-${{ steps.default_compiler_inputs.outputs.digest }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v1-
 
       - name: Build
         id: default_build

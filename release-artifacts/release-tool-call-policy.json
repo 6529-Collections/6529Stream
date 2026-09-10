@@ -14244,8 +14244,8 @@
     {
       "path": "tools/protocol/check_governance_action_policy.py",
       "role": "runtime",
-      "source_sha256": "1d92c83ca6ed7ae8287d0d80dbc1cce3f5df3c20656a0224f6eb73bec546c591",
-      "size_bytes": 26171,
+      "source_sha256": "1f4718d4e6d6052591c5ca94ce871dbb14a1434a19d9737440c808dff5dc254d",
+      "size_bytes": 27075,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Path\",\"kind\":\"from\",\"level\":0,\"member\":\"Path\",\"module\":\"pathlib\"}",
@@ -14303,7 +14303,7 @@
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"re\"}",
-          "count": 14
+          "count": 17
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"sys\"}",
@@ -14342,12 +14342,16 @@
           "count": 2
         },
         {
+          "record": "{\"context\":\"call-target\",\"target\":\"re.match\"}",
+          "count": 1
+        },
+        {
           "record": "{\"context\":\"call-target\",\"target\":\"re.search\"}",
           "count": 1
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"re.sub\"}",
-          "count": 7
+          "count": 9
         },
         {
           "record": "{\"context\":\"keyword.value\",\"target\":\"sys.stderr\"}",
@@ -14413,6 +14417,12 @@
           "target": "expression:Subscript:30dcd407ff1d3b11e4f60336f908c2c8b70eca5ec11b9de7ac25ed182c7aa602.lower",
           "shape": "positional=0;starred=0;keywords=",
           "ast_sha256": "41fadf042ffdcf84922e1625c37a4327626ccbbfe0397cb7eefd380b7d67bc8f",
+          "count": 1
+        },
+        {
+          "target": "expression:Subscript:6d55447686fab56498dd2020534abf21e4533629d63a1ea55a463adbd68fd72d.strip",
+          "shape": "positional=0;starred=0;keywords=",
+          "ast_sha256": "173d232a2bf69752bacbc327637a76b5ce99a3bddd78eb17885ddac862d24c46",
           "count": 1
         },
         {
@@ -14652,6 +14662,12 @@
         {
           "target": "local:_top_level_statements",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "51e23e5df257ac9452e9faeae08929fac147a60d522d54eb088c37988ce72e71",
+          "count": 1
+        },
+        {
+          "target": "local:_top_level_statements",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "da748621c8aee5ae784adf32ac5a751fb476a9714f186e991d9a2a9e05e7c433",
           "count": 1
         },
@@ -14719,6 +14735,12 @@
           "target": "local:any",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5ad73a6b6141b2f89fae44824520138dda71634ac6341ba8cc7b1b7593ef8d5a",
+          "count": 1
+        },
+        {
+          "target": "local:any",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "d68a94cd684e3554fb8bb5502c66614163f6bb14689b22dbbfaa6b41441c87ea",
           "count": 1
         },
         {
@@ -15001,7 +15023,7 @@
           "target": "local:execute.index",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "0d8f191ff853ac18802383699688105d01e3377708ef729b5bcea7c93ce35efd",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:execute.index",
@@ -15223,6 +15245,12 @@
           "target": "local:prepare.count",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "5c2c9a7a48abcd9055623ed3dc5f8f9107d7d11d3f96e51e5c03be0d11df6839",
+          "count": 1
+        },
+        {
+          "target": "local:prepare.index",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "423c16acc4d9a5b8ed43016c5634412d3cbb9c575be90e741f725624b1d88c92",
           "count": 1
         },
         {
@@ -15708,6 +15736,12 @@
         {
           "target": "local:require",
           "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "ea67403724d65a16e4d662f4145f1123b0fdd935ec4187f716526ca377a5c838",
+          "count": 1
+        },
+        {
+          "target": "local:require",
+          "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "ecc68cee51fdbb87348cf501df765f78f6f4ad570fe997187a77fca509e987f7",
           "count": 1
         },
@@ -15804,7 +15838,13 @@
         {
           "target": "local:statements.append",
           "shape": "positional=1;starred=0;keywords=",
-          "ast_sha256": "47343a69f05bb3852d6174f2d801cbfb4e8f93042e9a143b25da908c50baca8a",
+          "ast_sha256": "a9c7a6f0d1b718230c65ad313665b74dd4421e342332df12c6698eae8f517c9b",
+          "count": 1
+        },
+        {
+          "target": "local:statements.extend",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "aedaaf4ecc483aee6f94761f53115e8f8b368333fa1afe042a2599da1a499a56",
           "count": 1
         },
         {
@@ -15934,6 +15974,12 @@
           "count": 1
         },
         {
+          "target": "re.match",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "684df1d3eac2297d5981143f3a4e66abf3e061ad0351435ea8c1924168ff6c98",
+          "count": 1
+        },
+        {
           "target": "re.search",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "e290bdb55d3314eb4310af6a7beb58f92cb61fa0115991aeac7ceed6432d3b0b",
@@ -15960,8 +16006,14 @@
         {
           "target": "re.sub",
           "shape": "positional=3;starred=0;keywords=",
+          "ast_sha256": "454ab3067b2c6abaee3d46460560540149ca7d32eafc429ca0f6c635236210ab",
+          "count": 2
+        },
+        {
+          "target": "re.sub",
+          "shape": "positional=3;starred=0;keywords=",
           "ast_sha256": "839d9c18ea32cd1d99399187ce9667c3def525adfaf20d40ac578f31b4c864df",
-          "count": 1
+          "count": 2
         },
         {
           "target": "re.sub",
@@ -15973,12 +16025,6 @@
           "target": "re.sub",
           "shape": "positional=3;starred=0;keywords=",
           "ast_sha256": "a4d1bb2c2998d3b253bfa19b76c8187547d3e64cbab70878fff2c68fb6d18372",
-          "count": 1
-        },
-        {
-          "target": "re.sub",
-          "shape": "positional=3;starred=0;keywords=",
-          "ast_sha256": "fa62df3c5641f599ca5ed61898a0d961e9bf72325af77f6e9c98eeadcff68bfe",
           "count": 1
         },
         {

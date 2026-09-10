@@ -1889,7 +1889,7 @@ Acceptance criteria:
 
 - Normalized rows retain detector, impact, confidence, repo-relative semantic
   location, classification, owner, rationale, issue, and required proof.
-- JSON and Markdown views agree exactly, all current rows are Open, and the
+- JSON and Markdown views agree exactly, each row retains its reviewed status, and the
   source/config/tool provenance is machine checked.
 - Every Open finding has a canonical GitHub issue link that owns remediation or
   reviewed disposition.
@@ -2837,8 +2837,8 @@ Before any "best-in-class 1/1" release claim:
 Source of truth: `ops/SLITHER_BASELINE.json`; the checked reviewer mirror is
 `ops/SLITHER_BASELINE.md`.
 
-The current first-party production status is only `Open`. A future PR may move
-a row to a reviewed resolution only with issue-linked proof; matching the
+The current first-party production statuses are `Open` and `False Positive`.
+A row moves to a reviewed resolution only with issue-linked proof; matching the
 baseline does not accept a finding. Vendored, test, and script scopes are
 reported separately by the live checker and cannot reduce the production set.
 
@@ -2848,16 +2848,17 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `baf459c1f29ec6ee9bfdac81006c8cc71b83d982`.
-- Captured at: `2026-08-09T19:48:03Z`.
+- Source commit: `db8e31ed886faa838a9dc83926d8bad869ce549b`.
+- Captured at: `2026-09-10T19:32:07Z`.
 - Live gate: `python -m tools.security.check_slither_baseline --run-slither`.
-- Status: exact normalized drift is gated; 30 of 32 retained first-party
-  production rows remain Open under issue #658, while two `StreamSplitWallet`
-  `incorrect-equality` rows have focused False Positive dispositions.
-- Raw analyzed run: 3,242 findings across all impacts/scopes: 49 High, 847
-  Medium, 1,269 Low, 1,035 Informational, and 42 Optimization. High/Medium scope
-  totals are first-party production `2/30/32`, vendored `1/9/10`, test
-  `46/801/847`, script `0/7/7`, and other `0/0/0`.
+- Status: exact normalized drift is gated; 30 of 45 retained first-party
+  production rows remain Open under issue #658, with 15 reviewed False Positive
+  dispositions. Open rows comprise 2 High and 28 Medium findings.
+- Raw analyzed run: 796 findings across all impacts/scopes: 5 High, 50 Medium,
+  106 Low, 627 Informational, and 8 Optimization. High/Medium scope totals are
+  first-party production `4/41/45`, vendored `1/9/10`, test `0/0/0`, script
+  `0/0/0`, and other `0/0/0`. The production capture excludes test and script
+  compilation and covers all 171 production source files.
 - Bounded assembly makes the Governance Executor's proposal-selected
   native-value call invisible to Slither's `arbitrary-send-eth` detector
   without removing the authority. The issue #685 slice adds the closed-world
@@ -2869,8 +2870,8 @@ Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 2 |
-| Medium | 30 |
+| High | 4 |
+| Medium | 41 |
 
 Classification summary:
 
@@ -2878,7 +2879,8 @@ Classification summary:
 | --- | ---: | --- | --- |
 | Confirmed gap | 0 | Open | No current row; any future confirmed gap must be remediated with issue-linked evidence |
 | Design review | 6 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
-| Pending disposition | 26 | Open | Complete row-level review; no implicit acceptance or suppression |
+| Pending disposition | 24 | Open | Complete row-level review; no implicit acceptance or suppression |
+| False positive | 15 | False Positive | Preserve the retained row-level rationale and proof; baseline equality is not an audit |
 
 ## Appendix B: Test Matrix
 

@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import shutil
+import tempfile
 from pathlib import Path
 
 from tools.deployment import generate_current_stack_artifacts as exporter
@@ -56,18 +57,11 @@ def prepare(root: Path, artifacts: Path, cache: Path, destination: Path, config:
             and (artifacts / "build-info" / (build_id + ".json")).is_file(),
             "cache references missing or invalid build-info",
         )
-    destination.mkdir(parents=True)
     writable_out, writable_cache = destination / "out", destination / "cache"
-    shutil.copytree(artifacts, writable_out)
-    shutil.copytree(cache, writable_cache)
-    exporter.require(inventory(writable_out) == original["out"], "copied artifacts differ from retained evidence")
-    exporter.require(inventory(writable_cache) == original["cache"], "copied cache differs from retained evidence")
     # Rebase only the two output-location fields in the writable copy. Compiler
     # input, artifact contents, profile settings, source hashes and build IDs stay intact.
     cache_data["paths"]["artifacts"] = writable_out.as_posix()
     cache_data["paths"]["build_infos"] = (writable_out / "build-info").as_posix()
-    (writable_cache / cache_file.name).write_bytes(exporter.encoded(cache_data))
-    exporter.require(inventory(artifacts) == original["out"] and inventory(cache) == original["cache"], "retained evidence changed during copy")
     report = {
         "schema": "6529stream.current-compilation-workspace.v1",
         "profile": "current",
@@ -82,7 +76,24 @@ def prepare(root: Path, artifacts: Path, cache: Path, destination: Path, config:
         "retained_files": original,
         "cache_reuse": "validated writable copy; actual Forge cache hit must still be observed",
     }
-    (destination / "compilation-workspace.json").write_bytes(exporter.encoded(report))
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    # Publish only a fully validated workspace. The temporary sibling is owned by
+    # this invocation; exceptions clean it without touching retained evidence or
+    # a destination another invocation may have created.
+    with tempfile.TemporaryDirectory(prefix=f".{destination.name}-", dir=destination.parent) as temporary:
+        temporary_root = Path(temporary).resolve()
+        exporter.require(temporary_root.parent == destination.parent, "temporary workspace escaped destination parent")
+        staging = temporary_root / "workspace"
+        staging.mkdir()
+        shutil.copytree(artifacts, staging / "out")
+        shutil.copytree(cache, staging / "cache")
+        exporter.require(inventory(staging / "out") == original["out"], "copied artifacts differ from retained evidence")
+        exporter.require(inventory(staging / "cache") == original["cache"], "copied cache differs from retained evidence")
+        (staging / "cache" / cache_file.name).write_bytes(exporter.encoded(cache_data))
+        exporter.require(inventory(artifacts) == original["out"] and inventory(cache) == original["cache"], "retained evidence changed during copy")
+        (staging / "compilation-workspace.json").write_bytes(exporter.encoded(report))
+        exporter.require(not destination.exists(), "destination appeared during preparation; preserving it")
+        staging.rename(destination)
     return report
 
 

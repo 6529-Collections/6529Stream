@@ -347,7 +347,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:1f95efb0db512b4ab724b503dbb49e8048837cfbdc744e0f557acc0f058dfa27"
+    "sha256": "sha256:1f1e05bc1093b631353c22ee9219ae2163ccb2084241ba77b327402d9c3c3646"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -396,8 +396,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:35e2fc49c6a4d1820249d3169d7bfe8220e90ee68e2766e42fe0a8a03625610f",
-      "size_bytes": 69344
+      "sha256": "sha256:de4730ea3f5ecfd5a600eb4dda8d95abfe5e4aa14550d3ffc6deafaff85014ba",
+      "size_bytes": 70334
     },
     {
       "path": ".github/workflows/release-mode.yml",
@@ -406,8 +406,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0ae0ce78228f2df6798e9daba9d5c9371739ee15bf5bddd131faf9638335e8d5",
-      "size_bytes": 167929
+      "sha256": "sha256:b765e275a25b0eff318b6abf85cfd0eb7d4c5fff6012801d79f665e0e938d1a8",
+      "size_bytes": 168324
     },
     {
       "path": "Makefile",
@@ -941,8 +941,8 @@
     },
     {
       "path": "docs/reference/tooling/toolchain.md",
-      "sha256": "sha256:807600b846e723c0031f3fe056c5f456b8d87d2586f3885d17cc4c02e086d685",
-      "size_bytes": 6817
+      "sha256": "sha256:0ea2fa07f7d4ac874ab92209202f1270f9f15e2c0df01fd4b415de9b00891f69",
+      "size_bytes": 7144
     },
     {
       "path": "docs/reference/tooling/validation.md",
@@ -1051,8 +1051,8 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:36fa11c1a14b9e2a7fc931898715369c132c4b66f83ed1249806edac28e8f9ed",
-      "size_bytes": 285235
+      "sha256": "sha256:1bc8b892519f14f9ad83d6363e0f7de91c3ba1a568da3bf3a302b60784c190bb",
+      "size_bytes": 285470
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
@@ -2176,7 +2176,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:aa6ee528f04018403003099747c59515bfa3cbbe4418bacca782b5a7669ea6db",
+      "sha256": "sha256:6e686cad25491deed6d91bda53d5dc296fd06dca9b9042584ec624721e58150e",
       "size_bytes": 151729
     },
     {
@@ -2241,7 +2241,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:4cdf70a5afe9352ba3ab504c79d87acd5971e2f33c381f90b5f8c3040ee9da89",
+      "sha256": "sha256:190b4bdcac71f89431022e3243f63d4c35e79c10e9da6256fddc87abbf4f0ac6",
       "size_bytes": 13846
     },
     {
@@ -2291,22 +2291,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:7a2e61bcef8b0023cb76bd933c36a22784c036330282891cb6e65393a576d056",
+      "sha256": "sha256:7abcb391c032dc044bc4a4711f4e6afb9990eb788cabac427f449d0f78a59c39",
       "size_bytes": 150606
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:57abd6dbf6f452054a7e73ba57ccfdacd3f13766b1a21a48691145c537baf0f4",
-      "size_bytes": 168637
+      "sha256": "sha256:3fff6ae1c0c4fdc6ce25e93d538bc1d164bce3ad5c6e021334bfeebe43f9a19c",
+      "size_bytes": 169040
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:b8770beedbbecff401186c4dc462081ea463c954e356ffe4c3bef0ce6466ecdf",
-      "size_bytes": 164899
+      "sha256": "sha256:ed1f397950703778c83bf57f1c9ac61fb398c2a7c33797f069db912c86c3a70b",
+      "size_bytes": 165288
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d763f2c1d4aece5f892ad4fcded19c2be7894656e43ea97da490ed74853e7640",
+      "sha256": "sha256:34a4596e1d345bb6abd70633c773bea1ae8d5e39e4fe5bb5f98fdefe5624ba80",
       "size_bytes": 34457
     },
     {
@@ -2356,8 +2356,8 @@
     },
     {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:e84a10425681a552e9c43ae5d56cd3f47564e467699be85770e133a00f890b0d",
-      "size_bytes": 2501313
+      "sha256": "sha256:799711c1fd61a907e62cdb1d9463ee0ce9a6514d2869d838eda236fd49c9ac7c",
+      "size_bytes": 2503113
     },
     {
       "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
@@ -2826,8 +2826,8 @@
     },
     {
       "path": "tools/deployment/prepare_current_stack_compilation.py",
-      "sha256": "sha256:8f0218aae7167ad7d75f53af173a12401e3856362851f61b0c711797aa310e82",
-      "size_bytes": 5597
+      "sha256": "sha256:9b081e1aa73a3a166d7690ffd0bcd266d21370197d11f4ab5da314d058969b11",
+      "size_bytes": 6388
     },
     {
       "path": "tools/deployment/test_admin_ceremony_evidence.py",
@@ -2861,8 +2861,8 @@
     },
     {
       "path": "tools/deployment/test_prepare_current_stack_compilation.py",
-      "sha256": "sha256:d1e724bf03412a47352743e8191e9ef22823c6eed82b3ce4b7288c6ab15b7b46",
-      "size_bytes": 5212
+      "sha256": "sha256:8d1bd89692513f0a05ffe222a7b79d5113c9ab2b3917e7243d9d00777fbb1ea9",
+      "size_bytes": 7590
     },
     {
       "path": "tools/deployment/verify_current_stack_deployment.py",
@@ -2886,8 +2886,8 @@
     },
     {
       "path": "tools/development/test_python_toolchain.py",
-      "sha256": "sha256:debb1fa401ecef9c93516a5c48fef3d6110422c866c2d3d032a7d08d000aad33",
-      "size_bytes": 32370
+      "sha256": "sha256:7b08693798c6bb0781348b7bce5f32905a96be046b13a202bfff3c7b2141b50a",
+      "size_bytes": 36840
     },
     {
       "path": "tools/development/test_windows_ci_wrapper.py",
@@ -3061,8 +3061,8 @@
     },
     {
       "path": "tools/protocol/check_governance_action_policy.py",
-      "sha256": "sha256:1d92c83ca6ed7ae8287d0d80dbc1cce3f5df3c20656a0224f6eb73bec546c591",
-      "size_bytes": 26171
+      "sha256": "sha256:1f4718d4e6d6052591c5ca94ce871dbb14a1434a19d9737440c808dff5dc254d",
+      "size_bytes": 27075
     },
     {
       "path": "tools/protocol/check_governed_parameter_identifiers.py",
@@ -3166,8 +3166,8 @@
     },
     {
       "path": "tools/protocol/test_governance_action_policy.py",
-      "sha256": "sha256:cd01a59e9d059701d109e421887c6e600d62babf25337714beac2ec9716340c7",
-      "size_bytes": 13356
+      "sha256": "sha256:71c9da6af92b027cf29fbf520d2575690e60cabf057d196dee053b597cc7808a",
+      "size_bytes": 16365
     },
     {
       "path": "tools/protocol/test_governed_parameter_identifiers.py",

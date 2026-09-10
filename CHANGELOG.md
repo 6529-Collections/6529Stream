@@ -38,6 +38,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Reuse compiler caches within the pinned toolchain and profile while retaining
+  unconditional builds, tests and source validation. Mixed current build-info
+  after a fallback restore triggers one fresh build before export validation.
+- Publish writable compilation workspaces only after copying and validation
+  succeed, and reject unreachable governance-policy validation in the source gate.
 - Organized Solidity interfaces by domain, isolated legacy implementations and
   regression tests, and grouped maintenance tools into Python packages. Rewrote
   contributor and integration guides around the current APIs; older examples and

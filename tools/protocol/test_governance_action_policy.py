@@ -64,6 +64,60 @@ class GovernanceActionPolicyCheckerTest(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "policy validation path"):
                     checker.validate_policy_call_path(executor, scheduling.replace(call, replacement))
 
+    def test_policy_validation_cannot_follow_unconditional_revert(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        for target in ("scheduling", "execution"):
+            source = scheduling if target == "scheduling" else executor
+            call = self._policy_call(source)
+            for termination in (
+                "revert();",
+                "revert IStreamGovernanceExecutor.GovernanceSchedulingDuringExecution();",
+                "revert /* reason */\nIStreamGovernanceExecutor.GovernanceSchedulingDuringExecution();",
+                "{ revert(); }",
+                "{ revert IStreamGovernanceExecutor.GovernanceSchedulingDuringExecution(); }",
+                "{ { revert(); } }",
+                "unchecked { revert(); }",
+            ):
+                with self.subTest(target=target, termination=termination):
+                    changed = source.replace(call, termination + "\n" + call)
+                    with self.assertRaisesRegex(
+                        ValueError, "unconditional revert before policy validation"
+                    ):
+                        checker.validate_policy_call_path(
+                            executor if target == "scheduling" else changed,
+                            changed if target == "scheduling" else scheduling,
+                        )
+
+    def test_schedule_delegation_cannot_follow_unconditional_revert(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        delegation = "StreamGovernanceScheduling.Prepared memory prepared ="
+        changed = executor.replace(delegation, "revert(); " + delegation)
+        with self.assertRaisesRegex(ValueError, "schedule delegation"):
+            checker.validate_policy_call_path(changed, scheduling)
+
+    def test_conditional_reverts_and_masked_text_remain_allowed(self) -> None:
+        executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
+        scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")
+        for target in ("scheduling", "execution"):
+            source = scheduling if target == "scheduling" else executor
+            call = self._policy_call(source)
+            for prefix in (
+                "if (false) revert();",
+                "if (false) { revert(); }",
+                "{ if (false) { revert(); } }",
+                "unchecked { if (false) revert(); }",
+                "/* revert(); */",
+                'string memory note = "revert();";',
+            ):
+                with self.subTest(target=target, prefix=prefix):
+                    changed = source.replace(call, prefix + "\n" + call)
+                    checker.validate_policy_call_path(
+                        executor if target == "scheduling" else changed,
+                        changed if target == "scheduling" else scheduling,
+                    )
+
     def test_other_function_cannot_supply_scheduling_validation(self) -> None:
         executor = checker.EXECUTOR_PATH.read_text(encoding="utf-8")
         scheduling = checker.SCHEDULING_PATH.read_text(encoding="utf-8")

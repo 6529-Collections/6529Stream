@@ -234,22 +234,28 @@ def _function_body(source: str, name: str) -> str:
 
 
 def _top_level_statements(body: str) -> list[str]:
-    """Select unconditional statement spellings, including any unbraced if prefix."""
+    """Flatten unconditional blocks while retaining unbraced conditional prefixes."""
     statements = []
-    depth = parens = start = 0
+    depth = parens = start = block_start = 0
+    unconditional_block = False
     for index, char in enumerate(body):
         if char == "(":
             parens += 1
         elif char == ")":
             parens -= 1
         elif char == "{":
+            if depth == 0 and parens == 0:
+                block_start = index + 1
+                unconditional_block = body[start:index].strip() in {"", "unchecked"}
             depth += 1
         elif char == "}":
             depth -= 1
             if depth == 0 and parens == 0:
+                if unconditional_block:
+                    statements.extend(_top_level_statements(body[block_start:index]))
                 start = index + 1
         elif char == ";" and depth == 0 and parens == 0:
-            statements.append(re.sub(r"\s+", "", body[start:index + 1]))
+            statements.append(body[start:index + 1])
             start = index + 1
     return statements
 
@@ -263,8 +269,10 @@ def validate_policy_call_path(executor_source: str, scheduling_source: str) -> N
     schedule_body = _function_body(executor_source, "_schedule")
     prepare_body = _function_body(scheduling_source, "prepare")
     execute_body = _function_body(executor_source, "_execute")
-    prepare = _top_level_statements(prepare_body)
-    execute = _top_level_statements(execute_body)
+    prepare_statements = _top_level_statements(prepare_body)
+    execute_statements = _top_level_statements(execute_body)
+    prepare = [re.sub(r"\s+", "", statement) for statement in prepare_statements]
+    execute = [re.sub(r"\s+", "", statement) for statement in execute_statements]
     expected_delegation = """StreamGovernanceScheduling.Prepared memory prepared =
         StreamGovernanceScheduling.prepare(_admin, _policy, _actionPolicy, _manifest,
             StreamGovernanceScheduling.Runtime({owner: owner(),
@@ -287,6 +295,14 @@ def validate_policy_call_path(executor_source: str, scheduling_source: str) -> N
     require(execute.count(execution_call) == 1 and executed in execute
             and execute.index(execution_call) < execute.index(executed),
             "policy validation path: execution policy validation before effects")
+    for statements, call_index in (
+        (prepare_statements, prepare.index(re.sub(r"\s+", "", expected_prepare))),
+        (execute_statements, execute.index(execution_call)),
+    ):
+        require(
+            not any(re.match(r"\s*revert\b", statement) for statement in statements[:call_index]),
+            "policy validation path: unconditional revert before policy validation",
+        )
     require(not any(re.search(r"\b(return|assembly)\b", body)
                     for body in (schedule_body, prepare_body, execute_body)),
             "policy validation path: early return or assembly bypass")

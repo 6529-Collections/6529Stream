@@ -179,33 +179,60 @@ contract StreamPaymentIntentVerifierTest is CharacterizationTestBase {
             IStreamPaymentIntentVerifier.PaymentIntent memory changed = intent;
             if (i == 0) changed.payer = address(0xBAD);
             if (i == 1) changed.asset = address(0xBAD);
-            if (i == 2) changed.maxAmount = terms.amount - 1;
+            if (i == 2) changed.maxAmount = intent.maxAmount + 1;
             if (i == 3) changed.saleRef = keccak256("another sale");
             if (i == 4) changed.expectedPrimaryPolicyHash = keccak256("another policy");
             if (i == 5) changed.nonce = bytes32(uint256(1));
             if (i == 6) changed.deadline += 1;
-            (bool ok,) = address(verifier)
+            bytes memory expected = (i == 0 || i == 1 || i == 3 || i == 4)
+                ? abi.encodeWithSelector(IStreamPaymentIntentVerifier.InvalidPaymentIntent.selector)
+                : abi.encodeWithSelector(
+                    IStreamPaymentIntentVerifier.InvalidPaymentSignature.selector, payer
+                );
+            (bool ok, bytes memory result) = address(verifier)
                 .call(abi.encodeCall(verifier.authorize, (terms, changed, signature, false)));
             require(
-                !ok && verifier.authorized() == 0
+                !ok && keccak256(result) == keccak256(expected) && verifier.authorized() == 0
                     && !verifier.isPaymentIntentNonceUsed(payer, intent.nonce),
                 "mutated consent accepted"
             );
         }
     }
 
+    function testAmountAboveSignedCapRejectsBeforeConsumption() public {
+        bytes memory signature = _sign(PAYER_KEY, verifier.paymentIntentDigest(intent));
+        terms.amount = intent.maxAmount + 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamPaymentIntentVerifier.InvalidPaymentIntent.selector)
+        );
+        verifier.authorize(terms, intent, signature, false);
+        require(!verifier.isPaymentIntentNonceUsed(payer, intent.nonce), "cap failure consumed");
+    }
+
     function testWrongChainVerifierAndExpiredIntentReject() public {
         bytes memory signature = _sign(PAYER_KEY, verifier.paymentIntentDigest(intent));
         uint256 chain = block.chainid;
         vm.chainId(chain + 1);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamPaymentIntentVerifier.InvalidPaymentSignature.selector, payer
+            )
+        );
         verifier.authorize(terms, intent, signature, false);
         vm.chainId(chain);
         PaymentIntentHarness another = new PaymentIntentHarness();
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamPaymentIntentVerifier.InvalidPaymentSignature.selector, payer
+            )
+        );
         another.authorize(terms, intent, signature, false);
         vm.warp(uint256(intent.deadline) + 1);
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamPaymentIntentVerifier.PaymentIntentExpired.selector, intent.deadline
+            )
+        );
         verifier.authorize(terms, intent, signature, false);
         require(!verifier.isPaymentIntentNonceUsed(payer, intent.nonce), "failed checks consumed");
     }

@@ -206,8 +206,13 @@ installed by this current path.
 Canonical EOA signatures and bounded ERC-1271 are supported. A delegated EOA
 retains its own-key ECDSA route when an EIP-7702 designation is observed.
 Contract verification starts with a 400,000-gas stipend; the adapter owner,
-normally the delayed Executor, can only raise it. This adapter-local setting
-is not the factory-wide governed parameter store specified for the complete
+normally the delayed Executor, can only raise it. Governance must measure an
+increase against transaction gas limits: an unusably large stipend prevents
+ERC-1271 authorization and signed revocation, and correcting that raise requires
+a replacement adapter. EOA signatures and direct nonce revocation are unaffected.
+The literal-payer exemption still applies to payer consent, but a contract artist
+or platform signer continues to require ERC-1271 verification. This adapter-local
+setting is not the factory-wide governed parameter store specified for the complete
 revenue protocol, and the test wallet is not certification of every supported
 production wallet class.
 

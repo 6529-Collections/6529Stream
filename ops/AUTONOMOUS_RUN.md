@@ -39,10 +39,13 @@ runtime space without moving existing storage or the execution loop. The payment
 lane installs the existing primary revenue resolver for supported fixed-profile
 assignments; unsupported primary templates and deferred escrow remain explicit.
 Both features are covered by real current-stack integration tests. The integrated
-revision passes 1,390 default Foundry tests across 115 suites and 28 current-stack
-tests across five suites. The current Windows wrapper also passes its 42 Python
+revision passes 1,379 default Foundry tests across 114 suites and 28 current-stack
+tests across five suites. The current Windows wrapper also passes its 44 Python
 tests. The exact current compilation exports 86 targets from 186 sources; the
 independent release verifier and packaging review pass all 625 checksummed files.
+The earlier 1,390-execution run included twelve additional via-IR executions of
+the Core target suite. The latest run retains every distinct test and adds one
+payment-cap regression; its smaller count reflects that compiler-profile duplicate.
 
 The patched deployment runner completed a fresh local deployment with its normal
 115% gas multiplier: all 43 deployment transactions succeeded after the complete
