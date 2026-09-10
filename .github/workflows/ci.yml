@@ -2,6 +2,12 @@ name: CI
 
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      extended_campaign:
+        description: Extended current-stack fuzz and invariant campaign
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -20,7 +26,7 @@ jobs:
   current-stack:
     name: Current stack integration
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     steps:
       - name: Checkout
@@ -125,6 +131,18 @@ jobs:
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate
           python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
 
+      - name: Reproducible current fuzz and invariant campaign
+        shell: bash
+        env:
+          EXTENDED_CAMPAIGN: ${{ inputs.extended_campaign }}
+        run: |
+          python -m tools.development.test_dev
+          mode=quick
+          if [ "$EXTENDED_CAMPAIGN" = "true" ]; then
+            mode=extended
+          fi
+          python scripts/dev.py campaign --mode "$mode" --seed 0x6529 --reuse-current --artifacts ci-logs/invariant-campaign
+
       - name: Upload current compilation evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -135,10 +153,12 @@ jobs:
             ci-logs/current-stack-build.log
             ci-logs/current-stack-export.log
             ci-logs/current-candidate
+            ci-logs/invariant-campaign
           if-no-files-found: error
           retention-days: 14
 
   windows-wrapper:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Windows PowerShell wrapper
     runs-on: windows-latest
     timeout-minutes: 30
@@ -230,6 +250,7 @@ jobs:
           ./scripts/test_current_stack_transaction_journal.ps1
           ./scripts/test_current_stack_launch_status.ps1
           ./scripts/test_current_stack_scenarios.ps1
+          ./scripts/test_current_stack_completion.ps1
 
       - name: Full release-builder test authority
         shell: powershell
@@ -255,6 +276,7 @@ jobs:
           retention-days: 14
 
   stream-client:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: TypeScript client
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -274,8 +296,10 @@ jobs:
         run: |
           npm --prefix packages/stream-client ci --ignore-scripts
           npm --prefix packages/stream-client test
+          node scripts/test_current_stack_collector.mjs
 
   slither-baseline:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Slither first-party baseline
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -336,6 +360,7 @@ jobs:
           make slither-baseline-check 2>&1 | tee ci-logs/slither-baseline-check.log
 
   foundry:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Foundry smoke
     runs-on: ubuntu-latest
     timeout-minutes: 90
