@@ -227,6 +227,9 @@ jobs:
         run: |
           ./scripts/test_current_stack_local.ps1
           ./scripts/test_current_stack_sepolia.ps1
+          ./scripts/test_current_stack_transaction_journal.ps1
+          ./scripts/test_current_stack_launch_status.ps1
+          ./scripts/test_current_stack_scenarios.ps1
 
       - name: Full release-builder test authority
         shell: powershell
@@ -250,6 +253,27 @@ jobs:
           path: ci-logs/release-build-tests-windows.log
           if-no-files-found: error
           retention-days: 14
+
+  stream-client:
+    name: TypeScript client
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+          cache: npm
+          cache-dependency-path: packages/stream-client/package-lock.json
+
+      - name: Test generated ABIs, signing payloads and snapshots
+        shell: bash
+        run: |
+          npm --prefix packages/stream-client ci --ignore-scripts
+          npm --prefix packages/stream-client test
 
   slither-baseline:
     name: Slither first-party baseline

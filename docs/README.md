@@ -13,6 +13,8 @@ their own scope and must not be read as a list of installed features.
 | Understand storage, authority, and module boundaries | [Architecture](architecture.md) |
 | Find source or a caller capability | [Source map](../smart-contracts/README.md), [interface map](../smart-contracts/interfaces/stream/README.md) |
 | Sign, buy, bid, index, withdraw, or render | [Integration guide](integrations/README.md) |
+| Use typed calls and export selected state | [TypeScript client](integrations/typescript-client.md) |
+| Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
 | Add tests or submit a change | [Tests](../test/README.md), [Contributing](../CONTRIBUTING.md) |
 | Run local or testnet transactions | [Current deployment guide](../script/current/README.md) |

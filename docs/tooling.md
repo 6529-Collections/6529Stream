@@ -20,6 +20,12 @@ remain supported current/full validation entrypoints. PowerShell users can also
 run `pwsh -NoProfile -File scripts/check.ps1 -CurrentStack` or omit `-CurrentStack`
 for the full aggregate wrapper.
 
+Application integrations have an optional [TypeScript client](integrations/typescript-client.md).
+With Node.js 22 or newer, run `npm --prefix packages/stream-client ci --ignore-scripts`
+once, then `npm --prefix packages/stream-client test`. Its independent CI job
+checks retained ABI freshness, TypeScript types, signing payloads and snapshots
+without recompiling Solidity. Solidity development does not require Node.js.
+
 ## Pick the relevant tests
 
 ```text
