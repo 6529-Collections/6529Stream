@@ -84,6 +84,9 @@ git branch --show-current
   and the Solidity formatting policy in [docs/tooling.md](docs/tooling.md).
 - Do not edit generated release artifacts by hand. Use the generator scripts and
   commit the deterministic outputs only when the changed inputs require it.
+- Read and write text with explicit UTF-8 on Windows; use byte copies when
+  preserving exact source files. After integrating generated artifacts, run
+  their generators' check mode against the integration checkout's inputs.
 - Do not mark scaffold, template, or placeholder evidence as reviewed or
   complete.
 - Do not close, resolve, or mark tracker issues complete unless the merged
