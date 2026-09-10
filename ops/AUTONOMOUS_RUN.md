@@ -11,7 +11,7 @@ repository reorganization, independent adversarial review, and testnet delivery.
 | Active PR branch | `codex/developer-experience-reorganization` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/739` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/738` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/740` |
 | Next issue | `TBD` |
 | Source checkpoint | `7b4ef22b052419e88d56cf7f207a7a7738dba7a7` |
 | Roadmap file | `ops/ROADMAP.md` |
@@ -33,6 +33,21 @@ includes coherent public interfaces, accurate integration guides, a focused
 contributor workflow, organized tests and maintenance tooling, and a separate
 adversarial reviewer. A final review and validation pass must cover the actual
 reorganized tree; earlier tests alone do not validate later edits.
+
+The reorganization is now in [PR #740](https://github.com/6529-Collections/6529Stream/pull/740).
+Its source checkpoint passes 1,346 configured Foundry tests across 111 suites,
+including maximum-size artwork through the current Core. All eleven current
+integration scenarios and thirteen retained gas snapshots pass. The fresh current
+export contains 76 targets from one exact 168-source compiler input. The independent
+offline verifier passes all 589 covered files; the full native wrapper and PR CI
+are still running. These results do not complete the funded Sepolia demonstration.
+
+Independent adversarial review has cleared the source/API organization, developer
+commands, current export, historical provenance, cleanup, and package integrity
+changes. One instruction-surface defect remains: automatic approval review rejected
+the attempted `AGENTS.md` update with only `rejected: blocked by policy`. That file
+retains stale flat-script commands. The contributor guides and `scripts/dev.py`
+contain the working commands; no retry or bypass of the rejected edit was attempted.
 
 | Owner | Responsibility |
 | --- | --- |

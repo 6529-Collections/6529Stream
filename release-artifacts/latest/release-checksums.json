@@ -338,7 +338,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:395c1d0b6d00edb163f6fde9813873bf6c5070aa97910ec833f5b960f2afd240"
+    "sha256": "sha256:75153bcc9ea002e18e8ed69d3ff3c5da7994cb7bb76573bed9b4c87e90c91e82"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1032,8 +1032,8 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:4f62dbc771b001f2719cca76e1e98f55204ee1966f1c0dd45264be13d57f9409",
-      "size_bytes": 211703
+      "sha256": "sha256:96a3ae36d0d387a212ff066e201492ba354b21881ae92728176fb3af636ec766",
+      "size_bytes": 211713
     },
     {
       "path": "ops/EXTERNAL_CALL_GAS_INVENTORY.json",
