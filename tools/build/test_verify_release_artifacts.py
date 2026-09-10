@@ -74,6 +74,36 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "scripts/rehearse-current-stack-vrf.ps1",
         "scripts/test_current_stack_local.ps1",
         "scripts/test_current_stack_sepolia.ps1",
+        "scripts/current-stack-transaction-journal.ps1",
+        "scripts/current-stack-launch-status.ps1",
+        "scripts/test_current_stack_transaction_journal.ps1",
+        "scripts/test_current_stack_launch_status.ps1",
+        "scripts/run-current-stack-scenarios.ps1",
+        "scripts/test_current_stack_scenarios.ps1",
+        "scripts/complete-current-stack-collection.ps1",
+        "scripts/test_current_stack_completion.ps1",
+        "scripts/collector",
+        "scripts/verify_current_stack_collector.mjs",
+        "scripts/test_current_stack_collector.mjs",
+        "packages/stream-client/.gitattributes",
+        "packages/stream-client/.gitignore",
+        "packages/stream-client/README.md",
+        "packages/stream-client/package.json",
+        "packages/stream-client/package-lock.json",
+        "packages/stream-client/tsconfig.json",
+        "packages/stream-client/tsconfig.test.json",
+        "packages/stream-client/src",
+        "packages/stream-client/examples",
+        "packages/stream-client/scripts",
+        "packages/stream-client/test",
+        "test/README.md",
+        "test/current",
+        "test/helpers/StreamCurrentStackFixture.sol",
+        "test/helpers/StreamCurrentStackHandler.sol",
+        "docs/README.md",
+        "docs/integrations/typescript-client.md",
+        "docs/integrations/product-demo.md",
+        "docs/integrations/collector-package.md",
         "script/current/README.md",
         *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
     )
@@ -87,11 +117,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 336
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 336
+    len(TEST_CANONICAL_COVERED_PATHS) != 366
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 366
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 336 unique coverage roots"
+        "canonical verifier fixtures require exactly 366 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("tools/security/generate_risk_register.py"),
@@ -769,12 +799,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 336)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 336)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 336)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 366)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 366)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 366)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "afa29c005c3580c2910067c48953daa2c986b7cf04e56f40323915e2f3d5ffe3",
+            "90baf0d590ea57fde26c29d04c0cfc5213ba9c73796a8535287aedeeb911f471",
         )
         self.assertIn(
             "tools/development/test_windows_ci_wrapper.py",

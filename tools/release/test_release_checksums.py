@@ -165,7 +165,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 336)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 366)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3160,7 +3160,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 336)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 366)
         manifest_paths = [record["path"] for record in manifest["files"]]
         checksum_paths = [
             path for _, path in generator.parse_checksum_file(checksum_text)
@@ -3173,6 +3173,33 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assert_committed_checksums_cover(
             {Path("tools/build/check_contract_size_budget.py")}
         )
+
+    def test_committed_checksums_cover_developer_kit_without_local_builds(self) -> None:
+        self.assert_committed_checksums_cover({
+            Path("scripts/current-stack-transaction-journal.ps1"),
+            Path("scripts/current-stack-launch-status.ps1"),
+            Path("scripts/run-current-stack-scenarios.ps1"),
+            Path("scripts/complete-current-stack-collection.ps1"),
+            Path("scripts/collector/field-studies.js"),
+            Path("scripts/verify_current_stack_collector.mjs"),
+            Path("packages/stream-client/.gitattributes"),
+            Path("packages/stream-client/package-lock.json"),
+            Path("packages/stream-client/src/client.ts"),
+            Path("packages/stream-client/src/snapshot.ts"),
+            Path("packages/stream-client/src/generated/abis.ts"),
+            Path("packages/stream-client/examples/snapshot.mjs"),
+            Path("packages/stream-client/test/snapshot.test.mjs"),
+            Path("test/current/StreamCurrentStackFuzz.t.sol"),
+            Path("test/current/StreamCurrentStackInvariant.t.sol"),
+            Path("test/helpers/StreamCurrentStackHandler.sol"),
+            Path("docs/integrations/collector-package.md"),
+        })
+        repo_root = SCRIPT_PATH.parent.parent.parent
+        files = generator.collect_files(
+            repo_root, generator.DEFAULT_COVERED_PATHS,
+            repo_root / generator.DEFAULT_OUTPUT_DIR,
+        )
+        self.assertFalse(any("node_modules" in path.parts or "dist" in path.parts for path in files))
 
     def test_committed_checksums_cover_deployment_candidate_and_plan_tools(
         self,

@@ -11,6 +11,7 @@ release-artifacts/** text eol=lf
 *.json text eol=lf
 *.lock text eol=lf
 *.js text eol=lf
+*.mjs text eol=lf
 *.toml text eol=lf
 *.txt text eol=lf
 *.py text eol=lf
