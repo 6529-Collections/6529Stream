@@ -304,6 +304,9 @@ class PythonToolchainTests(unittest.TestCase):
         cases = [
             (Path("workflow.yml"), valid_workflow(), command),
             (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", '--in""stall')),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", "--in\\stall")),
+            (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace('"', "").replace("--install", "--in\\\n          stall")),
             (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace("1.7.1", "1.7.2")),
             (checker.CI_WORKFLOW_PATH, valid_multi_job_ci_workflow(), command.replace("; then", " --force; then")),
         ]

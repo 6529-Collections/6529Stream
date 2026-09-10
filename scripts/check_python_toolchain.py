@@ -443,7 +443,6 @@ def check_workflow(path: Path, text: str) -> list[str]:
     expected_solc_select = WORKFLOW_SOLC_SELECT_COUNTS.get(path, 1)
     approved_install_lines = set(COMMON_APPROVED_INSTALL_LINES)
     approved_install_lines.update(WORKFLOW_APPROVED_INSTALL_LINES.get(path, set()))
-    normalized_install_lines = {normalize_shell_tokens(line) for line in approved_install_lines}
     stripped_lines: list[str] = []
     action_refs: list[tuple[str, str]] = []
     literal_run_indent: int | None = None
@@ -539,7 +538,9 @@ def check_workflow(path: Path, text: str) -> list[str]:
 
     logical_text = normalize_shell_continuations(text)
     shell_text = normalize_shell_tokens(text)
-    for logical_line_number, raw_line in enumerate(shell_text.splitlines(), start=1):
+    for logical_line_number, (raw_line, original_line) in enumerate(
+        zip(shell_text.splitlines(), logical_text.splitlines()), start=1
+    ):
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue
@@ -547,7 +548,7 @@ def check_workflow(path: Path, text: str) -> list[str]:
         if (
             logical_name_key is None
             and "install" in stripped.casefold()
-            and stripped not in normalized_install_lines
+            and original_line.strip() not in approved_install_lines
         ):
             errors.append(
                 f"{path}:logical-line-{logical_line_number} unapproved install line "
