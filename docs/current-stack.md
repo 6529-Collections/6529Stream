@@ -109,11 +109,11 @@ replace the executor or bypass Core authorization. Ordinary governance delays
 remain after genesis initialization.
 
 Use the [deployment guide](../script/current/README.md) for offline simulation,
-an existing local Anvil node, and Sepolia configuration. The isolated full-stack
-simulation measured 10,966,570 gas for preparation and 12,683,466 for activation,
-including transaction intrinsic costs. Each fits the 16,777,216 transaction gas
-cap. These measurements describe simulation; deployed addresses and successful
-testnet receipts are separate evidence.
+an existing local Anvil node, and Sepolia configuration. Rehearse the exact
+selected compilation and check every transaction against the chain's gas cap;
+the extended governance catalog and deployment add work beyond the earlier
+native-sale prototype. Local receipts and successful testnet execution are
+separate evidence.
 
 ## Replace and configure modules
 

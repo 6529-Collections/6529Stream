@@ -30,10 +30,11 @@ the release policy in `docs/release-policy.md`.
 - Added committed one-time genesis initialization, real system discovery and
   current-stack tests covering paid mint, auction custody/refunds, withdrawals,
   metadata, transfer/burn, receiver rollback and delayed governance rotation.
-  Normal governance delays remain after genesis. The stack is deployed on
-  Sepolia with a successful paid mint; the real randomness callback and final
-  demonstration are pending subscription funding. This is a development
-  deployment, not an audit or production release.
+  Normal governance delays remain after genesis. An earlier prototype completed
+  a Sepolia paid mint. The corrected, extended source requires a new deployment;
+  its real randomness callback and final demonstration are pending subscription
+  funding. The prototype is historical development evidence, not the current
+  candidate or a production release.
 
 ### Changed
 

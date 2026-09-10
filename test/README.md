@@ -8,7 +8,7 @@ python scripts/dev.py test
 
 This selects the `current` profile and integration suites under `test/current`.
 They wire actual permanent Core, governance, canonical registry, sale/auction,
-artist attribution, entropy, metadata and split wallets. Start here to understand
+artist attribution, entropy, metadata, ERC-20 payments, state exports and split wallets. Start here to understand
 a complete transaction.
 
 | Path | Responsibility | Command |
@@ -21,6 +21,8 @@ a complete transaction.
 
 ```text
 python scripts/dev.py test --match-contract StreamCurrentStackTest
+python scripts/dev.py test --match-contract StreamCurrentStackERC20Test
+python scripts/dev.py test --match-contract StreamCurrentStateExportTest
 python scripts/dev.py test --suite unit --match-contract StreamFixedPriceSaleAdapterTest
 python scripts/dev.py test --suite all
 ```
