@@ -14244,8 +14244,8 @@
     {
       "path": "tools/protocol/check_governance_action_policy.py",
       "role": "runtime",
-      "source_sha256": "1f4718d4e6d6052591c5ca94ce871dbb14a1434a19d9737440c808dff5dc254d",
-      "size_bytes": 27075,
+      "source_sha256": "9ce6a26ece4c22761ce82f2ee4f990636a120f96668aba75059273ed7bfd29ed",
+      "size_bytes": 27563,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Path\",\"kind\":\"from\",\"level\":0,\"member\":\"Path\",\"module\":\"pathlib\"}",
@@ -14303,7 +14303,7 @@
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"re\"}",
-          "count": 17
+          "count": 18
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"sys\"}",
@@ -14340,6 +14340,10 @@
         {
           "record": "{\"context\":\"call-target\",\"target\":\"re.finditer\"}",
           "count": 2
+        },
+        {
+          "record": "{\"context\":\"call-target\",\"target\":\"re.fullmatch\"}",
+          "count": 1
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"re.match\"}",
@@ -14723,6 +14727,12 @@
           "target": "local:_validate_candidate_binding",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "e530e7e56ac0a6699d3140c4da5b0e14953ed4b188263e0f25adad43a2b67f0e",
+          "count": 1
+        },
+        {
+          "target": "local:any",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "125515720990207aaab8848139d389fbf2fb45ca77749aff78569b48a7452d3c",
           "count": 1
         },
         {
@@ -15712,6 +15722,12 @@
         {
           "target": "local:require",
           "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "e18fe2533eb95ba3d1c71e21839def11752d92c6a93ed1d6d087841dea060ea3",
+          "count": 1
+        },
+        {
+          "target": "local:require",
+          "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "e2ec91cf090d2ffc39ae218363b4fa796e2849cce9866a1096189f37e92f9d53",
           "count": 1
         },
@@ -15971,6 +15987,12 @@
           "target": "re.finditer",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "e0be3fe61f55dd6d5cb6da4957e56b73c87dd69dff300fffd65f3cde50d5ca0e",
+          "count": 1
+        },
+        {
+          "target": "re.fullmatch",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "d88406977afba026323f929fde17d420f33a853cd8298da617d9ba3cbc9d3773",
           "count": 1
         },
         {
