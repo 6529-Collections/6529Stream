@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "description": "Read-only digest calls to the current local Anvil deployment; arbitrary public payloads, no signatures or transactions. These are encoding vectors, not valid sale authorizations or recommended deployment addresses.",
-  "compilerInputSha256": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0",
-  "blockNumber": 332,
-  "blockHash": "0xd5b9a792735602ae4cd4971869f50ac05837ca3359dd638a5f7a08e54f01776c",
+  "description": "Read-only digest calls pinned to the frozen local Anvil collection block; arbitrary public payloads, no signatures or transactions. These are encoding vectors, not valid sale authorizations or recommended deployment addresses. Compiler input identifies the current client ABI export, whose 86 selected artifact bytes equal the original deployment compilation.",
+  "compilerInputSha256": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+  "blockNumber": 375,
+  "blockHash": "0x27c1299cef09a71edb4b9c6018c8c54cbb76b75b07a409a13fedd27d2a320ea5",
   "vectors": [
     {
       "request": {

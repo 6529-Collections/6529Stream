@@ -2,8 +2,8 @@
 export const provenance = {
   "schemaVersion": 1,
   "source": "release-artifacts/current",
-  "manifestSha256": "sha256:dbceba9d1a5b8fce165bb65b0e98ac04b535f087b49a4caee00055cd825d9bc3",
-  "compilerInputSha256": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0",
+  "manifestSha256": "sha256:e474537c6a2cc6b2d33896d68de92565f10fcc080cf6f753022675e19615510b",
+  "compilerInputSha256": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
   "compilerVersion": "0.8.19+commit.7dd6d404",
   "artifacts": {
     "artifacts/StreamCore.json": "sha256:5c0c10dc2fdb7096ce6c2f89de1d95741dd3956d04df37f00927c0994907d499",
