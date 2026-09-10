@@ -11,7 +11,7 @@ repository reorganization, independent adversarial review, and testnet delivery.
 | Active PR branch | `codex/offline-release-completion` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/740` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/738` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/741` |
 | Next issue | `TBD` |
 | Source checkpoint | `2e675281b18f8881b341eb47cd26cd60ad63f6b0` (merged baseline) |
 | Roadmap file | `ops/ROADMAP.md` |
@@ -24,8 +24,8 @@ repository reorganization, independent adversarial review, and testnet delivery.
 The owner requested further implementation while Sepolia funding is pending.
 The active branch is `codex/offline-release-completion`, from merged
 [PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
-builds executable product paths in three parallel lanes, then integrates and
-validates the resulting source once it stabilizes.
+has completed executable product paths in three parallel lanes. Source is now
+stable; final aggregate validation and PR review are in progress.
 
 | Owner | Delivery |
 | --- | --- |
@@ -38,8 +38,25 @@ The publisher stays on the actual Executor. Linked scheduling validation frees
 runtime space without moving existing storage or the execution loop. The payment
 lane installs the existing primary revenue resolver for supported fixed-profile
 assignments; unsupported primary templates and deferred escrow remain explicit.
-Both features require real current-stack integration tests. Existing tests and
-artifacts do not attest these new changes.
+Both features are covered by real current-stack integration tests. The integrated
+revision passes 1,390 default Foundry tests across 115 suites and 28 current-stack
+tests across five suites. The current Windows wrapper also passes its 42 Python
+tests. The exact current compilation exports 86 targets from 186 sources; the
+independent release verifier and packaging review pass all 625 checksummed files.
+
+The patched deployment runner completed a fresh local deployment with its normal
+115% gas multiplier: all 43 deployment transactions succeeded after the complete
+unsigned plan passed preflight. Paid native mint, final metadata, the Core update
+event, both 90/10 split withdrawals, artist transfer and 40 bytecode readbacks
+passed. A separate fresh-transaction VRF rehearsal passed with 500,000 gas
+forwarded to the real provider/coordinator/Core path; its upstream coordinator is
+a local mock, so this does not attest Chainlink service, billing or live fulfilment.
+Independent reviewers cleared the implementation, package and local evidence.
+
+The aggregate native check found a stale test-discovery assertion after three
+diagnostic tests were added. Its count is corrected to 127 while retaining every
+existing suite-partition assertion. Final native validation and required PR CI
+remain merge gates; this state does not claim they have completed.
 
 The merged baseline passed 1,346 configured Foundry tests across 111 suites,
 eleven current-stack scenarios, thirteen gas snapshots, the complete native
@@ -81,7 +98,8 @@ Core runtime measurements belong to the
 [canonical bytecode proof](../release-artifacts/latest/bytecode-release-proof.json)
 and its bound compiler/ABI inputs; they are not duplicated in this active run state.
 Reread that proof after the reorganized tree is rebuilt and its evidence refreshed.
-The previous revision's passing checks above do not attest the new compilation.
+The integrated checks above attest local behavior and compiler packaging, not a
+replacement Sepolia deployment or a frozen testnet release candidate.
 
 ## Recovery and remaining scope
 

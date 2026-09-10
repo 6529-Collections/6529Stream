@@ -13366,7 +13366,7 @@ class R11AuthoritativeEvidenceTests(
         self.assertNotIn("advapi32", builder_source.casefold())
 
     def test_r11_35_discovery_manifest_preserves_every_r4_case_once(self) -> None:
-        # These counts prove the complete suite partition; 40, 34, 50, and 124
+        # These counts prove the complete suite partition; 43, 34, 50, and 127
         # must move together when a test method is added or removed.
         legacy = {
             name for name, value in ReleaseBuildArtifactTests.__dict__.items()
@@ -13380,7 +13380,7 @@ class R11AuthoritativeEvidenceTests(
             name for name, value in R11AuthoritativeEvidenceTests.__dict__.items()
             if name.startswith("test_") and callable(value)
         }
-        self.assertEqual(len(legacy), 40)
+        self.assertEqual(len(legacy), 43)
         self.assertEqual(len(inherited), 34)
         self.assertEqual(
             inherited,
@@ -13394,7 +13394,7 @@ class R11AuthoritativeEvidenceTests(
         self.assertEqual(legacy & inherited, set())
         self.assertEqual(legacy & amendments, set())
         self.assertEqual(inherited & amendments, set())
-        self.assertEqual(len(legacy | inherited | amendments), 124)
+        self.assertEqual(len(legacy | inherited | amendments), 127)
         amendment_ids = {
             int(match.group(1))
             for name in amendments
@@ -13417,7 +13417,7 @@ class R11AuthoritativeEvidenceTests(
         normal_discovery = unittest.defaultTestLoader.loadTestsFromModule(
             sys.modules[__name__],
         )
-        self.assertEqual(normal_discovery.countTestCases(), 124)
+        self.assertEqual(normal_discovery.countTestCases(), 127)
         self.assertFalse(
             os.environ.get(R4_HERMETIC_CHILD_ENV) == "1"
             and os.environ.get(R4_HERMETIC_CHILD_CWD_ENV) == os.getcwd()
