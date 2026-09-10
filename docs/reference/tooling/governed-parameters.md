@@ -214,4 +214,3 @@ compatibility but must be exactly empty; the checker rejects every attempted
 exception row. Because this is a lexical policy gate rather than a Solidity
 data-flow engine, normal review and focused behavioral tests remain required
 when gas is computed through helper functions or structured state.
-

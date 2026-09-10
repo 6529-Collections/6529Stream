@@ -104,4 +104,3 @@ Do not change external ABI names, function `stateMutability`, or Core bytecode
 shape only to quiet cosmetic warning suggestions. Any such change needs the
 normal production evidence: focused tests, ABI compatibility checks, production
 size proof, release artifact regeneration, and changelog coverage.
-
