@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Interface, TypedDataEncoder, Wallet, verifyTypedData, ZeroHash } from "ethers";
-import { StreamClient, contractInterface, typedDataFromJSON, nativeSaleTypedData, paymentIntentTypedData, artistAcceptanceTypedData, toJSON, stackConfigFromJSON } from "../dist/index.js";
+import { StreamClient, contractInterface, typedDataFromJSON, nativeSaleTypedData, paymentIntentTypedData, artistAcceptanceTypedData, toJSON, stackConfigFromJSON, walletTypedData } from "../dist/index.js";
 
 const A = "0x0000000000000000000000000000000000000001";
 const B = "0x0000000000000000000000000000000000000002";
@@ -60,6 +60,14 @@ test("JSON preserves values above Number.MAX_SAFE_INTEGER and rejects numeric/lo
   assert.throws(() => typedDataFromJSON({ ...request, chainId: 31337 }));
   assert.throws(() => typedDataFromJSON({ ...request, message: { ...request.message, maxAmount: Number(intent.maxAmount) } }));
   assert.throws(() => typedDataFromJSON({ ...request, extra: true }));
+});
+test("raw wallet RPC representation includes domain schema and preserves the reviewed digest", () => {
+  const payload = paymentIntentTypedData(31337n, C, intent), rpc = walletTypedData(payload);
+  assert.deepEqual(rpc.types.EIP712Domain.map(field => field.name), ["name", "version", "chainId", "verifyingContract"]);
+  assert.equal(rpc.primaryType, "StreamPaymentIntent");
+  assert.equal(rpc.message.maxAmount, "9007199254740993");
+  const { EIP712Domain, ...types } = rpc.types;
+  assert.equal(TypedDataEncoder.hash(rpc.domain, types, rpc.message), payload.digest);
 });
 test("typed calls preserve exact buy argument ordering and native value; nonpayable value fails", () => {
   const client = new StreamClient(provider, config);

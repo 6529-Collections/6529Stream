@@ -101,3 +101,8 @@ export function typedDataFromJSON(input: unknown): SigningPayload<SigningMessage
 export function toJSON(value: unknown): string {
   return JSON.stringify(value, (_, item: unknown) => typeof item === "bigint" ? item.toString() : item, 2);
 }
+
+/** eth_signTypedData_v4 representation, including the EIP712Domain fields required by JSON-RPC wallets. */
+export function walletTypedData<T extends object>(payload: SigningPayload<T>): ReturnType<typeof TypedDataEncoder.getPayload> {
+  return TypedDataEncoder.getPayload(payload.domain, payload.types, payload.message);
+}
