@@ -437,11 +437,16 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         uint256 gasUsed = startGas - gasleft();
         emit log_named_uint("maximum cold metadata gas", gasUsed);
         emit log_named_uint("maximum metadata URI bytes", bytes(expected).length);
-        require(gasUsed < 11000000, "maximum content has 1m gas headroom");
+        (uint256 metadataBudget,,,) = core.gasParameterInfo(
+            0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93
+        );
+        require(gasUsed < metadataBudget, "maximum content fits the configured metadata budget");
         require(abi.encode(expected).length <= 65536, "complete URI fits Core response ceiling");
         _coolMetadata();
         startGas = gasleft();
-        string memory actual = core.tokenURI(id);
+        // Core reserves the full router allocation, EIP-150 overhead and its shared 2.91m
+        // return buffer before calling the router. Exercise that complete bounded outer read.
+        string memory actual = core.tokenURI{ gas: 16000000 }(id);
         emit log_named_uint("maximum cold Core tokenURI gas", startGas - gasleft());
         require(
             keccak256(bytes(actual)) == keccak256(bytes(expected)),

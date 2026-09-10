@@ -24,6 +24,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Validate maximum-content metadata against the configured 12 million router
+  gas budget and require the complete URI through a bounded 16 million gas
+  Core read. Refresh the full default compilation's measured gas snapshots
+  within unchanged release ceilings, and preserve exact UTF-8 release notes.
 - Increase native Foundry installer retries for transient download failures,
   including attestations, while preserving pinned versions and verification.
 - Keep token and registered-scope entropy subjects distinct when requesting
