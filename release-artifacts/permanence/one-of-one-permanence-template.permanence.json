@@ -46,7 +46,7 @@
     "dependency_artifact_manifest": {
       "category": "dependency_artifact_manifest",
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
-      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce"
+      "sha256": "sha256:e0e218bc17d6b71db912fd30d1e7a5d7be637cd9c8a44c29362b8ed29bea6978"
     },
     "dependency_registry": "0x0000000000000000000000000000000000000004",
     "dependency_count": 1,
@@ -141,12 +141,12 @@
     },
     "dependency_artifact_manifest": {
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
-      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce",
+      "sha256": "sha256:e0e218bc17d6b71db912fd30d1e7a5d7be637cd9c8a44c29362b8ed29bea6978",
       "status": "template"
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:1bf952f9c27d2877afb980ababe124d6b29d9de1846ad383a9592b45e86e4a6c",
+      "sha256": "sha256:271a4b42721091afc976e69c6e51852aec7b53c0bb6403d26fddf42fba721487",
       "status": "template"
     }
   },
@@ -182,12 +182,12 @@
     {
       "category": "dependency_artifact_manifest",
       "path": "release-artifacts/latest/dependency-artifact-manifest.json",
-      "sha256": "sha256:58f4bce9386d87ee9d59a9bc91184db2e04f3efeb366b280a9f94506bc02f1ce"
+      "sha256": "sha256:e0e218bc17d6b71db912fd30d1e7a5d7be637cd9c8a44c29362b8ed29bea6978"
     },
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:1bf952f9c27d2877afb980ababe124d6b29d9de1846ad383a9592b45e86e4a6c"
+      "sha256": "sha256:271a4b42721091afc976e69c6e51852aec7b53c0bb6403d26fddf42fba721487"
     }
   ],
   "redaction_policy": {

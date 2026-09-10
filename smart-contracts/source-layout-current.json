@@ -1004,6 +1004,86 @@
       "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."
     },
     {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/address-books/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "acc9115787abd45cfadec4def4eddc18cb910385b789ee3b03eceda0088357e0",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "d8bc0cf1a38450041c32bc16997591e717c66bf7142615a4f1aa81014409ec8e",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/examples/anvil-6529stream-v0.1.0-001.json",
+      "sha256": "c9b3f926441d6bfcff0cf9a76e6b335aadf83eae10b0966853792039cf94de1b",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
+      "sha256": "5b6fe7d9a90a31ae00c04dcf90bf8d6f69ccf218d2a8c87559ed0aa483a1d9a6",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/docs/adr/0005-randomness.md.txt",
+      "sha256": "7f9950298c705b49524f683b2572e0f7b300df3aa84ea75c63ed5eefe9bf5b65",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/release-artifacts/latest/abi-checksums.json",
+      "sha256": "f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseAuctionCeremony.s.sol.txt",
+      "sha256": "f9cb15d00f9188db5b8df3e4c52b780cd9bf206297ef6789e57a17caabc69f15",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseDeployment.s.sol.txt",
+      "sha256": "640b3b870ea4667519ada3da0b65f31edbca9f562aeedef29f698db5d114cfb1",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseEmergencyRedeployment.s.sol.txt",
+      "sha256": "79a306a866415c8045fbd4f8e9fafca2ef8187cd4cfc561923c0863b0fc90917",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/script/RehearseMetadataBrowser.s.sol.txt",
+      "sha256": "84079b960916213a42e478d06b3b25156acc128fdf65924564f7ac8420ae62bd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamEmergencyWithdraw.t.sol.txt",
+      "sha256": "3a9a0ed60df626cd1a1bb53a9da12352ae085ce41e43ac0553b74cd5d07955bd",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamPaymentsInvariant.t.sol.txt",
+      "sha256": "5aa9eddf5ab621dc762f8dd4264fed0fb19af22bbc67a21d026f775a67a57df7",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerAdversarial.t.sol.txt",
+      "sha256": "a2131f389b8e205835265be81db458c60ac1595e2bc94057d9d6ff957cf99e93",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerLifecycle.t.sol.txt",
+      "sha256": "726dea90688ed678af4972c7fdf321f932d6ecc2c78b1e2bdf2c4c76426e49cb",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerPayments.t.sol.txt",
+      "sha256": "89a30d666b42a9daf8b8ee34d09e0d53e96c5992e41500e1285ec84f568515ff",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
+      "path": "release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/test/StreamRandomizerRetry.t.sol.txt",
+      "sha256": "30cb423465fa36784d3e488cc29b33f5e8a863842aa0f3d79fc7f5a0da029ef6",
+      "purpose": "Exact historical local Anvil evidence/input bytes retained at 330ac1d4; placeholder source provenance and local-only results, not current execution proof."
+    },
+    {
       "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
       "sha256": "db88ca51f51b18c6a0409116830ac93a60a46c7c15a094311d199819988268af",
       "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."

@@ -254,7 +254,8 @@ measured delta, maximum approved runtime size, and mitigation before
 Accepted headroom-recovery records use `measured_delta_bytes` as
 `runtime_size_bytes - baseline_runtime_size_bytes`, which makes reductions
 negative and bytecode spend positive.
-The approved `StreamCore` runtime baseline is 22,184 bytes; its approved
+The policy retains its historically approved spend ceiling; this is not a claim
+about the current compiled runtime. The approved `StreamCore` runtime baseline is 22,184 bytes; its approved
 baseline EIP-170 margin is 2,392 bytes. Mutable runtime and margin are owned by the
 `StreamCore` row in
 `release-artifacts/latest/bytecode-release-proof.json`, not by copied tooling

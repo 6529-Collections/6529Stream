@@ -10,7 +10,7 @@
     {
       "descriptor": {
         "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-        "sha256": "sha256:1d1d428f7ace0bd17e822870f7ebc64dea91ccbed4baeb2b47f943b35d0f3a06",
+        "sha256": "sha256:3e5a004a30cd646ae6cc0f440827e58bcdae5edfd020c9b91bda6023338f30fe",
         "size_bytes": 8418,
         "schema_version": "6529stream.one-of-one-permanence-package.v1"
       },

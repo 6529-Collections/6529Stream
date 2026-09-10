@@ -19,7 +19,7 @@ DEFAULT_FOUNDRY_CONFIG = release_build.DEFAULT_FOUNDRY_CONFIG
 DEFAULT_FOUNDRY_OUT = release_build.DEFAULT_OUTPUT_DIR
 DEFAULT_CONTRACT = "StreamCore"
 EXPECTED_BASELINE_COMMAND = release_build.CANONICAL_BUILD_COMMAND
-DOC_BASELINE_PATHS = (Path("docs/architecture.md"), Path("docs/tooling.md"))
+DOC_BASELINE_PATHS = (Path("docs/reference/tooling/validation.md"),)
 EXCEPTION_STATUSES = {"accepted", "rejected", "superseded"}
 
 

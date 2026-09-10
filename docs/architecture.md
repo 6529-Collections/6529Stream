@@ -131,6 +131,8 @@ it does not require splitting one coherent state machine across deployments.
 
 Core's runtime-size policy remains in
 [`release-artifacts/contracts.json`](../release-artifacts/contracts.json).
+The [validation reference](reference/tooling/validation.md) explains its
+historically approved spend ceiling and the exception process.
 The [bytecode release proof](../release-artifacts/latest/bytecode-release-proof.json)
 owns the canonical release measurement. Target-isolated artifacts establish release size; an aggregate
 `forge build --sizes` report is diagnostic. Constructor arguments, linked

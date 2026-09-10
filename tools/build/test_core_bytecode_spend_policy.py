@@ -105,10 +105,11 @@ def write_tree(
             "accepted_reductions": accepted_reductions or [],
         }
     write_json(root / "release-artifacts/contracts.json", config)
-    (root / "docs").mkdir(parents=True, exist_ok=True)
-    for doc_name in ("architecture.md", "tooling.md"):
-        (root / "docs" / doc_name).write_text(
-            f"StreamCore runtime {approved_size:,} bytes and margin "
+    for relative_path in checker.DOC_BASELINE_PATHS:
+        doc_path = root / relative_path
+        doc_path.parent.mkdir(parents=True, exist_ok=True)
+        doc_path.write_text(
+            f"Approved StreamCore runtime baseline {approved_size:,} bytes and margin "
             f"{24_576 - approved_size:,} bytes.\n",
             encoding="utf-8",
             newline="\n",
@@ -437,14 +438,41 @@ class CoreBytecodeSpendPolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             write_tree(root)
-            (root / "docs" / "tooling.md").write_text(
-                "StreamCore runtime 22,184 bytes.\n",
+            (root / checker.DOC_BASELINE_PATHS[0]).write_text(
+                "Approved StreamCore runtime baseline 22,184 bytes.\n",
                 encoding="utf-8",
                 newline="\n",
             )
 
             with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "margin"):
                 checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_current_measurement_does_not_replace_approved_doc_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=18_997)
+            (root / checker.DOC_BASELINE_PATHS[0]).write_text(
+                "Current StreamCore runtime 18,997 bytes and margin 5,579 bytes.\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "22,184"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_navigation_docs_do_not_duplicate_approved_measurement(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root, runtime_size=18_997)
+            for name in ("architecture.md", "tooling.md"):
+                (root / "docs" / name).write_text(
+                    "See the validation reference for the approved Core spend policy.\n",
+                    encoding="utf-8",
+                    newline="\n",
+                )
+            self.assertEqual(
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT),
+                0,
+            )
 
     def test_missing_policy_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

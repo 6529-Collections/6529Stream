@@ -45,7 +45,8 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline.
 
 The release-tool call policy and its schema are reviewed inputs, not generated
-outputs. Any change to one of the 34 reviewed tool/test sources or to an allowed
+outputs. Any change to a reviewed tool/test source listed in the
+[call policy](../../../release-artifacts/release-tool-call-policy.json) or to an allowed
 dangerous exception must update and review the policy before the generated
 tail with:
 

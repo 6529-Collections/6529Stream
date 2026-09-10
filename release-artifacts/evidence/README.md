@@ -21,6 +21,12 @@ Those copies preserve the previously recorded hashes while current examples
 under `deployments/` can be regenerated. The pending packet metadata was
 updated to identify this retention location; no new run or review is claimed.
 
+The earlier local Anvil ceremony and randomizer records retain their original
+inputs under [the local Anvil snapshot](local-anvil/snapshots/pre-reorganization-330ac1d4/README.md).
+Their relocated references preserve all recorded hashes and local result
+statuses. Their zero source commit and placeholder participants/providers are
+still limitations; these records do not attest the current stack.
+
 For current packet validation, run from the repository root:
 
 ```sh

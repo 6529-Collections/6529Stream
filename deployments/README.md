@@ -115,7 +115,10 @@ instead of editing address books by hand.
 
 Ceremony evidence bundles are retained under `deployments/ceremony-evidence/`
 and validated by `tools/deployment/check_ceremony_evidence.py`. The committed local
-bundle is Anvil-only evidence. Fork, testnet, and production bundles must retain
+bundle is historical Anvil-only evidence. Its original inputs are retained in
+the [local snapshot](../release-artifacts/evidence/local-anvil/snapshots/pre-reorganization-330ac1d4/README.md);
+relocated references preserve the original hashes and result statuses. This
+does not report a current-source run. Fork, testnet, and production bundles must retain
 real broadcast manifests, address books, checksum references, source/explorer
 verification status, admin/signer/dependency/auction/emergency ceremony
 results, and operator notes without private keys, RPC URLs, API keys, mnemonics,
@@ -124,7 +127,8 @@ or unreleased drop payloads.
 Randomizer operations evidence bundles are retained under
 `deployments/randomizer-operations/` and validated by
 `tools/deployment/check_randomizer_operations.py`. The committed local bundle is
-Anvil-only evidence. Fork, testnet, and production bundles must retain real VRF
+historical Anvil-only evidence with the same snapshot boundary. Fork, testnet,
+and production bundles must retain real VRF
 and arRNG provider configuration, funding or billing proof, provider health,
 pending/stale/failed request state, migration controls, emergency controls, and
 operator notes without private keys, RPC URLs, API keys, mnemonics, provider
