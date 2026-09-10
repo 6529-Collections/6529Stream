@@ -40,6 +40,8 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         address artistRegistry;
         bytes32 splitProfile;
         bool developmentEntropy;
+        address erc20Sale;
+        address primaryRevenueResolver;
     }
 
     function run() external returns (DeploymentAddresses memory deployed) {
@@ -72,7 +74,9 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
             address(royalty),
             address(artistRegistry),
             profile,
-            localDevelopment
+            localDevelopment,
+            address(erc20Sale),
+            address(primaryRevenue)
         );
     }
 

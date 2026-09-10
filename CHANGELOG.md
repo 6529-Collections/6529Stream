@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added current-stack ERC-20 fixed-price sales with payer-bound intents,
+  canonical primary-policy commitments, exact allowance settlement and atomic
+  Core minting. Supported primary assignments use fixed collection/default profiles.
+- Added state-export publication on the actual governance Executor, live-role
+  authorization, permissionless challenges, forward supersession and historical
+  reads. Scheduling validation is linked separately to retain runtime headroom.
+- Added local transaction demonstrations with receipt-bound token/request IDs,
+  final metadata notification, split withdrawals and a fresh-transaction VRF
+  adapter callback rehearsal against an explicitly local upstream mock.
+
 - Added focused Core, mint and governance caller interfaces, shared request
   types, and interface compatibility regressions. Added a portable developer
   command for the supported stack and explicit unit, legacy, gas and full suites.

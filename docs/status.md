@@ -9,8 +9,8 @@ document conflicts with a specification home, the specification wins.
 6529Stream is pre-audit and not production-ready.
 
 The working permanent-Core product is documented in [current stack](current-stack.md):
-signed native sales, English auctions, accepted attribution, split withdrawals,
-entropy and metadata. Use the [current developer commands](tooling.md) to exercise
+signed native and fixed-profile ERC-20 sales, English auctions, accepted attribution,
+split withdrawals, entropy, metadata and governance-hosted state exports. Use the [current developer commands](tooling.md) to exercise
 that implementation. Broader specification and release acceptance remain separate.
 
 The historical Gate A regression/evidence baseline records:

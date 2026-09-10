@@ -7,7 +7,8 @@ not select a different contract or grant a caller additional authority.
 | Operation | Import | Implementation |
 | --- | --- | --- |
 | Token ownership and complete permanent Core API | [core/IStreamCore.sol](core/IStreamCore.sol) | [StreamCore](../../core/StreamCore.sol) |
-| Paid fixed-price mint | [mint/IStreamFixedPriceSaleAdapter.sol](mint/IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
+| Native fixed-price mint | [mint/IStreamFixedPriceSaleAdapter.sol](mint/IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
+| ERC-20 fixed-price mint and payer consent | [IStreamERC20FixedPriceSaleAdapter](mint/IStreamERC20FixedPriceSaleAdapter.sol), [IStreamPaymentIntentVerifier](revenue/IStreamPaymentIntentVerifier.sol) | [StreamERC20FixedPriceSaleAdapter](../../domains/mint/StreamERC20FixedPriceSaleAdapter.sol) |
 | Mint execution, phase administration, and reads | [IStreamMintExecution](mint/IStreamMintExecution.sol), [IStreamMintAdmin](mint/IStreamMintAdmin.sol), [IStreamMintReads](mint/IStreamMintReads.sol) | [StreamMintManager](../../domains/mint/StreamMintManager.sol) |
 | Durable counters and replay protection | [mint/IStreamMintLedger.sol](mint/IStreamMintLedger.sol) | [StreamMintLedger](../../domains/mint/StreamMintLedger.sol) |
 | Optional eligibility gate | [mint/IStreamMintGate.sol](mint/IStreamMintGate.sol) | A registered gate module |
@@ -23,6 +24,7 @@ not select a different contract or grant a caller additional authority.
 | Governed control-plane administration | [governance/IStreamGovernanceAdmin.sol](governance/IStreamGovernanceAdmin.sol) | The same Executor |
 | Governance state and current execution context | [governance/IStreamGovernanceReads.sol](governance/IStreamGovernanceReads.sol) | The same Executor |
 | One-time genesis and append-only catalog changes | [IStreamGenesisInitializer](governance/IStreamGenesisInitializer.sol), [IStreamGovernanceCatalog](governance/IStreamGovernanceCatalog.sol) | The same Executor, with each operation's distinct authority and timing rules |
+| State-export discovery, publication and history | [IStreamStateExportPublisher](governance/IStreamStateExportPublisher.sol), [IStreamStateExportOperations](governance/IStreamStateExportOperations.sol), [IStreamStateExportHistory](governance/IStreamStateExportHistory.sol) | The same Executor; operational publisher role for writes, public challenges |
 | Installed module eligibility | [modules/IStreamModuleRegistry.sol](modules/IStreamModuleRegistry.sol) | [StreamModuleRegistry](../../domains/modules/StreamModuleRegistry.sol) |
 | Published deployment inventory | [governance/IStreamSystemManifest.sol](governance/IStreamSystemManifest.sol) | [StreamSystemManifest](../../domains/governance/StreamSystemManifest.sol) |
 

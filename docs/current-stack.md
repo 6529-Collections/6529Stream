@@ -37,6 +37,33 @@ integrated build supports.
    royalty. Collection settings may override a default or explicitly disable
    royalties; freezing a collection captures its effective default.
 
+## Pay with an ERC-20
+
+The separate `StreamERC20FixedPriceSaleAdapter` registers immutable sale terms
+under canonical sale IDs. Platform and artist signatures bind those terms and
+each mint. A relayer additionally supplies the payer's pinned `PaymentIntent`;
+the literal payer may authorize its own call directly. The adapter checks the
+active asset and canonical primary policy, previews manager identities, pulls
+exact tokens into the verified split wallet, and mints atomically. Tokens with
+transfer taxes, misleading returns or incompatible balance changes are rejected.
+
+The current primary resolver supports fixed-profile collection/default
+assignments in this path. Deployment installs the resolver, adapter and mint
+phase, then transfers their configuration to governance. ERC-20 asset admission
+and sale registration remain explicit configuration steps. See the
+[ERC-20 integration guide](integrations/erc20-sales.md) for exact signatures,
+allowance, revocation, withdrawals and supported assignment boundaries.
+
+## Publish a state export
+
+The actual governance Executor exposes the locked state-export read interface,
+with separate publication and history capabilities. Live export-role holders
+append recent canonical block commitments; anyone may challenge them. Forward
+supersession links retain every original claim. Core pointer replacement stops
+old writes while preserving historical reads. These operations run outside
+governance batches. See [state exports](integrations/state-exports.md) for anchor
+windows, authority, event schemas and reconstruction boundaries.
+
 ## Follow an auction
 
 The artist and platform sign an `AuctionAuthorization` binding the artwork,
@@ -72,7 +99,8 @@ Use the default profile for the broader regression suite before release.
 The focused domain suites are `StreamFixedPriceSaleAdapter`,
 `StreamEnglishAuctionHouse`, `StreamMintCanonicalRegistry`, `StreamEntropyMetadata`,
 `StreamCollectionArtistRegistry`, `StreamRoyaltyResolver`,
-`StreamGenesisInitializer` and `StreamSystemManifest`. Keep their narrow
+`StreamGenesisInitializer`, `StreamSystemManifest`, `StreamERC20FixedPriceSaleAdapter`
+and `StreamPaymentIntentVerifier`. Keep their narrow
 behavior checks while extending the product test for newly integrated flows.
 
 The helpers in `script/current/` assemble exact governance transition hashes
@@ -124,6 +152,6 @@ actual executor. Existing tokens retain their original entropy coordinator.
   declares `token_data_location` as `animation_url:tokenDataBase64`.
 
 This is a development/testnet implementation under active integration. Full
-artist lifecycle and recovery, additional payment modes, advanced entropy recovery and the wider
+artist lifecycle and recovery, broader payment/escrow modes, advanced entropy recovery and the wider
 full-v1 feature set remain separate work. The supported candidate still needs
 the broad validation and actual testnet transaction pass before it is frozen.
