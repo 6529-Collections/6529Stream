@@ -282,6 +282,7 @@ try {
         $subscription = Subscription-State
         if ($subscription[3] -ine $deployer.address -or (Uint $subscription[1]) -eq 0) { throw 'Owned funded subscription required.' }
         $environment = @{
+            FOUNDRY_PROFILE='current'
             FOUNDRY_BROADCAST=$BroadcastDirectory
             STREAM_DEPLOYER=$deployer.address;STREAM_PROTOCOL_TREASURY=$deployer.address
             STREAM_ARTIST=$artist.address;STREAM_PLATFORM_SIGNER=$platform.address
@@ -293,8 +294,6 @@ try {
         foreach ($key in $environment.Keys) {$saved[$key]=[Environment]::GetEnvironmentVariable($key);[Environment]::SetEnvironmentVariable($key,$environment[$key])}
         try {
             $skip = @('--skip','test')
-            Get-ChildItem script -Recurse -Filter '*.s.sol' | Where-Object Name -ne 'DeployCurrentStack.s.sol' |
-                ForEach-Object {$skip+=@('--skip',$_.Name)}
             $forgeArguments = @('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
                 '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
                 '--rpc-url',$RpcUrl,'--sender',$deployer.address,'--slow',

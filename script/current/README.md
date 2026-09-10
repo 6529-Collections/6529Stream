@@ -9,7 +9,7 @@ SystemManifest pointer, and publishes an explicitly labeled development manifest
 These module metadata hashes describe development configurations. They are not
 release checksums, audit evidence, or a frozen release candidate.
 
-The deployment uses Solidity 0.8.19, optimizer 200 runs, and **global via-IR**, the
+The deployment uses `FOUNDRY_PROFILE=current`, Solidity 0.8.19, optimizer 200 runs, and **global via-IR**, the
 same instance profile as the current-stack integration test. The script's deployer
 is the bootstrap authority and controller of each separate governance actor.
 Manager, ledger, sale, auction, asset policy, and royalty control belongs to the
@@ -23,6 +23,12 @@ Provide an existing Anvil node on chain 31337. The helper uses only loopback RPC
 and Anvil's standard public unlocked accounts; it neither starts a daemon nor
 reads a private key.
 
+Start Anvil in a separate terminal with the normal transaction gas cap enabled:
+
+```powershell
+anvil --host 127.0.0.1 --port 8547 --chain-id 31337 --gas-limit 30000000 --enable-tx-gas-limit --quiet
+```
+
 ```powershell
 pwsh -NoProfile -File scripts/run-current-stack.ps1 -RpcUrl http://127.0.0.1:8547
 ```
@@ -32,18 +38,92 @@ sale through Anvil's EIP-712 RPC, pays 0.01 ETH, requests and completes developm
 entropy, exports final onchain metadata and artwork, releases both split shares,
 and transfers the NFT. Public addresses and receipts are saved to
 `$env:TEMP/6529stream-current-local/current-stack.json`. Use `-DeployOnly` to stop
-after deployment or `-OutputDirectory` to choose an artifact directory.
+after deployment or `-OutputDirectory` to choose a fresh evidence directory.
+Compilation, cache, and broadcast outputs default to separate subdirectories of
+that directory; all three can be supplied explicitly. An existing deployment
+checkpoint or broadcast file blocks an accidental fresh deployment. Keep a failed
+run for diagnosis and use a fresh directory for a new local deployment.
+
+The helper checks the accepted artist, decodes the token and entropy request from
+their own receipts, and requires the callback to be mined after the request. It
+asserts a nonzero final seed, stored and delivered provider result, Core's
+`MetadataUpdate` event, no pending metadata notification, both 90/10 withdrawals,
+and the NFT's final owner. `-DemonstrateOnly` completes a previously successful
+`-DeployOnly` run; it rejects an already attempted mint.
 
 `DevelopmentEntropyProvider` accepts controller-supplied values. **These are not
 secure randomness.** Its constructor rejects every chain except 31337. The local
 mode never presents this provider as Chainlink VRF.
+
+### Reuse a retained compilation safely
+
+Both runners set and restore the `current` profile and compile the complete
+current script selection with `--skip test`. Do not add per-script skip filters:
+they can select a different compiler input and invalidate reuse. The complete raw
+Foundry output and its paired cache are required; a published ABI/bytecode export
+alone is not a reusable Foundry cache.
+
+For an initial build, use fresh output paths:
+
+```powershell
+$env:FOUNDRY_PROFILE = 'current'
+forge build --skip test --build-info --out "$env:TEMP/stream-raw/out" --cache-path "$env:TEMP/stream-raw/cache"
+```
+
+Preserve that raw pair. Prepare a separate writable copy before running a script:
+
+```powershell
+python -m tools.deployment.prepare_current_stack_compilation --artifacts "$env:TEMP/stream-raw/out" --cache "$env:TEMP/stream-raw/cache" --destination "$env:TEMP/stream-local-compiler"
+pwsh -NoProfile -File scripts/run-current-stack.ps1 -OutputDirectory "$env:TEMP/stream-local-demo" -ArtifactDirectory "$env:TEMP/stream-local-compiler/out" -CacheDirectory "$env:TEMP/stream-local-compiler/cache"
+```
+
+Preparation verifies source freshness, compiler settings, the full compiler
+input, and selected artifacts. It hash-checks every copied file, rebases only the
+writable cache's two output-location fields, and checks the original pair again.
+`compilation-workspace.json` records those identities. The same helper accepts
+`--repo-root` when invoked from another directory. A successful copy does not
+promise a cache hit: the subsequent Forge log must actually report
+`No files changed, compilation skipped`. Source or configuration changes require
+a new compilation and new evidence; never relabel an older prepared candidate.
+
+### Real adapter, local upstream callback
+
+The separate VRF rehearsal uses the actual `StreamEntropyProviderVRF` artifact
+and the clearly named `MockVRFCoordinatorV2Plus` test artifact. It does not compile
+or use a real subscription. Before the first mint, it deploys both contracts,
+verifies source-bound artifacts, executable runtime and public configuration,
+and changes the collection provider through its normal delayed governance call.
+Only Anvil's clock advances; contract storage and authority checks are unchanged.
+
+```powershell
+pwsh -NoProfile -File scripts/run-current-stack.ps1 -DeployOnly -OutputDirectory "$env:TEMP/stream-vrf-demo" -ArtifactDirectory "$env:TEMP/stream-local-compiler/out" -CacheDirectory "$env:TEMP/stream-local-compiler/cache"
+pwsh -NoProfile -File scripts/rehearse-current-stack-vrf.ps1 -OutputDirectory "$env:TEMP/stream-vrf-demo" -ArtifactDirectory "$env:TEMP/stream-local-compiler/out" -MockArtifactFile out/MockVRFCoordinatorV2Plus.sol/MockVRFCoordinatorV2Plus.json -CallbackGasLimit 500000
+```
+
+The mock artifact normally comes from the test build. If absent, build its single
+source with `forge build test/mocks/MockVRFCoordinatorV2Plus.sol` into separate
+output/cache directories and supply that artifact's path. The rehearsal refuses
+stale source hashes. It preserves a call trace and distinguishes the adapter
+callback frame's gas from the entire fulfillment transaction's gas. Request and
+callback are separate mined transactions, with explicit Core notification and
+final metadata assertions. This proves the local callback path, including its
+gas cap; it does not prove Chainlink's proof verification, billing, solvency or
+service delivery. Its default 500,000 cap does not alter Sepolia's 1,500,000 cap.
+
+Run the offline helper regressions without an RPC node:
+
+```powershell
+python -m unittest tools.deployment.test_prepare_current_stack_compilation
+pwsh -NoProfile -File scripts/test_current_stack_local.ps1
+```
 
 For deployment simulation without an RPC endpoint:
 
 ```powershell
 $env:STREAM_DEPLOYER = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
 $env:STREAM_PROTOCOL_TREASURY = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --isolate --skip test --sender $env:STREAM_DEPLOYER
+$env:FOUNDRY_PROFILE = 'current'
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --sender $env:STREAM_DEPLOYER
 ```
 
 The current offline isolated simulation uses 10,966,570 gas for preparation and
@@ -74,7 +154,8 @@ configuration; no upstream coordinator, key hash, or subscription is invented.
 Use an existing secure Foundry signer and the intended RPC endpoint:
 
 ```powershell
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
+$env:FOUNDRY_PROFILE = 'current'
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
 ```
 
 The adapter must be added as a consumer of the supplied subscription, and that
