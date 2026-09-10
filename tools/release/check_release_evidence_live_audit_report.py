@@ -317,14 +317,20 @@ def expected_export_fragments(profile: str, snapshot_path: str) -> list[str]:
 def expected_export_fragment_sets(profile: str, snapshot_path: str) -> list[list[str]]:
     """Return accepted command-fragment sets for historical and exact exports."""
     common = expected_export_fragments(profile, snapshot_path)
+    current = [
+        "-m tools.release.export_release_evidence_issue_snapshot ",
+        *common[1:],
+    ]
+    exact = [
+        "--exact-linked-issues",
+        "--issue-links",
+        "release-artifacts/latest/release-evidence-issue-links.json",
+    ]
     return [
         common,
-        [
-            *common,
-            "--exact-linked-issues",
-            "--issue-links",
-            "release-artifacts/latest/release-evidence-issue-links.json",
-        ],
+        [*common, *exact],
+        current,
+        [*current, *exact],
     ]
 
 
@@ -408,9 +414,17 @@ def validate_profile_result(
         expected_export_fragment_sets(profile_name, snapshot_path),
         f"{path}.export_command",
     )
-    require_command_fragments(
+    require_any_command_fragment_set(
         checker_command,
-        expected_checker_fragments(profile_name, snapshot_path),
+        [
+            expected_checker_fragments(profile_name, snapshot_path),
+            [
+                "-m tools.release."
+                + Path(auditor.PROFILE_CONFIG[profile_name]["checker"]).stem
+                + " ",
+                f"--live-json {snapshot_path}",
+            ],
+        ],
         f"{path}.checker_command",
     )
 

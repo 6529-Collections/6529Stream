@@ -80,6 +80,11 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
 
+def resolve_repo_path(path: Path) -> Path:
+    """Resolve file arguments against the same base used by audit children."""
+    return (path if path.is_absolute() else repo_root() / path).resolve()
+
+
 def provenance_token(token: str) -> str:
     """Return a portable token for retained command provenance."""
     token_path = Path(token)
@@ -88,7 +93,7 @@ def provenance_token(token: str) -> str:
         return "python"
     if token_path.is_absolute():
         try:
-            return token_path.resolve().relative_to(repo_root()).as_posix()
+            return token_path.resolve().relative_to(repo_root().resolve()).as_posix()
         except ValueError:
             return token
     return token_path.as_posix() if "\\" in token else token
@@ -179,7 +184,8 @@ def audit_profile(
     collect_report: bool = False,
 ) -> dict[str, object] | None:
     """Export and check one live issue snapshot profile."""
-    output = snapshot_path(tmp_dir, profile)
+    output = resolve_repo_path(snapshot_path(tmp_dir, profile))
+    issue_links = resolve_repo_path(issue_links)
     export_command = exporter_command(python, profile, repo, gh, output, issue_links)
     check_command = checker_command(python, profile, output)
     run_checked(export_command, f"{profile} snapshot export")
@@ -189,7 +195,7 @@ def audit_profile(
         return None
     return {
         "profile": profile,
-        "snapshot_path": output.as_posix(),
+        "snapshot_path": provenance_token(output.as_posix()),
         "snapshot_sha256": sha256_file(output),
         "export_command": command_provenance(export_command),
         "checker_command": command_provenance(check_command),
@@ -346,10 +352,14 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_ISSUE_LINKS,
         help=(
             "Release-evidence issue-link artifact. Live audits fetch these "
-            "exact tracker issues instead of relying on gh issue list paging."
+            "exact tracker issues instead of relying on gh issue list paging. "
+            "Relative paths resolve from the repository root."
         ),
     )
-    parser.add_argument("--tmp-dir", type=Path, default=Path("tmp"))
+    parser.add_argument(
+        "--tmp-dir", type=Path, default=Path("tmp"),
+        help="Snapshot directory; relative paths resolve from the repository root.",
+    )
     parser.add_argument(
         "--python",
         default=sys.executable,
@@ -363,12 +373,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--report-json",
         type=Path,
-        help="Optional path for a no-secret deterministic JSON audit report.",
+        help="Optional JSON report path; relative paths resolve from the repository root.",
     )
     parser.add_argument(
         "--report-md",
         type=Path,
-        help="Optional path for a no-secret deterministic Markdown audit report.",
+        help="Optional Markdown report path; relative paths resolve from the repository root.",
     )
     parser.add_argument(
         "--generated-at",
@@ -404,9 +414,9 @@ def main(argv: list[str] | None = None) -> int:
         if collect_report:
             report = build_report(args.repo, args.generated_at, profile_results)
             if args.report_json is not None:
-                write_report_json(args.report_json, report)
+                write_report_json(resolve_repo_path(args.report_json), report)
             if args.report_md is not None:
-                write_report_markdown(args.report_md, report)
+                write_report_markdown(resolve_repo_path(args.report_md), report)
     except ReleaseEvidenceIssueSnapshotAuditError as exc:
         print(f"release evidence issue snapshot audit failed: {exc}", file=sys.stderr)
         return 1

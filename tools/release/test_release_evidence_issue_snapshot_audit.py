@@ -10,7 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stderr, redirect_stdout
+from contextlib import chdir, redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
@@ -123,11 +123,12 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         commands = [call.args[0] for call in run.call_args_list]
         self.assertEqual(len(commands), 2)
         self.assertIn("--output", commands[0])
-        self.assertIn("tmp/live/release-evidence-issue-bodies.json", commands[0])
+        expected = (auditor.repo_root() / "tmp/live/release-evidence-issue-bodies.json").as_posix()
+        self.assertIn(expected, commands[0])
         self.assertIn("--exact-linked-issues", commands[0])
         self.assertIn("--issue-links", commands[0])
         self.assertIn("--live-json", commands[1])
-        self.assertIn("tmp/live/release-evidence-issue-bodies.json", commands[1])
+        self.assertIn(expected, commands[1])
 
     def test_all_profile_deduplicates_explicit_profiles(self) -> None:
         """The all profile expands once even when profiles are repeated."""
@@ -185,10 +186,52 @@ class ReleaseEvidenceIssueSnapshotAuditTests(unittest.TestCase):
         check_command = run.call_args_list[1].args[0]
         self.assertIn("owner/repo", export_command)
         self.assertIn("custom-gh", export_command)
-        self.assertIn("custom/links.json", export_command)
+        links = (auditor.repo_root() / "custom/links.json").as_posix()
+        self.assertIn(links, export_command)
         self.assertNotIn("17", export_command)
         self.assertNotIn("custom-gh", check_command)
-        self.assertNotIn("custom/links.json", check_command)
+        self.assertNotIn(links, check_command)
+
+    def test_relative_paths_from_outside_cwd_share_repository_base(self) -> None:
+        """Child output, parent hashes, input links and report writes use one root."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "repo"
+            caller = Path(temp_dir) / "caller"
+            root.mkdir()
+            caller.mkdir()
+            with (
+                patch.object(auditor, "repo_root", return_value=root),
+                patch.object(
+                    auditor.subprocess, "run", side_effect=run_success_and_write_snapshots
+                ) as run,
+                chdir(caller),
+                redirect_stdout(StringIO()),
+                redirect_stderr(StringIO()),
+            ):
+                result = auditor.main([
+                    "--profile", "labels", "--python", "python",
+                    "--tmp-dir", "tmp/live", "--issue-links", "custom/links.json",
+                    "--report-json", "reports/audit.json",
+                    "--report-md", "reports/audit.md",
+                ])
+            self.assertEqual(result, 0)
+            snapshot = root / "tmp/live/release-evidence-issue-labels.json"
+            self.assertTrue(snapshot.is_file())
+            self.assertFalse((caller / "tmp").exists())
+            self.assertFalse((caller / "reports").exists())
+            self.assertTrue((root / "reports/audit.md").is_file())
+            report = json.loads((root / "reports/audit.json").read_text(encoding="utf-8"))
+            row = report["profiles"][0]
+            self.assertEqual(row["snapshot_sha256"], snapshot_digest("labels"))
+            self.assertEqual(row["snapshot_path"], snapshot.relative_to(root).as_posix())
+            export = run.call_args_list[0].args[0]
+            self.assertEqual(
+                export[export.index("--issue-links") + 1],
+                (root / "custom/links.json").resolve().as_posix(),
+            )
+            self.assertIn("--issue-links custom/links.json", row["export_command"])
+            self.assertNotIn(root.as_posix(), row["export_command"])
+            self.assertNotIn(root.as_posix(), row["checker_command"])
 
     def test_command_provenance_normalizes_python_and_repo_scripts(self) -> None:
         """Retained command provenance uses portable repo-relative script paths."""

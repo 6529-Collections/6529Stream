@@ -58,15 +58,15 @@ release-signature evidence, Slither baseline, signed release tag gate,
 post-bundle release-signature evidence, production release-signing checker,
 production release-signing retained artifact,
 public-beta evidence status, non-local release evidence, incident response,
-incident drill evidence, incident_drill_evidence, check_incident_drill_evidence.py,
+incident drill evidence, incident_drill_evidence, tools.release.check_incident_drill_evidence,
 signer compromise drill evidence, signer_compromise_drill_evidence,
-check_signer_compromise_drill_evidence.py,
+tools.release.check_signer_compromise_drill_evidence,
 stuck auction drill evidence, stuck_auction_drill_evidence,
-check_stuck_auction_drill_evidence.py,
+tools.release.check_stuck_auction_drill_evidence,
 failed randomness drill evidence, failed_randomness_drill_evidence,
-check_failed_randomness_drill_evidence.py,
+tools.release.check_failed_randomness_drill_evidence,
 bad metadata/dependency drill evidence, bad_metadata_dependency_drill_evidence,
-check_bad_metadata_dependency_drill_evidence.py,
+tools.protocol.check_bad_metadata_dependency_drill_evidence,
 the integration entrypoint,
 the fixed-price mint and drop authorization flow spec,
 the auction frontend and indexer flow spec,
@@ -99,7 +99,7 @@ production broadcast retention checker, production broadcast retention retained 
 public-beta verified-addresses checker, public-beta verified-addresses retained artifact,
 production verified-addresses checker, production verified-addresses retained artifact,
 live metadata-browser evidence, live_metadata_browser_evidence, and
-check_live_metadata_browser_evidence.py
+tools.release.check_live_metadata_browser_evidence
 are summarized.
 The release evidence live audit report schema is summarized.
 The release evidence live audit Markdown parity is summarized.

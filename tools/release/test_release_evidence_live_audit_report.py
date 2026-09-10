@@ -93,7 +93,8 @@ def valid_profile(root: Path, profile: str) -> dict[str, object]:
             f"--output {path} --gh gh"
         ),
         "checker_command": (
-            f"python scripts/{checker.auditor.PROFILE_CONFIG[profile]['checker']} "
+            "python -m tools.release."
+            f"{Path(checker.auditor.PROFILE_CONFIG[profile]['checker']).stem} "
             f"--live-json {path}"
         ),
         "export_status": "passed",
@@ -430,6 +431,42 @@ class ReleaseEvidenceLiveAuditReportTests(unittest.TestCase):
             report["profiles"][0]["checker_command"] = "python something_else.py"
 
             self.assert_checker_fails(report, root, "checker_command")
+
+    def test_historical_script_commands_remain_valid(self) -> None:
+        """Retained captures keep their original script invocation provenance."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            report = valid_report(root)
+            for row in report["profiles"]:
+                row["export_command"] = row["export_command"].replace(
+                    "-m tools.release.export_release_evidence_issue_snapshot",
+                    "scripts/export_release_evidence_issue_snapshot.py",
+                )
+                module = Path(checker.auditor.PROFILE_CONFIG[row["profile"]]["checker"]).stem
+                row["checker_command"] = row["checker_command"].replace(
+                    "-m tools.release." + module, "scripts/" + module + ".py"
+                )
+            checker.validate_report_document(report, root)
+
+    def test_current_module_provenance_keeps_required_identity_and_arguments(self) -> None:
+        """A current spelling cannot hide module, profile, repository, or path drift."""
+        cases = (
+            ("export_command", "tools.release.export_release_evidence_issue_snapshot ", "tools.release.export_release_evidence_issue_snapshot_other "),
+            ("export_command", "--profile labels", "--profile bodies"),
+            ("export_command", "--repo " + checker.REPO_FULL_NAME, "--repo other/repo"),
+            ("export_command", "--output tmp/live-audit/labels.json", "--output tmp/wrong.json"),
+            ("checker_command", "tools.release.check_release_evidence_issue_labels ", "tools.release.check_release_evidence_issue_labels_other "),
+            ("checker_command", "--live-json tmp/live-audit/labels.json", "--live-json tmp/wrong.json"),
+        )
+        for field, original, replacement in cases:
+            with self.subTest(field=field, replacement=replacement):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    report = valid_report(root)
+                    row = report["profiles"][0]
+                    self.assertIn(original, row[field])
+                    row[field] = row[field].replace(original, replacement)
+                    self.assert_checker_fails(report, root, field)
 
     def test_rejects_local_absolute_command_provenance(self) -> None:
         """Retained reports must not embed operator-specific absolute paths."""
