@@ -11,11 +11,6 @@ from pathlib import Path
 import jsonschema
 from eth_hash.auto import keccak
 
-from tools.protocol.check_external_call_gas_inventory import (
-    mask_comments_and_strings,
-    matching_closing_brace,
-)
-
 ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = ROOT / "release-artifacts" / "governance-action-policy.json"
 SCHEMA_PATH = (
@@ -141,6 +136,87 @@ def validate_catalog_snapshot_source(executor_source: str, bootstrap_source: str
         and "revertIStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(" in bootstrap,
         "scheduled catalog snapshot check",
     )
+
+
+# Pure lexical helpers copied from tools/protocol/check_external_call_gas_inventory.py
+# at e7a6550c8f22315d954c7141e00d7ec1fda66342. Keep these algorithms local so the
+# deliberately closed release verifier does not import the inventory CLI runtime.
+def mask_comments_and_strings(source: str) -> str:
+    """Replace comments and string contents with spaces while preserving offsets."""
+
+    masked = list(source)
+    index = 0
+    state = "code"
+    quote = ""
+    while index < len(source):
+        current = source[index]
+        following = source[index + 1] if index + 1 < len(source) else ""
+
+        if state == "code":
+            if current == "/" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "line-comment"
+                index += 2
+                continue
+            if current == "/" and following == "*":
+                masked[index] = masked[index + 1] = " "
+                state = "block-comment"
+                index += 2
+                continue
+            if current in {'"', "'"}:
+                quote = current
+                masked[index] = " "
+                state = "string"
+                index += 1
+                continue
+            index += 1
+            continue
+
+        if state == "line-comment":
+            if current == "\n":
+                state = "code"
+            else:
+                masked[index] = " "
+            index += 1
+            continue
+
+        if state == "block-comment":
+            if current == "*" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "code"
+                index += 2
+            else:
+                if current not in "\r\n":
+                    masked[index] = " "
+                index += 1
+            continue
+
+        if current == "\\":
+            masked[index] = " "
+            if index + 1 < len(source):
+                if source[index + 1] not in "\r\n":
+                    masked[index + 1] = " "
+                index += 2
+            else:
+                index += 1
+            continue
+        masked[index] = " " if current not in "\r\n" else current
+        if current == quote:
+            state = "code"
+        index += 1
+
+    return "".join(masked)
+
+def matching_closing_brace(source: str, opening: int) -> int | None:
+    depth = 0
+    for index in range(opening, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
 
 
 def _function_body(source: str, name: str) -> str:
