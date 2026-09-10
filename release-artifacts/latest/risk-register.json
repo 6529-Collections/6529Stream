@@ -601,7 +601,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:adc2c01fad26a8d36942e85c922dd78bb41e9b394fd5b849460f2f4890a2601d"
+          "sha256": "sha256:3747428383fee43acee4101bd1cc8a58306e93b13d7de44f4a9227feee821897"
         },
         {
           "path": "release-artifacts/latest/abi-checksums.json",
@@ -684,7 +684,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:f72ef104b728f8a076ba7242fef2305e35aaaedae46d1cb88808df03d1072689"
+          "sha256": "sha256:630b708682e3cf5de9fe145062c66e929c3071307d45410dc65c179592baf840"
         },
         {
           "path": "docs/warning-dispositions.md",
