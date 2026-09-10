@@ -80,6 +80,10 @@ is supplied by the local controller and does not demonstrate Chainlink service,
 secure randomness or oracle billing. The protocol remains pre-audit; these are
 runnable local product flows, not production-readiness evidence.
 
+After the sales and auction settle, use the [collector completion guide](collector-package.md)
+to finish the artwork, exercise the irreversible collection controls and build
+a portable offline rendering package.
+
 Run the offline helper regressions after building the client:
 
 ```powershell

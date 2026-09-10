@@ -92,6 +92,14 @@ function Assert-ScenarioTransaction([object]$Actual,[object]$Expected) {
         } elseif ($actualValue -ine $expectedValue) {throw "Recovered transaction $key differs"}
     }
 }
+function Assert-ScenarioReceipt([object]$Receipt,[object]$Actual,[object]$Header,[string]$ExpectedHash) {
+    if ($Actual.hash -ine $ExpectedHash -or $Receipt.transactionHash -ine $ExpectedHash) {throw 'Receipt transaction hash differs from the recorded operation.'}
+    if ($Header.hash -ine $Receipt.blockHash -or $Actual.blockHash -ine $Receipt.blockHash -or (Scenario-UInt $Header.number) -ne (Scenario-UInt $Receipt.blockNumber) -or (Scenario-UInt $Actual.blockNumber) -ne (Scenario-UInt $Receipt.blockNumber)) {throw 'Receipt is not in its recorded canonical block.'}
+    if ($Receipt.from -ine $Actual.from -or $Receipt.to -ine $Actual.to) {throw 'Receipt sender or target differs from the transaction.'}
+    $index=Scenario-UInt $Receipt.transactionIndex
+    $members=@($Header.transactions)
+    if ($index -lt 0 -or $index -ne (Scenario-UInt $Actual.transactionIndex) -or $index -ge $members.Count -or $members[[int]$index] -ine $ExpectedHash) {throw 'Receipt transaction index or canonical membership differs.'}
+}
 function Send-Scenario([string]$Label,[string]$Sender,[string]$Target,[string]$Data,[string]$Value='0') {
     if (-not $Execute) {throw 'Use -Execute for local transactions.'}
     $identity=Hash-ScenarioAbi 'address,address,uint256,bytes' @($Sender,$Target,$Value,$Data)
@@ -140,7 +148,7 @@ function Send-Scenario([string]$Label,[string]$Sender,[string]$Target,[string]$D
     $actual=Invoke-ScenarioRpc 'eth_getTransactionByHash' @($operation.transactionHash)
     Assert-ScenarioTransaction $actual $operation.transaction
     $header=Invoke-ScenarioRpc 'eth_getBlockByNumber' @($receipt.blockNumber,$false)
-    if ($header.hash -ine $receipt.blockHash -or $actual.hash -ine $receipt.transactionHash -or $actual.blockHash -ine $receipt.blockHash -or (Scenario-UInt $actual.blockNumber) -ne (Scenario-UInt $receipt.blockNumber)) {throw "Receipt for $Label is not in its recorded canonical block."}
+    Assert-ScenarioReceipt $receipt $actual $header $operation.transactionHash
     $operation.receipt=$receipt;$operation.rpcTransaction=$actual;$operation.blockHeader=$header;$operation.status='confirmed';Save-ScenarioState
     return $receipt
 }
@@ -152,13 +160,19 @@ function New-ScenarioCall([string]$Module,[string]$Name,[string[]]$Values,[strin
     if (-not $Scope) {$Scope=Hash-ScenarioAbi 'address,bytes' @($target,$data);$Old=$zero;$New=$hash}
     return @{target=$target;data=$data;scope=$Scope;old=$Old;new=$New;tuple="($target,0,$($data.Substring(0,10)),$hash,$Scope,$Old,$New)"}
 }
-function Invoke-ScenarioGovernance([string]$Label,[object[]]$Calls) {
+function Invoke-ScenarioGovernance([string]$Label,[object[]]$Calls,[byte]$ActionClass=1) {
+    $delay=Scenario-UInt (Read-Scenario executor minimumDelay @([string]$ActionClass))[0]
+    if ($script:state.governance.Contains($Label)) {
+        $saved=$script:state.governance[$Label]
+        $savedClass=if ($saved.Contains('actionClass')) {[byte]$saved.actionClass} else {[byte]1}
+        if ($savedClass -ne $ActionClass) {throw 'Governance action class changed for a retained plan.'}
+    }
     if ($script:state.governance.Contains($Label) -and -not $script:state.operations.Contains("$Label.schedule")) {
         $pendingTime=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
         $previous=$script:state.governance[$Label]
-        if ((Scenario-UInt $previous.notBefore) -lt $pendingTime+172800) {
+        if ((Scenario-UInt $previous.notBefore) -lt $pendingTime+$delay) {
             if (-not $script:state.Contains('unscheduledGovernanceHistory')) {$script:state.unscheduledGovernanceHistory=@()}
-            $script:state.unscheduledGovernanceHistory+=@{label=$Label;reason='Unsubmitted schedule fell below the live 48-hour delay floor.';plan=$previous}
+            $script:state.unscheduledGovernanceHistory+=@{label=$Label;reason='Unsubmitted schedule fell below the live governance delay floor.';plan=$previous}
             $Calls=@($previous.calls)
             $script:state.governance.Remove($Label)
             Save-ScenarioState
@@ -174,10 +188,10 @@ function Invoke-ScenarioGovernance([string]$Label,[object[]]$Calls) {
             $transitions+=Hash-ScenarioAbi 'bytes32,bytes32,bytes32[]' @($entry[1],$hash,$values)
         }
         $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
-        $ready=($now+173100).ToString();$expires=($now+173100+604800).ToString()
+        $ready=($now+$delay+300).ToString();$expires=($now+$delay+300+604800).ToString()
         $manifest=(Read-Scenario manifest streamSystemManifest)[0]
-        $schedule=Scenario-CallData executor scheduleGovernanceBatch @('1',$tuples,$transitions[0],$transitions[1],$transitions[2],$ready,$expires,(Hash-ScenarioText "Product demo $Label"),"urn:6529stream:product-demo:$Label",$manifest)
-        $script:state.governance[$Label]=[ordered]@{calls=$Calls;tuples=$tuples;data=$data;notBefore=$ready;expiresAfter=$expires;schedule=$schedule;status='planned'}
+        $schedule=Scenario-CallData executor scheduleGovernanceBatch @([string]$ActionClass,$tuples,$transitions[0],$transitions[1],$transitions[2],$ready,$expires,(Hash-ScenarioText "Product demo $Label"),"urn:6529stream:product-demo:$Label",$manifest)
+        $script:state.governance[$Label]=[ordered]@{actionClass=[string]$ActionClass;calls=$Calls;tuples=$tuples;data=$data;notBefore=$ready;expiresAfter=$expires;schedule=$schedule;status='planned'}
         Save-ScenarioState
     }
     $action=$script:state.governance[$Label]
