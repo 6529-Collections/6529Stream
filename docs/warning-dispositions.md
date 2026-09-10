@@ -33,6 +33,14 @@ The warning baseline complements [`docs/tooling.md`](tooling.md),
 risk row for this work is retained in
 [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
 
+External-call gas limits remain a separate, open inventory in
+[`ops/EXTERNAL_CALL_GAS_INVENTORY.json`](../ops/EXTERNAL_CALL_GAS_INVENTORY.json).
+The ERC-20 sale adapter's asset-policy probe uses 30,000 gas; its payment-intent
+verifier starts contract-signature checks at a locally governed, raise-only
+400,000 gas. These two sites remain open under issue #669 because that local
+setting does not implement the required factory-wide gas-parameter binding.
+The warning dispositions below grant no exception to that remaining work.
+
 ## Current Warning Baseline
 
 The current committed release gate still runs `forge build`, the diagnostic
@@ -42,6 +50,9 @@ target-isolated release builder, release manifest/checksum checks, and the
 warning disposition checker. The warning-disposition checker compares the
 retained aggregate `forge-size.log` output against the accepted solc warning
 rows so new compiler warnings cannot silently enter CI. Foundry compilation
+outputs for this forced diagnostic belong in the wrapper's isolated
+`out-diagnostics` and `cache-diagnostics` directories; its retained log remains
+`cache/forge-size.log` and does not replace ordinary compiler artifacts. Foundry compilation
 restrictions can admit test helpers to that diagnostic despite its skip flags;
 the log is therefore warning evidence, not production bytecode or source-input
 evidence. The diagnostic wrapper accepts Forge's size exit only when the sole
@@ -52,8 +63,10 @@ and `check_contract_size_budget.py` remain the production size authorities. The
 parser is tested against a captured
 `forge build --sizes --via-ir --skip test --skip script --force` fixture from
 Foundry v1.7.1 and Solidity 0.8.19, and it keys the accepted solc rows by
-warning code, source file, and source excerpt instead of raw line number. As of
-this baseline:
+warning code, source file, and source excerpt. The state-export wrappers also
+bind each diagnostic's reported line to its exact enclosing function and check
+the complete forwarding body. Line numbers locate current source; they are not
+permanent baseline identities. As of this baseline:
 
 | Category | Current disposition | Owner | Evidence |
 | --- | --- | --- | --- |
@@ -115,6 +128,7 @@ prior via-IR release artifact baseline to the current compiled output.
 | `SOLC-UNUSED-RANDOMIZER-SALT-RNG` | `unused-param` | [`smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol`](../smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol) `calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)` | `_saltfun_o` is intentionally unused by the current RNG adapter | `accepted-abi-compatibility` for interface consistency | Revisit only in a focused randomizer-interface cleanup with ABI/artifact review |
 | `SOLC-UNUSED-RANDOMIZER-SALT-VRF` | `unused-param` | [`smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol`](../smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol) `calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)` | `_saltfun_o` is intentionally unused by the current VRF adapter | `accepted-abi-compatibility` for interface consistency | Revisit only in a focused randomizer-interface cleanup with ABI/artifact review |
 | `SOLC-UNUSED-EXECUTOR-ENCODED-PAGE-RETURNS` | `unused-param` | [`smart-contracts/domains/governance/StreamGovernanceExecutor.sol`](../smart-contracts/domains/governance/StreamGovernanceExecutor.sol) `terminalFreezeActionPage` | Solc 5667 reports the three named return variables because memory-safe assembly forwards the encoded tuple directly | `accepted-abi-compatibility`; the protocol owner retains readable ABI output names and the existing bytecode-size optimization. [`StreamGovernanceBootstrap`](../smart-contracts/domains/governance/StreamGovernanceBootstrap.sol) returns `abi.encode(ids, deadlines, next)`, and the Executor returns its complete payload without decoding and re-encoding | Keep exact page membership, deadlines, cursor and bounds assertions in `testTerminalFreezeRawPaginationAndPermissionlessElapsedPruning` in [`test/unit/governance/StreamGovernanceExecutor.t.sol`](../test/unit/governance/StreamGovernanceExecutor.t.sol); reconsider the disposition if that forwarding implementation changes |
+| `SOLC-UNUSED-EXECUTOR-STATE-EXPORT-FORWARDERS` | `unused-param` | `StreamGovernanceExecutor.latestStateExport`, `stateExport`, `publishStateExport`, `challengeStateExport`, `supersedeStateExport` | Solc 5667 reports named ABI arguments and returns used through raw calldata or an encoded tuple instead of Solidity variable references | `accepted-abi-compatibility`; the three writers forward complete `msg.data` with the real manifest and execution context to [`StreamStateExport`](../smart-contracts/domains/governance/StreamStateExport.sol), which dispatches exact selectors and decodes their typed arguments. The two readers return the complete encoded latest/record tuples through memory-safe assembly, retaining readable ABI names | Preserve the exact forwarding bodies and typed tuple encoders. [`test/current/StreamCurrentStateExport.t.sol`](../test/current/StreamCurrentStateExport.t.sol) asserts decoded empty/live records, exact receipts, role checks, governance-execution exclusion and immutable history |
 | `SOLC-TEST-UNUSED-LEGACY-ROYALTY-TOKENID` | `unused-param` | [`test/regression/legacy/helpers/LegacyStreamCore.sol`](../test/regression/legacy/helpers/LegacyStreamCore.sol) `royaltyInfo(uint256 tokenId, uint256 salePrice)` | The retained transitional test helper is token-agnostic, so `tokenId` is unused | `accepted-test-only`; the permanent production Core forwards `tokenId` to the authenticated resolver and does not emit this warning | Remove with the legacy characterization helper |
 | `SOLC-PURE-RANDOMIZER-NXT` | `pure-suggestion` | [`smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol`](../smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol) `isRandomizerContract()` | Marker function could be `pure` | `accepted-abi-compatibility` because changing `view` to `pure` changes ABI `stateMutability` for no security gain | Revisit only in a coordinated interface version bump |
 | `SOLC-PURE-RANDOMIZER-RNG` | `pure-suggestion` | [`smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol`](../smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol) `isRandomizerContract()` | Marker function could be `pure` | `accepted-abi-compatibility` because changing `view` to `pure` changes ABI `stateMutability` for no security gain | Revisit only in a coordinated interface version bump |
@@ -122,6 +136,14 @@ prior via-IR release artifact baseline to the current compiled output.
 | `SOLC-PURE-MINTER-MARKER` | `pure-suggestion` | [`smart-contracts/domains/mint/legacy/StreamMinter.sol`](../smart-contracts/domains/mint/legacy/StreamMinter.sol) `isMinterContract()` | Marker function could be `pure` | `accepted-abi-compatibility` because changing `view` to `pure` changes ABI `stateMutability` for no security gain | Revisit only in a coordinated interface version bump |
 | `SOLC-TEST-PURE-LEGACY-ROYALTY` | `pure-suggestion` | [`test/regression/legacy/helpers/LegacyStreamCore.sol`](../test/regression/legacy/helpers/LegacyStreamCore.sol) `royaltyInfo(uint256 tokenId, uint256 salePrice)` | The retained transitional helper's fixed royalty math could be `pure` | `accepted-test-only`; the permanent production Core performs an authenticated external resolver read and cannot be pure | Remove with the legacy characterization helper |
 | `SOLC-TEST-SELFDESTRUCT-HELPERS` | `selfdestruct-deprecation` | [`test/regression/legacy/auctions/StreamAuctionPayments.t.sol`](../test/regression/legacy/auctions/StreamAuctionPayments.t.sol), [`test/unit/revenue/StreamCuratorsPool.t.sol`](../test/unit/revenue/StreamCuratorsPool.t.sol), [`test/unit/protocol/StreamEmergencyWithdraw.t.sol`](../test/unit/protocol/StreamEmergencyWithdraw.t.sol), [`test/regression/legacy/mint/StreamFixedPricePayments.t.sol`](../test/regression/legacy/mint/StreamFixedPricePayments.t.sol), [`test/unit/entropy/StreamRandomizerPayments.t.sol`](../test/unit/entropy/StreamRandomizerPayments.t.sol) | Forced-ETH helper contracts intentionally use `selfdestruct` under Solidity 0.8.19 | `accepted-test-only` because their retained occurrence is aggregate diagnostic warning evidence and any such source is rejected from canonical release inputs | Replace only when the test suite adopts an equivalent deterministic forced-ETH primitive |
+
+The 111-source current integration compile that introduced state exports
+reported 19 physical warnings for these five new wrappers, represented by 18
+function-scoped identities because both `stateExport` outputs share one source
+line. Its existing terminal-page warning is separate. That focused compile
+does not contain all legacy diagnostic targets and cannot replace the complete
+aggregate warning gate. The earlier captured parser fixture remains unchanged
+historical evidence; it does not attest the new state-export implementation.
 
 ## Accepted Documentation And Linter Dispositions
 
