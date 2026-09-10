@@ -139,7 +139,7 @@
     "release_tool_call_policy": {
       "policy": {
         "path": "release-artifacts/release-tool-call-policy.json",
-        "sha256": "sha256:99a192cb035b2af3148573932d06a66122a8c6d612f63f757078107a1c1705e6",
+        "sha256": "sha256:bcb98d8283fae9cd54c8baf3245a8939a2a43e22f51c071f3ec5554006eaf162",
         "size_bytes": 2461326,
         "schema_version": "6529stream.release-tool-call-policy.v1"
       },
@@ -203,14 +203,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:a54583ca58f20a5b72260d34bf6879beef3c309b292d6b3ca1abbab757b264c1",
-        "size_bytes": 166549,
+        "sha256": "sha256:4db4922a5fbe653a166f90c7d1d705886829d455480829030c2d62cad7b9998d",
+        "size_bytes": 166799,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:cf140c910b4165210b14b4af7da804c31beee1cf94c8b47412a70da1f9cee199",
-        "size_bytes": 162873
+        "sha256": "sha256:2b81f32d3c3fe655f3485fd3304d67043ddfceabac7d3be1d7191faab6622b1c",
+        "size_bytes": 163116
       }
     },
     "release_candidate_lockfile": {
@@ -2503,8 +2503,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3092c4db98320c2a89da2749fbca81521ff17ae33c4f61701125646b6c29f5aa",
-      "size_bytes": 165892
+      "sha256": "sha256:40de6e71c514d29480f6d306430be4ab0757dad5741960b7baaad0d09472948d",
+      "size_bytes": 166139
     },
     "governance_docs": [
       {

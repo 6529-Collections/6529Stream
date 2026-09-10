@@ -24,6 +24,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Retry the complete pinned Foundry installer after transient attestation-service
+  failures without bypassing verification. Reconcile reviewed release-tool source
+  bindings and make the output-directory-swap regression deterministic on Windows.
 - Retain the Executor pagination ABI return names with a narrowly checked
   warning disposition for its existing encoded-tuple forwarding implementation.
 - Validate maximum-content metadata against the configured 12 million router

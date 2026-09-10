@@ -4281,7 +4281,10 @@ class ReleaseChecksumTests(unittest.TestCase):
                     self.skipTest(
                         f"directory symlink creation unavailable: {exc}"
                     )
-                return original_mkstemp(*args, **kwargs)
+                # Keep the attacked output path redirected, but create the descriptor
+                # in its actual target. Windows tempfile retries PermissionError for
+                # symlink directories and can otherwise spin before our rejection.
+                return original_mkstemp(*args, **dict(kwargs, dir=hostile_dir))
 
             with mock.patch.object(
                 generator.tempfile,
