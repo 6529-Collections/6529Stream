@@ -48,7 +48,7 @@ not hand-maintained copies:
 - [docs/incident-response.md](incident-response.md)
 - [docs/integrations/README.md](integrations/README.md)
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
-- [docs/integrations/operator-admin-ui.md](integrations/operator-admin-ui.md)
+- [docs/reference/legacy-stack/integrations/operator-admin-ui.md](reference/legacy-stack/integrations/operator-admin-ui.md)
 - [docs/operator-dashboard-query-model.md](operator-dashboard-query-model.md)
 - [docs/integrations/auction-flows.md](integrations/auction-flows.md)
 - [docs/integrations/withdrawals-and-credits.md](integrations/withdrawals-and-credits.md)
@@ -74,19 +74,19 @@ not hand-maintained copies:
 - [deployments/address-books/anvil-6529stream-v0.1.0-001.json](../deployments/address-books/anvil-6529stream-v0.1.0-001.json)
 - [deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json](../deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json)
 - [smart-contracts/domains/access/StreamAdmins.sol](../smart-contracts/domains/access/StreamAdmins.sol)
-- [smart-contracts/domains/mint/StreamDrops.sol](../smart-contracts/domains/mint/StreamDrops.sol)
-- [smart-contracts/domains/auctions/AuctionContract.sol](../smart-contracts/domains/auctions/AuctionContract.sol)
-- [smart-contracts/domains/mint/StreamMinter.sol](../smart-contracts/domains/mint/StreamMinter.sol)
-- [smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol](../smart-contracts/integrations/randomizers/StreamRandomizerLifecycle.sol)
-- [smart-contracts/integrations/randomizers/RandomizerRNG.sol](../smart-contracts/integrations/randomizers/RandomizerRNG.sol)
-- [smart-contracts/integrations/randomizers/RandomizerVRF.sol](../smart-contracts/integrations/randomizers/RandomizerVRF.sol)
+- [smart-contracts/domains/mint/legacy/StreamDrops.sol](../smart-contracts/domains/mint/legacy/StreamDrops.sol)
+- [smart-contracts/domains/auctions/legacy/AuctionContract.sol](../smart-contracts/domains/auctions/legacy/AuctionContract.sol)
+- [smart-contracts/domains/mint/legacy/StreamMinter.sol](../smart-contracts/domains/mint/legacy/StreamMinter.sol)
+- [smart-contracts/integrations/randomizers/legacy/StreamRandomizerLifecycle.sol](../smart-contracts/integrations/randomizers/legacy/StreamRandomizerLifecycle.sol)
+- [smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol](../smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol)
+- [smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol](../smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol)
 - [smart-contracts/core/StreamCore.sol](../smart-contracts/core/StreamCore.sol)
-- [test/StreamEventReconstructability.t.sol](../test/StreamEventReconstructability.t.sol)
-- [test/StreamPauseControls.t.sol](../test/StreamPauseControls.t.sol)
-- [test/StreamAuctionPayments.t.sol](../test/StreamAuctionPayments.t.sol)
-- [test/StreamRandomizerLifecycle.t.sol](../test/StreamRandomizerLifecycle.t.sol)
-- [test/StreamRandomizerPayments.t.sol](../test/StreamRandomizerPayments.t.sol)
-- [test/StreamSignerAdmin.t.sol](../test/StreamSignerAdmin.t.sol)
+- [test/regression/legacy/protocol/StreamEventReconstructability.t.sol](../test/regression/legacy/protocol/StreamEventReconstructability.t.sol)
+- [test/regression/legacy/protocol/StreamPauseControls.t.sol](../test/regression/legacy/protocol/StreamPauseControls.t.sol)
+- [test/regression/legacy/auctions/StreamAuctionPayments.t.sol](../test/regression/legacy/auctions/StreamAuctionPayments.t.sol)
+- [test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol](../test/regression/legacy/entropy/StreamRandomizerLifecycle.t.sol)
+- [test/unit/entropy/StreamRandomizerPayments.t.sol](../test/unit/entropy/StreamRandomizerPayments.t.sol)
+- [test/unit/protocol/StreamSignerAdmin.t.sol](../test/unit/protocol/StreamSignerAdmin.t.sol)
 
 ## Data Sources
 
@@ -370,24 +370,24 @@ Minimum retained evidence:
 Run the focused monitoring checks:
 
 ```sh
-python scripts/test_monitoring_spec.py
-python scripts/check_monitoring_spec.py
-python scripts/test_operator_dashboard_query_model.py
-python scripts/check_operator_dashboard_query_model.py
+python -m tools.docs.test_monitoring_spec
+python -m tools.docs.check_monitoring_spec
+python -m tools.docs.test_operator_dashboard_query_model
+python -m tools.docs.check_operator_dashboard_query_model
 ```
 
 Run the surrounding documentation checks:
 
 ```sh
-python scripts/test_integrations_readme.py
-python scripts/check_integrations_readme.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_readme.py
-python scripts/check_readme.py
-python scripts/test_markdown_links.py
-python scripts/check_markdown_links.py
-python scripts/check_changelog.py
+python -m tools.docs.test_integrations_readme
+python -m tools.docs.check_integrations_readme
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.docs.test_readme
+python -m tools.docs.check_readme
+python -m tools.docs.test_markdown_links
+python -m tools.docs.check_markdown_links
+python -m tools.docs.check_changelog
 make monitoring-spec-check
 make check
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1

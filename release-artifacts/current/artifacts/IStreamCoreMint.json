@@ -1,0 +1,639 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "abortPreparedMintFromManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "initialRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintCommitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "completePreparedMintFromManager",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "initialRecipient",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "tokenData_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintCommitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "mintFromManager",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingPreparedMintTokenId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "tokenData_",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "tokenDataHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "prepareMintFromManager",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "preparedMint",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StreamPreparedMintRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenData",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenCollectionRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "name": "TokenCollectionRegistrationReverted",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenCollectionRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            }
+          ],
+          "name": "TokenCollectionRegistrationReverted",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "abortPreparedMintFromManager",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "completePreparedMintFromManager",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "initialRecipient",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData_",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "mintFromManager",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "pendingPreparedMintTokenId",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData_",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "prepareMintFromManager",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "preparedMint",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "exists",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "operationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct StreamPreparedMintRecord",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenData",
+          "outputs": [
+            {
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "abortPreparedMintFromManager(uint256,bytes32)": {
+            "details": "The installed caller must differ from the preparing manager. The exact      token/operation match is required; abort removes its identity/data and      rewinds the global token and collection serial allocation frontiers."
+          },
+          "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": {
+            "details": "The caller, tokenId, and operationId must match the pending preparation.",
+            "params": {
+              "initialRecipient": "Address receiving the completed token and safe-receiver callback.",
+              "mintCommitment": "Per-token commitment supplied at completion."
+            }
+          },
+          "mintFromManager(uint256,address,bytes,bytes32,bytes32)": {
+            "details": "Only the installed manager may call; receiver rejection rolls back the entire mint.",
+            "params": {
+              "collectionId": "Existing collection receiving the new token.",
+              "initialRecipient": "Address receiving the ERC-721 token and its safe-receiver callback.",
+              "mintCommitment": "Per-token commitment passed to the entropy registration boundary.",
+              "tokenDataHash": "keccak256 of tokenData_.",
+              "tokenData_": "Artwork bytes whose exact encoding is committed by tokenDataHash."
+            },
+            "returns": {
+              "collectionSerial": "Collection-local serial assigned to this token.",
+              "tokenId": "Globally allocated token identifier."
+            }
+          },
+          "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": {
+            "details": "Only the installed manager may call; at most one prepared token exists at a time.",
+            "params": {
+              "operationId": "Nonzero identity repeated at completion or by a replacement manager during abort."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "abortPreparedMintFromManager(uint256,bytes32)": {
+            "notice": "Aborts a pending preparation through the installed replacement manager."
+          },
+          "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": {
+            "notice": "Completes the manager operation that owns the prepared token."
+          },
+          "mintFromManager(uint256,address,bytes,bytes32,bytes32)": {
+            "notice": "Allocates and safely mints a token for the installed mint manager."
+          },
+          "pendingPreparedMintTokenId()": {
+            "notice": "Returns the singleton pending token identifier, or zero when none exists."
+          },
+          "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": {
+            "notice": "Reserves the singleton prepared token without completing its ERC-721 mint."
+          },
+          "preparedMint(uint256)": {
+            "notice": "Returns the public pending-operation record for a token."
+          },
+          "tokenData(uint256)": {
+            "notice": "Returns the token artwork data stored by the mint operation."
+          }
+        },
+        "notice": "Manager-only token allocation, prepared mint lifecycle, and token data.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": "IStreamCoreMint"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": {
+        "keccak256": "0x17eda017b0bdff553f0f28671ea2e3957583c3dab5363a366c6b56a8472e5e03",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1ac287b96afffb3aa0fab790b90ed922e1f81f564e74d7836c9e986cdd423de8",
+          "dweb:/ipfs/Qmaas7p6Kpxzu9oGPbGkmCfUoRax46ALxNSvtxrJg1ZPBM"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol": {
+        "keccak256": "0xda7dcfb09a364ed19b904ba56a341c1c0af80648fdeab54c4d0866f3e7de20ac",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ec2ce519990a65835bbfb67f312577d50f220723a99626f8fd42264309bdf919",
+          "dweb:/ipfs/QmPcMWtiJVKHX4gPhaUPE3QfirCyY5bgwYGekRF8Qw5MrQ"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "abortPreparedMintFromManager(uint256,bytes32)": "d9251657",
+    "completePreparedMintFromManager(uint256,address,bytes32,bytes32)": "abf5d45f",
+    "mintFromManager(uint256,address,bytes,bytes32,bytes32)": "c4e32ca9",
+    "pendingPreparedMintTokenId()": "a767d50e",
+    "prepareMintFromManager(uint256,bytes,bytes32,bytes32)": "67c6528b",
+    "preparedMint(uint256)": "06d25065",
+    "tokenData(uint256)": "b4b5b48f"
+  }
+}

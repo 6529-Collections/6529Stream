@@ -30,7 +30,7 @@ false positives for `P0-LIB-001`:
   intentionally computes `4 * ceil(data.length / 3)` for Base64 output sizing;
   padding golden vectors cover the non-multiple-of-three cases.
 
-Regression coverage lives in `test/StreamVendoredLibraries.t.sol` and covers
+Regression coverage lives in `test/unit/libraries/StreamVendoredLibraries.t.sol` and covers
 Base64 golden vectors, binary padding, `mulDiv` full-precision boundaries,
 rounding-up behavior, overflow, and zero-denominator reverts.
 
@@ -43,7 +43,7 @@ Get-FileHash smart-contracts\vendor\openzeppelin\Base64.sol -Algorithm SHA256
 Get-FileHash smart-contracts\vendor\openzeppelin\Math.sol -Algorithm SHA256
 Get-FileHash smart-contracts\vendor\openzeppelin\SignedMath.sol -Algorithm SHA256
 Get-FileHash smart-contracts\vendor\openzeppelin\Strings.sol -Algorithm SHA256
-forge test --match-path test\StreamVendoredLibraries.t.sol -vvv
+forge test --match-path test\unit\libraries\StreamVendoredLibraries.t.sol -vvv
 ```
 
 When a vendored file changes, update this manifest, rerun the focused
@@ -58,7 +58,7 @@ only for the explicit vendored/provenance exemptions below. These files are not
 mechanically reformatted in feature PRs because formatting-only churn would make
 future upstream provenance review harder without changing protocol behavior.
 
-The exemption set lives in `scripts/check_solidity_formatting.py` as
+The exemption set lives in `tools/build/check_solidity_formatting.py` as
 `VENDORED_FORMATTING_EXEMPTIONS`. New files must not be added without a focused
 provenance note. First-party interfaces, provider/integration interfaces, and
 protocol-owned contracts are not vendored and must pass the scoped formatting

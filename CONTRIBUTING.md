@@ -1,171 +1,93 @@
 # Contributing
 
-Thanks for helping make 6529Stream safer and easier to review. This repository
-is pre-audit, so the contribution process favors small PRs, explicit evidence,
-and honest maturity labels over speed.
+Start with [setup and your first run](docs/first-30-minutes.md), then follow the
+[current-stack walkthrough](docs/current-stack.md). Stream is pre-audit and not
+production-ready. This guide explains development and review, not release approval.
 
-## Ground Rules
+## Find the right implementation
 
-- Work from [ops/ROADMAP.md](ops/ROADMAP.md) unless a maintainer directs
-  otherwise.
-- Keep PRs focused on one roadmap item or one tightly related bug.
-- Do not claim production readiness, audit completion, or protocol correctness
-  unless the relevant launch gate evidence is merged.
-- Do not report exploitable security issues in public issues or PRs. Follow
-  [SECURITY.md](SECURITY.md).
-- Never commit private keys, seed phrases, RPC credentials, signer material, or
-  production deployment secrets.
+Use the [source map](smart-contracts/README.md) and
+[interface map](smart-contracts/interfaces/stream/README.md). Keep implementations
+in their domain and depend on the smallest useful caller interface. Shared
+structs have explicit type homes; the aggregate interfaces retain compatibility.
 
-## Local Setup
+The current Core lives in `smart-contracts/core/`. Historical Core behavior is
+kept in test helpers for regression coverage. Test the real current stack when
+a change affects a boundary between modules. The [test guide](test/README.md)
+explains integration, domain, legacy, and gas suites.
 
-For a fresh checkout, start with the checked
-[first-30-minutes guide](docs/first-30-minutes.md). It covers prerequisites,
-`forge` not being on `PATH`, Windows wrapper usage, known warning noise,
-generated artifact drift, docs-only paths, Solidity/test paths, no-secret
-boundaries, and the commands below.
+## Work on a change
 
-Install or bootstrap the pinned toolchain:
+1. Check `git status -sb`. Use a branch or worktree that does not mix unrelated work.
+2. Identify the intended behavior, relevant issue, and owning interface/domain.
+3. Implement a coherent change and run its focused behavioral tests.
+4. Run `python scripts/dev.py check` for the current stack and the affected
+   domain suite. For prose changes, use `python scripts/dev.py docs`.
+5. Update caller documentation and the changelog when behavior, setup, or
+   supported scope changes. Hand off a reviewable diff with exact validation results.
 
-```bash
-bash scripts/bootstrap-ec2.sh
-```
+Independent domain changes can proceed in parallel. Agree ownership before
+editing shared files, integrate real flows frequently, and run the broad release
+pass once the combined implementation stabilizes. Do not rebuild all evidence
+for every small intermediate commit.
 
-Windows PowerShell:
+## Solidity conventions
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
-```
+- Preserve Solidity 0.8.19 and the reviewed compiler profiles.
+- Document external behavior, units, authority, failure conditions, and returned
+  values with NatSpec. An interface name alone is not documentation.
+- Keep authorization and replay checks explicit. Prefer custom errors, events
+  for external state changes, `abi.encode` for structured commitments, and
+  storage-backed nonce consumption.
+- Treat payment, receiver callbacks, entropy callbacks, and cross-contract
+  rollback as behavior to test. Small interfaces do not replace runtime access control.
+- Keep ownership, supply, and permanent token identity in Core. Put product
+  extensions in satellites unless the invariant needs a Core change; see
+  [Core size policy](docs/architecture.md#product-extension-and-size-budget-policy).
+- Preserve public selectors, tuple layouts, event topics, error signatures, and
+  ERC-165 IDs during organizational changes. Review an intentional API change
+  separately from a file move.
+- Run the scoped formatting check. Retained dependencies under `vendor/` have
+  [provenance rules](docs/vendored-libraries.md); do not restyle upstream code.
 
-Run the canonical smoke check before opening a PR:
+## Documentation and evidence
 
-```bash
-make check
-```
+Keep executable current guides separate from [legacy reference](docs/reference/legacy-stack/README.md)
+and [normative specifications](docs/spec-policy.md). A planned interface or
+specification is not an installed feature. Link to source and meaningful tests,
+and state when an example uses a development provider or placeholder address.
 
-Windows PowerShell:
+Read and write text as UTF-8. Fix links when files move. Keep generated outputs
+generated: use their documented tools, and let one owner perform the ordered
+artifact refresh. Historical deployment compiler snapshots retain the exact
+source paths and bytes used for those deployments.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\check.ps1
-```
+`python scripts/dev.py release` invokes the full checked validation workflow.
+Use it for a stabilized release candidate, not as the default edit/test loop.
+See [release artifacts](docs/reference/tooling/release-artifacts.md) and
+[release policy](docs/release-policy.md) for the authoritative generator order.
 
-The canonical check proves compilation, executes the protocol test suite, and
-validates the fast Slither baseline metadata gate plus repository evidence and
-policy gates. For Solidity changes, also run the complete live comparison when
-the pinned Slither toolchain is available:
+## Pull requests and review
 
-```bash
-make fmt-check
-make slither-baseline-check
-```
+Use `codex/` branches for automated work. Fill the [PR template](.github/PULL_REQUEST_TEMPLATE.md)
+with the concrete problem, resulting behavior, issue/scope, validation, and any
+release impact. Open a draft while work is incomplete. Request CodeRabbit review
+with `@coderabbitai review`; inspect its findings against the actual source.
+Do not mistake a skipped or rate-limited review for completed review.
 
-The raw analyzer command remains useful for investigation:
+Merge after required CI passes, actionable findings are fixed or explicitly
+accepted with evidence, and the final diff matches its description. Report
+tests that were not run and environmental blockers accurately. Use the
+[issue forms](.github/ISSUE_TEMPLATE/) for implementation and integration work.
+Do not close a broader parent issue because one implementation slice shipped.
 
-```bash
-make slither
-```
+## Security and maturity
 
-The live baseline currently contains 3 High and 27 Medium first-party findings,
-so raw Slither can exit non-zero. The baseline gates detect unreviewed drift;
-they do not establish audit completion or public-beta/production readiness.
-The Governance Executor's proposal-selected native-value authority is also
-tracked separately as High open blocker `RISK-GOV-003`: bounded assembly made
-that behavior invisible to Slither without removing the underlying authority.
+Never commit private keys, seed phrases, RPC credentials, signing secrets,
+or unredacted private broadcasts. Report exploitable vulnerabilities through
+[SECURITY.md](SECURITY.md), not public issues or PR comments.
 
-## Pull Request Expectations
-
-Every PR should include:
-
-- Roadmap gate or issue ID.
-- Problem statement and intended behavior.
-- Files changed and why the scope is intentionally limited.
-- Local commands run, including command output summary.
-- CI status once available.
-- Security impact notes, especially for authorization, payments, custody,
-  randomness, admin controls, deployment, and metadata.
-- Docs updates when external behavior, setup, or maturity status changes.
-- Known limitations and follow-up issues.
-
-For contract behavior changes, include tests or explain why the PR is a
-characterization, documentation, or scaffolding-only step. P0 behavior changes
-should include at least a happy path, direct regression test, negative test,
-event assertion where relevant, and documentation update.
-
-## Review And Bot Workflow
-
-- Resolve all actionable CodeRabbit, Claude, CI, and human review comments
-  before merge.
-- If a bot does not run automatically, maintainers may request review by
-  commenting on the PR.
-- Treat bot comments as findings to verify, not commands to apply blindly.
-- Prefer a follow-up commit with validation notes over force-pushing away review
-  history.
-
-## Issue Quality
-
-Roadmap issues should be implementation-ready. Use the issue forms and include:
-
-- Problem.
-- Current behavior.
-- Intended behavior.
-- Required code changes.
-- Required tests.
-- Required docs.
-- Acceptance criteria.
-- Dependencies and blocking ADRs.
-
-If the issue touches a protocol decision, create or reference the corresponding
-ADR before implementation begins.
-
-Use the specialized checked issue forms when they fit:
-
-- [integration report](.github/ISSUE_TEMPLATE/integration_report.yml) for
-  frontend, mobile, Electron, indexer, wallet, operator UI, marketplace, or
-  signing-service integration work.
-- [audit finding](.github/ISSUE_TEMPLATE/audit_finding.yml) for public-safe
-  external audit finding, remediation, retest, or accepted-risk tracking.
-- [release evidence](.github/ISSUE_TEMPLATE/release_evidence.yml) for
-  public-beta, production-release, retained-artifact, blocker, or evidence
-  review work.
-
-Do not use public issue forms for exploitable vulnerability reports; follow
-[SECURITY.md](SECURITY.md).
-
-Pull requests should use the checked
-[PR template](.github/PULL_REQUEST_TEMPLATE.md). Keep the roadmap/gate linkage,
-validation evidence, release-impact classification, generated-artifact impact,
-and breaking-change approval fields complete. The template is validated by
-`python scripts/check_pr_template.py`, so changes to release-impact intake must
-update the checker and tests in the same PR.
-
-Local Markdown links and heading anchors in the contributor, docs, ops, GitHub
-template, and release-artifact surfaces are validated by
-`python scripts/check_markdown_links.py`. Update links, anchors, checker
-coverage, and release artifacts together when moving or renaming docs.
-
-## Style
-
-- Solidity compiler target is `0.8.19` until the roadmap changes it.
-- Keep changes conservative and local to the roadmap item.
-- Prefer explicit custom errors, events for external state transitions, and
-  storage-backed replay protection for authorization work.
-- Use `abi.encode` for structured hash leaves and signed payloads unless an ADR
-  explicitly approves a different encoding.
-- Keep generated artifacts out of git unless a release process explicitly
-  requires checksummed artifacts.
-
-## Documentation
-
-Update docs in the same PR when behavior changes. At minimum, check whether the
-change affects:
-
-- [README.md](README.md)
-- [docs/first-30-minutes.md](docs/first-30-minutes.md)
-- [docs/status.md](docs/status.md)
-- [docs/tooling.md](docs/tooling.md)
-- [docs/known-blockers.md](docs/known-blockers.md)
-- [.github/ISSUE_TEMPLATE/integration_report.yml](.github/ISSUE_TEMPLATE/integration_report.yml)
-- [.github/ISSUE_TEMPLATE/audit_finding.yml](.github/ISSUE_TEMPLATE/audit_finding.yml)
-- [.github/ISSUE_TEMPLATE/release_evidence.yml](.github/ISSUE_TEMPLATE/release_evidence.yml)
-- [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)
-- [ops/ROADMAP.md](ops/ROADMAP.md)
-- [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md)
+Tests and development deployments do not prove protocol correctness or audit
+completion. [Release readiness](docs/release-readiness.md) retains the audit,
+signing, custody, deployment-verification, and external operational requirements;
+the [backlog](ops/EXECUTION_BACKLOG.md) tracks unsupported full-v1 work.

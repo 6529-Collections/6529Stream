@@ -41,15 +41,15 @@ not completion evidence.
 ## Validation Commands
 
 ```sh
-python scripts/test_production_release_signing_evidence.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/test_release_signatures.py
-python scripts/check_release_signatures.py
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_production_release_signing_evidence
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.release.test_release_signatures
+python -m tools.release.check_release_signatures
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes
@@ -72,7 +72,7 @@ python scripts/generate_release_checksums.py --check
   retained digest output, including release digest files, to the explicit
   `sha256:<hex>` form before review.
 - The referenced release signature evidence JSON must also pass
-  `scripts/check_release_signatures.py` and must describe a `mainnet` or
+  `tools/release/check_release_signatures.py` and must describe a `mainnet` or
   `production` release whose version and commit match this retained artifact.
   The signed Git tag release-mode verifier remains the source of truth for live
   `git tag -v` validation when an actual release tag exists locally.

@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.risk-register.v1",
-  "generated_by": "scripts/generate_risk_register.py:1",
+  "generated_by": "tools/security/generate_risk_register.py:1",
   "maturity": "pre_audit_local_baseline",
   "readiness_boundary": "Open blockers and planned mitigations are not launch approvals. Public beta and production claims require reviewed retained evidence or explicit accepted-risk records in the public-beta evidence manifest.",
   "source_documents": [
@@ -10,35 +10,35 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:468f0c59facc72105ec81d8f6d17fea6b56daf68a367a098e9675a234bb20058"
+      "sha256": "sha256:7992210d5c4e5408f0dd9ca7f2df40941ad8abd454f448c6d0e962d2b8c8eb05"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:d01b4efc51434f5c7b36921d98da40eab69ac8fa465bf5a12b4eb19c728b7857"
+      "sha256": "sha256:4f62dbc771b001f2719cca76e1e98f55204ee1966f1c0dd45264be13d57f9409"
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:38f50029589f8eba3e53b6892707712db19de1e63f8f56850f75cf7fddf31d24"
+      "sha256": "sha256:997ed8535883916b0bb1956301334a6b8ef7276ada7c26c3f5b0f10efa9a64a3"
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:3177cc07249eb2cc0d1f706ca16aab21aade03f9cecae928c902a7db955f86be"
+      "sha256": "sha256:609d634391976b8c52b83064388d08f20c10b9e9657a35792a03c3839b6b1be4"
     },
     {
       "path": "docs/permanence-packages.md",
-      "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6"
+      "sha256": "sha256:aa9a2ece27520528ace78338bccfa5c061fa09a201d2062a6b24ee2065ecb167"
     },
     {
       "path": "docs/royalty-policy.md",
-      "sha256": "sha256:482ef60468393c842a34366df603ef20eafa9b14f0261bbe30b31cedaa8d48c7"
+      "sha256": "sha256:fe34b0f828597177547b4a1847224aec361bb747e16df69c5f1e6ae916c15289"
     },
     {
       "path": "docs/warning-dispositions.md",
-      "sha256": "sha256:3af79c72f46f77cbd3c0b25d3787102f5cfb3d1ebd5faebf0f1769d6eb108e26"
+      "sha256": "sha256:da29e177ff8b763bfe514d216e346d45d646b76e7815f882b05e7571e2da37b8"
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:07c65f7ece71cfb667f302da2e6904ca97b50cd9bfa8229a6ce9dc5749564bd9"
+      "sha256": "sha256:920f3cb60325107cdf915f68fc1dc8a0d505ec688f5dd73c99ae19cb2582d756"
     },
     {
       "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -46,23 +46,23 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:c4e73eb86c3c17f857c2e8cabb6baef0b1645879425d966e11d3d34b6523f29f"
+      "sha256": "sha256:700b4c85d064f16113225ddb35223bfee81af137987f2e2063b9dec3181c56ae"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:03f5ebeb02672896677f44edba0316591d9a9cb01da304a4d96fd90fe5e4ef98"
+      "sha256": "sha256:a8cf6f0050c9253e5545c61fe07e3a1b5cb74088abe0cc588eafe55c7b07ba22"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:28ee9e07f9e55337e276b3434df14dfa4e34d3f0cbe1bff4c44020fee356b3b1"
+      "sha256": "sha256:a58c46a84e4672685ec2a4f08b3dec896568e4efbbf531065646cc17121d87f2"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29"
+      "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c"
     },
     {
       "path": "release-artifacts/latest/production-release-blockers.md",
-      "sha256": "sha256:b0e55746f8ec9f7857706c75682868096bd14ed9e6aa0147bf9645ff63da275a"
+      "sha256": "sha256:4e214dfdec869cd9b272fe32638c751db558d03b076094b9c23ad4d8da4c19fd"
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-links.json",
@@ -90,11 +90,11 @@
       "mitigation": "Retain a reviewed external audit report, map findings to issues, add remediation evidence, and keep post-audit remediation blocked until accepted by maintainers.",
       "residual_risk": "The local test and Slither baseline is not an independent security assessment and cannot support public beta or production claims.",
       "checks": [
-        "python scripts/test_external_audit_report_evidence.py",
-        "python scripts/check_external_audit_report_evidence.py",
-        "python scripts/test_audit_package.py",
-        "python scripts/check_audit_package.py",
-        "python scripts/check_public_beta_evidence.py"
+        "python -m tools.release.test_external_audit_report_evidence",
+        "python -m tools.release.check_external_audit_report_evidence",
+        "python -m tools.docs.test_audit_package",
+        "python -m tools.docs.check_audit_package",
+        "python -m tools.release.check_public_beta_evidence"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/215",
@@ -103,19 +103,19 @@
       "evidence": [
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:38f50029589f8eba3e53b6892707712db19de1e63f8f56850f75cf7fddf31d24"
+          "sha256": "sha256:997ed8535883916b0bb1956301334a6b8ef7276ada7c26c3f5b0f10efa9a64a3"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29"
+          "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
-          "sha256": "sha256:b0e55746f8ec9f7857706c75682868096bd14ed9e6aa0147bf9645ff63da275a"
+          "sha256": "sha256:4e214dfdec869cd9b272fe32638c751db558d03b076094b9c23ad4d8da4c19fd"
         },
         {
           "path": "release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md",
-          "sha256": "sha256:d575a626ce65eb1543dbefc67201025352dc981792fe4792fc73b3039d991ce7"
+          "sha256": "sha256:9b0bd248537b24132906718cf4a84b85f5b4d3bf1d58b3720ce4a84f59313807"
         }
       ],
       "risk_acceptance": null
@@ -132,9 +132,9 @@
       "mitigation": "Generate this risk register from the committed roadmap, backlog, blocker reports, Slither baseline, and audit package, then fail local and CI checks on missing categories, stale hashes, or unsafe accepted-risk metadata.",
       "residual_risk": "The register can only summarize committed public evidence; it does not replace real external audit, production ceremony, or marketplace evidence.",
       "checks": [
-        "python scripts/test_risk_register.py",
-        "python scripts/check_risk_register.py",
-        "python scripts/generate_risk_register.py --check"
+        "python -m tools.security.test_risk_register",
+        "python -m tools.security.check_risk_register",
+        "python -m tools.security.generate_risk_register --check"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/388"
@@ -146,11 +146,11 @@
         },
         {
           "path": "docs/audit-package.md",
-          "sha256": "sha256:38f50029589f8eba3e53b6892707712db19de1e63f8f56850f75cf7fddf31d24"
+          "sha256": "sha256:997ed8535883916b0bb1956301334a6b8ef7276ada7c26c3f5b0f10efa9a64a3"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d01b4efc51434f5c7b36921d98da40eab69ac8fa465bf5a12b4eb19c728b7857"
+          "sha256": "sha256:4f62dbc771b001f2719cca76e1e98f55204ee1966f1c0dd45264be13d57f9409"
         }
       ],
       "risk_acceptance": null
@@ -167,10 +167,10 @@
       "mitigation": "Retain reviewed fork, testnet, metadata browser, ceremony, randomizer, verified address, and explorer evidence through the no-secret evidence intake.",
       "residual_risk": "Local and fork artifacts do not prove public testnet or live-chain deployment behavior, explorer verification, or indexer-visible state.",
       "checks": [
-        "python scripts/test_public_beta_evidence.py",
-        "python scripts/check_public_beta_evidence.py",
-        "python scripts/test_non_local_release_evidence.py",
-        "python scripts/check_non_local_release_evidence.py"
+        "python -m tools.release.test_public_beta_evidence",
+        "python -m tools.release.check_public_beta_evidence",
+        "python -m tools.release.test_non_local_release_evidence",
+        "python -m tools.release.check_non_local_release_evidence"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/216",
@@ -183,15 +183,15 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:3177cc07249eb2cc0d1f706ca16aab21aade03f9cecae928c902a7db955f86be"
+          "sha256": "sha256:609d634391976b8c52b83064388d08f20c10b9e9657a35792a03c3839b6b1be4"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:28ee9e07f9e55337e276b3434df14dfa4e34d3f0cbe1bff4c44020fee356b3b1"
+          "sha256": "sha256:a58c46a84e4672685ec2a4f08b3dec896568e4efbbf531065646cc17121d87f2"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29"
+          "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c"
         }
       ],
       "risk_acceptance": null
@@ -208,10 +208,10 @@
       "mitigation": "Retain reviewed Safe ownership, role grants, signer manager, pause guardian, emergency recipient, signer custody, rotation, and monitoring evidence.",
       "residual_risk": "Production authority could be misunderstood or unverifiable without reviewed ceremony artifacts and custody evidence.",
       "checks": [
-        "python scripts/test_signer_custody_readiness.py",
-        "python scripts/check_signer_custody_readiness.py",
-        "python scripts/test_admin_ceremony_evidence.py",
-        "python scripts/check_admin_ceremony_evidence.py"
+        "python -m tools.release.test_signer_custody_readiness",
+        "python -m tools.release.check_signer_custody_readiness",
+        "python -m tools.deployment.test_admin_ceremony_evidence",
+        "python -m tools.deployment.check_admin_ceremony_evidence"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/219",
@@ -220,7 +220,7 @@
       "evidence": [
         {
           "path": "docs/signer-custody-readiness.md",
-          "sha256": "sha256:b8f6b6e01ccf445f52e4a95e09188bf79ed8b84000c4e796c7583012ced685b3"
+          "sha256": "sha256:ac5657504d4e39576f0606f625c34bc6ee5e8fda9d673c2c463f743d567d6a0d"
         },
         {
           "path": "deployments/admin-ceremony/admin-ceremony-evidence-template.json",
@@ -245,9 +245,9 @@
       "mitigation": "Retain the fail-closed source implementation and complete the exact candidate-bound admission/provider/grant map, shared host-registry address, finalized current/pending configuration-authority observation, deployed runtime/codehash bindings, reconciled propose/accept/cancel lifecycle evidence, phase evidence, and independent review before release.",
       "residual_risk": "Source-level family isolation does not prove the selected candidate's deployed registry, provider/grant configuration, configuration-authority state, runtime, or lifecycle; an unbound or drifted candidate could therefore admit or authorize the wrong record writers.",
       "checks": [
-        "python scripts/test_record_family_authorization.py",
-        "python scripts/check_record_family_authorization.py",
-        "python scripts/check_risk_register.py"
+        "python -m tools.protocol.test_record_family_authorization",
+        "python -m tools.protocol.check_record_family_authorization",
+        "python -m tools.security.check_risk_register"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/690"
@@ -267,7 +267,7 @@
         },
         {
           "path": "release-artifacts/record-family-authorization-source-catalog.json",
-          "sha256": "sha256:ffafa7c4f543b6f0e3497709aa0462d408e81f254cdef25d630ffc847a66dc39"
+          "sha256": "sha256:af08a02c516c0c18123ea9e2a57bdb5cbb39950ffb4e0e9badb2d5672e704081"
         },
         {
           "path": "release-artifacts/schema/record-family-authorization-source-catalog.v1.schema.json",
@@ -279,7 +279,7 @@
         },
         {
           "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
-          "sha256": "sha256:bf466bc4011bccc76f23accc8a33cdf80ac59e88135f375dae21a181ec9cacd9"
+          "sha256": "sha256:d48e39db97b235ac0228ef151404e7b6c485f361aa3c1e5945170560855df489"
         },
         {
           "path": "deployments/record-family-authorization/record-family-authorization-evidence-template.json",
@@ -300,10 +300,10 @@
       "mitigation": "Implement and bind a closed-world target, selector, and native-value action policy; review every balance source and destination; retain hostile target, reentrancy, value-exhaustion, refund, and atomic-rollback tests; prove the policy in deployment evidence; and complete independent review before governance ownership cutover.",
       "residual_risk": "The Executor can forward proposal-selected native value from a governed batch. Bounded assembly prevents returndata bombs but is invisible to Slither's arbitrary-send-eth detector and does not constrain destination, value, balance source, or downstream call semantics.",
       "checks": [
-        "forge test --match-path test/StreamGovernanceExecutor.t.sol -vvv",
-        "python scripts/test_risk_register.py",
-        "python scripts/check_risk_register.py",
-        "python scripts/test_release_mode.py"
+        "forge test --match-path test/unit/governance/StreamGovernanceExecutor.t.sol -vvv",
+        "python -m tools.security.test_risk_register",
+        "python -m tools.security.check_risk_register",
+        "python -m tools.release.test_release_mode"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/656",
@@ -313,19 +313,19 @@
       "evidence": [
         {
           "path": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
-          "sha256": "sha256:bbe15583d5fea596db3ec7741042086914c8416e592763ce3358b13cdc30e945"
+          "sha256": "sha256:f48e7f0320f79fda657dbedd5507422d2e940d05a43b70c15674087284519314"
         },
         {
           "path": "docs/adr/0004-admin-governance.md",
-          "sha256": "sha256:46378633ae7bc4629cd157894b97cbefbbc24f8a5d09255df0e162860a21e9b4"
+          "sha256": "sha256:1f838fbfe450bfcf289a5c5f3e7e561325eaf2e972218f45650784b4971f8830"
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:07c65f7ece71cfb667f302da2e6904ca97b50cd9bfa8229a6ce9dc5749564bd9"
+          "sha256": "sha256:920f3cb60325107cdf915f68fc1dc8a0d505ec688f5dd73c99ae19cb2582d756"
         },
         {
-          "path": "test/StreamGovernanceExecutor.t.sol",
-          "sha256": "sha256:1dc73b5d356997de4c77b67d6a5ecdad1a6eb5b2143e05b97db0b039e9288834"
+          "path": "test/unit/governance/StreamGovernanceExecutor.t.sol",
+          "sha256": "sha256:026deee1e428e60131ef57a62af1837be82fc9fa5fecb97e0c4f61beaeb62875"
         }
       ],
       "risk_acceptance": null
@@ -342,14 +342,14 @@
       "mitigation": "Complete the checked versioned 22-GGP/3-GTP inventory by binding every row to the required production profile instance, genesis value, immutable floor, failure class or cadence rule, reviewed candidate-bound measurement evidence, and reachable fixed-stipend raise chains; bind the concrete candidate and keep strict production release mode fail-closed on every unresolved row.",
       "residual_risk": "The committed inventory is a structurally checked planning artifact. It does not yet prove that the 37-entry production candidate registers every governed parameter on the correct deployed host with safe values, floors, cadence evidence, or downstream gas compatibility.",
       "checks": [
-        "python scripts/test_governed_parameter_inventory.py",
-        "python scripts/check_governed_parameter_inventory.py",
-        "python scripts/check_governed_parameter_inventory.py --require-complete",
-        "python scripts/test_governed_parameter_identifiers.py",
-        "python scripts/check_governed_parameter_identifiers.py",
-        "python scripts/test_risk_register.py",
-        "python scripts/check_risk_register.py",
-        "python scripts/test_release_mode.py"
+        "python -m tools.protocol.test_governed_parameter_inventory",
+        "python -m tools.protocol.check_governed_parameter_inventory",
+        "python -m tools.protocol.check_governed_parameter_inventory --require-complete",
+        "python -m tools.protocol.test_governed_parameter_identifiers",
+        "python -m tools.protocol.check_governed_parameter_identifiers",
+        "python -m tools.security.test_risk_register",
+        "python -m tools.security.check_risk_register",
+        "python -m tools.release.test_release_mode"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/656",
@@ -363,15 +363,15 @@
         },
         {
           "path": "docs/launch-v1-target-architecture.md",
-          "sha256": "sha256:5f3b45605b109a6d92eefce643272dedb42f7da857047e0b8bcf095a8db0b9ea"
+          "sha256": "sha256:ba0e0206fe8bc17d7d1192cda2b9d030ae0b702f7f943d11d1b13a6cafe065c2"
         },
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:07c65f7ece71cfb667f302da2e6904ca97b50cd9bfa8229a6ce9dc5749564bd9"
+          "sha256": "sha256:920f3cb60325107cdf915f68fc1dc8a0d505ec688f5dd73c99ae19cb2582d756"
         },
         {
           "path": "release-artifacts/governed-parameter-inventory.json",
-          "sha256": "sha256:95ac4d37e93391fe696ea9a457e6967d5dbc65bc5cdf4f0e6a42faa4f5079610"
+          "sha256": "sha256:3cb19c6c924bf5df05eeb8eeb25d530f4f1a1d1b0d0edb47919e7a79c71c89e5"
         },
         {
           "path": "release-artifacts/schema/governed-parameter-inventory.v1.schema.json",
@@ -382,11 +382,11 @@
           "sha256": "sha256:e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135"
         },
         {
-          "path": "scripts/check_governed_parameter_inventory.py",
-          "sha256": "sha256:a8e820de9b5dfcd91ac39c73e37294ef7f8ea8f9951de6c1137c40d911f304a3"
+          "path": "tools/protocol/check_governed_parameter_inventory.py",
+          "sha256": "sha256:66f2a4733cebaa02da72ac3c5fd114a380ceff90d6fce209f2324aff5c242715"
         },
         {
-          "path": "scripts/check_governed_parameter_identifiers.py",
+          "path": "tools/protocol/check_governed_parameter_identifiers.py",
           "sha256": "sha256:67d8e97156e56b33247684c94ffff4c34a58b36680728d622371697e8eb1268a"
         }
       ],
@@ -404,12 +404,12 @@
       "mitigation": "Retain fork, testnet, and live evidence for token metadata refresh, animation execution, marketplace display, royalty display, event replay, and cache invalidation.",
       "residual_risk": "Local browser and fixture checks do not prove collector-facing marketplace behavior.",
       "checks": [
-        "python scripts/test_metadata_fixtures.py",
-        "python scripts/check_metadata_fixtures.py",
-        "python scripts/test_metadata_browser_sandbox.py",
-        "python scripts/check_metadata_browser_sandbox.py",
-        "python scripts/test_marketplace_indexer_evidence.py",
-        "python scripts/check_marketplace_indexer_evidence.py"
+        "python -m tools.protocol.test_metadata_fixtures",
+        "python -m tools.protocol.check_metadata_fixtures",
+        "python -m tools.deployment.test_metadata_browser_sandbox",
+        "python -m tools.deployment.check_metadata_browser_sandbox",
+        "python -m tools.release.test_marketplace_indexer_evidence",
+        "python -m tools.release.check_marketplace_indexer_evidence"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/424",
@@ -418,27 +418,27 @@
       "evidence": [
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:7ca42c4ccc78e1717f6156d5728c02685638552d52b531810d206bba5aa00b0c"
+          "sha256": "sha256:9482855f98269c5beeb6c4bb8d0ab0134b01f38b062937f4e27999df37b3bc48"
         },
         {
           "path": "docs/integrations/marketplace-indexer-evidence.md",
-          "sha256": "sha256:c094d4261f62a4d0287053790d2f531b5071555f1fa7e2ff9b452c54cb40c9a2"
+          "sha256": "sha256:30935e34f1c90bc235987d8b28e51f5cc61ce11564ef9a551459bc057652c2e0"
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:3177cc07249eb2cc0d1f706ca16aab21aade03f9cecae928c902a7db955f86be"
+          "sha256": "sha256:609d634391976b8c52b83064388d08f20c10b9e9657a35792a03c3839b6b1be4"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29"
+          "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c"
         },
         {
           "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md",
-          "sha256": "sha256:811c7131c7b999a6c1b8c23e369d6e0ab4048498789f54eba91c7b3aa9b4097e"
+          "sha256": "sha256:fefea2c59cad5765c6db1ba78ce5fbe174ad9eb5cec86ea0e5a5dd2a601f252f"
         },
         {
           "path": "release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md",
-          "sha256": "sha256:d414f7172ad166fe3682b0bc1db77dcac311bc0da13b90d6514c5459d3ec23f7"
+          "sha256": "sha256:75c18cd2160fd564b9b6183d568851b59f2bff5db00a303c7c6af895850dbe8b"
         }
       ],
       "risk_acceptance": null
@@ -455,13 +455,13 @@
       "mitigation": "Decide and implement or explicitly defer contract-level metadata, 1/1 provenance manifests, artist/authenticity records, royalty policy, collector permanence packages, and marketplace/indexer evidence.",
       "residual_risk": "The protocol can be locally safe without yet meeting a world-class collector-facing 1/1 release bar.",
       "checks": [
-        "python scripts/test_risk_register.py",
-        "python scripts/check_risk_register.py",
-        "python scripts/test_one_of_one_permanence_package.py",
-        "python scripts/check_one_of_one_permanence_package.py",
-        "python scripts/test_royalty_policy.py",
-        "python scripts/check_royalty_policy.py",
-        "python scripts/check_audit_package.py"
+        "python -m tools.security.test_risk_register",
+        "python -m tools.security.check_risk_register",
+        "python -m tools.protocol.test_one_of_one_permanence_package",
+        "python -m tools.protocol.check_one_of_one_permanence_package",
+        "python -m tools.docs.test_royalty_policy",
+        "python -m tools.docs.check_royalty_policy",
+        "python -m tools.docs.check_audit_package"
       ],
       "tracking": [
         "ops/EXECUTION_BACKLOG.md"
@@ -469,23 +469,23 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:468f0c59facc72105ec81d8f6d17fea6b56daf68a367a098e9675a234bb20058"
+          "sha256": "sha256:7992210d5c4e5408f0dd9ca7f2df40941ad8abd454f448c6d0e962d2b8c8eb05"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d01b4efc51434f5c7b36921d98da40eab69ac8fa465bf5a12b4eb19c728b7857"
+          "sha256": "sha256:4f62dbc771b001f2719cca76e1e98f55204ee1966f1c0dd45264be13d57f9409"
         },
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:7ca42c4ccc78e1717f6156d5728c02685638552d52b531810d206bba5aa00b0c"
+          "sha256": "sha256:9482855f98269c5beeb6c4bb8d0ab0134b01f38b062937f4e27999df37b3bc48"
         },
         {
           "path": "docs/permanence-packages.md",
-          "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6"
+          "sha256": "sha256:aa9a2ece27520528ace78338bccfa5c061fa09a201d2062a6b24ee2065ecb167"
         },
         {
           "path": "docs/royalty-policy.md",
-          "sha256": "sha256:482ef60468393c842a34366df603ef20eafa9b14f0261bbe30b31cedaa8d48c7"
+          "sha256": "sha256:fe34b0f828597177547b4a1847224aec361bb747e16df69c5f1e6ae916c15289"
         }
       ],
       "risk_acceptance": null
@@ -502,9 +502,9 @@
       "mitigation": "Retain reviewed fork/testnet/live provider configuration, funding, request health, epoch, stale/failure/retry, and metadata-finalization evidence.",
       "residual_risk": "Local mock provider evidence does not prove live provider funding, callback, or operational monitoring behavior.",
       "checks": [
-        "python scripts/test_randomizer_operations.py",
-        "python scripts/check_randomizer_operations.py",
-        "python scripts/check_public_beta_evidence.py"
+        "python -m tools.deployment.test_randomizer_operations",
+        "python -m tools.deployment.check_randomizer_operations",
+        "python -m tools.release.check_public_beta_evidence"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/220",
@@ -513,7 +513,7 @@
       "evidence": [
         {
           "path": "docs/randomizer-operations.md",
-          "sha256": "sha256:107a2f76f9c4e258a4a24ca4e63db2cec805b4066d435677d652b47aa0556efe"
+          "sha256": "sha256:8118604b82e39cdb6359cdb45874371c71a43e7a92382d93b1b218375d1b486d"
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
@@ -521,7 +521,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
-          "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29"
+          "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c"
         }
       ],
       "risk_acceptance": null
@@ -538,10 +538,10 @@
       "mitigation": "Retain production checksum signatures, signed Git tag evidence, production deployment manifests, source verification inputs, and live bytecode/explorer proof.",
       "residual_risk": "The local bytecode-to-release proof does not prove deployed live bytecode or production signer approval.",
       "checks": [
-        "python scripts/test_signed_release_tag.py",
-        "python scripts/check_signed_release_tag.py",
-        "python scripts/test_bytecode_release_proof.py",
-        "python scripts/generate_bytecode_release_proof.py --check"
+        "python -m tools.release.test_signed_release_tag",
+        "python -m tools.release.check_signed_release_tag",
+        "python -m tools.build.test_bytecode_release_proof",
+        "python -m tools.build.generate_bytecode_release_proof --check"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/223",
@@ -554,15 +554,15 @@
       "evidence": [
         {
           "path": "docs/release-signatures.md",
-          "sha256": "sha256:3c04d64b2b476185903f92e0f052847a37cf58c97521aac0fc186be98006b703"
+          "sha256": "sha256:1a1f16c34f1bdca766176eaf7752d80818538efdcd317b592c9850bfe078259d"
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:dcfbf048480366fb3db074582859b46b53e3f080804dafd5448f2d6ecf88fce8"
+          "sha256": "sha256:011d2047cf567c22dccbf0b9be97ed5cd3ad8a4887407ece039bc340c3fb6bf1"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
-          "sha256": "sha256:b0e55746f8ec9f7857706c75682868096bd14ed9e6aa0147bf9645ff63da275a"
+          "sha256": "sha256:4e214dfdec869cd9b272fe32638c751db558d03b076094b9c23ad4d8da4c19fd"
         }
       ],
       "risk_acceptance": null
@@ -575,12 +575,12 @@
       "target_gate": "Gate G",
       "source": "launch conformance matrix, target architecture, and artifact-backed size proof",
       "checks": [
-        "python scripts/build_release_artifacts.py",
-        "python scripts/check_contract_size_budget.py",
-        "python scripts/test_risk_register.py",
-        "python scripts/generate_risk_register.py --check",
-        "python scripts/check_release_mode.py --phase production-release",
-        "python scripts/generate_release_manifest.py --check"
+        "python -m tools.build.build_release_artifacts",
+        "python -m tools.build.check_contract_size_budget",
+        "python -m tools.security.test_risk_register",
+        "python -m tools.security.generate_risk_register --check",
+        "python -m tools.release.check_release_mode --phase production-release",
+        "python -m tools.release.generate_release_manifest --check"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/654",
@@ -593,19 +593,19 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:07c65f7ece71cfb667f302da2e6904ca97b50cd9bfa8229a6ce9dc5749564bd9"
+          "sha256": "sha256:920f3cb60325107cdf915f68fc1dc8a0d505ec688f5dd73c99ae19cb2582d756"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:468f0c59facc72105ec81d8f6d17fea6b56daf68a367a098e9675a234bb20058"
+          "sha256": "sha256:7992210d5c4e5408f0dd9ca7f2df40941ad8abd454f448c6d0e962d2b8c8eb05"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:87729624d357fa246a7c8d2faac63b84d6a7f62e37a0846551c50aa017aead0c"
+          "sha256": "sha256:07530ea726b7e508a3539862af7c28b758f66123a12946e591d3ebde529b9bd3"
         },
         {
           "path": "release-artifacts/latest/abi-checksums.json",
-          "sha256": "sha256:f264d695346cc991734776466e62cf48bc66fd91590aab88619f8a6d825b69fd"
+          "sha256": "sha256:397fd8c2c24381063c9e320431c37c1884b066717dbb6dd78ee4f24ce30ab90c"
         }
       ],
       "risk_acceptance": null
@@ -622,11 +622,11 @@
       "mitigation": "Disposition and remediate every open first-party production high/medium finding, retain issue-linked proof for each resolution, and keep the exact normalized baseline drift gate green.",
       "residual_risk": "The current normalized baseline contains 2 High and 28 Medium open first-party production findings; local normalization and drift detection do not establish that any finding is safe.",
       "checks": [
-        "python scripts/test_slither_baseline.py",
-        "python scripts/check_slither_baseline.py --baseline-only",
-        "python scripts/check_slither_baseline.py --run-slither",
-        "python scripts/test_release_mode.py",
-        "python scripts/check_audit_package.py"
+        "python -m tools.security.test_slither_baseline",
+        "python -m tools.security.check_slither_baseline --baseline-only",
+        "python -m tools.security.check_slither_baseline --run-slither",
+        "python -m tools.release.test_release_mode",
+        "python -m tools.docs.check_audit_package"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/658",
@@ -635,19 +635,19 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:c4e73eb86c3c17f857c2e8cabb6baef0b1645879425d966e11d3d34b6523f29f"
+          "sha256": "sha256:700b4c85d064f16113225ddb35223bfee81af137987f2e2063b9dec3181c56ae"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:03f5ebeb02672896677f44edba0316591d9a9cb01da304a4d96fd90fe5e4ef98"
+          "sha256": "sha256:a8cf6f0050c9253e5545c61fe07e3a1b5cb74088abe0cc588eafe55c7b07ba22"
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:07fee4109b5a47082bc36699af72f9bd7af8bb2e4cbfa1d810e9eb41ded113d8"
+          "sha256": "sha256:1e06bbda5bbbdf9a1b99a135665b756e8415ad73c2d2dfc680a32ae9f8456fb7"
         },
         {
-          "path": "scripts/check_slither_baseline.py",
-          "sha256": "sha256:77dbd34317af8828cc7dcd3f4cdd789776d96b22865ddc2315386edfb7a4fb17"
+          "path": "tools/security/check_slither_baseline.py",
+          "sha256": "sha256:5c05ea6621e60a584e1ea9727884178598120e68c9306fd4cfae0b269cf6b375"
         }
       ],
       "risk_acceptance": null
@@ -665,10 +665,10 @@
       "residual_risk": "Accepted local-baseline warnings remain audit inputs and should be rechecked before public beta or production release.",
       "checks": [
         "forge build",
-        "python scripts/run_forge_size_log.py --log cache/forge-size.log",
+        "python -m tools.build.run_forge_size_log --log cache/forge-size.log",
         "forge doc --build",
-        "python scripts/test_warning_dispositions.py",
-        "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log"
+        "python -m tools.security.test_warning_dispositions",
+        "python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log"
       ],
       "tracking": [
         "https://github.com/6529-Collections/6529Stream/issues/428"
@@ -676,19 +676,19 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:468f0c59facc72105ec81d8f6d17fea6b56daf68a367a098e9675a234bb20058"
+          "sha256": "sha256:7992210d5c4e5408f0dd9ca7f2df40941ad8abd454f448c6d0e962d2b8c8eb05"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:d01b4efc51434f5c7b36921d98da40eab69ac8fa465bf5a12b4eb19c728b7857"
+          "sha256": "sha256:4f62dbc771b001f2719cca76e1e98f55204ee1966f1c0dd45264be13d57f9409"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:d5a5169e772273d8d45e904e9591478a8ed97aaef43b59f82775914d1dae2e27"
+          "sha256": "sha256:ed67df24de003b4bdf61264bc54e3036e307510bbbc8af9d3ba382a95db74dc8"
         },
         {
           "path": "docs/warning-dispositions.md",
-          "sha256": "sha256:3af79c72f46f77cbd3c0b25d3787102f5cfb3d1ebd5faebf0f1769d6eb108e26"
+          "sha256": "sha256:da29e177ff8b763bfe514d216e346d45d646b76e7815f882b05e7571e2da37b8"
         }
       ],
       "risk_acceptance": null

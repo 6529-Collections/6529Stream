@@ -303,8 +303,8 @@ The implementation must provide one measured Core hook proof before the
 implementation PR is accepted. The proof must be produced by:
 
 ```bash
-python scripts/build_release_artifacts.py
-python scripts/check_contract_size_budget.py
+python -m tools.build.build_release_artifacts
+python -m tools.build.check_contract_size_budget
 ```
 
 The aggregate `forge build --sizes --via-ir --skip test --skip script --force`

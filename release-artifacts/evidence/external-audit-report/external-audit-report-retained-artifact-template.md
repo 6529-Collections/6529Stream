@@ -55,13 +55,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_external_audit_report_evidence.py
-python scripts/check_external_audit_report_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/external-audit-report-template.json --retained-artifact release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md --output release-artifacts/evidence/external-audit-report/external-audit-report-evidence.json --environment audit --chain-id not_applicable --block-or-reference "<final audit report ID or public URL>" --command-or-source-system "<auditor report source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<audited commit>" --source-ci-run "<release CI run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_external_audit_report_evidence
+python -m tools.release.check_external_audit_report_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/public-beta-templates/external-audit-report-template.json --retained-artifact release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md --output release-artifacts/evidence/external-audit-report/external-audit-report-evidence.json --environment audit --chain-id not_applicable --block-or-reference "<final audit report ID or public URL>" --command-or-source-system "<auditor report source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<audited commit>" --source-ci-run "<release CI run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

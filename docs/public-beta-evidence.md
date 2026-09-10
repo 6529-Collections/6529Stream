@@ -11,21 +11,21 @@ explorer verification evidence exists.
 Validate the evidence status with:
 
 ```sh
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
-python scripts/test_public_beta_blocker_report.py
-python scripts/generate_public_beta_blocker_report.py --check
-python scripts/test_production_release_blocker_report.py
-python scripts/generate_production_release_blocker_report.py --check
-python scripts/test_release_evidence_packet_index.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/test_release_evidence_issue_backlog.py
-python scripts/generate_release_evidence_issue_backlog.py --check
-python scripts/test_release_evidence_issue_links.py
-python scripts/check_release_evidence_issue_links.py
-python scripts/test_release_evidence_issue_snapshot.py
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
+python -m tools.release.test_public_beta_blocker_report
+python -m tools.release.generate_public_beta_blocker_report --check
+python -m tools.release.test_production_release_blocker_report
+python -m tools.release.generate_production_release_blocker_report --check
+python -m tools.release.test_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.test_release_evidence_issue_backlog
+python -m tools.release.generate_release_evidence_issue_backlog --check
+python -m tools.release.test_release_evidence_issue_links
+python -m tools.release.check_release_evidence_issue_links
+python -m tools.release.test_release_evidence_issue_snapshot
 ```
 
 ## Evidence Artifact
@@ -93,7 +93,7 @@ no-secret and tracker-only, does not update GitHub automatically, and does not
 make issue closure completion evidence.
 
 The release evidence issue closure checker,
-`scripts/check_release_evidence_issue_closure.py`, validates that the committed
+`tools/release/check_release_evidence_issue_closure.py`, validates that the committed
 tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
 artifact, packet index, and shared release evidence status manifest agree on
 which tracker issues may close. A linked tracker issue should remain open while
@@ -101,7 +101,7 @@ its committed evidence status is `missing`, `pending`, `blocked`, or
 `not_applicable`; it may close only after the committed status is `complete` or
 `accepted_risk`.
 
-The checker constants in `scripts/check_public_beta_evidence.py` are the
+The checker constants in `tools/release/check_public_beta_evidence.py` are the
 canonical requirement list. If the required public-beta or production rows
 change, update the schema's `requirements.minItems` count and this document in
 the same PR.
@@ -128,14 +128,14 @@ and are also template-only artifacts.
 
 Drop authorization signing evidence should also follow
 [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json)
-and pass `python scripts/check_drop_authorization_signing_evidence.py` before
+and pass `python -m tools.release.check_drop_authorization_signing_evidence` before
 any public-beta or production status row relies on it. The committed
 [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json)
 is a local template only, not completion evidence.
 
 Signer custody readiness evidence should follow
 [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json)
-and pass `python scripts/check_signer_custody_readiness.py` before any
+and pass `python -m tools.release.check_signer_custody_readiness` before any
 public-beta or production status row relies on signer custody readiness
 evidence for non-local signing. The committed
 [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json)
@@ -146,7 +146,7 @@ templates at
 [`release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`](../release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md)
 and
 [`release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`](../release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md),
-and pass `python scripts/check_marketplace_indexer_evidence.py` before any
+and pass `python -m tools.release.check_marketplace_indexer_evidence` before any
 public-beta or production status row relies on marketplace/indexer evidence.
 
 ## Status Values
@@ -224,87 +224,87 @@ To move a requirement to `complete`:
    invariant, checksum-backed production-signature, signed-tag,
    production-address-book, or production-broadcast-retention proof.
 5. Keep `risk_acceptance` as `null`.
-6. Run `python scripts/check_public_beta_evidence.py`.
-7. Run `python scripts/check_non_local_release_evidence.py` for every reviewed
+6. Run `python -m tools.release.check_public_beta_evidence`.
+7. Run `python -m tools.release.check_non_local_release_evidence` for every reviewed
    non-local evidence metadata JSON that supports the row.
-8. Run `python scripts/check_fork_deployment_rehearsal_evidence.py` when the
+8. Run `python -m tools.deployment.check_fork_deployment_rehearsal_evidence` when the
    retained artifact supports `fork_deployment_rehearsal` / issue #216.
-9. Run `python scripts/check_marketplace_indexer_evidence.py` when the
+9. Run `python -m tools.release.check_marketplace_indexer_evidence` when the
    retained artifact supports `fork_testnet_marketplace_indexer_evidence` /
    issue #423 or `live_marketplace_indexer_evidence` / issue #424.
-10. Run `python scripts/check_drop_authorization_signing_evidence.py` for any
+10. Run `python -m tools.release.check_drop_authorization_signing_evidence` for any
    retained drop authorization signing evidence that supports the row.
-11. Run `python scripts/check_signer_custody_readiness.py` for any signer
+11. Run `python -m tools.release.check_signer_custody_readiness` for any signer
    custody readiness evidence that supports the row.
 12. Regenerate and check the blocker reports with
-   `python scripts/generate_public_beta_blocker_report.py` and
-   `python scripts/generate_production_release_blocker_report.py`.
+   `python -m tools.release.generate_public_beta_blocker_report` and
+   `python -m tools.release.generate_production_release_blocker_report`.
 13. Regenerate and check the release evidence packet index with
-   `python scripts/generate_release_evidence_packet_index.py`,
-   `python scripts/test_release_evidence_packet_index.py`, and
-   `python scripts/generate_release_evidence_packet_index.py --check`.
+   `python -m tools.release.generate_release_evidence_packet_index`,
+   `python -m tools.release.test_release_evidence_packet_index`, and
+   `python -m tools.release.generate_release_evidence_packet_index --check`.
 14. Regenerate and check the release evidence issue backlog with
-   `python scripts/generate_release_evidence_issue_backlog.py`,
-   `python scripts/test_release_evidence_issue_backlog.py`, and
-   `python scripts/generate_release_evidence_issue_backlog.py --check`.
+   `python -m tools.release.generate_release_evidence_issue_backlog`,
+   `python -m tools.release.test_release_evidence_issue_backlog`, and
+   `python -m tools.release.generate_release_evidence_issue_backlog --check`.
 15. Check the issue-link map with
-    `python scripts/test_release_evidence_issue_links.py` and
-    `python scripts/check_release_evidence_issue_links.py`.
+    `python -m tools.release.test_release_evidence_issue_links` and
+    `python -m tools.release.check_release_evidence_issue_links`.
 16. Check committed release evidence tracker labels with
-    `python scripts/test_release_evidence_issue_labels.py` and
-    `python scripts/check_release_evidence_issue_labels.py`. To audit live
+    `python -m tools.release.test_release_evidence_issue_labels` and
+    `python -m tools.release.check_release_evidence_issue_labels`. To audit live
     GitHub label, body, and closure drift together, run the operator-only
     no-secret orchestrator:
 
     ```bash
-    python scripts/audit_release_evidence_issue_snapshots.py
+    python -m tools.release.audit_release_evidence_issue_snapshots
     ```
 
     To retain a no-secret JSON/Markdown report bundle for the operator run
     without changing readiness claims, pass explicit report paths:
 
     ```bash
-    python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+    python -m tools.release.audit_release_evidence_issue_snapshots --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
     ```
 
     To audit only live GitHub label drift, export a local snapshot and pass it
     with `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile labels --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
-    python scripts/check_release_evidence_issue_labels.py --live-json tmp/release-evidence-issue-labels.json
+    python -m tools.release.export_release_evidence_issue_snapshot --profile labels --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
+    python -m tools.release.check_release_evidence_issue_labels --live-json tmp/release-evidence-issue-labels.json
     ```
 
     In exact linked-issue mode, `--state` and `--limit` are intentionally
     ignored because the exporter fetches each committed tracker issue directly.
 
 17. Regenerate and check the release evidence issue body sync artifact with
-    `python scripts/generate_release_evidence_issue_body_sync.py`,
-    `python scripts/test_release_evidence_issue_body_sync.py`, and
-    `python scripts/generate_release_evidence_issue_body_sync.py --check`.
+    `python -m tools.release.generate_release_evidence_issue_body_sync`,
+    `python -m tools.release.test_release_evidence_issue_body_sync`, and
+    `python -m tools.release.generate_release_evidence_issue_body_sync --check`.
 18. Check committed release evidence tracker bodies with
-    `python scripts/test_release_evidence_issue_bodies.py` and
-    `python scripts/check_release_evidence_issue_bodies.py`. To audit live
+    `python -m tools.release.test_release_evidence_issue_bodies` and
+    `python -m tools.release.check_release_evidence_issue_bodies`. To audit live
     GitHub body drift, export a local snapshot and pass it with `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile bodies --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
-    python scripts/check_release_evidence_issue_bodies.py --live-json tmp/release-evidence-issue-bodies.json
+    python -m tools.release.export_release_evidence_issue_snapshot --profile bodies --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
+    python -m tools.release.check_release_evidence_issue_bodies --live-json tmp/release-evidence-issue-bodies.json
     ```
 
     If drift is reported, generate deterministic body files with
-    `python scripts/check_release_evidence_issue_bodies.py --write-body-files tmp/release-evidence-issue-bodies`
+    `python -m tools.release.check_release_evidence_issue_bodies --write-body-files tmp/release-evidence-issue-bodies`
     and apply the issue-specific `gh issue edit ... --body-file ...` command
     printed by the checker.
 19. Check release evidence tracker closure readiness with
-    `python scripts/test_release_evidence_issue_closure.py` and
-    `python scripts/check_release_evidence_issue_closure.py`. To audit live
+    `python -m tools.release.test_release_evidence_issue_closure` and
+    `python -m tools.release.check_release_evidence_issue_closure`. To audit live
     GitHub closure state, export all tracker issues and pass the snapshot with
     `--live-json`:
 
     ```bash
-    python scripts/export_release_evidence_issue_snapshot.py --profile closure --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
-    python scripts/check_release_evidence_issue_closure.py --live-json tmp/release-evidence-issue-closure.json
+    python -m tools.release.export_release_evidence_issue_snapshot --profile closure --exact-linked-issues --issue-links release-artifacts/latest/release-evidence-issue-links.json
+    python -m tools.release.check_release_evidence_issue_closure --live-json tmp/release-evidence-issue-closure.json
     ```
 
     If premature closure is reported, reopen the issue with the remediation
@@ -315,7 +315,7 @@ To move a requirement to `complete`:
 To move a requirement to `accepted_risk`, include `accepted_by`, `accepted_at`,
 `expires_at`, `reference`, and `notes`. The `accepted_at` and `expires_at`
 fields must use real ISO `YYYY-MM-DD` calendar dates, such as `2026-06-12`;
-`scripts/check_public_beta_evidence.py` enforces the format and tests reject
+`tools/release/check_public_beta_evidence.py` enforces the format and tests reject
 free-form values. Risk acceptance should be rare, explicit, and tied to a
 public issue, governance decision, or release note.
 

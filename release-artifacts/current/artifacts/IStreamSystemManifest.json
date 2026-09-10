@@ -1,0 +1,650 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "payloadPointer",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "eventCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "compatibilityMatrixHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "numericIdCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "schemaCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "canonicalizationCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "specBundleHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reconstructionClientHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct StreamSystemManifestUpdate",
+          "name": "update",
+          "type": "tuple"
+        }
+      ],
+      "name": "publishStreamSystemManifest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamSystemManifest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "revenueResolver",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "metadataRouter",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "collectionMetadata",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "entropyCoordinator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "mintManager",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "mintLedger",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "artistRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "streamAdminsOrGovernance",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "artworkFinalityRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "moduleRegistry",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "stateExportPublisher",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "eventCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "compatibilityMatrixHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "numericIdCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "schemaCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "canonicalizationCatalogHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "specBundleHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reconstructionClientHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamSystemManifestPointer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "payloadPointer",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "streamSystemManifestPointerAt",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "payloadPointer",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "updatedAt",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "streamSystemManifestPointerCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "payloadPointer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StreamSystemManifestPublished",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StreamSystemManifestPublished",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "manifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "manifestURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "eventCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "compatibilityMatrixHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "numericIdCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "schemaCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "canonicalizationCatalogHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "specBundleHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "reconstructionClientHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct StreamSystemManifestUpdate",
+              "name": "update",
+              "type": "tuple"
+            }
+          ],
+          "name": "publishStreamSystemManifest",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamSystemManifest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "revenueResolver",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "metadataRouter",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "collectionMetadata",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "entropyCoordinator",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "mintManager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "mintLedger",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "artistRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "streamAdminsOrGovernance",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "artworkFinalityRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "moduleRegistry",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "stateExportPublisher",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "eventCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "compatibilityMatrixHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "numericIdCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "schemaCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "canonicalizationCatalogHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "specBundleHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reconstructionClientHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamSystemManifestPointer",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "streamSystemManifestPointerAt",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "payloadPointer",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "updatedAt",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "streamSystemManifestPointerCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "The two immutable binding reads (`core()` and      `governanceExecutor()`) are deliberately outside this five-function      interface. The five selectors below XOR to `0x37660ede`.",
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "notice": "State-only aggregate and append-only payload-history surface for         discovering the active Stream deployment.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol": "IStreamSystemManifest"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol": {
+        "keccak256": "0x89f04723cdfd347b24eccb85507659dbb327985a8e38029b405941c656cebea7",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f2e6b847bcecf47cfbe6c0ca219f65dd4c2b0065cd9b5544da7e4db7f258f5cc",
+          "dweb:/ipfs/QmUJUNZoUCiuJf6F7Wdsum56huBEqVxGxSQdoy4sZnLvwb"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "publishStreamSystemManifest(address,(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32))": "09b1b5c6",
+    "streamSystemManifest()": "97c93f10",
+    "streamSystemManifestPointer()": "7b3a36b1",
+    "streamSystemManifestPointerAt(uint256)": "893aae03",
+    "streamSystemManifestPointerCount()": "5b1e1cba",
+    "supportsInterface(bytes4)": "01ffc9a7"
+  }
+}

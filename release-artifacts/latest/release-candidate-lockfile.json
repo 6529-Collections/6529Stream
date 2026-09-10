@@ -1,6 +1,6 @@
 {
   "schema_version": "6529stream.release-candidate-lockfile.v1",
-  "generated_by": "scripts/generate_release_candidate_lockfile.py:1",
+  "generated_by": "tools/release/generate_release_candidate_lockfile.py:1",
   "release": {
     "project": "6529Stream",
     "version": "v0.1.0-local",
@@ -55,31 +55,31 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:95ec4748530142730be935483fc66a1c83e47370b129442d3069777c0f51e41a",
-      "size_bytes": 149412,
+      "sha256": "sha256:0c3aa660f82487949f6657d6eae2cf3e5c818b67be23cfa217772924b2e3a850",
+      "size_bytes": 150297,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:6fdde02f817aaf5a35ba0bacd39a5e607e1247031317940aa0f82f79d7f7cdcb",
-      "size_bytes": 151617,
+      "sha256": "sha256:178f51a7c0383bda6fd0d6a3ed3bc1d9227edc27212f722189f736825f1d6238",
+      "size_bytes": 151729,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:28ee9e07f9e55337e276b3434df14dfa4e34d3f0cbe1bff4c44020fee356b3b1",
-      "size_bytes": 10171,
+      "sha256": "sha256:a58c46a84e4672685ec2a4f08b3dec896568e4efbbf531065646cc17121d87f2",
+      "size_bytes": 10646,
       "schema_version": "6529stream.public-beta-evidence.v1"
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:729b00121d1c3130dffb232629a4c17e5a699d6458a8a27a1c546dcd57aab46f",
-      "size_bytes": 33995,
+      "sha256": "sha256:a4d59b98e31d5e758d7b2b3768e1b715cd75c753c48a5ab993fc892684addcf9",
+      "size_bytes": 34457,
       "schema_version": "6529stream.risk-register.v1"
     },
     "governed_parameter_inventory": {
       "path": "release-artifacts/governed-parameter-inventory.json",
-      "sha256": "sha256:95ac4d37e93391fe696ea9a457e6967d5dbc65bc5cdf4f0e6a42faa4f5079610",
+      "sha256": "sha256:3cb19c6c924bf5df05eeb8eeb25d530f4f1a1d1b0d0edb47919e7a79c71c89e5",
       "size_bytes": 42325,
       "schema_version": "6529stream.governed-parameter-inventory.v1"
     },
@@ -91,8 +91,8 @@
     },
     "record_family_authorization_source_catalog": {
       "path": "release-artifacts/record-family-authorization-source-catalog.json",
-      "sha256": "sha256:ffafa7c4f543b6f0e3497709aa0462d408e81f254cdef25d630ffc847a66dc39",
-      "size_bytes": 9968,
+      "sha256": "sha256:af08a02c516c0c18123ea9e2a57bdb5cbb39950ffb4e0e9badb2d5672e704081",
+      "size_bytes": 10682,
       "schema_version": "6529stream.record-family-authorization-source-catalog.v1"
     },
     "record_family_authorization_source_catalog_schema": {
@@ -127,22 +127,22 @@
     },
     "record_family_authorization_grant_map_schema": {
       "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
-      "sha256": "sha256:bf466bc4011bccc76f23accc8a33cdf80ac59e88135f375dae21a181ec9cacd9",
-      "size_bytes": 24837,
+      "sha256": "sha256:d48e39db97b235ac0228ef151404e7b6c485f361aa3c1e5945170560855df489",
+      "size_bytes": 24859,
       "schema_version": "https://json-schema.org/draft/2020-12/schema",
       "schema_id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/record-family-authorization-grant-map.v1.schema.json",
       "document_schema_version": "6529stream.record-family-authorization-grant-map.v1"
     },
     "release_tool_call_policy": {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:bcb98d8283fae9cd54c8baf3245a8939a2a43e22f51c071f3ec5554006eaf162",
-      "size_bytes": 2461326,
+      "sha256": "sha256:f32fc93948ab36614d1c048bdc47b80c8bb55df9fc706d350ce90c4b6aec3292",
+      "size_bytes": 2488022,
       "schema_version": "6529stream.release-tool-call-policy.v1"
     },
     "release_tool_call_policy_schema": {
       "path": "release-artifacts/schema/release-tool-call-policy.v1.schema.json",
-      "sha256": "sha256:7845d1936755fb37ca922f8b6f77982112ebee2543f123debe586a158f31f955",
-      "size_bytes": 11147,
+      "sha256": "sha256:23fb98033db6232028f2b4d9fe489791b4b440e493da0aacf577da5996fabdd1",
+      "size_bytes": 22826,
       "schema_version": "https://json-schema.org/draft/2020-12/schema",
       "schema_id": "https://6529.io/schemas/release-tool-call-policy.v1.schema.json",
       "document_schema_version": "6529stream.release-tool-call-policy.v1"
@@ -150,65 +150,65 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:4db4922a5fbe653a166f90c7d1d705886829d455480829030c2d62cad7b9998d",
-        "size_bytes": 166799,
+        "sha256": "sha256:1171144bf9e457544ccc76bf55b1873a577dd1aaa780510e509849aad5435b6a",
+        "size_bytes": 167847,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:2b81f32d3c3fe655f3485fd3304d67043ddfceabac7d3be1d7191faab6622b1c",
-        "size_bytes": 163116
+        "sha256": "sha256:fe381fa05ea26927863aecf464b86c9e7eab2abf02102f7eab848d4042c909e2",
+        "size_bytes": 164130
       }
     },
     "blocker_reports": {
       "public_beta": {
         "path": "release-artifacts/latest/public-beta-blockers.md",
-        "sha256": "sha256:77a79eb04568e654934c6cc8d9a926aca53c1e96704a6e3356ed26c72bbf0f29",
-        "size_bytes": 11995
+        "sha256": "sha256:80d6d08bf28a3b5a8a0ffc87baa442c29bfdd77441ebfedbd98c3ef753f13e3c",
+        "size_bytes": 12614
       },
       "production_release": {
         "path": "release-artifacts/latest/production-release-blockers.md",
-        "sha256": "sha256:b0e55746f8ec9f7857706c75682868096bd14ed9e6aa0147bf9645ff63da275a",
-        "size_bytes": 9438
+        "sha256": "sha256:4e214dfdec869cd9b272fe32638c751db558d03b076094b9c23ad4d8da4c19fd",
+        "size_bytes": 9534
       }
     },
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:f109ed9561d09cebf3c502199c26ac4420db91521b2413a0d551e49769c0dccd",
-        "size_bytes": 74215,
+        "sha256": "sha256:d19f54ed7f6fea32e04aec443bf95c189bec1c9d2f45cb284df92806891debae",
+        "size_bytes": 76634,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-packet-index.md",
-        "sha256": "sha256:fdc94a96d30bd0972204bccc834cae31413377f4033b39cf5451e3bddb484a78",
-        "size_bytes": 34692
+        "sha256": "sha256:0dacfc76e9ded3dc47f401b4d4ace3a7af499519c01da0cb67460795c244dddc",
+        "size_bytes": 36636
       }
     },
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:63b96e9b1e379018062eedb75206945a6ce1d5fa2dab09ac4e7c46a3447374c9",
-        "size_bytes": 124588,
+        "sha256": "sha256:515717f30c9c6a3f4d826692e19f38216ba572bbf303600b743da52803a09e54",
+        "size_bytes": 127852,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.md",
-        "sha256": "sha256:08cb9d0a2216f826d6a404a51e917be2d9a117aafe88362cbe3983a01041d812",
-        "size_bytes": 78829
+        "sha256": "sha256:47d0a1a1494a346fe4c8f251c01321c0c213dff507ebde3ed5faa9dc6f83c1f3",
+        "size_bytes": 80617
       }
     },
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:c182015a64a01e78225d7feeba2ffa086ea6fd9df80606d3a3b3c9fba59960b1",
-        "size_bytes": 84653,
+        "sha256": "sha256:833a975ad2e37758de750cfc41b075c43e0e6e48fd4073a406ad9e23793b7803",
+        "size_bytes": 86177,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:cd572168dace4fee7fa4af1c9fee1e81322d521ed4c49379b67192538adcb551",
-        "size_bytes": 75155
+        "sha256": "sha256:842c07244d85c0f5cf65c1955d773fcad4a51c52581dbf9a23d09950e215f8eb",
+        "size_bytes": 76679
       }
     }
   },
@@ -262,28 +262,28 @@
   },
   "signed_tag_gate": {
     "status": "not_locked_until_signed_release_tag",
-    "release_mode_command": "python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json"
+    "release_mode_command": "python -m tools.release.check_signed_release_tag --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json"
   },
   "validation": {
     "commands": [
-      "python scripts/test_release_candidate_lockfile.py",
-      "python scripts/generate_release_candidate_lockfile.py --check",
-      "python scripts/test_release_manifest.py",
-      "python scripts/generate_release_manifest.py --check",
-      "python scripts/test_governed_parameter_inventory.py",
-      "python scripts/check_governed_parameter_inventory.py",
-      "python scripts/test_record_family_authorization.py",
-      "python scripts/check_record_family_authorization.py",
-      "python scripts/test_artist_semantic_owner_matrix.py",
-      "python scripts/check_artist_semantic_owner_matrix.py",
-      "python scripts/test_bytecode_release_proof.py",
-      "python scripts/generate_bytecode_release_proof.py --check",
-      "python scripts/test_release_checksums.py",
-      "python scripts/generate_release_checksums.py --check",
-      "python scripts/test_verify_release_artifacts.py",
-      "python scripts/verify_release_artifacts.py",
-      "python scripts/check_release_signatures.py",
-      "python scripts/check_signed_release_tag.py"
+      "python -m tools.release.test_release_candidate_lockfile",
+      "python -m tools.release.generate_release_candidate_lockfile --check",
+      "python -m tools.release.test_release_manifest",
+      "python -m tools.release.generate_release_manifest --check",
+      "python -m tools.protocol.test_governed_parameter_inventory",
+      "python -m tools.protocol.check_governed_parameter_inventory",
+      "python -m tools.protocol.test_record_family_authorization",
+      "python -m tools.protocol.check_record_family_authorization",
+      "python -m tools.protocol.test_artist_semantic_owner_matrix",
+      "python -m tools.protocol.check_artist_semantic_owner_matrix",
+      "python -m tools.build.test_bytecode_release_proof",
+      "python -m tools.build.generate_bytecode_release_proof --check",
+      "python -m tools.release.test_release_checksums",
+      "python -m tools.release.generate_release_checksums --check",
+      "python -m tools.build.test_verify_release_artifacts",
+      "python -m tools.build.verify_release_artifacts",
+      "python -m tools.release.check_release_signatures",
+      "python -m tools.release.check_signed_release_tag"
     ]
   },
   "limitations": [

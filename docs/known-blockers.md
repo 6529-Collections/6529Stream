@@ -7,7 +7,11 @@ document conflicts with a specification home, the specification wins.
 
 
 This file summarizes the high-level blockers from `ops/ROADMAP.md` for
-contributors who start from the README.
+contributors who start from the README. The [current stack](current-stack.md)
+implements the working permanent-Core sale/auction flow; the items below also
+retain earlier regression and evidence history. Legacy drop contracts and their
+ledgers are not the current sale adapter. Full Artist V2/finality and production
+custody, audit and operational evidence remain distinct acceptance requirements.
 
 - The scoped Solidity formatting gate now passes for formatting-required
   first-party and provider/integration files and blocks any new unformatted
@@ -15,7 +19,7 @@ contributors who start from the README.
   `forge fmt --check smart-contracts` diagnostic still fails on 17
   vendored OpenZeppelin-style files; any change to that exemption set requires
   a focused provenance review and must not be mixed into behavior changes.
-- Drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
+- Legacy drop execution uses EIP-712 authorization for EOA and ERC-1271 contract
   signers, and no-secret local signing examples plus deterministic fixtures now
   live in [`docs/drop-authorization-signing.md`](drop-authorization-signing.md).
   The same guide links no-secret unsigned payload-generator templates for
@@ -29,13 +33,13 @@ contributors who start from the README.
   fork/testnet/live signing evidence contents, reviewed signer custody
   readiness evidence, and approved external signer integration still need to
   be completed or explicitly accepted before public beta.
-- Auction custody and settlement state-machine coverage now exists for ADR 0002:
+- Legacy auction custody and settlement state-machine coverage now exists for ADR 0002:
   auction NFTs are escrowed by the auction contract, no-bid and with-bid
   settlement are explicit, outbid refunds use bidder credits, and auction-local
   settlement proceeds use pull credits.
-- Fixed-price mints now record `StreamDrops` poster, protocol, and curator
-  reserve credits instead of pushing ETH during mint execution. Current local
-  ledgers now have fixed scenario coverage plus bounded sequence fuzz invariants
+- Legacy fixed-price mints record `StreamDrops` poster, protocol, and curator
+  reserve credits instead of pushing ETH during mint execution. Those local
+  ledgers have fixed scenario coverage plus bounded sequence fuzz invariants
   for owed totals, total-reserved aliases, surplus aliases, reserves, and
   emergency-withdrawable views. Broader shared ledger architecture or
   protocol-wide aggregation, plus richer randomizer reserve lifecycle
@@ -176,7 +180,7 @@ contributors who start from the README.
 - `StreamCore` now uses a linked metadata renderer library, inherits plain
   non-enumerable ERC-721 with no enumerable index storage, preserves a live
   `totalSupply()` view, and has an IR-optimized development size gate:
-  canonical isolated `python scripts/build_release_artifacts.py` output. The
+  canonical isolated `python -m tools.build.build_release_artifacts` output. The
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
   committed

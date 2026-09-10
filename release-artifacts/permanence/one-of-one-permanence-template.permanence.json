@@ -8,8 +8,8 @@
   "deployment_version": "anvil-6529stream-v0.1.0-001",
   "source": {
     "repository": "https://github.com/6529-Collections/6529Stream",
-    "git_commit": "e9ca329f0ea6ee3cc5d0c5650ddc0d98dee3d0a0",
-    "source_dirty": false,
+    "git_commit": "7b4ef22b052419e88d56cf7f207a7a7738dba7a7",
+    "source_dirty": true,
     "ci_run": "TBD"
   },
   "scope": {
@@ -31,7 +31,7 @@
     "renderer_source": {
       "category": "renderer_source",
       "path": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol",
-      "sha256": "sha256:3dafabf0509b0bc0d014c1f8eeba32e2f5a0b13d466e702d62e1c9af27016f1f"
+      "sha256": "sha256:e850aae6c96309d13166bf6da4df6e5a988a7dd3fd3605461a1ba526166e147f"
     },
     "rendering_mode": "animation_html",
     "runtime_assumptions": {
@@ -68,7 +68,7 @@
       {
         "category": "source_archive_file",
         "path": "docs/metadata.md",
-        "sha256": "sha256:7ca42c4ccc78e1717f6156d5728c02685638552d52b531810d206bba5aa00b0c"
+        "sha256": "sha256:9482855f98269c5beeb6c4bb8d0ab0134b01f38b062937f4e27999df37b3bc48"
       }
     ]
   },
@@ -77,12 +77,12 @@
     "replay_requires_network": false,
     "replay_commands": [
       {
-        "command": "python scripts/check_metadata_browser_sandbox.py",
+        "command": "python -m tools.protocol.check_metadata_browser_sandbox",
         "purpose": "Validate committed metadata browser sandbox fixtures before using final-drop package evidence.",
         "working_directory": "."
       },
       {
-        "command": "python scripts/check_one_of_one_permanence_package.py",
+        "command": "python -m tools.protocol.check_one_of_one_permanence_package",
         "purpose": "Validate permanence package descriptor structure, hashes, no-secret policy, and reviewed-evidence boundaries.",
         "working_directory": "."
       }
@@ -177,7 +177,7 @@
     {
       "category": "permanence_runbook",
       "path": "docs/permanence-packages.md",
-      "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6"
+      "sha256": "sha256:aa9a2ece27520528ace78338bccfa5c061fa09a201d2062a6b24ee2065ecb167"
     },
     {
       "category": "dependency_artifact_manifest",
@@ -203,5 +203,5 @@
     ]
   },
   "template_notice": "Template only. This file is not completion evidence.",
-  "operator_notes": "No-secret local template for collector-verifiable permanence package requirements."
+  "operator_notes": "No-secret local template for collector-verifiable permanence package requirements. Current references were refreshed after source reorganization; this is not a historical capture or reviewed replay."
 }

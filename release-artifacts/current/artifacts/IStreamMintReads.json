@@ -1,0 +1,1485 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "core",
+      "outputs": [
+        {
+          "internalType": "contract IStreamCore",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "counterConfig",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "enum IStreamMintManager.CounterKeyMode",
+              "name": "keyMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintCounterConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isAuthorizationUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nullifier",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isNullifierUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "name": "isOperationRootUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isStreamMintManager",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mintLedger",
+      "outputs": [
+        {
+          "internalType": "contract IStreamMintLedger",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "moduleRegistry",
+      "outputs": [
+        {
+          "internalType": "contract IERC165",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextOperationNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "phase",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "paused",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxBatchQuantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "configHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintPhaseConfig",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "phaseCounterIds",
+      "outputs": [
+        {
+          "internalType": "bytes32[]",
+          "name": "",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "name": "phaseExecutor",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "phaseGate",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "gate",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateCodehash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateMetadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "gateSemanticVersion",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "gateGasLimit",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintGateConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "phasePolicyGrace",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "previousPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint64",
+          "name": "graceUntil",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "phasePolicyHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "subjectKey",
+          "type": "bytes32"
+        }
+      ],
+      "name": "previewCounterValueKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "initialRecipients",
+              "type": "address[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "beneficiaries",
+              "type": "address[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "tokenData",
+              "type": "bytes[]"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "mintCommitments",
+              "type": "bytes32[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes",
+              "name": "resolverData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintBatch",
+          "name": "batch",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "gateData",
+          "type": "bytes"
+        }
+      ],
+      "name": "previewSingleStepMintOperation",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "operationIds",
+          "type": "bytes32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum IStreamMintManager.CounterKeyMode",
+          "name": "keyMode",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "authorizer",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "contextHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "previewSubjectKey",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [],
+          "name": "core",
+          "outputs": [
+            {
+              "internalType": "contract IStreamCore",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "counterConfig",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "enabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterCapMode",
+                  "name": "capMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+                  "name": "deltaMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticIncrement",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintCounterConfig",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isAuthorizationUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "nullifier",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isNullifierUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "name": "isOperationRootUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isStreamMintManager",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "mintLedger",
+          "outputs": [
+            {
+              "internalType": "contract IStreamMintLedger",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "moduleRegistry",
+          "outputs": [
+            {
+              "internalType": "contract IERC165",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "nextOperationNonce",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phase",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxBatchQuantity",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintPhaseConfig",
+              "name": "config",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phaseCounterIds",
+          "outputs": [
+            {
+              "internalType": "bytes32[]",
+              "name": "",
+              "type": "bytes32[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            }
+          ],
+          "name": "phaseExecutor",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phaseGate",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "gate",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateCodehash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateMetadataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "gateSemanticVersion",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "gateGasLimit",
+                  "type": "uint32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintGateConfig",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phasePolicyGrace",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "previousPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "graceUntil",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "phasePolicyHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "subjectKey",
+              "type": "bytes32"
+            }
+          ],
+          "name": "previewCounterValueKey",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "authorizer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "initialRecipients",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "beneficiaries",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "bytes[]",
+                  "name": "tokenData",
+                  "type": "bytes[]"
+                },
+                {
+                  "internalType": "bytes32[]",
+                  "name": "mintCommitments",
+                  "type": "bytes32[]"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "authorizationId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "contextHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "resolverData",
+                  "type": "bytes"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintBatch",
+              "name": "batch",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "gateData",
+              "type": "bytes"
+            }
+          ],
+          "name": "previewSingleStepMintOperation",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "operationIds",
+              "type": "bytes32[]"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "enum IStreamMintManager.CounterKeyMode",
+              "name": "keyMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "authorizer",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "contextHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "previewSubjectKey",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI at the manager address. Use IStreamMintManager for ERC165      discovery and canonical nested request types; subset IDs are not advertised.",
+        "kind": "dev",
+        "methods": {
+          "previewSingleStepMintOperation((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "details": "Matches execution only while the nonce, phase policy/grace, and gate result stay unchanged."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "core()": {
+            "notice": "Permanent Core to which this manager allocates tokens."
+          },
+          "counterConfig(uint256,bytes32,bytes32)": {
+            "notice": "Returns one manager-side counter config."
+          },
+          "isAuthorizationUsed(bytes32)": {
+            "notice": "Returns manager-scoped authorization replay state independent of the caller."
+          },
+          "isNullifierUsed(bytes32)": {
+            "notice": "Returns manager-scoped nullifier replay state independent of the caller."
+          },
+          "isOperationRootUsed(bytes32)": {
+            "notice": "Returns manager-scoped operation-root replay state independent of the caller."
+          },
+          "isStreamMintManager()": {
+            "notice": "Returns true for deployment validation."
+          },
+          "mintLedger()": {
+            "notice": "Durable replay and counter ledger used by this manager."
+          },
+          "moduleRegistry()": {
+            "notice": "Canonical or compatibility module registry used for gate admission."
+          },
+          "nextOperationNonce()": {
+            "notice": "Returns the first unreserved manager operation nonce."
+          },
+          "phase(uint256,bytes32)": {
+            "notice": "Returns immutable phase config plus existence."
+          },
+          "phaseCounterIds(uint256,bytes32)": {
+            "notice": "Returns the ordered counter IDs for a phase."
+          },
+          "phaseExecutor(uint256,bytes32,address)": {
+            "notice": "Returns whether an executor may call a phase."
+          },
+          "phaseGate(uint256,bytes32)": {
+            "notice": "Returns one phase's optional gate config."
+          },
+          "phasePolicyGrace(uint256,bytes32)": {
+            "notice": "Returns the immediate predecessor policy and its grace expiry."
+          },
+          "phasePolicyHash(uint256,bytes32)": {
+            "notice": "Returns the active manager policy hash for a phase."
+          },
+          "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)": {
+            "notice": "Previews the canonical ledger value key for a derived subject."
+          },
+          "previewSingleStepMintOperation((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": {
+            "notice": "Previews the single-step identity transcript for the current manager state."
+          },
+          "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)": {
+            "notice": "Previews the manager-derived subject key for one token/counter context."
+          }
+        },
+        "notice": "Manager bindings, phase policy, replay state, counters, and operation previews.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/mint/IStreamMintReads.sol": "IStreamMintReads"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/standards/IERC7572.sol": {
+        "keccak256": "0x815f8122b984a4ae5593e49464ff3a80fee96c86da7566cb15b9c1e8accb655b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://a3449caa1c13b4a4e232eaaabc8c91d529e704894223831d32732157c2571c96",
+          "dweb:/ipfs/QmRXi692uqvqj7nMJwcRGdC4Y3zKV8QjCWfYE6QfCw9Js6"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCore.sol": {
+        "keccak256": "0xb28dd68ea50bf59296d5d8ce05145d2ce419e900c8a20dd029a70f783a35c5cb",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://34ced37128905c5213e7c26539b3d72057e7b404d87ea9f93039068eef733e6b",
+          "dweb:/ipfs/QmQFNVZzKqrfnSJFuNYYPYdxVM9ha25YYxGj49h4rVjghd"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreBurn.sol": {
+        "keccak256": "0x7573906d25ad73af7885d7c6653e0f9ba2389034a2b3e90cda0b92d142e8976b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://7a4697efe627df212051c9496407c61e9a691fb4f1b7e91e706b59b8b9bc00e5",
+          "dweb:/ipfs/QmciDrhn2ng9aczDqy5NxsRww5xnmxu8roTpzprdYcrUJc"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreCollectionManagement.sol": {
+        "keccak256": "0x669418d474dca76833d6428f47abdd7d2140f99563b0128787b6c6a984184ce5",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://8e4ae01c6514c6ca0c0376ee08bb3848e061909016d800793bee46ca1b685df9",
+          "dweb:/ipfs/QmcheVPWBzFQj76s9MiFXwYqmEnfmmW6NeZGwJrgb8sgUH"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreCollectionView.sol": {
+        "keccak256": "0xc6b46969527d2c5146106138586e9700857f0a83d9065587f9eca1f7fe7c6560",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://888c054ea33f88260ec76d36e697c9462e7b445aac440d989427482f30320c17",
+          "dweb:/ipfs/QmXsjmt6BBbVChvrxAcTKpYrHRR8oxqcd6AtGaFNCwfHET"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreEnumeration.sol": {
+        "keccak256": "0x6427e30ccdc827854c8b16a0f7fa2012b2927cd0f50252376ee658c7d5a08183",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://f8137db75162e63f6965d9a34b2d3e04063dfc36cece7194a235b804eb5b7056",
+          "dweb:/ipfs/QmewGGcXgqJQMLXb7RCw6u6YvD51Eu6CmiZYGuiXx8EyU4"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol": {
+        "keccak256": "0xf8429a05994ad571fd72e70203fb642028a3270661c20ae41741a144e3308889",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b3191cf83b0b1d76677a10a56ca8d7efe225fda0b4a882ad08e88b001dbc9f47",
+          "dweb:/ipfs/QmUuFomWv5gfByZGwe2G1NMJMKfvK8XgfvWVTAD5rRfxKL"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": {
+        "keccak256": "0x710958fbeae0efa716f445630f8f4bcb963f826546bdcbc54ff646ee9a20da62",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://60f09cd3894bdcc3cb6f547acacafb2dc5ef10717e5b6e5fe00ebd15b518d808",
+          "dweb:/ipfs/QmTbt2EjzgEo3o63H5Bf6bFSoPpTL7CEyYM59iuHu8XE4e"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreMetadataEmitters.sol": {
+        "keccak256": "0x3a6937f2ef05829c763bca8150cef1cbd38013667828df2a2c611003a2341a26",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://d536810a5f460d77b6a155d71c658353653dd74f7dffc45cfded637d2061c2c2",
+          "dweb:/ipfs/QmSYwHTWyDDhk2CbswKWYMRtE7xLzEaC8QAvAfbHTDeevv"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCoreMint.sol": {
+        "keccak256": "0x17eda017b0bdff553f0f28671ea2e3957583c3dab5363a366c6b56a8472e5e03",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1ac287b96afffb3aa0fab790b90ed922e1f81f564e74d7836c9e986cdd423de8",
+          "dweb:/ipfs/Qmaas7p6Kpxzu9oGPbGkmCfUoRax46ALxNSvtxrJg1ZPBM"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol": {
+        "keccak256": "0x41f689d0317767abb933d3de8f54fc13002da9da8757242b925a2635e130cd79",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://253ee168d58ac6e651073bfe87744542298e1b7a1a6cfd7f9acae335994c5118",
+          "dweb:/ipfs/QmSmD8kqa95gZc5isNRAHP2MqWsm212XMEWeJUNs6WR9Jo"
+        ]
+      },
+      "smart-contracts/interfaces/stream/core/StreamCoreTypes.sol": {
+        "keccak256": "0xda7dcfb09a364ed19b904ba56a341c1c0af80648fdeab54c4d0866f3e7de20ac",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ec2ce519990a65835bbfb67f312577d50f220723a99626f8fd42264309bdf919",
+          "dweb:/ipfs/QmPcMWtiJVKHX4gPhaUPE3QfirCyY5bgwYGekRF8Qw5MrQ"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol": {
+        "keccak256": "0xdc4436195f131e3132813a8dba6b440e379c78480c88a69847080642b2f0d3fa",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://094d2ea7f54998f9317cafd72d46390eb710040f4f5f101cc89e89411b234ad2",
+          "dweb:/ipfs/Qmed4WwaxJzEwvtyh5s7k2gBJnFDqyfq2WEPJkBdSAtKNA"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintReads.sol": {
+        "keccak256": "0x8a5e3c126b28da0ac28038748662c836db42b72b41384bc68f3bc30976d3b692",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://a7a229cd255a51b09d012e7d80d43ea6d07d67b31f9ff4ee797651f85223af14",
+          "dweb:/ipfs/QmUaSKD7xcLTabxbGmZ6CnFj8GdvTRV5S8wKRF36SaTb8C"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol": {
+        "keccak256": "0x334079e7024d83c9313a781fc85d9e49438a9c4634d023f9477a9f3c31e3b576",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://531387a5003283f7695ea8aa75bcebbfc4da3ad1ed4711dbea135ecbb35d49b7",
+          "dweb:/ipfs/QmPUU2W1W5BAnhmg9MSkaPmcMEXD41dQTaBJBWgnpHVqXH"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC2981.sol": {
+        "keccak256": "0x6bead664473e3954487f80da3fcca7d4793d125c87fe708968ab806638a3eeda",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://6abe68e9fbb292fc8abb261649377825831830e44ac9125f860647b63e561895",
+          "dweb:/ipfs/QmZpWpiVx3pa6gQ4zapRp8mKnFUz9b1mMNTabbN4xepvSy"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC721.sol": {
+        "keccak256": "0x9abd6072a984ac217daf3ab14a47822b5042b4203499c349e38d460b11d3253b",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://4ad9f735077d7c9a7abdc3e5711be994a5f39af2e57c8f7309264941b786915b",
+          "dweb:/ipfs/QmNgyLpFYb6jTXyBumhQcnrj7f2WWKqcgFEhkejzrscGvb"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC721Metadata.sol": {
+        "keccak256": "0x770bb92d2bb1a0c7857e4c3a6e2295cd6adf4854aafb1467c5d881965645a381",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://ad3686f5926e6ec6c8714f713f8dc180962e94c85f63527972be8663fb6b4f1b",
+          "dweb:/ipfs/QmVsrqQopTPwAicXW8pCkoWqbF5w1b56kR2JQxDRRdJNtF"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "core()": "f2f4eb26",
+    "counterConfig(uint256,bytes32,bytes32)": "2e19907b",
+    "isAuthorizationUsed(bytes32)": "14335b8d",
+    "isNullifierUsed(bytes32)": "22dc7b4c",
+    "isOperationRootUsed(bytes32)": "12837042",
+    "isStreamMintManager()": "47588f68",
+    "mintLedger()": "7786e390",
+    "moduleRegistry()": "b95459e4",
+    "nextOperationNonce()": "37f8eaa5",
+    "phase(uint256,bytes32)": "0bce32df",
+    "phaseCounterIds(uint256,bytes32)": "489a0ae5",
+    "phaseExecutor(uint256,bytes32,address)": "84fd1d05",
+    "phaseGate(uint256,bytes32)": "4c7fc533",
+    "phasePolicyGrace(uint256,bytes32)": "1f90e95c",
+    "phasePolicyHash(uint256,bytes32)": "d3285f9c",
+    "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)": "37315649",
+    "previewSingleStepMintOperation((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)": "a5651f13",
+    "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)": "bb08032d"
+  }
+}

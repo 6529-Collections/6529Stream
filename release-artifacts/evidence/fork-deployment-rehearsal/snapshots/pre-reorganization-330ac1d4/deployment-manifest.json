@@ -1,0 +1,316 @@
+{
+  "manifest_schema_version": "6529stream.deployment-manifest.v1",
+  "protocol_version": "0.1.0",
+  "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+  "lifecycle_state": "Rehearsed",
+  "network": {
+    "name": "fork-mainnet",
+    "chain_id": 1,
+    "rpc_environment_variable": "FORK_MAINNET_RPC_URL",
+    "confirmation_depth": 0
+  },
+  "git": {
+    "repository": "https://github.com/6529-Collections/6529Stream",
+    "commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
+    "source_dirty": false
+  },
+  "toolchain": {
+    "foundry_version": "v1.7.1",
+    "solidity_version": "0.8.19",
+    "profile": "default",
+    "optimizer": true,
+    "optimizer_runs": 200,
+    "via_ir": true
+  },
+  "contracts": {
+    "StreamAdmins": {
+      "address": "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000006532"
+      ],
+      "abi_hash": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+      "bytecode_hash": "sha256:349796dbed7890e01e49c3265338fb8234713c740599cc1db802628ac095fdde",
+      "verification_status": "not_applicable"
+    },
+    "DependencyRegistry": {
+      "address": "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f",
+      "constructor_args": [
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f"
+      ],
+      "abi_hash": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "bytecode_hash": "sha256:3796548faef9617e5f3681430a62cbdaa4b07b3be5f240a04957cd71d1a19b12",
+      "verification_status": "not_applicable"
+    },
+    "StreamCore": {
+      "address": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+      "constructor_args": [
+        "6529 Stream",
+        "STREAM",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f"
+      ],
+      "abi_hash": "sha256:05703cd2b2f198de9457c8ee41533fe72412f04b7db63e5cb80836c469309650",
+      "bytecode_hash": "sha256:7ba4e8220c54374644e3aa27112007395a75bec70aebfb0ca5dbd2dba1e69525",
+      "verification_status": "not_applicable"
+    },
+    "StreamContractMetadata": {
+      "address": "0x200000000000000000000000000000000000000a",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "ipfs://6529stream-contract-metadata/rehearsal.json"
+      ],
+      "abi_hash": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
+      "bytecode_hash": "sha256:f9296d8a77b8efebaa06a5011153bdf6809a32ed57fa663d543bb5faa899e28f",
+      "verification_status": "not_applicable"
+    },
+    "StreamCollectionMetadata": {
+      "address": "0x2000000000000000000000000000000000000011",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "abi_hash": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "bytecode_hash": "sha256:7b902e9b1478d7292fe91b5d29c46ffc12c0e7f40ca842197f3f7140f1a09404",
+      "verification_status": "not_applicable"
+    },
+    "StreamPreservationRecords": {
+      "address": "0x2000000000000000000000000000000000000012",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x2000000000000000000000000000000000000011",
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "abi_hash": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
+      "bytecode_hash": "sha256:3b16acb80dfd545c9cf14762c988f8a40fc00fc69d9ec6f7d5a02b99d913c5de",
+      "verification_status": "not_applicable"
+    },
+    "StreamCuratorsPool": {
+      "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
+      "constructor_args": [
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x0000000000000000000000000000000000006534"
+      ],
+      "abi_hash": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+      "bytecode_hash": "sha256:f2590f6e0081805a89a0755fb5862e07ec1a0ca2561864317c0a648df5e7ce48",
+      "verification_status": "not_applicable"
+    },
+    "StreamMinter": {
+      "address": "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "abi_hash": "sha256:94a10370fb1f1630b651afbbd287fb5df4b43743397aa1bcdc7f2745416405d0",
+      "bytecode_hash": "sha256:df9cd52f9bcb4ee809e9599c47bfd04928078ad2c051d6bc75c4818dccff4499",
+      "verification_status": "not_applicable"
+    },
+    "StreamDrops": {
+      "address": "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
+      "constructor_args": [
+        "0x0000000000000000000000000000000000006532",
+        "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x0000000000000000000000000000000000006533",
+        "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d"
+      ],
+      "abi_hash": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
+      "bytecode_hash": "sha256:b38c8314502ffdbfc8eacca26e12a0060db8c4be11cf1ec307b8a19da45bc1b3",
+      "verification_status": "not_applicable"
+    },
+    "StreamAuctions": {
+      "address": "0x0192b664e3c73416451f23c0c361c4ff1dd385fa",
+      "constructor_args": [
+        "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
+        "0x0000000000000000000000000000000000006533",
+        "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d"
+      ],
+      "abi_hash": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
+      "bytecode_hash": "sha256:22a525e5e15be0ef0c4d7c23bfd514c87640f41f1a7f59b156c4130de74ea635",
+      "verification_status": "not_applicable"
+    },
+    "NextGenRandomizerVRF": {
+      "address": "0x9e3b3fd0017753ceb467036cf605a94660aae126",
+      "constructor_args": [
+        6529,
+        "0x0000000000000000000000000000000000006535",
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f"
+      ],
+      "abi_hash": "sha256:636e3f5e843baeb408876e37a2eed422488e7b54eec6dea48bc3088aa60942c1",
+      "bytecode_hash": "sha256:d4c21bfad1e79e01b7ba51e37e1e9472f22a3a8bc2922d309eef6dd74c70655c",
+      "verification_status": "not_applicable"
+    },
+    "NextGenRandomizerRNG": {
+      "address": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+        "0x0000000000000000000000000000000000006536"
+      ],
+      "abi_hash": "sha256:3dcea39be05680867eae1e42a5f57f0c7cffe20ef714f468ad0a5718aad23a4d",
+      "bytecode_hash": "sha256:186991193969a33bbd158f7a2ae520385680e1ced335aa3701085a6309ec1582",
+      "verification_status": "not_applicable"
+    },
+    "StreamAssetPolicyRegistry": {
+      "address": "0x200000000000000000000000000000000000000b",
+      "constructor_args": [],
+      "abi_hash": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "bytecode_hash": "sha256:c7de8e8dcba09321cc8f043c84796bfa77c13e0964afbcd0471ad0e300119057",
+      "verification_status": "not_applicable"
+    },
+    "StreamSplitFactory": {
+      "address": "0x200000000000000000000000000000000000000c",
+      "constructor_args": [
+        "0x200000000000000000000000000000000000000b"
+      ],
+      "abi_hash": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
+      "bytecode_hash": "sha256:84a2bd32a62f86f5e426165c6b359e81f0eab0159320e971de589c4b8f8518a6",
+      "verification_status": "not_applicable"
+    },
+    "StreamRevenueResolver": {
+      "address": "0x200000000000000000000000000000000000000d",
+      "constructor_args": [
+        "0x200000000000000000000000000000000000000c"
+      ],
+      "abi_hash": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
+      "bytecode_hash": "sha256:caea8a0ced7fa0f2e5e4fe1c4470bcfe6db4206c7b22d8f82ea67798eb677e84",
+      "verification_status": "not_applicable"
+    },
+    "StreamPrimarySaleSettlement": {
+      "address": "0x200000000000000000000000000000000000000e",
+      "constructor_args": [
+        "0x200000000000000000000000000000000000000d"
+      ],
+      "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+      "bytecode_hash": "sha256:c5de2cfdc43bbdbfccd2dad6056b526f3626152d8cf8caa0f207eb8949c841d7",
+      "verification_status": "not_applicable"
+    },
+    "StreamMintLedger": {
+      "address": "0x200000000000000000000000000000000000000f",
+      "constructor_args": [],
+      "abi_hash": "sha256:2210b16797bc48c2ded18997e9e5f694c773cf3df2e586a3be170c556b375d2d",
+      "bytecode_hash": "sha256:915f5bd4c4271ad3df4dce829364df75969e39f2480a957dbf6d03e2851f73ea",
+      "verification_status": "not_applicable"
+    },
+    "StreamMintModuleRegistry": {
+      "address": "0x2000000000000000000000000000000000000013",
+      "constructor_args": [],
+      "abi_hash": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
+      "bytecode_hash": "sha256:0a5829b191135bd87496225abe75e7659f83a564aac96839be84d697ac6fbc9d",
+      "verification_status": "not_applicable"
+    },
+    "StreamMintManager": {
+      "address": "0x2000000000000000000000000000000000000010",
+      "constructor_args": [
+        "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+        "0x200000000000000000000000000000000000000f",
+        "0x2000000000000000000000000000000000000013"
+      ],
+      "abi_hash": "sha256:a3bc4c6c1c51b7fb377b6d9d01207cf58c2e3c3eb61dbcc26bba9b485b099147",
+      "bytecode_hash": "sha256:14b9b4586b96b9a7335a6bbcbbbc290e3695fe9a06aad6f7369fbe0ec212e135",
+      "verification_status": "not_applicable"
+    }
+  },
+  "admin_ceremony": {
+    "deployer": "0x0000000000000000000000000000000000006537",
+    "admin_safe": "0x0000000000000000000000000000000000006529",
+    "emergency_recipient": "0x0000000000000000000000000000000000006531",
+    "pause_guardians": [
+      "0x0000000000000000000000000000000000006530"
+    ],
+    "unpause_admins": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "signer_managers": [
+      "0x0000000000000000000000000000000000006529"
+    ],
+    "drop_signers": [
+      "0x0000000000000000000000000000000000006532"
+    ],
+    "temporary_admins_revoked": true,
+    "ownership_transfers": [
+      {
+        "contract": "StreamAdmins",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamCore",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamAssetPolicyRegistry",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamRevenueResolver",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamPrimarySaleSettlement",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamMintLedger",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamMintModuleRegistry",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamMintManager",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      }
+    ]
+  },
+  "external_dependencies": {
+    "vrf_coordinator": "0x0000000000000000000000000000000000006535",
+    "arrng_controller": "0x0000000000000000000000000000000000006536",
+    "delegation_registry": "0x0000000000000000000000000000000000006534"
+  },
+  "verification": {
+    "contract_verification": "not_applicable",
+    "constructor_args_retained": true,
+    "commands": [
+      "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir"
+    ]
+  },
+  "release_artifacts": {
+    "manifest_sha256": "sha256:6081b5afcd349eed3f4b712c7387921de9593c1c1461e08cf6fd6f84db13c711",
+    "abi_hashes": {
+      "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
+      "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
+      "StreamCore": "sha256:05703cd2b2f198de9457c8ee41533fe72412f04b7db63e5cb80836c469309650",
+      "StreamContractMetadata": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
+      "StreamCollectionMetadata": "sha256:a8554de04461874ebf2a9b0960a61cc8ebe0c870749e6edd2a3bed0280959ed3",
+      "StreamPreservationRecords": "sha256:a28428641b46b007263200ae512b45847c9f26719ae7edb9df449f901adbf894",
+      "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
+      "StreamMinter": "sha256:94a10370fb1f1630b651afbbd287fb5df4b43743397aa1bcdc7f2745416405d0",
+      "StreamDrops": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
+      "StreamAuctions": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
+      "NextGenRandomizerVRF": "sha256:636e3f5e843baeb408876e37a2eed422488e7b54eec6dea48bc3088aa60942c1",
+      "NextGenRandomizerRNG": "sha256:3dcea39be05680867eae1e42a5f57f0c7cffe20ef714f468ad0a5718aad23a4d",
+      "StreamAssetPolicyRegistry": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "StreamSplitFactory": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
+      "StreamRevenueResolver": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
+      "StreamPrimarySaleSettlement": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+      "StreamMintLedger": "sha256:2210b16797bc48c2ded18997e9e5f694c773cf3df2e586a3be170c556b375d2d",
+      "StreamMintModuleRegistry": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
+      "StreamMintManager": "sha256:a3bc4c6c1c51b7fb377b6d9d01207cf58c2e3c3eb61dbcc26bba9b485b099147"
+    },
+    "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
+  },
+  "rehearsal": {
+    "command": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \\\"run()\\\" --rpc-url <redacted local anvil fork> --broadcast --unlocked --via-ir",
+    "anvil_passed": true,
+    "fork_passed": true,
+    "notes": "Generated from a sanitized Foundry broadcast fixture. The fixture contains public deployment evidence only; it is not a live production broadcast."
+  }
+}

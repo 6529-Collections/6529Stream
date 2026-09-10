@@ -1,277 +1,130 @@
-# First 30 Minutes
+# Setup and your first run
 
-This guide is the fresh-contributor path for 6529Stream. It turns a new
-checkout into a useful local validation run without production secrets and
-without overstating what the current repository proves.
-
-6529Stream is pre-audit and not production-ready. The local gate proves that
-the checked build, tests, scripts, documentation validators, release artifact
-generators, and deployment rehearsals can execute from this checkout. It does
-not prove protocol correctness, public-beta readiness, production readiness, or
-external audit completion.
-
-## What This Guide Proves
-
-A successful first-30-minutes run proves:
-
-- the pinned Foundry, Solidity, Python, and optional Slither expectations are
-  visible to a new contributor;
-- `forge build`, `forge test -vvv`, and the canonical local gate can run;
-- Windows contributors have a PowerShell wrapper instead of needing a Unix
-  `make` environment;
-- known warning noise is documented before a contributor mistakes it for a new
-  failure;
-- generated artifact drift is visible before a PR reaches CI;
-- docs-only and Solidity/test contributors can choose the smallest honest
-  validation path for their change.
-
-This guide does not authorize production drops, live deployment, private key
-use, release signing, signer custody, or external audit claims. Those gates are
-tracked in [docs/status.md](status.md), [docs/release-readiness.md](release-readiness.md),
-[docs/known-blockers.md](known-blockers.md), [ops/ROADMAP.md](../ops/ROADMAP.md),
-and [ops/EXECUTION_BACKLOG.md](../ops/EXECUTION_BACKLOG.md).
+This guide gets a contributor into the **current** Stream implementation. It is
+the repository's first-30-minutes orientation, not a promise that a cold compiler
+run finishes in thirty minutes. Stream remains pre-audit and not production-ready.
 
 ## Prerequisites
 
-Install or verify:
+- Git and Foundry **v1.7.1** (`forge`, `cast`, and `anvil`).
+- Solidity **0.8.19**, downloaded/resolved by Foundry from the checked configuration.
+- Python **3.12** is required by the developer CLI. For CI parity use
+  **3.12.13 on Linux** or **3.12.10 on Windows**.
+- PowerShell 7 (`pwsh`) for the supplied local transaction-demo helper. Build and
+  test commands themselves work from any ordinary shell.
 
-- Git.
-- Foundry `v1.7.1`, with `forge` and `cast` available either on `PATH` or under
-  the normal Foundry install directory.
-- Solidity compiler `0.8.19`, resolved through Foundry for this repo.
-- Python 3.8 or newer.
-- PowerShell for Windows local checks.
-- Slither `0.11.5` only when you need static-analysis parity with the reviewed
-  baseline.
+Clone the repository and check the tools:
 
-Bootstrap helpers are available for common local setup:
-
-```bash
-bash scripts/bootstrap-ec2.sh
-```
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
-```
-
-The bootstrap helpers are convenience setup, not a substitute for reading the
-current tool expectations in [docs/tooling.md](tooling.md).
-
-## Clone And Verify Tools
-
-Clone the repository and enter the checkout:
-
-```bash
+```text
 git clone https://github.com/6529-Collections/6529Stream.git
 cd 6529Stream
-```
-
-Verify the tools before running the full gate:
-
-```bash
 forge --version
 python --version
+python scripts/dev.py doctor
 ```
 
-On Linux and macOS, `python3 --version` may be the available command instead:
+If Foundry is missing, follow the official [Foundry installation guide](https://getfoundry.sh/introduction/installation/) to obtain `foundryup`, or install the
+matching v1.7.1 release binaries for your platform. Then select the pinned toolchain
+with `foundryup --install 1.7.1`. On Windows use a supported installer shell or the
+native release binaries; do not paste POSIX shell commands into PowerShell.
 
-```bash
-python3 --version
+If Foundry is installed but `forge` is not on `PATH`, add your user Foundry `bin`
+directory and reopen the shell. It is usually `~/.foundry/bin`, or
+`$env:USERPROFILE + "\.foundry\bin"` on Windows. With the upstream installer
+available, select the pinned toolchain using `foundryup --install 1.7.1`.
+`foundryup --version` reports the installer version; it does not install Foundry.
+
+For the complete Python toolchain, use a virtual environment and the hashed lock:
+
+```text
+python -m venv .venv-tools
 ```
 
-If `forge` is not on `PATH`, install or update Foundry and reopen the shell:
+Activate it with `source .venv-tools/bin/activate` on a POSIX shell or
+`.venv-tools\Scripts\Activate.ps1` on PowerShell, then:
 
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-foundryup --version v1.7.1
+```text
+python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+python -m pip check
 ```
 
-Review the upstream installer before piping it into a shell, or use the
-installation method already approved by your development environment.
+The bootstrap scripts are optional machine-setup conveniences. Read them before
+running; they are not needed when these tools are already installed. See
+[toolchain reference](reference/tooling/toolchain.md) for the exact release setup.
 
-On Windows, also check the normal Foundry user-bin directory if the shell cannot
-find `forge`:
+## Build and test the current product
 
-```powershell
-$env:USERPROFILE + "\.foundry\bin"
+```text
+python scripts/dev.py build
+python scripts/dev.py test
 ```
 
-The repository `Makefile` prepends the usual Foundry install directory for
-local gates, but a fresh contributor should still be able to explain which
-Foundry version they are using in a PR.
+The commands select the `current` Foundry profile without leaving a persistent
+`FOUNDRY_PROFILE` in your shell. The integration suite constructs the real Core,
+executor, registry, and product contracts; it checks paid minting, auctions,
+entropy, metadata, revenue, and governance after genesis. It uses a controlled
+external randomness provider, not live Chainlink in the test process.
 
-## Run The Local Gate
+A first optimized build can take tens of minutes on a new machine. Once cached,
+use a filter while iterating:
 
-Start with the direct Foundry smoke commands when diagnosing setup:
-
-```bash
-forge build
-forge test -vvv
+```text
+python scripts/dev.py test --match-contract StreamCurrentStackTest
 ```
 
-Then run the canonical local gate:
+Use the [test guide](../test/README.md) for domain suites and the historical
+regression boundary. Do not interpret a pass using `LegacyStreamCore` as proof
+of the current Core integration.
 
-```bash
-make check
+## Run a complete local transaction flow
+
+In a separate terminal, start Anvil:
+
+```text
+anvil --port 8547 --chain-id 31337
 ```
 
-On Windows PowerShell, run the checked wrapper:
+Then run the supplied demo from the repository root:
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1
+```text
+pwsh -NoProfile -File scripts/run-current-stack.ps1 -RpcUrl http://127.0.0.1:8547
 ```
 
-The Windows wrapper exists so Windows contributors do not need to prove a Unix
-`make` environment before they can prove the repository gate. The Unix shell
-entrypoint is [scripts/check.sh](../scripts/check.sh), and the PowerShell
-entrypoint is [scripts/check.ps1](../scripts/check.ps1).
+This uses Anvil's public unlocked development accounts. It deploys the actual
+stack, accepts the artist, buys a token, completes development entropy, exports
+metadata/artwork, releases split shares, and transfers the NFT. The helper prints
+its output location. The local provider is deterministic development tooling;
+it is not secure randomness. See [deployment](../script/current/README.md) for
+the output schema, offline simulation, and separate Sepolia/VRF requirements.
 
-## Choose A Contribution Path
+## Choose validation for your change
 
-For docs-only changes, run the checker for the document you touched, then run
-the shared documentation and release-impact checks:
+| Change | During iteration | Before handoff |
+| --- | --- | --- |
+| Documentation | `python scripts/dev.py docs` | Check linked code, executable commands, and current/legacy labels |
+| Contract or test | Filter the affected suite | `python scripts/dev.py check`, plus affected domain tests |
+| Release/compiler/evidence inputs | Focused checker or generator check mode | `python scripts/dev.py release` after the implementation stabilizes |
 
-```bash
-python scripts/test_first_30_minutes.py
-python scripts/check_first_30_minutes.py
-python scripts/test_readme.py
-python scripts/check_readme.py
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/check_changelog.py
-```
-
-For Solidity or Foundry test changes, run the relevant focused test, the direct
-Foundry smoke, and the size-sensitive gates:
-
-```bash
-forge test -vvv --match-path test/StreamCoreBurn.t.sol
-forge build
-forge test -vvv
-forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
-python scripts/run_forge_size_log.py --log cache/forge-size.log
-python scripts/check_contract_size_budget.py
-python scripts/check_core_bytecode_spend_policy.py
-```
-
-For release-artifact or generated-evidence changes, regenerate and check the
-affected artifacts in dependency order:
-
-```bash
-python scripts/generate_risk_register.py
-python scripts/generate_public_beta_blocker_report.py
-python scripts/generate_production_release_blocker_report.py
-python scripts/generate_release_notes.py
-python scripts/generate_release_manifest.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/generate_release_checksums.py
-```
-
-When in doubt, finish with `make check` or the Windows wrapper before opening
-a PR. Every PR should also update [CHANGELOG.md](../CHANGELOG.md) when it has
-release impact, setup impact, public docs impact, generated-artifact impact, or
-integration impact. The full contribution policy is in
-[CONTRIBUTING.md](../CONTRIBUTING.md).
-
-If you are opening an issue instead of a PR, use the checked GitHub forms for
-[integration reports](../.github/ISSUE_TEMPLATE/integration_report.yml),
-[audit findings](../.github/ISSUE_TEMPLATE/audit_finding.yml), or
-[release evidence](../.github/ISSUE_TEMPLATE/release_evidence.yml) when one of
-those scopes fits.
-
-If you are opening a PR, keep the checked
-[PR template](../.github/PULL_REQUEST_TEMPLATE.md) complete, especially the
-roadmap/gate linkage, validation evidence, release-impact classification,
-generated-artifact impact, and breaking-change approval fields.
-
-## Generated Artifact Drift
-
-Many repository files are deterministic release evidence, not hand-written
-notes. If a PR changes roadmap, risk, release, integration, ABI, bytecode,
-deployment, signing, evidence, docs, or checker coverage, expect one or more of
-these generated files to drift:
-
-- `release-artifacts/latest/risk-register.json`
-- `release-artifacts/latest/public-beta-blockers.md`
-- `release-artifacts/latest/production-release-blockers.md`
-- `release-artifacts/latest/release-notes.json`
-- `release-artifacts/latest/release-notes.md`
-- `release-artifacts/latest/release-manifest.json`
-- `release-artifacts/latest/bytecode-release-proof.json`
-- `release-artifacts/latest/SHA256SUMS`
-- `release-artifacts/latest/release-checksums.json`
-
-Regenerate the upstream artifact first, then regenerate the release manifest,
-bytecode release proof, and checksum bundle last. A clean checker run is better
-evidence than a manually edited generated file.
-
-## Known Warning Noise
-
-Current local runs can still show known and reviewed warning noise. Treat new
-or changed warnings as real until the relevant checker or baseline proves
-otherwise.
-
-Known examples include:
-
-- Solidity compiler warnings captured by [docs/warning-dispositions.md](warning-dispositions.md).
-- Foundry trace-source warnings during some script and test execution.
-- Missing Etherscan configuration warnings for local-only rehearsal commands.
-- Predeploy-linked library warnings in deployment rehearsal output.
-- An existing Windows line-ending warning from `git diff --check` on
-  `scripts/check.ps1` in some local shells.
-
-The warning-disposition gate checks reviewed compiler-warning rows against a
-retained forge-size log:
-
-```bash
-python scripts/run_forge_size_log.py --log cache/forge-size.log
-python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
-```
+The release command runs the full existing checked pipeline. It includes broad
+regressions, canonical compilation, size and gas evidence, static-analysis
+policy, documentation, artifacts, and deployment rehearsals. It can take much
+longer than the developer loop; it is not a first-run smoke test.
 
 ## Troubleshooting
 
-If `forge` is not found, install Foundry, run `foundryup --version v1.7.1`,
-then reopen the shell or add the Foundry user-bin directory to `PATH`.
+- **Tool missing or wrong version:** run `python scripts/dev.py doctor`, correct
+  the tool selection, and inspect [tooling](tooling.md) before installing more software.
+- **Compilation appears idle:** optimized Solidity compilation can be CPU-bound
+  with little intermediate output. Avoid launching overlapping builds into the same cache.
+- **Wrong suite or stale profile:** use the explicit developer command instead
+  of relying on a previously exported `FOUNDRY_PROFILE`.
+- **Generated artifact drift:** do not hand-edit outputs to make a checker pass.
+  Follow the [release workflow](reference/tooling/release-artifacts.md) after
+  source changes stabilize; a checker failure is not permission to bless new evidence.
+- **Compiler warning:** compare it with [warning dispositions](warning-dispositions.md).
+  The scoped formatter preserves vendored provenance; broad reformatting is unnecessary.
 
-If `make` is not available on Windows, use the PowerShell wrapper instead of
-rewriting Makefile commands by hand:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1
-```
-
-If Python commands fail, verify whether the shell expects `python` or `python3`
-and rerun the exact checker command with the available executable.
-
-If release manifest or checksum checks fail after a docs or roadmap change,
-regenerate in this order:
-
-```bash
-python scripts/generate_risk_register.py
-python scripts/generate_release_notes.py
-python scripts/generate_release_manifest.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/generate_release_checksums.py
-```
-
-If CI reports a missing changelog entry, update the `Unreleased` section of
-[CHANGELOG.md](../CHANGELOG.md) or explain why the PR is not release-impacting.
-
-## No Secrets And Maturity Boundaries
-
-Local Anvil, fork templates, retained evidence templates, integration fixtures,
-and release-artifact examples are no-secret artifacts. Do not commit private
-keys, seed phrases, RPC credentials, signer material, WalletConnect project
-secrets, production deployment secrets, private marketplace credentials, or
-unredacted transaction-broadcast material.
-
-Public beta remains blocked until reviewed fork/testnet or live deployment
-rehearsal, verified addresses, explorer verification, signer custody readiness,
-production signing, signed release artifacts, and live metadata/indexer/
-marketplace evidence exist. Production release remains blocked until external
-audit, post-audit remediation, signed release tag ceremony, and release-mode
-evidence are accepted. See [README.md](../README.md), [docs/status.md](status.md),
-and [docs/release-readiness.md](release-readiness.md) before making any
-readiness claim.
+Read [Contributing](../CONTRIBUTING.md) for review expectations and
+[current architecture](architecture.md) before changing authority or custody.
+No local command above authorizes public deployment, signing, custody changes,
+or production use. Use [SECURITY.md](../SECURITY.md) for private vulnerability reports.

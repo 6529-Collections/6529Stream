@@ -43,7 +43,7 @@ Use the following tracked sources before making any royalty claim:
 | Permanent royalty implementation | [`smart-contracts/core/StreamCore.sol`](../smart-contracts/core/StreamCore.sol), [`smart-contracts/core/StreamCoreExternalReads.sol`](../smart-contracts/core/StreamCoreExternalReads.sol) | Exposes ERC-2981-compatible `royaltyInfo()` through an authenticated, gas-bounded resolver read with a zero-royalty failure tuple |
 | Royalty interface | [`smart-contracts/vendor/openzeppelin/IERC2981.sol`](../smart-contracts/vendor/openzeppelin/IERC2981.sol), [`smart-contracts/vendor/openzeppelin/ERC2981.sol`](../smart-contracts/vendor/openzeppelin/ERC2981.sol) | `IERC2981` is used by `StreamCore`; the full vendored helper remains review material |
 | Current royalty policy | [`smart-contracts/domains/revenue/StreamRoyaltyResolver.sol`](../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol) | Core-bound resolver with governed default/collection settings, existing split-wallet receivers, and permanent freezes |
-| Royalty tests | [`test/StreamRoyaltyResolver.t.sol`](../test/StreamRoyaltyResolver.t.sol), [`test/StreamCorePermanentTarget.t.sol`](../test/StreamCorePermanentTarget.t.sol), [`test/StreamRoyalty.t.sol`](../test/StreamRoyalty.t.sol) | Real Core installation, collection splits, authority, freezes, and fail-soft reads; the retained legacy characterization separately covers the historical fixed receiver and 690-bps math |
+| Royalty tests | [`test/unit/revenue/StreamRoyaltyResolver.t.sol`](../test/unit/revenue/StreamRoyaltyResolver.t.sol), [`test/unit/core/StreamCorePermanentTarget.t.sol`](../test/unit/core/StreamCorePermanentTarget.t.sol), [`test/regression/legacy/revenue/StreamRoyalty.t.sol`](../test/regression/legacy/revenue/StreamRoyalty.t.sol) | Real Core installation, collection splits, authority, freezes, and fail-soft reads; the retained legacy characterization separately covers the historical fixed receiver and 690-bps math |
 | Metadata boundary | [`docs/metadata.md`](metadata.md), [`docs/integrations/metadata-rendering.md`](integrations/metadata-rendering.md) | Metadata and marketplace display evidence are separate from royalty enforcement |
 | Integration entrypoint | [`docs/integrations/README.md`](integrations/README.md) | Routes frontend, mobile, Electron, indexer, operator UI, and backend signing-service teams |
 | Event and indexer context | [`docs/integrations/events-and-indexing.md`](integrations/events-and-indexing.md) | Event replay and indexer reconstruction do not prove marketplace royalty payment |
@@ -83,7 +83,7 @@ Current permanent-target behavior for this release line:
   change that frozen collection. Per-token overrides and mint-time snapshots
   remain unimplemented.
 
-The retained legacy characterization in `test/StreamRoyalty.t.sol` separately
+The retained legacy characterization in `test/regression/legacy/revenue/StreamRoyalty.t.sol` separately
 pins the former fixed default royalty: receiver
 `0xC8ed02aFEBD9aCB14c33B5330c803feacAF01377`, `690 basis points`, and
 `salePrice * 690 / 10_000`. That historical baseline is not the permanent
@@ -211,10 +211,10 @@ configuration is a separate governance action against the installed satellite.
 
 Local tests and docs prove only the committed local baseline:
 
-- `test/StreamRoyaltyResolver.t.sol` exercises typed resolver installation into
+- `test/unit/revenue/StreamRoyaltyResolver.t.sol` exercises typed resolver installation into
   the actual Core, executor authority, split receivers, permanent freezes,
   invalid interface rejection, and bounded fail-soft response handling.
-- `test/StreamRoyalty.t.sol` proves only the retained legacy fixed-royalty
+- `test/regression/legacy/revenue/StreamRoyalty.t.sol` proves only the retained legacy fixed-royalty
   characterization.
 - The release manifest and ABI checksums prove committed artifact consistency.
 - The event topic catalog records configuration and accounting events; those
@@ -251,8 +251,8 @@ Royalty coverage should stay split across layers:
   and malformed-response regressions, and retained `690`-bps legacy characterization against
   `smart-contracts/core/StreamCore.sol`,
   `smart-contracts/core/StreamCoreExternalReads.sol`,
-  `test/StreamCorePermanentTarget.t.sol`, `test/StreamRoyaltyResolver.t.sol`, and
-  `test/StreamRoyalty.t.sol`.
+  `test/unit/core/StreamCorePermanentTarget.t.sol`, `test/unit/revenue/StreamRoyaltyResolver.t.sol`, and
+  `test/regression/legacy/revenue/StreamRoyalty.t.sol`.
 - Integration tests that use marketplaces, wallet flows, or indexers belong in
   retained non-local evidence before public beta or production claims.
 - If future work adds setter, override, satellite, validator, or enforcement
@@ -264,21 +264,21 @@ Royalty coverage should stay split across layers:
 Run these focused checks after editing royalty policy or related release docs:
 
 ```sh
-python scripts/test_royalty_policy.py
-python scripts/check_royalty_policy.py
-python scripts/test_integrations_readme.py
-python scripts/check_integrations_readme.py
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_bytecode_release_proof.py
-python scripts/generate_bytecode_release_proof.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/check_changelog.py
+python -m tools.docs.test_royalty_policy
+python -m tools.docs.check_royalty_policy
+python -m tools.docs.test_integrations_readme
+python -m tools.docs.check_integrations_readme
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.release.test_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.build.test_bytecode_release_proof
+python -m tools.build.generate_bytecode_release_proof --check
+python -m tools.release.test_release_checksums
+python -m tools.release.generate_release_checksums --check
+python -m tools.docs.check_changelog
 make check
 powershell -ExecutionPolicy Bypass -File scripts\check.ps1
 ```

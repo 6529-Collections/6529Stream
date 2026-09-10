@@ -245,15 +245,15 @@ native-value and hostile-drift requirements above are independently accepted.
 This documentation-only decision should be reviewed with:
 
 ```text
-python scripts/test_artist_semantic_owner_matrix.py
-python scripts/check_artist_semantic_owner_matrix.py
-python scripts/test_solidity_source_layout.py
-python scripts/check_solidity_source_layout.py
-forge test --match-path test/StreamArtistArchiveV2.t.sol -vvv
-forge test --match-path test/StreamArtistRegistryV2.t.sol -vvv
-python scripts/test_markdown_links.py
-python scripts/check_markdown_links.py
-python scripts/check_changelog.py
+python -m tools.protocol.test_artist_semantic_owner_matrix
+python -m tools.protocol.check_artist_semantic_owner_matrix
+python -m tools.build.test_solidity_source_layout
+python -m tools.build.check_solidity_source_layout
+forge test --match-path test/unit/artist/StreamArtistArchiveV2.t.sol -vvv
+forge test --match-path test/unit/artist/StreamArtistRegistryV2.t.sol -vvv
+python -m tools.docs.test_markdown_links
+python -m tools.docs.check_markdown_links
+python -m tools.docs.check_changelog
 codex-diff-check
 ```
 

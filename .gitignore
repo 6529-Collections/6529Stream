@@ -7,7 +7,7 @@ logs/
 
 # Build outputs
 dist/
-build/
+/build/
 out/
 out-release/
 cache/

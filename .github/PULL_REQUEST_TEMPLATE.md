@@ -32,7 +32,7 @@ Local commands run:
 # command and result summary
 ```
 
-- [ ] `make check` or platform equivalent passed.
+- [ ] Applicable focused/current checks and any required full release checks are listed above with their results.
 - [ ] Tests were added/updated, or this PR explains why no tests are required.
 - [ ] CI is green.
 - [ ] Bot and human review comments are resolved or explicitly accepted with rationale.

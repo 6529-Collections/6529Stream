@@ -1,0 +1,1593 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MAX_ENTRIES",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_UNIQUE_ACCOUNTS",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "PROFILE_DOMAIN",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCHEMA_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SHARE_DENOMINATOR_PPM",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "WALLET_VERSION",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "assetPolicyRegistry",
+      "outputs": [
+        {
+          "internalType": "contract IStreamAssetPolicyRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+          "name": "entries",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "createProfile",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "deployWallet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileEntriesHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "profileEntry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileEntryCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+          "name": "entries",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileIdFor",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileMetadataURIHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "profileUniqueAccount",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "profileUniqueAccountCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "splitWalletExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "splitWalletInitCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "splitWalletRuntimeCodeHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "walletFor",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        }
+      ],
+      "name": "AssetPolicyRegistryPinned",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "entriesHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "walletVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "name": "SplitProfileCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint16",
+          "name": "index",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SplitProfileEntry",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint16",
+          "name": "walletVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "initCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SplitWalletDeployed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint16",
+          "name": "walletVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "initCodeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "runtimeCodeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SplitWalletDiscovered",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "DuplicateSplitEntry",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "registry",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidAssetPolicyRegistry",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidEntryCount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidSplitAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidSplitShare",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "totalSharePpm",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidSplitTotal",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "name": "SplitWalletAddressPoisoned",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnknownProfile",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "DuplicateSplitEntry",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidAssetPolicyRegistry",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "count",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidEntryCount",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitAccount",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitShare",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "totalSharePpm",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidSplitTotal",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "name": "SplitWalletAddressPoisoned",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownProfile",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "registry",
+              "type": "address"
+            }
+          ],
+          "name": "AssetPolicyRegistryPinned",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "name": "SplitProfileCreated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "index",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitProfileEntry",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "initCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitWalletDeployed",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "walletVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "initCodeHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "runtimeCodeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SplitWalletDiscovered",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_ENTRIES",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "MAX_UNIQUE_ACCOUNTS",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "PROFILE_DOMAIN",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCHEMA_VERSION",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SHARE_DENOMINATOR_PPM",
+          "outputs": [
+            {
+              "internalType": "uint32",
+              "name": "",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "WALLET_VERSION",
+          "outputs": [
+            {
+              "internalType": "uint16",
+              "name": "",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "assetPolicyRegistry",
+          "outputs": [
+            {
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sharePpm",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "labelId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+              "name": "entries",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "createProfile",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "deployWallet",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileEntriesHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "profileEntry",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileEntryCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileExists",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sharePpm",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "labelId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamSplitWallet.SplitEntry[]",
+              "name": "entries",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileIdFor",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileMetadataURIHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "profileUniqueAccount",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "profileUniqueAccountCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "splitWalletExists",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "splitWalletInitCodeHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "splitWalletRuntimeCodeHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "walletFor",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "DuplicateSplitEntry(address,bytes32)": [
+            {
+              "notice": "Reverts when two canonical entries use the same account and label."
+            }
+          ],
+          "InvalidAssetPolicyRegistry(address)": [
+            {
+              "notice": "Reverts when the factory is initialized with an invalid asset policy registry."
+            }
+          ],
+          "InvalidEntryCount(uint256)": [
+            {
+              "notice": "Reverts when a split profile has zero entries or exceeds the entry limit."
+            }
+          ],
+          "InvalidSplitAccount(uint256)": [
+            {
+              "notice": "Reverts when a split entry account is the zero address."
+            }
+          ],
+          "InvalidSplitShare(uint256)": [
+            {
+              "notice": "Reverts when a split entry share is zero or above the denominator."
+            }
+          ],
+          "InvalidSplitTotal(uint256)": [
+            {
+              "notice": "Reverts when split entry shares do not sum to the denominator."
+            }
+          ],
+          "SplitWalletAddressPoisoned(bytes32,address)": [
+            {
+              "notice": "Reverts when the deterministic wallet address already has unexpected code."
+            }
+          ],
+          "UnknownProfile(bytes32)": [
+            {
+              "notice": "Reverts when a caller asks to deploy a profile that does not exist."
+            }
+          ]
+        },
+        "events": {
+          "AssetPolicyRegistryPinned(address)": {
+            "notice": "Emitted once when the factory pins its deployment-wide asset policy registry."
+          },
+          "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)": {
+            "notice": "Emitted once when a canonical split profile is first created."
+          },
+          "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)": {
+            "notice": "Emitted for each canonical label-level split entry in a created profile."
+          },
+          "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)": {
+            "notice": "Emitted when the factory deploys a split wallet for a profile."
+          },
+          "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)": {
+            "notice": "Emitted when the factory records a pre-existing wallet with expected code."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "MAX_ENTRIES()": {
+            "notice": "Maximum label-level entries in one profile."
+          },
+          "MAX_UNIQUE_ACCOUNTS()": {
+            "notice": "Maximum unique account aggregates in one profile."
+          },
+          "PROFILE_DOMAIN()": {
+            "notice": "Domain separator label for profile identifiers."
+          },
+          "SCHEMA_VERSION()": {
+            "notice": "Split profile schema version."
+          },
+          "SHARE_DENOMINATOR_PPM()": {
+            "notice": "Parts-per-million share denominator."
+          },
+          "WALLET_VERSION()": {
+            "notice": "Split wallet implementation version."
+          },
+          "assetPolicyRegistry()": {
+            "notice": "Deployment-wide asset policy registry pinned for split-wallet ERC-20 support."
+          },
+          "createProfile((address,uint32,bytes32)[],bytes32)": {
+            "notice": "Creates or reuses a split profile and deploys its wallet."
+          },
+          "deployWallet(bytes32)": {
+            "notice": "Deploys the wallet for an existing profile."
+          },
+          "profileEntriesHash(bytes32)": {
+            "notice": "Returns the canonical entries hash committed by a profile."
+          },
+          "profileEntry(bytes32,uint256)": {
+            "notice": "Returns one canonical profile entry by index."
+          },
+          "profileEntryCount(bytes32)": {
+            "notice": "Returns the canonical entry count for a profile."
+          },
+          "profileExists(bytes32)": {
+            "notice": "Returns true when a profile exists."
+          },
+          "profileIdFor((address,uint32,bytes32)[],bytes32)": {
+            "notice": "Computes a profile identifier for entries and metadata."
+          },
+          "profileMetadataURIHash(bytes32)": {
+            "notice": "Returns the metadata URI hash committed by a profile."
+          },
+          "profileUniqueAccount(bytes32,uint256)": {
+            "notice": "Returns one unique account and aggregate share by index."
+          },
+          "profileUniqueAccountCount(bytes32)": {
+            "notice": "Returns the unique account count for a profile."
+          },
+          "splitWalletExists(bytes32)": {
+            "notice": "Returns true when the profile wallet is deployed with expected code and metadata."
+          },
+          "splitWalletInitCodeHash()": {
+            "notice": "Returns the wallet creation-code hash used by CREATE2."
+          },
+          "splitWalletRuntimeCodeHash()": {
+            "notice": "Returns the wallet runtime-code hash accepted after deployment."
+          },
+          "walletFor(bytes32)": {
+            "notice": "Returns the deterministic wallet address for a profile."
+          }
+        },
+        "notice": "Interface for creating deterministic split profiles and wallets.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol": "IStreamSplitFactory"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol": {
+        "keccak256": "0xe877f4dea83110ff91373b34ef2dfaad1bbf8ffc4af7a69784213c78b18bf6cf",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://21adc0a0b1740f0e4f1e91858ebeffb377c88707e3baab817e8bdf397a90b4d0",
+          "dweb:/ipfs/QmUgdkEbe3xyobfwRtHy2q4SWJNctoMdmh713N3KL7qsuS"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol": {
+        "keccak256": "0x4fc76452fbec07bd6df67c13dacbb6e5129c4449586f786de5f0098e5f001fe1",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1c304979a76aaa9b7bc83988c7f6ff077d297cb8ace5aab0e8a2de257b398192",
+          "dweb:/ipfs/QmNvzFz4wkDTW3RaRruuSurZ9ZBKtRjqNksDfS1YDEAGGv"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol": {
+        "keccak256": "0xee002101da7ca6a334d4c4ebf4ca1a2b7e6628b1aba18a11361806c0db12cb64",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b7abee91ca6f30024cedee8374791f31c7d09c63a80288ed54d7c2fec29d8329",
+          "dweb:/ipfs/QmeGaE5ng9241X9EG2tSj5oSXXgTE94jSQkokpzvGAJf2u"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "MAX_ENTRIES()": "7d4cb964",
+    "MAX_UNIQUE_ACCOUNTS()": "65695602",
+    "PROFILE_DOMAIN()": "761751d9",
+    "SCHEMA_VERSION()": "6233b32a",
+    "SHARE_DENOMINATOR_PPM()": "6e41b376",
+    "WALLET_VERSION()": "1127b57e",
+    "assetPolicyRegistry()": "decadc35",
+    "createProfile((address,uint32,bytes32)[],bytes32)": "6c539c25",
+    "deployWallet(bytes32)": "6e1a1e9e",
+    "profileEntriesHash(bytes32)": "472f4153",
+    "profileEntry(bytes32,uint256)": "6d9d0dcf",
+    "profileEntryCount(bytes32)": "39e27f9a",
+    "profileExists(bytes32)": "93e9701b",
+    "profileIdFor((address,uint32,bytes32)[],bytes32)": "6bcf174f",
+    "profileMetadataURIHash(bytes32)": "9236fe29",
+    "profileUniqueAccount(bytes32,uint256)": "73f35546",
+    "profileUniqueAccountCount(bytes32)": "30743b1e",
+    "splitWalletExists(bytes32)": "33c0a3d3",
+    "splitWalletInitCodeHash()": "57de32be",
+    "splitWalletRuntimeCodeHash()": "914575a9",
+    "walletFor(bytes32)": "7730ab1a"
+  }
+}

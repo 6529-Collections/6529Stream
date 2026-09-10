@@ -17,7 +17,7 @@
 - CI run or operator transcript: `TBD`
 - Production block or reference: `TBD`
 - Deployment transaction references: `TBD`
-- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --rpc-url <redacted> --broadcast --verify --via-ir`
+- Command: `forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --rpc-url <redacted> --broadcast --verify --via-ir`
 
 ## Required Retained Artifacts
 
@@ -53,13 +53,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_production_broadcast_retention.py
-python scripts/check_production_broadcast_retention.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json --retained-artifact release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md --output release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-evidence.json --environment live --chain-id 1 --block-or-reference "<production block or transaction reference>" --command-or-source-system "<operator transcript>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_production_broadcast_retention
+python -m tools.release.check_production_broadcast_retention
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/production-broadcast-retention-template.json --retained-artifact release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md --output release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-evidence.json --environment live --chain-id 1 --block-or-reference "<production block or transaction reference>" --command-or-source-system "<operator transcript>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

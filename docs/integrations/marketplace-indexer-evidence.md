@@ -35,8 +35,8 @@ The checked artifacts are:
 | Production retained artifact template | [`release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md`](../../release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md) |
 | Public-beta non-local envelope template | [`release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json) |
 | Production non-local envelope template | [`release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json) |
-| Evidence checker | [`scripts/check_marketplace_indexer_evidence.py`](../../scripts/check_marketplace_indexer_evidence.py) |
-| Checker tests | [`scripts/test_marketplace_indexer_evidence.py`](../../scripts/test_marketplace_indexer_evidence.py) |
+| Evidence checker | [`tools/release/check_marketplace_indexer_evidence.py`](../../tools/release/check_marketplace_indexer_evidence.py) |
+| Checker tests | [`tools/release/test_marketplace_indexer_evidence.py`](../../tools/release/test_marketplace_indexer_evidence.py) |
 | Shared evidence status | [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json) |
 
 Template only. This file is not completion evidence.
@@ -58,7 +58,7 @@ proof.
 When either row moves to `complete`, keep the reusable template files in place
 and add a reviewed non-local evidence envelope from
 [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
-`scripts/check_marketplace_indexer_evidence.py` follows complete marketplace /
+`tools/release/check_marketplace_indexer_evidence.py` follows complete marketplace /
 indexer rows from the shared evidence manifest to the reviewed envelope, checks
 that the envelope is not template-only, verifies the retained Markdown hash, and
 then validates the retained Markdown with the same coverage and no-secret rules
@@ -109,7 +109,7 @@ For public-beta evidence:
    [`release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json).
 5. Link the generated evidence from
    [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
-6. Run `python scripts/check_marketplace_indexer_evidence.py` so the shared
+6. Run `python -m tools.release.check_marketplace_indexer_evidence` so the shared
    manifest row, reviewed envelope, retained Markdown hash, and retained
    Markdown coverage are checked together.
 7. Keep issue #423 open until the row is `complete` or explicitly
@@ -125,7 +125,7 @@ For production evidence:
    [`release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json`](../../release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json).
 5. Link the generated evidence from
    [`release-artifacts/latest/public-beta-evidence.json`](../../release-artifacts/latest/public-beta-evidence.json).
-6. Run `python scripts/check_marketplace_indexer_evidence.py` so the shared
+6. Run `python -m tools.release.check_marketplace_indexer_evidence` so the shared
    manifest row, reviewed envelope, retained Markdown hash, and retained
    Markdown coverage are checked together.
 7. Keep issue #424 open until the row is `complete` or explicitly
@@ -148,23 +148,23 @@ Run these when editing this guide or the retained marketplace/indexer evidence
 templates:
 
 ```sh
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
-python scripts/test_non_local_release_evidence.py
-python scripts/check_non_local_release_evidence.py
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_public_beta_blocker_report.py
-python scripts/generate_public_beta_blocker_report.py --check
-python scripts/test_production_release_blocker_report.py
-python scripts/generate_production_release_blocker_report.py --check
-python scripts/test_release_evidence_packet_index.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/check_changelog.py
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
+python -m tools.release.test_non_local_release_evidence
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.test_public_beta_blocker_report
+python -m tools.release.generate_public_beta_blocker_report --check
+python -m tools.release.test_production_release_blocker_report
+python -m tools.release.generate_production_release_blocker_report --check
+python -m tools.release.test_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.test_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.test_release_checksums
+python -m tools.release.generate_release_checksums --check
+python -m tools.docs.check_changelog
 ```
 
 ## Maintenance

@@ -72,13 +72,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json --retained-artifact release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md --output release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-evidence.json --environment live --chain-id 1 --block-or-reference "<live block, token ID, collection ID, and deployment reference>" --command-or-source-system "<marketplace/indexer transcript>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/live-marketplace-indexer-evidence-template.json --retained-artifact release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-retained-artifact-template.md --output release-artifacts/evidence/marketplace-indexer/live-marketplace-indexer-evidence.json --environment live --chain-id 1 --block-or-reference "<live block, token ID, collection ID, and deployment reference>" --command-or-source-system "<marketplace/indexer transcript>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

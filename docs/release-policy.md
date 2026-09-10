@@ -49,7 +49,7 @@ A PR is release-impacting when it changes any of these surfaces:
   or the PR template.
 
 Release-impacting PRs must update `CHANGELOG.md` under `## Unreleased` with a
-non-placeholder bullet. The `scripts/check_changelog.py` gate enforces this for
+non-placeholder bullet. The `tools/docs/check_changelog.py` gate enforces this for
 changed paths that affect the release surface.
 
 ## Core Bytecode And Extension Policy
@@ -64,8 +64,8 @@ include:
 - a linked issue or ADR explaining why a satellite contract, read adapter,
   linked library, release artifact, or docs-only path is insufficient;
 - the before/after `StreamCore` runtime size from
-  `python scripts/build_release_artifacts.py` followed by
-  `python scripts/check_contract_size_budget.py`; the aggregate
+  `python -m tools.build.build_release_artifacts` followed by
+  `python -m tools.build.check_contract_size_budget`; the aggregate
   `forge build --sizes --via-ir --skip test --skip script --force` output is
   diagnostic only;
 - the resulting EIP-170 margin and whether it remains above the interim
@@ -192,8 +192,8 @@ independent current-versus-baseline comparison.
 Run the changelog gate locally with:
 
 ```sh
-python scripts/test_changelog_check.py
-python scripts/check_changelog.py
+python -m tools.docs.test_changelog_check
+python -m tools.docs.check_changelog
 ```
 
 In CI, the gate compares the pull request branch against the PR base SHA. On a
@@ -215,7 +215,7 @@ Before a public release tag:
   green. Matching a tracked baseline is not acceptance.
 - Gas and size snapshots are accepted. The current local gas baseline is
   `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and must pass
-  `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
+  `forge snapshot --match-path test/gas/StreamGasSnapshot.t.sol --check
   release-artifacts/baselines/v0.1.0/gas-snapshot.snap`.
 - Deployment rehearsal passes.
 - ABI, bytecode, interface ID, event topic, protocol surface report,
@@ -229,45 +229,45 @@ Before a public release tag:
 - Randomizer provider configuration, funding/billing status, lifecycle controls,
   reserve policy, retained artifacts, and redaction policy follow
   `docs/randomizer-operations.md` and pass
-  `python scripts/check_randomizer_operations.py`.
+  `python -m tools.deployment.check_randomizer_operations`.
 - Release signature evidence follows `docs/release-signatures.md` and passes
-  `python scripts/check_release_signatures.py`.
+  `python -m tools.release.check_release_signatures`.
 - Signed release tag verification passes
-  `python scripts/check_signed_release_tag.py` in non-release mode for ordinary
+  `python -m tools.release.check_signed_release_tag` in non-release mode for ordinary
   PRs, and in `--mode release --tag <tag> --evidence <post-bundle-evidence>`
   mode before any public release tag claim.
 - Bytecode-to-release proof passes
-  `python scripts/generate_bytecode_release_proof.py --check`; the committed
+  `python -m tools.build.generate_bytecode_release_proof --check`; the committed
   local/fork proof is not live-chain verification, and production completion
   requires reviewed retained live bytecode or explorer evidence.
 - Drop authorization signing evidence follows
   `docs/drop-authorization-signing.md` and passes
-  `python scripts/check_drop_authorization_signing_evidence.py`.
+  `python -m tools.release.check_drop_authorization_signing_evidence`.
 - Signer custody readiness evidence follows
   `docs/signer-custody-readiness.md` and passes
-  `python scripts/check_signer_custody_readiness.py`.
+  `python -m tools.release.check_signer_custody_readiness`.
 - Public-beta evidence status follows `docs/public-beta-evidence.md`, keeps
   unresolved public-beta and production blockers visible, and passes
-  `python scripts/check_public_beta_evidence.py`.
+  `python -m tools.release.check_public_beta_evidence`.
 - Non-local release evidence follows `docs/non-local-release-evidence.md`
   before any fork, testnet, live, audit, explorer, gas, invariant, signature,
   or signed-tag row is marked complete in the public-beta evidence status.
 - Architecture and threat-model evidence follows `docs/architecture.md` and
   `docs/threat-model.md` and passes
-  `python scripts/check_architecture_threat_model.py`.
+  `python -m tools.docs.check_architecture_threat_model`.
 - Product extensions follow the satellite-first Core bytecode policy in
   `docs/architecture.md#product-extension-and-size-budget-policy`; any
   non-critical `StreamCore` bytecode spend has an explicit size-budget
   exception and measured runtime delta.
 - The external audit package follows `docs/audit-package.md` and passes
-  `python scripts/check_audit_package.py`.
+  `python -m tools.docs.check_audit_package`.
 - The release-readiness dashboard follows `docs/release-readiness.md` and
-  passes `python scripts/check_release_readiness.py`.
+  passes `python -m tools.release.check_release_readiness`.
 - The opt-in release-mode CI profile is run with
-  `python scripts/check_release_mode.py --phase public-beta` or
-  `python scripts/check_release_mode.py --phase production-release` only for
+  `python -m tools.release.check_release_mode --phase public-beta` or
+  `python -m tools.release.check_release_mode --phase production-release` only for
   release-candidate evidence review. The default baseline runs
-  `python scripts/test_release_mode.py`; local release-mode Make targets run the
+  `python -m tools.release.test_release_mode`; local release-mode Make targets run the
   aggregate `check` gate and live exact Slither comparison first, and the manual
   workflow requires the protected default branch and runs both before the strict
   decision. Release mode rejects expired,
@@ -281,7 +281,7 @@ Before a public release tag:
   retain at least 2,000 bytes of EIP-170 runtime headroom; missing, malformed,
   inconsistent, or sub-threshold size fields fail closed under issue #654.
 - Royalty policy follows `docs/royalty-policy.md` and passes
-  `python scripts/check_royalty_policy.py`.
+  `python -m tools.docs.check_royalty_policy`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
 - `SECURITY.md`, deployment docs, and known-risk docs are current.
 - Contract verification status is recorded or explicitly blocked.

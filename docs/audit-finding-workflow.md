@@ -95,11 +95,11 @@ Required local validation for a remediation PR:
 
 ```sh
 make check
-python scripts/test_audit_finding_workflow.py
-python scripts/check_audit_finding_workflow.py
-python scripts/check_audit_package.py
-python scripts/check_release_readiness.py
-python scripts/check_changelog.py
+python -m tools.docs.test_audit_finding_workflow
+python -m tools.docs.check_audit_finding_workflow
+python -m tools.docs.check_audit_package
+python -m tools.release.check_release_readiness
+python -m tools.docs.check_changelog
 ```
 
 Windows validation:
@@ -130,7 +130,7 @@ Closure requires:
 Before closing release-evidence tracker issues, run:
 
 ```sh
-python scripts/check_release_evidence_issue_closure.py
+python -m tools.release.check_release_evidence_issue_closure
 ```
 
 ## Accepted Risk
@@ -195,16 +195,16 @@ Run these commands after editing this workflow:
 
 ```sh
 make check
-python scripts/test_audit_finding_workflow.py
-python scripts/check_audit_finding_workflow.py
-python scripts/test_issue_templates.py
-python scripts/check_issue_templates.py
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/check_release_readiness.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
-python scripts/check_changelog.py
+python -m tools.docs.test_audit_finding_workflow
+python -m tools.docs.check_audit_finding_workflow
+python -m tools.docs.test_issue_templates
+python -m tools.docs.check_issue_templates
+python -m tools.docs.test_audit_package
+python -m tools.docs.check_audit_package
+python -m tools.release.check_release_readiness
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
+python -m tools.docs.check_changelog
 ```
 
 ## Non-Goals

@@ -23,7 +23,7 @@ work.
 | Issue | [P0-AUCT-ADR](https://github.com/6529-Collections/6529Stream/issues/21) |
 | Blocks | [P0-AUCT-001](https://github.com/6529-Collections/6529Stream/issues/22), [P0-AUCT-002](https://github.com/6529-Collections/6529Stream/issues/12) |
 | Related issues | [P0-PAY-008](https://github.com/6529-Collections/6529Stream/issues/8) |
-| Affected contracts | `smart-contracts/domains/auctions/AuctionContract.sol`, `smart-contracts/domains/mint/StreamDrops.sol`, `smart-contracts/domains/mint/StreamMinter.sol`, `smart-contracts/core/StreamCore.sol` |
+| Affected contracts | `smart-contracts/domains/auctions/legacy/AuctionContract.sol`, `smart-contracts/domains/mint/legacy/StreamDrops.sol`, `smart-contracts/domains/mint/legacy/StreamMinter.sol`, `smart-contracts/core/StreamCore.sol` |
 | Work type | `DESIGN` |
 
 ## Problem
@@ -56,10 +56,10 @@ The legacy behavior that motivated this ADR was:
 
 Current target-state tests replace the legacy custody characterization:
 
-- `test/StreamDropsCharacterization.t.sol`
-- `test/StreamDropsIntegrationCharacterization.t.sol`
-- `test/StreamAuctionCustody.t.sol`
-- `test/StreamAuctionPayments.t.sol`
+- `test/unit/mint/StreamDropsCharacterization.t.sol`
+- `test/regression/legacy/mint/StreamDropsIntegrationCharacterization.t.sol`
+- `test/regression/legacy/auctions/StreamAuctionCustody.t.sol`
+- `test/regression/legacy/auctions/StreamAuctionPayments.t.sol`
 
 ## Decision
 

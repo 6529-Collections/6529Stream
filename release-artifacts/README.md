@@ -40,78 +40,78 @@ outside the I-JSON safe range.
 Build and validate the canonical target-isolated release profile first:
 
 ```sh
-python scripts/test_external_call_gas_inventory.py
-python scripts/check_external_call_gas_inventory.py
-python scripts/test_abi_compatibility.py
-python scripts/check_abi_compatibility.py --target-only
-python scripts/test_release_build_artifacts.py
-python scripts/build_release_artifacts.py
-python scripts/build_release_artifacts.py --check
-python scripts/check_contract_size_budget.py
-forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
-python scripts/generate_release_artifacts.py
-python scripts/generate_protocol_surface_report.py
-python scripts/generate_source_verification_inputs.py
-python scripts/generate_dependency_artifact_manifest.py
-python scripts/generate_dependency_provenance_attestation.py
-python scripts/check_abi_compatibility.py
-python scripts/generate_deployment_manifest.py
-python scripts/generate_address_books.py
-python scripts/check_ceremony_evidence.py
-python scripts/check_randomizer_operations.py
-python scripts/check_release_signatures.py
-python scripts/check_signed_release_tag.py
-python scripts/check_public_beta_verified_addresses.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/check_non_local_release_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_mint_manager_domain_constants.py
-python scripts/check_mint_manager_domain_constants.py
-python scripts/generate_one_of_one_provenance_manifest.py
-python scripts/generate_one_of_one_permanence_manifest.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_public_beta_blocker_report.py
-python scripts/generate_production_release_blocker_report.py
-python scripts/generate_risk_register.py
-python scripts/generate_release_evidence_packet_index.py
-python scripts/generate_release_evidence_issue_backlog.py
-python scripts/check_release_evidence_issue_links.py
-python scripts/check_release_evidence_issue_labels.py
-python scripts/check_release_evidence_live_audit_report.py
-python scripts/generate_release_evidence_issue_body_sync.py
-python scripts/check_release_evidence_issue_bodies.py
-python scripts/check_release_evidence_issue_closure.py
-python scripts/check_architecture_threat_model.py
-python scripts/check_audit_package.py
-python scripts/check_integrations_readme.py
-python scripts/check_contract_flows.py
-python scripts/check_auction_flows.py
-python scripts/check_wallet_signature_flows.py
-python scripts/check_events_and_indexing.py
-python scripts/check_metadata_rendering.py
-python scripts/check_react_next_reference.py
-python scripts/check_mobile_walletconnect.py
-python scripts/check_electron_security_wallets.py
-python scripts/check_operator_admin_ui.py
-python scripts/check_release_readiness.py
-python scripts/test_genesis_deployment_profile.py
-python scripts/check_genesis_deployment_profile.py
-python scripts/test_governed_parameter_identifiers.py
-python scripts/check_governed_parameter_identifiers.py
-python scripts/test_governed_parameter_inventory.py
-python scripts/check_governed_parameter_inventory.py
-python scripts/generate_system_manifest_payload_vector.py
-python scripts/test_system_manifest_payload_vector.py
-python scripts/check_system_manifest_payload_vector.py
-python scripts/test_system_manifest_payload_vector_reference.py
-python scripts/check_system_manifest_payload_vector_reference.py
-python scripts/test_release_mode.py
-python scripts/generate_release_notes.py
-python scripts/generate_release_manifest.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/generate_release_candidate_lockfile.py
-python scripts/generate_release_checksums.py
+python -m tools.protocol.test_external_call_gas_inventory
+python -m tools.protocol.check_external_call_gas_inventory
+python -m tools.build.test_abi_compatibility
+python -m tools.build.check_abi_compatibility --target-only
+python -m tools.build.test_release_build_artifacts
+python -m tools.build.build_release_artifacts
+python -m tools.build.build_release_artifacts --check
+python -m tools.build.check_contract_size_budget
+forge snapshot --match-path test/gas/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+python -m tools.build.generate_release_artifacts
+python -m tools.build.generate_protocol_surface_report
+python -m tools.build.generate_source_verification_inputs
+python -m tools.protocol.generate_dependency_artifact_manifest
+python -m tools.protocol.generate_dependency_provenance_attestation
+python -m tools.build.check_abi_compatibility
+python -m tools.deployment.generate_deployment_manifest
+python -m tools.deployment.generate_address_books
+python -m tools.deployment.check_ceremony_evidence
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.check_release_signatures
+python -m tools.release.check_signed_release_tag
+python -m tools.release.check_public_beta_verified_addresses
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.check_signer_custody_readiness
+python -m tools.protocol.test_mint_manager_domain_constants
+python -m tools.protocol.check_mint_manager_domain_constants
+python -m tools.protocol.generate_one_of_one_provenance_manifest
+python -m tools.protocol.generate_one_of_one_permanence_manifest
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_public_beta_blocker_report
+python -m tools.release.generate_production_release_blocker_report
+python -m tools.security.generate_risk_register
+python -m tools.release.generate_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_issue_backlog
+python -m tools.release.check_release_evidence_issue_links
+python -m tools.release.check_release_evidence_issue_labels
+python -m tools.release.check_release_evidence_live_audit_report
+python -m tools.release.generate_release_evidence_issue_body_sync
+python -m tools.release.check_release_evidence_issue_bodies
+python -m tools.release.check_release_evidence_issue_closure
+python -m tools.docs.check_architecture_threat_model
+python -m tools.docs.check_audit_package
+python -m tools.docs.check_integrations_readme
+python -m tools.docs.check_contract_flows
+python -m tools.docs.check_auction_flows
+python -m tools.docs.check_wallet_signature_flows
+python -m tools.docs.check_events_and_indexing
+python -m tools.docs.check_metadata_rendering
+python -m tools.docs.check_react_next_reference
+python -m tools.docs.check_mobile_walletconnect
+python -m tools.docs.check_electron_security_wallets
+python -m tools.docs.check_operator_admin_ui
+python -m tools.release.check_release_readiness
+python -m tools.protocol.test_genesis_deployment_profile
+python -m tools.protocol.check_genesis_deployment_profile
+python -m tools.protocol.test_governed_parameter_identifiers
+python -m tools.protocol.check_governed_parameter_identifiers
+python -m tools.protocol.test_governed_parameter_inventory
+python -m tools.protocol.check_governed_parameter_inventory
+python -m tools.protocol.generate_system_manifest_payload_vector
+python -m tools.protocol.test_system_manifest_payload_vector
+python -m tools.protocol.check_system_manifest_payload_vector
+python -m tools.protocol.test_system_manifest_payload_vector_reference
+python -m tools.protocol.check_system_manifest_payload_vector_reference
+python -m tools.release.test_release_mode
+python -m tools.release.generate_release_notes
+python -m tools.release.generate_release_manifest
+python -m tools.build.generate_bytecode_release_proof
+python -m tools.release.generate_release_candidate_lockfile
+python -m tools.release.generate_release_checksums
 ```
 
 The retained compiler inputs validate Forge's exact repository-root path
@@ -130,135 +130,135 @@ deployment-bytecode evidence.
 Check the committed artifacts without rewriting them:
 
 ```sh
-python scripts/test_contract_size_budget.py
-python scripts/check_contract_size_budget.py
-python scripts/test_release_artifacts.py
-python scripts/generate_release_artifacts.py --check
-python scripts/test_protocol_surface_report.py
-python scripts/generate_protocol_surface_report.py --check
-forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
-python scripts/test_mint_manager_domain_constants.py
-python scripts/check_mint_manager_domain_constants.py
-python scripts/test_source_verification_inputs.py
-python scripts/generate_source_verification_inputs.py --check
-python scripts/test_dependency_artifact_manifest.py
-python scripts/generate_dependency_artifact_manifest.py --check
-python scripts/test_dependency_provenance_attestation.py
-python scripts/generate_dependency_provenance_attestation.py --check
-python scripts/test_abi_compatibility.py
-python scripts/check_abi_compatibility.py --target-only
-python scripts/check_abi_compatibility.py --check
-python scripts/test_deployment_manifest.py
-python scripts/generate_deployment_manifest.py --check
-python scripts/test_address_books.py
-python scripts/generate_address_books.py --check
-python scripts/test_ceremony_evidence.py
-python scripts/check_ceremony_evidence.py
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
-python scripts/test_release_signatures.py
-python scripts/check_release_signatures.py
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
-python scripts/test_public_beta_verified_addresses.py
-python scripts/check_public_beta_verified_addresses.py
-python scripts/test_production_release_signing_evidence.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/test_non_local_release_evidence.py
-python scripts/check_non_local_release_evidence.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_one_of_one_provenance_manifest.py
-python scripts/check_one_of_one_provenance_manifest.py
-python scripts/generate_one_of_one_provenance_manifest.py --check
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_risk_register.py
-python scripts/check_risk_register.py
-python scripts/generate_risk_register.py --check
-python scripts/test_public_beta_blocker_report.py
-python scripts/generate_public_beta_blocker_report.py --check
-python scripts/test_production_release_blocker_report.py
-python scripts/generate_production_release_blocker_report.py --check
-python scripts/test_release_evidence_packet_index.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/test_release_evidence_issue_backlog.py
-python scripts/generate_release_evidence_issue_backlog.py --check
-python scripts/test_release_evidence_issue_links.py
-python scripts/check_release_evidence_issue_links.py
-python scripts/test_release_evidence_issue_snapshot.py
-python scripts/test_release_evidence_issue_snapshot_audit.py
-python scripts/test_release_evidence_live_audit_report.py
-python scripts/check_release_evidence_live_audit_report.py
-python scripts/test_release_evidence_live_audit_markdown.py
-python scripts/check_release_evidence_live_audit_markdown.py
-python scripts/test_release_evidence_live_audit_archive.py
-python scripts/generate_release_evidence_live_audit_archive.py --check
-python scripts/test_release_evidence_issue_labels.py
-python scripts/check_release_evidence_issue_labels.py
-python scripts/test_release_evidence_issue_body_sync.py
-python scripts/generate_release_evidence_issue_body_sync.py --check
-python scripts/test_release_evidence_issue_bodies.py
-python scripts/check_release_evidence_issue_bodies.py
-python scripts/test_release_evidence_issue_closure.py
-python scripts/check_release_evidence_issue_closure.py
-python scripts/test_architecture_threat_model.py
-python scripts/check_architecture_threat_model.py
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/test_integrations_readme.py
-python scripts/check_integrations_readme.py
-python scripts/test_contract_flows.py
-python scripts/check_contract_flows.py
-python scripts/test_auction_flows.py
-python scripts/check_auction_flows.py
-python scripts/test_wallet_signature_flows.py
-python scripts/check_wallet_signature_flows.py
-python scripts/test_events_and_indexing.py
-python scripts/check_events_and_indexing.py
-python scripts/test_metadata_rendering.py
-python scripts/check_metadata_rendering.py
-python scripts/test_react_next_reference.py
-python scripts/check_react_next_reference.py
-python scripts/test_mobile_walletconnect.py
-python scripts/check_mobile_walletconnect.py
-python scripts/test_electron_security_wallets.py
-python scripts/check_electron_security_wallets.py
-python scripts/test_operator_admin_ui.py
-python scripts/check_operator_admin_ui.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_genesis_deployment_profile.py
-python scripts/check_genesis_deployment_profile.py
-python scripts/test_governed_parameter_identifiers.py
-python scripts/check_governed_parameter_identifiers.py
-python scripts/test_governed_parameter_inventory.py
-python scripts/check_governed_parameter_inventory.py
-python scripts/test_system_manifest_payload_vector.py
-python scripts/check_system_manifest_payload_vector.py
-python scripts/test_system_manifest_payload_vector_reference.py
-python scripts/check_system_manifest_payload_vector_reference.py
-python scripts/test_release_mode.py
-python scripts/test_production_broadcast_retention.py
-python scripts/check_production_broadcast_retention.py
-python scripts/test_public_beta_verified_addresses.py
-python scripts/check_public_beta_verified_addresses.py
-python scripts/test_production_verified_addresses.py
-python scripts/check_production_verified_addresses.py
-python scripts/test_release_notes.py
-python scripts/generate_release_notes.py --check
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_bytecode_release_proof.py
-python scripts/generate_bytecode_release_proof.py --check
-python scripts/test_release_candidate_lockfile.py
-python scripts/generate_release_candidate_lockfile.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/test_verify_release_artifacts.py
-python scripts/verify_release_artifacts.py
+python -m tools.build.test_contract_size_budget
+python -m tools.build.check_contract_size_budget
+python -m tools.build.test_release_artifacts
+python -m tools.build.generate_release_artifacts --check
+python -m tools.build.test_protocol_surface_report
+python -m tools.build.generate_protocol_surface_report --check
+forge snapshot --match-path test/gas/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+python -m tools.protocol.test_mint_manager_domain_constants
+python -m tools.protocol.check_mint_manager_domain_constants
+python -m tools.build.test_source_verification_inputs
+python -m tools.build.generate_source_verification_inputs --check
+python -m tools.protocol.test_dependency_artifact_manifest
+python -m tools.protocol.generate_dependency_artifact_manifest --check
+python -m tools.protocol.test_dependency_provenance_attestation
+python -m tools.protocol.generate_dependency_provenance_attestation --check
+python -m tools.build.test_abi_compatibility
+python -m tools.build.check_abi_compatibility --target-only
+python -m tools.build.check_abi_compatibility --check
+python -m tools.deployment.test_deployment_manifest
+python -m tools.deployment.generate_deployment_manifest --check
+python -m tools.deployment.test_address_books
+python -m tools.deployment.generate_address_books --check
+python -m tools.deployment.test_ceremony_evidence
+python -m tools.deployment.check_ceremony_evidence
+python -m tools.deployment.test_randomizer_operations
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.test_release_signatures
+python -m tools.release.check_release_signatures
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
+python -m tools.release.test_public_beta_verified_addresses
+python -m tools.release.check_public_beta_verified_addresses
+python -m tools.release.test_production_release_signing_evidence
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.release.test_non_local_release_evidence
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.protocol.test_one_of_one_provenance_manifest
+python -m tools.protocol.check_one_of_one_provenance_manifest
+python -m tools.protocol.generate_one_of_one_provenance_manifest --check
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.security.test_risk_register
+python -m tools.security.check_risk_register
+python -m tools.security.generate_risk_register --check
+python -m tools.release.test_public_beta_blocker_report
+python -m tools.release.generate_public_beta_blocker_report --check
+python -m tools.release.test_production_release_blocker_report
+python -m tools.release.generate_production_release_blocker_report --check
+python -m tools.release.test_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.test_release_evidence_issue_backlog
+python -m tools.release.generate_release_evidence_issue_backlog --check
+python -m tools.release.test_release_evidence_issue_links
+python -m tools.release.check_release_evidence_issue_links
+python -m tools.release.test_release_evidence_issue_snapshot
+python -m tools.release.test_release_evidence_issue_snapshot_audit
+python -m tools.release.test_release_evidence_live_audit_report
+python -m tools.release.check_release_evidence_live_audit_report
+python -m tools.release.test_release_evidence_live_audit_markdown
+python -m tools.release.check_release_evidence_live_audit_markdown
+python -m tools.release.test_release_evidence_live_audit_archive
+python -m tools.release.generate_release_evidence_live_audit_archive --check
+python -m tools.release.test_release_evidence_issue_labels
+python -m tools.release.check_release_evidence_issue_labels
+python -m tools.release.test_release_evidence_issue_body_sync
+python -m tools.release.generate_release_evidence_issue_body_sync --check
+python -m tools.release.test_release_evidence_issue_bodies
+python -m tools.release.check_release_evidence_issue_bodies
+python -m tools.release.test_release_evidence_issue_closure
+python -m tools.release.check_release_evidence_issue_closure
+python -m tools.docs.test_architecture_threat_model
+python -m tools.docs.check_architecture_threat_model
+python -m tools.docs.test_audit_package
+python -m tools.docs.check_audit_package
+python -m tools.docs.test_integrations_readme
+python -m tools.docs.check_integrations_readme
+python -m tools.docs.test_contract_flows
+python -m tools.docs.check_contract_flows
+python -m tools.docs.test_auction_flows
+python -m tools.docs.check_auction_flows
+python -m tools.docs.test_wallet_signature_flows
+python -m tools.docs.check_wallet_signature_flows
+python -m tools.docs.test_events_and_indexing
+python -m tools.docs.check_events_and_indexing
+python -m tools.docs.test_metadata_rendering
+python -m tools.docs.check_metadata_rendering
+python -m tools.docs.test_react_next_reference
+python -m tools.docs.check_react_next_reference
+python -m tools.docs.test_mobile_walletconnect
+python -m tools.docs.check_mobile_walletconnect
+python -m tools.docs.test_electron_security_wallets
+python -m tools.docs.check_electron_security_wallets
+python -m tools.docs.test_operator_admin_ui
+python -m tools.docs.check_operator_admin_ui
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.protocol.test_genesis_deployment_profile
+python -m tools.protocol.check_genesis_deployment_profile
+python -m tools.protocol.test_governed_parameter_identifiers
+python -m tools.protocol.check_governed_parameter_identifiers
+python -m tools.protocol.test_governed_parameter_inventory
+python -m tools.protocol.check_governed_parameter_inventory
+python -m tools.protocol.test_system_manifest_payload_vector
+python -m tools.protocol.check_system_manifest_payload_vector
+python -m tools.protocol.test_system_manifest_payload_vector_reference
+python -m tools.protocol.check_system_manifest_payload_vector_reference
+python -m tools.release.test_release_mode
+python -m tools.release.test_production_broadcast_retention
+python -m tools.release.check_production_broadcast_retention
+python -m tools.release.test_public_beta_verified_addresses
+python -m tools.release.check_public_beta_verified_addresses
+python -m tools.release.test_production_verified_addresses
+python -m tools.release.check_production_verified_addresses
+python -m tools.release.test_release_notes
+python -m tools.release.generate_release_notes --check
+python -m tools.release.test_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.build.test_bytecode_release_proof
+python -m tools.build.generate_bytecode_release_proof --check
+python -m tools.release.test_release_candidate_lockfile
+python -m tools.release.generate_release_candidate_lockfile --check
+python -m tools.release.test_release_checksums
+python -m tools.release.generate_release_checksums --check
+python -m tools.build.test_verify_release_artifacts
+python -m tools.build.verify_release_artifacts
 ```
 
 The generated files under `latest/` are intentionally tracked. They give
@@ -304,8 +304,8 @@ and preserves the boundary that the current committed bundle is local
 pre-audit evidence only. It does not prove live dependency registration,
 collection pin transactions, public-beta readiness, production readiness, or
 external audit acceptance. Validate it with
-`python scripts/test_dependency_provenance_attestation.py` and
-`python scripts/generate_dependency_provenance_attestation.py --check`.
+`python -m tools.protocol.test_dependency_provenance_attestation` and
+`python -m tools.protocol.generate_dependency_provenance_attestation --check`.
 
 `genesis-deployment-profile.json` is the canonical machine-readable mirror of
 the normative `[LCM-GENESIS]` closed world. Its entry count is derived from the
@@ -363,10 +363,10 @@ host instances, genesis values, immutable floors, reviewed measurement or
 cadence evidence, and fixed-stipend compatibility are not yet available.
 Every row also marks its current guarded-consumer list `planning`; those lists
 are useful review inputs but are not claimed exhaustive. Run
-`python scripts/test_governed_parameter_inventory.py` and
-`python scripts/check_governed_parameter_inventory.py` for the ordinary
+`python -m tools.protocol.test_governed_parameter_inventory` and
+`python -m tools.protocol.check_governed_parameter_inventory` for the ordinary
 structural/policy gate. Production release mode directly applies
-`python scripts/check_governed_parameter_inventory.py --require-complete`,
+`python -m tools.protocol.check_governed_parameter_inventory --require-complete`,
 which rejects every `not_available` binding, non-complete guarded-consumer
 inventory, and incomplete required host coverage. The schema reserves exact
 instance, source, address, runtime-code-hash, immutable-authority, host-local
@@ -410,8 +410,8 @@ The committed candidate binding is deliberately `not_available` because issue
 readiness evidence and keeps `RISK-GOV-003` open pending candidate expansion,
 deployment/system-manifest reconciliation, fork and testnet rehearsal,
 monitoring, and independent review. Run
-`python scripts/test_governance_action_policy.py` and
-`python scripts/check_governance_action_policy.py`, or
+`python -m tools.protocol.test_governance_action_policy` and
+`python -m tools.protocol.check_governance_action_policy`, or
 `make governance-action-policy-check`, to enforce the source catalog,
 fail-closed candidate grammar, independent candidate-catalog commitment
 recomputation, forbidden generic routing classes, and honest release status.
@@ -427,12 +427,12 @@ target digest under the production outer
 deployment-identity domain instead of inventing a per-entry identity. The file
 keeps both `production_candidate`
 and `readiness_evidence` false. Regenerate it with
-`python scripts/generate_system_manifest_payload_vector.py`; the drift command
-is `python scripts/check_system_manifest_payload_vector.py` (plus
-`python scripts/test_system_manifest_payload_vector.py`), followed by the
+`python -m tools.protocol.generate_system_manifest_payload_vector`; the drift command
+is `python -m tools.protocol.check_system_manifest_payload_vector` (plus
+`python -m tools.protocol.test_system_manifest_payload_vector`), followed by the
 independent fixed-golden
-`python scripts/test_system_manifest_payload_vector_reference.py` and
-`python scripts/check_system_manifest_payload_vector_reference.py` pair, not a
+`python -m tools.protocol.test_system_manifest_payload_vector_reference` and
+`python -m tools.protocol.check_system_manifest_payload_vector_reference` pair, not a
 generator `--check` mode. The reference scripts are required CI and
 checksum-covered release inputs. `make system-manifest-payload-vector` validates
 the genesis profile and governed-parameter catalog before generation, then runs
@@ -445,8 +445,8 @@ replace the synthetic fixture facts.
 
 The release-mode gate is not part of the default artifact refresh path because
 the committed baseline is intentionally blocked. Use
-`python scripts/check_release_mode.py --phase public-beta`,
-`python scripts/check_release_mode.py --phase production-release`, or the manual
+`python -m tools.release.check_release_mode --phase public-beta`,
+`python -m tools.release.check_release_mode --phase production-release`, or the manual
 Release Mode GitHub workflow only when reviewing a release candidate with
 retained live evidence. Those commands are expected to fail until every row
 for the selected phase is `complete` or `accepted_risk`; production release
@@ -460,9 +460,9 @@ template is an artifact-only model for artist/story/authenticity context; it is
 not `tokenURI` metadata, not `contractURI()` metadata, not included in
 `collectionFreezeManifestHash(collectionId)`, not marketplace readiness proof,
 not royalty enforcement, and not ownership proof beyond chain state. Validate
-it with `python scripts/test_one_of_one_provenance_manifest.py`,
-`python scripts/check_one_of_one_provenance_manifest.py`, and
-`python scripts/generate_one_of_one_provenance_manifest.py --check`.
+it with `python -m tools.protocol.test_one_of_one_provenance_manifest`,
+`python -m tools.protocol.check_one_of_one_provenance_manifest`, and
+`python -m tools.protocol.generate_one_of_one_provenance_manifest --check`.
 
 `latest/one-of-one-permanence-manifest.json` is generated from schemaed
 descriptors under `permanence/`. It catalogs collector-verifiable permanence
@@ -473,9 +473,9 @@ template is an artifact-only model for replayability requirements; it is not
 final collector proof, not marketplace readiness proof, not ownership proof
 beyond chain state, and not production release approval until reviewed
 non-local or final-drop evidence exists. Validate it with
-`python scripts/test_one_of_one_permanence_package.py`,
-`python scripts/check_one_of_one_permanence_package.py`, and
-`python scripts/generate_one_of_one_permanence_manifest.py --check`.
+`python -m tools.protocol.test_one_of_one_permanence_package`,
+`python -m tools.protocol.check_one_of_one_permanence_package`, and
+`python -m tools.protocol.generate_one_of_one_permanence_manifest --check`.
 
 `latest/release-manifest.json` is a generated top-level release manifest. It
 records release metadata, release artifact hashes, ABI compatibility baseline
@@ -484,12 +484,12 @@ public-beta evidence status, schema hashes, governance doc hashes including
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`,
-`docs/integrations/frontend-reference-architecture.md`,
-`docs/integrations/mobile-walletconnect.md`,
-`docs/integrations/electron-security-wallets.md`,
-`docs/integrations/operator-admin-ui.md`,
+`docs/reference/legacy-stack/integrations/frontend-reference-architecture.md`,
+`docs/reference/legacy-stack/integrations/mobile-walletconnect.md`,
+`docs/reference/legacy-stack/integrations/electron-security-wallets.md`,
+`docs/reference/legacy-stack/integrations/operator-admin-ui.md`,
 `docs/permanence-packages.md`,
-`docs/integrations/examples/react-viem.md`, and
+`docs/reference/legacy-stack/integrations/examples/react-viem.md`, and
 `docs/release-readiness.md`, and the release-ceremony items that are not yet
 available for this pre-audit local baseline.
 
@@ -523,8 +523,8 @@ retained or explicitly risk-accepted.
 audit-package, Slither, release, and evidence inputs. It records launch
 blockers, accepted local-baseline risks, planned mitigations, source-document
 hashes, evidence hashes, required checks, and tracking references. The register
-is validated by `scripts/check_risk_register.py`, refreshed by
-`scripts/generate_risk_register.py`, and backed by
+is validated by `tools/security/check_risk_register.py`, refreshed by
+`tools/security/generate_risk_register.py`, and backed by
 `schema/risk-register.schema.json`. It is checksum-covered and included in the
 top-level release manifest, but it is not itself launch approval.
 
@@ -536,8 +536,8 @@ Unreleased changelog entries, bytecode-proof status, risk status/area counts,
 and validation commands. They are review aids only; they do not prove live
 deployment, public-beta readiness, production readiness, signed tags, detached
 signatures, or explorer verification. Validate them with
-`python scripts/test_release_notes.py` and
-`python scripts/generate_release_notes.py --check`.
+`python -m tools.release.test_release_notes` and
+`python -m tools.release.generate_release_notes --check`.
 
 `latest/public-beta-blockers.md` is generated from
 `latest/public-beta-evidence.json`. It lists incomplete public-beta and
@@ -571,13 +571,13 @@ production-release readiness claims.
 from each issue-backlog entry to its GitHub issue. It lets maintainers audit
 that every incomplete evidence requirement has a durable issue without making
 the issue itself completion evidence. The
-`scripts/check_release_evidence_issue_labels.py` checker validates committed
+`tools/release/check_release_evidence_issue_labels.py` checker validates committed
 `applied_labels` deterministically and can audit an exported live GitHub issue
 JSON snapshot with `--live-json` before a release ceremony.
 All retained-evidence tracker issues should carry `release`, `roadmap`, and
 `evidence`; public-beta rows also carry `public-beta`, and production-release
 rows also carry `production-release`.
-Use `scripts/export_release_evidence_issue_snapshot.py` to write label, body,
+Use `tools/release/export_release_evidence_issue_snapshot.py` to write label, body,
 or closure snapshots as UTF-8 JSON without relying on shell redirection. For
 retained live audit evidence, prefer `--exact-linked-issues --issue-links
 release-artifacts/latest/release-evidence-issue-links.json` so the export
@@ -585,7 +585,7 @@ fetches every committed tracker issue directly instead of depending on issue
 list pagination. In exact linked-issue mode, `--state` and `--limit` are
 ignored because each linked issue is fetched directly and the closure checker
 needs the returned live state for every linked issue.
-Use `scripts/audit_release_evidence_issue_snapshots.py` as the operator-only
+Use `tools/release/audit_release_evidence_issue_snapshots.py` as the operator-only
 one-command live audit for label, body, and closure drift; CI runs only its
 mocked unit tests and never requires GitHub network access.
 When operators pass `--report-json` or `--report-md`, the live audit
@@ -599,10 +599,10 @@ template report lives at
 human-readable template at
 `evidence/release-evidence-live-audit-report-template.md` and template snapshots
 under `evidence/live-audit-report-template/`. Run
-`scripts/check_release_evidence_live_audit_report.py` to validate retained JSON
+`tools/release/check_release_evidence_live_audit_report.py` to validate retained JSON
 report bundles offline against snapshot digests, command provenance, profile
 coverage, freshness/currentness claims, and the blocked-readiness posture. Run
-`scripts/check_release_evidence_live_audit_markdown.py` with the retained JSON
+`tools/release/check_release_evidence_live_audit_markdown.py` with the retained JSON
 and Markdown paths to prove the human-readable report is the canonical render of
 the validated JSON source and still contains no secret-shaped values. Report
 bundles are ceremony evidence for review; they do not make any retained
@@ -610,7 +610,7 @@ public-beta or production evidence row complete.
 
 `latest/release-evidence-live-audit-report-archive.json` and
 `latest/release-evidence-live-audit-report-archive.md` are generated by
-`scripts/generate_release_evidence_live_audit_archive.py`; they index the
+`tools/release/generate_release_evidence_live_audit_archive.py`; they index the
 committed template pair plus any future no-secret bundles retained under
 `evidence/live-audit-reports/`, record JSON/Markdown digests and validation
 commands, and keep CI network-free.
@@ -635,17 +635,17 @@ validation command sequence.
 committed issue-link map into exact GitHub issue body payloads plus a Markdown
 review view. They are no-secret, tracker-only artifacts; they do not update
 GitHub automatically and do not make tracker closure retained evidence. The
-`scripts/check_release_evidence_issue_bodies.py` checker validates committed
+`tools/release/check_release_evidence_issue_bodies.py` checker validates committed
 body payloads deterministically, can audit an exported live GitHub issue JSON
 snapshot with `--live-json`, and can write deterministic per-issue body files
 with `--write-body-files` for operator-run `gh issue edit --body-file`
 remediation.
 
-`scripts/check_release_evidence_issue_closure.py` validates the committed
+`tools/release/check_release_evidence_issue_closure.py` validates the committed
 tracker map, `release-evidence-issue-backlog.json` backlog artifact, body-sync
 artifact, packet index, and shared release evidence status manifest agree on
 tracker closure readiness. Its optional `--live-json` mode audits a
-closure snapshot written by `scripts/export_release_evidence_issue_snapshot.py`
+closure snapshot written by `tools/release/export_release_evidence_issue_snapshot.py`
 and fails if a linked tracker issue is closed while the committed evidence
 status is still `missing`, `pending`, `blocked`, or `not_applicable`.
 
@@ -711,10 +711,10 @@ production admin ceremony completion.
 `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`,
 `docs/incident-response.md`, `docs/public-beta-evidence.md`,
 `docs/non-local-release-evidence.md`, `docs/signer-custody-readiness.md`,
-`docs/integrations/frontend-reference-architecture.md`,
-`docs/integrations/mobile-walletconnect.md`,
-`docs/integrations/electron-security-wallets.md`,
-`docs/integrations/operator-admin-ui.md`, and
+`docs/reference/legacy-stack/integrations/frontend-reference-architecture.md`,
+`docs/reference/legacy-stack/integrations/mobile-walletconnect.md`,
+`docs/reference/legacy-stack/integrations/electron-security-wallets.md`,
+`docs/reference/legacy-stack/integrations/operator-admin-ui.md`, and
 `docs/release-readiness.md` are the
 auditor-facing architecture, trust-boundary, package, incident-response,
 evidence-status, non-local evidence intake, signer custody readiness, frontend
@@ -726,24 +726,24 @@ release manifest records their hashes as governance documents.
 `evidence/external-audit-report/external-audit-report-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `external_audit_report` evidence. Validate it with
-`python scripts/test_external_audit_report_evidence.py` and
-`python scripts/check_external_audit_report_evidence.py` before generating a
+`python -m tools.release.test_external_audit_report_evidence` and
+`python -m tools.release.check_external_audit_report_evidence` before generating a
 non-local evidence envelope. The committed template is not audit evidence and
 does not change public-beta readiness.
 
 `evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `post_audit_remediation` evidence. Validate it with
-`python scripts/test_post_audit_remediation_evidence.py` and
-`python scripts/check_post_audit_remediation_evidence.py` before generating a
+`python -m tools.release.test_post_audit_remediation_evidence` and
+`python -m tools.release.check_post_audit_remediation_evidence` before generating a
 non-local evidence envelope. The committed template is not post-audit
 remediation evidence and does not change production-release readiness.
 
 `evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `testnet_deployment_rehearsal` evidence. Validate it with
-`python scripts/test_testnet_deployment_rehearsal_evidence.py` and
-`python scripts/check_testnet_deployment_rehearsal_evidence.py` before
+`python -m tools.deployment.test_testnet_deployment_rehearsal_evidence` and
+`python -m tools.deployment.check_testnet_deployment_rehearsal_evidence` before
 generating a non-local evidence envelope. The committed template is not testnet
 evidence and does not change public-beta readiness. Pending or reviewed
 retained references must stay repo-relative, point at committed UTF-8 text
@@ -752,8 +752,8 @@ files, remain no-secret, and match optional declared `sha256:` hashes.
 `evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future public-beta
 address-book and explorer verification evidence. Validate it with
-`python scripts/test_public_beta_verified_addresses.py` and
-`python scripts/check_public_beta_verified_addresses.py` before generating
+`python -m tools.release.test_public_beta_verified_addresses` and
+`python -m tools.release.check_public_beta_verified_addresses` before generating
 non-local evidence envelopes for `verified_deployed_addresses` or
 `explorer_verification_status`. The committed template is not verified
 testnet address evidence and does not change public-beta readiness.
@@ -761,24 +761,24 @@ testnet address evidence and does not change public-beta readiness.
 `evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `production_broadcast_retention` evidence. Validate it with
-`python scripts/test_production_broadcast_retention.py` and
-`python scripts/check_production_broadcast_retention.py` before generating a
+`python -m tools.release.test_production_broadcast_retention` and
+`python -m tools.release.check_production_broadcast_retention` before generating a
 non-local evidence envelope. The committed template is not production broadcast
 evidence and does not change production-release readiness.
 
 `evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `live_deployment_manifest` evidence. Validate it with
-`python scripts/test_live_deployment_manifest_evidence.py` and
-`python scripts/check_live_deployment_manifest_evidence.py` before generating a
+`python -m tools.release.test_live_deployment_manifest_evidence` and
+`python -m tools.release.check_live_deployment_manifest_evidence` before generating a
 non-local evidence envelope. The committed template is not a live deployment
 manifest and does not change production-release readiness.
 
 `evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future production
 address-book and live explorer verification evidence. Validate it with
-`python scripts/test_production_verified_addresses.py` and
-`python scripts/check_production_verified_addresses.py` before generating
+`python -m tools.release.test_production_verified_addresses` and
+`python -m tools.release.check_production_verified_addresses` before generating
 non-local evidence envelopes for `production_address_books` or
 `live_explorer_verification`. The committed template is not verified live
 address evidence and does not change production-release readiness.
@@ -786,40 +786,40 @@ address evidence and does not change production-release readiness.
 `evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `live_metadata_browser_evidence`. Validate it with
-`python scripts/test_live_metadata_browser_evidence.py` and
-`python scripts/check_live_metadata_browser_evidence.py` before generating a
+`python -m tools.release.test_live_metadata_browser_evidence` and
+`python -m tools.release.check_live_metadata_browser_evidence` before generating a
 non-local evidence envelope. The committed template is not live browser proof
 and does not change production-release readiness.
 
 `evidence/live-ceremony/live-ceremony-retained-artifact-template.md` is the
 checked no-secret retained-artifact template for future
 `live_ceremony_evidence`. Validate it with
-`python scripts/test_live_ceremony_evidence.py` and
-`python scripts/check_live_ceremony_evidence.py` before generating a non-local
+`python -m tools.deployment.test_live_ceremony_evidence` and
+`python -m tools.deployment.check_live_ceremony_evidence` before generating a non-local
 evidence envelope. The committed template is not live governance or deployment
 ceremony proof and does not change production-release readiness.
 
 `evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `live_randomizer_operations_evidence`. Validate it with
-`python scripts/test_live_randomizer_operations_evidence.py` and
-`python scripts/check_live_randomizer_operations_evidence.py` before generating
+`python -m tools.deployment.test_live_randomizer_operations_evidence` and
+`python -m tools.deployment.check_live_randomizer_operations_evidence` before generating
 a non-local evidence envelope. The committed template is not live provider
 operations proof and does not change production-release readiness.
 
 `evidence/incident-drills/incident-drill-retained-artifact-template.md` is the
 checked no-secret retained-artifact template for future
 `incident_drill_evidence`. Validate it with
-`python scripts/test_incident_drill_evidence.py` and
-`python scripts/check_incident_drill_evidence.py` before treating any drill
+`python -m tools.release.test_incident_drill_evidence` and
+`python -m tools.release.check_incident_drill_evidence` before treating any drill
 bundle as reviewed release evidence. The committed template is not incident
 drill completion proof and does not change production-release readiness.
 
 `evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md` is
 the checked no-secret retained-artifact template for future
 `stuck_auction_drill_evidence`. Validate it with
-`python scripts/test_stuck_auction_drill_evidence.py` and
-`python scripts/check_stuck_auction_drill_evidence.py` before treating a
+`python -m tools.release.test_stuck_auction_drill_evidence` and
+`python -m tools.release.check_stuck_auction_drill_evidence` before treating a
 stuck-auction drill bundle as reviewed release evidence. The committed template
 is not incident drill completion proof and does not change production-release
 readiness.
@@ -827,8 +827,8 @@ readiness.
 `evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `failed_randomness_drill_evidence`. Validate it with
-`python scripts/test_failed_randomness_drill_evidence.py` and
-`python scripts/check_failed_randomness_drill_evidence.py` before treating a
+`python -m tools.release.test_failed_randomness_drill_evidence` and
+`python -m tools.release.check_failed_randomness_drill_evidence` before treating a
 failed-randomness drill bundle as reviewed release evidence. The committed
 template is not incident drill completion proof and does not change
 production-release readiness.
@@ -836,8 +836,8 @@ production-release readiness.
 `evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`
 is the checked no-secret retained-artifact template for future
 `bad_metadata_dependency_drill_evidence`. Validate it with
-`python scripts/test_bad_metadata_dependency_drill_evidence.py` and
-`python scripts/check_bad_metadata_dependency_drill_evidence.py` before
+`python -m tools.protocol.test_bad_metadata_dependency_drill_evidence` and
+`python -m tools.protocol.check_bad_metadata_dependency_drill_evidence` before
 treating a bad metadata/dependency drill bundle as reviewed release evidence.
 The committed template is not incident drill completion proof and does not
 change production-release readiness.
@@ -856,7 +856,7 @@ and release manifest. Treat
 signature evidence records that production detached signatures and signed tags
 remain a maintainer release-ceremony step.
 
-Third-party consumers can run `python scripts/verify_release_artifacts.py` from
+Third-party consumers can run `python -m tools.build.verify_release_artifacts` from
 the repository root to verify the committed release bundle without regenerating
 artifacts, rebuilding Solidity, using RPC, or contacting explorers. The
 verifier checks that `latest/SHA256SUMS`, `latest/release-checksums.json`,
@@ -901,12 +901,12 @@ every production contract against EIP-170, and enforces the configured
 
 `baselines/v0.1.0/gas-snapshot.snap` is the local Foundry gas snapshot for the
 Gate D operations. It is generated with `forge snapshot --match-path
-test/StreamGasSnapshot.t.sol --snap
+test/gas/StreamGasSnapshot.t.sol --snap
 release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and checked with the same
 command's `--check` form. The snapshot intentionally covers deterministic local
 tests only; fork/testnet/mainnet gas measurements remain a later release step.
 `baselines/v0.1.0/gas-envelopes.json` adds named release envelopes for those
-snapshot rows. Check it with `python scripts/check_gas_envelopes.py`; the
+snapshot rows. Check it with `python -m tools.protocol.check_gas_envelopes`; the
 checker requires every snapshot row to have exactly one envelope and fails when
 any measured flow exceeds its documented ceiling.
 
@@ -919,55 +919,55 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
-python scripts/test_external_call_gas_inventory.py
-python scripts/check_external_call_gas_inventory.py
-python scripts/test_abi_compatibility.py
-python scripts/check_abi_compatibility.py --check
-python scripts/check_contract_size_budget.py
-python scripts/generate_deployment_manifest.py
-python scripts/generate_address_books.py
-python scripts/generate_source_verification_inputs.py
-python scripts/generate_dependency_artifact_manifest.py
-python scripts/generate_dependency_provenance_attestation.py
-python scripts/check_ceremony_evidence.py
-python scripts/check_randomizer_operations.py
-python scripts/check_release_signatures.py
-python scripts/check_public_beta_verified_addresses.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/check_non_local_release_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_mint_manager_domain_constants.py
-python scripts/check_mint_manager_domain_constants.py
-python scripts/generate_one_of_one_provenance_manifest.py
-python scripts/generate_one_of_one_permanence_manifest.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_public_beta_blocker_report.py
-python scripts/generate_production_release_blocker_report.py
-python scripts/generate_release_evidence_packet_index.py
-python scripts/generate_release_evidence_live_audit_archive.py
-python scripts/check_architecture_threat_model.py
-python scripts/check_audit_package.py
-python scripts/check_react_next_reference.py
-python scripts/check_mobile_walletconnect.py
-python scripts/check_release_readiness.py
-python scripts/test_genesis_deployment_profile.py
-python scripts/check_genesis_deployment_profile.py
-python scripts/test_governed_parameter_identifiers.py
-python scripts/check_governed_parameter_identifiers.py
-python scripts/test_governed_parameter_inventory.py
-python scripts/check_governed_parameter_inventory.py
-python scripts/generate_system_manifest_payload_vector.py
-python scripts/test_system_manifest_payload_vector.py
-python scripts/check_system_manifest_payload_vector.py
-python scripts/test_system_manifest_payload_vector_reference.py
-python scripts/check_system_manifest_payload_vector_reference.py
-python scripts/generate_risk_register.py
-python scripts/generate_release_notes.py
-python scripts/generate_release_manifest.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/generate_release_candidate_lockfile.py
-python scripts/generate_release_checksums.py
+python -m tools.protocol.test_external_call_gas_inventory
+python -m tools.protocol.check_external_call_gas_inventory
+python -m tools.build.test_abi_compatibility
+python -m tools.build.check_abi_compatibility --check
+python -m tools.build.check_contract_size_budget
+python -m tools.deployment.generate_deployment_manifest
+python -m tools.deployment.generate_address_books
+python -m tools.build.generate_source_verification_inputs
+python -m tools.protocol.generate_dependency_artifact_manifest
+python -m tools.protocol.generate_dependency_provenance_attestation
+python -m tools.deployment.check_ceremony_evidence
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.check_release_signatures
+python -m tools.release.check_public_beta_verified_addresses
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.check_signer_custody_readiness
+python -m tools.protocol.test_mint_manager_domain_constants
+python -m tools.protocol.check_mint_manager_domain_constants
+python -m tools.protocol.generate_one_of_one_provenance_manifest
+python -m tools.protocol.generate_one_of_one_permanence_manifest
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_public_beta_blocker_report
+python -m tools.release.generate_production_release_blocker_report
+python -m tools.release.generate_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_live_audit_archive
+python -m tools.docs.check_architecture_threat_model
+python -m tools.docs.check_audit_package
+python -m tools.docs.check_react_next_reference
+python -m tools.docs.check_mobile_walletconnect
+python -m tools.release.check_release_readiness
+python -m tools.protocol.test_genesis_deployment_profile
+python -m tools.protocol.check_genesis_deployment_profile
+python -m tools.protocol.test_governed_parameter_identifiers
+python -m tools.protocol.check_governed_parameter_identifiers
+python -m tools.protocol.test_governed_parameter_inventory
+python -m tools.protocol.check_governed_parameter_inventory
+python -m tools.protocol.generate_system_manifest_payload_vector
+python -m tools.protocol.test_system_manifest_payload_vector
+python -m tools.protocol.check_system_manifest_payload_vector
+python -m tools.protocol.test_system_manifest_payload_vector_reference
+python -m tools.protocol.check_system_manifest_payload_vector_reference
+python -m tools.security.generate_risk_register
+python -m tools.release.generate_release_notes
+python -m tools.release.generate_release_manifest
+python -m tools.build.generate_bytecode_release_proof
+python -m tools.release.generate_release_candidate_lockfile
+python -m tools.release.generate_release_checksums
 ```
 
 If only `release-artifacts/` changed, the manifest and address-book commands

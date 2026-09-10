@@ -11,7 +11,7 @@ The canonical machine-readable catalog is:
 The catalog is generated from:
 
 - `release-artifacts/latest/protocol-surface-report.json`
-- `scripts/generate_custom_error_catalog.py`
+- `tools/build/generate_custom_error_catalog.py`
 
 ## Scope
 
@@ -88,17 +88,17 @@ Indexers and monitoring should:
 Run these commands after ABI, error, or release-artifact changes:
 
 ```bash
-python scripts/generate_protocol_surface_report.py
-python scripts/generate_custom_error_catalog.py
-python scripts/generate_release_manifest.py
-python scripts/generate_release_checksums.py
+python -m tools.build.generate_protocol_surface_report
+python -m tools.build.generate_custom_error_catalog
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_checksums
 ```
 
 CI and local gates check drift with:
 
 ```bash
-python scripts/test_custom_error_catalog.py
-python scripts/generate_custom_error_catalog.py --check
+python -m tools.build.test_custom_error_catalog
+python -m tools.build.generate_custom_error_catalog --check
 ```
 
 Changing or removing a custom error is a release-impacting ABI change. The

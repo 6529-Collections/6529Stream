@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added focused Core, mint and governance caller interfaces, shared request
+  types, and interface compatibility regressions. Added a portable developer
+  command for the supported stack and explicit unit, legacy, gas and full suites.
 - Integrated the current Core with signed native fixed-price sales, English
   auctions, canonical mint accounting, immutable split wallets and royalty
   resolution. Sales and auctions require the accepted collection artist and
@@ -24,6 +27,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Organized Solidity interfaces by domain, isolated legacy implementations and
+  regression tests, and grouped maintenance tools into Python packages. Rewrote
+  contributor and integration guides around the current APIs; older examples and
+  detailed maintenance instructions now have separate reference sections.
+- Preserved historical compilation, source-layout and documentation snapshots
+  while refreshing current evidence. Exported interface IDs now follow Solidity's
+  own-selector rules, including the inheritance-only Core aggregate's zero ID.
+- Build cleanup preserves broadcast receipts and deployment records. Offline
+  release verification binds package initializers and isolates cached first-party
+  modules when validating a materialized release snapshot.
 - Retry the complete pinned Foundry installer after transient attestation-service
   failures without bypassing verification. Reconcile reviewed release-tool source
   bindings and make the output-directory-swap regression deterministic on Windows.

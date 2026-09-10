@@ -59,13 +59,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_post_audit_remediation_evidence.py
-python scripts/check_post_audit_remediation_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json --retained-artifact release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md --output release-artifacts/evidence/post-audit-remediation/post-audit-remediation-evidence.json --environment audit --chain-id not_applicable --block-or-reference "<audit report, remediation tracker, or retest reference>" --command-or-source-system "<auditor retest source or remediation review command>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_post_audit_remediation_evidence
+python -m tools.release.check_post_audit_remediation_evidence
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/post-audit-remediation-template.json --retained-artifact release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md --output release-artifacts/evidence/post-audit-remediation/post-audit-remediation-evidence.json --environment audit --chain-id not_applicable --block-or-reference "<audit report, remediation tracker, or retest reference>" --command-or-source-system "<auditor retest source or remediation review command>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

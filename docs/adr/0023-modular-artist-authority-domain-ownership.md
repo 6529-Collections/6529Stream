@@ -26,8 +26,8 @@ The machine-readable normative companion is the
 [global artist semantic-owner matrix v2](../architecture/artist-semantic-owner-matrix-v2.json).
 Its strict
 [schema](../architecture/artist-semantic-owner-matrix-v2.schema.json),
-[checker](../../scripts/check_artist_semantic_owner_matrix.py), and
-[hostile tests](../../scripts/test_artist_semantic_owner_matrix.py) bind:
+[checker](../../tools/protocol/check_artist_semantic_owner_matrix.py), and
+[hostile tests](../../tools/protocol/test_artist_semantic_owner_matrix.py) bind:
 
 - all 57 source rows;
 - all 18 columns in every row;
@@ -547,12 +547,12 @@ catalog, profile, policy, manifest, checksum, and release-tail effects.
 Required packet checks:
 
 ```text
-python scripts/check_artist_semantic_owner_matrix.py
-python scripts/test_artist_semantic_owner_matrix.py
-python -m py_compile scripts/check_artist_semantic_owner_matrix.py scripts/test_artist_semantic_owner_matrix.py
-python scripts/test_markdown_links.py
-python scripts/check_markdown_links.py
-python scripts/check_changelog.py
+python -m tools.protocol.check_artist_semantic_owner_matrix
+python -m tools.protocol.test_artist_semantic_owner_matrix
+python -m py_compile tools/protocol/check_artist_semantic_owner_matrix.py tools/protocol/test_artist_semantic_owner_matrix.py
+python -m tools.docs.test_markdown_links
+python -m tools.docs.check_markdown_links
+python -m tools.docs.check_changelog
 codex-diff-check
 ```
 

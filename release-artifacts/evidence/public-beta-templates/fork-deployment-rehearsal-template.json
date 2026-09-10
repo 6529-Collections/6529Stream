@@ -8,7 +8,7 @@
   "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
   "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
   "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-  "sha256": "sha256:d5d4ac1813cc16321ccfaf0fd50c06d14070847d91068209960f6a096a408142",
+  "sha256": "sha256:0677aca9ba3d10a1ba5328348dfdbc63d64841e48e9246b760cd071fa0842f98",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

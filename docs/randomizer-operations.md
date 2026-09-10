@@ -34,8 +34,8 @@ readiness status.
 Validate the committed local evidence with:
 
 ```sh
-python scripts/test_randomizer_operations.py
-python scripts/check_randomizer_operations.py
+python -m tools.deployment.test_randomizer_operations
+python -m tools.deployment.check_randomizer_operations
 ```
 
 The committed
@@ -81,10 +81,10 @@ After changing randomizer evidence, schemas, or docs, regenerate and check the
 top-level release files:
 
 ```sh
-python scripts/generate_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py
-python scripts/generate_release_checksums.py --check
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_checksums --check
 ```
 
 The local evidence does not prove provider readiness for public beta. It proves

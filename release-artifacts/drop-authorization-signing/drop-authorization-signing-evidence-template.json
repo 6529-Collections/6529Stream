@@ -14,7 +14,7 @@
   "payload": {
     "payload_file": {
       "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
-      "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+      "sha256": "sha256:a2872eed5dcdbae5f39b9e3d00e31882342bb7bc6fb4c0c1f34845b9dbb153ee"
     },
     "payload_schema_version": "6529stream.drop-authorization-payload.v1",
     "payload_kind": "fixed_price",
@@ -80,7 +80,7 @@
     {
       "category": "payload_output",
       "path": "test/fixtures/drop-authorization/payload-generator/fixed-price-output.json",
-      "sha256": "sha256:80d397dc7e2c26e3f5472f1450745767529395e77a776ff9f3ff4e4d75f222fe"
+      "sha256": "sha256:a2872eed5dcdbae5f39b9e3d00e31882342bb7bc6fb4c0c1f34845b9dbb153ee"
     },
     {
       "category": "retained_transcript",

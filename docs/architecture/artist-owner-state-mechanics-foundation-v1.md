@@ -12,8 +12,8 @@ Machine-readable surfaces:
 
 - [foundation packet](artist-owner-state-mechanics-foundation-v1.json)
 - [Draft 2020-12 schema](artist-owner-state-mechanics-foundation-v1.schema.json)
-- [independent checker](../../scripts/check_artist_owner_state_mechanics_foundation.py)
-- [hostile tests](../../scripts/test_artist_owner_state_mechanics_foundation.py)
+- [independent checker](../../tools/protocol/check_artist_owner_state_mechanics_foundation.py)
+- [hostile tests](../../tools/protocol/test_artist_owner_state_mechanics_foundation.py)
 
 ## Selected outer mechanics
 

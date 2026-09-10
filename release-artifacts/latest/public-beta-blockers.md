@@ -37,10 +37,10 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Requirement | Status | Owner | Evidence Posture | Evidence Count | Risk Acceptance | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `external_audit_report` | `missing` | TBD | external/future | 0 | none | A completed external audit report and issue-linked remediation status are not yet retained. |
-| `fork_deployment_rehearsal` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork deployment rehearsal artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. |
+| `fork_deployment_rehearsal` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork deployment rehearsal artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention keeps the original command/receipts and byte-exact pre-reorganization manifest/address-book snapshots; no new run or review is claimed. |
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
-| `fork_testnet_ceremony_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the permanent-Core metadata/router deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. |
-| `fork_testnet_randomizer_operations_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork randomizer operations artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. |
+| `fork_testnet_ceremony_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the permanent-Core metadata/router deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention preserves historical command/receipts and exact pre-reorganization deployment snapshots; no new execution or review is claimed. |
+| `fork_testnet_randomizer_operations_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork randomizer operations artifact set now binds the permanent-Core metadata/router deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the permanent-Core PR before the row can return to complete. Public beta remains blocked. Reorganization retention keeps the original command/receipts and byte-exact pre-reorganization manifest/address-book snapshots; no new run or review is claimed. |
 | `verified_deployed_addresses` | `missing` | TBD | external/future | 0 | none | Verified deployed addresses for non-local environments are not yet retained. |
 | `explorer_verification_status` | `missing` | TBD | external/future | 0 | none | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 
@@ -91,25 +91,25 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Evidence Family | Command |
 | --- | --- |
-| Shared evidence status manifest | `python scripts/test_public_beta_evidence.py` |
-| Shared evidence status manifest | `python scripts/check_public_beta_evidence.py` |
-| Public beta blocker report | `python scripts/test_public_beta_blocker_report.py` |
-| Public beta blocker report | `python scripts/generate_public_beta_blocker_report.py --check` |
-| Non-local release evidence | `python scripts/test_non_local_release_evidence.py` |
-| Non-local release evidence | `python scripts/check_non_local_release_evidence.py` |
-| Drop authorization signing evidence | `python scripts/test_drop_authorization_signing_evidence.py` |
-| Drop authorization signing evidence | `python scripts/check_drop_authorization_signing_evidence.py` |
-| Signer custody readiness evidence | `python scripts/test_signer_custody_readiness.py` |
-| Signer custody readiness evidence | `python scripts/check_signer_custody_readiness.py` |
-| Release signatures | `python scripts/test_release_signatures.py` |
-| Release signatures | `python scripts/check_release_signatures.py` |
-| Ceremony evidence | `python scripts/test_ceremony_evidence.py` |
-| Ceremony evidence | `python scripts/check_ceremony_evidence.py` |
-| Randomizer operations | `python scripts/test_randomizer_operations.py` |
-| Randomizer operations | `python scripts/check_randomizer_operations.py` |
-| Marketplace/indexer evidence | `python scripts/test_marketplace_indexer_evidence.py` |
-| Marketplace/indexer evidence | `python scripts/check_marketplace_indexer_evidence.py` |
-| Release manifest | `python scripts/test_release_manifest.py` |
-| Release manifest | `python scripts/generate_release_manifest.py --check` |
-| Release checksums | `python scripts/test_release_checksums.py` |
-| Release checksums | `python scripts/generate_release_checksums.py --check` |
+| Shared evidence status manifest | `python -m tools.release.test_public_beta_evidence` |
+| Shared evidence status manifest | `python -m tools.release.check_public_beta_evidence` |
+| Public beta blocker report | `python -m tools.release.test_public_beta_blocker_report` |
+| Public beta blocker report | `python -m tools.release.generate_public_beta_blocker_report --check` |
+| Non-local release evidence | `python -m tools.release.test_non_local_release_evidence` |
+| Non-local release evidence | `python -m tools.release.check_non_local_release_evidence` |
+| Drop authorization signing evidence | `python -m tools.release.test_drop_authorization_signing_evidence` |
+| Drop authorization signing evidence | `python -m tools.release.check_drop_authorization_signing_evidence` |
+| Signer custody readiness evidence | `python -m tools.release.test_signer_custody_readiness` |
+| Signer custody readiness evidence | `python -m tools.release.check_signer_custody_readiness` |
+| Release signatures | `python -m tools.release.test_release_signatures` |
+| Release signatures | `python -m tools.release.check_release_signatures` |
+| Ceremony evidence | `python -m tools.deployment.test_ceremony_evidence` |
+| Ceremony evidence | `python -m tools.deployment.check_ceremony_evidence` |
+| Randomizer operations | `python -m tools.deployment.test_randomizer_operations` |
+| Randomizer operations | `python -m tools.deployment.check_randomizer_operations` |
+| Marketplace/indexer evidence | `python -m tools.release.test_marketplace_indexer_evidence` |
+| Marketplace/indexer evidence | `python -m tools.release.check_marketplace_indexer_evidence` |
+| Release manifest | `python -m tools.release.test_release_manifest` |
+| Release manifest | `python -m tools.release.generate_release_manifest --check` |
+| Release checksums | `python -m tools.release.test_release_checksums` |
+| Release checksums | `python -m tools.release.generate_release_checksums --check` |

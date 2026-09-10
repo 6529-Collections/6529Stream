@@ -1,0 +1,405 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "rawRandomness",
+          "type": "bytes32"
+        }
+      ],
+      "name": "fulfillEntropy",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "outcome",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "mintCommitment",
+          "type": "bytes32"
+        }
+      ],
+      "name": "onTokenMinted",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scopeKind",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeRef",
+          "type": "bytes32"
+        }
+      ],
+      "name": "registerEntropyScope",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "requestEntropy",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "providerRequestId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "scopeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "scopeInputsHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "requestScopeEntropy",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "providerRequestId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "rawRandomness",
+              "type": "bytes32"
+            }
+          ],
+          "name": "fulfillEntropy",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "outcome",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            }
+          ],
+          "name": "onTokenMinted",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scopeKind",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeRef",
+              "type": "bytes32"
+            }
+          ],
+          "name": "registerEntropyScope",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "requestEntropy",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "scopeId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "scopeInputsHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "requestScopeEntropy",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "payable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "fulfillEntropy(bytes32,bytes32)": {
+            "notice": "Records a provider callback and returns the pinned fulfillment outcome code."
+          },
+          "onTokenMinted(uint256,uint256,address,bytes32)": {
+            "notice": "Registers a newly allocated token before Core invokes the ERC-721 receiver hook."
+          },
+          "registerEntropyScope(uint256,uint8,bytes32)": {
+            "notice": "Registers a collection- or sale-scoped entropy subject."
+          },
+          "requestEntropy(uint256)": {
+            "notice": "Requests token entropy under the collection's active provider policy."
+          },
+          "requestScopeEntropy(bytes32,bytes32)": {
+            "notice": "Requests entropy for a registered scope."
+          }
+        },
+        "notice": "Permanent write surface for the Core-bound entropy coordinator.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol": "IStreamEntropyCoordinator"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/entropy/IStreamEntropyCoordinator.sol": {
+        "keccak256": "0x64b9dc87ed300f630378572d4c8d93dcd2f931d8c29c873b96c2fef426d2b990",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://323aee145974ca8bff45cf47b29eefa7352db074b1166a8bb26f9b80620ef8b9",
+          "dweb:/ipfs/QmZhZL4GA3h69eh6HZLcptB9bU7Hg3GHguP8Ws8L1mauK6"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "fulfillEntropy(bytes32,bytes32)": "53bc2b32",
+    "onTokenMinted(uint256,uint256,address,bytes32)": "714ae638",
+    "registerEntropyScope(uint256,uint8,bytes32)": "5c77f5e5",
+    "requestEntropy(uint256)": "68feeeab",
+    "requestScopeEntropy(bytes32,bytes32)": "81e4413b",
+    "supportsInterface(bytes4)": "01ffc9a7"
+  }
+}

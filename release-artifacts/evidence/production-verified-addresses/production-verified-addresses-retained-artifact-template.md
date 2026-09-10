@@ -53,13 +53,13 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_production_verified_addresses.py
-python scripts/check_production_verified_addresses.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/production-address-books-template.json --retained-artifact release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md --output release-artifacts/evidence/production-verified-addresses/production-address-books-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, deployment version, or address-book reference>" --command-or-source-system "<operator transcript or explorer verification source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.test_production_verified_addresses
+python -m tools.release.check_production_verified_addresses
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/production-address-books-template.json --retained-artifact release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md --output release-artifacts/evidence/production-verified-addresses/production-address-books-evidence.json --environment live --chain-id 1 --block-or-reference "<production block, deployment version, or address-book reference>" --command-or-source-system "<operator transcript or explorer verification source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes

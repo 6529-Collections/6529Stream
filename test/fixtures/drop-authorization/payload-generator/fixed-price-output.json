@@ -1,11 +1,11 @@
 {
   "schema_version": "6529stream.drop-authorization-payload.v1",
-  "generated_by": "scripts/generate_drop_authorization_payload.py:1",
+  "generated_by": "tools/protocol/generate_drop_authorization_payload.py:1",
   "description": "No-secret local fixed-price payload template for generating unsigned StreamDrops EIP-712 typed data.",
   "source": {
     "input_schema": "6529stream.drop-authorization-payload-input.v1",
-    "generator": "scripts/generate_drop_authorization_payload.py",
-    "canonical_checker": "scripts/check_drop_authorization_fixtures.py",
+    "generator": "tools/protocol/generate_drop_authorization_payload.py",
+    "canonical_checker": "tools/protocol/check_drop_authorization_fixtures.py",
     "adr": "docs/adr/0001-drop-authorization.md"
   },
   "no_secret_policy": {

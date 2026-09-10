@@ -974,6 +974,11 @@
       "purpose": "Historical protocol baseline"
     },
     {
+      "path": "release-artifacts/baselines/record-family-authorization-source-catalog-f5c7164f.json",
+      "sha256": "ffafa7c4f543b6f0e3497709aa0462d408e81f254cdef25d630ffc847a66dc39",
+      "purpose": "Exact pre-reorganization source implementation catalog at f5c7164f; superseded active source catalog binds 7b4ef22b separately."
+    },
+    {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
       "sha256": "06fbf04484b33b5fe86ecb1a6b35309790e15c229de91a2db421a6e1ef8fa61b",
       "purpose": "Historical protocol baseline"
@@ -982,6 +987,36 @@
       "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
       "sha256": "1fce5b6eae4517a1d71a9621ca2835b8698f7c51ce2b3ae46c1a28d123e5440f",
       "purpose": "Historical protocol baseline"
+    },
+    {
+      "path": "release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/address-book.json",
+      "sha256": "89ce751bf16c885d0ca6b6a9e8499653d4e2e435952ca8b719ce511c7c0eba6f",
+      "purpose": "Exact historical pre-reorganization fork deployment snapshot retained at 330ac1d4; pending review evidence, not current deployment proof."
+    },
+    {
+      "path": "release-artifacts/evidence/fork-deployment-rehearsal/snapshots/pre-reorganization-330ac1d4/deployment-manifest.json",
+      "sha256": "ae9a3efc67041c4475edbe8f2584b1cf5a4abd3627bcf4a2a4c38289744b1343",
+      "purpose": "Exact historical pre-reorganization fork deployment snapshot retained at 330ac1d4; pending review evidence, not current deployment proof."
+    },
+    {
+      "path": "release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md",
+      "sha256": "c1c9f29dc7889912fee6c3f9be390d97d711002455e232c2fd12df67fa92827c",
+      "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."
+    },
+    {
+      "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
+      "sha256": "db88ca51f51b18c6a0409116830ac93a60a46c7c15a094311d199819988268af",
+      "purpose": "Exact reviewed historical retained capture, including original command spellings; does not attest current source."
+    },
+    {
+      "path": "release-artifacts/record-family-authorization-inventory.json",
+      "sha256": "23aa0deac8b4b2b50c72322eea02bb6aa5026746cea46c8e9e216e5eb1d43aef",
+      "purpose": "Historical 063605ea fail-open planning inventory; its labels and source hashes are not current implementation proof."
+    },
+    {
+      "path": "test/fixtures/warning-dispositions/forge-size-output.txt",
+      "sha256": "e8efb57a57cc836512c422b4ec74faeca1eeade5e10b93d4cc08071219232cd4",
+      "purpose": "Retained historical compiler warning transcript; current warning baseline must use independently captured current output."
     }
   ]
 }

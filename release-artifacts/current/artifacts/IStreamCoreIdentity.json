@@ -1,0 +1,222 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "coordinatorAtMint",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenCollectionIdentity",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "mappingExists",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collectionSerial",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "burned",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenLifecycle",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "lifecycle",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "coordinatorAtMint",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenCollectionIdentity",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "mappingExists",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collectionSerial",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "burned",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenLifecycle",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "lifecycle",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "coordinatorAtMint(uint256)": {
+            "notice": "Returns the entropy coordinator bound at mint completion, or zero before completion."
+          },
+          "tokenCollectionIdentity(uint256)": {
+            "notice": "Returns the permanent collection mapping, serial, and burn flag for a token."
+          },
+          "tokenLifecycle(uint256)": {
+            "notice": "Returns UNKNOWN=0, PREPARED_INCOMPLETE=1, MINTED=2, or BURNED=3."
+          }
+        },
+        "notice": "Permanent token-to-collection identity and lifecycle reads.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": "IStreamCoreIdentity"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreIdentity.sol": {
+        "keccak256": "0x710958fbeae0efa716f445630f8f4bcb963f826546bdcbc54ff646ee9a20da62",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://60f09cd3894bdcc3cb6f547acacafb2dc5ef10717e5b6e5fe00ebd15b518d808",
+          "dweb:/ipfs/QmTbt2EjzgEo3o63H5Bf6bFSoPpTL7CEyYM59iuHu8XE4e"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "coordinatorAtMint(uint256)": "d1bc8cc2",
+    "tokenCollectionIdentity(uint256)": "a6b638c9",
+    "tokenLifecycle(uint256)": "8c46d901"
+  }
+}

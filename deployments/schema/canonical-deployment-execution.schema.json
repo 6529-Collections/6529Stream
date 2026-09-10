@@ -20,7 +20,7 @@
       "const": "6529stream.canonical-deployment-execution.v1"
     },
     "generated_by": {
-      "const": "scripts/execute_canonical_deployment_plan.py:2"
+      "const": "tools/deployment/execute_canonical_deployment_plan.py:2"
     },
     "release_posture": {
       "type": "object",
@@ -240,7 +240,7 @@
           "$ref": "#/$defs/sha256"
         },
         "driver_path": {
-          "const": "scripts/execute_canonical_deployment_plan.py"
+          "const": "tools/deployment/execute_canonical_deployment_plan.py"
         },
         "driver_sha256": {
           "$ref": "#/$defs/sha256"

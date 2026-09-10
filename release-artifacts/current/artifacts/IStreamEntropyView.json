@@ -1,0 +1,312 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenEntropy",
+      "outputs": [
+        {
+          "internalType": "enum StreamEntropyStatus",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "seed",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "provider",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "providerEpoch",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "providerConfigHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "requestKey",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "providerRequestId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint16",
+          "name": "requestAttempt",
+          "type": "uint16"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenEntropyStatus",
+      "outputs": [
+        {
+          "internalType": "enum StreamEntropyStatus",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenSeed",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "seed",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "finalized",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenEntropy",
+          "outputs": [
+            {
+              "internalType": "enum StreamEntropyStatus",
+              "name": "status",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "seed",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "provider",
+              "type": "address"
+            },
+            {
+              "internalType": "uint32",
+              "name": "providerEpoch",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "providerConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "requestKey",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "providerRequestId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint16",
+              "name": "requestAttempt",
+              "type": "uint16"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenEntropyStatus",
+          "outputs": [
+            {
+              "internalType": "enum StreamEntropyStatus",
+              "name": "status",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            }
+          ],
+          "name": "tokenSeed",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "seed",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "finalized",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {},
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol": "IStreamEntropyView"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/entropy/IStreamEntropyView.sol": {
+        "keccak256": "0x3e3955a91554f5823f0501f2487bdf249ac9da09085d9fa711463d4bbcd03d5a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://c88fc2eed7fac2b45ee43958a458f4f2d7e11bd0e0cca8bced533aedfd420c3e",
+          "dweb:/ipfs/QmYJtvDap9S2mZzjR9Qd4T35kPjhPY7GsKSYjkvFuVVa5b"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "tokenEntropy(uint256)": "16ad45d5",
+    "tokenEntropyStatus(uint256)": "e314a208",
+    "tokenSeed(uint256)": "5f516836"
+  }
+}

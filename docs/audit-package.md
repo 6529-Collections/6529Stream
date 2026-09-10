@@ -120,15 +120,15 @@ should be treated as audit evidence to inspect, not as exhaustive proof.
 
 | Evidence area | Current evidence |
 | --- | --- |
-| Payment accounting and reserves | [`test/StreamPaymentsInvariant.t.sol`](../test/StreamPaymentsInvariant.t.sol) |
-| Supply, replay, burn, and freeze state | [`test/StreamSupplyReplayFreezeInvariant.t.sol`](../test/StreamSupplyReplayFreezeInvariant.t.sol) |
-| Auction custody and proceeds consistency | [`test/StreamAuctionInvariant.t.sol`](../test/StreamAuctionInvariant.t.sol) |
-| End-to-end protocol state machine | [`test/StreamProtocolStateMachine.t.sol`](../test/StreamProtocolStateMachine.t.sol) |
-| Signer compromise and revocation sequences | [`test/StreamSignerCompromiseFuzz.t.sol`](../test/StreamSignerCompromiseFuzz.t.sol) |
-| Pause and settlement matrix | [`test/StreamPauseControls.t.sol`](../test/StreamPauseControls.t.sol) |
-| Randomizer reserve lifecycle | [`test/StreamRandomizerPayments.t.sol`](../test/StreamRandomizerPayments.t.sol) |
-| Deployment, manifest, and ceremony smoke tests | [`test/StreamDeploymentManifest.t.sol`](../test/StreamDeploymentManifest.t.sol) |
-| Bytecode proof and checksum coverage | [`scripts/generate_bytecode_release_proof.py`](../scripts/generate_bytecode_release_proof.py), [`scripts/check_signed_release_tag.py`](../scripts/check_signed_release_tag.py) |
+| Payment accounting and reserves | [`test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol`](../test/regression/legacy/protocol/StreamPaymentsInvariant.t.sol) |
+| Supply, replay, burn, and freeze state | [`test/regression/legacy/protocol/StreamSupplyReplayFreezeInvariant.t.sol`](../test/regression/legacy/protocol/StreamSupplyReplayFreezeInvariant.t.sol) |
+| Auction custody and proceeds consistency | [`test/regression/legacy/auctions/StreamAuctionInvariant.t.sol`](../test/regression/legacy/auctions/StreamAuctionInvariant.t.sol) |
+| End-to-end protocol state machine | [`test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol`](../test/regression/legacy/protocol/StreamProtocolStateMachine.t.sol) |
+| Signer compromise and revocation sequences | [`test/regression/legacy/protocol/StreamSignerCompromiseFuzz.t.sol`](../test/regression/legacy/protocol/StreamSignerCompromiseFuzz.t.sol) |
+| Pause and settlement matrix | [`test/regression/legacy/protocol/StreamPauseControls.t.sol`](../test/regression/legacy/protocol/StreamPauseControls.t.sol) |
+| Randomizer reserve lifecycle | [`test/unit/entropy/StreamRandomizerPayments.t.sol`](../test/unit/entropy/StreamRandomizerPayments.t.sol) |
+| Deployment, manifest, and ceremony smoke tests | [`test/regression/legacy/protocol/StreamDeploymentManifest.t.sol`](../test/regression/legacy/protocol/StreamDeploymentManifest.t.sol) |
+| Bytecode proof and checksum coverage | [`tools/build/generate_bytecode_release_proof.py`](../tools/build/generate_bytecode_release_proof.py), [`tools/release/check_signed_release_tag.py`](../tools/release/check_signed_release_tag.py) |
 | Full status summary | [`docs/status.md`](status.md) |
 | Test matrix and remaining test work | [`ops/ROADMAP.md`](../ops/ROADMAP.md) |
 
@@ -156,10 +156,10 @@ Static-analysis review inputs:
   independently as High open blocker `RISK-GOV-003` pending closed-world
   target/selector/value policy, deployment binding, hostile-target tests, and
   independent review.
-- [`scripts/check_slither_baseline.py`](../scripts/check_slither_baseline.py)
+- [`tools/security/check_slither_baseline.py`](../tools/security/check_slither_baseline.py)
   validates metadata without running Slither and can run the pinned analyzer to
   fail on any exact normalized drift; focused behavior is covered by
-  [`scripts/test_slither_baseline.py`](../scripts/test_slither_baseline.py).
+  [`tools/security/test_slither_baseline.py`](../tools/security/test_slither_baseline.py).
 - [`docs/warning-dispositions.md`](warning-dispositions.md) tracks fixed
   NatSpec warning noise and accepted solc, documentation, linter, vendored,
   test-only, ABI-compatibility, and Core size-tradeoff warning dispositions.
@@ -189,14 +189,16 @@ Local deployment and release evidence:
   records the release-tracked contracts' functions, selectors, events, topic0
   values, custom errors, ABI hashes, bytecode hashes, and runtime sizes for
   integrator and audit review. It is checked by
-  [`scripts/generate_protocol_surface_report.py`](../scripts/generate_protocol_surface_report.py)
+  [`tools/build/generate_protocol_surface_report.py`](../tools/build/generate_protocol_surface_report.py)
   and is not protocol correctness proof.
-- [`release-artifacts/baselines/v0.1.0/natspec-coverage.json`](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+- [`release-artifacts/natspec-coverage.json`](../release-artifacts/natspec-coverage.json)
   records the current NatSpec coverage debt for release-surface functions,
   public variable getters, events, and custom errors. It is checked by
-  [`scripts/check_natspec_coverage.py`](../scripts/check_natspec_coverage.py)
+  [`tools/build/check_natspec_coverage.py`](../tools/build/check_natspec_coverage.py)
   and keeps new undocumented protocol surface from entering silently; it is not
-  proof that API documentation is complete.
+  proof that API documentation is complete. The earlier
+  [v0.1.0 snapshot](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+  remains immutable historical evidence.
 - [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
   is the bytecode-to-release proof. It ties committed local/fork address books,
   deployment manifests, ABI checksums, source verification inputs, compiler
@@ -215,17 +217,17 @@ Local deployment and release evidence:
 - [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json)
   is the generated risk register for launch blockers, accepted local-baseline
   risks, and planned mitigations. Its source-document and evidence hashes are
-  validated by [`scripts/check_risk_register.py`](../scripts/check_risk_register.py)
+  validated by [`tools/security/check_risk_register.py`](../tools/security/check_risk_register.py)
   and refreshed by
-  [`scripts/generate_risk_register.py`](../scripts/generate_risk_register.py).
+  [`tools/security/generate_risk_register.py`](../tools/security/generate_risk_register.py).
   The schema is retained at
   [`release-artifacts/schema/risk-register.schema.json`](../release-artifacts/schema/risk-register.schema.json),
   and the focused regression suite lives in
-  [`scripts/test_risk_register.py`](../scripts/test_risk_register.py).
+  [`tools/security/test_risk_register.py`](../tools/security/test_risk_register.py).
 - [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json)
   records local placeholder signature evidence and the self-referential
   manifest/checksum boundary.
-- [`scripts/check_signed_release_tag.py`](../scripts/check_signed_release_tag.py)
+- [`tools/release/check_signed_release_tag.py`](../tools/release/check_signed_release_tag.py)
   is the signed release tag verifier. Ordinary local/CI runs stay in
   non-release mode, while production release mode requires a safe signed tag,
   tag-to-HEAD match, current checksum bundle, and matching reviewed signature
@@ -337,54 +339,54 @@ maintainers confirm disclosure timing.
 Run the audit-package checks directly:
 
 ```sh
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/test_audit_finding_workflow.py
-python scripts/check_audit_finding_workflow.py
-python scripts/test_architecture_threat_model.py
-python scripts/check_architecture_threat_model.py
-python scripts/test_warning_dispositions.py
-python scripts/run_forge_size_log.py --log cache/forge-size.log
-python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
-python scripts/test_slither_baseline.py
-python scripts/check_slither_baseline.py --baseline-only
-python scripts/check_slither_baseline.py --run-slither
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
-python scripts/test_incident_response.py
-python scripts/check_incident_response.py
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_risk_register.py
-python scripts/check_risk_register.py
-python scripts/generate_risk_register.py --check
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py --check
-python scripts/test_bytecode_release_proof.py
-python scripts/generate_bytecode_release_proof.py --check
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py --check
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
+python -m tools.docs.test_audit_package
+python -m tools.docs.check_audit_package
+python -m tools.docs.test_audit_finding_workflow
+python -m tools.docs.check_audit_finding_workflow
+python -m tools.docs.test_architecture_threat_model
+python -m tools.docs.check_architecture_threat_model
+python -m tools.security.test_warning_dispositions
+python -m tools.build.run_forge_size_log --log cache/forge-size.log
+python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log
+python -m tools.security.test_slither_baseline
+python -m tools.security.check_slither_baseline --baseline-only
+python -m tools.security.check_slither_baseline --run-slither
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
+python -m tools.docs.test_incident_response
+python -m tools.docs.check_incident_response
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.security.test_risk_register
+python -m tools.security.check_risk_register
+python -m tools.security.generate_risk_register --check
+python -m tools.release.test_release_manifest
+python -m tools.release.generate_release_manifest --check
+python -m tools.build.test_bytecode_release_proof
+python -m tools.build.generate_bytecode_release_proof --check
+python -m tools.release.test_release_checksums
+python -m tools.release.generate_release_checksums --check
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
 ```
 
 Run the release evidence generators if tracked artifacts need refreshing:
 
 ```sh
-python scripts/generate_release_manifest.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/generate_release_checksums.py
+python -m tools.release.generate_release_manifest
+python -m tools.build.generate_bytecode_release_proof
+python -m tools.release.generate_release_checksums
 ```
 
 Run the full local gate when changing audit scope, release artifacts, or
@@ -451,40 +453,40 @@ The `generate_*` calls below regenerate tracked output files; the `--check`
 calls verify that those tracked files are current.
 
 ```sh
-python scripts/test_audit_package.py
-python scripts/check_audit_package.py
-python scripts/test_architecture_threat_model.py
-python scripts/check_architecture_threat_model.py
-python scripts/test_warning_dispositions.py
-python scripts/run_forge_size_log.py --log cache/forge-size.log
-python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_risk_register.py
-python scripts/check_risk_register.py
-python scripts/generate_risk_register.py
-python scripts/test_release_manifest.py
-python scripts/generate_release_manifest.py
-python scripts/test_bytecode_release_proof.py
-python scripts/generate_bytecode_release_proof.py
-python scripts/test_release_checksums.py
-python scripts/generate_release_checksums.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_bytecode_release_proof.py --check
-python scripts/generate_release_checksums.py --check
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
+python -m tools.docs.test_audit_package
+python -m tools.docs.check_audit_package
+python -m tools.docs.test_architecture_threat_model
+python -m tools.docs.check_architecture_threat_model
+python -m tools.security.test_warning_dispositions
+python -m tools.build.run_forge_size_log --log cache/forge-size.log
+python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.security.test_risk_register
+python -m tools.security.check_risk_register
+python -m tools.security.generate_risk_register
+python -m tools.release.test_release_manifest
+python -m tools.release.generate_release_manifest
+python -m tools.build.test_bytecode_release_proof
+python -m tools.build.generate_bytecode_release_proof
+python -m tools.release.test_release_checksums
+python -m tools.release.generate_release_checksums
+python -m tools.release.generate_release_manifest --check
+python -m tools.build.generate_bytecode_release_proof --check
+python -m tools.release.generate_release_checksums --check
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
 ```

@@ -104,20 +104,20 @@ Reservoir, Blur, Manifold, equivalent collector/indexer tooling, contract
 metadata, token metadata refresh, animation rendering, royalty display,
 transfer/listing/sale paths, event replay, and cache invalidation.
 Use
-[`docs/integrations/frontend-reference-architecture.md`](integrations/frontend-reference-architecture.md)
+[`docs/reference/legacy-stack/integrations/frontend-reference-architecture.md`](reference/legacy-stack/integrations/frontend-reference-architecture.md)
 as the React/Next frontend reference architecture for current INT-007
 integration work, including artifact import, client layering, query/cache,
 transaction, wallet, metadata, indexer, environment, and testing boundaries
 without adding a maintained frontend package or generated SDK.
 Use
-[`docs/integrations/mobile-walletconnect.md`](integrations/mobile-walletconnect.md)
+[`docs/reference/legacy-stack/integrations/mobile-walletconnect.md`](reference/legacy-stack/integrations/mobile-walletconnect.md)
 as the mobile and WalletConnect integration guide for current INT-008
 integration work, including mobile browser, native shell, WalletConnect session
 lifecycle, foreground wallet handoff, deep links, reconnect, offline/background,
 telemetry, and no-secret boundaries without adding a maintained mobile SDK,
 React Native app, or WalletConnect dependency recommendation.
 Use
-[`docs/integrations/electron-security-wallets.md`](integrations/electron-security-wallets.md)
+[`docs/reference/legacy-stack/integrations/electron-security-wallets.md`](reference/legacy-stack/integrations/electron-security-wallets.md)
 as the Electron security and wallet integration guide for current INT-009
 integration work, including Electron main/renderer/preload boundaries,
 BrowserWindow hardening, context isolation, IPC allowlists, wallet-provider
@@ -126,7 +126,7 @@ updates, code signing, autoUpdater caveats, telemetry, and no-secret boundaries
 without adding a maintained Electron app, native desktop app, desktop SDK,
 code-signing implementation, or signed-update implementation.
 Use
-[`docs/integrations/operator-admin-ui.md`](integrations/operator-admin-ui.md)
+[`docs/reference/legacy-stack/integrations/operator-admin-ui.md`](reference/legacy-stack/integrations/operator-admin-ui.md)
 as the operator admin UI specification for current INT-010 integration work,
 including operator personas, Safe/multisig ceremony, role grants, signer
 lifecycle, pause domains, metadata freeze, dependency updates, randomizer
@@ -169,7 +169,7 @@ derived from that backlog and tracker map. Use
 as the generated risk register for launch blockers, accepted local-baseline
 risks, planned mitigations, source-document hashes, and evidence links.
 Run
-`python scripts/check_release_evidence_issue_closure.py` before closing any
+`python -m tools.release.check_release_evidence_issue_closure` before closing any
 linked tracker issue; that release evidence issue closure readiness check loads
 the tracker map, `release-evidence-issue-backlog.json` backlog artifact,
 body-sync artifact, packet index, and evidence manifest, then keeps issues open
@@ -334,13 +334,13 @@ The current local baseline includes:
   [`test/fixtures/drop-authorization/`](../test/fixtures/drop-authorization/),
   [`release-artifacts/schema/drop-authorization-signing-evidence.schema.json`](../release-artifacts/schema/drop-authorization-signing-evidence.schema.json),
   [`release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json`](../release-artifacts/drop-authorization-signing/drop-authorization-signing-evidence-template.json),
-  and [`scripts/check_drop_authorization_signing_evidence.py`](../scripts/check_drop_authorization_signing_evidence.py);
+  and [`tools/release/check_drop_authorization_signing_evidence.py`](../tools/release/check_drop_authorization_signing_evidence.py);
 - signer custody readiness guidance, schema, checked template, and checker in
   [`docs/signer-custody-readiness.md`](signer-custody-readiness.md),
   [`release-artifacts/schema/signer-custody-readiness.schema.json`](../release-artifacts/schema/signer-custody-readiness.schema.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json),
   [`release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt`](../release-artifacts/signer-custody-readiness/signer-custody-readiness-retained-artifact.txt),
-  and [`scripts/check_signer_custody_readiness.py`](../scripts/check_signer_custody_readiness.py);
+  and [`tools/release/check_signer_custody_readiness.py`](../tools/release/check_signer_custody_readiness.py);
 - 1/1 provenance manifest guidance, schema, checked template, retained-artifact
   checklist, generated release catalog, and checker in
   [`docs/provenance-manifests.md`](provenance-manifests.md),
@@ -348,9 +348,9 @@ The current local baseline includes:
   [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json),
   [`release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`](../release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md),
   [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../release-artifacts/latest/one-of-one-provenance-manifest.json),
-  [`scripts/check_one_of_one_provenance_manifest.py`](../scripts/check_one_of_one_provenance_manifest.py),
+  [`tools/protocol/check_one_of_one_provenance_manifest.py`](../tools/protocol/check_one_of_one_provenance_manifest.py),
   and
-  [`scripts/generate_one_of_one_provenance_manifest.py`](../scripts/generate_one_of_one_provenance_manifest.py),
+  [`tools/protocol/generate_one_of_one_provenance_manifest.py`](../tools/protocol/generate_one_of_one_provenance_manifest.py),
   which establish the artifact-only artist/story/authenticity model without
   claiming token finality, marketplace readiness, royalty enforcement, or
   ownership proof beyond chain state;
@@ -361,25 +361,25 @@ The current local baseline includes:
   [`release-artifacts/permanence/one-of-one-permanence-template.permanence.json`](../release-artifacts/permanence/one-of-one-permanence-template.permanence.json),
   [`release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md`](../release-artifacts/permanence/one-of-one-permanence-retained-artifact-template.md),
   [`release-artifacts/latest/one-of-one-permanence-manifest.json`](../release-artifacts/latest/one-of-one-permanence-manifest.json),
-  [`scripts/check_one_of_one_permanence_package.py`](../scripts/check_one_of_one_permanence_package.py),
+  [`tools/protocol/check_one_of_one_permanence_package.py`](../tools/protocol/check_one_of_one_permanence_package.py),
   and
-  [`scripts/generate_one_of_one_permanence_manifest.py`](../scripts/generate_one_of_one_permanence_manifest.py),
+  [`tools/protocol/generate_one_of_one_permanence_manifest.py`](../tools/protocol/generate_one_of_one_permanence_manifest.py),
   which establish the artifact-only replay command, renderer/dependency/source
   hash, browser proof, output hash, and fully on-chain versus decentralized
   storage boundary without claiming final collector proof until reviewed
   non-local or final-drop evidence exists;
 - royalty policy guidance in
   [`docs/royalty-policy.md`](royalty-policy.md), covered by
-  `python scripts/test_royalty_policy.py` and
-  `python scripts/check_royalty_policy.py`, which documents current ERC-2981
+  `python -m tools.docs.test_royalty_policy` and
+  `python -m tools.docs.check_royalty_policy`, which documents current ERC-2981
   disclosure, governance and enforcement boundaries, marketplace display
   guidance, and the rule that No production-readiness claim depends on
   marketplaces honoring royalties;
 - warning disposition guidance in
   [`docs/warning-dispositions.md`](warning-dispositions.md), covered by
-  `python scripts/test_warning_dispositions.py`,
-  `python scripts/run_forge_size_log.py --log cache/forge-size.log`, and
-  `python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log`, which documents fixed NatSpec
+  `python -m tools.security.test_warning_dispositions`,
+  `python -m tools.build.run_forge_size_log --log cache/forge-size.log`, and
+  `python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log`, which documents fixed NatSpec
   warning noise and accepted solc, documentation, linter, vendored, test-only,
   ABI-compatibility, and `StreamCore` size-tradeoff warning decisions without
   treating warning quietness as protocol correctness proof;
@@ -408,8 +408,8 @@ The current local baseline includes:
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
   its
   [`v1 schema`](../release-artifacts/schema/governed-parameter-inventory.v1.schema.json),
-  and the `scripts/test_governed_parameter_inventory.py` /
-  `scripts/check_governed_parameter_inventory.py` pair. The ordinary check
+  and the `tools/protocol/test_governed_parameter_inventory.py` /
+  `tools/protocol/check_governed_parameter_inventory.py` pair. The ordinary check
   proves exact policy and honest incompleteness; it does not satisfy the
   production-only `--require-complete` decision;
 - the record-family authorization source implementation catalog, retained
@@ -422,8 +422,8 @@ The current local baseline includes:
   [`deployments/schema/record-family-authorization-grant-map.v1.schema.json`](../deployments/schema/record-family-authorization-grant-map.v1.schema.json),
   and
   [`deployments/record-family-authorization/record-family-authorization-evidence-template.json`](../deployments/record-family-authorization/record-family-authorization-evidence-template.json).
-  Run `python scripts/test_record_family_authorization.py` and
-  `python scripts/check_record_family_authorization.py`. A future complete
+  Run `python -m tools.protocol.test_record_family_authorization` and
+  `python -m tools.protocol.check_record_family_authorization`. A future complete
   envelope must bind its `grant_map.path` to the separate phase- and
   candidate-bound `public-beta-record-family-authorization-grant-map.json` or
   `production-release-record-family-authorization-grant-map.json` artifact in
@@ -443,18 +443,18 @@ The current local baseline includes:
   indexers must not interpret the convenience latest read as a global
   collection/type/subject pointer.
   Record-family semantic revalidation binds exactly twelve source inputs:
-  `smart-contracts/interfaces/stream/IStreamRecordFamilyAuthorityProvider.sol`,
-  `smart-contracts/interfaces/stream/IStreamRecordFamilyRegistry.sol`,
+  `smart-contracts/interfaces/stream/records/IStreamRecordFamilyAuthorityProvider.sol`,
+  `smart-contracts/interfaces/stream/records/IStreamRecordFamilyRegistry.sol`,
   `smart-contracts/domains/records/StreamRecordFamilyRegistry.sol`,
   `smart-contracts/domains/metadata/StreamCollectionMetadata.sol`,
-  `smart-contracts/interfaces/stream/IStreamCollectionMetadata.sol`,
+  `smart-contracts/interfaces/stream/metadata/IStreamCollectionMetadata.sol`,
   `smart-contracts/domains/preservation/StreamPreservationRecords.sol`,
-  `smart-contracts/interfaces/stream/IStreamPreservationRecords.sol`,
-  `script/RehearseDeployment.s.sol`, plus the catalog-named suites
-  `test/StreamRecordFamilyAuthorization.t.sol`,
-  `test/StreamCollectionMetadata.t.sol`,
-  `test/StreamPreservationRecords.t.sol`, and
-  `test/StreamDeploymentManifest.t.sol`. These are twelve exact
+  `smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol`,
+  `script/legacy/RehearseDeployment.s.sol`, plus the catalog-named suites
+  `test/regression/legacy/records/StreamRecordFamilyAuthorization.t.sol`,
+  `test/regression/legacy/metadata/StreamCollectionMetadata.t.sol`,
+  `test/regression/legacy/preservation/StreamPreservationRecords.t.sol`, and
+  `test/regression/legacy/protocol/StreamDeploymentManifest.t.sol`. These are twelve exact
   checksum roots and entries, not broad `smart-contracts/` coverage. The
   offline verifier snapshots the complete canonical set, materializes
   it under a temporary root, and loads the checker and all twelve inputs there;
@@ -470,25 +470,25 @@ The current local baseline includes:
 - protocol surface report guidance and generated output under
   [`docs/protocol-surface.md`](protocol-surface.md) and
   [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json),
-  covered by `python scripts/test_protocol_surface_report.py` and
-  `python scripts/generate_protocol_surface_report.py --check`;
+  covered by `python -m tools.build.test_protocol_surface_report` and
+  `python -m tools.build.generate_protocol_surface_report --check`;
 - NatSpec coverage guidance and checked baseline under
   [`docs/natspec-coverage.md`](natspec-coverage.md) and
-  [`release-artifacts/baselines/v0.1.0/natspec-coverage.json`](../release-artifacts/baselines/v0.1.0/natspec-coverage.json),
-  covered by `python scripts/test_natspec_coverage.py` and
-  `python scripts/check_natspec_coverage.py`, which keeps new undocumented
+  [`release-artifacts/natspec-coverage.json`](../release-artifacts/natspec-coverage.json),
+  covered by `python -m tools.build.test_natspec_coverage` and
+  `python -m tools.build.check_natspec_coverage`, which keeps new undocumented
   release-surface entries from entering silently without claiming the current
   API documentation is complete;
 - bytecode-to-release proof under
   [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json),
-  covered by `python scripts/test_bytecode_release_proof.py` and
-  `python scripts/generate_bytecode_release_proof.py --check`, which tie
+  covered by `python -m tools.build.test_bytecode_release_proof` and
+  `python -m tools.build.generate_bytecode_release_proof --check`, which tie
   committed local/fork addresses and runtime bytecode hashes to the release
   manifest without claiming live production bytecode verification;
 - release-candidate lockfile under
   [`release-artifacts/latest/release-candidate-lockfile.json`](../release-artifacts/latest/release-candidate-lockfile.json),
-  covered by `python scripts/test_release_candidate_lockfile.py` and
-  `python scripts/generate_release_candidate_lockfile.py --check`, which ties
+  covered by `python -m tools.release.test_release_candidate_lockfile` and
+  `python -m tools.release.generate_release_candidate_lockfile --check`, which ties
   release manifest, bytecode proof, evidence status, risk register, blocker
   reports, release notes, release-signature evidence, the release-tool call
   policy/schema records, and explicit non-release commit/tag/signature status
@@ -497,20 +497,20 @@ The current local baseline includes:
   [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json),
   backed by
   [`release-artifacts/schema/risk-register.schema.json`](../release-artifacts/schema/risk-register.schema.json),
-  `python scripts/test_risk_register.py`,
-  `python scripts/check_risk_register.py`, and
-  `python scripts/generate_risk_register.py --check`, which summarize launch
+  `python -m tools.security.test_risk_register`,
+  `python -m tools.security.check_risk_register`, and
+  `python -m tools.security.generate_risk_register --check`, which summarize launch
   blockers, accepted local-baseline risks, planned mitigations, source-document
   hashes, and evidence links without changing readiness claims;
 - canonical normalized Slither evidence under
   [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) and its
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) reviewer mirror,
   checked by
-  [`scripts/check_slither_baseline.py`](../scripts/check_slither_baseline.py)
-  and [`scripts/test_slither_baseline.py`](../scripts/test_slither_baseline.py)
-  with `python scripts/test_slither_baseline.py`,
-  `python scripts/check_slither_baseline.py --baseline-only`, and
-  `python scripts/check_slither_baseline.py --run-slither`; the 2 High and 30
+  [`tools/security/check_slither_baseline.py`](../tools/security/check_slither_baseline.py)
+  and [`tools/security/test_slither_baseline.py`](../tools/security/test_slither_baseline.py)
+  with `python -m tools.security.test_slither_baseline`,
+  `python -m tools.security.check_slither_baseline --baseline-only`, and
+  `python -m tools.security.check_slither_baseline --run-slither`; the 2 High and 30
   Medium first-party production rows remain Open and block release;
 - source verification inputs under
   [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json);
@@ -524,16 +524,16 @@ The current local baseline includes:
   [`deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json`](../deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json),
   and [`release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json`](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json);
 - signed release tag gate coverage through
-  `python scripts/test_signed_release_tag.py` and
-  `python scripts/check_signed_release_tag.py`; the default non-release mode
+  `python -m tools.release.test_signed_release_tag` and
+  `python -m tools.release.check_signed_release_tag`; the default non-release mode
   runs in local and CI gates without claiming release status, while strict
   release mode requires a matching signed tag, current checksum bundle, and
   post-bundle release-signature evidence outside the `SHA256SUMS` coverage set;
 - production release-signing retained artifact coverage through
   [`release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`](../release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md),
-  [`scripts/test_production_release_signing_evidence.py`](../scripts/test_production_release_signing_evidence.py),
+  [`tools/release/test_production_release_signing_evidence.py`](../tools/release/test_production_release_signing_evidence.py),
   and
-  [`scripts/check_production_release_signing_evidence.py`](../scripts/check_production_release_signing_evidence.py),
+  [`tools/release/check_production_release_signing_evidence.py`](../tools/release/check_production_release_signing_evidence.py),
   which validates future retained `production_signatures` and `signed_git_tag`
   references, optional declared `sha256:` hashes, no-secret redaction, release
   signature evidence JSON alignment, and signed-tag checker handoff without
@@ -543,7 +543,7 @@ The current local baseline includes:
   [`deployments/schema/admin-ceremony-evidence.schema.json`](../deployments/schema/admin-ceremony-evidence.schema.json),
   [`deployments/admin-ceremony/admin-ceremony-evidence-template.json`](../deployments/admin-ceremony/admin-ceremony-evidence-template.json),
   [`deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md`](../deployments/admin-ceremony/admin-ceremony-retained-artifact-template.md),
-  and [`scripts/check_admin_ceremony_evidence.py`](../scripts/check_admin_ceremony_evidence.py);
+  and [`tools/deployment/check_admin_ceremony_evidence.py`](../tools/deployment/check_admin_ceremony_evidence.py);
 - no-secret public-beta evidence status under
   [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json)
   following [`docs/public-beta-evidence.md`](public-beta-evidence.md), plus the
@@ -562,8 +562,8 @@ The current local baseline includes:
   plus the committed GitHub tracker map at
   [`release-artifacts/latest/release-evidence-issue-links.json`](../release-artifacts/latest/release-evidence-issue-links.json),
   plus deterministic live issue snapshot exporter tests with
-  `python scripts/test_release_evidence_issue_snapshot.py` and
-  `python scripts/test_release_evidence_issue_snapshot_audit.py`, including
+  `python -m tools.release.test_release_evidence_issue_snapshot` and
+  `python -m tools.release.test_release_evidence_issue_snapshot_audit`, including
   release evidence live audit report bundle coverage for retained no-secret
   JSON/Markdown audit summaries,
   plus the release evidence live audit report schema at
@@ -574,16 +574,16 @@ The current local baseline includes:
   [`release-artifacts/evidence/release-evidence-live-audit-report-template.md`](../release-artifacts/evidence/release-evidence-live-audit-report-template.md),
   and offline report validation plus release evidence live audit Markdown parity
   with
-  `python scripts/test_release_evidence_live_audit_report.py` and
-  `python scripts/check_release_evidence_live_audit_report.py`,
-  `python scripts/test_release_evidence_live_audit_markdown.py`, and
-  `python scripts/check_release_evidence_live_audit_markdown.py`, plus the
+  `python -m tools.release.test_release_evidence_live_audit_report` and
+  `python -m tools.release.check_release_evidence_live_audit_report`,
+  `python -m tools.release.test_release_evidence_live_audit_markdown`, and
+  `python -m tools.release.check_release_evidence_live_audit_markdown`, plus the
   release evidence live audit report archive at
   [`release-artifacts/latest/release-evidence-live-audit-report-archive.json`](../release-artifacts/latest/release-evidence-live-audit-report-archive.json)
   and
   [`release-artifacts/latest/release-evidence-live-audit-report-archive.md`](../release-artifacts/latest/release-evidence-live-audit-report-archive.md),
-  checked with `python scripts/test_release_evidence_live_audit_archive.py` and
-  `python scripts/generate_release_evidence_live_audit_archive.py --check`,
+  checked with `python -m tools.release.test_release_evidence_live_audit_archive` and
+  `python -m tools.release.generate_release_evidence_live_audit_archive --check`,
   plus the future live audit archive retention workflow under
   [`release-artifacts/evidence/live-audit-reports/README.md`](../release-artifacts/evidence/live-audit-reports/README.md)
   for paired JSON/Markdown reports in
@@ -594,109 +594,109 @@ The current local baseline includes:
   plus the production broadcast retention checker and production broadcast
   retention retained artifact template under
   [`release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`](../release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md),
-  validated with `python scripts/test_production_broadcast_retention.py` and
-  `python scripts/check_production_broadcast_retention.py`,
+  validated with `python -m tools.release.test_production_broadcast_retention` and
+  `python -m tools.release.check_production_broadcast_retention`,
   plus the live deployment manifest checker and retained artifact template
   under
   [`release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md`](../release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md),
-  validated with `python scripts/test_live_deployment_manifest_evidence.py`
-  and `python scripts/check_live_deployment_manifest_evidence.py`,
+  validated with `python -m tools.release.test_live_deployment_manifest_evidence`
+  and `python -m tools.release.check_live_deployment_manifest_evidence`,
   plus the public-beta verified-addresses checker and public-beta
   verified-addresses retained artifact template under
   [`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md),
   validated with
-  [`scripts/test_public_beta_verified_addresses.py`](../scripts/test_public_beta_verified_addresses.py)
+  [`tools/release/test_public_beta_verified_addresses.py`](../tools/release/test_public_beta_verified_addresses.py)
   and
-  [`scripts/check_public_beta_verified_addresses.py`](../scripts/check_public_beta_verified_addresses.py),
+  [`tools/release/check_public_beta_verified_addresses.py`](../tools/release/check_public_beta_verified_addresses.py),
   plus the Sepolia evidence preflight checker for no-secret public-beta
   rehearsal prerequisites, validated with
-  [`scripts/test_sepolia_evidence_preflight.py`](../scripts/test_sepolia_evidence_preflight.py)
+  [`tools/deployment/test_sepolia_evidence_preflight.py`](../tools/deployment/test_sepolia_evidence_preflight.py)
   and
-  [`scripts/check_sepolia_evidence_preflight.py`](../scripts/check_sepolia_evidence_preflight.py),
+  [`tools/deployment/check_sepolia_evidence_preflight.py`](../tools/deployment/check_sepolia_evidence_preflight.py),
   plus the production verified-addresses checker and production
   verified-addresses retained artifact template under
   [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
-  validated with `python scripts/test_production_verified_addresses.py` and
-  `python scripts/check_production_verified_addresses.py`,
+  validated with `python -m tools.release.test_production_verified_addresses` and
+  `python -m tools.release.check_production_verified_addresses`,
   plus fork/testnet metadata-browser evidence for
   `fork_testnet_metadata_browser_evidence` under
   [`release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md),
-  validated offline with `python scripts/test_fork_metadata_browser_evidence.py`
-  and `python scripts/check_fork_metadata_browser_evidence.py`,
+  validated offline with `python -m tools.release.test_fork_metadata_browser_evidence`
+  and `python -m tools.release.check_fork_metadata_browser_evidence`,
   plus fork/testnet ceremony evidence for `fork_testnet_ceremony_evidence`
   under
   [`release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md),
-  validated offline with `python scripts/test_fork_ceremony_evidence.py` and
-  `python scripts/check_fork_ceremony_evidence.py`; the current CON-015
+  validated offline with `python -m tools.deployment.test_fork_ceremony_evidence` and
+  `python -m tools.deployment.check_fork_ceremony_evidence`; the current CON-015
   artifact set is pending re-review before this row can return to complete,
   plus fork/testnet randomizer operations evidence for
   `fork_testnet_randomizer_operations_evidence` under
   [`release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`](../release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_fork_randomizer_operations_evidence.py` and
-  `python scripts/check_fork_randomizer_operations_evidence.py`,
+  `python -m tools.deployment.test_fork_randomizer_operations_evidence` and
+  `python -m tools.deployment.check_fork_randomizer_operations_evidence`,
   plus live metadata-browser evidence for `live_metadata_browser_evidence`
   under
   [`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md),
-  validated offline with `python scripts/test_live_metadata_browser_evidence.py`
-  and `python scripts/check_live_metadata_browser_evidence.py`,
+  validated offline with `python -m tools.release.test_live_metadata_browser_evidence`
+  and `python -m tools.release.check_live_metadata_browser_evidence`,
   plus live ceremony evidence for `live_ceremony_evidence` under
   [`release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md),
-  validated offline with `python scripts/test_live_ceremony_evidence.py` and
-  `python scripts/check_live_ceremony_evidence.py`,
+  validated offline with `python -m tools.deployment.test_live_ceremony_evidence` and
+  `python -m tools.deployment.check_live_ceremony_evidence`,
   plus live randomizer operations evidence for
   `live_randomizer_operations_evidence` under
   [`release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`](../release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_live_randomizer_operations_evidence.py` and
-  `python scripts/check_live_randomizer_operations_evidence.py`,
+  `python -m tools.deployment.test_live_randomizer_operations_evidence` and
+  `python -m tools.deployment.check_live_randomizer_operations_evidence`,
   plus incident drill evidence for `incident_drill_evidence` under
   [`release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/incident-drill-retained-artifact-template.md),
-  validated offline with `python scripts/test_incident_drill_evidence.py` and
-  `python scripts/check_incident_drill_evidence.py`,
+  validated offline with `python -m tools.release.test_incident_drill_evidence` and
+  `python -m tools.release.check_incident_drill_evidence`,
   plus signer compromise drill evidence for
   `signer_compromise_drill_evidence` under
   [`release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/signer-compromise-drill-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_signer_compromise_drill_evidence.py` and
-  `python scripts/check_signer_compromise_drill_evidence.py`,
+  `python -m tools.release.test_signer_compromise_drill_evidence` and
+  `python -m tools.release.check_signer_compromise_drill_evidence`,
   plus stuck auction drill evidence for `stuck_auction_drill_evidence` under
   [`release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/stuck-auction-drill-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_stuck_auction_drill_evidence.py` and
-  `python scripts/check_stuck_auction_drill_evidence.py`,
+  `python -m tools.release.test_stuck_auction_drill_evidence` and
+  `python -m tools.release.check_stuck_auction_drill_evidence`,
   plus failed randomness drill evidence for `failed_randomness_drill_evidence`
   under
   [`release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/failed-randomness-drill-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_failed_randomness_drill_evidence.py` and
-  `python scripts/check_failed_randomness_drill_evidence.py`,
+  `python -m tools.release.test_failed_randomness_drill_evidence` and
+  `python -m tools.release.check_failed_randomness_drill_evidence`,
   plus bad metadata/dependency drill evidence for
   `bad_metadata_dependency_drill_evidence` under
   [`release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md`](../release-artifacts/evidence/incident-drills/bad-metadata-dependency-drill-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_bad_metadata_dependency_drill_evidence.py` and
-  `python scripts/check_bad_metadata_dependency_drill_evidence.py`,
+  `python -m tools.protocol.test_bad_metadata_dependency_drill_evidence` and
+  `python -m tools.protocol.check_bad_metadata_dependency_drill_evidence`,
   plus post-audit remediation evidence for `post_audit_remediation` under
   [`release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md`](../release-artifacts/evidence/post-audit-remediation/post-audit-remediation-retained-artifact-template.md),
   validated offline with
-  `python scripts/test_post_audit_remediation_evidence.py` and
-  `python scripts/check_post_audit_remediation_evidence.py`,
+  `python -m tools.release.test_post_audit_remediation_evidence` and
+  `python -m tools.release.check_post_audit_remediation_evidence`,
   plus deterministic tracker-label checks with
-  `python scripts/test_release_evidence_issue_labels.py` and
-  `python scripts/check_release_evidence_issue_labels.py`,
+  `python -m tools.release.test_release_evidence_issue_labels` and
+  `python -m tools.release.check_release_evidence_issue_labels`,
   plus the generated exact issue body payloads at
   [`release-artifacts/latest/release-evidence-issue-body-sync.json`](../release-artifacts/latest/release-evidence-issue-body-sync.json)
   and
   [`release-artifacts/latest/release-evidence-issue-body-sync.md`](../release-artifacts/latest/release-evidence-issue-body-sync.md),
   plus deterministic tracker-body checks with
-  `python scripts/test_release_evidence_issue_bodies.py` and
-  `python scripts/check_release_evidence_issue_bodies.py`, plus release
+  `python -m tools.release.test_release_evidence_issue_bodies` and
+  `python -m tools.release.check_release_evidence_issue_bodies`, plus release
   evidence issue closure readiness checks with
-  `python scripts/test_release_evidence_issue_closure.py` and
-  `python scripts/check_release_evidence_issue_closure.py`, plus an
+  `python -m tools.release.test_release_evidence_issue_closure` and
+  `python -m tools.release.check_release_evidence_issue_closure`, plus an
   authenticated live tracker sync gate with
-  `python scripts/fetch_release_evidence_issue_snapshot.py` and
+  `python -m tools.release.fetch_release_evidence_issue_snapshot` and
   `make release-evidence-live-issue-sync-check`;
 - non-local release evidence intake requirements, schema, checked template, and
   checker under [`docs/non-local-release-evidence.md`](non-local-release-evidence.md),
@@ -705,9 +705,9 @@ The current local baseline includes:
   [`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md),
   [`release-artifacts/evidence/public-beta-templates/`](../release-artifacts/evidence/public-beta-templates/),
   [`release-artifacts/evidence/production-release-templates/`](../release-artifacts/evidence/production-release-templates/),
-  [`scripts/check_non_local_release_evidence.py`](../scripts/check_non_local_release_evidence.py),
+  [`tools/release/check_non_local_release_evidence.py`](../tools/release/check_non_local_release_evidence.py),
   and
-  [`scripts/check_fork_deployment_rehearsal_evidence.py`](../scripts/check_fork_deployment_rehearsal_evidence.py);
+  [`tools/deployment/check_fork_deployment_rehearsal_evidence.py`](../tools/deployment/check_fork_deployment_rehearsal_evidence.py);
 - Slither baseline evidence in
   [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json),
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md), and
@@ -816,8 +816,8 @@ Audit and protocol evidence:
 - [docs/adr/README.md](adr/README.md)
 - [ops/SLITHER_BASELINE.md](../ops/SLITHER_BASELINE.md)
 - [ops/SLITHER_BASELINE.json](../ops/SLITHER_BASELINE.json)
-- [scripts/check_slither_baseline.py](../scripts/check_slither_baseline.py)
-- [scripts/test_slither_baseline.py](../scripts/test_slither_baseline.py)
+- [tools/security/check_slither_baseline.py](../tools/security/check_slither_baseline.py)
+- [tools/security/test_slither_baseline.py](../tools/security/test_slither_baseline.py)
 - [docs/integrations/README.md](integrations/README.md)
 - [docs/integrations/contract-flows.md](integrations/contract-flows.md)
 - [docs/integrations/auction-flows.md](integrations/auction-flows.md)
@@ -825,13 +825,13 @@ Audit and protocol evidence:
 - [docs/integrations/events-and-indexing.md](integrations/events-and-indexing.md)
 - [docs/integrations/metadata-rendering.md](integrations/metadata-rendering.md)
 - [docs/integrations/marketplace-indexer-evidence.md](integrations/marketplace-indexer-evidence.md)
-- [docs/integrations/frontend-reference-architecture.md](integrations/frontend-reference-architecture.md)
-- [docs/integrations/mobile-walletconnect.md](integrations/mobile-walletconnect.md)
-- [docs/integrations/electron-security-wallets.md](integrations/electron-security-wallets.md)
-- [docs/integrations/operator-admin-ui.md](integrations/operator-admin-ui.md)
+- [docs/reference/legacy-stack/integrations/frontend-reference-architecture.md](reference/legacy-stack/integrations/frontend-reference-architecture.md)
+- [docs/reference/legacy-stack/integrations/mobile-walletconnect.md](reference/legacy-stack/integrations/mobile-walletconnect.md)
+- [docs/reference/legacy-stack/integrations/electron-security-wallets.md](reference/legacy-stack/integrations/electron-security-wallets.md)
+- [docs/reference/legacy-stack/integrations/operator-admin-ui.md](reference/legacy-stack/integrations/operator-admin-ui.md)
 - [docs/monitoring.md](monitoring.md)
 - [docs/operator-dashboard-query-model.md](operator-dashboard-query-model.md)
-- [docs/integrations/examples/react-viem.md](integrations/examples/react-viem.md)
+- [docs/reference/legacy-stack/integrations/examples/react-viem.md](reference/legacy-stack/integrations/examples/react-viem.md)
 
 Release artifacts:
 
@@ -883,7 +883,7 @@ Release artifacts:
 - [release-artifacts/baselines/v0.1.0/abi-surface.json](../release-artifacts/baselines/v0.1.0/abi-surface.json)
 - [release-artifacts/baselines/v0.1.0/gas-snapshot.snap](../release-artifacts/baselines/v0.1.0/gas-snapshot.snap)
 - [release-artifacts/baselines/v0.1.0/gas-envelopes.json](../release-artifacts/baselines/v0.1.0/gas-envelopes.json)
-- [release-artifacts/baselines/v0.1.0/natspec-coverage.json](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+- [release-artifacts/natspec-coverage.json](../release-artifacts/natspec-coverage.json)
 - [deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json](../deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json)
 - [deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json](../deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json)
 - [release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json](../release-artifacts/signatures/anvil-6529stream-v0.1.0-001-local.json)
@@ -893,110 +893,110 @@ Release artifacts:
 Run the dashboard checker directly:
 
 ```sh
-python scripts/test_release_readiness.py
-python scripts/check_release_readiness.py
-python scripts/test_release_mode.py
-python scripts/check_release_mode.py --phase public-beta
-python scripts/check_release_mode.py --phase production-release
-python scripts/test_production_broadcast_retention.py
-python scripts/check_production_broadcast_retention.py
-python scripts/test_public_beta_verified_addresses.py
-python scripts/check_public_beta_verified_addresses.py
-python scripts/test_sepolia_evidence_preflight.py
-python scripts/check_sepolia_evidence_preflight.py
-python scripts/test_production_verified_addresses.py
-python scripts/check_production_verified_addresses.py
-python scripts/test_signed_release_tag.py
-python scripts/check_signed_release_tag.py
-python scripts/test_production_release_signing_evidence.py
-python scripts/check_production_release_signing_evidence.py
-python scripts/test_incident_response.py
-python scripts/check_incident_response.py
-python scripts/test_stuck_auction_drill_evidence.py
-python scripts/check_stuck_auction_drill_evidence.py
-python scripts/test_failed_randomness_drill_evidence.py
-python scripts/check_failed_randomness_drill_evidence.py
-python scripts/test_bad_metadata_dependency_drill_evidence.py
-python scripts/check_bad_metadata_dependency_drill_evidence.py
-python scripts/test_contract_flows.py
-python scripts/check_contract_flows.py
-python scripts/test_auction_flows.py
-python scripts/check_auction_flows.py
-python scripts/test_wallet_signature_flows.py
-python scripts/check_wallet_signature_flows.py
-python scripts/test_events_and_indexing.py
-python scripts/check_events_and_indexing.py
-python scripts/test_metadata_rendering.py
-python scripts/check_metadata_rendering.py
-python scripts/test_marketplace_indexer_evidence.py
-python scripts/check_marketplace_indexer_evidence.py
-python scripts/test_react_next_reference.py
-python scripts/check_react_next_reference.py
-python scripts/test_mobile_walletconnect.py
-python scripts/check_mobile_walletconnect.py
-python scripts/test_electron_security_wallets.py
-python scripts/check_electron_security_wallets.py
-python scripts/test_operator_admin_ui.py
-python scripts/check_operator_admin_ui.py
-python scripts/test_operator_dashboard_query_model.py
-python scripts/check_operator_dashboard_query_model.py
-python scripts/test_monitoring_spec.py
-python scripts/check_monitoring_spec.py
-python scripts/test_drop_authorization_payload_generator.py
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
-python scripts/generate_drop_authorization_payload.py --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
-python scripts/test_drop_authorization_fixtures.py
-python scripts/check_drop_authorization_fixtures.py
-python scripts/test_drop_authorization_signing_evidence.py
-python scripts/check_drop_authorization_signing_evidence.py
-python scripts/test_signer_custody_readiness.py
-python scripts/check_signer_custody_readiness.py
-python scripts/test_one_of_one_provenance_manifest.py
-python scripts/check_one_of_one_provenance_manifest.py
-python scripts/generate_one_of_one_provenance_manifest.py --check
-python scripts/test_one_of_one_permanence_package.py
-python scripts/check_one_of_one_permanence_package.py
-python scripts/generate_one_of_one_permanence_manifest.py --check
-python scripts/test_royalty_policy.py
-python scripts/check_royalty_policy.py
-python scripts/test_warning_dispositions.py
-python scripts/run_forge_size_log.py --log cache/forge-size.log
-python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
-python scripts/test_gas_envelopes.py
-python scripts/check_gas_envelopes.py
-python scripts/test_public_beta_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/test_risk_register.py
-python scripts/check_risk_register.py
-python scripts/generate_risk_register.py --check
-python scripts/test_production_release_blocker_report.py
-python scripts/generate_production_release_blocker_report.py --check
-python scripts/test_release_evidence_packet_index.py
-python scripts/generate_release_evidence_packet_index.py --check
-python scripts/test_release_evidence_issue_backlog.py
-python scripts/generate_release_evidence_issue_backlog.py --check
-python scripts/test_release_evidence_issue_links.py
-python scripts/check_release_evidence_issue_links.py
-python scripts/test_release_evidence_issue_snapshot.py
-python scripts/test_release_evidence_issue_snapshot_audit.py
-python scripts/test_release_evidence_live_audit_report.py
-python scripts/check_release_evidence_live_audit_report.py
-python scripts/test_release_evidence_live_audit_markdown.py
-python scripts/check_release_evidence_live_audit_markdown.py
-python scripts/test_release_evidence_live_audit_archive.py
-python scripts/generate_release_evidence_live_audit_archive.py --check
-python scripts/test_release_evidence_issue_labels.py
-python scripts/check_release_evidence_issue_labels.py
-python scripts/test_release_evidence_issue_body_sync.py
-python scripts/generate_release_evidence_issue_body_sync.py --check
-python scripts/test_release_evidence_issue_bodies.py
-python scripts/check_release_evidence_issue_bodies.py
-python scripts/test_release_evidence_issue_closure.py
-python scripts/check_release_evidence_issue_closure.py
-python scripts/test_non_local_release_evidence.py
-python scripts/check_non_local_release_evidence.py
+python -m tools.release.test_release_readiness
+python -m tools.release.check_release_readiness
+python -m tools.release.test_release_mode
+python -m tools.release.check_release_mode --phase public-beta
+python -m tools.release.check_release_mode --phase production-release
+python -m tools.release.test_production_broadcast_retention
+python -m tools.release.check_production_broadcast_retention
+python -m tools.release.test_public_beta_verified_addresses
+python -m tools.release.check_public_beta_verified_addresses
+python -m tools.deployment.test_sepolia_evidence_preflight
+python -m tools.deployment.check_sepolia_evidence_preflight
+python -m tools.release.test_production_verified_addresses
+python -m tools.release.check_production_verified_addresses
+python -m tools.release.test_signed_release_tag
+python -m tools.release.check_signed_release_tag
+python -m tools.release.test_production_release_signing_evidence
+python -m tools.release.check_production_release_signing_evidence
+python -m tools.docs.test_incident_response
+python -m tools.docs.check_incident_response
+python -m tools.release.test_stuck_auction_drill_evidence
+python -m tools.release.check_stuck_auction_drill_evidence
+python -m tools.release.test_failed_randomness_drill_evidence
+python -m tools.release.check_failed_randomness_drill_evidence
+python -m tools.protocol.test_bad_metadata_dependency_drill_evidence
+python -m tools.protocol.check_bad_metadata_dependency_drill_evidence
+python -m tools.docs.test_contract_flows
+python -m tools.docs.check_contract_flows
+python -m tools.docs.test_auction_flows
+python -m tools.docs.check_auction_flows
+python -m tools.docs.test_wallet_signature_flows
+python -m tools.docs.check_wallet_signature_flows
+python -m tools.docs.test_events_and_indexing
+python -m tools.docs.check_events_and_indexing
+python -m tools.docs.test_metadata_rendering
+python -m tools.docs.check_metadata_rendering
+python -m tools.release.test_marketplace_indexer_evidence
+python -m tools.release.check_marketplace_indexer_evidence
+python -m tools.docs.test_react_next_reference
+python -m tools.docs.check_react_next_reference
+python -m tools.docs.test_mobile_walletconnect
+python -m tools.docs.check_mobile_walletconnect
+python -m tools.docs.test_electron_security_wallets
+python -m tools.docs.check_electron_security_wallets
+python -m tools.docs.test_operator_admin_ui
+python -m tools.docs.check_operator_admin_ui
+python -m tools.docs.test_operator_dashboard_query_model
+python -m tools.docs.check_operator_dashboard_query_model
+python -m tools.docs.test_monitoring_spec
+python -m tools.docs.check_monitoring_spec
+python -m tools.protocol.test_drop_authorization_payload_generator
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/fixed-price-input.json --output test/fixtures/drop-authorization/payload-generator/fixed-price-output.json --check
+python -m tools.protocol.generate_drop_authorization_payload --input test/fixtures/drop-authorization/payload-generator/auction-input.json --output test/fixtures/drop-authorization/payload-generator/auction-output.json --check
+python -m tools.protocol.test_drop_authorization_fixtures
+python -m tools.protocol.check_drop_authorization_fixtures
+python -m tools.release.test_drop_authorization_signing_evidence
+python -m tools.release.check_drop_authorization_signing_evidence
+python -m tools.release.test_signer_custody_readiness
+python -m tools.release.check_signer_custody_readiness
+python -m tools.protocol.test_one_of_one_provenance_manifest
+python -m tools.protocol.check_one_of_one_provenance_manifest
+python -m tools.protocol.generate_one_of_one_provenance_manifest --check
+python -m tools.protocol.test_one_of_one_permanence_package
+python -m tools.protocol.check_one_of_one_permanence_package
+python -m tools.protocol.generate_one_of_one_permanence_manifest --check
+python -m tools.docs.test_royalty_policy
+python -m tools.docs.check_royalty_policy
+python -m tools.security.test_warning_dispositions
+python -m tools.build.run_forge_size_log --log cache/forge-size.log
+python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
+python -m tools.protocol.test_gas_envelopes
+python -m tools.protocol.check_gas_envelopes
+python -m tools.release.test_public_beta_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.security.test_risk_register
+python -m tools.security.check_risk_register
+python -m tools.security.generate_risk_register --check
+python -m tools.release.test_production_release_blocker_report
+python -m tools.release.generate_production_release_blocker_report --check
+python -m tools.release.test_release_evidence_packet_index
+python -m tools.release.generate_release_evidence_packet_index --check
+python -m tools.release.test_release_evidence_issue_backlog
+python -m tools.release.generate_release_evidence_issue_backlog --check
+python -m tools.release.test_release_evidence_issue_links
+python -m tools.release.check_release_evidence_issue_links
+python -m tools.release.test_release_evidence_issue_snapshot
+python -m tools.release.test_release_evidence_issue_snapshot_audit
+python -m tools.release.test_release_evidence_live_audit_report
+python -m tools.release.check_release_evidence_live_audit_report
+python -m tools.release.test_release_evidence_live_audit_markdown
+python -m tools.release.check_release_evidence_live_audit_markdown
+python -m tools.release.test_release_evidence_live_audit_archive
+python -m tools.release.generate_release_evidence_live_audit_archive --check
+python -m tools.release.test_release_evidence_issue_labels
+python -m tools.release.check_release_evidence_issue_labels
+python -m tools.release.test_release_evidence_issue_body_sync
+python -m tools.release.generate_release_evidence_issue_body_sync --check
+python -m tools.release.test_release_evidence_issue_bodies
+python -m tools.release.check_release_evidence_issue_bodies
+python -m tools.release.test_release_evidence_issue_closure
+python -m tools.release.check_release_evidence_issue_closure
+python -m tools.release.test_non_local_release_evidence
+python -m tools.release.check_non_local_release_evidence
 ```
 
 Run the release evidence drift checks:
@@ -1007,19 +1007,19 @@ canonical generated tail in dependency order: risk register, release notes,
 release manifest, bytecode proof, candidate lockfile, then checksum bundle.
 
 ```sh
-python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
-python scripts/audit_release_evidence_issue_snapshots.py --generated-at YYYYMMDDTHHMMSSZ --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
-python scripts/check_release_evidence_live_audit_report.py --report-json tmp/release-evidence-live-audit-report.json
-python scripts/check_release_evidence_live_audit_report.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json
-python scripts/check_release_evidence_live_audit_markdown.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
-python scripts/check_release_evidence_live_audit_markdown.py --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
-python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports
-python scripts/generate_release_evidence_live_audit_archive.py --archive-dir release-artifacts/evidence/live-audit-reports --check
-python scripts/generate_release_evidence_live_audit_archive.py --check
-python scripts/check_signed_release_tag.py --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_candidate_lockfile.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.release.audit_release_evidence_issue_snapshots --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python -m tools.release.audit_release_evidence_issue_snapshots --generated-at YYYYMMDDTHHMMSSZ --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python -m tools.release.check_release_evidence_live_audit_report --report-json tmp/release-evidence-live-audit-report.json
+python -m tools.release.check_release_evidence_live_audit_report --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json
+python -m tools.release.check_release_evidence_live_audit_markdown --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
+python -m tools.release.check_release_evidence_live_audit_markdown --report-json release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.json --report-md release-artifacts/evidence/live-audit-reports/YYYYMMDDTHHMMSSZ-release-evidence-live-audit-report.md
+python -m tools.release.generate_release_evidence_live_audit_archive --archive-dir release-artifacts/evidence/live-audit-reports
+python -m tools.release.generate_release_evidence_live_audit_archive --archive-dir release-artifacts/evidence/live-audit-reports --check
+python -m tools.release.generate_release_evidence_live_audit_archive --check
+python -m tools.release.check_signed_release_tag --mode release --tag vX.Y.Z --evidence path/to/post-bundle-release-signature-evidence.json
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_candidate_lockfile --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 Run the full local release gate:

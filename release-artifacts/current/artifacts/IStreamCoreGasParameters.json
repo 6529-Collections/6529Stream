@@ -1,0 +1,294 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "gasParameterInfo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "floor",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "failureClass",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint64",
+          "name": "revision",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "raiseGasParameter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "parameterId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "host",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "actionId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "oldValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newValue",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "floor",
+          "type": "uint256"
+        }
+      ],
+      "name": "GasParameterUpdated",
+      "type": "event"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "host",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "actionId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "oldValue",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            }
+          ],
+          "name": "GasParameterUpdated",
+          "type": "event"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "gasParameterInfo",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "floor",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "failureClass",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "revision",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "parameterId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "newValue",
+              "type": "uint256"
+            }
+          ],
+          "name": "raiseGasParameter",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "gasParameterInfo(bytes32)": {
+            "params": {
+              "parameterId": "Domain-defined identifier for the bounded external call."
+            },
+            "returns": {
+              "failureClass": "Protocol failure-behavior classification for this call.",
+              "floor": "Permanent lower bound in gas units.",
+              "revision": "Monotonic configuration revision.",
+              "value": "Current call budget in gas units."
+            }
+          },
+          "raiseGasParameter(bytes32,uint256)": {
+            "details": "Requires the exact governed transition; callers cannot use this to lower a budget.",
+            "params": {
+              "newValue": "Requested call budget in gas units."
+            }
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "gasParameterInfo(bytes32)": {
+            "notice": "Returns the configured call budget and its lower bound in gas units."
+          },
+          "raiseGasParameter(bytes32,uint256)": {
+            "notice": "Raises a governed external-call budget without lowering its current value or floor."
+          }
+        },
+        "notice": "Raise-only gas budgets for bounded Core external calls.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol": "IStreamCoreGasParameters"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/core/IStreamCoreGasParameters.sol": {
+        "keccak256": "0xf8429a05994ad571fd72e70203fb642028a3270661c20ae41741a144e3308889",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b3191cf83b0b1d76677a10a56ca8d7efe225fda0b4a882ad08e88b001dbc9f47",
+          "dweb:/ipfs/QmUuFomWv5gfByZGwe2G1NMJMKfvK8XgfvWVTAD5rRfxKL"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "gasParameterInfo(bytes32)": "ec2ef90a",
+    "raiseGasParameter(bytes32,uint256)": "5c0df7da"
+  }
+}

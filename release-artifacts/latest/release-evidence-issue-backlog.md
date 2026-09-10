@@ -69,19 +69,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_external_audit_report_evidence.py`
-- `python scripts/check_external_audit_report_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_external_audit_report_evidence`
+- `python -m tools.release.check_external_audit_report_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -138,19 +138,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_deployment_rehearsal_evidence.py`
-- `python scripts/check_fork_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_deployment_rehearsal_evidence`
+- `python -m tools.deployment.check_fork_deployment_rehearsal_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -207,19 +207,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_testnet_deployment_rehearsal_evidence`
+- `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -276,19 +276,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_ceremony_evidence.py`
-- `python scripts/check_fork_ceremony_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_ceremony_evidence`
+- `python -m tools.deployment.check_fork_ceremony_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -345,19 +345,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_fork_randomizer_operations_evidence.py`
-- `python scripts/check_fork_randomizer_operations_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_fork_randomizer_operations_evidence`
+- `python -m tools.deployment.check_fork_randomizer_operations_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -414,19 +414,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_verified_addresses.py`
-- `python scripts/check_public_beta_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_verified_addresses`
+- `python -m tools.release.check_public_beta_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -483,19 +483,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_verified_addresses.py`
-- `python scripts/check_public_beta_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_verified_addresses`
+- `python -m tools.release.check_public_beta_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_public_beta_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -552,23 +552,23 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_release_signing_evidence.py`
-- `python scripts/check_production_release_signing_evidence.py`
-- `python scripts/test_release_signatures.py`
-- `python scripts/check_release_signatures.py`
-- `python scripts/test_signed_release_tag.py`
-- `python scripts/check_signed_release_tag.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_release_signing_evidence`
+- `python -m tools.release.check_production_release_signing_evidence`
+- `python -m tools.release.test_release_signatures`
+- `python -m tools.release.check_release_signatures`
+- `python -m tools.release.test_signed_release_tag`
+- `python -m tools.release.check_signed_release_tag`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -625,23 +625,23 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_release_signing_evidence.py`
-- `python scripts/check_production_release_signing_evidence.py`
-- `python scripts/test_release_signatures.py`
-- `python scripts/check_release_signatures.py`
-- `python scripts/test_signed_release_tag.py`
-- `python scripts/check_signed_release_tag.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_release_signing_evidence`
+- `python -m tools.release.check_production_release_signing_evidence`
+- `python -m tools.release.test_release_signatures`
+- `python -m tools.release.check_release_signatures`
+- `python -m tools.release.test_signed_release_tag`
+- `python -m tools.release.check_signed_release_tag`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -698,19 +698,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_verified_addresses.py`
-- `python scripts/check_production_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_verified_addresses`
+- `python -m tools.release.check_production_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -767,17 +767,17 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -834,19 +834,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_deployment_manifest_evidence.py`
-- `python scripts/check_live_deployment_manifest_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_live_deployment_manifest_evidence`
+- `python -m tools.release.check_live_deployment_manifest_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -903,19 +903,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_ceremony_evidence.py`
-- `python scripts/check_live_ceremony_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_live_ceremony_evidence`
+- `python -m tools.deployment.check_live_ceremony_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -972,19 +972,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_randomizer_operations_evidence.py`
-- `python scripts/check_live_randomizer_operations_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.deployment.test_live_randomizer_operations_evidence`
+- `python -m tools.deployment.check_live_randomizer_operations_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1041,19 +1041,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_live_metadata_browser_evidence.py`
-- `python scripts/check_live_metadata_browser_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_live_metadata_browser_evidence`
+- `python -m tools.release.check_live_metadata_browser_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1110,19 +1110,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_marketplace_indexer_evidence.py`
-- `python scripts/check_marketplace_indexer_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_marketplace_indexer_evidence`
+- `python -m tools.release.check_marketplace_indexer_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1179,19 +1179,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_production_verified_addresses.py`
-- `python scripts/check_production_verified_addresses.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_production_verified_addresses`
+- `python -m tools.release.check_production_verified_addresses`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1248,19 +1248,19 @@ Suggested issue body:
 
 ## Validation
 
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_post_audit_remediation_evidence.py`
-- `python scripts/check_post_audit_remediation_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_production_release_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.test_release_evidence_packet_index`
+- `python -m tools.release.test_public_beta_evidence`
+- `python -m tools.release.test_non_local_release_evidence`
+- `python -m tools.release.test_post_audit_remediation_evidence`
+- `python -m tools.release.check_post_audit_remediation_evidence`
+- `python -m tools.release.test_public_beta_blocker_report`
+- `python -m tools.release.test_production_release_blocker_report`
+- `python -m tools.release.generate_production_release_blocker_report --check`
+- `python -m tools.release.check_public_beta_evidence`
+- `python -m tools.release.check_non_local_release_evidence`
+- `python -m tools.release.generate_release_evidence_packet_index --check`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.release.generate_release_checksums --check`
 
 ## Non-Goals
 
@@ -1280,49 +1280,49 @@ Suggested issue body:
 
 | Command |
 | --- |
-| `python scripts/check_external_audit_report_evidence.py` |
-| `python scripts/check_fork_ceremony_evidence.py` |
-| `python scripts/check_fork_deployment_rehearsal_evidence.py` |
-| `python scripts/check_fork_randomizer_operations_evidence.py` |
-| `python scripts/check_live_ceremony_evidence.py` |
-| `python scripts/check_live_deployment_manifest_evidence.py` |
-| `python scripts/check_live_metadata_browser_evidence.py` |
-| `python scripts/check_live_randomizer_operations_evidence.py` |
-| `python scripts/check_marketplace_indexer_evidence.py` |
-| `python scripts/check_non_local_release_evidence.py` |
-| `python scripts/check_post_audit_remediation_evidence.py` |
-| `python scripts/check_production_release_signing_evidence.py` |
-| `python scripts/check_production_verified_addresses.py` |
-| `python scripts/check_public_beta_evidence.py` |
-| `python scripts/check_public_beta_verified_addresses.py` |
-| `python scripts/check_release_signatures.py` |
-| `python scripts/check_signed_release_tag.py` |
-| `python scripts/check_testnet_deployment_rehearsal_evidence.py` |
-| `python scripts/generate_production_release_blocker_report.py --check` |
-| `python scripts/generate_public_beta_blocker_report.py --check` |
-| `python scripts/generate_release_checksums.py --check` |
-| `python scripts/generate_release_evidence_issue_backlog.py --check` |
-| `python scripts/generate_release_evidence_packet_index.py --check` |
-| `python scripts/generate_release_manifest.py --check` |
-| `python scripts/test_external_audit_report_evidence.py` |
-| `python scripts/test_fork_ceremony_evidence.py` |
-| `python scripts/test_fork_deployment_rehearsal_evidence.py` |
-| `python scripts/test_fork_randomizer_operations_evidence.py` |
-| `python scripts/test_live_ceremony_evidence.py` |
-| `python scripts/test_live_deployment_manifest_evidence.py` |
-| `python scripts/test_live_metadata_browser_evidence.py` |
-| `python scripts/test_live_randomizer_operations_evidence.py` |
-| `python scripts/test_marketplace_indexer_evidence.py` |
-| `python scripts/test_non_local_release_evidence.py` |
-| `python scripts/test_post_audit_remediation_evidence.py` |
-| `python scripts/test_production_release_blocker_report.py` |
-| `python scripts/test_production_release_signing_evidence.py` |
-| `python scripts/test_production_verified_addresses.py` |
-| `python scripts/test_public_beta_blocker_report.py` |
-| `python scripts/test_public_beta_evidence.py` |
-| `python scripts/test_public_beta_verified_addresses.py` |
-| `python scripts/test_release_evidence_issue_backlog.py` |
-| `python scripts/test_release_evidence_packet_index.py` |
-| `python scripts/test_release_signatures.py` |
-| `python scripts/test_signed_release_tag.py` |
-| `python scripts/test_testnet_deployment_rehearsal_evidence.py` |
+| `python -m tools.deployment.check_fork_ceremony_evidence` |
+| `python -m tools.deployment.check_fork_deployment_rehearsal_evidence` |
+| `python -m tools.deployment.check_fork_randomizer_operations_evidence` |
+| `python -m tools.deployment.check_live_ceremony_evidence` |
+| `python -m tools.deployment.check_live_randomizer_operations_evidence` |
+| `python -m tools.deployment.check_testnet_deployment_rehearsal_evidence` |
+| `python -m tools.deployment.test_fork_ceremony_evidence` |
+| `python -m tools.deployment.test_fork_deployment_rehearsal_evidence` |
+| `python -m tools.deployment.test_fork_randomizer_operations_evidence` |
+| `python -m tools.deployment.test_live_ceremony_evidence` |
+| `python -m tools.deployment.test_live_randomizer_operations_evidence` |
+| `python -m tools.deployment.test_testnet_deployment_rehearsal_evidence` |
+| `python -m tools.release.check_external_audit_report_evidence` |
+| `python -m tools.release.check_live_deployment_manifest_evidence` |
+| `python -m tools.release.check_live_metadata_browser_evidence` |
+| `python -m tools.release.check_marketplace_indexer_evidence` |
+| `python -m tools.release.check_non_local_release_evidence` |
+| `python -m tools.release.check_post_audit_remediation_evidence` |
+| `python -m tools.release.check_production_release_signing_evidence` |
+| `python -m tools.release.check_production_verified_addresses` |
+| `python -m tools.release.check_public_beta_evidence` |
+| `python -m tools.release.check_public_beta_verified_addresses` |
+| `python -m tools.release.check_release_signatures` |
+| `python -m tools.release.check_signed_release_tag` |
+| `python -m tools.release.generate_production_release_blocker_report --check` |
+| `python -m tools.release.generate_public_beta_blocker_report --check` |
+| `python -m tools.release.generate_release_checksums --check` |
+| `python -m tools.release.generate_release_evidence_issue_backlog --check` |
+| `python -m tools.release.generate_release_evidence_packet_index --check` |
+| `python -m tools.release.generate_release_manifest --check` |
+| `python -m tools.release.test_external_audit_report_evidence` |
+| `python -m tools.release.test_live_deployment_manifest_evidence` |
+| `python -m tools.release.test_live_metadata_browser_evidence` |
+| `python -m tools.release.test_marketplace_indexer_evidence` |
+| `python -m tools.release.test_non_local_release_evidence` |
+| `python -m tools.release.test_post_audit_remediation_evidence` |
+| `python -m tools.release.test_production_release_blocker_report` |
+| `python -m tools.release.test_production_release_signing_evidence` |
+| `python -m tools.release.test_production_verified_addresses` |
+| `python -m tools.release.test_public_beta_blocker_report` |
+| `python -m tools.release.test_public_beta_evidence` |
+| `python -m tools.release.test_public_beta_verified_addresses` |
+| `python -m tools.release.test_release_evidence_issue_backlog` |
+| `python -m tools.release.test_release_evidence_packet_index` |
+| `python -m tools.release.test_release_signatures` |
+| `python -m tools.release.test_signed_release_tag` |

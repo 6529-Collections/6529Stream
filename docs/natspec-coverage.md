@@ -24,7 +24,12 @@ immediately above it, allowing blank lines between the comment and declaration.
 ## Baseline
 
 The current accepted-missing baseline lives at
-[`release-artifacts/baselines/v0.1.0/natspec-coverage.json`](../release-artifacts/baselines/v0.1.0/natspec-coverage.json).
+[`release-artifacts/natspec-coverage.json`](../release-artifacts/natspec-coverage.json).
+
+The preserved [v0.1.0 snapshot](../release-artifacts/baselines/v0.1.0/natspec-coverage.json)
+is historical evidence, not the active allowlist. The current report has 1,059
+entries: 111 documented and 948 explicit exclusions. This reorganization adds no
+new documentation gaps and resolves one previously excluded declaration.
 
 The baseline is intentional release debt. It exists so the repo can enforce the
 rule "do not add more undocumented protocol surface" before the full NatSpec
@@ -34,11 +39,11 @@ Current baseline summary:
 
 | Status | Count | Meaning |
 | --- | ---: | --- |
-| `missing_natspec` | 362 | First-party function, event, or custom error declaration lacks nearby NatSpec |
+| `missing_natspec` | 361 | First-party function, event, or custom error declaration lacks nearby NatSpec |
 | `public_variable_getter_missing_natspec` | 121 | Compiler-generated public getter lacks NatSpec on the state variable |
 | `declaration_not_in_source` | 466 | ABI entry is inherited or otherwise not declared in the first-party source body |
 
-The checker reports 110 documented release-surface entries and 949 explicit
+The checker reports 111 documented release-surface entries and 948 explicit
 exclusions in this baseline. That is not acceptable as a final documentation
 standard; it is a machine-readable starting line for audit preparation.
 
@@ -59,15 +64,15 @@ integrator-facing ambiguity if used casually.
 Run the focused gate:
 
 ```sh
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
 ```
 
 Refresh the current baseline after intentional NatSpec or release-surface
 changes:
 
 ```sh
-python scripts/check_natspec_coverage.py --write-baseline
+python -m tools.build.check_natspec_coverage --write-baseline
 ```
 
 The refresh command prints the total explicit exclusions, added exclusions,
@@ -77,10 +82,10 @@ change burns debt down or accepts new debt.
 Then rerun:
 
 ```sh
-python scripts/test_natspec_coverage.py
-python scripts/check_natspec_coverage.py
-python scripts/generate_release_manifest.py
-python scripts/generate_release_checksums.py
+python -m tools.build.test_natspec_coverage
+python -m tools.build.check_natspec_coverage
+python -m tools.release.generate_release_manifest
+python -m tools.release.generate_release_checksums
 ```
 
 The full local gate also runs NatSpec coverage:

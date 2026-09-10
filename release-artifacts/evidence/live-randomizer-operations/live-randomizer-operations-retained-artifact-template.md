@@ -79,14 +79,14 @@
 ## Validation Commands
 
 ```sh
-python scripts/test_live_randomizer_operations_evidence.py
-python scripts/check_live_randomizer_operations_evidence.py
-python scripts/check_randomizer_operations.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-evidence.json --environment live --chain-id 1 --block-or-reference "<mainnet block, provider epoch, request-health reference, or deployment version>" --command-or-source-system "<provider export, explorer source, operations JSON, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
-python scripts/check_non_local_release_evidence.py
-python scripts/check_public_beta_evidence.py
-python scripts/generate_release_manifest.py --check
-python scripts/generate_release_checksums.py --check
+python -m tools.deployment.test_live_randomizer_operations_evidence
+python -m tools.deployment.check_live_randomizer_operations_evidence
+python -m tools.deployment.check_randomizer_operations
+python -m tools.release.generate_non_local_release_evidence --template release-artifacts/evidence/production-release-templates/live-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-evidence.json --environment live --chain-id 1 --block-or-reference "<mainnet block, provider epoch, request-health reference, or deployment version>" --command-or-source-system "<provider export, explorer source, operations JSON, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<release CI run>"
+python -m tools.release.check_non_local_release_evidence
+python -m tools.release.check_public_beta_evidence
+python -m tools.release.generate_release_manifest --check
+python -m tools.release.generate_release_checksums --check
 ```
 
 ## Operator Notes
@@ -105,7 +105,7 @@ python scripts/generate_release_checksums.py --check
   `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style
   retained digest output to the explicit `sha256:<hex>` form before review.
 - The referenced randomizer operations JSON should also pass
-  `python scripts/check_randomizer_operations.py` against retained live
+  `python -m tools.deployment.check_randomizer_operations` against retained live
   deployment manifests, address books, provider funding evidence, request
   health evidence, lifecycle control evidence, and redaction policy.
 - Do not commit private keys, private RPC URLs, provider dashboard secrets,

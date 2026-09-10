@@ -23,9 +23,9 @@ The machine-readable provenance model lives in:
 - [`release-artifacts/provenance/one-of-one-provenance-template.provenance.json`](../release-artifacts/provenance/one-of-one-provenance-template.provenance.json)
 - [`release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md`](../release-artifacts/provenance/one-of-one-provenance-retained-artifact-template.md)
 - [`release-artifacts/latest/one-of-one-provenance-manifest.json`](../release-artifacts/latest/one-of-one-provenance-manifest.json)
-- [`scripts/check_one_of_one_provenance_manifest.py`](../scripts/check_one_of_one_provenance_manifest.py)
-- [`scripts/generate_one_of_one_provenance_manifest.py`](../scripts/generate_one_of_one_provenance_manifest.py)
-- [`scripts/test_one_of_one_provenance_manifest.py`](../scripts/test_one_of_one_provenance_manifest.py)
+- [`tools/protocol/check_one_of_one_provenance_manifest.py`](../tools/protocol/check_one_of_one_provenance_manifest.py)
+- [`tools/protocol/generate_one_of_one_provenance_manifest.py`](../tools/protocol/generate_one_of_one_provenance_manifest.py)
+- [`tools/protocol/test_one_of_one_provenance_manifest.py`](../tools/protocol/test_one_of_one_provenance_manifest.py)
 
 The template is intentionally not drop-completion evidence. The generated
 `latest/one-of-one-provenance-manifest.json` file catalogs checked provenance
@@ -101,9 +101,9 @@ documents or linked media.
 
 Before a manifest can support a reviewed release claim:
 
-1. Run `python scripts/test_one_of_one_provenance_manifest.py`.
-2. Run `python scripts/check_one_of_one_provenance_manifest.py`.
-3. Run `python scripts/generate_one_of_one_provenance_manifest.py --check`.
+1. Run `python -m tools.protocol.test_one_of_one_provenance_manifest`.
+2. Run `python -m tools.protocol.check_one_of_one_provenance_manifest`.
+3. Run `python -m tools.protocol.generate_one_of_one_provenance_manifest --check`.
 4. Regenerate and check `release-artifacts/latest/release-manifest.json`.
 5. Regenerate and check the bytecode release proof and checksum bundle.
 6. Retain non-local indexer/marketplace evidence separately if the release claim

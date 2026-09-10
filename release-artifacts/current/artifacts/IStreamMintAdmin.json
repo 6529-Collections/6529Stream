@@ -1,0 +1,503 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "paused",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endTime",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint32",
+              "name": "maxBatchQuantity",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "configHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintPhaseConfig",
+          "name": "config",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "gate",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateCodehash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "gateMetadataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "gateSemanticVersion",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "gateGasLimit",
+              "type": "uint32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintGateConfig",
+          "name": "gateConfig",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "counterIds",
+          "type": "bytes32[]"
+        },
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "enabled",
+              "type": "bool"
+            },
+            {
+              "internalType": "enum IStreamMintManager.CounterKeyMode",
+              "name": "keyMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterCapMode",
+              "name": "capMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+              "name": "deltaMode",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticCap",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "staticIncrement",
+              "type": "uint64"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "counterConfigHash",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamMintManager.MintCounterConfig[]",
+          "name": "counterConfigs",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "configurePhase",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "executor",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "allowed",
+          "type": "bool"
+        }
+      ],
+      "name": "setPhaseExecutor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "paused",
+          "type": "bool"
+        }
+      ],
+      "name": "setPhasePaused",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endTime",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "maxBatchQuantity",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "metadataHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintPhaseConfig",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "gate",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateCodehash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "gateMetadataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "gateSemanticVersion",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "gateGasLimit",
+                  "type": "uint32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintGateConfig",
+              "name": "gateConfig",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32[]",
+              "name": "counterIds",
+              "type": "bytes32[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "enabled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "enum IStreamMintManager.CounterKeyMode",
+                  "name": "keyMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterCapMode",
+                  "name": "capMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "enum IStreamMintLedger.CounterDeltaMode",
+                  "name": "deltaMode",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticCap",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "staticIncrement",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "counterConfigHash",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamMintManager.MintCounterConfig[]",
+              "name": "counterConfigs",
+              "type": "tuple[]"
+            }
+          ],
+          "name": "configurePhase",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "internalType": "bool",
+              "name": "allowed",
+              "type": "bool"
+            }
+          ],
+          "name": "setPhaseExecutor",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "name": "setPhasePaused",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Caller ABI at the manager address. Use IStreamMintManager for ERC165      discovery and canonical nested request types; subset IDs are not advertised.      These methods require the manager owner. In the governed deployment that      owner is the Executor, whose action policy supplies the required delays.",
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])": {
+            "notice": "Configures and registers a launch-static phase policy."
+          },
+          "setPhaseExecutor(uint256,bytes32,address,bool)": {
+            "notice": "Enables or disables a caller for a configured phase."
+          },
+          "setPhasePaused(uint256,bytes32,bool)": {
+            "notice": "Pauses or unpauses a configured phase."
+          }
+        },
+        "notice": "Phase policy, execution authorization, and pause configuration.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/mint/IStreamMintAdmin.sol": "IStreamMintAdmin"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/mint/IStreamMintAdmin.sol": {
+        "keccak256": "0x685a8d54cf6730515b4e0b9b454fe270925cbd85c4f376b135ec43e22a1698ef",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1f3b7cf532c50029f0c4bd41ca37932240ce3137f39dd52d68236cafeb7e3ce4",
+          "dweb:/ipfs/QmNctMgwwamANfyxi8M8XBbg1nJwA4noEYH7p2ZE8JqxD4"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol": {
+        "keccak256": "0xdc4436195f131e3132813a8dba6b440e379c78480c88a69847080642b2f0d3fa",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://094d2ea7f54998f9317cafd72d46390eb710040f4f5f101cc89e89411b234ad2",
+          "dweb:/ipfs/Qmed4WwaxJzEwvtyh5s7k2gBJnFDqyfq2WEPJkBdSAtKNA"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol": {
+        "keccak256": "0x334079e7024d83c9313a781fc85d9e49438a9c4634d023f9477a9f3c31e3b576",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://531387a5003283f7695ea8aa75bcebbfc4da3ad1ed4711dbea135ecbb35d49b7",
+          "dweb:/ipfs/QmPUU2W1W5BAnhmg9MSkaPmcMEXD41dQTaBJBWgnpHVqXH"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])": "01bc316a",
+    "setPhaseExecutor(uint256,bytes32,address,bool)": "c473ba18",
+    "setPhasePaused(uint256,bytes32,bool)": "846bb3a1"
+  }
+}

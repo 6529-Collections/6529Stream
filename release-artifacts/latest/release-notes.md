@@ -23,9 +23,13 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added focused Core, mint and governance caller interfaces, shared request types, and interface compatibility regressions. Added a portable developer command for the supported stack and explicit unit, legacy, gas and full suites.
 - Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.
 - Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.
 - Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The stack is deployed on Sepolia with a successful paid mint; the real randomness callback and final demonstration are pending subscription funding. This is a development deployment, not an audit or production release.
+- Organized Solidity interfaces by domain, isolated legacy implementations and regression tests, and grouped maintenance tools into Python packages. Rewrote contributor and integration guides around the current APIs; older examples and detailed maintenance instructions now have separate reference sections.
+- Preserved historical compilation, source-layout and documentation snapshots while refreshing current evidence. Exported interface IDs now follow Solidity's own-selector rules, including the inheritance-only Core aggregate's zero ID.
+- Build cleanup preserves broadcast receipts and deployment records. Offline release verification binds package initializers and isolates cached first-party modules when validating a materialized release snapshot.
 - Retry the complete pinned Foundry installer after transient attestation-service failures without bypassing verification. Reconcile reviewed release-tool source bindings and make the output-directory-swap regression deterministic on Windows.
 - Retain the Executor pagination ABI return names with a narrowly checked warning disposition for its existing encoded-tuple forwarding implementation.
 - Validate maximum-content metadata against the configured 12 million router gas budget and require the complete URI through a bounded 16 million gas Core read. Refresh the full default compilation's measured gas snapshots within unchanged release ceilings, and preserve exact UTF-8 release notes. Rebind the non-production materialization fixture to the verified canonical build and reconcile the documented NatSpec coverage count without adding accepted documentation exclusions.
@@ -392,8 +396,8 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Validation Commands
 
-- `python scripts/generate_release_notes.py --check`
-- `python scripts/verify_release_artifacts.py`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_bytecode_release_proof.py --check`
-- `python scripts/generate_release_checksums.py --check`
+- `python -m tools.release.generate_release_notes --check`
+- `python -m tools.build.verify_release_artifacts`
+- `python -m tools.release.generate_release_manifest --check`
+- `python -m tools.build.generate_bytecode_release_proof --check`
+- `python -m tools.release.generate_release_checksums --check`

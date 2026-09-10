@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "ba4bcedeaecf90f2b81a1d764e48c7c64250bce2",
-    "captured_at_utc": "2026-09-09T23:25:48Z",
+    "analyzed_commit": "7b4ef22b052419e88d56cf7f207a7a7738dba7a7",
+    "captured_at_utc": "2026-09-10T15:04:05Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,11 +12,11 @@
     "gate_command": "python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": 0,
     "capture_json_success": true,
-    "raw_json_size_bytes": 35670229,
-    "raw_json_sha256": "sha256:f6cf2b94d04ec5e0b758a69cdbc041f589b06fdc08afe92294df010700d1b7aa",
-    "solidity_tree_sha256": "sha256:6843b4ee87da0c8d7ba558f689572fd94308034e919debe675b1ab1f540da475",
+    "raw_json_size_bytes": 35734817,
+    "raw_json_sha256": "sha256:7260359bea13d719f00ef7241fb530dc386a9360a733196e088ddabb9fa74dc6",
+    "solidity_tree_sha256": "sha256:e9f4026750c661cba51ebcbfc781330643e2df6e3bc092196ec97859b4163153",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
-    "foundry_config_sha256": "sha256:b316489c314feff2b627e9a84bdd93dccf26603d30b93c66dd66fe6efeabeb75",
+    "foundry_config_sha256": "sha256:da72c962bd2c89706b082a589862e22863b4b1db27dfc3651ba30b3892ed7c8f",
     "requirements_tools_sha256": "sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2"
   },
   "scope": {
@@ -39,9 +39,9 @@
     "High": 5,
     "Medium": 49,
     "Low": 102,
-    "Informational": 620,
+    "Informational": 619,
     "Optimization": 8,
-    "total": 784
+    "total": 783
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
@@ -77,14 +77,14 @@
   },
   "findings": [
     {
-      "fingerprint": "sha256:900d917a61d091a4a8f954fe5365102a15106abb840a323d27c2cf85ed369574",
+      "fingerprint": "sha256:0fe4cfb770461a1fff62dff960bf1485bb2800f087224a9004eae7e571fd0570",
       "detector": "arbitrary-send-eth",
       "impact": "High",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-        "start_line": 426,
-        "end_line": 429,
+        "start_line": 424,
+        "end_line": 427,
         "element_type": "function",
         "name": "_sendNative",
         "signature": "_sendNative(address,uint256)"
@@ -92,16 +92,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 426,
-          "end_line": 429,
+          "start_line": 424,
+          "end_line": 427,
           "element_type": "function",
           "name": "_sendNative",
           "signature": "_sendNative(address,uint256)"
         },
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 427,
-          "end_line": 427,
+          "start_line": 425,
+          "end_line": 425,
           "element_type": "node",
           "name": "(ok,None) = recipient.call{value: amount}()",
           "signature": ""
@@ -116,20 +116,20 @@
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:272-296,327-334,426-429 restrict recipient/value provenance to the signed split or the caller's own refund balance.",
-        "test/StreamEnglishAuctionHouse.t.sol:testSettlementPaysSplitBeforeReceiverAndCanWithdrawShares and testRejectingRefundPreservesCreditAndPauseLeavesExitsAvailable; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting."
+        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:270-294,325-332,424-427 restrict recipient/value provenance to the signed split or the caller's own refund balance.",
+        "test/unit/auctions/StreamEnglishAuctionHouse.t.sol:testSettlementPaysSplitBeforeReceiverAndCanWithdrawShares and testRejectingRefundPreservesCreditAndPauseLeavesExitsAvailable; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting."
       ],
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:a59c896abc11cc61ac8816c118dc998260b9125955bf69fd8343093c099d4000",
+      "fingerprint": "sha256:0f43a5954ab781f57b13a9815718f7c052842ada433048cbe3032d277efd2a81",
       "detector": "arbitrary-send-eth",
       "impact": "High",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-        "start_line": 97,
-        "end_line": 122,
+        "start_line": 93,
+        "end_line": 118,
         "element_type": "function",
         "name": "settleNativePrimarySale",
         "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
@@ -137,16 +137,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 97,
-          "end_line": 122,
+          "start_line": 93,
+          "end_line": 118,
           "element_type": "function",
           "name": "settleNativePrimarySale",
           "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 116,
-          "end_line": 116,
+          "start_line": 112,
+          "end_line": 112,
           "element_type": "node",
           "name": "(success,None) = address(wallet).call{value: sale.amount}()",
           "signature": ""
@@ -208,7 +208,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/metadata/StreamMetadataRouter.sol:174-193 returns the constructed JSON and never hashes it for authorization.",
-        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testMaximumTokenDataScriptAndEscapedIdentityFitCoreResponse exercise response construction and parsing."
+        "test/unit/entropy/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testMaximumTokenDataScriptAndEscapedIdentityFitCoreResponse exercise response construction and parsing."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -362,14 +362,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:0b04fab8809606f193c03e4b36f6e2637f4bf206e8e0f37cca602bf2b314deb9",
+      "fingerprint": "sha256:4de01fd443b84cc8279435720eb6801acc4a1a7bb9a4ff6e93c86ca2f5b754da",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-        "start_line": 200,
-        "end_line": 251,
+        "start_line": 194,
+        "end_line": 245,
         "element_type": "function",
         "name": "release",
         "signature": "release(address,address,address)"
@@ -377,16 +377,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-          "start_line": 200,
-          "end_line": 251,
+          "start_line": 194,
+          "end_line": 245,
           "element_type": "function",
           "name": "release",
           "signature": "release(address,address,address)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-          "start_line": 216,
-          "end_line": 216,
+          "start_line": 210,
+          "end_line": 210,
           "element_type": "node",
           "name": "amount == 0",
           "signature": ""
@@ -402,20 +402,20 @@
       ],
       "required_proof": [
         "Source evidence: smart-contracts/domains/revenue/StreamSplitWallet.sol release computes the cumulative entitlement first, then uses `amount == 0` only to reject a no-op before any state mutation or external call.",
-        "Focused executable evidence: test/StreamSplitWallet.t.sol::testReleaseZeroSentinelRevertsAndPositiveBoundaryReleases proves exact zero reverts without effects and the adjacent one-wei value releases successfully.",
-        "Accounting evidence: test/StreamSplitWallet.t.sol::testNativeAccountingInvariantsAcrossReceiptReleaseAndSyncRounds proves positive releases preserve cumulative entitlement conservation."
+        "Focused executable evidence: test/unit/revenue/StreamSplitWallet.t.sol::testReleaseZeroSentinelRevertsAndPositiveBoundaryReleases proves exact zero reverts without effects and the adjacent one-wei value releases successfully.",
+        "Accounting evidence: test/unit/revenue/StreamSplitWallet.t.sol::testNativeAccountingInvariantsAcrossReceiptReleaseAndSyncRounds proves positive releases preserve cumulative entitlement conservation."
       ],
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:3a8fa406fd87274e4df731130c3099a9c127b9c69ba9c7e5f217c697e5e63fa4",
+      "fingerprint": "sha256:eccef5c909e126bc00fe2a2777b28ea04378aeeea4944a7ba42d6625b00c81a7",
       "detector": "incorrect-equality",
       "impact": "Medium",
       "confidence": "High",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-        "start_line": 253,
-        "end_line": 270,
+        "start_line": 247,
+        "end_line": 264,
         "element_type": "function",
         "name": "_recordObservation",
         "signature": "_recordObservation(address,uint256)"
@@ -423,16 +423,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-          "start_line": 253,
-          "end_line": 270,
+          "start_line": 247,
+          "end_line": 264,
           "element_type": "function",
           "name": "_recordObservation",
           "signature": "_recordObservation(address,uint256)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamSplitWallet.sol",
-          "start_line": 265,
-          "end_line": 265,
+          "start_line": 259,
+          "end_line": 259,
           "element_type": "node",
           "name": "observed == previous",
           "signature": ""
@@ -448,13 +448,13 @@
       ],
       "required_proof": [
         "Source evidence: smart-contracts/domains/revenue/StreamSplitWallet.sol _recordObservation initializes once, rejects `observed < previous`, returns only for exact equality, and records every `observed > previous` increase.",
-        "Focused executable evidence: test/StreamSplitWallet.t.sol::testSyncAssetRecordsInitializationIncreaseAndSkipsUnchangedObservations covers first-zero initialization, unchanged zero, increase, and unchanged positive observations with exact event assertions.",
-        "Negative-boundary evidence: test/StreamSplitWallet.t.sol::testSyncAssetRejectsDecreasingObservedReceipts proves the immediately lower branch reverts with the retained high-water mark."
+        "Focused executable evidence: test/unit/revenue/StreamSplitWallet.t.sol::testSyncAssetRecordsInitializationIncreaseAndSkipsUnchangedObservations covers first-zero initialization, unchanged zero, increase, and unchanged positive observations with exact event assertions.",
+        "Negative-boundary evidence: test/unit/revenue/StreamSplitWallet.t.sol::testSyncAssetRejectsDecreasingObservedReceipts proves the immediately lower branch reverts with the retained high-water mark."
       ],
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:d5db840a8561e523cb094750792434338a7e13227bed077e2879bea87dd9bb0e",
+      "fingerprint": "sha256:aa2fd38d8782c4ca84eb6f8964250561dc36f7c33602c18e57beae7692ba9baa",
       "detector": "locked-ether",
       "impact": "Medium",
       "confidence": "High",
@@ -484,7 +484,7 @@
           "signature": "requestEntropy(bytes32,bytes)"
         },
         {
-          "path": "smart-contracts/interfaces/stream/IStreamEntropyProvider.sol",
+          "path": "smart-contracts/interfaces/stream/entropy/IStreamEntropyProvider.sol",
           "start_line": 22,
           "end_line": 25,
           "element_type": "function",
@@ -502,7 +502,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-198 authenticates the coordinator and rejects nonzero msg.value.",
-        "test/StreamEntropyProviderVRF.t.sol:testUnauthorizedRequestsPaymentsAndUnknownCallbacks covers payment rejection and unauthorized calls."
+        "test/unit/entropy/StreamEntropyProviderVRF.t.sol:testUnauthorizedRequestsPaymentsAndUnknownCallbacks covers payment rejection and unauthorized calls."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -633,14 +633,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:a38a7583f5405a62ef7d4eef85304c1ecccf26dc8aa914837e6a8e937663155c",
+      "fingerprint": "sha256:08cb157b0142cd5701213ef2472413cb0baac0c536119ded26d7de3e65a9d017",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-        "start_line": 135,
-        "end_line": 157,
+        "start_line": 133,
+        "end_line": 155,
         "element_type": "function",
         "name": "createAuction",
         "signature": "createAuction(IStreamEnglishAuctionHouse.AuctionAuthorization,bytes,bytes,bytes)"
@@ -648,34 +648,50 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 135,
-          "end_line": 157,
+          "start_line": 133,
+          "end_line": 155,
           "element_type": "function",
           "name": "createAuction",
           "signature": "createAuction(IStreamEnglishAuctionHouse.AuctionAuthorization,bytes,bytes,bytes)"
         },
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 154,
-          "end_line": 154,
+          "start_line": 152,
+          "end_line": 152,
           "element_type": "node",
           "name": "(tokenId,operationRoot) = _mintAuctionToken(authorization,tokenData,digest,id)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 155,
-          "end_line": 155,
+          "start_line": 153,
+          "end_line": 153,
           "element_type": "node",
           "name": "_storeAuction(tokenId,authorization,wallet)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 196,
-          "end_line": 196,
+          "start_line": 194,
+          "end_line": 194,
           "element_type": "node",
           "name": "(tokenIds,operationRoot,operationIds) = mintManager.executeSingleStepMint(batch,)",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 399,
+          "end_line": 399,
+          "element_type": "node",
+          "name": "created.artist = item.artist",
+          "signature": ""
+        },
+        {
+          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "start_line": 400,
+          "end_line": 400,
+          "element_type": "node",
+          "name": "created.wallet = wallet",
           "signature": ""
         },
         {
@@ -683,7 +699,7 @@
           "start_line": 401,
           "end_line": 401,
           "element_type": "node",
-          "name": "created.artist = item.artist",
+          "name": "created.profileId = item.profileId",
           "signature": ""
         },
         {
@@ -691,7 +707,7 @@
           "start_line": 402,
           "end_line": 402,
           "element_type": "node",
-          "name": "created.wallet = wallet",
+          "name": "created.reservePrice = item.reservePrice",
           "signature": ""
         },
         {
@@ -699,7 +715,7 @@
           "start_line": 403,
           "end_line": 403,
           "element_type": "node",
-          "name": "created.profileId = item.profileId",
+          "name": "created.startTime = item.startTime",
           "signature": ""
         },
         {
@@ -707,7 +723,7 @@
           "start_line": 404,
           "end_line": 404,
           "element_type": "node",
-          "name": "created.reservePrice = item.reservePrice",
+          "name": "created.endTime = item.endTime",
           "signature": ""
         },
         {
@@ -715,7 +731,7 @@
           "start_line": 405,
           "end_line": 405,
           "element_type": "node",
-          "name": "created.startTime = item.startTime",
+          "name": "created.extensionWindow = item.extensionWindow",
           "signature": ""
         },
         {
@@ -723,29 +739,13 @@
           "start_line": 406,
           "end_line": 406,
           "element_type": "node",
-          "name": "created.endTime = item.endTime",
+          "name": "created.minBidIncrementBps = item.minBidIncrementBps",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
           "start_line": 407,
           "end_line": 407,
-          "element_type": "node",
-          "name": "created.extensionWindow = item.extensionWindow",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 408,
-          "end_line": 408,
-          "element_type": "node",
-          "name": "created.minBidIncrementBps = item.minBidIncrementBps",
-          "signature": ""
-        },
-        {
-          "path": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
-          "start_line": 409,
-          "end_line": 409,
           "element_type": "node",
           "name": "created.deliveryRecipient = item.artist",
           "signature": ""
@@ -760,8 +760,8 @@
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
       "required_proof": [
-        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:135-157,194-211,345-355 prevents callback mutation or replay while _storeAuction follows the manager call.",
-        "test/StreamEnglishAuctionHouse.t.sol:testSignedCreationCustodiesActualCoreNFTAndConsumesReplay and testEntropyFailureRollsBackAuctionNonceAndMint; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting cover custody, nonce, and rollback boundaries."
+        "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:133-155,192-209,343-353 prevents callback mutation or replay while _storeAuction follows the manager call.",
+        "test/unit/auctions/StreamEnglishAuctionHouse.t.sol:testSignedCreationCustodiesActualCoreNFTAndConsumesReplay and testEntropyFailureRollsBackAuctionNonceAndMint; test/current/StreamCurrentStackAdversarial.t.sol:testAuctionDeliveryAndRefundFailuresPreserveCrossDomainAccounting cover custody, nonce, and rollback boundaries."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -814,7 +814,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:190-230,244-269 guards request, fulfillment, and retry; the detector cross-function target keyToVrfRequest is a view getter.",
-        "test/StreamEntropyProviderVRF.t.sol:testV25RequestIdentityAuthenticationAndDuplicateCallback and testRevertOutOfGasAndMalformedResponseRetainIdenticalRandomness cover identity and retry boundaries."
+        "test/unit/entropy/StreamEntropyProviderVRF.t.sol:testV25RequestIdentityAuthenticationAndDuplicateCallback and testRevertOutOfGasAndMalformedResponseRetainIdenticalRandomness cover identity and retry boundaries."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -931,19 +931,19 @@
       ],
       "required_proof": [
         "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:138-147,168-195,1048,1384 checks immutable authority/plan and guards one-shot scheduling and execution.",
-        "test/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized product stack."
+        "test/unit/governance/StreamGenesisInitializer.t.sol covers unauthorized initialization, changed calldata, prepared failure/retry, complete seal, and irrevocably closed initialization; test/current/StreamCurrentStack.t.sol exercises the actual initialized product stack."
       ],
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:55075801b158706a68351cda5af9e8c828d6f7ac82f59b4eced311f3f4d7bfbd",
+      "fingerprint": "sha256:32fc7052ecfe04d924c98e3afe915c7891452ad52fbe4ed155b34ea7b97c6513",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-        "start_line": 97,
-        "end_line": 122,
+        "start_line": 93,
+        "end_line": 118,
         "element_type": "function",
         "name": "settleNativePrimarySale",
         "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
@@ -951,40 +951,40 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 97,
-          "end_line": 122,
+          "start_line": 93,
+          "end_line": 118,
           "element_type": "function",
           "name": "settleNativePrimarySale",
           "signature": "settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 111,
-          "end_line": 111,
+          "start_line": 107,
+          "end_line": 107,
           "element_type": "node",
           "name": "resolution = _resolveSale(sale)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 112,
-          "end_line": 112,
+          "start_line": 108,
+          "end_line": 108,
           "element_type": "node",
           "name": "_consumeSettlementKey(key)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 206,
-          "end_line": 206,
+          "start_line": 202,
+          "end_line": 202,
           "element_type": "node",
           "name": "settlementConsumed[key] = true",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 228,
-          "end_line": 229,
+          "start_line": 224,
+          "end_line": 225,
           "element_type": "node",
           "name": "(resolution.profileId,resolution.wallet,None) = revenueResolver.materializePrimaryProfile(assignment.templateId,sale.poster)",
           "signature": ""
@@ -1006,14 +1006,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:4e6df200e41e14434d823cfb14152a35cbe01093dd354cce9885eed7ce0980cf",
+      "fingerprint": "sha256:013da58b37b877db67596a1843adfa8cdb59b95b29a01a7e6a95eda26e78e986",
       "detector": "reentrancy-no-eth",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-        "start_line": 125,
-        "end_line": 145,
+        "start_line": 121,
+        "end_line": 141,
         "element_type": "function",
         "name": "settleERC20PrimarySale",
         "signature": "settleERC20PrimarySale(IStreamPrimarySaleSettlement.PrimarySale,address)"
@@ -1021,40 +1021,40 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 125,
-          "end_line": 145,
+          "start_line": 121,
+          "end_line": 141,
           "element_type": "function",
           "name": "settleERC20PrimarySale",
           "signature": "settleERC20PrimarySale(IStreamPrimarySaleSettlement.PrimarySale,address)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 136,
-          "end_line": 136,
+          "start_line": 132,
+          "end_line": 132,
           "element_type": "node",
           "name": "resolution = _resolveSale(sale)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 137,
-          "end_line": 137,
+          "start_line": 133,
+          "end_line": 133,
           "element_type": "node",
           "name": "_consumeSettlementKey(key)",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 206,
-          "end_line": 206,
+          "start_line": 202,
+          "end_line": 202,
           "element_type": "node",
           "name": "settlementConsumed[key] = true",
           "signature": ""
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 228,
-          "end_line": 229,
+          "start_line": 224,
+          "end_line": 225,
           "element_type": "node",
           "name": "(resolution.profileId,resolution.wallet,None) = revenueResolver.materializePrimaryProfile(assignment.templateId,sale.poster)",
           "signature": ""
@@ -1162,7 +1162,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:54-69 defines the 14 fields; lines 443-458 assign all of them before encoding.",
-        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testScopeEntropySharesLifecycleButNotTokenIdentity exercise token-specific and scope-shared entropy identity."
+        "test/unit/entropy/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata and testScopeEntropySharesLifecycleButNotTokenIdentity exercise token-specific and scope-shared entropy identity."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -1313,7 +1313,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:170-184 checks i != 0 before the only read and assigns priorKey on each iteration.",
-        "test/StreamGovernanceCatalog.t.sol:testExtensionBoundsAndSortingAreEnforced exercises first, duplicate, and unsorted additions; testMaximumExtensionAndManifestURIFitPublicationEnvelope covers the 64-entry bound."
+        "test/unit/governance/StreamGovernanceCatalog.t.sol:testExtensionBoundsAndSortingAreEnforced exercises first, duplicate, and unsorted additions; testMaximumExtensionAndManifestURIFitPublicationEnvelope covers the 64-entry bound."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -1502,7 +1502,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:101-120 validates the rate/profile equivalence, initializes nonzero receivers from the immutable factory, and intentionally stores address(0) for a zero rate.",
-        "test/StreamRoyaltyResolver.t.sol:testExplicitZeroOverridesDefaultAndMaximumPriceNeverOverflows asserts zero receiver and amount; testOnlyExecutorCanConfigureAndInvalidProfilesRatesOrCollectionsFail rejects invalid rate/profile combinations."
+        "test/unit/revenue/StreamRoyaltyResolver.t.sol:testExplicitZeroOverridesDefaultAndMaximumPriceNeverOverflows asserts zero receiver and amount; testOnlyExecutorCanConfigureAndInvalidProfilesRatesOrCollectionsFail rejects invalid rate/profile combinations."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -1643,7 +1643,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:237-257 validates the returned identity fields needed by registration while intentionally omitting collection serial.",
-        "test/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata, testUnauthorizedCallbackAndReplayCannotChangeSeed, and testScopeEntropySharesLifecycleButNotTokenIdentity cover registration and seed identity."
+        "test/unit/entropy/StreamEntropyMetadata.t.sol:testRealCoreMintRequestFulfillAndMetadata, testUnauthorizedCallbackAndReplayCannotChangeSeed, and testScopeEntropySharesLifecycleButNotTokenIdentity cover registration and seed identity."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -1688,7 +1688,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:487-500 enforces timeout, exact request binding, and !rawRandomnessReceived.",
-        "test/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover no-reroll and retained-output rejection."
+        "test/unit/entropy/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover no-reroll and retained-output rejection."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -1733,7 +1733,7 @@
       ],
       "required_proof": [
         "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:503-514 checks exact terminal failure and rejects retained randomness.",
-        "test/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover terminal and retained-result behavior."
+        "test/unit/entropy/StreamEntropyMetadata.t.sol:testStaleAndFailureStatesDoNotAuthorizeReroll and testRevokedProviderRetainsOutputAndCanDeliverSameResultAfterRestore cover terminal and retained-result behavior."
       ],
       "gate": "Gate C / Gate F"
     },
@@ -2198,12 +2198,12 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:4e93c7924294a5649f312cbc43df80a8ccd720ec0ebbedbe9bed8e8ebdfd4fc0",
+      "fingerprint": "sha256:ae9693d96fc7705912fd10bb62d124086943fcac1316299e0942da9b4e454cfa",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
-        "path": "smart-contracts/domains/mint/StreamMinter.sol",
+        "path": "smart-contracts/domains/mint/legacy/StreamMinter.sol",
         "start_line": 177,
         "end_line": 180,
         "element_type": "function",
@@ -2212,7 +2212,7 @@
       },
       "semantic_elements": [
         {
-          "path": "smart-contracts/domains/mint/StreamMinter.sol",
+          "path": "smart-contracts/domains/mint/legacy/StreamMinter.sol",
           "start_line": 177,
           "end_line": 180,
           "element_type": "function",
@@ -2220,7 +2220,7 @@
           "signature": "_collectionTotalSupply(uint256)"
         },
         {
-          "path": "smart-contracts/domains/mint/StreamMinter.sol",
+          "path": "smart-contracts/domains/mint/legacy/StreamMinter.sol",
           "start_line": 178,
           "end_line": 178,
           "element_type": "node",
@@ -2231,7 +2231,7 @@
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/domains/mint/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/domains/mint/legacy/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential.",
       "owner": "Protocol maintainers and independent security reviewers",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
@@ -2244,14 +2244,14 @@
       "gate": "Gate C / Gate F"
     },
     {
-      "fingerprint": "sha256:a64ee063fd3336720eb905ef89c2b90a30039ce06904366b625b8b157b52f9b6",
+      "fingerprint": "sha256:01d2efb6d47a0e62da5145d1797d84e0c46f1f415fd4f6b2846e0cc5b2a7012c",
       "detector": "unused-return",
       "impact": "Medium",
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-        "start_line": 209,
-        "end_line": 259,
+        "start_line": 205,
+        "end_line": 255,
         "element_type": "function",
         "name": "_resolveSale",
         "signature": "_resolveSale(IStreamPrimarySaleSettlement.PrimarySale)"
@@ -2259,16 +2259,16 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 209,
-          "end_line": 259,
+          "start_line": 205,
+          "end_line": 255,
           "element_type": "function",
           "name": "_resolveSale",
           "signature": "_resolveSale(IStreamPrimarySaleSettlement.PrimarySale)"
         },
         {
           "path": "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol",
-          "start_line": 228,
-          "end_line": 229,
+          "start_line": 224,
+          "end_line": 225,
           "element_type": "node",
           "name": "(resolution.profileId,resolution.wallet,None) = revenueResolver.materializePrimaryProfile(assignment.templateId,sale.poster)",
           "signature": ""
