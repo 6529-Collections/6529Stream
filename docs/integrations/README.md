@@ -9,6 +9,7 @@ deployment evidence.
 | --- | --- |
 | Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |
 | Onboard another artist and exercise sales and auctions | [Executable product scenarios](product-demo.md) |
+| Finish a collection and verify its portable artwork | [Collection completion and collector package](collector-package.md) |
 | Buy one NFT with native ETH | [Fixed-price purchase](contract-flows.md) |
 | Buy with an ERC-20 and payer consent | [ERC-20 sales](erc20-sales.md) |
 | Discover, publish or challenge a state export | [State exports](state-exports.md) |

@@ -15,6 +15,7 @@ their own scope and must not be read as a list of installed features.
 | Sign, buy, bid, index, withdraw, or render | [Integration guide](integrations/README.md) |
 | Use typed calls and export selected state | [TypeScript client](integrations/typescript-client.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
+| Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
 | Add tests or submit a change | [Tests](../test/README.md), [Contributing](../CONTRIBUTING.md) |
 | Run local or testnet transactions | [Current deployment guide](../script/current/README.md) |
