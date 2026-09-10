@@ -102,19 +102,29 @@ exporter, a second-artist product demonstration and resumable Sepolia stages.
 - Launch recovery retains exact transaction intents, reconciles receipts before
   constructing fresh authorizations and provides credential-free status. Its
   independent journal/status suites pass 78 and 27 cases respectively.
-- The deployment builder is completing collection-two artwork and terminal
-  collection/royalty freezes with a portable collector package. Global metadata
-  pointers remain governed; a collection freeze must not be described as freezing
-  the entire protocol or all future rendering authority.
-- The test builder is adding real current-stack stateful invariants for money,
-  supply, ownership, auction refunds and replay. A separate builder owns quick
-  and extended campaign commands, seed/corpus retention and parallel CI. Tests
-  must demonstrate successful operations and reject unexpected reverts.
+- Collection two has completed its artwork, closure, burn block and collection/
+  royalty freezes through the normal governance actions. Its portable collector
+  package passes independent reconstruction and integrity checks; repeating the
+  workflow sends no new transactions. Global metadata, entropy, artist and royalty
+  pointers remain governed. This is scoped collection completion, not the full
+  artwork-finality design or a freeze of all future rendering authority.
+- Five input-fuzz properties cover native settlement and rounding, incorrect
+  value, altered signatures, replay and expiry. The first focused run passes
+  256 cases per property, plus 32 stateful runs with 2,048 actions and no unexpected
+  reverts or discards. Both the successful-activity check and the deliberately
+  corrupted payer-accounting oracle test pass. An initial test-helper compiler
+  failure is retained separately from the corrected passing run.
+- The seed-bound campaign command, isolated caches, retained failures and CI
+  wiring pass 19 tooling regressions and independent review. Final canonical-source
+  quick/extended campaigns and the full current compilation are running separately;
+  the focused 112-source result is not a full integration/export result.
 
 Builders exchange adversarial reviews before integration. The owner explicitly
 requests this testing upgrade and defers Lean verification until traditional
-implementation stabilizes. Neither the testing campaign nor collection-completion
-work is reported as finished until its actual results are retained.
+implementation stabilizes. The immutable non-release tag
+`evidence/developer-kit-2026-09-10` preserves the reviewed collector and original
+client/snapshot ancestry before integration. Historical snapshots retain their
+original compiler/client provenance when current generated exports change.
 
 ## Sepolia and release
 
