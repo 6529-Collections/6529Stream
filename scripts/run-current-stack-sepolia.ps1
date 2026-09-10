@@ -46,6 +46,18 @@ function Invoke-Tool([string]$Program, [string[]]$Arguments, [AllowNull()][strin
     }
     return ($captured -join "`n").Trim()
 }
+function Restore-DeploymentEnvironment([System.Collections.IDictionary]$Saved) {
+    foreach ($key in $Saved.Keys) {
+        $environmentPath="Env:$key"
+        # Passing null to the .NET string setter can leave an empty variable.
+        # Missing, explicitly empty, and nonempty caller values are distinct.
+        if ($null -eq $Saved[$key]) {
+            if (Test-Path -LiteralPath $environmentPath) {Remove-Item -LiteralPath $environmentPath}
+        } else {
+            Set-Item -LiteralPath $environmentPath -Value $Saved[$key]
+        }
+    }
+}
 function Cast([string[]]$Arguments) {
     # Genesis calldata and deployed runtime exceed Windows' command-line limit.
     if ($Arguments.Count -eq 2 -and $Arguments[0] -eq 'keccak' -and $Arguments[1].StartsWith('0x')) {
@@ -396,7 +408,7 @@ try {
             Save-State
             $null = With-Signer $deployer 'forge' ($forgeArguments+@('--broadcast'))
             }
-        } finally {foreach ($key in $saved.Keys) {[Environment]::SetEnvironmentVariable($key,$saved[$key])}}
+        } finally {Restore-DeploymentEnvironment $saved}
         $run = Get-Content -Raw -LiteralPath $broadcastFile | ConvertFrom-Json -AsHashtable
         Validate-RecordedDeployment $run
         if ($run.receipts.Count -ne $run.transactions.Count) { throw 'Deployment receipts are incomplete; use ResumeDeploy.' }

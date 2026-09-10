@@ -6,7 +6,7 @@ $path=Join-Path $PSScriptRoot 'run-current-stack-sepolia.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw 'Sepolia helper syntax errors.'}
 # Load only pure receipt/recovery functions. No account files, RPC calls or signers run.
-$names=@('Invoke-Tool','Cast','Uint','With-Signer','Mint-TokenId','Require-FreshDeployment','Transaction-Value','Validate-RecordedDeployment','Remaining-DeploymentGas','Checked-UnsignedDeploymentGas')
+$names=@('Invoke-Tool','Cast','Uint','With-Signer','Mint-TokenId','Require-FreshDeployment','Transaction-Value','Validate-RecordedDeployment','Remaining-DeploymentGas','Checked-UnsignedDeploymentGas','Restore-DeploymentEnvironment')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -15,6 +15,48 @@ function Reject([scriptblock]$Action,[string]$Label) {
     $rejected=$false
     try {& $Action | Out-Null} catch {$rejected=$true}
     Check $rejected $Label
+}
+# Execute the actual deployment finally block without deploying or invoking Forge.
+$environmentFinalizers=@($ast.FindAll({param($node)
+    $node -is [System.Management.Automation.Language.TryStatementAst] -and
+    $null -ne $node.Finally -and $node.Finally.Extent.Text.Contains('$saved')
+},$true))
+Check ($environmentFinalizers.Count -eq 1) 'Exactly one deployment environment finalizer must be exercised.'
+$restoreEnvironment=[scriptblock]::Create(($environmentFinalizers[0].Finally.Statements | ForEach-Object {$_.Extent.Text}) -join "`n")
+$environmentNames=@('FOUNDRY_BROADCAST','FOUNDRY_PROFILE')
+$originalEnvironment=@{}
+foreach ($name in $environmentNames) {$originalEnvironment[$name]=[Environment]::GetEnvironmentVariable($name)}
+try {
+    foreach ($case in @(@{kind='absent';value=$null},@{kind='empty';value=''},@{kind='existing';value='prior value with spaces / ñ'})) {
+        foreach ($failBuild in @($false,$true)) {
+            $saved=@{}
+            foreach ($name in $environmentNames) {
+                if ($null -eq $case.value) {Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue}
+                else {Set-Item -LiteralPath "Env:$name" -Value $case.value}
+                Check ((Test-Path -LiteralPath "Env:$name") -eq ($case.kind -ne 'absent')) 'Fixture must distinguish missing and explicitly empty variables.'
+                $saved[$name]=[Environment]::GetEnvironmentVariable($name)
+                [Environment]::SetEnvironmentVariable($name,'temporary-deployment-value')
+            }
+            $caught=$false
+            try {
+                try {if ($failBuild) {throw 'expected deployment probe failure'}}
+                finally {& $restoreEnvironment}
+            } catch {
+                $caught=$true
+                Check ($_.Exception.Message -eq 'expected deployment probe failure') 'Environment restoration must preserve the original build failure.'
+            }
+            Check ($caught -eq $failBuild) 'Deployment probe success/failure must propagate unchanged.'
+            foreach ($name in $environmentNames) {
+                Check ((Test-Path -LiteralPath "Env:$name") -eq ($case.kind -ne 'absent')) "Restore $name must preserve $($case.kind) presence."
+                Check ([Environment]::GetEnvironmentVariable($name) -ceq $case.value) "Restore $name must preserve its exact prior value."
+            }
+        }
+    }
+} finally {
+    foreach ($name in $environmentNames) {
+        if ($null -eq $originalEnvironment[$name]) {Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue}
+        else {Set-Item -LiteralPath "Env:$name" -Value $originalEnvironment[$name]}
+    }
 }
 Check ((Cast @('keccak',('0x'+('00'*40000)))) -eq '0xc625f79680f7083b0bdaef0ba2e4e67b9132ea5edfcecefb31b2b5f3a5a9282e') 'Large calldata must hash through stdin without Windows argument truncation.'
 Check ((Cast @('keccak','artist')) -eq '0xf8c87671fe259c56f53406842c278dbf0d49073ecc39fc38bfc052a1b1a125cb') 'Plain text hashes must exclude the pipeline newline.'
