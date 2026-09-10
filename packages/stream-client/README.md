@@ -34,6 +34,13 @@ The examples are executable functions accepting caller-supplied ethers wallets:
 - `examples/auction.mjs`: signed creation and escrow; bidding/settlement are separate.
 - `examples/prepare.mjs`: offline JSON payload construction.
 - `examples/check-digests.mjs`: read-only comparison against deployed digest methods.
+- `examples/snapshot.mjs`: pinned-block capture, readable inspection, offline verification and chain readback.
+
+The supported-state exporter creates a deterministic package for **explicitly
+selected** collections, tokens, ERC-20 sales and mint phases. It is compatible
+with the current publisher's export/manifest hash fields. It does not reconstruct
+all history, expose private mappings, host files or publish a transaction. See
+the [snapshot workflow](../../docs/integrations/typescript-client.md#capture-and-verify-supported-state).
 
 The committed digest fixtures were observed on a local current-stack deployment.
 Their addresses are encoding-vector inputs, not an address book or live launch
