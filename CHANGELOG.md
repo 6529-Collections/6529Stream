@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added current-stack input fuzzing and stateful conservation checks, with
+  successful-action counters, per-payer accounting, reproducible quick/extended
+  campaigns and retained failure traces. CI runs the quick campaign; an explicit
+  workflow dispatch can select the extended campaign.
+- Added governed local collection completion and a portable collector package
+  that reconstructs its retained metadata and artwork without RPC access.
 - Added a TypeScript client with retained current ABIs, typed contract calls,
   EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.
 - Added repeatable local product scenarios covering a second artist, native and
