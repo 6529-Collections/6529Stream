@@ -24,6 +24,8 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Retain the Executor pagination ABI return names with a narrowly checked
+  warning disposition for its existing encoded-tuple forwarding implementation.
 - Validate maximum-content metadata against the configured 12 million router
   gas budget and require the complete URI through a bounded 16 million gas
   Core read. Refresh the full default compilation's measured gas snapshots

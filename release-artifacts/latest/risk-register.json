@@ -34,7 +34,7 @@
     },
     {
       "path": "docs/warning-dispositions.md",
-      "sha256": "sha256:28727ed0410899efda8870ff722e458cab220d8e67d117265394bcc454dde615"
+      "sha256": "sha256:3af79c72f46f77cbd3c0b25d3787102f5cfb3d1ebd5faebf0f1769d6eb108e26"
     },
     {
       "path": "docs/known-blockers.md",
@@ -688,7 +688,7 @@
         },
         {
           "path": "docs/warning-dispositions.md",
-          "sha256": "sha256:28727ed0410899efda8870ff722e458cab220d8e67d117265394bcc454dde615"
+          "sha256": "sha256:3af79c72f46f77cbd3c0b25d3787102f5cfb3d1ebd5faebf0f1769d6eb108e26"
         }
       ],
       "risk_acceptance": null

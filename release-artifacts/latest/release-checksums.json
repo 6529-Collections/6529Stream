@@ -312,7 +312,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:3f0b3053b52140fa01b99b07587f620761494031d73ac698d002a3eefc8f73da"
+    "sha256": "sha256:a908ea26cbfdf01829ba33c903451fe43009c8104d9a046ee0211f87a66c156c"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -371,8 +371,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e85b905e4d6cd1f54b9e6989113192d40259ab4090f4196cab677406bf3d6e5c",
-      "size_bytes": 165738
+      "sha256": "sha256:3092c4db98320c2a89da2749fbca81521ff17ae33c4f61701125646b6c29f5aa",
+      "size_bytes": 165892
     },
     {
       "path": "Makefile",
@@ -966,8 +966,8 @@
     },
     {
       "path": "docs/warning-dispositions.md",
-      "sha256": "sha256:28727ed0410899efda8870ff722e458cab220d8e67d117265394bcc454dde615",
-      "size_bytes": 19429
+      "sha256": "sha256:3af79c72f46f77cbd3c0b25d3787102f5cfb3d1ebd5faebf0f1769d6eb108e26",
+      "size_bytes": 20420
     },
     {
       "path": "foundry.toml",
@@ -1561,7 +1561,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:595a213db964b656a525394645c99afb124ebd9cc9d647863dc7c9ef21ea3446",
+      "sha256": "sha256:e1be18c2cc0a3027c0b7bec038c7a5969e34145ed144252dc590d3d915fe38c5",
       "size_bytes": 151617
     },
     {
@@ -1626,7 +1626,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:aca477d4ac61d6be93ff6c1cf31124d7537ca8345285a5e4adb0823b93b88b9f",
+      "sha256": "sha256:0e02fc134c75bed5a716b55e2a59b7bca0b9069f10ceb771bab247d58fa356f4",
       "size_bytes": 13727
     },
     {
@@ -1676,22 +1676,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:0bd1072df04fbd611c7033c8e356febe2220a388bef8729acdf84ff21e201b89",
+      "sha256": "sha256:9c0918cfa4007352c902f5905dcb1a269c11ac6b5407ffc85dc280c440ef02e4",
       "size_bytes": 149412
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:5e62ea0980cfd025f1eee4866e74c32a662ab564459ff019ab5d79972ce4d562",
-      "size_bytes": 166390
+      "sha256": "sha256:a54583ca58f20a5b72260d34bf6879beef3c309b292d6b3ca1abbab757b264c1",
+      "size_bytes": 166549
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:e27ddc27c35f0e37486bd3a710e5e96897d515ebc72d78e6e746c070b05b101c",
-      "size_bytes": 162721
+      "sha256": "sha256:cf140c910b4165210b14b4af7da804c31beee1cf94c8b47412a70da1f9cee199",
+      "size_bytes": 162873
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:94d05b41c89e90da323d5b175928a507cf9437f1fdc264737ef5bc8d557c7349",
+      "sha256": "sha256:729b00121d1c3130dffb232629a4c17e5a699d6458a8a27a1c546dcd57aab46f",
       "size_bytes": 33995
     },
     {
@@ -2146,8 +2146,8 @@
     },
     {
       "path": "scripts/check_warning_dispositions.py",
-      "sha256": "sha256:7fbe4d41ba005ad9e24bfad08194a18281f35f49376495ae155d2c4775912ade",
-      "size_bytes": 19336
+      "sha256": "sha256:37cbec04f22733d3351f9e04550bf25703b06551e6ec7b27d9dd7d455e9e169f",
+      "size_bytes": 20385
     },
     {
       "path": "scripts/check_withdrawals_credits_flow.py",
@@ -2516,8 +2516,8 @@
     },
     {
       "path": "scripts/test_warning_dispositions.py",
-      "sha256": "sha256:9f9d89bb6eb03c8c7d6f26b6cc2871f114f56d929b025e56b21347fbac10aac5",
-      "size_bytes": 15640
+      "sha256": "sha256:f05fda5a93ec1fd00700600be80176712cf0b6dd9b9039aee2ca0f84bb1418fb",
+      "size_bytes": 17055
     },
     {
       "path": "scripts/test_windows_ci_wrapper.py",
@@ -2696,8 +2696,8 @@
     },
     {
       "path": "test/fixtures/warning-dispositions/forge-size-output.txt",
-      "sha256": "sha256:6fed14f280067fe75bb7a3d182adb991c27ba9f77352dfdedab599184ea7939b",
-      "size_bytes": 3135
+      "sha256": "sha256:e8efb57a57cc836512c422b4ec74faeca1eeade5e10b93d4cc08071219232cd4",
+      "size_bytes": 4122
     },
     {
       "path": "test/helpers/StreamPostEntropyCompletionGasHarness.sol",

@@ -293,6 +293,31 @@ class WarningDispositionTests(unittest.TestCase):
                     root, root / checker.DEFAULT_WARNING_DISPOSITIONS
                 )
 
+    def test_rejects_changed_executor_forwarding(self) -> None:
+        """The accepted return-name warning requires the reviewed assembly forwarding."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            source = root / "smart-contracts/domains/governance/StreamGovernanceExecutor.sol"
+            write_text(source, source.read_text(encoding="utf-8").replace(
+                "return(add(encoded, 0x20), mload(encoded))", "return(0, 0)"
+            ))
+            with self.assertRaisesRegex(checker.WarningDispositionError, "source markers drifted"):
+                checker.validate_source_markers(root)
+
+    def test_rejects_other_unused_executor_output(self) -> None:
+        """The disposition admits one exact signature, not all Executor 5667 warnings."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "forge-size.log"
+            warnings = set(checker.EXPECTED_SOLC_WARNINGS)
+            warnings.add((
+                "5667", "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+                "returns (uint256 otherOutput)",
+            ))
+            write_text(path, solc_warning_log(warnings))
+            with self.assertRaisesRegex(checker.WarningDispositionError, "unexpected warning"):
+                checker.validate_solc_warning_log(path)
+
     def test_accepts_expected_solc_warning_log(self) -> None:
         """The live solc-warning baseline accepts exactly documented warnings."""
         with tempfile.TemporaryDirectory() as temp_dir:
