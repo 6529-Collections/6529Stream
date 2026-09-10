@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string]$DeploymentState,
     [Parameter(Mandatory)][string]$OutputDirectory,
-    [ValidateSet('Status','Onboard')][string]$Stage = 'Status',
+    [ValidateSet('Status','Onboard','Native','ERC20','Auction','Export','All')][string]$Stage = 'Status',
     [string]$RpcUrl = 'http://127.0.0.1:8547',
     [string]$Artist = '',
     [string]$Buyer = '',
@@ -52,14 +52,18 @@ function Scenario-CanonicalType([object]$Parameter) {
     }
     return $Parameter.type
 }
-function Scenario-Method([string]$Module,[string]$Name) {
+function Get-ScenarioArtifact([string]$Module) {
     $contract=$contracts[$Module]
     if (-not $artifactCache.ContainsKey($contract)) {
         $path=Join-Path $deployment.artifactDirectory "$contract.sol/$contract.json"
         $artifactCache[$contract]=Get-Content -Raw -Encoding UTF8 -LiteralPath $path | ConvertFrom-Json -AsHashtable
     }
-    $matches=@($artifactCache[$contract].abi | Where-Object {$_.type -eq 'function' -and $_.name -eq $Name})
-    if ($matches.Count -ne 1) {throw "Expected one ABI method $contract.$Name"}
+    return $artifactCache[$contract]
+}
+function Scenario-Method([string]$Module,[string]$Name) {
+    $artifact=Get-ScenarioArtifact $Module
+    $matches=@($artifact.abi | Where-Object {$_.type -eq 'function' -and $_.name -eq $Name})
+    if ($matches.Count -ne 1) {throw "Expected one ABI method $Module.$Name"}
     return $matches[0]
 }
 function Scenario-CallData([string]$Module,[string]$Name,[string[]]$Values=@()) {
@@ -80,10 +84,10 @@ function Find-ScenarioEvent([object]$Receipt,[string]$Address,[string]$Topic) {
     return $items[0]
 }
 function Assert-ScenarioTransaction([object]$Actual,[object]$Expected) {
-    foreach ($key in @('from','to','input','value','nonce')) {
+    foreach ($key in @('from','to','input','value','nonce','gas','chainId')) {
         $actualValue=if ($key -eq 'input') {$Actual.input} else {$Actual.$key}
         $expectedValue=if ($key -eq 'input') {$Expected.data} else {$Expected[$key]}
-        if ($key -in @('value','nonce')) {
+        if ($key -in @('value','nonce','gas','chainId')) {
             if ((Scenario-UInt $actualValue) -ne (Scenario-UInt $expectedValue)) {throw "Recovered transaction $key differs"}
         } elseif ($actualValue -ine $expectedValue) {throw "Recovered transaction $key differs"}
     }
@@ -135,7 +139,9 @@ function Send-Scenario([string]$Label,[string]$Sender,[string]$Target,[string]$D
     if ((Scenario-UInt $receipt.status) -ne 1) {throw "Operation $Label reverted; retained transaction $($operation.transactionHash)."}
     $actual=Invoke-ScenarioRpc 'eth_getTransactionByHash' @($operation.transactionHash)
     Assert-ScenarioTransaction $actual $operation.transaction
-    $operation.receipt=$receipt;$operation.status='confirmed';Save-ScenarioState
+    $header=Invoke-ScenarioRpc 'eth_getBlockByNumber' @($receipt.blockNumber,$false)
+    if ($header.hash -ine $receipt.blockHash -or $actual.hash -ine $receipt.transactionHash -or $actual.blockHash -ine $receipt.blockHash -or (Scenario-UInt $actual.blockNumber) -ne (Scenario-UInt $receipt.blockNumber)) {throw "Receipt for $Label is not in its recorded canonical block."}
+    $operation.receipt=$receipt;$operation.rpcTransaction=$actual;$operation.blockHeader=$header;$operation.status='confirmed';Save-ScenarioState
     return $receipt
 }
 function Send-ScenarioMethod([string]$Label,[string]$Sender,[string]$Module,[string]$Name,[string[]]$Values=@(),[string]$Value='0') {
@@ -250,12 +256,214 @@ function Invoke-ScenarioOnboarding {
             $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('latest',$false)).timestamp
             $script:state.acceptance=@{nominationHash=$attribution[3];nonce=(Read-Scenario artistRegistry acceptanceNonces @($Artist))[0];deadline=($now+3600).ToString()};Save-ScenarioState
         }
+    }
+    if ($script:state.Contains('acceptance')) {
         $a=$script:state.acceptance
         $null=Send-ScenarioMethod 'artist.accept' $Artist artistRegistry acceptArtist @($id,$a.nominationHash,$a.nonce,$a.deadline,'0x')
     }
     if ((Read-Scenario artistRegistry acceptedArtist @($id))[0] -ine $Artist) {throw 'Second artist acceptance mismatch.'}
     if (-not (Read-Scenario core collectionExists @($id))[0]) {throw 'Second collection was not created.'}
     $script:state.onboarded=$true;Save-ScenarioState
+}
+
+function Require-ScenarioOnboarded {
+    if (-not $script:state.Contains('onboarded') -or -not $script:state.onboarded) {throw 'Complete Onboard before the product scenarios.'}
+    $addresses.wallet=$script:state.wallet;$contracts.wallet='StreamSplitWallet'
+}
+function Scenario-Event([object]$Receipt,[string]$Module,[string]$Name) {
+    $artifact=Get-ScenarioArtifact $Module
+    $events=@($artifact.abi | Where-Object {$_.type -eq 'event' -and $_.name -eq $Name})
+    if ($events.Count -ne 1) {throw "Expected one ABI event $Module.$Name"}
+    $event=$events[0];$signature=$Name+'('+(($event.inputs|ForEach-Object {Scenario-CanonicalType $_}) -join ',')+')'
+    $log=Find-ScenarioEvent $Receipt $addresses[$Module] (Hash-ScenarioText $signature)
+    $plain=@($event.inputs|Where-Object {-not $_.indexed})
+    $decoded=@()
+    if ($plain.Count) {
+        $signature='f()('+(($plain|ForEach-Object {Scenario-CanonicalType $_}) -join ',')+')'
+        $raw=Invoke-ScenarioCast @('abi-decode',$signature,$log.data,'--json')
+        $decoded=$raw|ConvertFrom-Json -NoEnumerate
+    }
+    $values=[ordered]@{};$topicIndex=1;$dataIndex=0
+    foreach ($input in $event.inputs) {
+        if ($input.indexed) {
+            $word=$log.topics[$topicIndex];$topicIndex++
+            $values[$input.name]=if ($input.type.StartsWith('uint')) {(Scenario-UInt $word).ToString()} elseif ($input.type -eq 'address') {'0x'+$word.Substring(26)} else {$word}
+        } else {$values[$input.name]=$decoded[$dataIndex];$dataIndex++}
+    }
+    return $values
+}
+function New-ScenarioAuthorization([string]$Label,[string]$Kind,[string]$Module,[object]$Message) {
+    if (-not $script:state.Contains('authorizations')) {$script:state.authorizations=[ordered]@{}}
+    if (-not $script:state.authorizations.Contains($Label)) {
+        $script:state.authorizations[$Label]=[ordered]@{kind=$Kind;chainId='31337';verifyingContract=$addresses[$Module];message=$Message}
+        Save-ScenarioState
+    }
+    $request=$script:state.authorizations[$Label]
+    foreach ($key in @($request.message.Keys)) {$request.message[$key]=[string]$request.message[$key]}
+    Save-ScenarioState
+    $path=Join-Path $OutputDirectory "$Label.signing-request.json"
+    [IO.File]::WriteAllText($path,($request|ConvertTo-Json -Depth 30)+"`n",[Text.UTF8Encoding]::new($false))
+    $prepared=& node (Join-Path $repoRoot 'packages/stream-client/examples/prepare.mjs') $path 2>&1
+    if ($LASTEXITCODE -ne 0) {throw "Build the current client package before signing: $($prepared -join ' ')"}
+    $typed=($prepared -join "`n")|ConvertFrom-Json -AsHashtable
+    [IO.File]::WriteAllText((Join-Path $OutputDirectory "$Label.typed-data.json"),($typed|ConvertTo-Json -Depth 30)+"`n",[Text.UTF8Encoding]::new($false))
+    $tuple='('+(($request.message.Values) -join ',')+')'
+    $method=if($Kind -eq 'paymentIntent'){'paymentIntentDigest'}else{'authorizationDigest'}
+    $onchain=(Read-Scenario $Module $method @($tuple))[0]
+    if ($onchain -ne $typed.digest) {throw "Client digest differs from the deployed contract for $Label."}
+    $rpcPrepared=& node (Join-Path $repoRoot 'packages/stream-client/examples/prepare.mjs') --rpc $path 2>&1
+    if ($LASTEXITCODE -ne 0) {throw "Client RPC payload preparation failed: $($rpcPrepared -join ' ')"}
+    $rpcPayload=($rpcPrepared -join "`n")|ConvertFrom-Json -AsHashtable
+    return @{request=$request;typed=$typed;rpc=$rpcPayload;tuple=$tuple}
+}
+function Sign-ScenarioTyped([string]$Signer,[object]$Typed) {
+    if (-not $Execute) {throw 'Signing local test payloads requires -Execute.'}
+    if (-not $Typed.types.Contains('EIP712Domain')) {throw 'Use the client package RPC signing payload.'}
+    return Invoke-ScenarioRpc 'eth_signTypedData_v4' @($Signer,($Typed|ConvertTo-Json -Depth 30 -Compress))
+}
+function Complete-ScenarioEntropy([string]$Label,[string]$TokenId) {
+    $requestReceipt=Send-ScenarioMethod "$Label.entropy.request" $Buyer entropy requestEntropy @($TokenId)
+    $event=Scenario-Event $requestReceipt entropy EntropyRequested
+    if ([string]$event.tokenId -ne $TokenId -or $event.provider -ine $addresses.provider) {throw 'Entropy event identity differs from the scenario token/provider.'}
+    $raw=Hash-ScenarioText "Development-only product entropy $Label $TokenId"
+    $receipt=Send-ScenarioMethod "$Label.entropy.fulfill" $controller provider fulfill @([string]$event.providerRequestId,$raw)
+    $seed=Read-Scenario entropy tokenSeed @($TokenId)
+    if (-not $seed[1] -or $seed[0] -eq $zero) {throw 'Scenario entropy did not finalize.'}
+    $notification=Find-ScenarioEvent $receipt $addresses.core (Hash-ScenarioText 'MetadataUpdate(uint256)')
+    $decoded=Invoke-ScenarioCast @('abi-decode','f()(uint256)',$notification.data,'--json')|ConvertFrom-Json -NoEnumerate
+    if ([string]$decoded[0] -ne $TokenId -or (Read-Scenario entropy metadataNotificationPending @($TokenId))[0]) {throw 'Metadata notification did not complete for the scenario token.'}
+    $uri=(Read-Scenario core tokenURI @($TokenId))[0]
+    if (-not $uri.StartsWith('data:application/json;base64,')) {throw 'Expected onchain metadata.'}
+    $json=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($uri.Split(',')[1]));$metadata=$json|ConvertFrom-Json
+    if ($metadata.metadata_state -ne 'final' -or [string]$metadata.token_id -ne $TokenId -or [string]$metadata.collection_id -ne $script:state.collectionId -or $metadata.hash -ne $seed[0] -or $metadata.artist -ine $Artist) {throw 'Final metadata identity, artist or seed differs from the scenario token.'}
+    [IO.File]::WriteAllText((Join-Path $OutputDirectory "$Label.metadata.json"),$json+"`n",[Text.UTF8Encoding]::new($false))
+    return @{tokenId=$TokenId;requestKey=$event.requestKey;providerRequestId=[string]$event.providerRequestId;seed=$seed[0];metadataState='final';notificationDelivered=$true;randomness='Controller-supplied development value, not secure randomness.'}
+}
+function Release-ScenarioProceeds([string]$Label,[string]$Asset,[string]$Amount) {
+    if (-not $script:state.Contains('withdrawals')) {$script:state.withdrawals=[ordered]@{}}
+    $receiptA=Send-ScenarioMethod "$Label.artist.withdraw" $Artist wallet release @($Asset,$Artist,$Artist)
+    $receiptP=Send-ScenarioMethod "$Label.protocol.withdraw" $controller wallet release @($Asset,$protocol,$protocol)
+    $eventName=if($Asset -eq $zeroAddress){'NativeReleased'}else{'ERC20Released'}
+    $a=Scenario-Event $receiptA wallet $eventName;$p=Scenario-Event $receiptP wallet $eventName
+    $artistAmount=[bigint]::Divide((Scenario-UInt $Amount)*9,10);$protocolAmount=(Scenario-UInt $Amount)-$artistAmount
+    if ((Scenario-UInt $a.amount) -ne $artistAmount -or (Scenario-UInt $p.amount) -ne $protocolAmount) {throw "Unexpected split amounts in $Label receipts."}
+    if ((Scenario-UInt (Read-Scenario wallet accountReleased @($Asset,$Artist))[0]) -lt $artistAmount -or (Scenario-UInt (Read-Scenario wallet accountReleased @($Asset,$protocol))[0]) -lt $protocolAmount) {throw 'Split release accounting is inconsistent.'}
+    $script:state.withdrawals[$Label]=@{asset=$Asset;artist=$artistAmount.ToString();protocol=$protocolAmount.ToString()};Save-ScenarioState
+}
+function Invoke-ScenarioNative {
+    Require-ScenarioOnboarded
+    $id=$script:state.collectionId;$phase=$script:state.phases.native;$price='1000000000000'
+    $tokenData='0x'+[Convert]::ToHexString([Text.Encoding]::UTF8.GetBytes('Second artist native purchase'))
+    $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
+    $message=[ordered]@{collectionId=$id;phaseId=$phase;payer=$Buyer;recipient=$Buyer;artist=$Artist;profileId=$script:state.profileId;tokenDataHash=(Hash-ScenarioHex $tokenData);mintCommitment=(Hash-ScenarioText "Native artwork $id");mintPolicyHash=(Read-Scenario manager phasePolicyHash @($id,$phase))[0];price=$price;nonce=(Hash-ScenarioText "Product demo native $id");deadline=($now+3600).ToString();signerEpoch=(Read-Scenario nativeSale signerEpoch)[0]}
+    $auth=New-ScenarioAuthorization 'native' 'nativeSale' 'nativeSale' $message
+    $platform=(Read-Scenario nativeSale platformSigner)[0]
+    $receipt=Send-ScenarioMethod 'native.buy' $Buyer nativeSale buy @($auth.tuple,$tokenData,(Sign-ScenarioTyped $platform $auth.rpc),(Sign-ScenarioTyped $Artist $auth.rpc)) $price
+    $event=Scenario-Event $receipt nativeSale NativeSaleSettled
+    $tokenId=[string]$event.tokenId
+    $script:state.native=Complete-ScenarioEntropy 'native' $tokenId
+    if ((Read-Scenario core ownerOf @($tokenId))[0] -ine $Buyer) {throw 'Native purchaser does not own the NFT.'}
+    Release-ScenarioProceeds 'native' $zeroAddress $price
+    $script:state.native.price=$price;Save-ScenarioState
+}
+function Invoke-ScenarioERC20 {
+    Require-ScenarioOnboarded
+    $artifactPath=Join-Path $deployment.artifactDirectory 'MockStreamPaymentToken.sol/MockStreamPaymentToken.json'
+    $artifact=Get-Content -Raw -Encoding UTF8 -LiteralPath $artifactPath|ConvertFrom-Json -AsHashtable
+    $receipt=Send-Scenario 'erc20.token.deploy' $controller $zeroAddress $artifact.bytecode.object
+    if ($script:state.Contains('paymentToken') -and $script:state.paymentToken -ine $receipt.contractAddress) {throw 'Stored test-token address differs from its deployment receipt.'}
+    $script:state.paymentToken=$receipt.contractAddress
+    $code=Invoke-ScenarioRpc 'eth_getCode' @($receipt.contractAddress,'latest')
+    if ($code -ine $artifact.deployedBytecode.object) {throw 'Local test-token runtime differs from the selected artifact.'}
+    $script:state.paymentTokenDisclosure='MockStreamPaymentToken in standard mode, deployed only on local chain 31337. Not an approved public stablecoin.'
+    Save-ScenarioState
+    $addresses.paymentToken=$script:state.paymentToken;$contracts.paymentToken='MockStreamPaymentToken'
+    $id=$script:state.collectionId;$phase=$script:state.phases.erc20;$price='1000'
+    if (-not $script:state.governance.Contains('erc20.configure')) {
+        $policy=Read-Scenario erc20Sale primaryPolicy @($id,$script:state.revenueClass)
+        $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
+        $config="($id,$phase,$($addresses.paymentToken),$($script:state.revenueClass),$price,$((Read-Scenario manager phasePolicyHash @($id,$phase))[0]),$($policy[0]),0,$($now+2592000))"
+        $calls=@(New-ScenarioCall assetPolicy setAssetStatus @($addresses.paymentToken,'1',(Hash-ScenarioText 'Local standard-mode test token')))
+        $calls+=New-ScenarioCall erc20Sale registerSale @($config)
+        Invoke-ScenarioGovernance 'erc20.configure' $calls
+    } else {Invoke-ScenarioGovernance 'erc20.configure' @()}
+    $configured=Scenario-Event $script:state.operations['erc20.configure.execute'].receipt erc20Sale SaleConfigured
+    $saleId=$configured.saleId;$record=(Read-Scenario erc20Sale saleRecord @($saleId))[0]
+    $null=Send-ScenarioMethod 'erc20.token.mint' $controller paymentToken mint @($Buyer,'10000')
+    $null=Send-ScenarioMethod 'erc20.approve' $Buyer paymentToken approve @($addresses.erc20Sale,$price)
+    $tokenData='0x'+[Convert]::ToHexString([Text.Encoding]::UTF8.GetBytes('Second artist ERC20 purchase'))
+    $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
+    $message=[ordered]@{saleId=$saleId;saleConfigHash=$record[2];payer=$Buyer;recipient=$Buyer;artist=$Artist;tokenDataHash=(Hash-ScenarioHex $tokenData);mintCommitment=(Hash-ScenarioText "ERC20 artwork $id");nonce=(Hash-ScenarioText "Product demo ERC20 $id");deadline=($now+3600).ToString();signerEpoch=(Read-Scenario erc20Sale signerEpoch)[0]}
+    $auth=New-ScenarioAuthorization 'erc20.sale' 'erc20Sale' 'erc20Sale' $message
+    $intent=[ordered]@{payer=$Buyer;asset=$addresses.paymentToken;maxAmount=$price;saleRef=$saleId;expectedPrimaryPolicyHash=$record[0][6];nonce=(Hash-ScenarioText "Product demo payer $id");deadline=$auth.request.message.deadline}
+    $payment=New-ScenarioAuthorization 'erc20.payment' 'paymentIntent' 'erc20Sale' $intent
+    $platform=(Read-Scenario erc20Sale platformSigner)[0]
+    $receipt=Send-ScenarioMethod 'erc20.buy' $controller erc20Sale buy @($auth.tuple,$tokenData,(Sign-ScenarioTyped $platform $auth.rpc),(Sign-ScenarioTyped $Artist $auth.rpc),$payment.tuple,(Sign-ScenarioTyped $Buyer $payment.rpc))
+    $event=Scenario-Event $receipt erc20Sale ERC20SaleSettled;$tokenId=[string]$event.tokenId
+    $script:state.erc20=Complete-ScenarioEntropy 'erc20' $tokenId
+    if ((Read-Scenario core ownerOf @($tokenId))[0] -ine $Buyer) {throw 'ERC20 purchaser does not own the NFT.'}
+    Release-ScenarioProceeds 'erc20' $addresses.paymentToken $price
+    $script:state.erc20.saleId=$saleId;$script:state.erc20.price=$price;$script:state.erc20.asset=$addresses.paymentToken;Save-ScenarioState
+}
+function Invoke-ScenarioAuction {
+    Require-ScenarioOnboarded
+    $id=$script:state.collectionId;$phase=$script:state.phases.auction
+    $tokenData='0x'+[Convert]::ToHexString([Text.Encoding]::UTF8.GetBytes('Second artist auction artwork'))
+    $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('pending',$false)).timestamp
+    $message=[ordered]@{collectionId=$id;phaseId=$phase;artist=$Artist;profileId=$script:state.profileId;tokenDataHash=(Hash-ScenarioHex $tokenData);mintCommitment=(Hash-ScenarioText "Auction artwork $id");mintPolicyHash=(Read-Scenario manager phasePolicyHash @($id,$phase))[0];reservePrice='1000000000000';startTime=$now.ToString();endTime=($now+600).ToString();extensionWindow='60';minBidIncrementBps='1000';nonce=(Hash-ScenarioText "Product demo auction $id");deadline=($now+3600).ToString();signerEpoch=(Read-Scenario auction signerEpoch)[0]}
+    $auth=New-ScenarioAuthorization 'auction' 'auction' 'auction' $message
+    $platform=(Read-Scenario auction platformSigner)[0]
+    $receipt=Send-ScenarioMethod 'auction.create' $controller auction createAuction @($auth.tuple,$tokenData,(Sign-ScenarioTyped $platform $auth.rpc),(Sign-ScenarioTyped $Artist $auth.rpc))
+    $created=Scenario-Event $receipt auction AuctionCreated;$tokenId=[string]$created.tokenId
+    $script:state.auction=Complete-ScenarioEntropy 'auction' $tokenId
+    $null=Send-ScenarioMethod 'auction.bid.first' $Buyer auction bid @($tokenId,$Buyer) '1000000000000'
+    $null=Send-ScenarioMethod 'auction.bid.second' $SecondBidder auction bid @($tokenId,$SecondBidder) '1100000000000'
+    $refund=Send-ScenarioMethod 'auction.refund.first' $Buyer auction withdrawRefund @($Buyer)
+    $refunded=Scenario-Event $refund auction AuctionRefundWithdrawn
+    if ((Scenario-UInt $refunded.amount) -ne 1000000000000 -or (Scenario-UInt (Read-Scenario auction refundCredit @($Buyer))[0]) -ne 0) {throw 'Outbid buyer refund did not complete.'}
+    $auction=(Read-Scenario auction auction @($tokenId))[0]
+    $now=Scenario-UInt (Invoke-ScenarioRpc 'eth_getBlockByNumber' @('latest',$false)).timestamp
+    if ($now -le (Scenario-UInt $auction[5])) {
+        if (-not $AdvanceLocalTime) {throw "Auction $tokenId ends at $($auction[5]); rerun after that timestamp."}
+        $null=Invoke-ScenarioRpc 'evm_increaseTime' @([long]((Scenario-UInt $auction[5])-$now+1));$null=Invoke-ScenarioRpc 'evm_mine'
+    }
+    $null=Send-ScenarioMethod 'auction.settle' $controller auction settle @($tokenId)
+    if ((Read-Scenario core ownerOf @($tokenId))[0] -ine $SecondBidder) {throw 'Winning bidder did not receive the auction NFT.'}
+    Release-ScenarioProceeds 'auction' $zeroAddress '1100000000000'
+    $script:state.auction.winner=$SecondBidder;$script:state.auction.winningBid='1100000000000';$script:state.auction.refund='1000000000000';Save-ScenarioState
+}
+function Invoke-ScenarioExport {
+    Require-ScenarioOnboarded
+    if (-not $script:state.Contains('export')) {
+        if (-not $Execute) {throw 'Export publication requires -Execute.'}
+        $null=Invoke-ScenarioRpc 'evm_mine'
+        $height=(Scenario-UInt (Invoke-ScenarioRpc 'eth_blockNumber'))-1
+        $anchor=Invoke-ScenarioRpc 'eth_getBlockByNumber' @((Scenario-Hex $height),$false)
+        $snapshot=[ordered]@{schema='6529stream.product-demo-snapshot.v1';scope='Demonstration collection ownership, not a complete protocol reconstruction';chainId='31337';core=$addresses.core;blockNumber=$height.ToString();blockHash=$anchor.hash;collectionId=$script:state.collectionId;artist=$Artist;profileId=$script:state.profileId;tokens=[ordered]@{}}
+        foreach ($label in @('native','erc20','auction')) {
+            if ($script:state.Contains($label)) {
+                $tokenId=$script:state[$label].tokenId
+                $owner=Invoke-ScenarioCast @('call',$addresses.core,'ownerOf(uint256)(address)',$tokenId,'--block',$height.ToString(),'--rpc-url',$RpcUrl)
+                $snapshot.tokens[$label]=@{tokenId=$tokenId;owner=$owner}
+            }
+        }
+        $path=Join-Path $OutputDirectory 'state-export.snapshot.json'
+        $bytes=[Text.Encoding]::UTF8.GetBytes(($snapshot|ConvertTo-Json -Depth 20 -Compress)+"`n");[IO.File]::WriteAllBytes($path,$bytes)
+        $hash=Hash-ScenarioHex ('0x'+[Convert]::ToHexString($bytes))
+        $script:state.export=[ordered]@{blockNumber=$height.ToString();blockHash=$anchor.hash;exportHash=$hash;manifestHash=(Read-Scenario manifest streamSystemManifest)[0];manifestURI="urn:6529stream:local-product-export:$hash";snapshotFile=$path;snapshotSha256=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()};Save-ScenarioState
+    }
+    $e=$script:state.export
+    $receipt=Send-ScenarioMethod 'export.publish' $controller executor publishStateExport @($e.blockNumber,$e.blockHash,$e.exportHash,$e.manifestHash,$e.manifestURI)
+    $event=Scenario-Event $receipt executor StateExportPublished
+    $latest=Read-Scenario executor latestStateExport
+    if ($event.exportHash -ne $e.exportHash -or $latest[2] -ne $e.exportHash -or $latest[1] -ne $e.blockHash) {throw 'Published export readback differs from the snapshot claim.'}
+    $script:state.export.published=$true;Save-ScenarioState
+}
+
+function New-ScenarioClientConfig {
+    $public=[ordered]@{}
+    foreach ($name in @('core','manager','nativeSale','erc20Sale','auction','artistRegistry','entropy','splitFactory','primaryRevenue','assetPolicy','executor')) {$public[$name]=$addresses[$name]}
+    return [ordered]@{schemaVersion=1;chainId='31337';addresses=$public}
 }
 
 $uri=[Uri]$RpcUrl
@@ -279,9 +487,14 @@ try {
     if ($script:state.deploymentStateSha256 -ne $binding -or $script:state.artist -ine $Artist -or $script:state.buyer -ine $Buyer -or $script:state.secondBidder -ine $SecondBidder) {throw 'Scenario deployment or actor binding changed.'}
     if ((Read-Scenario governanceRoot controller)[0] -ine $controller) {throw 'Governance root controller differs from the deployment.'}
     if ((Read-Scenario artistRegistry acceptedArtist @('1'))[0] -ine $controller) {throw 'Original collection attribution changed.'}
-    $config=[ordered]@{schemaVersion=1;chainId='31337';addresses=$addresses}
+    $script:state.addresses=$addresses
+    $config=New-ScenarioClientConfig
     [IO.File]::WriteAllText((Join-Path $OutputDirectory 'client-config.json'),($config | ConvertTo-Json -Depth 8)+"`n",[Text.UTF8Encoding]::new($false))
-    if ($Stage -eq 'Onboard') {Invoke-ScenarioOnboarding}
+    if ($Stage -in @('Onboard','All')) {Invoke-ScenarioOnboarding}
+    if ($Stage -in @('Native','All')) {Invoke-ScenarioNative}
+    if ($Stage -in @('ERC20','All')) {Invoke-ScenarioERC20}
+    if ($Stage -in @('Auction','All')) {Invoke-ScenarioAuction}
+    if ($Stage -in @('Export','All')) {Invoke-ScenarioExport}
     Save-ScenarioState
     Write-Output $statePath
 } finally {$lock.Dispose()}
