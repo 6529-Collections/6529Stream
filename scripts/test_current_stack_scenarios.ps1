@@ -24,6 +24,36 @@ Require ((Scenario-Hex ([bigint]16777216)) -eq '0x1000000') 'Gas cap quantity en
 $parameter=@{type='tuple[]';components=@(@{type='uint256'},@{type='tuple[]';components=@(@{type='address'},@{type='bytes32'})})}
 Require ((Scenario-CanonicalType $parameter) -eq '(uint256,(address,bytes32)[])[]') 'Nested ABI tuple arrays.'
 
+# A --skip test deployment has no mock artifact. Preparation must supply both
+# creation bytecode and the shared ABI cache used by mint/approve/balance reads.
+$fixtureParent=[IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$fixture=Join-Path $fixtureParent ('stream-scenario-token-'+[guid]::NewGuid().ToString('N'))
+$null=New-Item -ItemType Directory -Path (Join-Path $fixture 'production')
+try {
+    $deployment=@{artifactDirectory=(Join-Path $fixture 'production')}
+    $contracts=@{paymentToken='MockStreamPaymentToken'};$artifactCache=@{}
+    Require-Failure {Get-ScenarioArtifact paymentToken} 'does not exist'
+    $tokenArtifact=@{bytecode=@{object='0x6000'};deployedBytecode=@{object='0x6001'};abi=@(
+        @{type='function';name='mint';inputs=@(@{type='address'},@{type='uint256'});outputs=@()},
+        @{type='function';name='approve';inputs=@(@{type='address'},@{type='uint256'});outputs=@(@{type='bool'})},
+        @{type='function';name='balanceOf';inputs=@(@{type='address'});outputs=@(@{type='uint256'})}
+    )}
+    $tokenPath=Join-Path $fixture 'isolated-token.json'
+    [IO.File]::WriteAllText($tokenPath,($tokenArtifact|ConvertTo-Json -Depth 12),[Text.UTF8Encoding]::new($false))
+    $script:preparedToken=@{artifact_path=$tokenPath;artifact_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $tokenPath).Hash.ToLowerInvariant()}
+    function Invoke-ScenarioTestTokenPreparation {return $script:preparedToken}
+    $null=Initialize-ScenarioPaymentToken
+    Require ((Get-ScenarioArtifact paymentToken).bytecode.object -eq '0x6000') 'Isolated artifact supplies token creation bytecode.'
+    foreach ($method in @('mint','approve','balanceOf')) {Require ((Scenario-Method paymentToken $method).name -eq $method) "Isolated artifact supplies $method ABI."}
+    Require (@(Get-ChildItem -LiteralPath $deployment.artifactDirectory).Count -eq 0) 'Production output remains empty and untouched.'
+    $script:preparedToken.artifact_sha256='0'*64
+    Require-Failure {Initialize-ScenarioPaymentToken} 'artifact hash differs'
+} finally {
+    $resolvedFixture=[IO.Path]::GetFullPath($fixture)
+    if ([IO.Path]::GetDirectoryName($resolvedFixture) -ne $fixtureParent.TrimEnd([IO.Path]::DirectorySeparatorChar)) {throw 'Temporary fixture escaped its parent.'}
+    Remove-Item -LiteralPath $resolvedFixture -Recurse -Force
+}
+
 function Scenario-Method {return @{inputs=@();outputs=@(@{type='uint256'},@{type='tuple';components=@(@{type='address'},@{type='uint256'})})}}
 function Invoke-ScenarioCast {return '["7",["0x0000000000000000000000000000000000000001","9"]]'}
 $addresses=@{sample='0x0000000000000000000000000000000000000001'};$RpcUrl='http://127.0.0.1:8547'

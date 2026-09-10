@@ -52,6 +52,23 @@ function Scenario-CanonicalType([object]$Parameter) {
     }
     return $Parameter.type
 }
+function Invoke-ScenarioTestTokenPreparation {
+    Push-Location $repoRoot
+    try {
+        $result=& python -m tools.deployment.prepare_current_stack_test_token --output-dir (Join-Path $OutputDirectory 'test-token-compilation') --deployment-artifacts $deployment.artifactDirectory
+        if ($LASTEXITCODE -ne 0) {throw 'Local test-token preparation failed; retained compiler log identifies the failure.'}
+        return ($result -join "`n") | ConvertFrom-Json -AsHashtable
+    } finally {Pop-Location}
+}
+function Initialize-ScenarioPaymentToken {
+    $prepared=Invoke-ScenarioTestTokenPreparation
+    $artifactBytes=[IO.File]::ReadAllBytes($prepared.artifact_path)
+    $actualHash=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($artifactBytes)).ToLowerInvariant()
+    if ($actualHash -cne $prepared.artifact_sha256) {throw 'Prepared local test-token artifact hash differs.'}
+    $artifactCache['MockStreamPaymentToken']=[Text.Encoding]::UTF8.GetString($artifactBytes) | ConvertFrom-Json -AsHashtable
+    $contracts.paymentToken='MockStreamPaymentToken'
+    return $prepared
+}
 function Get-ScenarioArtifact([string]$Module) {
     $contract=$contracts[$Module]
     if (-not $artifactCache.ContainsKey($contract)) {
@@ -382,13 +399,16 @@ function Invoke-ScenarioNative {
 }
 function Invoke-ScenarioERC20 {
     Require-ScenarioOnboarded
-    $artifactPath=Join-Path $deployment.artifactDirectory 'MockStreamPaymentToken.sol/MockStreamPaymentToken.json'
-    $artifact=Get-Content -Raw -Encoding UTF8 -LiteralPath $artifactPath|ConvertFrom-Json -AsHashtable
+    $prepared=Initialize-ScenarioPaymentToken
+    $artifact=Get-ScenarioArtifact paymentToken
     $receipt=Send-Scenario 'erc20.token.deploy' $controller $zeroAddress $artifact.bytecode.object
     if ($script:state.Contains('paymentToken') -and $script:state.paymentToken -ine $receipt.contractAddress) {throw 'Stored test-token address differs from its deployment receipt.'}
     $script:state.paymentToken=$receipt.contractAddress
     $code=Invoke-ScenarioRpc 'eth_getCode' @($receipt.contractAddress,'latest')
     if ($code -ine $artifact.deployedBytecode.object) {throw 'Local test-token runtime differs from the selected artifact.'}
+    # Reproduction checks current source against the original transaction/runtime;
+    # it does not relabel an older token's original compiler provenance.
+    $script:state.paymentTokenCurrentSourceReproduction=$prepared
     $script:state.paymentTokenDisclosure='MockStreamPaymentToken in standard mode, deployed only on local chain 31337. Not an approved public stablecoin.'
     Save-ScenarioState
     $addresses.paymentToken=$script:state.paymentToken;$contracts.paymentToken='MockStreamPaymentToken'

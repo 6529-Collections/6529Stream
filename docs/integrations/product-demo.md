@@ -9,10 +9,19 @@ journal so an interrupted run can resume.
 Use a loopback Anvil endpoint on chain 31337 with unlocked public test accounts
 and the explicitly labeled development entropy provider. The runner does not
 create or reset a node, load keys or send Sepolia transactions. It requires
-PowerShell 7, Foundry `cast`, Node.js and the built [Stream client](typescript-client.md).
+PowerShell 7, Python 3.12, Foundry 1.7.1 (`forge` and `cast`), Node.js and the built [Stream client](typescript-client.md).
 Supply the `current-stack.json` from the local deployment runner; its retained
-artifact directory supplies the matching contract ABIs and local test-token
-bytecode. Production contracts are not recompiled by these scenarios.
+artifact directory supplies the matching production contract ABIs. The ERC-20 stage
+compiles only `test/mocks/MockStreamPaymentToken.sol` into the scenario output’s
+`test-token-compilation` directory using Solc 0.8.19, via-IR, optimizer 200 and Paris.
+It retains exact source, settings, compiler input/output hashes and a build log;
+subsequent runs validate and reuse that artifact for creation and token ABI reads.
+This works with a fresh `--skip test` deployment and leaves its output/cache untouched.
+A changed source or retained binding fails closed; preserve the scenario journal
+and recover deliberately instead of replacing an already submitted token deployment.
+An older journal retains its original transaction and runtime evidence; the new
+compilation is recorded as a current-source reproduction. Production contracts
+are not recompiled by these scenarios.
 
 ```powershell
 npm --prefix packages/stream-client run build
@@ -87,5 +96,6 @@ a portable offline rendering package.
 Run the offline helper regressions after building the client:
 
 ```powershell
+python -m unittest tools.deployment.test_prepare_current_stack_test_token
 pwsh -NoProfile -File scripts/test_current_stack_scenarios.ps1
 ```
