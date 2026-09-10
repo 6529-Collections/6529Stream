@@ -24,8 +24,12 @@ repository reorganization, independent adversarial review, and testnet delivery.
 The owner requested further implementation while Sepolia funding is pending.
 The active branch is `codex/offline-release-completion`, from merged
 [PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
-has completed executable product paths in three parallel lanes. Source is now
-stable; final aggregate validation and PR review are in progress.
+has completed executable product paths in three parallel lanes. The contract changes are
+stable. All four CI jobs and the complete source-bound native validation passed
+on `3ab8be81`. Two final review corrections bind fallback compiler caches to
+Foundry settings and reject literal failing guards in the source-policy checker.
+Their focused tests and refreshed release package pass; final CI for `640cd995`
+is running in [run 34535587115](https://github.com/6529-Collections/6529Stream/actions/runs/34535587115).
 
 | Owner | Delivery |
 | --- | --- |
@@ -58,8 +62,11 @@ Independent reviewers cleared the implementation, package and local evidence.
 
 The aggregate native check found a stale test-discovery assertion after three
 diagnostic tests were added. Its count is corrected to 127 while retaining every
-existing suite-partition assertion. Final native validation and required PR CI
-remain merge gates; this state does not claim they have completed.
+existing suite-partition assertion. Native validation subsequently completed all 285 wrapper statements through
+source-bound continuations and focused final-input supplements. Original failed
+logs remain retained. The last review-only delta passes 29 governance-policy
+tests, 33 toolchain tests and the 625-file offline verifier; the new final CI run
+remains a merge gate.
 
 The merged baseline passed 1,346 configured Foundry tests across 111 suites,
 eleven current-stack scenarios, thirteen gas snapshots, the complete native
@@ -78,6 +85,36 @@ Builders hand over coherent changes to one integrator. Ordinary implementation
 choices do not require owner decisions. Run focused checks during implementation;
 run the broad integrated validation and deterministic artifact refresh after the
 supported behavior stabilizes. Resolve substantive review findings before merge.
+
+## Developer launch kit and testing upgrade
+
+The next increment is being integrated on `codex/developer-launch-kit` while
+PR #741 completes. No production Solidity behavior is changed by this increment
+so far. Completed pieces include the TypeScript client, a selected-state snapshot
+exporter, a second-artist product demonstration and resumable Sepolia stages.
+
+- The client passes 31 tests plus its build, type checks and retained-ABI checks.
+  Its snapshot records selected public facts at one block, with explicit coverage,
+  canonical hashes and fresh RPC readback. It is not a complete archival export.
+- The product demonstration executes 31 local transactions across native/ERC-20
+  purchases, auction bids/refunds/settlement, withdrawals and export publication.
+  Repeating every stage sends no duplicate transactions.
+- Launch recovery retains exact transaction intents, reconciles receipts before
+  constructing fresh authorizations and provides credential-free status. Its
+  independent journal/status suites pass 78 and 27 cases respectively.
+- The deployment builder is completing collection-two artwork and terminal
+  collection/royalty freezes with a portable collector package. Global metadata
+  pointers remain governed; a collection freeze must not be described as freezing
+  the entire protocol or all future rendering authority.
+- The test builder is adding real current-stack stateful invariants for money,
+  supply, ownership, auction refunds and replay. A separate builder owns quick
+  and extended campaign commands, seed/corpus retention and parallel CI. Tests
+  must demonstrate successful operations and reject unexpected reverts.
+
+Builders exchange adversarial reviews before integration. The owner explicitly
+requests this testing upgrade and defers Lean verification until traditional
+implementation stabilizes. Neither the testing campaign nor collection-completion
+work is reported as finished until its actual results are retained.
 
 ## Sepolia and release
 
@@ -108,8 +145,10 @@ replacement Sepolia deployment or a frozen testnet release candidate.
 
 The original checkout is clean on merged main. Prior cleanup retired 55 worktrees
 and archived 19 superseded tasks. All 160 original changed/untracked paths, recovery
-refs/bundles and 6,646 ignored files were preserved and verified. Four registered
-worktrees remain: original, integration, deployer and immutable review baseline.
+refs/bundles and 6,646 ignored files were preserved and verified. Five registered
+worktrees remain: original, integration, developer launch kit, deployer and
+immutable review baseline. The launch-kit checkout is active implementation work,
+not an abandoned worktree.
 The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
 directory remains after automatic approval review blocked its removal.
 
