@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FOUNDRYUP_MAX_RETRIES: "10"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}

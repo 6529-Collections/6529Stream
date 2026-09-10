@@ -24,6 +24,8 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Increase native Foundry installer retries for transient download failures,
+  including attestations, while preserving pinned versions and verification.
 - Keep token and registered-scope entropy subjects distinct when requesting
   randomness; the regression covers unchanged token inputs and both lifecycles.
 - Scope the live Slither gate to all production Solidity sources, excluding
