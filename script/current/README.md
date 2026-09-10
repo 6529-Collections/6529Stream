@@ -51,11 +51,9 @@ nonces. Sepolia also checks its complete unsigned plan before signing. A late
 over-cap transaction therefore stops the whole deployment before its first
 transaction. The error identifies the transaction, limit and selected
 `-DeploymentGasEstimateMultiplier`; review any lower multiplier explicitly and
-rerun. Neither runner reduces limits or disables the cap automatically. Fitting
-the cap does not prove gas sufficiency: estimates can be low, and receipt gas
-after refunds can understate the gas a call needs to finish. Simulation is a
-preflight observation; another transaction or state change before broadcast can
-also invalidate it. Preserve partial receipts if a later broadcast fails;
+rerun. Neither runner reduces limits or disables the cap automatically. Simulation
+is a preflight observation: another transaction or state change before broadcast
+can still invalidate it. Preserve partial receipts if a later broadcast fails;
 Sepolia's `ResumeDeploy` retains its existing checkpoint and nonce checks.
 
 The helper checks the accepted artist, decodes the token and entropy request from

@@ -115,6 +115,11 @@ the extended governance catalog and deployment add work beyond the earlier
 native-sale prototype. Local receipts and successful testnet execution are
 separate evidence.
 
+Fitting the transaction cap does not prove gas sufficiency: estimates can be
+low, and receipt gas after refunds can understate the gas a call needs to finish.
+Rehearse explicitly reviewed lower gas multipliers against the exact plan before
+broadcasting; preserve partial receipts if a later transaction fails.
+
 ## Replace and configure modules
 
 Core pointers and the action catalog are separate controls. A replacement
