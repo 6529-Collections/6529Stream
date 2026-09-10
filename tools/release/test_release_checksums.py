@@ -165,7 +165,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 327)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 336)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3160,7 +3160,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 327)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 336)
         manifest_paths = [record["path"] for record in manifest["files"]]
         checksum_paths = [
             path for _, path in generator.parse_checksum_file(checksum_text)

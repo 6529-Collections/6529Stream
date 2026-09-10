@@ -66,6 +66,15 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "smart-contracts/interfaces/stream/artist/IStreamCollectionArtistRegistry.sol",
         "smart-contracts/domains/artist/StreamArtistRegistryV2.sol",
         "smart-contracts/interfaces/stream/artist/IStreamArtistRegistryV2.sol",
+        "tools/deployment/prepare_current_stack_compilation.py",
+        "tools/deployment/test_prepare_current_stack_compilation.py",
+        "scripts/run-current-stack.ps1",
+        "scripts/run-current-stack-sepolia.ps1",
+        "scripts/current-stack-local-functions.ps1",
+        "scripts/rehearse-current-stack-vrf.ps1",
+        "scripts/test_current_stack_local.ps1",
+        "scripts/test_current_stack_sepolia.ps1",
+        "script/current/README.md",
         *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
     )
 )
@@ -78,11 +87,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 327
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 327
+    len(TEST_CANONICAL_COVERED_PATHS) != 336
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 336
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 327 unique coverage roots"
+        "canonical verifier fixtures require exactly 336 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("tools/security/generate_risk_register.py"),
@@ -760,12 +769,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 327)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 327)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 327)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 336)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 336)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 336)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "a371f5d0cbcb6dd7260f2a9c9f71f5a67bdd5c187aa41b12c677a8f809e07b13",
+            "afa29c005c3580c2910067c48953daa2c986b7cf04e56f40323915e2f3d5ffe3",
         )
         self.assertIn(
             "tools/development/test_windows_ci_wrapper.py",

@@ -40,6 +40,17 @@ class WindowsCiWrapperTests(unittest.TestCase):
             self.windows_job,
         )
 
+    def test_current_runner_regressions_use_powershell_seven(self) -> None:
+        # Local JSON decoding requires PS7; retain the separate PS5.1 wrapper job.
+        self.assertIn(
+            "- name: Current local and Sepolia runner tests\n"
+            "        shell: pwsh\n"
+            "        run: |\n"
+            "          ./scripts/test_current_stack_local.ps1\n"
+            "          ./scripts/test_current_stack_sepolia.ps1",
+            self.windows_job,
+        )
+
     def test_windows_job_runs_and_retains_full_builder_authority(self) -> None:
         self.assertIn("name: Full release-builder test authority", self.windows_job)
         self.assertIn("name: Initialize Windows release-builder log", self.windows_job)

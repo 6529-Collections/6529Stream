@@ -209,9 +209,10 @@ jobs:
           }
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
 
-      - name: Current Sepolia runner tests
+      - name: Current local and Sepolia runner tests
         shell: pwsh
         run: |
+          ./scripts/test_current_stack_local.ps1
           ./scripts/test_current_stack_sepolia.ps1
 
       - name: Full release-builder test authority
