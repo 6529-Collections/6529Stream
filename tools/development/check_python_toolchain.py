@@ -13,6 +13,7 @@ WINDOWS_PYTHON_VERSION = "3.12.10"
 SETUP_PYTHON_SHA = "ece7cb06caefa5fff74198d8649806c4678c61a1"
 FOUNDRY_TOOLCHAIN_SHA = "b00af27efadbc7b4ca8b82abbd903b17cc874d2a"
 FOUNDRY_VERSION = "v1.7.1"
+CACHE_ACTION_SHA = "0057852bfaa89a56745cba8c7296529d2fc39830"
 LOCK_INSTALL_COMMAND = (
     "python -m pip install --disable-pip-version-check --require-hashes "
     "--only-binary=:all: -r requirements-tools.lock"
@@ -121,6 +122,11 @@ HASH_RE = re.compile(r"^--hash=sha256:([0-9a-f]{64})(?:\s+\\)?$")
 STRICT_ACTION_RE = re.compile(
     r"^\s*(?:-\s*)?uses:\s+"
     r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\s*$"
+)
+CI_CACHE_ACTION_RE = re.compile(
+    r"^\s*(?:-\s*)?uses:\s+(actions/cache/(?:restore|save))@("
+    + CACHE_ACTION_SHA
+    + r")\s*$"
 )
 USES_TOKEN_RE = re.compile(r"\buses\b", re.IGNORECASE)
 RUN_TOKEN_RE = re.compile(r"\brun\b", re.IGNORECASE)
@@ -461,6 +467,8 @@ def check_workflow(path: Path, text: str) -> list[str]:
         canonical_run_key = STRICT_RUN_KEY_RE.fullmatch(raw_line)
         name_key = NAME_KEY_RE.match(raw_line)
         action_match = STRICT_ACTION_RE.fullmatch(raw_line)
+        if action_match is None and path == CI_WORKFLOW_PATH:
+            action_match = CI_CACHE_ACTION_RE.fullmatch(raw_line)
 
         if not in_literal_run_block and FOLDED_RUN_RE.match(raw_line):
             errors.append(

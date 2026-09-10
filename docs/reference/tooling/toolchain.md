@@ -21,6 +21,25 @@ preparing the corresponding evidence. Commands below run from the repository roo
 | Playwright | `1.60.0` |
 
 
+## Compiler cache in CI
+
+The default and current jobs cache compiler outputs separately, including the
+current profile's complete build-info. Keys bind the operating system,
+architecture, pinned Forge/Solc versions, profile, workflow, Foundry settings,
+source/test/script/dependency trees and remapping inputs. The input digest uses
+staged Git paths and blob IDs, including submodule commits, so a same-content
+source rename also invalidates it. There are no fallback keys.
+Documentation or Python-only changes can reuse an exact compilation; Solidity
+test changes invalidate the key along with other compiler inputs.
+
+Every run still executes its build, tests and current artifact validation.
+Successful compiler outputs are saved before later checks can fail or the
+forced size diagnostic can replace the default output. The current cache is
+saved only after its export validates one matching full compiler input and
+source freshness. Cache hits provide reusable compiler data, not new test or
+release evidence. The canonical target-isolated release builder still runs
+fresh with `--force`; its outputs and receipts are not cached here.
+
 ## Reproducible Python Audit And Release Toolchain
 
 [`requirements-tools.txt`](../../../requirements-tools.txt) is the short,

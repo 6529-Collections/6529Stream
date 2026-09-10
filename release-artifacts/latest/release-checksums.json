@@ -338,7 +338,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:eb7b816244e04d7b39d473c2655dfe31221a719597c81441348219c9b0f92a90"
+    "sha256": "sha256:d3740db54f8d239616bff4349a957cc5eadc1f943ea7928a4d5eca83c69d87ea"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -387,8 +387,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:60a379ac0a91fbafa5fa093a8f95fd9561569e48fd9be1da67dd22a04debfaf0",
-      "size_bytes": 66297
+      "sha256": "sha256:020971e190021ba1e2ce12511fd94f1f74a9212cd773b841620e4746c63143c9",
+      "size_bytes": 69285
     },
     {
       "path": ".github/workflows/release-mode.yml",
@@ -932,8 +932,8 @@
     },
     {
       "path": "docs/reference/tooling/toolchain.md",
-      "sha256": "sha256:0b00803a91b85e6c765d86ba832ee51d7ec33cd45c62627f62394b9a214fe85e",
-      "size_bytes": 5677
+      "sha256": "sha256:807600b846e723c0031f3fe056c5f456b8d87d2586f3885d17cc4c02e086d685",
+      "size_bytes": 6817
     },
     {
       "path": "docs/reference/tooling/validation.md",
@@ -2692,8 +2692,8 @@
     },
     {
       "path": "tools/build/test_verify_release_artifacts.py",
-      "sha256": "sha256:33b0a034e7a35e83a555a64574e03ea661eae990e7e14d1a03ae7a262479251a",
-      "size_bytes": 175567
+      "sha256": "sha256:005026ab05592925ece632a191a0b3265384ae7755180576941dc32144c8aca2",
+      "size_bytes": 176115
     },
     {
       "path": "tools/build/verify_release_artifacts.py",
@@ -2772,8 +2772,8 @@
     },
     {
       "path": "tools/development/check_python_toolchain.py",
-      "sha256": "sha256:798c2c7f719ddd0a0ffa8cf5bde94cf9a4a3c832e1714245394b8fe4be1c09c6",
-      "size_bytes": 30079
+      "sha256": "sha256:f9b69c6f8ff9abf1d60f5b3d75907b8f7a33f8377b4e81dfb75a53e60ba55941",
+      "size_bytes": 30405
     },
     {
       "path": "tools/development/test_dev.py",
@@ -2782,8 +2782,8 @@
     },
     {
       "path": "tools/development/test_python_toolchain.py",
-      "sha256": "sha256:6d884275204b42d97971a2d01b5524b7f7488e898caa86bbccb7fc69de713046",
-      "size_bytes": 26262
+      "sha256": "sha256:debb1fa401ecef9c93516a5c48fef3d6110422c866c2d3d032a7d08d000aad33",
+      "size_bytes": 32370
     },
     {
       "path": "tools/development/test_windows_ci_wrapper.py",
@@ -3277,8 +3277,8 @@
     },
     {
       "path": "tools/release/test_release_checksums.py",
-      "sha256": "sha256:36dee4a47b297e6fcb39c95037710a9e5de2e1f668646905fb34ed2cac921e51",
-      "size_bytes": 213069
+      "sha256": "sha256:7f6b6ad012e966af199436f60657f7c82727a2ea55f68350cb7c6bea4f9ed041",
+      "size_bytes": 213298
     },
     {
       "path": "tools/release/test_release_evidence_issue_links.py",

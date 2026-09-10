@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -393,6 +395,118 @@ class PythonToolchainTests(unittest.TestCase):
         self.assertTrue(
             any("every uses line must be a strict external" in error for error in errors)
         )
+
+    def test_ci_accepts_only_reviewed_cache_subactions(self) -> None:
+        workflow = valid_multi_job_ci_workflow().replace(
+            "    steps:\n",
+            "    steps:\n"
+            f"      - uses: actions/cache/restore@{checker.CACHE_ACTION_SHA}\n"
+            f"      - uses: actions/cache/save@{checker.CACHE_ACTION_SHA}\n",
+            1,
+        )
+        self.assertEqual(checker.check_workflow(checker.CI_WORKFLOW_PATH, workflow), [])
+
+    def test_cache_subaction_allowance_rejects_other_refs_and_spellings(self) -> None:
+        approved = f"actions/cache/restore@{checker.CACHE_ACTION_SHA}"
+        spellings = (
+            f"actions/cache/restore@{'1' * 40}",
+            "actions/cache/restore@v4",
+            approved.replace("actions/cache", "another/cache"),
+            approved.replace("/restore@", "/lookup@"),
+            approved.replace("/restore@", "/restore/extra@"),
+            approved.replace("/restore@", "/Restore@"),
+            f'"{approved}"',
+            approved + " --force",
+            "actions/cache/restore@${{ github.sha }}",
+            approved.replace("/restore@", "/\n        restore@"),
+        )
+        for spelling in spellings:
+            with self.subTest(spelling=spelling):
+                workflow = valid_multi_job_ci_workflow().replace(
+                    "    steps:\n", f"    steps:\n      - uses: {spelling}\n", 1
+                )
+                self.assertTrue(any(
+                    "every uses line must be a strict external" in error
+                    for error in checker.check_workflow(checker.CI_WORKFLOW_PATH, workflow)
+                ))
+
+    def test_cache_subactions_are_not_allowed_outside_ci(self) -> None:
+        for action in ("restore", "save"):
+            with self.subTest(action=action):
+                workflow = valid_workflow() + (
+                    f"  - uses: actions/cache/{action}@{checker.CACHE_ACTION_SHA}\n"
+                )
+                self.assertTrue(any(
+                    "every uses line must be a strict external" in error
+                    for error in checker.check_workflow(Path("workflow.yml"), workflow)
+                ))
+
+    def test_compiler_cache_keeps_build_test_and_fresh_release_boundaries(self) -> None:
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(
+            encoding="utf-8"
+        )
+        jobs = checker.workflow_job_blocks(workflow)
+        for profile, job, build_name, test_command in (
+            ("current", "current-stack", "Build current compilation", "make current-stack-check"),
+            ("default", "foundry", "Build", "forge test -vvv"),
+        ):
+            with self.subTest(profile=profile):
+                block = jobs[job]
+                self.assertNotIn("restore-keys:", block)
+                restore = block.index(f"- name: Restore {profile} compiler outputs")
+                build = block.index(f"- name: {build_name}\n")
+                save = block.index(f"- name: Save {profile} compiler outputs")
+                self.assertLess(restore, build)
+                self.assertLess(build, save)
+                self.assertLess(save, block.index(test_command))
+                build_step = block[build:save]
+                self.assertNotIn("        if:", build_step)
+                self.assertIn("forge build", build_step)
+                self.assertIn(
+                    f"fromJSON(steps.{profile}_compiler_cache.outputs.cache-hit || 'false') == false",
+                    block,
+                )
+                self.assertIn(f"steps.{profile}_compiler_cache.outputs.cache-primary-key", block)
+                identity = block[:restore]
+                self.assertIn("git ls-files --stage -z --", identity)
+                for source_input in (
+                    "foundry.toml", ".github/workflows/ci.yml", ".gitattributes",
+                    ".gitmodules", "foundry.lock", "remappings.txt",
+                    "smart-contracts", "test", "script", "lib",
+                ):
+                    self.assertIn(source_input, identity)
+                self.assertIn(f"steps.{profile}_compiler_inputs.outputs.digest", block[restore:build])
+                self.assertIn(f"-forge-1.7.1-solc-0.8.19-{profile}-v1-", block)
+        current = jobs["current-stack"]
+        before_save = current[:current.index("- name: Save current compiler outputs")]
+        self.assertIn("FOUNDRY_PROFILE=current forge build", before_save)
+        self.assertIn("--output-dir ci-logs/current-candidate --check", before_save)
+        self.assertEqual(current.count("            out/current\n"), 2)
+        self.assertEqual(current.count("            cache/current\n"), 2)
+        self.assertLess(
+            jobs["foundry"].index("- name: Save default compiler outputs"),
+            jobs["foundry"].index("- name: Aggregate size and warning diagnostic"),
+        )
+        self.assertIn("- name: Canonical release build", jobs["foundry"])
+
+    def test_git_compiler_identity_changes_for_same_content_path_rename(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            source = root / "smart-contracts" / "Before.sol"
+            source.parent.mkdir()
+            source.write_bytes(b"pragma solidity 0.8.19; contract Example {}\n")
+            subprocess.run(["git", "-C", str(root), "add", "smart-contracts"], check=True)
+            before = subprocess.check_output(
+                ["git", "-C", str(root), "ls-files", "--stage", "-z", "--", "smart-contracts"]
+            )
+            source.rename(source.with_name("After.sol"))
+            subprocess.run(["git", "-C", str(root), "add", "-A"], check=True)
+            after = subprocess.check_output(
+                ["git", "-C", str(root), "ls-files", "--stage", "-z", "--", "smart-contracts"]
+            )
+            self.assertEqual(before.split()[1], after.split()[1])
+            self.assertNotEqual(hashlib.sha256(before).digest(), hashlib.sha256(after).digest())
 
     def test_workflow_bypass_matrix_fails_closed(self) -> None:
         """Known YAML, wrapper, package-tool, and ordering bypasses are rejected."""

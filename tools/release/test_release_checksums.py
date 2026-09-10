@@ -3161,11 +3161,13 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
         self.assertEqual(len(manifest["source"]["covered_paths"]), 327)
-        self.assertEqual(len(manifest["files"]), 477)
-        self.assertEqual(
-            len(generator.parse_checksum_file(checksum_text)),
-            477,
-        )
+        manifest_paths = [record["path"] for record in manifest["files"]]
+        checksum_paths = [
+            path for _, path in generator.parse_checksum_file(checksum_text)
+        ]
+        self.assertEqual(len(manifest_paths), len(set(manifest_paths)))
+        self.assertEqual(len(checksum_paths), len(set(checksum_paths)))
+        self.assertEqual(set(manifest_paths), set(checksum_paths))
 
     def test_committed_checksums_bind_risk_size_checker(self) -> None:
         self.assert_committed_checksums_cover(

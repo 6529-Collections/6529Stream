@@ -67,6 +67,43 @@ jobs:
           python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
           python -m pip check
 
+      - name: Identify current compiler inputs
+        id: current_compiler_inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The staged Git records bind paths, blob IDs, modes and submodule commits.
+          inputs=$(git ls-files --stage -z -- foundry.toml .github/workflows/ci.yml .gitattributes .gitmodules foundry.lock remappings.txt smart-contracts test script lib | sha256sum | cut -d ' ' -f1)
+          echo "digest=$inputs" >> "$GITHUB_OUTPUT"
+
+      - name: Restore current compiler outputs
+        id: current_compiler_cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            out/current
+            cache/current
+          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v1-${{ steps.current_compiler_inputs.outputs.digest }}
+
+      - name: Build current compilation
+        id: current_build
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          FOUNDRY_PROFILE=current forge build 2>&1 | tee ci-logs/current-stack-build.log
+          python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate
+          python -m tools.deployment.generate_current_stack_artifacts --output-dir ci-logs/current-candidate --check
+
+      - name: Save current compiler outputs
+        if: ${{ fromJSON(steps.current_compiler_cache.outputs.cache-hit || 'false') == false }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            out/current
+            cache/current
+          key: ${{ steps.current_compiler_cache.outputs.cache-primary-key }}
+
       - name: Validate and export the current compilation
         shell: bash
         run: |
@@ -83,6 +120,7 @@ jobs:
           name: current-stack-compilation
           path: |
             ci-logs/current-stack.log
+            ci-logs/current-stack-build.log
             ci-logs/current-candidate
           if-no-files-found: error
           retention-days: 14
@@ -638,12 +676,40 @@ jobs:
           }
           & ./scripts/test_windows_check_helpers.ps1
 
+      - name: Identify default compiler inputs
+        id: default_compiler_inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The staged Git records bind paths, blob IDs, modes and submodule commits.
+          inputs=$(git ls-files --stage -z -- foundry.toml .github/workflows/ci.yml .gitattributes .gitmodules foundry.lock remappings.txt smart-contracts test script lib | sha256sum | cut -d ' ' -f1)
+          echo "digest=$inputs" >> "$GITHUB_OUTPUT"
+
+      - name: Restore default compiler outputs
+        id: default_compiler_cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            out
+            cache
+          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v1-${{ steps.default_compiler_inputs.outputs.digest }}
+
       - name: Build
+        id: default_build
         shell: bash
         run: |
           set -o pipefail
           mkdir -p ci-logs
           forge build 2>&1 | tee ci-logs/forge-build.log
+
+      - name: Save default compiler outputs
+        if: ${{ fromJSON(steps.default_compiler_cache.outputs.cache-hit || 'false') == false }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            out
+            cache
+          key: ${{ steps.default_compiler_cache.outputs.cache-primary-key }}
 
       - name: Test
         shell: bash

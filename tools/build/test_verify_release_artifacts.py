@@ -24,13 +24,13 @@ SPEC.loader.exec_module(verifier)
 
 SOURCE_REPO_ROOT = SCRIPT_PATH.parent.parent.parent
 RELEASE_TOOL_FIXTURE_PATH = "tools/build/generate_bytecode_release_proof.py"
+COMMITTED_CHECKSUM_MANIFEST = json.loads(
+    (
+        SOURCE_REPO_ROOT / "release-artifacts/latest/release-checksums.json"
+    ).read_text(encoding="utf-8")
+)
 COMMITTED_COVERED_PATHS = tuple(
-    json.loads(
-        (
-            SOURCE_REPO_ROOT
-            / "release-artifacts/latest/release-checksums.json"
-        ).read_text(encoding="utf-8")
-    )["source"]["covered_paths"]
+    COMMITTED_CHECKSUM_MANIFEST["source"]["covered_paths"]
 )
 REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
     Path(path)
@@ -45,10 +45,10 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "tools/protocol/check_artist_semantic_owner_matrix.py",
         "tools/protocol/test_artist_semantic_owner_matrix.py",
         "docs/architecture/artist-record-event-reconstruction-correction-v1.json",
-    "docs/architecture/artist-record-event-reconstruction-correction-v1.md",
-    "docs/architecture/artist-record-event-reconstruction-correction-v1.schema.json",
-    "docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json",
-    "tools/protocol/check_artist_record_event_reconstruction_correction.py",
+        "docs/architecture/artist-record-event-reconstruction-correction-v1.md",
+        "docs/architecture/artist-record-event-reconstruction-correction-v1.schema.json",
+        "docs/architecture/artist-record-event-reconstruction-historical-git-objects-v1.json",
+        "tools/protocol/check_artist_record_event_reconstruction_correction.py",
         "tools/protocol/test_artist_record_event_reconstruction_correction.py",
         "docs/architecture/artist-owner-record-continuity-v1.json",
         "docs/architecture/artist-owner-record-continuity-v1.md",
@@ -477,6 +477,10 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
 
 def seed_record_family_authorization_tree(root: Path) -> None:
     source_root = SCRIPT_PATH.parent.parent.parent
+    historical_catalog = Path(
+        "release-artifacts/baselines/record-family-authorization-source-catalog-f5c7164f.json"
+    )
+    write_bytes(root / historical_catalog, (source_root / historical_catalog).read_bytes())
     for relative_path in (
         Path(verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_PATH),
         Path(verifier.RECORD_FAMILY_AUTHORIZATION_SOURCE_CATALOG_SCHEMA_PATH),
@@ -700,6 +704,7 @@ def seed_release_bundle(root: Path) -> None:
         root,
         [
             "deployments/examples/anvil.json",
+            "release-artifacts/baselines/record-family-authorization-source-catalog-f5c7164f.json",
             verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
             "release-artifacts/evidence/royalty-return-gas-buffer.json",
             verifier.GENESIS_DEPLOYMENT_PROFILE_PATH,
@@ -2437,8 +2442,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertEqual(summary.checksum_entries, 477)
-        self.assertEqual(summary.checksum_manifest_records, 477)
+        expected_count = len(COMMITTED_CHECKSUM_MANIFEST["files"])
+        self.assertEqual(summary.checksum_entries, expected_count)
+        self.assertEqual(summary.checksum_manifest_records, expected_count)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -2450,8 +2456,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertEqual(data["checksum_entries"], 477)
-        self.assertEqual(data["checksum_manifest_records"], 477)
+        expected_count = len(COMMITTED_CHECKSUM_MANIFEST["files"])
+        self.assertEqual(data["checksum_entries"], expected_count)
+        self.assertEqual(data["checksum_manifest_records"], expected_count)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
