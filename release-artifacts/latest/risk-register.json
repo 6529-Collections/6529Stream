@@ -46,11 +46,11 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:ba349dcd195fc084b7bbc21ab7fdf55e3ffc76daec477aa89e5a3d52c08a882c"
+      "sha256": "sha256:8c0004651751fa6b77c2d3996bcb580ad64cda2a46f937c439964f7838872c4f"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:ef66bed71885bd7f33c3c6b1514e4c60fb6bf1ebd4888bb89c1f3162d8cdaacd"
+      "sha256": "sha256:fad5a67c7ebd431c1f19c287ef9184269b84cd733c98b62de5bcbe4da2d6fb8f"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -635,11 +635,11 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:ba349dcd195fc084b7bbc21ab7fdf55e3ffc76daec477aa89e5a3d52c08a882c"
+          "sha256": "sha256:8c0004651751fa6b77c2d3996bcb580ad64cda2a46f937c439964f7838872c4f"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:ef66bed71885bd7f33c3c6b1514e4c60fb6bf1ebd4888bb89c1f3162d8cdaacd"
+          "sha256": "sha256:fad5a67c7ebd431c1f19c287ef9184269b84cd733c98b62de5bcbe4da2d6fb8f"
         },
         {
           "path": "docs/slither.md",
@@ -647,7 +647,7 @@
         },
         {
           "path": "tools/security/check_slither_baseline.py",
-          "sha256": "sha256:f9f9ba30d144b05769f16f80ebff26216c99b62cb09c06b1acf5ac25ced37e5a"
+          "sha256": "sha256:4bd12e50ac34108097fd4e3741d3820bde7036bf013bcb0406c59ca9ea0f2189"
         }
       ],
       "risk_acceptance": null
@@ -684,7 +684,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:ed67df24de003b4bdf61264bc54e3036e307510bbbc8af9d3ba382a95db74dc8"
+          "sha256": "sha256:f72ef104b728f8a076ba7242fef2305e35aaaedae46d1cb88808df03d1072689"
         },
         {
           "path": "docs/warning-dispositions.md",

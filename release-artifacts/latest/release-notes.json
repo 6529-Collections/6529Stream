@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b765e275a25b0eff318b6abf85cfd0eb7d4c5fff6012801d79f665e0e938d1a8",
-      "size_bytes": 168324
+      "sha256": "sha256:dd8826a5474ad28b9517c89099344bf0707a3412f50898071a5da5e88a26c689",
+      "size_bytes": 169275
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:34a4596e1d345bb6abd70633c773bea1ae8d5e39e4fe5bb5f98fdefe5624ba80",
+      "sha256": "sha256:95ce9f04829320206c899e2087bf176a5f624b50637b285387a488e1db78ad68",
       "size_bytes": 34457
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,11 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added current-stack input fuzzing and stateful conservation checks, with successful-action counters, per-payer accounting, reproducible quick/extended campaigns and retained failure traces. CI runs the quick campaign; an explicit workflow dispatch can select the extended campaign.",
+      "Added governed local collection completion and a portable collector package that reconstructs its retained metadata and artwork without RPC access.",
+      "Added a TypeScript client with retained current ABIs, typed contract calls, EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.",
+      "Added repeatable local product scenarios covering a second artist, native and ERC-20 purchases, auction bidding/refunds/settlement and state-export publication.",
+      "Added credential-free Sepolia status and transaction recovery that preserves the exact signed intent across interrupted runs, plus explicit entropy and metadata delivery retries.",
       "Added current-stack ERC-20 fixed-price sales with payer-bound intents, canonical primary-policy commitments, exact allowance settlement and atomic Core minting. Supported primary assignments use fixed collection/default profiles.",
       "Added state-export publication on the actual governance Executor, live-role authorization, permissionless challenges, forward supersession and historical reads. Scheduling validation is linked separately to retain runtime headroom.",
       "Added local transaction demonstrations with receipt-bound token/request IDs, final metadata notification, split withdrawals and a fresh-transaction VRF adapter callback rehearsal against an explicitly local upstream mock.",

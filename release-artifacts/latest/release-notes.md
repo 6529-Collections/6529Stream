@@ -23,6 +23,11 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added current-stack input fuzzing and stateful conservation checks, with successful-action counters, per-payer accounting, reproducible quick/extended campaigns and retained failure traces. CI runs the quick campaign; an explicit workflow dispatch can select the extended campaign.
+- Added governed local collection completion and a portable collector package that reconstructs its retained metadata and artwork without RPC access.
+- Added a TypeScript client with retained current ABIs, typed contract calls, EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.
+- Added repeatable local product scenarios covering a second artist, native and ERC-20 purchases, auction bidding/refunds/settlement and state-export publication.
+- Added credential-free Sepolia status and transaction recovery that preserves the exact signed intent across interrupted runs, plus explicit entropy and metadata delivery retries.
 - Added current-stack ERC-20 fixed-price sales with payer-bound intents, canonical primary-policy commitments, exact allowance settlement and atomic Core minting. Supported primary assignments use fixed collection/default profiles.
 - Added state-export publication on the actual governance Executor, live-role authorization, permissionless challenges, forward supersession and historical reads. Scheduling validation is linked separately to retain runtime headroom.
 - Added local transaction demonstrations with receipt-bound token/request IDs, final metadata notification, split withdrawals and a fresh-transaction VRF adapter callback rehearsal against an explicitly local upstream mock.
