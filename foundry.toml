@@ -48,6 +48,20 @@ cache_path = "cache/current"
 via_ir = true
 build_info = true
 
+# Keep ordinary test invocations bounded. scripts/dev.py campaign supplies an
+# explicit seed and may override these runtime-only limits for extended runs.
+[profile.default.invariant]
+runs = 32
+depth = 64
+fail_on_revert = true
+show_metrics = true
+
+[profile.current.invariant]
+runs = 32
+depth = 64
+fail_on_revert = true
+show_metrics = true
+
 [fmt]
 line_length = 100
 tab_width = 4
