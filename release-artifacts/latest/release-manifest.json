@@ -2033,7 +2033,7 @@
       },
       {
         "path": "deployments/config/canonical-deployment-candidate-non-production.json",
-        "sha256": "sha256:e5d386a6d140e54c94b1f4fc371f4ca0567a1b74704a3535e7b7058adae02b5b",
+        "sha256": "sha256:368ea2d9d9128615f0a4365860e5bd92818bb8a1152b1bf4a4d22af0c65b403d",
         "size_bytes": 2208,
         "schema_version": "6529stream.canonical-deployment-candidate.v1"
       },

@@ -753,6 +753,15 @@ The checker reads
 binding the active source and import paths to checkpoint `7b4ef22b`. The previous
 `f5c7164f` source catalog is preserved unchanged at
 `release-artifacts/baselines/record-family-authorization-source-catalog-f5c7164f.json`.
+The immutable annotated tag `evidence/source-layout-2026-09-10` retains the active
+checkpoint across a squash merge and branch deletion. It is an evidence reference,
+not a release tag. A normal full clone fetches it; existing, shallow, or no-tags
+checkouts can fetch the required reference explicitly before running the checker:
+
+```sh
+git fetch origin refs/tags/evidence/source-layout-2026-09-10:refs/tags/evidence/source-layout-2026-09-10
+```
+
 That historical catalog and the `063605ea` historical inventory are evidence of
 their original revisions, not current implementation claims. The checker
 reads the retained historical baseline in
