@@ -74,6 +74,16 @@ function Get-DeploymentAddress([object]$Broadcast, [string]$Name, [switch]$Optio
     return $matches[0].contractAddress
 }
 
+function Assert-ExtendedPublisherPointer([object[]]$Pointer,[string]$Executor,[string]$Registry) {
+    # Core's pointer key is STATE_EXPORT_PUBLISHER; the installed Executor module
+    # is GOVERNANCE_LAYER. These are deliberately distinct permanent identities.
+    $governanceLayer='0xa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e'
+    if ($Pointer.Count -ne 10 -or $Pointer[0] -ine $Executor -or $Pointer[3] -ine $governanceLayer -or
+        $Pointer[4] -ine '0x77faad4f' -or $Pointer[5] -ine $Registry -or $Pointer[6] -ne 1) {
+        throw 'State export publisher pointer is not the active registered governance Executor with its canonical interface.'
+    }
+}
+
 function Write-PublicResult([object]$Result) {
     $Result | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'current-stack.json') -Encoding utf8
 }

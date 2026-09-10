@@ -5,7 +5,7 @@ $path=Join-Path $PSScriptRoot 'current-stack-local-functions.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw ($parseErrors | Out-String)}
 # Exercise receipt identity and recovery guards without RPC, accounts or transactions.
-$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime','Get-DeploymentAddress')
+$names=@('Invoke-Cast','Convert-UInt','Find-ReceiptEvent','Get-MintedTokenId','Get-EntropyRequest','Require-FreshLocalRun','Assert-ArtifactRuntime','Get-DeploymentAddress','Assert-ExtendedPublisherPointer')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -26,6 +26,19 @@ Assert-ArtifactRuntime $artifact '0x60ff6000'
 Reject {Assert-ArtifactRuntime $artifact '0x60ff6001'} 'Only compiler-declared immutable bytes may differ.'
 $sale='0x0000000000000000000000000000000000000001'
 $other='0x0000000000000000000000000000000000000002'
+$hash='0x'+('11'*32)
+$moduleType='0xa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e'
+$pointerAbi='address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64'
+$pointerData=Invoke-Cast @('abi-encode',"pointer($pointerAbi)",$sale,$hash,'false',$moduleType,'0x77faad4f',$other,'1',$hash,$hash,'1')
+$pointer=Invoke-Cast @('abi-decode',"pointer()($pointerAbi)",$pointerData,'--json') | ConvertFrom-Json -NoEnumerate
+Check ($pointer.Count -eq 10) 'The deployed Core pointer read has ten ABI fields.'
+Assert-ExtendedPublisherPointer $pointer $sale $other
+$wrongModule=$pointer.Clone();$wrongModule[3]='0x03f5dfc0687afbbc9c86bda58667bf3bb235a2d1cbe7273bbbe4d5301fb0b6d2'
+Reject {Assert-ExtendedPublisherPointer $wrongModule $sale $other} 'The pointer key cannot substitute for the Executor module type.'
+$wrongInterface=$pointer.Clone();$wrongInterface[4]='0x01ffc9a7'
+Reject {Assert-ExtendedPublisherPointer $wrongInterface $sale $other} 'Serving ERC165 alone is not the canonical publisher interface.'
+$inactive=$pointer.Clone();$inactive[6]=2
+Reject {Assert-ExtendedPublisherPointer $inactive $sale $other} 'A deprecated publisher is not active.'
 $deployment=@{transactions=@(@{contractName='CurrentSale';transactionType='CREATE';contractAddress=$sale})}
 Check ((Get-DeploymentAddress $deployment 'CurrentSale') -eq $sale) 'Deployment address must use its named CREATE receipt.'
 Check ($null -eq (Get-DeploymentAddress $deployment 'LaterModule' -Optional)) 'Retained older deployments may omit a later module.'

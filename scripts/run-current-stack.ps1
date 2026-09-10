@@ -109,8 +109,8 @@ try {
     $publisherType=Invoke-Cast @('keccak','STATE_EXPORT_PUBLISHER')
     $publisher=Read-Contract $addresses.core 'getSatellitePointer(bytes32)(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)' @($publisherType)
     if ($publisher[0] -ne '0x0000000000000000000000000000000000000000') {
-        if ($publisher[0] -ine $addresses.executor -or $publisher[3] -ine $publisherType -or $publisher[5] -ine $addresses.registry -or $publisher[6] -ne 1) {throw 'State export publisher pointer is not the active registered Executor.'}
-        if (-not (Read-Value $addresses.executor 'supportsInterface(bytes4)(bool)' @($publisher[4]))) {throw 'Publisher interface is not supported by its target.'}
+        Assert-ExtendedPublisherPointer $publisher $addresses.executor $addresses.registry
+        if (-not (Read-Value $addresses.executor 'supportsInterface(bytes4)(bool)' @('0x77faad4f'))) {throw 'Publisher interface is not supported by its target.'}
         $addresses.stateExportPublisher=$publisher[0]
         $result.publisherPointer=$publisher
     } elseif ($RequireExtendedStack) {throw 'The extended stack requires its active state export publisher pointer.'}
