@@ -180,3 +180,114 @@ the actual deployed digest methods using read-only calls.
 the current export's file hashes and compiler input. Six retained local onchain
 vectors pin domain/field encoding in offline tests. This is integration evidence,
 not audit credit, public deployment evidence or a proof of full-v1 conformance.
+
+## Capture and verify supported state
+
+The client can capture a verifiable package of current **public getter results**
+at one explicit past block. Select up to 32 collections, 32 tokens, 64 registered
+ERC-20 sale IDs and 64 mint phases. Token, sale and phase selections must also
+include their collection IDs. There is no implicit event crawl or claim that an
+omitted collection has no activity.
+
+Save a selection JSON with decimal-string IDs:
+
+```json
+{
+  "blockNumber": "365",
+  "collectionIds": ["2"],
+  "tokenIds": ["2", "3", "4"],
+  "saleIds": [],
+  "phases": []
+}
+```
+
+Those are format examples, not chain/deployment defaults. For a sale or phase,
+provide its exact bytes32 ID. The configuration must include Core, manager,
+native sale, ERC-20 sale, auction, artist registry, entropy and Executor.
+Optional configured split/revenue/asset addresses are checked against the
+observed bindings when those getters exist.
+
+Set `STREAM_RPC_URL` privately for capture/readback. Do not commit or print a
+credentialed endpoint. From the package directory:
+
+```sh
+npm run snapshot -- capture config.json selection.json /absolute/path/new-snapshot
+npm run snapshot -- verify /absolute/path/new-snapshot
+npm run snapshot -- inspect /absolute/path/new-snapshot
+npm run snapshot -- readback config.json /absolute/path/new-snapshot
+```
+
+The output directory must not already exist. Capture writes three fixed files:
+
+| File | Contents |
+| --- | --- |
+| `snapshot.json` | Chain/block identity, exact client ABI/compiler provenance, explicit coverage and selection, observed code hashes, raw ABI returns and decoded facts |
+| `manifest.json` | The relative `snapshot.json` reference, byte count, SHA-256 and export hash, chain/block and compilation identity |
+| `publication.json` | The four block/hash arguments used by `publishStateExport`, before the caller adds a manifest URI |
+
+Canonical format v1 sorts object keys, preserves array order, writes UTF-8 with
+no insignificant whitespace or final newline, and represents protocol integers
+as decimal strings. Selections are sorted before capture. `exportHash` is
+Keccak-256 of the exact `snapshot.json` bytes. `manifestHash` is Keccak-256 of
+the exact `manifest.json` bytes. Do not pretty-print these files before hosting:
+that changes their hashes. `inspect` prints a readable decoded view without
+rewriting the canonical files.
+
+The fixed coverage includes Core's twelve current stored pointer families and
+allocation/supply counters; selected collection status, supply, burns/freeze,
+artist attribution and entropy configuration; selected token identity and data;
+rendered metadata; registered ERC-20 sale configuration and current primary
+policy; and selected mint-phase policy/configuration. Configured sale and auction
+signer/pause/accounting reads are also retained. It deliberately excludes full
+role, replay and credit mappings, individual auction/refund history, all counter
+subjects, unselected state, and offchain content availability. The complete
+coverage and exclusions are embedded in every snapshot and checked offline.
+
+Burned and prepared-incomplete tokens retain their identity and stored bytes.
+The package explicitly marks `ownerOf` and `tokenURI`
+unavailable for those lifecycle states; it does not call them and hide a revert.
+Core assigns the entropy coordinator during completion, so a prepared token with
+a zero coordinator also explicitly omits the two coordinator getters. Burned
+tokens retain their coordinator and entropy observations.
+For every other supported getter, an unexpected failure aborts capture. Tokens
+use their stored **coordinator at mint**, including an older compatible
+coordinator, rather than substituting the current entropy pointer.
+
+The snapshot API requires a JSON-RPC provider exposing `send(method, params)`;
+the CLI supplies an ethers `JsonRpcProvider`. It uses fresh raw JSON-RPC reads
+for headers, chain identity, calls and code, bypassing ethers' short-lived
+high-level provider cache. Each call and code read uses the selected block number. Capture checks the
+canonical block hash before and after the bounded reads; a detected reorg aborts
+it. A historical block may require an archive-capable RPC. Getter calls use a
+16-million gas budget and reject oversized ABI returns. An incompatible earlier
+coordinator or unsupported getter requires an explicit later exporter version;
+it is never represented by invented empty state.
+
+Offline verification checks the exact schema, canonical bytes, ABI decoding,
+fixed read inventory, expected dependency bindings, selection, declared lifecycle
+omissions, code-hash coverage and manifest/publication hashes. An attacker can
+still forge a coherent package and recompute its hashes. `readback` repeats all
+observations against the pinned canonical block and compares the complete
+snapshot; use a trusted independent RPC for meaningful corroboration. Neither
+mode proves consensus, hidden storage completeness or full protocol conformance.
+Observed code hashes do not themselves prove a source-code match: the package
+records the ABI/compiler identity used to decode the calls separately.
+
+To publish the reference, host the **unaltered three files together** at a durable
+reachable location so `snapshot.json` resolves relative to `manifest.json`.
+Then use the fields in `publication.json` with that real manifest URI:
+
+```typescript
+const call = client.prepare("executor", "publishStateExport", [
+  BigInt(publication.blockNumber), publication.blockHash,
+  publication.exportHash, publication.manifestHash, manifestURI,
+]);
+```
+
+The current publisher requires a recent canonical nonzero past block within
+256 blocks, an active matching Core publisher pointer and the live publication
+role. A valid historical snapshot can be too old to publish; capture a new one
+instead of relabeling its anchor. The CLI never uploads, signs, schedules or
+publishes. Hosting a package or publishing its hash does not turn it into a full
+archival export or independently audited state. See the
+[publisher guide](state-exports.md) for challenges, supersession and lineage.
