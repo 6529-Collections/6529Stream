@@ -1,0 +1,2298 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "artistRegistry",
+      "outputs": [
+        {
+          "internalType": "contract IStreamCollectionArtistRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "assetPolicyRegistry",
+      "outputs": [
+        {
+          "internalType": "contract IStreamAssetPolicyRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "saleConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "deadline",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "signerEpoch",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleAuthorization",
+          "name": "authorization",
+          "type": "tuple"
+        }
+      ],
+      "name": "authorizationDigest",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "authorizationId",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "authorizationUsed",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "saleConfigHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "tokenDataHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintCommitment",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "deadline",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "signerEpoch",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleAuthorization",
+          "name": "authorization",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "tokenData",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "platformSignature",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "artistSignature",
+          "type": "bytes"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "saleRef",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPrimaryPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct IStreamPaymentIntentVerifier.PaymentIntent",
+          "name": "intent",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "payerSignature",
+          "type": "bytes"
+        }
+      ],
+      "name": "buy",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelAuthorization",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "cancelSale",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "mintManager",
+      "outputs": [
+        {
+          "internalType": "contract IStreamMintManager",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextSaleNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "paused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "platformSigner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        }
+      ],
+      "name": "primaryPolicy",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "proceeds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "mintPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "expectedPrimaryPolicyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint64",
+              "name": "startsAt",
+              "type": "uint64"
+            },
+            {
+              "internalType": "uint64",
+              "name": "endsAt",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleConfig",
+          "name": "config",
+          "type": "tuple"
+        }
+      ],
+      "name": "registerSale",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "revenueResolver",
+      "outputs": [
+        {
+          "internalType": "contract IStreamRevenueResolver",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "saleNonce",
+          "type": "uint256"
+        }
+      ],
+      "name": "saleIdFor",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "saleRecord",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "revenueClass",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "price",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startsAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endsAt",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleConfig",
+              "name": "config",
+              "type": "tuple"
+            },
+            {
+              "internalType": "uint256",
+              "name": "saleNonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "configHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "cancelled",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleRecord",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "value",
+          "type": "bool"
+        }
+      ],
+      "name": "setPaused",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        }
+      ],
+      "name": "setPlatformSigner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "signerEpoch",
+      "outputs": [
+        {
+          "internalType": "uint64",
+          "name": "",
+          "type": "uint64"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "splitFactory",
+      "outputs": [
+        {
+          "internalType": "contract IStreamSplitFactory",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "totalProceeds",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "payer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "primaryPolicyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ERC20SaleParticipants",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "operationRoot",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "authorizationId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "authorizationDigest",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC20SaleSettled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "epoch",
+          "type": "uint64"
+        }
+      ],
+      "name": "PlatformSignerChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SaleAuthorizationCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SaleCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "saleNonce",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "saleConfigHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SaleConfigured",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "paused",
+          "type": "bool"
+        }
+      ],
+      "name": "SalesPauseChanged",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "AssetNotActive",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "ERC20AmountMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "ERC20BalanceReadFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "name": "ERC20TransferFailed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSaleAuthorization",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSaleConfiguration",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        }
+      ],
+      "name": "InvalidSaleSignature",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "expected",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "actual",
+          "type": "bytes32"
+        }
+      ],
+      "name": "PrimaryPolicyMismatch",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "artist",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "nonce",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SaleAuthorizationUsed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SaleMintResultInvalid",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "saleId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "SaleUnavailable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UnsupportedPrimaryAssignment",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "AssetNotActive",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "ERC20AmountMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "ERC20BalanceReadFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "ERC20TransferFailed",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaleAuthorization",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaleConfiguration",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            }
+          ],
+          "name": "InvalidSaleSignature",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "expected",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "actual",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryPolicyMismatch",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SaleAuthorizationUsed",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SaleMintResultInvalid",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SaleUnavailable",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "UnsupportedPrimaryAssignment",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "payer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "primaryPolicyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "ERC20SaleParticipants",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "authorizationId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "authorizationDigest",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "ERC20SaleSettled",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint64",
+              "name": "epoch",
+              "type": "uint64"
+            }
+          ],
+          "name": "PlatformSignerChanged",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SaleAuthorizationCancelled",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SaleCancelled",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "saleNonce",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "saleConfigHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "SaleConfigured",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "bool",
+              "name": "paused",
+              "type": "bool"
+            }
+          ],
+          "name": "SalesPauseChanged",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "artistRegistry",
+          "outputs": [
+            {
+              "internalType": "contract IStreamCollectionArtistRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "assetPolicyRegistry",
+          "outputs": [
+            {
+              "internalType": "contract IStreamAssetPolicyRegistry",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "saleId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "signerEpoch",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            }
+          ],
+          "name": "authorizationDigest",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "authorizationId",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "artist",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "authorizationUsed",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "saleId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleConfigHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "artist",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "tokenDataHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintCommitment",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "signerEpoch",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleAuthorization",
+              "name": "authorization",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "tokenData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "platformSignature",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "artistSignature",
+              "type": "bytes"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "payer",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "maxAmount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "saleRef",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "nonce",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "deadline",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamPaymentIntentVerifier.PaymentIntent",
+              "name": "intent",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes",
+              "name": "payerSignature",
+              "type": "bytes"
+            }
+          ],
+          "name": "buy",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "operationRoot",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ],
+          "name": "cancelAuthorization",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "cancelSale",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "mintManager",
+          "outputs": [
+            {
+              "internalType": "contract IStreamMintManager",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "nextSaleNonce",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "paused",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "platformSigner",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "primaryPolicy",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "proceeds",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "collectionId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "phaseId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "asset",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "revenueClass",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "price",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "mintPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "expectedPrimaryPolicyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "startsAt",
+                  "type": "uint64"
+                },
+                {
+                  "internalType": "uint64",
+                  "name": "endsAt",
+                  "type": "uint64"
+                }
+              ],
+              "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleConfig",
+              "name": "config",
+              "type": "tuple"
+            }
+          ],
+          "name": "registerSale",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "revenueResolver",
+          "outputs": [
+            {
+              "internalType": "contract IStreamRevenueResolver",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "phaseId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "saleNonce",
+              "type": "uint256"
+            }
+          ],
+          "name": "saleIdFor",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "saleId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "saleRecord",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "collectionId",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "phaseId",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "asset",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "revenueClass",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "price",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "mintPolicyHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "expectedPrimaryPolicyHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "startsAt",
+                      "type": "uint64"
+                    },
+                    {
+                      "internalType": "uint64",
+                      "name": "endsAt",
+                      "type": "uint64"
+                    }
+                  ],
+                  "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleConfig",
+                  "name": "config",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "saleNonce",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "configHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "cancelled",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamERC20FixedPriceSaleAdapter.SaleRecord",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bool",
+              "name": "value",
+              "type": "bool"
+            }
+          ],
+          "name": "setPaused",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            }
+          ],
+          "name": "setPlatformSigner",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "signerEpoch",
+          "outputs": [
+            {
+              "internalType": "uint64",
+              "name": "",
+              "type": "uint64"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "splitFactory",
+          "outputs": [
+            {
+              "internalType": "contract IStreamSplitFactory",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes4",
+              "name": "interfaceId",
+              "type": "bytes4"
+            }
+          ],
+          "name": "supportsInterface",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "asset",
+              "type": "address"
+            }
+          ],
+          "name": "totalProceeds",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Fixed-profile collection/default primary assignments only; no deferred escrow or permits.",
+        "kind": "dev",
+        "methods": {
+          "supportsInterface(bytes4)": {
+            "details": "Returns true if this contract implements the interface defined by `interfaceId`. See the corresponding https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section] to learn more about how these ids are created. This function call must use less than 30 000 gas."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "artistRegistry()": {
+            "notice": "Collection attribution authority bound to the manager's Core."
+          },
+          "assetPolicyRegistry()": {
+            "notice": "Shared token admission registry pinned by the split factory."
+          },
+          "authorizationDigest((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64))": {
+            "notice": "Creator/platform digest under the reported PaymentIntentVerifier domain and a distinct type."
+          },
+          "authorizationId(address,bytes32)": {
+            "notice": "Manager authorization identity scoped to this adapter, artist and nonce."
+          },
+          "authorizationUsed(address,bytes32)": {
+            "notice": "Returns whether an artist nonce was used or cancelled."
+          },
+          "buy((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64),bytes,bytes,bytes,(address,address,uint256,bytes32,bytes32,bytes32,uint64),bytes)": {
+            "notice": "Executes one atomic payment and mint; an empty payer signature only exempts the literal payer caller."
+          },
+          "cancelAuthorization(bytes32)": {
+            "notice": "Cancels the caller's artist nonce independently of payer consent."
+          },
+          "cancelSale(bytes32)": {
+            "notice": "Permanently stops new purchases while retaining the original sale record."
+          },
+          "mintManager()": {
+            "notice": "Mint execution dependency bound to the same Core as the artist registry."
+          },
+          "nextSaleNonce()": {
+            "notice": "Next never-reused sale program nonce."
+          },
+          "paused()": {
+            "notice": "Whether all purchases are paused; revocation remains available."
+          },
+          "platformSigner()": {
+            "notice": "Current platform signer for commercial sale authorizations."
+          },
+          "primaryPolicy(uint256,bytes32)": {
+            "notice": "Returns the canonical primary-policy commitment for a fixed collection/default profile."
+          },
+          "proceeds(bytes32,address)": {
+            "notice": "Exact successfully settled amounts for one profile and asset; excludes donations."
+          },
+          "registerSale((uint256,bytes32,address,bytes32,uint256,bytes32,bytes32,uint64,uint64))": {
+            "notice": "Registers immutable commercial terms under the next canonical fixed-price sale ID."
+          },
+          "revenueResolver()": {
+            "notice": "Immutable primary-assignment resolver; distinct from the royalty resolver."
+          },
+          "saleIdFor(uint256,bytes32,uint256)": {
+            "notice": "Computes the SSA-IDENTITY sale ID with FIXED_PRICE kind 0."
+          },
+          "saleRecord(bytes32)": {
+            "notice": "Reads the full immutable sale terms and cancellation state."
+          },
+          "setPaused(bool)": {
+            "notice": "Owner governance pauses or resumes purchases."
+          },
+          "setPlatformSigner(address)": {
+            "notice": "Owner governance rotates the platform key and advances the signer epoch."
+          },
+          "signerEpoch()": {
+            "notice": "Monotonic signer epoch included in every commercial authorization."
+          },
+          "splitFactory()": {
+            "notice": "Factory used to verify the assigned immutable split wallet."
+          },
+          "totalProceeds(address)": {
+            "notice": "Exact successfully settled amounts per asset across profiles."
+          }
+        },
+        "notice": "Current-stack fixed-price ERC-20 purchases with creator, platform and payer consent.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol": "IStreamERC20FixedPriceSaleAdapter"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/artist/IStreamCollectionArtistRegistry.sol": {
+        "keccak256": "0x924d1740865e13614bdf9fbd8bc1834c528292c52d6ed0133bdf4531e8122e33",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://98210cd99cca7dd24330f18116c5ae26b5ffe5e255fcb24339c5e80b2401d5fe",
+          "dweb:/ipfs/QmPSh1kUa9rdwwNdADT2AJehmFF4tBz5Vn7uepAs54iy6v"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol": {
+        "keccak256": "0x23df2953cae042546da23258c8dc1e534c4cd831b6b9460d4944585c55603cba",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://dcd2ae0877affbc80c693d6382b2f9fce20e2773c69ceaabd230d63a07764fd8",
+          "dweb:/ipfs/QmQuTfBcMDNX77Z7AzFF1mo2CWApa6sAEZ3cdzZVXk11cD"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintLedger.sol": {
+        "keccak256": "0x82b2b413f62d81fd324ce6932d5f14fa5517216e30810bae937ca16573aacb4a",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://e4992e717438b1c34de0d13b6f44820947c1c5c0e4da83f15d0334e481c1a1af",
+          "dweb:/ipfs/QmWnEpH2YwgH8StjTLoWYvv3BjKS1uvbrdmszZNZs14eic"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/IStreamMintManager.sol": {
+        "keccak256": "0xdc4436195f131e3132813a8dba6b440e379c78480c88a69847080642b2f0d3fa",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://094d2ea7f54998f9317cafd72d46390eb710040f4f5f101cc89e89411b234ad2",
+          "dweb:/ipfs/Qmed4WwaxJzEwvtyh5s7k2gBJnFDqyfq2WEPJkBdSAtKNA"
+        ]
+      },
+      "smart-contracts/interfaces/stream/mint/compatibility/IStreamMintModuleRegistry.sol": {
+        "keccak256": "0x334079e7024d83c9313a781fc85d9e49438a9c4634d023f9477a9f3c31e3b576",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://531387a5003283f7695ea8aa75bcebbfc4da3ad1ed4711dbea135ecbb35d49b7",
+          "dweb:/ipfs/QmPUU2W1W5BAnhmg9MSkaPmcMEXD41dQTaBJBWgnpHVqXH"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol": {
+        "keccak256": "0xe877f4dea83110ff91373b34ef2dfaad1bbf8ffc4af7a69784213c78b18bf6cf",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://21adc0a0b1740f0e4f1e91858ebeffb377c88707e3baab817e8bdf397a90b4d0",
+          "dweb:/ipfs/QmUgdkEbe3xyobfwRtHy2q4SWJNctoMdmh713N3KL7qsuS"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol": {
+        "keccak256": "0x0bf20cbd1d0c21b5b6e0fc71e10cf585b7dffbdb79da9cdee6b73bba03ff775d",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0afbbc84df478b02858527b71949e0b457b783ac05aa647d79c7d367cb5cc4c0",
+          "dweb:/ipfs/QmTkDa4Tsm5hgLDQ7jc4NEUCiUweDfcjT9qPa42ocRKohE"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol": {
+        "keccak256": "0x28791b4e242e681e79866a9d31e19977157eb9bfc99ba575882d2f2802a64429",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://77f795da1fd43fdeeeabb956f970b4ffc77176345143b26f21fa90da11a2fc6b",
+          "dweb:/ipfs/QmRErD4tWh1KKdt6qR54M6StEdzN6t1ZNpXeM8KNVwvXJy"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamSplitFactory.sol": {
+        "keccak256": "0x4fc76452fbec07bd6df67c13dacbb6e5129c4449586f786de5f0098e5f001fe1",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://1c304979a76aaa9b7bc83988c7f6ff077d297cb8ace5aab0e8a2de257b398192",
+          "dweb:/ipfs/QmNvzFz4wkDTW3RaRruuSurZ9ZBKtRjqNksDfS1YDEAGGv"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol": {
+        "keccak256": "0xee002101da7ca6a334d4c4ebf4ca1a2b7e6628b1aba18a11361806c0db12cb64",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b7abee91ca6f30024cedee8374791f31c7d09c63a80288ed54d7c2fec29d8329",
+          "dweb:/ipfs/QmeGaE5ng9241X9EG2tSj5oSXXgTE94jSQkokpzvGAJf2u"
+        ]
+      },
+      "smart-contracts/vendor/openzeppelin/IERC165.sol": {
+        "keccak256": "0xa36a31b4bb17fad88d023474893b3b895fa421650543b1ce5aefc78efbd43244",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://0f235b9175d95111f301d729566e214c32559e55a2b0579c947484748e20679d",
+          "dweb:/ipfs/QmSsNBuPejy1wNe2u3JSt2p9wFhrjvBjFrnAaNe1nDNkEA"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "artistRegistry()": "81703be7",
+    "assetPolicyRegistry()": "decadc35",
+    "authorizationDigest((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64))": "544042e3",
+    "authorizationId(address,bytes32)": "e743cd7e",
+    "authorizationUsed(address,bytes32)": "162ce8bc",
+    "buy((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64),bytes,bytes,bytes,(address,address,uint256,bytes32,bytes32,bytes32,uint64),bytes)": "a763265a",
+    "cancelAuthorization(bytes32)": "845ab94f",
+    "cancelSale(bytes32)": "0bea8985",
+    "mintManager()": "7e4edf70",
+    "nextSaleNonce()": "7ba1cb7f",
+    "paused()": "5c975abb",
+    "platformSigner()": "ba92ddbc",
+    "primaryPolicy(uint256,bytes32)": "64a6c855",
+    "proceeds(bytes32,address)": "9acd8c56",
+    "registerSale((uint256,bytes32,address,bytes32,uint256,bytes32,bytes32,uint64,uint64))": "143b863c",
+    "revenueResolver()": "86624fc7",
+    "saleIdFor(uint256,bytes32,uint256)": "8d92b3e6",
+    "saleRecord(bytes32)": "ee25a57f",
+    "setPaused(bool)": "16c38b3c",
+    "setPlatformSigner(address)": "3b79c44f",
+    "signerEpoch()": "5b814063",
+    "splitFactory()": "5720babb",
+    "supportsInterface(bytes4)": "01ffc9a7",
+    "totalProceeds(address)": "4afb66d5"
+  }
+}

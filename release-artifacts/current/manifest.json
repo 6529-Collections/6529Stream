@@ -1,10 +1,10 @@
 {
   "compilation_unit": "one complete globally-via-IR Foundry compiler input containing the current deployment script and all selected targets",
   "compiler_input": "compiler-input.json",
-  "compiler_input_sha256": "sha256:6c1a88f5ed102e68c46ab315c9e567478fa5b0ca047d13519bdef317e6912920",
+  "compiler_input_sha256": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0",
   "compiler_version": "0.8.19+commit.7dd6d404",
   "files": {
-    "artifacts/DeployCurrentStack.json": "sha256:2162c88014d04bae7395438a5a7ffb342227496c582f91acd48fc5afacc630c6",
+    "artifacts/DeployCurrentStack.json": "sha256:fe90faf99340b28aba296a9b457f4adb4eb0d3658825be2179f8b49f1d498d90",
     "artifacts/IERC165.json": "sha256:2fc70ed8980066c0cca8a115a7d1df618f7ee91622efdca7cd39107dcf70cab8",
     "artifacts/IERC2981.json": "sha256:cc81d16b623befcb159f2e2134df5761c43d34e1dc5e8000473c6d058265ebad",
     "artifacts/IERC4906.json": "sha256:f8318afa426c59bec8f6d9cdd082e5b30eba2f3ff755bf154607c9a60ab2e9b9",
@@ -23,6 +23,7 @@
     "artifacts/IStreamCoreMetadataEmitters.json": "sha256:e73d9ca41f5ccce99c9dfbf21c7d0db5d901149cd0eb6c3af06e7ba5672dc7ac",
     "artifacts/IStreamCoreMint.json": "sha256:3180e08a85c888fe078df9db83d60ff4660780cf65f97d36d7a302e446ee6aa2",
     "artifacts/IStreamCorePointers.json": "sha256:da4861209edcefe7c37affb9c9c9c039edae5c92cf3838c1f42720b1b43eefcd",
+    "artifacts/IStreamERC20FixedPriceSaleAdapter.json": "sha256:32f6f3d4653d4dcc0c582becc5dbeff2cece225cb0423e2be0eb404eec0dd343",
     "artifacts/IStreamEnglishAuctionHouse.json": "sha256:66ffb9d309274ac2fdeb2622d35589ff19ee828ca0bda0adcd1ab39b2323b922",
     "artifacts/IStreamEntropyCoordinator.json": "sha256:441078acd267ca0e53d07b7e1c14c1ab8b340d78091543c96c7945d08a2b1160",
     "artifacts/IStreamEntropyProvider.json": "sha256:eadabfd785307213d05a9e5b0b1cb5eb95419636e69ef448429c03ca00c9179c",
@@ -46,46 +47,55 @@
     "artifacts/IStreamMintReads.json": "sha256:89254cbf383991ad30363e3e10807807ed7eb907ee239e91d4c0731308f1661f",
     "artifacts/IStreamModule.json": "sha256:5b39412c6c3436f635f9d30cce95bcc4fcc17c1c9de4f85ee59324278fac4334",
     "artifacts/IStreamModuleRegistry.json": "sha256:9107737f88b66ce9c68c9dc509628e5c0957e9a8a7c80dc185acd37289bcbc9c",
+    "artifacts/IStreamPaymentIntentVerifier.json": "sha256:6042d21bf08c7e2021be577ee5d422fc66240d6ee437a3722ad908fd8cdb6f40",
+    "artifacts/IStreamRevenueResolver.json": "sha256:f92292f1e56273ac0a2b8ad8fb7cb292b921a8ceae31f11c971d374289a1125c",
     "artifacts/IStreamRoleRegistry.json": "sha256:f9338ac0efa5ecf432361e15faefe82e95c69cc11d47b422450669e4e0b1eb87",
     "artifacts/IStreamRoyaltyResolver.json": "sha256:e8ba383a10656860983a81fc2dc20a0caf6f5abd47e88762ade625c7122e7c7b",
     "artifacts/IStreamSplitFactory.json": "sha256:f9238ea4ddf79c62f0485460549e57e26dc2995de229c5ec7e092017d511b33f",
     "artifacts/IStreamSplitWallet.json": "sha256:a2145cba989383991bee9a2a482ddcc8aaae74d52f2efd613c0bd59ccfe018c6",
+    "artifacts/IStreamStateExportHistory.json": "sha256:097966844b0ac645c40df6308378c16f6eb202b2050ebe4e58dff231f69e6261",
+    "artifacts/IStreamStateExportOperations.json": "sha256:03d004a0721b0d7f63c9534cf90073d8340ac3f84dfe3795789f5a4ce709ae4a",
+    "artifacts/IStreamStateExportPublisher.json": "sha256:e956664c7e0d3bd1dab5cc6100da5ba4a066ac79ceb79d9ced5fe73099a38704",
     "artifacts/IStreamSystemManifest.json": "sha256:40fef2f0009b6a87a05f3300d91e6d6f47427bfa0d3ef108afcf878fde3d13bc",
     "artifacts/IVRFCoordinatorV2Plus.json": "sha256:e4624ed1a07ba7311f6874c429a576ff24316f2764a804c5111f56f0fee0feaa",
-    "artifacts/StreamAssetPolicyRegistry.json": "sha256:341f5ca2777122b66952dfff21b10af88539773c532973258ecd9bbfa81c3dfe",
-    "artifacts/StreamCollectionArtistRegistry.json": "sha256:602604f084711c4c74857811ce2df21145b52590388cc92c9e5859ad4076a21a",
-    "artifacts/StreamCore.json": "sha256:62fcedf47f932aabb5eb1094296e3e59f45e03d05a4727f2d5522211a7192e50",
+    "artifacts/StreamAssetPolicyRegistry.json": "sha256:2f157fd856a2c13708cd8586afbb58ebbcd0d98e1dc9b04393abd993012bfd57",
+    "artifacts/StreamCollectionArtistRegistry.json": "sha256:731a76e65e715c38dde0f46f6881e9171cf49b1664a031399835ab1d3fe19a56",
+    "artifacts/StreamCore.json": "sha256:5c0c10dc2fdb7096ce6c2f89de1d95741dd3956d04df37f00927c0994907d499",
     "artifacts/StreamCoreExternalReads.json": "sha256:ae34ad6d257d3d4de82bc470c28a99897e1e5036ef223d89b7cd2bf461cd43f8",
-    "artifacts/StreamEnglishAuctionHouse.json": "sha256:1cb7680ce008ac2c6f749a213136c222f312b337c64c67968134052339229f64",
-    "artifacts/StreamEntropyCoordinator.json": "sha256:087d1494a7d81dc554d3d780d05e62ec8a953a56c4f947e1579ff8ba0186f737",
-    "artifacts/StreamEntropyProviderVRF.json": "sha256:f85fa275a4f490aaa1f91ac2b3a22d579214616ffe24615265b7d3dabd927744",
-    "artifacts/StreamFixedPriceSaleAdapter.json": "sha256:50bf66f0e14b04c892b0933889192c7a58976e64693660cf9e65439265999c64",
-    "artifacts/StreamGovernanceActionPolicy.json": "sha256:c79b4795f750fc978238933c320f23bb8628de37ac9d259358c4d09af09a5716",
-    "artifacts/StreamGovernanceActor.json": "sha256:2e1afc57d84de6cc724a9d6c0762c164c532c036c5b3ac5d22ef9a7810060d17",
-    "artifacts/StreamGovernanceBootstrap.json": "sha256:fcd1a795b0537590698fa2e12d3f5ca1e2b2db6ad47d2c31518a2a98157d20d0",
-    "artifacts/StreamGovernanceEvidence.json": "sha256:be86084be03e1a470eee2401d7891ca52d7d1d1547312ad51536a53fdd835163",
-    "artifacts/StreamGovernanceExecutor.json": "sha256:e32105de90d84cac1271ff979e6578066dfe79a4e50586c7246ff9c5eae30aa3",
-    "artifacts/StreamGovernanceManifest.json": "sha256:ec78c462c2171d33100b5dfac5bd506672bafdeb404c898c5704a6971c002530",
-    "artifacts/StreamGovernancePolicy.json": "sha256:48c05c1e2c0b68c6bdd1e598e180dec3676c0da0676aeff080fd5299634687a5",
-    "artifacts/StreamMetadataRenderer.json": "sha256:33419d0c4451e60d7ea76fcac064b5c287386fa9e8ca2b2e04eda7f2ae2fddf9",
-    "artifacts/StreamMetadataRouter.json": "sha256:afa7b434e7188934116b04657c02d22f569d969f1b52ca4d0375cfdbde64030a",
-    "artifacts/StreamMintCoreExecutor.json": "sha256:263b37774aebe4d18624443eecbe8329539280bfdad8bbc66b133ad6152871a4",
-    "artifacts/StreamMintGateValidator.json": "sha256:07aca4b797461b1dd09bacca3fd9c991070599860d4b587cb74f377183175f55",
-    "artifacts/StreamMintLedger.json": "sha256:ca85af0c62963115941cb04acd3b02de45f3a103f915b6ccbcd7bac69394db95",
-    "artifacts/StreamMintManager.json": "sha256:9363e3877c076ba87d12d6e6c04e49bf43b580b73ebe2b7b14a7830a3167c53b",
-    "artifacts/StreamMintOperationIdentity.json": "sha256:3e1af1580328c2049e98480031d080910e2cffb7337629645212425c8eea560c",
-    "artifacts/StreamModuleRegistry.json": "sha256:5648fc6a0e2282032aad4c59534d9d3825e171939a112fd522ba5eec31511f27",
-    "artifacts/StreamRoleRegistry.json": "sha256:6cec544a1b104b8a164b38b9223128e5566bf200408b6d4398bc76d37ef20b6c",
-    "artifacts/StreamRoyaltyResolver.json": "sha256:202f218bf49612a572dd2f1e9b9108cd10fd49cbecd0938bf2890e38cee19167",
-    "artifacts/StreamSplitFactory.json": "sha256:19443680793c5054d1697fa0961b7881d4e8c7f1780dfe57130708b446aed9d2",
-    "artifacts/StreamSplitWallet.json": "sha256:6db9521ec54b73be6d5705c619457419b7a1f6266b9020d8d0ee622102fdb548",
-    "artifacts/StreamSystemManifest.json": "sha256:8794bfbdf58477a8e06b6cebf66591dee422c42c6d53f47448f55b7cf2fc9857",
-    "compiler-input.json": "sha256:6c1a88f5ed102e68c46ab315c9e567478fa5b0ca047d13519bdef317e6912920"
+    "artifacts/StreamERC20FixedPriceSaleAdapter.json": "sha256:92ea28600dc3d7d16ed920408f6d495bf44a9c50623940f7678843f7d21f4ea5",
+    "artifacts/StreamEnglishAuctionHouse.json": "sha256:4044c504c6768ab369560c891d342c6ef03e1c6f97b2556cdd43e4b0098983ac",
+    "artifacts/StreamEntropyCoordinator.json": "sha256:b4e6c02b450adb680acd51660af5d9b0a12461b6687e9544bc5d000ca0e57508",
+    "artifacts/StreamEntropyProviderVRF.json": "sha256:ec7f68dddecc4e0573c9e18efd0519871f15f3b6f8f21ed4499f9fe1c936ffe6",
+    "artifacts/StreamFixedPriceSaleAdapter.json": "sha256:7f0b6f7cacd4a9b9478c0fcc2d744ae2a7863f15b5abd2cceb5793a10555cb32",
+    "artifacts/StreamGovernanceActionPolicy.json": "sha256:1f5ad37efaab1b20f1562a598000f92a38fbb4f62098694e54312f30a770d715",
+    "artifacts/StreamGovernanceActor.json": "sha256:e4a4e4aa38ac5fdc08e3692ff429983bf443ee6a8239159996372ccda7b0cca6",
+    "artifacts/StreamGovernanceBootstrap.json": "sha256:ed96b4678038e0aee4ba7fe9ab0cf8461a7ad838f0c9680f719c86ba1965be43",
+    "artifacts/StreamGovernanceEvidence.json": "sha256:a22d85661bf8d208df334ab324df4ce852d48afff8b9b72f6e19230c721cd2f2",
+    "artifacts/StreamGovernanceExecutor.json": "sha256:d1e0e12b19381e3d42bf5c1d5fb586fbe3120ae022de54043101f380b8108cc9",
+    "artifacts/StreamGovernanceManifest.json": "sha256:039e3e17f09d535e7568b9928d83361909162f3e1aa65384f17a9711c63b49fb",
+    "artifacts/StreamGovernancePolicy.json": "sha256:34233dc89316403ebc4fd9391b1513a2a0b429c6fbae6e6684969eaa7cae77c9",
+    "artifacts/StreamGovernanceScheduling.json": "sha256:83038d5bfcafcba5d0d6af52d196845f67ef3c9d66fc20d6133ba5dc71ce2844",
+    "artifacts/StreamMetadataRenderer.json": "sha256:eab84254fb78b7980cb6a9ecae15772776ae68682796342883d3a737245acc7a",
+    "artifacts/StreamMetadataRouter.json": "sha256:ca9535240014147f417a4564a7c5e7025156a7cf344ad22786090ce7848f6600",
+    "artifacts/StreamMintCoreExecutor.json": "sha256:8aa54350ee55c6c819e43fa3c5b6e66633be739d78f9dc79f4d86e8b5f796d8b",
+    "artifacts/StreamMintGateValidator.json": "sha256:e9153c7489f967c3ff2388895c19cd2eace8b9fc64c889fc498a84d2cacac83f",
+    "artifacts/StreamMintLedger.json": "sha256:5bdc64bdf95c9ceea202ae7d0d9fac16b3a3e777f4054a4d2b156220cfac52b0",
+    "artifacts/StreamMintManager.json": "sha256:22d5d2981fabff76bf674809bbbc6a11960af8551591932dfe2b4e15614743cb",
+    "artifacts/StreamMintOperationIdentity.json": "sha256:25126235ddf76c1cc66c318755bce692d10d103db004137f5c85079e1bee0a4a",
+    "artifacts/StreamModuleRegistry.json": "sha256:2dd0dc302c13c3f68ea9e4a50d80348ebe67726b3d4096568bcc85ecfc15bc74",
+    "artifacts/StreamRevenueResolver.json": "sha256:a58544d25ce71e89143ba58593ac852ddd9aea95907d96596f42d9310c7d84cf",
+    "artifacts/StreamRoleRegistry.json": "sha256:1cd64f085154a00ac8e24a13944713d1fed6c7728c8c2bfad5b9e6322b40b005",
+    "artifacts/StreamRoyaltyResolver.json": "sha256:6ccdf74d74500714ebf1c94708f0fa1e794769bb60d67026516b68008eddf58b",
+    "artifacts/StreamSplitFactory.json": "sha256:6c9e4b2def7825408563a30e529472e1fdd7055c9a50d11d771a01f7f11e96c5",
+    "artifacts/StreamSplitWallet.json": "sha256:adb4754ce851cad4876af17bed5a48b30703c359a47c6e16de87bb736d202125",
+    "artifacts/StreamStateExport.json": "sha256:032d3ebf16541c785f60d7b37793757d8c145eceec1c75560b49ae6a292f4212",
+    "artifacts/StreamSystemManifest.json": "sha256:f1c7ed66cb13743cc1f956366f2b4d707042bdb3dc0a5412018c14e8d41a4ef0",
+    "compiler-input.json": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0"
   },
   "generated_by": "tools/deployment/generate_current_stack_artifacts.py:1",
   "generator_sha256": "sha256:7201ed89e1a26f5be499a277263a45b94a766ae2b444b6cad66756cf4f077fe0",
   "maturity": "development/testnet candidate; not an audit or live deployment attestation",
-  "reviewed_targets_sha256": "sha256:a5a925dd26507e30b64dcc43cf3b57d8b8a96be045fd7ab215b369d9a41a6005",
+  "reviewed_targets_sha256": "sha256:fb46f98472f57578103773b846b7a8e84a9787323babba630d16ec9c60a7375d",
   "schema_version": "6529stream.current-stack-compilation.v1",
   "settings": {
     "evmVersion": "paris",
@@ -122,8 +132,8 @@
   },
   "sources": {
     "script/current/DeployCurrentStack.s.sol": {
-      "bytes": 4234,
-      "sha256": "sha256:9ad33a621f7b30f83bce6c46f16cb5b99f83f4371b1d078b67bbaabec5d8352d"
+      "bytes": 4370,
+      "sha256": "sha256:7151869d27031a3c2662c72e298ded84ae7691b7e2c5050d1f2f892c5c534f40"
     },
     "script/current/DevelopmentEntropyProvider.sol": {
       "bytes": 4058,
@@ -134,8 +144,8 @@
       "sha256": "sha256:90ecbb0265c3094594279cebd3817137273084389e7961712656914be8dc7570"
     },
     "script/current/StreamCurrentStackDeployment.sol": {
-      "bytes": 30124,
-      "sha256": "sha256:79581366cf0228dd0039152f103da543d38bcd99955ec363cd2d183f0a289d9f"
+      "bytes": 32296,
+      "sha256": "sha256:b36a7a1aad8fa2988ace0baf12a260de90a3a39abd24a0a09926742e21ad02ac"
     },
     "script/current/StreamCurrentStackPlan.sol": {
       "bytes": 14895,
@@ -230,8 +240,8 @@
       "sha256": "sha256:a9380501ab307b33d07bd895e1f00fad41173025bf89a6143c5a525ecccc344a"
     },
     "smart-contracts/domains/governance/StreamGovernanceExecutor.sol": {
-      "bytes": 60102,
-      "sha256": "sha256:f48e7f0320f79fda657dbedd5507422d2e940d05a43b70c15674087284519314"
+      "bytes": 58403,
+      "sha256": "sha256:f14775a44b4f7c768639e207eba0f05a10a86745e9a6cc23294001a9d69bac1d"
     },
     "smart-contracts/domains/governance/StreamGovernanceManifest.sol": {
       "bytes": 35792,
@@ -241,6 +251,10 @@
       "bytes": 27749,
       "sha256": "sha256:fbf623b7d620502b80c28507fbc3ce8202d1a034f2dd2b006f7934e941776872"
     },
+    "smart-contracts/domains/governance/StreamGovernanceScheduling.sol": {
+      "bytes": 7313,
+      "sha256": "sha256:d0c3bd5d819faf304042308a66cde8244af9a6baef1d2159f1e416ece4d49304"
+    },
     "smart-contracts/domains/governance/StreamRoleRegistry.sol": {
       "bytes": 28224,
       "sha256": "sha256:4a81f642b439122a000e33855911bb43573189d96708091f0ec8f0d567f14aa7"
@@ -248,6 +262,10 @@
     "smart-contracts/domains/governance/StreamRoles.sol": {
       "bytes": 3857,
       "sha256": "sha256:e317938eb0ce2e302f498ab8c213bed23e220fe6c936753bfb15cd716710a989"
+    },
+    "smart-contracts/domains/governance/StreamStateExport.sol": {
+      "bytes": 9989,
+      "sha256": "sha256:94765c1dd8b09461faa2dca6b7f097f67d3969f0ee04915f00e74ca8923d36d8"
     },
     "smart-contracts/domains/governance/StreamSystemManifest.sol": {
       "bytes": 27797,
@@ -268,6 +286,10 @@
     "smart-contracts/domains/metadata/StreamMetadataRouter.sol": {
       "bytes": 16468,
       "sha256": "sha256:5425ddc0f3586bd807fb5fc3d1850325549403b87ba42e61668fce41a934612a"
+    },
+    "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol": {
+      "bytes": 18570,
+      "sha256": "sha256:3b6e7679fc28f105f30c781abc5b6e3c95a1c55d7da30d62f9bf7094b03c9130"
     },
     "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol": {
       "bytes": 9984,
@@ -348,6 +370,10 @@
     "smart-contracts/domains/revenue/StreamCuratorsPool.sol": {
       "bytes": 8273,
       "sha256": "sha256:d744a2e0b1212cf4e404a3c3b7843951a2d9af66203854ff0edd99a2ab0006b1"
+    },
+    "smart-contracts/domains/revenue/StreamPaymentIntentVerifier.sol": {
+      "bytes": 9100,
+      "sha256": "sha256:f42292ebf59107a0d7993a89c77d9ba115fb36b1019a5aacdf6f6cba94446197"
     },
     "smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol": {
       "bytes": 21013,
@@ -581,6 +607,18 @@
       "bytes": 11658,
       "sha256": "sha256:8d7c1dfbf52974a1238583d3f4bb325cb72d573abb6e24024b54523c3952aac8"
     },
+    "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol": {
+      "bytes": 1071,
+      "sha256": "sha256:aed0948cf3e268296c50fa073a75698c2894075cf09ecae5350bf914c3e71621"
+    },
+    "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol": {
+      "bytes": 2339,
+      "sha256": "sha256:07b8906fc9ae66c498db0993ae8cf45f325fe66ec3cd4a6b48838f16b6f186c7"
+    },
+    "smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol": {
+      "bytes": 1459,
+      "sha256": "sha256:f52a421ad63f35724492f7ad043c43ea53bcaa95e22c6fbf94c37a03ec4497e3"
+    },
     "smart-contracts/interfaces/stream/governance/IStreamSystemManifest.sol": {
       "bytes": 2524,
       "sha256": "sha256:2bcf41ccc8b83f4109d52be56dd47eda9573a27d3d1ff38a5b366fe701eb5173"
@@ -620,6 +658,10 @@
     "smart-contracts/interfaces/stream/metadata/IStreamMetadataRouter.sol": {
       "bytes": 940,
       "sha256": "sha256:a858388864ad6dc5512ccc05c151773e1a1f4af86817a0916c5ca3b7ec257536"
+    },
+    "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol": {
+      "bytes": 6968,
+      "sha256": "sha256:d7c922a8a091d99e04e8ddf890066a2f8db53727b3db18ef3ea9445877acd53b"
     },
     "smart-contracts/interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol": {
       "bytes": 2343,
@@ -688,6 +730,10 @@
     "smart-contracts/interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol": {
       "bytes": 2941,
       "sha256": "sha256:4dc780c1f9c3d44ed3f6e9f78c2b2bb7ba8a697249dcb43b359a96a2d135b937"
+    },
+    "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol": {
+      "bytes": 2810,
+      "sha256": "sha256:4a24ad32841d9c83783e844515fefa0f4e44b1bc1e387bf6c1c69644c989f247"
     },
     "smart-contracts/interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol": {
       "bytes": 7206,
@@ -792,6 +838,42 @@
     "smart-contracts/vendor/openzeppelin/Strings.sol": {
       "bytes": 2771,
       "sha256": "sha256:fd2b96feacea647d67a888537b75c4673c4193f444faae892634e5fc11c922d2"
+    },
+    "test/current/StreamCurrentStack.t.sol": {
+      "bytes": 12544,
+      "sha256": "sha256:48d28c3cd872a3734ce3c28043fa9d32bb26bd0cf8efca3fc528dc250526d2c9"
+    },
+    "test/current/StreamCurrentStackAdversarial.t.sol": {
+      "bytes": 18992,
+      "sha256": "sha256:ffaaa04428373a9bc9d9085f8c9c902fe9e233963838ebdf70043dab2ec0813e"
+    },
+    "test/current/StreamCurrentStackCatalog.t.sol": {
+      "bytes": 7989,
+      "sha256": "sha256:2a0fda33a62d37734e2f1a53c06e0e7f6ffe2d5846b0bc5bf4401275a25f21a0"
+    },
+    "test/current/StreamCurrentStackERC20.t.sol": {
+      "bytes": 15501,
+      "sha256": "sha256:5a39c416b5c5d46d220591117540e75facecf5a95ea4549aff3b8be914df60a2"
+    },
+    "test/current/StreamCurrentStateExport.t.sol": {
+      "bytes": 25777,
+      "sha256": "sha256:7edbc4034b9e7d7a209a366e1d0a5a46de00e56589b517aa15d9f621ae8c596d"
+    },
+    "test/helpers/StreamCurrentStackFixture.sol": {
+      "bytes": 29412,
+      "sha256": "sha256:910bc4b69e110cb7b0f82a16c66cbafbe17659942d19b1e66f62b6240fbe72da"
+    },
+    "test/mocks/MockStreamEntropyProvider.sol": {
+      "bytes": 4149,
+      "sha256": "sha256:1cabf44a2954442ebe43203553198a68aa340c4a5cd70e3583bccbdd98ab3f8e"
+    },
+    "test/mocks/MockStreamPaymentToken.sol": {
+      "bytes": 3010,
+      "sha256": "sha256:d3f1fa93c3c204024be3a5e6ddb8e3868132845f8894022d3a1f2cfd857e497e"
+    },
+    "test/regression/legacy/helpers/CharacterizationTestBase.sol": {
+      "bytes": 1804,
+      "sha256": "sha256:7fc7785d6c9d417bcd2f23aabf6235786fcc28c038b6b33f7758d1cd850c4be7"
     }
   },
   "targets": [
@@ -815,6 +897,13 @@
       "name": "StreamCore",
       "runtime_bytes": 18997,
       "source": "smart-contracts/core/StreamCore.sol"
+    },
+    {
+      "artifact": "artifacts/StreamERC20FixedPriceSaleAdapter.json",
+      "kind": "contract",
+      "name": "StreamERC20FixedPriceSaleAdapter",
+      "runtime_bytes": 13777,
+      "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol"
     },
     {
       "artifact": "artifacts/StreamEnglishAuctionHouse.json",
@@ -855,7 +944,7 @@
       "artifact": "artifacts/StreamGovernanceExecutor.json",
       "kind": "contract",
       "name": "StreamGovernanceExecutor",
-      "runtime_bytes": 24543,
+      "runtime_bytes": 23741,
       "source": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol"
     },
     {
@@ -885,6 +974,13 @@
       "name": "StreamModuleRegistry",
       "runtime_bytes": 10536,
       "source": "smart-contracts/domains/modules/StreamModuleRegistry.sol"
+    },
+    {
+      "artifact": "artifacts/StreamRevenueResolver.json",
+      "kind": "contract",
+      "name": "StreamRevenueResolver",
+      "runtime_bytes": 11637,
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol"
     },
     {
       "artifact": "artifacts/StreamRoleRegistry.json",
@@ -1082,6 +1178,15 @@
       "runtime_bytes": 0,
       "solidity_interface_id": "0x54fb352a",
       "source": "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol"
+    },
+    {
+      "artifact": "artifacts/IStreamERC20FixedPriceSaleAdapter.json",
+      "interface_id": "0x55c94d74",
+      "kind": "interface",
+      "name": "IStreamERC20FixedPriceSaleAdapter",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0x55c94d74",
+      "source": "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol"
     },
     {
       "artifact": "artifacts/IStreamEnglishAuctionHouse.json",
@@ -1291,6 +1396,24 @@
       "source": "smart-contracts/interfaces/stream/modules/IStreamModuleRegistry.sol"
     },
     {
+      "artifact": "artifacts/IStreamPaymentIntentVerifier.json",
+      "interface_id": "0x88136d5a",
+      "kind": "interface",
+      "name": "IStreamPaymentIntentVerifier",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0x88136d5a",
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol"
+    },
+    {
+      "artifact": "artifacts/IStreamRevenueResolver.json",
+      "interface_id": "0x3503c22e",
+      "kind": "interface",
+      "name": "IStreamRevenueResolver",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0x3503c22e",
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol"
+    },
+    {
       "artifact": "artifacts/IStreamRoleRegistry.json",
       "interface_id": "0xd77ee305",
       "kind": "interface",
@@ -1327,6 +1450,33 @@
       "source": "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol"
     },
     {
+      "artifact": "artifacts/IStreamStateExportHistory.json",
+      "interface_id": "0x18ac5014",
+      "kind": "interface",
+      "name": "IStreamStateExportHistory",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0x18ac5014",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol"
+    },
+    {
+      "artifact": "artifacts/IStreamStateExportOperations.json",
+      "interface_id": "0xf2a72cbb",
+      "kind": "interface",
+      "name": "IStreamStateExportOperations",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0xf2a72cbb",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol"
+    },
+    {
+      "artifact": "artifacts/IStreamStateExportPublisher.json",
+      "interface_id": "0x77faad4f",
+      "kind": "interface",
+      "name": "IStreamStateExportPublisher",
+      "runtime_bytes": 0,
+      "solidity_interface_id": "0x77faad4f",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol"
+    },
+    {
       "artifact": "artifacts/IStreamSystemManifest.json",
       "interface_id": "0x37660ede",
       "kind": "interface",
@@ -1348,7 +1498,7 @@
       "artifact": "artifacts/DeployCurrentStack.json",
       "kind": "deployment_script",
       "name": "DeployCurrentStack",
-      "runtime_bytes": 248087,
+      "runtime_bytes": 278325,
       "source": "script/current/DeployCurrentStack.s.sol"
     },
     {
@@ -1383,7 +1533,7 @@
       "artifact": "artifacts/StreamGovernanceManifest.json",
       "kind": "linked_library",
       "name": "StreamGovernanceManifest",
-      "runtime_bytes": 16772,
+      "runtime_bytes": 16755,
       "source": "smart-contracts/domains/governance/StreamGovernanceManifest.sol"
     },
     {
@@ -1392,6 +1542,20 @@
       "name": "StreamGovernancePolicy",
       "runtime_bytes": 11468,
       "source": "smart-contracts/domains/governance/StreamGovernancePolicy.sol"
+    },
+    {
+      "artifact": "artifacts/StreamGovernanceScheduling.json",
+      "kind": "linked_library",
+      "name": "StreamGovernanceScheduling",
+      "runtime_bytes": 5363,
+      "source": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol"
+    },
+    {
+      "artifact": "artifacts/StreamStateExport.json",
+      "kind": "linked_library",
+      "name": "StreamStateExport",
+      "runtime_bytes": 4533,
+      "source": "smart-contracts/domains/governance/StreamStateExport.sol"
     },
     {
       "artifact": "artifacts/StreamMintCoreExecutor.json",

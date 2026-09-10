@@ -1,0 +1,304 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "stateExport",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "sequence",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StreamStateExportRecord",
+          "name": "record",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "supersededBy",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "stateExportChallengeExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "stateExportCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "stateExportHashAt",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "stateExport",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "blockNumber",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "blockHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "exportHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "manifestHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "string",
+                  "name": "manifestURI",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "sequence",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct StreamStateExportRecord",
+              "name": "record",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "supersededBy",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "challengeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "stateExportChallengeExists",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "stateExportCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "stateExportHashAt",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {
+          "stateExport(bytes32)": {
+            "details": "Unknown hashes return a zero record; sequence numbers start at one."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "stateExport(bytes32)": {
+            "notice": "An immutable published claim and its optional forward supersession link."
+          },
+          "stateExportHashAt(uint256)": {
+            "notice": "Published hash at the zero-based append index; out-of-range indices revert."
+          }
+        },
+        "notice": "Historical state-export discovery remains available after publisher replacement.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol": "IStreamStateExportHistory"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol": {
+        "keccak256": "0x7c0dc9b1b8469d8bdac071deb19959c042ed7017cb0dc003a11e60bd27e81081",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://dd68e7beeac02d60b24ba47b10cbb91101381c2d4b972d8b541149c4916f6528",
+          "dweb:/ipfs/QmYNMTF78y5Vs2278Jx6Ans1fCJZnhw3o24NVypV7o8qkE"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "stateExport(bytes32)": "bb274137",
+    "stateExportChallengeExists(bytes32,bytes32)": "5eca51f6",
+    "stateExportCount()": "30d4fa1c",
+    "stateExportHashAt(uint256)": "cd95bac9"
+  }
+}

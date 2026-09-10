@@ -1,0 +1,513 @@
+{
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "challengeURI",
+          "type": "string"
+        }
+      ],
+      "name": "challengeStateExport",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "blockHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "manifestHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "manifestURI",
+          "type": "string"
+        }
+      ],
+      "name": "publishStateExport",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "oldExportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newExportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "reasonHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "reasonURI",
+          "type": "string"
+        }
+      ],
+      "name": "supersedeStateExport",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StateExportAlreadyPublished",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "previousBlock",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "proposedBlock",
+          "type": "uint256"
+        }
+      ],
+      "name": "StateExportAnchorNotIncreasing",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "challengeHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StateExportChallengeAlreadyRecorded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StateExportDuringGovernanceExecution",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "StateExportIndexOutOfBounds",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "blockHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StateExportInvalidAnchor",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StateExportInvalidHash",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "oldExportHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "newExportHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StateExportInvalidSupersession",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StateExportInvalidURI",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StateExportPublisherInactive",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "name": "StateExportPublisherUnauthorized",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exportHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "StateExportUnknown",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StateExportAlreadyPublished",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "previousBlock",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "proposedBlock",
+              "type": "uint256"
+            }
+          ],
+          "name": "StateExportAnchorNotIncreasing",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "challengeHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StateExportChallengeAlreadyRecorded",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "StateExportDuringGovernanceExecution",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "StateExportIndexOutOfBounds",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StateExportInvalidAnchor",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "StateExportInvalidHash",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "oldExportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newExportHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StateExportInvalidSupersession",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "StateExportInvalidURI",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "StateExportPublisherInactive",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "caller",
+              "type": "address"
+            }
+          ],
+          "name": "StateExportPublisherUnauthorized",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "StateExportUnknown",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "challengeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "challengeURI",
+              "type": "string"
+            }
+          ],
+          "name": "challengeStateExport",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "blockNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "blockHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "exportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "manifestURI",
+              "type": "string"
+            }
+          ],
+          "name": "publishStateExport",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "oldExportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "newExportHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "reasonHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "reasonURI",
+              "type": "string"
+            }
+          ],
+          "name": "supersedeStateExport",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "details": "Every write is rejected during a governance batch or after publisher replacement.",
+        "kind": "dev",
+        "methods": {
+          "challengeStateExport(bytes32,bytes32,string)": {
+            "details": "Challenges do not alter the latest export or supersession lineage."
+          },
+          "publishStateExport(uint256,bytes32,bytes32,bytes32,string)": {
+            "details": "The past block must be within the EVM's 256-block hash window. Heights      increase; equal height is allowed only for a different canonical reorg hash.      All hashes are nonzero. URI is nonempty strict UTF-8, at most 2,048 bytes."
+          },
+          "supersedeStateExport(bytes32,bytes32,bytes32,string)": {
+            "details": "Both claims must exist on this publisher. Forward-only sequence links      prevent cycles. The latest publication and all historical data are retained."
+          }
+        },
+        "version": 1
+      },
+      "userdoc": {
+        "kind": "user",
+        "methods": {
+          "challengeStateExport(bytes32,bytes32,string)": {
+            "notice": "Anyone may append one challenge per (known export, nonzero challenge hash)."
+          },
+          "publishStateExport(uint256,bytes32,bytes32,bytes32,string)": {
+            "notice": "A live ROLE_EXPORT_PUBLISHER holder appends a unique canonical recent-block claim."
+          },
+          "supersedeStateExport(bytes32,bytes32,bytes32,string)": {
+            "notice": "A live publisher links an older claim once to a previously published newer claim."
+          }
+        },
+        "notice": "Append-only state-export operations on the active governance-hosted publisher.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol": "IStreamStateExportOperations"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol": {
+        "keccak256": "0x4bb2efb12e969e277df9ded4b14dadb70f00fbf2dfd7812cf13690b88f990880",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://880acfdff24a4aceed528d3c232d3a8f99b3403be6df4f1901e6d08e8d8ac314",
+          "dweb:/ipfs/QmPahs1R7Xvr19vApPSGdQgisZq4cd6Mtac5eX7fNfUdxc"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "challengeStateExport(bytes32,bytes32,string)": "23ebf4a4",
+    "publishStateExport(uint256,bytes32,bytes32,bytes32,string)": "10e32cee",
+    "supersedeStateExport(bytes32,bytes32,bytes32,string)": "c1aff4f1"
+  }
+}
