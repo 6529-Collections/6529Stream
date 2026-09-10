@@ -1,0 +1,19 @@
+{
+  "name": "@6529/stream-client",
+  "version": "0.1.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Typed calls and signing payloads for the implemented Stream stack",
+  "engines": { "node": ">=22" },
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "generate:check": "node scripts/generate.mjs --check",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run generate:check && npm run build && tsc -p tsconfig.test.json && node --test test/*.test.mjs",
+    "example": "node examples/prepare.mjs",
+    "parity": "node examples/check-digests.mjs"
+  },
+  "dependencies": { "ethers": "6.17.0" },
+  "devDependencies": { "typescript": "5.9.3" }
+}
