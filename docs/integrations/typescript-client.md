@@ -167,7 +167,12 @@ npm --prefix packages/stream-client run example -- /absolute/path/request.json
 
 The output has `domain`, `types`, `primaryType`, `message` and `digest`. Give
 wallets the domain, types and message; the digest is for comparison. No signature
-is collected. `npm run parity -- config.json requests.json`, from the package
+is collected. For raw `eth_signTypedData_v4`, pass `--rpc` before the input path
+or call `walletTypedData(payload)`. This adds the canonical `EIP712Domain` type
+and produces the complete JSON-RPC wallet representation; do not pass that
+extra domain type back into ethers `signTypedData`.
+
+`npm run parity -- config.json requests.json`, from the package
 directory with `STREAM_RPC_URL` set privately, compares an array of requests to
 the actual deployed digest methods using read-only calls.
 
