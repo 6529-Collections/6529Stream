@@ -11,6 +11,10 @@ the development/testnet flows below; the wider protocol specification includes
 features that are still being implemented. See [supported scope](docs/current-stack.md)
 and [release readiness](docs/release-readiness.md) before making deployment claims.
 
+The [verified Sepolia instance](deployments/current/sepolia-2026-09-10/README.md)
+includes public addresses and a completed paid mint, real Chainlink callback,
+final metadata, revenue withdrawals and artist transfer.
+
 ## Start developing
 
 Use Foundry **v1.7.1**, Solidity **0.8.19**, and Python **3.12**. Start with

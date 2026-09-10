@@ -446,7 +446,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("tools/build/verify_release_artifacts.py"): (
-        "e4c60c581ee3bb743d309397e53065c775217b5d145a35290880e735a56551c3",
+        "c27d1c2187e4d2edac0adfc12f2723f59324396f4e2470f7f12cfba9a491e22e",
         179_203,
     ),
 }
@@ -472,6 +472,10 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/natspec-coverage.json"),
     Path("release-artifacts/current-contracts.json"),
     Path("release-artifacts/current"),
+    Path("deployments/current/sepolia-2026-09-10"),
+    Path("tools/deployment/prepare_current_stack_test_token.py"),
+    Path("tools/deployment/test_prepare_current_stack_test_token.py"),
+    Path("test/mocks/MockStreamPaymentToken.sol"),
     Path("tools/deployment/generate_current_stack_artifacts.py"),
     Path("tools/deployment/test_current_stack_artifacts.py"),
     Path("tools/deployment/verify_current_stack_deployment.py"),

@@ -1,0 +1,51 @@
+{
+  "schema": "6529stream.live-native-demonstration.v1",
+  "status": "complete",
+  "observedAtUtc": "2026-09-10T23:29:35.550154+00:00",
+  "chainId": "11155111",
+  "sourceCommit": "d636056b835c9c3ed0b1c4fe7951609429a5789c",
+  "sourceTag": "evidence/sepolia-deployment-2026-09-10",
+  "compilerInputSha256": "5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+  "anchor": {
+    "blockNumber": "11678119",
+    "blockHash": "0x7424b7fea1abd18a11e54b4f95faf2bd74665596613ec2119a05412f31890928"
+  },
+  "core": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+  "tokenId": "1",
+  "collectionId": "1",
+  "finalOwner": "0x111Cb972e6734feA580D403555a2a0ed4Cd3Ae1B",
+  "artist": "0x111Cb972e6734feA580D403555a2a0ed4Cd3Ae1B",
+  "priceWei": "1000000000000",
+  "artistReleasedWei": "900000000000",
+  "protocolReleasedWei": "100000000000",
+  "splitWallet": "0x52FeF8A501BBDB79cF5F4597Ac83667cB880E778",
+  "entropy": {
+    "provider": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+    "upstream": "0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B",
+    "callbackGasLimit": "1500000",
+    "requestKey": "0x7aa8edc6ada27936c7dd05b74186469fa6a7faaa385b2f257927cb5f8e1de593",
+    "providerRequestId": "100483611724423077173633214489044566444371221158496311510300556916979559693224",
+    "rawRandomness": "0xb7bc4365a9007e765208f60c1b32843479ef9f5a40b9a0d8dd50549738963c32",
+    "finalSeed": "0xddaf00d25f1695e6dc9ed11865b2ca3fc06012589b3d33f459df0e8535dfe835",
+    "metadataNotificationPending": false,
+    "upstreamFulfillmentTransaction": "0xd654aebb86c10cd9c2ae8d38944d2be2d1ed3f9391ef18d95b79c74b6b40e09b"
+  },
+  "subscription": {
+    "id": "73966132582566812656063189452102645361939437343677100907667208994508112710590",
+    "nativeBalanceWei": "1119622417570068091",
+    "completedRequestCount": "1",
+    "nativeChargeForThisRequestWei": "377582429931909"
+  },
+  "metadataSha256": "7e6f44177d2975c1e7488ffbbe6434025732d825bdcc0203751a61cc437cde7b",
+  "validatedReceiptCount": 9,
+  "pinnedReadCount": 18,
+  "deployerGasFeesForDeploymentAndDemoWei": "115136271012684993",
+  "finalDeployerBalanceWei": "1347620743004741312",
+  "limitations": [
+    "Development/testnet demonstration; not production readiness or an audit.",
+    "Exercises native fixed-price purchase; ERC20/auction/export are separately tested locally and require governed testnet configuration.",
+    "Genesis metadata is a protocol example, not a completed artist artwork or a collection/permanent-pointer freeze.",
+    "The public upstream coordinator address and successful callback were observed; this package does not independently reimplement the Chainlink VRF cryptographic verifier.",
+    "No signing secrets, raw signed transaction bytes, keystore data, or operational transcript are included."
+  ]
+}

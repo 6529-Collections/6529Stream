@@ -6,6 +6,10 @@ here for the active implementation. The broader specification and historical
 release evidence remain useful references; they describe more than this first
 integrated build supports.
 
+The [Sepolia evidence package](../deployments/current/sepolia-2026-09-10/README.md)
+provides the deployed addresses, strict client configuration and a completed
+native-sale flow using real Chainlink randomness.
+
 ## Follow one paid mint
 
 1. Genesis deploys the executor, role registry, canonical module registry,
@@ -158,5 +162,6 @@ actual executor. Existing tokens retain their original entropy coordinator.
 
 This is a development/testnet implementation under active integration. Full
 artist lifecycle and recovery, broader payment/escrow modes, advanced entropy recovery and the wider
-full-v1 feature set remain separate work. The supported candidate still needs
-the broad validation and actual testnet transaction pass before it is frozen.
+full-v1 feature set remain separate work. The native Sepolia transaction flow is
+complete; final repository validation and review precede the supported candidate
+freeze.

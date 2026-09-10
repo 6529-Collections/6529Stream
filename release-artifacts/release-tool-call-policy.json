@@ -2477,7 +2477,7 @@
     {
       "path": "tools/build/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "e4c60c581ee3bb743d309397e53065c775217b5d145a35290880e735a56551c3",
+      "source_sha256": "c27d1c2187e4d2edac0adfc12f2723f59324396f4e2470f7f12cfba9a491e22e",
       "size_bytes": 179203,
       "imports": [
         {
@@ -42201,8 +42201,8 @@
     {
       "path": "tools/release/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "41dc09d3f6456450270d3c4d1ee09390593218a80368e2646f3e01afd6a2cb40",
-      "size_bytes": 189619,
+      "source_sha256": "825888cfd891d3ea11cdbadb2c20cdfc5e5e47272102385e092cb08be291ec44",
+      "size_bytes": 189859,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"from\",\"level\":0,\"member\":\"check_governed_parameter_inventory\",\"module\":\"tools.protocol\"}",
@@ -42560,7 +42560,7 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path\"}",
-          "count": 455
+          "count": 459
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"pathlib.Path.cwd\"}",
@@ -47423,6 +47423,12 @@
         {
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "1f4d5d55bccb5590eb782a9d0c4ab7ca328fab38703db0485ee8bf6ea238b127",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "1f5d971f22b50f6f08f003bd4ab9b920da13fb957d6a4604bc8dcc50129762db",
           "count": 1
         },
@@ -47580,6 +47586,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "2fd7012b09e9ba085354c7e2cf1877f9b99c9b4a3ee33ea58e5ebd907ed605e2",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "2fe599171c4e408f62a47b93157fbe452ef5c2b64dd1a24785ea2287b2389044",
           "count": 1
         },
         {
@@ -48108,6 +48120,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "72a2848f3c83226b3ed549e80ee64f00f4a6b3507786e5354bcee5c420a37edd",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "73022346333a35a2b71d19d75f7ee7fc9522b32906ff994d8e7f10db9a350513",
           "count": 1
         },
         {
@@ -48918,6 +48936,12 @@
           "target": "pathlib.Path",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "cbc83747eafd3e5f43dbc12faad8fb136ff6d4e0bc39e660d1bd65ed27de34ed",
+          "count": 1
+        },
+        {
+          "target": "pathlib.Path",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "cbd080d1a472d0c9878866947801742cfb9d03cb793b94876d0a4073a0c1887a",
           "count": 1
         },
         {

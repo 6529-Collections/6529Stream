@@ -104,6 +104,11 @@ manually dispatch **CI** with `extended_campaign` enabled. Manual dispatch runs
 the current job only; the historical release and SDK jobs retain their normal
 PR/push triggers. There is no recurring campaign schedule.
 
+The release checksum and offline-verifier suites run in a separate CI job against
+the committed bundle, concurrently with Solidity compilation. They use the same
+pinned toolchain and retain their own logs. Current contract tests, Windows
+operator tests, static analysis and the TypeScript client also run independently.
+
 ## Compiler and evidence boundaries
 
 Foundry is pinned to **v1.7.1**, Solidity to **0.8.19**, and the supported developer

@@ -22,15 +22,20 @@ repository reorganization, independent adversarial review, and testnet delivery.
 ## Active work
 
 The owner requested further implementation while waiting for Sepolia funding.
-That funding has now arrived and the matching current deployment is running.
+That funding has arrived and the matching current deployment and native
+demonstration have completed successfully.
 The active branch is `codex/offline-release-completion`, from merged
 [PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
 has completed executable product paths in three parallel lanes. The contract changes are
 stable. All four CI jobs and the complete source-bound native validation passed
 on `3ab8be81`. Two final review corrections bind fallback compiler caches to
 Foundry settings and reject literal failing guards in the source-policy checker.
-Their focused tests and refreshed release package pass; final CI for `640cd995`
-is running in [run 34535587115](https://github.com/6529-Collections/6529Stream/actions/runs/34535587115).
+Their focused tests and refreshed release package pass. The final CI run for
+`640cd995` passed its earlier checks but reached the 90-minute job limit during
+the concluding deployment rehearsal. That job is rerunning in
+[run 34535587115](https://github.com/6529-Collections/6529Stream/actions/runs/34535587115).
+The developer-kit increment moves checksum/verifier suites into an independent
+CI job, removing that serial work from Solidity compilation and rehearsals.
 
 | Owner | Delivery |
 | --- | --- |
@@ -99,7 +104,10 @@ exporter, a second-artist product demonstration and resumable Sepolia stages.
   canonical hashes and fresh RPC readback. It is not a complete archival export.
 - The product demonstration executes 31 local transactions across native/ERC-20
   purchases, auction bids/refunds/settlement, withdrawals and export publication.
-  Repeating every stage sends no duplicate transactions.
+  A fresh scenario using the final 177-source production compilation and a
+  separately compiled payment-token mock also passes all 31 transactions.
+  Production compiler output and cache remain byte-identical. Repeating every
+  stage sends no duplicate transactions.
 - Launch recovery retains exact transaction intents, reconciles receipts before
   constructing fresh authorizations and provides credential-free status. Its
   independent journal/status suites pass 78 and 27 cases respectively.
@@ -144,19 +152,26 @@ is also retained exactly; its source paths predate this reorganization.
 Funding was confirmed at Sepolia block 11,678,000 on 10 September at 23:00 UTC:
 2.562757914017426305 ETH was available to the dedicated deployer
 `0x26A3f4505145b5E6164260cc868e50ddd9863697`. The fresh 45-transaction plan passed
-preflight against the matching 177-source compilation, and deployment is running
-from the frozen `codex/sepolia-launch-kit` checkout. Only the deployment owner
-broadcasts. The remaining demonstration is a paid mint, real callback, final
-metadata, both split withdrawals and artist transfer. Publish public
-source/bytecode/configuration verification and freeze the supported candidate
-after those steps pass.
+preflight against the matching 177-source compilation. All 45 transactions
+succeeded from the frozen `codex/sepolia-launch-kit` checkout. Independent public
+readback verifies 40 runtime addresses and 81 configuration checks. The real
+paid mint, Chainlink callback, final metadata, both split withdrawals and transfer
+to the dedicated artist also succeeded. The immutable non-release tag
+`evidence/sepolia-deployment-2026-09-10` preserves the exact deployed source.
+The [public instance package](../deployments/current/sepolia-2026-09-10/README.md)
+retains independent deployment and demonstration verification. Sourcify reports
+creation and runtime matches for all 34 named instances: 25 fresh submissions
+and nine existing deterministic library records. Independent comparison of all
+68 templates to the current compiler output passes with only declared library
+link spans normalized. Final repository integration and review precede the
+supported candidate freeze. Only the deployment owner broadcasts.
 
 Core runtime measurements belong to the
 [canonical bytecode proof](../release-artifacts/latest/bytecode-release-proof.json)
 and its bound compiler/ABI inputs; they are not duplicated in this active run state.
 Reread that proof after the reorganized tree is rebuilt and its evidence refreshed.
-The integrated checks above attest local behavior and compiler packaging, not a
-replacement Sepolia deployment or a frozen testnet release candidate.
+The source-bound local checks and completed Sepolia flow are distinct evidence.
+A frozen testnet release candidate still requires the final reviewed package.
 
 ## Recovery and remaining scope
 

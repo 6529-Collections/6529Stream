@@ -1,0 +1,967 @@
+{
+  "schema_version": "6529stream.current-source-verification.v2",
+  "chain_id": 11155111,
+  "observed_at": "2026-09-10T23:40:16.410501+00:00",
+  "provider": "Sourcify v2",
+  "compiler_input_sha256": "5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+  "source_commit": "d636056b835c9c3ed0b1c4fe7951609429a5789c",
+  "named_instances": 34,
+  "current_submission_matches": 25,
+  "existing_verified_records": 9,
+  "scope": "All 34 named deployed contract and library instances, including three governance actors and the split wallet. The six SSTORE2 data contracts are covered separately by the public bytecode report.",
+  "interpretation": "Sourcify reports creation/runtime match, not exact_match, with CBOR metadata disabled. Existing verified library records retain their earlier source layout and timestamp; current submissions returned already_verified without replacing them. Both creation and runtime compiler byte strings match the current selected artifact after zeroing only declared link spans. This establishes source correspondence supplemented by the separate current-compiler live bytecode verification, not audit completion or protocol correctness.",
+  "contracts": [
+    {
+      "address": "0x05914C6F62C819c861f01c5eDD4b6B17e935e75B",
+      "contract": "smart-contracts/core/StreamCore.sol:StreamCore",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:54Z",
+      "match_id": "48873018",
+      "verification_id": "81807772-0686-4164-9df4-76955409dc51",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/81807772-0686-4164-9df4-76955409dc51",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "service_source_contract": "smart-contracts/core/StreamCore.sol:StreamCore",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "b54e4e913341e77c9ab3ac7cc86bbadc56e339fba03b4be51080839a5ecbf648",
+          "service_unlinked_sha256": "b54e4e913341e77c9ab3ac7cc86bbadc56e339fba03b4be51080839a5ecbf648",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "5b4071432fe70e5505b39a791ed5cc6690d2be42282e90b1f04d6679f8b405a3",
+          "service_unlinked_sha256": "5b4071432fe70e5505b39a791ed5cc6690d2be42282e90b1f04d6679f8b405a3",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x477677ce83FF4b91f006439Ef299006426008acE",
+      "contract": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:41Z",
+      "match_id": "48246725",
+      "verification_id": "f700d198-ccac-4084-9fcd-b9200e0b3e1c",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/f700d198-ccac-4084-9fcd-b9200e0b3e1c",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x477677ce83ff4b91f006439ef299006426008ace",
+      "service_source_contract": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "c197de9668555a01853dc21cf63fec1a0a0a3fc2085ec533bfbb157305103469",
+          "service_unlinked_sha256": "c197de9668555a01853dc21cf63fec1a0a0a3fc2085ec533bfbb157305103469",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "37e710eb54498fb560cf272418209abc2cf5afb9f9ee9e50447e0b811da274ab",
+          "service_unlinked_sha256": "37e710eb54498fb560cf272418209abc2cf5afb9f9ee9e50447e0b811da274ab",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xf11c4f30bbb02c28e3934c001fC56F90be852746",
+      "contract": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol:StreamCollectionArtistRegistry",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:57Z",
+      "match_id": "48872728",
+      "verification_id": "cdf7f302-9a75-432c-ad3e-c4d74b7e0263",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/cdf7f302-9a75-432c-ad3e-c4d74b7e0263",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "service_source_contract": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol:StreamCollectionArtistRegistry",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "83b5109a13f8a54ee7d4489cff66839f354cc2780ab359445a51644812455d36",
+          "service_unlinked_sha256": "83b5109a13f8a54ee7d4489cff66839f354cc2780ab359445a51644812455d36",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "9fde70685c09359c3029afe102b03f3cca9a0ef1bcb0750460e3c34b5371b4a1",
+          "service_unlinked_sha256": "9fde70685c09359c3029afe102b03f3cca9a0ef1bcb0750460e3c34b5371b4a1",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x8deA43d1400eF286F8386d1b3c58F24997F2ebca",
+      "contract": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:27Z",
+      "match_id": "48872749",
+      "verification_id": "6c51d6a8-c84b-4419-8cad-4f6da3e93303",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/6c51d6a8-c84b-4419-8cad-4f6da3e93303",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "service_source_contract": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "20202d4d6097c32d6e6a0edd1744666a908fd426b4486a4b8dd1f055c733a3c7",
+          "service_unlinked_sha256": "20202d4d6097c32d6e6a0edd1744666a908fd426b4486a4b8dd1f055c733a3c7",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "243bb0c9c608dc4966179de4384952d02511f77735fed1388bde9e5227f0b50d",
+          "service_unlinked_sha256": "243bb0c9c608dc4966179de4384952d02511f77735fed1388bde9e5227f0b50d",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x258D07d853Be34aC022f24E255f02a21D6D340B5",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:25Z",
+      "match_id": "48872742",
+      "verification_id": "18315f08-6373-416c-9b69-c055875b3667",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/18315f08-6373-416c-9b69-c055875b3667",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x258d07d853be34ac022f24e255f02a21d6d340b5",
+      "service_source_contract": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "23a326b73555b0381ae38f0ba096f69b2bd1791ab584b6f98980343219e56141",
+          "service_unlinked_sha256": "23a326b73555b0381ae38f0ba096f69b2bd1791ab584b6f98980343219e56141",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "d2a4e7b7a8ee8930663bbbaf6db2401413014d8cb13ff5a9bd15a1f797173ac1",
+          "service_unlinked_sha256": "d2a4e7b7a8ee8930663bbbaf6db2401413014d8cb13ff5a9bd15a1f797173ac1",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xa7A9c0AF6166a02216421AB0b7Dca44b1c9b19cD",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:54Z",
+      "match_id": "48872725",
+      "verification_id": "e5393ab1-14f0-4af0-a81f-ebcc2c219c9f",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/e5393ab1-14f0-4af0-a81f-ebcc2c219c9f",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "service_source_contract": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "8eadecf23531bb0e281650c99200ddf5cd6a8e070d3ef8f32fa0dfb072ee8c99",
+          "service_unlinked_sha256": "8eadecf23531bb0e281650c99200ddf5cd6a8e070d3ef8f32fa0dfb072ee8c99",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "20179484e210fa5e8af3740c56611d62cc0a2d87d2a8aefb7339fae4318f30c0",
+          "service_unlinked_sha256": "20179484e210fa5e8af3740c56611d62cc0a2d87d2a8aefb7339fae4318f30c0",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x4d1C5BC16B0f667549AcCAC1D8E967c8Fa1ec9D6",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:37Z",
+      "match_id": "48246679",
+      "verification_id": "5e633adb-88f0-48db-8533-7bbf7c32a29f",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/5e633adb-88f0-48db-8533-7bbf7c32a29f",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "ea6cb4e7bdd9d904fb1d68818389c7f565529c6b6a330b047149c748df2cd727",
+          "service_unlinked_sha256": "ea6cb4e7bdd9d904fb1d68818389c7f565529c6b6a330b047149c748df2cd727",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "bf9417e0ddd865b49ad94b3ec1823fdaf0036f1e4baef524dc75135e811a47c4",
+          "service_unlinked_sha256": "bf9417e0ddd865b49ad94b3ec1823fdaf0036f1e4baef524dc75135e811a47c4",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x015779ebd0AA2484cAB510bbfe6B184517A2a66a",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:47Z",
+      "match_id": "48872615",
+      "verification_id": "721a55da-4018-48b7-9676-0f6ecf788dd6",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/721a55da-4018-48b7-9676-0f6ecf788dd6",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x015779ebd0aa2484cab510bbfe6b184517a2a66a",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "service_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "service_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xb57F26Fcc674059ef20180E29c530DB5F3321C77",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:54Z",
+      "match_id": "48872726",
+      "verification_id": "28e14875-19a1-4733-9ddc-cf3a5d1eb20c",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/28e14875-19a1-4733-9ddc-cf3a5d1eb20c",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xb57f26fcc674059ef20180e29c530db5f3321c77",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "service_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "service_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xcD711CB4C8e55a5425d94A5311Df01A35CD9175d",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:47Z",
+      "match_id": "48872610",
+      "verification_id": "7d9c024d-f1c5-46a9-a553-04c93b9fb8e2",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/7d9c024d-f1c5-46a9-a553-04c93b9fb8e2",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xcd711cb4c8e55a5425d94a5311df01a35cd9175d",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "service_unlinked_sha256": "38710dc7bdaa56432f99c0ea8716aa3cf5a59aa837f9b470ebfa22ee5f0226d7",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "service_unlinked_sha256": "a4f0de101c9265440532c7b2ae68b81120f01f53c134b632e0e11376d16dcb04",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x1D63762bD2dE327FA883e57A9ed94d7130e77b3A",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:38:17Z",
+      "match_id": "48247180",
+      "verification_id": "21bfb2d9-1157-4628-91f1-6dbee84ad62b",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/21bfb2d9-1157-4628-91f1-6dbee84ad62b",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "be36c2597961a5255f35a9e72e1fecbc7537eb529865290cfaf32310c0839e6d",
+          "service_unlinked_sha256": "be36c2597961a5255f35a9e72e1fecbc7537eb529865290cfaf32310c0839e6d",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "1c706fc8aba7e535adc0c6416ba9c37b6b8db1567e96fd7d8106c5187590b4ef",
+          "service_unlinked_sha256": "1c706fc8aba7e535adc0c6416ba9c37b6b8db1567e96fd7d8106c5187590b4ef",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x4203324F708730EeA0fA8389b782d7D7C2c284Aa",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:46Z",
+      "match_id": "48246778",
+      "verification_id": "e095d76c-3114-4049-8800-c620e5d36531",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/e095d76c-3114-4049-8800-c620e5d36531",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x4203324f708730eea0fa8389b782d7d7c2c284aa",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "3c52e7aa4c6f774d9c81fc393b855b6ac041639b568ecdfd13d265b3836540dc",
+          "service_unlinked_sha256": "3c52e7aa4c6f774d9c81fc393b855b6ac041639b568ecdfd13d265b3836540dc",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "fe4cf856becb62527ac17a206e6d0b51139dc7037626e3a6d8eb05f2e6fb29fe",
+          "service_unlinked_sha256": "fe4cf856becb62527ac17a206e6d0b51139dc7037626e3a6d8eb05f2e6fb29fe",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x09e676013Be9ac977a4aC41fE5fE4aAb269D8f35",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:39:06Z",
+      "match_id": "48873808",
+      "verification_id": "e3058c4c-4331-4283-babc-5cb406c94393",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/e3058c4c-4331-4283-babc-5cb406c94393",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "3d853bd46cb89cbfef2f14994eb51808499e23075a229224d539c7bbd0167c38",
+          "service_unlinked_sha256": "3d853bd46cb89cbfef2f14994eb51808499e23075a229224d539c7bbd0167c38",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "ccf70025c1050ff931817181636955adf25c6bdd51233e37b7eab1013ca1578a",
+          "service_unlinked_sha256": "ccf70025c1050ff931817181636955adf25c6bdd51233e37b7eab1013ca1578a",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xF2Fdb2E17b5c959ba94167c383be83ECDa3667eE",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:32Z",
+      "match_id": "48872854",
+      "verification_id": "6aaacd95-936b-4bab-90e9-59bd53267f90",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/6aaacd95-936b-4bab-90e9-59bd53267f90",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "bf338c9a6ff84f3b71c90cd955d24a96ae094edfcb5545b083896be6016781b5",
+          "service_unlinked_sha256": "bf338c9a6ff84f3b71c90cd955d24a96ae094edfcb5545b083896be6016781b5",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "426ef4a758d8ff319e8cd44e0339813405f8205f35ba9c8b9272973cabebacd5",
+          "service_unlinked_sha256": "426ef4a758d8ff319e8cd44e0339813405f8205f35ba9c8b9272973cabebacd5",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xE8FD763180a5DF256037123DC75f6ebCed7757d3",
+      "contract": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:46Z",
+      "match_id": "48246776",
+      "verification_id": "fc8e0729-797b-441c-8e62-144f0356f05b",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/fc8e0729-797b-441c-8e62-144f0356f05b",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xe8fd763180a5df256037123dc75f6ebced7757d3",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "4c19805fe4e5524c62f6c8735b2b5d5b69162c7b815404c72639cf03ee7d2271",
+          "service_unlinked_sha256": "4c19805fe4e5524c62f6c8735b2b5d5b69162c7b815404c72639cf03ee7d2271",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "6565736be214fbca6e869f10e2b8e0514657846c0f66298a8cccd84e3d26e265",
+          "service_unlinked_sha256": "6565736be214fbca6e869f10e2b8e0514657846c0f66298a8cccd84e3d26e265",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x70B914E90Cf02EdAcDea4772708FBD979683CE23",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:StreamGovernanceScheduling",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:38:36Z",
+      "match_id": "48873741",
+      "verification_id": "2aa9ac19-edc1-4078-9a15-6ca6a45251b0",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/2aa9ac19-edc1-4078-9a15-6ca6a45251b0",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x70b914e90cf02edacdea4772708fbd979683ce23",
+      "service_source_contract": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:StreamGovernanceScheduling",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "215be838905175374d62a4cdbd72787eb71ddc63b5117ae01e80c8d0e34d3daa",
+          "service_unlinked_sha256": "215be838905175374d62a4cdbd72787eb71ddc63b5117ae01e80c8d0e34d3daa",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "d2c46c52b55a1a822b21cc0160d0871a0a1ab81d2382dba2d725afde19b79c06",
+          "service_unlinked_sha256": "d2c46c52b55a1a822b21cc0160d0871a0a1ab81d2382dba2d725afde19b79c06",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x8cF3e2ac56958FC5E37f9738c4B61E95C278A5d4",
+      "contract": "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:01Z",
+      "match_id": "48872730",
+      "verification_id": "9b3a9c29-b69e-4a7a-b26d-ca9bffbc590b",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/9b3a9c29-b69e-4a7a-b26d-ca9bffbc590b",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+      "service_source_contract": "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "c4803ce47880f2e6cb8d2637f2bf3def04621915508ed0557887cddb120a4b88",
+          "service_unlinked_sha256": "c4803ce47880f2e6cb8d2637f2bf3def04621915508ed0557887cddb120a4b88",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "52cdf766543622d253101b23466a839647ead93eeafb345a68dd6640cd7e10d5",
+          "service_unlinked_sha256": "52cdf766543622d253101b23466a839647ead93eeafb345a68dd6640cd7e10d5",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x5a5050dC889C01704069119A8a6eC5cf78Bbc281",
+      "contract": "smart-contracts/domains/governance/StreamStateExport.sol:StreamStateExport",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:27Z",
+      "match_id": "48872757",
+      "verification_id": "c6d222cd-64cc-4109-9a75-f2a6d3c158ab",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/c6d222cd-64cc-4109-9a75-f2a6d3c158ab",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x5a5050dc889c01704069119a8a6ec5cf78bbc281",
+      "service_source_contract": "smart-contracts/domains/governance/StreamStateExport.sol:StreamStateExport",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "fa999e1d88bab136c51e4be8f3174971587dc32bd2f6720caeb3189bcc3bba2d",
+          "service_unlinked_sha256": "fa999e1d88bab136c51e4be8f3174971587dc32bd2f6720caeb3189bcc3bba2d",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "1e2b9b5991841e091ccb7ed2bc6d939a9ff31d74f3e1859ae3c2f2182c0a7ef2",
+          "service_unlinked_sha256": "1e2b9b5991841e091ccb7ed2bc6d939a9ff31d74f3e1859ae3c2f2182c0a7ef2",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x7e6C446B036119F67E3E2086Bd628c6D49a5d957",
+      "contract": "smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:38:22Z",
+      "match_id": "48873505",
+      "verification_id": "d984e309-86af-403d-a281-9a0f0d3c91ef",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/d984e309-86af-403d-a281-9a0f0d3c91ef",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+      "service_source_contract": "smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "2cc0d5b9aad564a4cad4150915cce2b976c0f3dfe2a009ac2af2801f82ba8587",
+          "service_unlinked_sha256": "2cc0d5b9aad564a4cad4150915cce2b976c0f3dfe2a009ac2af2801f82ba8587",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "ba1b7344eafd7cc7ad809dbc59d967cf9a45d97f0e84eaf22a7749b396d81c58",
+          "service_unlinked_sha256": "ba1b7344eafd7cc7ad809dbc59d967cf9a45d97f0e84eaf22a7749b396d81c58",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x1e09486dCa528CE70c72A4F1c5B32DC7D5f6676e",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:56Z",
+      "match_id": "48246911",
+      "verification_id": "924f3408-73cc-4c67-a865-7833397b7ecf",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/924f3408-73cc-4c67-a865-7833397b7ecf",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+      "service_source_contract": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "7740e165ac0b2b6ede0a4f26655733999657206f6db2e10f2f91a93fee7f15fe",
+          "service_unlinked_sha256": "7740e165ac0b2b6ede0a4f26655733999657206f6db2e10f2f91a93fee7f15fe",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "bf59b5b23cbbdc641d7a24363978317f43fcc684d79cd102482b9bf86bf30396",
+          "service_unlinked_sha256": "bf59b5b23cbbdc641d7a24363978317f43fcc684d79cd102482b9bf86bf30396",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x84a67c06d7f17d44690d263A66463c6a92A8723b",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:04Z",
+      "match_id": "48872734",
+      "verification_id": "4de1948e-e5a0-4b26-80b8-5f2c416e47b8",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/4de1948e-e5a0-4b26-80b8-5f2c416e47b8",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "service_source_contract": "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "aa02776db217d29938ee098afdafc9772391fe17edab76f8a7dc8a8d828cffd2",
+          "service_unlinked_sha256": "aa02776db217d29938ee098afdafc9772391fe17edab76f8a7dc8a8d828cffd2",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "c9f3161c802d929236a2789d67461a6a2a164006e22ad96a18fb0001c732d945",
+          "service_unlinked_sha256": "c9f3161c802d929236a2789d67461a6a2a164006e22ad96a18fb0001c732d945",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xBA804032dC5AEb8282490C49098a6A5057dFB8f0",
+      "contract": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol:StreamERC20FixedPriceSaleAdapter",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:35Z",
+      "match_id": "48872899",
+      "verification_id": "068d7dd6-2794-40d9-a652-46adb10c8887",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/068d7dd6-2794-40d9-a652-46adb10c8887",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "service_source_contract": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol:StreamERC20FixedPriceSaleAdapter",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "bd57ee827add6a41781c2a921ebbe34b9ae5338b43f66d7634613553d3b7c555",
+          "service_unlinked_sha256": "bd57ee827add6a41781c2a921ebbe34b9ae5338b43f66d7634613553d3b7c555",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "b2ad388d47224d33f8570682594a8dbbcc0aad9c78071df510a9d268eec49712",
+          "service_unlinked_sha256": "b2ad388d47224d33f8570682594a8dbbcc0aad9c78071df510a9d268eec49712",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x09047c394020bf49bCbA95616412a2e91CC8031F",
+      "contract": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:07Z",
+      "match_id": "48872737",
+      "verification_id": "9c849ccd-80fd-4846-ac4a-28d1e1e99186",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/9c849ccd-80fd-4846-ac4a-28d1e1e99186",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "service_source_contract": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "722e2b2cd2565b990ec959ff19e60c95bdcf21b4a2636349c047da8145e774ea",
+          "service_unlinked_sha256": "722e2b2cd2565b990ec959ff19e60c95bdcf21b4a2636349c047da8145e774ea",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "ed187875eac346122a392e57d7303dc844f269b78382b8e5e501afa33b5f312b",
+          "service_unlinked_sha256": "ed187875eac346122a392e57d7303dc844f269b78382b8e5e501afa33b5f312b",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xd75CD4Cc0c2b81657FfB9402987EED71ebeaf45a",
+      "contract": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:33Z",
+      "match_id": "48246640",
+      "verification_id": "e6c14404-7e27-424d-a293-ed26608a5b70",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/e6c14404-7e27-424d-a293-ed26608a5b70",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xd75cd4cc0c2b81657ffb9402987eed71ebeaf45a",
+      "service_source_contract": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "7bbad9a034117b7be99d25ce38847f1150b021d93a8b3d2a173cded5f7f0d13a",
+          "service_unlinked_sha256": "7bbad9a034117b7be99d25ce38847f1150b021d93a8b3d2a173cded5f7f0d13a",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "75d8ebedf0e5d54f7e0fb6c45be7fbb5ac13a14da00006bfc2fc0e48b8649bd3",
+          "service_unlinked_sha256": "75d8ebedf0e5d54f7e0fb6c45be7fbb5ac13a14da00006bfc2fc0e48b8649bd3",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x5Ae4f3C8e3E69ECb2F0C0d05fF043882C316d84A",
+      "contract": "smart-contracts/domains/mint/StreamMintGateValidator.sol:StreamMintGateValidator",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:37:54Z",
+      "match_id": "48246884",
+      "verification_id": "37ac9866-c160-48bd-9d9d-5d067085e4fa",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/37ac9866-c160-48bd-9d9d-5d067085e4fa",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x5ae4f3c8e3e69ecb2f0c0d05ff043882c316d84a",
+      "service_source_contract": "smart-contracts/domains/mint/StreamMintGateValidator.sol:StreamMintGateValidator",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "97b04b2f93f26ad66a3926145af3a63aa70563f780d020c7e39a49addb3a5d34",
+          "service_unlinked_sha256": "97b04b2f93f26ad66a3926145af3a63aa70563f780d020c7e39a49addb3a5d34",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "ce0d0a5a1935af1c3dc161bb022eb40f75af1684c706ff16376fcf758d2518ab",
+          "service_unlinked_sha256": "ce0d0a5a1935af1c3dc161bb022eb40f75af1684c706ff16376fcf758d2518ab",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xc1ffF76f146458fc96F10f1F52E428080EB21BE6",
+      "contract": "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:04Z",
+      "match_id": "48872733",
+      "verification_id": "2a258841-c8ef-4d34-9df6-a7321b11e5e2",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/2a258841-c8ef-4d34-9df6-a7321b11e5e2",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+      "service_source_contract": "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "8e23bec89acead3edb6b10d7a685a16a11f41ef706fc841d53d3f1646ffacfbe",
+          "service_unlinked_sha256": "8e23bec89acead3edb6b10d7a685a16a11f41ef706fc841d53d3f1646ffacfbe",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "915f5bd4c4271ad3df4dce829364df75969e39f2480a957dbf6d03e2851f73ea",
+          "service_unlinked_sha256": "915f5bd4c4271ad3df4dce829364df75969e39f2480a957dbf6d03e2851f73ea",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x695c55174DCD311C801c81147aa24826980BDf3e",
+      "contract": "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:16Z",
+      "match_id": "48872738",
+      "verification_id": "a52a80a2-02c4-48b1-8572-9bdd531053a5",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/a52a80a2-02c4-48b1-8572-9bdd531053a5",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "service_source_contract": "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "9820bb87d7d8a79917c2d01774935bbc4733c7c96d978e6773082c8121127ee8",
+          "service_unlinked_sha256": "9820bb87d7d8a79917c2d01774935bbc4733c7c96d978e6773082c8121127ee8",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "f35a0bf0ff907f46ea1033460091bc96eb008222de0039de45303ddaaeaa0a43",
+          "service_unlinked_sha256": "f35a0bf0ff907f46ea1033460091bc96eb008222de0039de45303ddaaeaa0a43",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xC0EA43fa70904c274Dd01d71d52acc19594b1866",
+      "contract": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "source_record_origin": "existing_verified_record",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-09T22:38:00Z",
+      "match_id": "48246968",
+      "verification_id": "e84e4722-1ac1-4b71-b65d-a12bda9bbd4c",
+      "job_error": "already_verified",
+      "verification_url": "https://sourcify.dev/server/v2/verify/e84e4722-1ac1-4b71-b65d-a12bda9bbd4c",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xc0ea43fa70904c274dd01d71d52acc19594b1866",
+      "service_source_contract": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "6bce9816e367d6a12891f552e470321ef4a972f355de5f810dae87478a084389",
+          "service_unlinked_sha256": "6bce9816e367d6a12891f552e470321ef4a972f355de5f810dae87478a084389",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "fcc7036ee0f4f6cbd5c68aa89b12525141d9c535a5f45fef85e97ae3fc942392",
+          "service_unlinked_sha256": "fcc7036ee0f4f6cbd5c68aa89b12525141d9c535a5f45fef85e97ae3fc942392",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xE2C0BD803ECCb3A95b82485197381D7d7530785E",
+      "contract": "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:03Z",
+      "match_id": "48872732",
+      "verification_id": "68725750-27b2-44e1-a408-3f7ee6621068",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/68725750-27b2-44e1-a408-3f7ee6621068",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+      "service_source_contract": "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "f461509768ded5176d9427307bc9781324597ac94239968a8d94745f1991ccc9",
+          "service_unlinked_sha256": "f461509768ded5176d9427307bc9781324597ac94239968a8d94745f1991ccc9",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "378d0aa972d357ca043e1bd6d00d123532de6dcefbfeddcfbd15b3f73bc3a300",
+          "service_unlinked_sha256": "378d0aa972d357ca043e1bd6d00d123532de6dcefbfeddcfbd15b3f73bc3a300",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xa9d6791502849519E16CDF335C0959Fd920B765F",
+      "contract": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:51Z",
+      "match_id": "48872678",
+      "verification_id": "8f87b0ac-bc94-4fd1-a7a8-4636c26c3fb0",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/8f87b0ac-bc94-4fd1-a7a8-4636c26c3fb0",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xa9d6791502849519e16cdf335c0959fd920b765f",
+      "service_source_contract": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "84f272972214fad13c1bccea90a1782b1276ff0f1f29cc723286b654a6051abf",
+          "service_unlinked_sha256": "84f272972214fad13c1bccea90a1782b1276ff0f1f29cc723286b654a6051abf",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "c7de8e8dcba09321cc8f043c84796bfa77c13e0964afbcd0471ad0e300119057",
+          "service_unlinked_sha256": "c7de8e8dcba09321cc8f043c84796bfa77c13e0964afbcd0471ad0e300119057",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0xa05044f746e64C16Cc229889a08E113d7f953Dac",
+      "contract": "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:06Z",
+      "match_id": "48872736",
+      "verification_id": "8d4ea359-8b2a-4bec-9f57-b368bf63117a",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/8d4ea359-8b2a-4bec-9f57-b368bf63117a",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0xa05044f746e64c16cc229889a08e113d7f953dac",
+      "service_source_contract": "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "623672871a396824d7f76aa761f152a7e1cc10f14bddabcfdbb1d9c0e437db4d",
+          "service_unlinked_sha256": "623672871a396824d7f76aa761f152a7e1cc10f14bddabcfdbb1d9c0e437db4d",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "caea8a0ced7fa0f2e5e4fe1c4470bcfe6db4206c7b22d8f82ea67798eb677e84",
+          "service_unlinked_sha256": "caea8a0ced7fa0f2e5e4fe1c4470bcfe6db4206c7b22d8f82ea67798eb677e84",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x8D5Ff93956fd63bcfa762076f5309b92C5f2A0f0",
+      "contract": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:36:55Z",
+      "match_id": "48872727",
+      "verification_id": "9ad47486-2680-4441-a161-befc979fa3ca",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/9ad47486-2680-4441-a161-befc979fa3ca",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "service_source_contract": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "7081ae82da59ba67ed041b493aaede3756fecff4711ccb695cdccc54f57cac4f",
+          "service_unlinked_sha256": "7081ae82da59ba67ed041b493aaede3756fecff4711ccb695cdccc54f57cac4f",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "01be51c0e67fce6f2ea8dfa062b2d16fe821d1690998ceffb7b9fb3eb8e0ee5a",
+          "service_unlinked_sha256": "01be51c0e67fce6f2ea8dfa062b2d16fe821d1690998ceffb7b9fb3eb8e0ee5a",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x5102Aa2d3162DF520857AdA9E3Beb3849ED1B917",
+      "contract": "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:05Z",
+      "match_id": "48872735",
+      "verification_id": "5bc910c5-8c40-4b10-85cb-427d4c6e3b8e",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/5bc910c5-8c40-4b10-85cb-427d4c6e3b8e",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+      "service_source_contract": "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "3274868745012913b996881a3a6082b13de7b9c1b0369fb5c60d303551be6bdd",
+          "service_unlinked_sha256": "3274868745012913b996881a3a6082b13de7b9c1b0369fb5c60d303551be6bdd",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "84a2bd32a62f86f5e426165c6b359e81f0eab0159320e971de589c4b8f8518a6",
+          "service_unlinked_sha256": "84a2bd32a62f86f5e426165c6b359e81f0eab0159320e971de589c4b8f8518a6",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    },
+    {
+      "address": "0x52FeF8A501BBDB79cF5F4597Ac83667cB880E778",
+      "contract": "smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet",
+      "source_record_origin": "current_submission_verified",
+      "creation_match": "match",
+      "runtime_match": "match",
+      "verified_at": "2026-09-10T23:37:00Z",
+      "match_id": "48872729",
+      "verification_id": "fa716df4-186a-4266-8ee7-0ae8b2f68939",
+      "job_error": null,
+      "verification_url": "https://sourcify.dev/server/v2/verify/fa716df4-186a-4266-8ee7-0ae8b2f68939",
+      "contract_url": "https://sourcify.dev/server/v2/contract/11155111/0x52fef8a501bbdb79cf5f4597ac83667cb880e778",
+      "service_source_contract": "smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet",
+      "compiled_byte_comparison": {
+        "creation": {
+          "current_unlinked_sha256": "649cb7f6fa06f98e2e83114c76933b29fe6eb956f1a6f2df8cda5e2823e3eadd",
+          "service_unlinked_sha256": "649cb7f6fa06f98e2e83114c76933b29fe6eb956f1a6f2df8cda5e2823e3eadd",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        },
+        "runtime": {
+          "current_unlinked_sha256": "add58be824860054176139ea551163ddfa7a77438f5f941e4901cce85fe9e76e",
+          "service_unlinked_sha256": "add58be824860054176139ea551163ddfa7a77438f5f941e4901cce85fe9e76e",
+          "equal": true,
+          "normalization": "Only declared external-library link spans replaced with zero bytes; no opcode, immutable, or metadata masking."
+        }
+      }
+    }
+  ]
+}

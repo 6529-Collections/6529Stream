@@ -168,12 +168,17 @@ configuration; no upstream coordinator, key hash, or subscription is invented.
 | `STREAM_VRF_MAX_CALLBACK_GAS` | Configured upstream limit; defaults to 2,500,000 |
 | `STREAM_VRF_NATIVE_PAYMENT` | Native subscription billing; defaults to true |
 
-Use an existing secure Foundry signer and the intended RPC endpoint:
+Inspect the unsigned deployment simulation against the intended RPC endpoint:
 
 ```powershell
 $env:FOUNDRY_PROFILE = 'current'
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER
 ```
+
+For broadcasting, use the resumable Sepolia helper below. It checks the complete
+unsigned plan against the transaction gas cap before its first deployment send.
+Choose `-DeploymentGasEstimateMultiplier` from that fresh complete-plan result;
+Forge's default margin exceeds the cap for the demonstrated 45-transaction plan.
 
 The adapter must be added as a consumer of the supplied subscription, and that
 subscription must be funded before requesting entropy. This script does not

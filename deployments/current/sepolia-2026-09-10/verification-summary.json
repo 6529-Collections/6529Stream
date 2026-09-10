@@ -1,0 +1,101 @@
+{
+  "schema": "6529stream.public-sepolia-evidence-review.v1",
+  "result": "PASS",
+  "network": "Sepolia",
+  "chainId": 11155111,
+  "sourceCommit": "d636056b835c9c3ed0b1c4fe7951609429a5789c",
+  "sourceTag": "evidence/sepolia-deployment-2026-09-10",
+  "compilerInputSha256": "5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+  "deployment": {
+    "blockNumber": 11678063,
+    "blockHash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+    "successfulTransactions": 45,
+    "sourceCount": 177,
+    "exportTargets": 86,
+    "runtimeAddresses": 40,
+    "configurationChecks": 81,
+    "independentRpcReads": 259,
+    "additionalPrivateCoreAuthorityBinding": true
+  },
+  "demonstration": {
+    "blockNumber": 11678119,
+    "blockHash": "0x7424b7fea1abd18a11e54b4f95faf2bd74665596613ec2119a05412f31890928",
+    "successfulTransactions": 9,
+    "completeAbiReadbacks": 18,
+    "independentRpcReads": 48,
+    "saleAndProviderEvents": {
+      "sale": {
+        "authorizationId": "0xb52bbc263d09f060bdd3c3f219b0587a0482e313c67670092a99c0cc4fed0114",
+        "operationRoot": "0x11a288b6ae68a3c86245ba2a5c9506e54b24c51570b410f8536e1ff130564ba1",
+        "tokenId": 1,
+        "authorizationDigest": "0x6590cd7ab77a675fd9b1d2c41b5d6f9d492e181f8b5131906f16ad546d0cbcd2",
+        "profileId": "0x5ebd9fe7eb6efdc299dbf2b9e1d0efb7bf9de078ce943172faa2b4d46e36ba7a",
+        "wallet": "0x52fef8a501bbdb79cf5f4597ac83667cb880e778",
+        "amount": 1000000000000
+      },
+      "providerRequest": {
+        "requestKey": "0x7aa8edc6ada27936c7dd05b74186469fa6a7faaa385b2f257927cb5f8e1de593",
+        "vrfRequestId": 100483611724423077173633214489044566444371221158496311510300556916979559693224,
+        "subscriptionId": 73966132582566812656063189452102645361939437343677100907667208994508112710590,
+        "schemaVersion": 1,
+        "providerEpoch": 1,
+        "keyHash": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae",
+        "requestConfirmations": 3,
+        "callbackGasLimit": 1500000,
+        "numWords": 1
+      },
+      "metadataUpdate": {
+        "tokenId": 1
+      },
+      "transfer": {
+        "from": "0x26a3f4505145b5e6164260cc868e50ddd9863697",
+        "to": "0x111cb972e6734fea580d403555a2a0ed4cd3ae1b",
+        "tokenId": 1
+      }
+    },
+    "finalOwner": "0x111Cb972e6734feA580D403555a2a0ed4Cd3Ae1B",
+    "artistReleasedWei": "900000000000",
+    "protocolReleasedWei": "100000000000",
+    "metadataSha256": "7e6f44177d2975c1e7488ffbbe6434025732d825bdcc0203751a61cc437cde7b"
+  },
+  "boundaries": [
+    "The deployment and completed native demonstration are real transactions on Sepolia, observed at two explicitly pinned historical blocks.",
+    "This is a development/testnet deployment and protocol example, not a production release, an audit, a completed artwork, or a collection/global-pointer freeze.",
+    "The public Chainlink coordinator callback was observed; the reviewers do not independently reimplement VRF cryptographic verification.",
+    "ERC20 purchases, auctions, export publication and collection completion were demonstrated locally, not by this Sepolia package.",
+    "No signing secrets, operational account configuration, raw signed transaction bytes or private RPC endpoints are included."
+  ],
+  "reviewedFiles": {
+    "demonstration/anchor-block.json": "b16c4cb84a5f76fa989fbe84d9259dce2d42de4288b4113706915f7c37cbe7b8",
+    "demonstration/client-config.json": "24264b890afca1b38d752dfa4812a7cad4eb292cc19beb0d748b9e1d8e58049b",
+    "demonstration/pinned-readbacks.json": "3edb2957661f128825c6d9b7ebf85778fc42ae62eff58fa331feebf437b28dff",
+    "demonstration/README.md": "a13f7ffe25313ac3a6d43d1ba7dff97f8dd2de321ba6c64cb2861a2bfe49e04d",
+    "demonstration/receipt-blocks.json": "cbde86c0371adeae79a57601a5cb637649f714517a7c6cb87b75ce444ca3d771",
+    "demonstration/receipts.json": "cbae163cba240cb24269cbf58947280259ebc0e9ce417a396de8956e414716c7",
+    "demonstration/summary.json": "43b1ef18eb60301dbc9e6d79abe9fdf015e6b1fa32571a3c9fafcc7ef48c416b",
+    "demonstration/token.animation.html": "93d8d0eb7b5e231263e979405da30bb020b8372f20b4a49545a6fa7ccd4cacec",
+    "demonstration/token.metadata.json": "7e6f44177d2975c1e7488ffbbe6434025732d825bdcc0203751a61cc437cde7b",
+    "demonstration/transaction-inventory.json": "4e29b919e3a1a4a2141a5746cfcbc0997e80247a2fa7fa7f337a9903ec5e18bb",
+    "deployment/addresses.json": "9521b928c4f4393384f0919e9570a259f82cc34de59b41bbe5086bfbef799fc8",
+    "deployment/compiler-binding.json": "60e3c63aca65d9ff3867fc0481c2f925fe7ed80292dc948eff18c3afd763ae51",
+    "deployment/configuration.json": "bf08bd56af712d712ca2e687d0e45e467df1ded4769898bade97dd59d0d82ad9",
+    "deployment/core-authority-binding.json": "29cccf23ce313f98737e2bc01be6440f7224ef3d122a9f4c96a78a18644f6b7b",
+    "deployment/README.md": "7c88d0199e528a5dd1781fb9d12d8fc86a51683669dacaf5a8b859cb75ba21c4",
+    "deployment/receipts.json": "1b8a442753074564405b2d90d633580dafedbc42c7eff00256c3a6ef7026e36b",
+    "deployment/runtime-verification.json": "8519792b47a204bc494ac0b0c77fd1c1c911a5d178b54f2774090b8c3d358b2e",
+    "deployment/summary.json": "40d63a477d91c57a230349d574fb1450578597fd690527cab474d866a15faf75",
+    "source-verification.json": "ce587d66fe40eb0549667414d50f17be22dad790784f4bfafb5f972ace31d72c"
+  },
+  "sourceVerification": {
+    "provider": "Sourcify v2",
+    "namedInstances": 34,
+    "freshCurrentSubmissions": 25,
+    "historicalAlreadyVerifiedRecords": 9,
+    "creationAndRuntimeTemplateComparisons": 68,
+    "serviceMatchStatus": "match; not exact_match",
+    "rawRetainedReportSha256": "e4d0b953e7459707f9274942b138ab03814d3bfc5eb40e8847253fea825fb1fc",
+    "publishedReportSha256": "ce587d66fe40eb0549667414d50f17be22dad790784f4bfafb5f972ace31d72c",
+    "independentReviewSha256": "fe377a7f239900dbd7349b721d86c8c1299638b023d59e50a06c9df53a68a275",
+    "boundary": "Historical library verification timestamps/source paths are preserved. Current artifact correspondence uses only equal compiler-declared library link spans; no opcode, immutable or metadata masking. Six SSTORE2 data addresses are covered by the separate live bytecode report."
+  }
+}

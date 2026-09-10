@@ -76,6 +76,10 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "scripts/test_current_stack_sepolia.ps1",
         "scripts/current-stack-transaction-journal.ps1",
         "scripts/current-stack-launch-status.ps1",
+        "deployments/current/sepolia-2026-09-10",
+        "tools/deployment/prepare_current_stack_test_token.py",
+        "tools/deployment/test_prepare_current_stack_test_token.py",
+        "test/mocks/MockStreamPaymentToken.sol",
         "scripts/test_current_stack_transaction_journal.ps1",
         "scripts/test_current_stack_launch_status.ps1",
         "scripts/run-current-stack-scenarios.ps1",
@@ -116,11 +120,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 365
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 365
+    len(TEST_CANONICAL_COVERED_PATHS) != 369
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 369
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 365 unique coverage roots"
+        "canonical verifier fixtures require exactly 369 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("tools/security/generate_risk_register.py"),
@@ -798,12 +802,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 365)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 365)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 365)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 369)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 369)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 369)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "5dcf7f4c7919ddf14d19e8d91a574156882219dc7e367a7d41e92d6ef19109d9",
+            "b4391b91377c659ab614651657465d2a36bdee77a16a08a608474e6a1997c028",
         )
         self.assertIn(
             "tools/development/test_windows_ci_wrapper.py",

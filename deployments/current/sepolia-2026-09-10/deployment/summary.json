@@ -1,0 +1,51 @@
+{
+  "schema": "6529stream.independent-sepolia-deployment.v1",
+  "result": "PASS",
+  "verifiedAtUtc": "2026-09-10T23:18:40.142541+00:00",
+  "sourceCommit": "d636056b835c9c3ed0b1c4fe7951609429a5789c",
+  "sourceCount": 177,
+  "exportTargets": 86,
+  "chainId": 11155111,
+  "pinnedBlock": 11678063,
+  "pinnedBlockHash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+  "successfulTransactions": 45,
+  "runtimeAddresses": 40,
+  "configurationChecks": 81,
+  "publicRpcReadCount": 259,
+  "gasUsed": 84950842,
+  "maximumGasLimit": 16627237,
+  "maximumGasUsed": 13559979,
+  "limitations": [
+    "Compiler outputs are supplied evidence, not independently recompiled by this helper.",
+    "Constructor arguments and observed immutable values are not semantically validated.",
+    "Runtime-only records do not prove their creation path.",
+    "This report does not assert audit completion or release readiness.",
+    "These are real successful Sepolia deployment receipts. No signer or send RPC method was used by this verifier.",
+    "Configuration is a bounded named set at the final deployment block, not a full storage audit.",
+    "Artist acceptance, consumer activation, mint, VRF callback and settlement are not asserted here."
+  ],
+  "additionalOfflineCheck": "All three Core private immutable governance-authority words and named constructor bindings match the deployed Executor/registry.",
+  "files": {
+    "addresses.json": "9521b928c4f4393384f0919e9570a259f82cc34de59b41bbe5086bfbef799fc8",
+    "compiler-binding.json": "60e3c63aca65d9ff3867fc0481c2f925fe7ed80292dc948eff18c3afd763ae51",
+    "configuration.json": "bf08bd56af712d712ca2e687d0e45e467df1ded4769898bade97dd59d0d82ad9",
+    "core-authority-binding.json": "29cccf23ce313f98737e2bc01be6440f7224ef3d122a9f4c96a78a18644f6b7b",
+    "receipts.json": "1b8a442753074564405b2d90d633580dafedbc42c7eff00256c3a6ef7026e36b",
+    "runtime-verification.json": "8519792b47a204bc494ac0b0c77fd1c1c911a5d178b54f2774090b8c3d358b2e"
+  },
+  "reproducibility": {
+    "sourceTag": "evidence/sepolia-deployment-2026-09-10",
+    "compiler": "0.8.19+commit.7dd6d404",
+    "compilerProfile": "viaIR, optimizer 200, Paris, no CBOR",
+    "originalVerifier": "tools/deployment/verify_current_stack_deployment.py at sourceCommit",
+    "independentReadOnlyScriptSha256": "1cea24d56e5f584de04e612884657f3dd2dd7f9dd4c26c07d24faf534b4bf468",
+    "rpcMethodsUsed": [
+      "eth_chainId",
+      "eth_getBlockByNumber",
+      "eth_getTransactionByHash",
+      "eth_getTransactionReceipt",
+      "eth_getCode",
+      "eth_call"
+    ]
+  }
+}

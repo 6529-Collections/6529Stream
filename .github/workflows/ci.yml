@@ -251,6 +251,8 @@ jobs:
           ./scripts/test_current_stack_launch_status.ps1
           ./scripts/test_current_stack_scenarios.ps1
           ./scripts/test_current_stack_completion.ps1
+          python -m unittest tools.deployment.test_prepare_current_stack_test_token
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Full release-builder test authority
         shell: powershell
@@ -359,11 +361,89 @@ jobs:
           mkdir -p ci-logs
           make slither-baseline-check 2>&1 | tee ci-logs/slither-baseline-check.log
 
+  release-verification:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    name: Release artifact verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.13"
+
+      - name: Install Foundry
+        id: foundry_setup
+        continue-on-error: true
+        uses: foundry-rs/foundry-toolchain@b00af27efadbc7b4ca8b82abbd903b17cc874d2a
+        with:
+          version: v1.7.1
+
+      - name: Retry verified Foundry installation
+        if: ${{ steps.foundry_setup.outcome == 'failure' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDRY_DIR="$HOME/.foundry"
+          foundryup="$FOUNDRY_DIR/bin/foundryup"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            foundryup="$foundryup.exe"
+          fi
+          test -x "$foundryup"
+          # Retry the complete verifier, including its attestation download.
+          for attempt in 1 2 3; do
+            sleep "$((attempt * 15))"
+            if "$foundryup" --install 1.7.1; then
+              echo "$FOUNDRY_DIR/bin" >> "$GITHUB_PATH"
+              exit 0
+            fi
+          done
+          exit 1
+
+      - name: Install pinned Python toolchain
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+
+      - name: Release checksums
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.release.test_release_checksums 2>&1 | tee ci-logs/release-checksum-tests.log
+          python3 -m tools.release.generate_release_checksums --check 2>&1 | tee ci-logs/release-checksums-check.log
+
+      - name: Release artifact verifier
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 -m tools.build.test_verify_release_artifacts 2>&1 | tee ci-logs/release-artifact-verifier-tests.log
+          python3 -m tools.build.verify_release_artifacts 2>&1 | tee ci-logs/release-artifact-verifier-check.log
+
+      - name: Upload release verification logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-verification-logs
+          path: ci-logs/
+          if-no-files-found: ignore
+          retention-days: 14
+
   foundry:
     if: github.event_name == 'pull_request' || github.event_name == 'push'
     name: Foundry smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # Cold via-IR compilation must leave time for the final deployment rehearsals.
+    timeout-minutes: 120
 
     steps:
       - name: Checkout
@@ -1255,22 +1335,6 @@ jobs:
           mkdir -p ci-logs
           python3 -m tools.release.test_release_candidate_lockfile 2>&1 | tee ci-logs/release-candidate-lockfile-tests.log
           python3 -m tools.release.generate_release_candidate_lockfile --check 2>&1 | tee ci-logs/release-candidate-lockfile-check.log
-
-      - name: Release checksums
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          python3 -m tools.release.test_release_checksums 2>&1 | tee ci-logs/release-checksum-tests.log
-          python3 -m tools.release.generate_release_checksums --check 2>&1 | tee ci-logs/release-checksums-check.log
-
-      - name: Release artifact verifier
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          python3 -m tools.build.test_verify_release_artifacts 2>&1 | tee ci-logs/release-artifact-verifier-tests.log
-          python3 -m tools.build.verify_release_artifacts 2>&1 | tee ci-logs/release-artifact-verifier-check.log
 
       - name: Deployment rehearsal gate parity
         shell: bash

@@ -12,6 +12,7 @@ release-artifacts/** text eol=lf
 *.lock text eol=lf
 *.js text eol=lf
 *.mjs text eol=lf
+*.html text eol=lf
 *.toml text eol=lf
 *.txt text eol=lf
 *.py text eol=lf
@@ -19,6 +20,7 @@ release-artifacts/** text eol=lf
 *.yaml text eol=lf
 *.sh text eol=lf
 Makefile text eol=lf
+deployments/current/sepolia-2026-09-10/SHA256SUMS text eol=lf
 
 *.ps1 text eol=crlf
 
