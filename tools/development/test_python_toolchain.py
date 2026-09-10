@@ -461,7 +461,7 @@ class PythonToolchainTests(unittest.TestCase):
                 self.assertLess(build, save)
                 self.assertLess(save, block.index(test_command))
                 restore_step = block[restore:build]
-                prefix = "${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-" + profile + "-v1-"
+                prefix = "${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-" + profile + "-v2-${{ hashFiles('foundry.toml') }}-"
                 fallback = restore_step.split("          restore-keys: |\n", 1)[1]
                 self.assertEqual(fallback.strip().splitlines(), [prefix])
                 self.assertEqual(block.count("restore-keys:"), 1)
@@ -483,7 +483,7 @@ class PythonToolchainTests(unittest.TestCase):
                 ):
                     self.assertIn(source_input, identity)
                 self.assertIn(f"steps.{profile}_compiler_inputs.outputs.digest", block[restore:build])
-                self.assertIn(f"-forge-1.7.1-solc-0.8.19-{profile}-v1-", block)
+                self.assertIn(f"-forge-1.7.1-solc-0.8.19-{profile}-v2-", block)
         current = jobs["current-stack"]
         before_save = current[:current.index("- name: Save current compiler outputs")]
         self.assertIn("FOUNDRY_PROFILE=current forge build", before_save)

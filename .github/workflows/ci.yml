@@ -83,9 +83,9 @@ jobs:
           path: |
             out/current
             cache/current
-          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v1-${{ steps.current_compiler_inputs.outputs.digest }}
+          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v2-${{ hashFiles('foundry.toml') }}-${{ steps.current_compiler_inputs.outputs.digest }}
           restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v1-
+            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-current-v2-${{ hashFiles('foundry.toml') }}-
 
       - name: Build current compilation
         id: current_build
@@ -706,9 +706,9 @@ jobs:
           path: |
             out
             cache
-          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v1-${{ steps.default_compiler_inputs.outputs.digest }}
+          key: ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v2-${{ hashFiles('foundry.toml') }}-${{ steps.default_compiler_inputs.outputs.digest }}
           restore-keys: |
-            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v1-
+            ${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-default-v2-${{ hashFiles('foundry.toml') }}-
 
       - name: Build
         id: default_build

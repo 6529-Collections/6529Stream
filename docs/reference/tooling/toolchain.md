@@ -30,8 +30,10 @@ source/test/script/dependency trees and remapping inputs. The input digest uses
 staged Git paths and blob IDs, including submodule commits, so a same-content
 source rename also invalidates it. If the exact key is absent, one fallback
 prefix permits the latest cache for the same operating system, architecture,
-Forge/Solc versions and profile. Foundry still rebuilds changed inputs; a test
-or workflow edit no longer automatically discards unrelated compiled output.
+Forge/Solc versions, profile and `foundry.toml` content digest. Changing compiler
+settings therefore cannot restore an older configuration's outputs, including
+through the fallback key. Foundry still rebuilds changed sources; a test or
+workflow edit can reuse unrelated compiled output.
 
 Every run still executes its build, tests and current artifact validation.
 Successful compiler outputs are saved before later checks; the forced size
