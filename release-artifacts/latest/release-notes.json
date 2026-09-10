@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:5a69dc1fc1833ad3a8265f9f17ecad57e6f5bb49abf3c939679b5be2fa8c943a",
-      "size_bytes": 165548
+      "sha256": "sha256:e85b905e4d6cd1f54b9e6989113192d40259ab4090f4196cab677406bf3d6e5c",
+      "size_bytes": 165738
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -48,7 +48,7 @@
       "Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.",
       "Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.",
       "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The stack is deployed on Sepolia with a successful paid mint; the real randomness callback and final demonstration are pending subscription funding. This is a development deployment, not an audit or production release.",
-      "Validate maximum-content metadata against the configured 12 million router gas budget and require the complete URI through a bounded 16 million gas Core read. Refresh the full default compilation's measured gas snapshots within unchanged release ceilings, and preserve exact UTF-8 release notes.",
+      "Validate maximum-content metadata against the configured 12 million router gas budget and require the complete URI through a bounded 16 million gas Core read. Refresh the full default compilation's measured gas snapshots within unchanged release ceilings, and preserve exact UTF-8 release notes. Rebind the non-production materialization fixture to the verified canonical build and reconcile the documented NatSpec coverage count without adding accepted documentation exclusions.",
       "Increase native Foundry installer retries for transient download failures, including attestations, while preserving pinned versions and verification.",
       "Keep token and registered-scope entropy subjects distinct when requesting randomness; the regression covers unchanged token inputs and both lifecycles.",
       "Scope the live Slither gate to all production Solidity sources, excluding expensive test and script constructor closures. Refresh exact source/capture provenance and retain reviewed detector-specific dispositions without suppressing findings or changing audit readiness.",

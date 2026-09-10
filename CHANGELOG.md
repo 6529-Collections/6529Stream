@@ -28,6 +28,9 @@ the release policy in `docs/release-policy.md`.
   gas budget and require the complete URI through a bounded 16 million gas
   Core read. Refresh the full default compilation's measured gas snapshots
   within unchanged release ceilings, and preserve exact UTF-8 release notes.
+  Rebind the non-production materialization fixture to the verified canonical
+  build and reconcile the documented NatSpec coverage count without adding
+  accepted documentation exclusions.
 - Increase native Foundry installer retries for transient download failures,
   including attestations, while preserving pinned versions and verification.
 - Keep token and registered-scope entropy subjects distinct when requesting

@@ -1,7 +1,8 @@
 # 6529Stream Delivery State
 
-Updated 9 September 2026 UTC. The owner authorized the integrator to make
-technical and delivery decisions autonomously and use parallel builders.
+Updated 10 September 2026 UTC. The owner authorized autonomous technical and
+delivery decisions, parallel builders, repository cleanup and testnet launch.
+This file owns current execution state; earlier chronology remains in Git.
 
 ## Current Repository State
 
@@ -16,141 +17,123 @@ technical and delivery decisions autonomously and use parallel builders.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | 2026-09-09 |
+| Last updated | 2026-09-10 |
 
 ## Target
 
-Deliver a working current-stack contract system and an organized repository
-that developers can navigate, then freeze a tested release candidate and
-launch it on testnet. First complete transaction: collection creation, signed
-native sale, mint through real Core/manager/ledger, split withdrawals, entropy
-fulfillment, rendered metadata, transfer, and burn, alongside English auctions.
-The full-v1 backlog remains visible; unsupported features are not complete.
+Ship a frozen, tested current-stack release candidate and a matching Sepolia
+demonstration, with a repository that developers can navigate. The implemented
+stack includes actual Core/registry/manager/ledger integration, accepted artist
+attribution, signed native sales and English auctions, immutable splits and
+withdrawals, royalties, VRF entropy, metadata, committed genesis and delayed
+governance/catalog evolution. The public Core interface remains protected.
+
+Start with [the product guide](../docs/current-stack.md),
+[source map](../smart-contracts/README.md),
+[interface map](../smart-contracts/interfaces/stream/README.md) and
+[deployment guide](../script/current/README.md).
 
 ## Integration baseline
 
-- Remote: `6529-Collections/6529Stream`.
-- Reviewed main: `92ea123380917032f01aae09691141a2a72df935` (PR #735).
-- Active integration branch: `codex/current-stack-integration`.
-- First compatibility fix: actual mint manager and ledger advertise the
-  ERC-165 identities required by current Core pointer validation.
-- Integrated native fixed-price sale: creator and platform signatures, exact
-  payment, immutable split wallets, replay protection, and atomic rollback.
-- Integrated concrete entropy coordinator and metadata router for current
-  Core. Focused external randomness tests use a controllable test provider.
-- Integrated English auctions, artist-accepted attribution, real royalty
-  resolution, atomic genesis and a VRF v2.5 adapter.
-- Five whole-stack tests passed: paid lifecycle, auction/refunds, failed
-  delivery rollback, delayed operating controls and governance-root rotation.
-- Four additional cross-domain tests passed for rejection recovery, payment
-  conservation, lifetime supply and stale authorization policies.
-- Maximum metadata content is measured through Core. The planner provides
-  12 million router gas; read callers should allow at least 16 million total.
-- Isolated deployment simulation passed: preparation 10,966,570 gas and
-  activation/sealing 12,683,466 gas, both including intrinsic transaction cost.
-- Delayed append-only catalog extension and rollback both passed against the
-  real SystemManifest. All eleven current-stack integration scenarios pass.
-- Dedicated Sepolia deployer received 0.20 test ETH. All 45 stack deployment
-  transactions succeeded, followed by activation, artist acceptance, a paid
-  mint and an actual VRF request. Chainlink holds that request for its required
-  subscription reserve: the observed minimum is 1.1133045 ETH and the current
-  balance is 0.02 ETH. Additional test funding is pending; the request remains
-  intact. The deployment helper now checks the configured gas-lane reserve.
-- The supported current build and all eleven integration scenarios pass.
-  Public bytecode checks cover 36 deployed instances, including data contracts;
-  Sourcify matched creation and runtime bytecode for all 30 named contracts
-  and libraries. These observations do not constitute an external audit.
-- A pinned Sepolia configuration audit passed 130 asserted public reads and
-  five cross-checks, including Core authority, all eight pointers, mint policy,
-  split/royalty and VRF configuration. The dedicated deployer controls this
-  development instance's root and veto-guardian actors.
-- Final independent flow review identified a token/scope identity defect in
-  the optional requester path. The private registered-scope guard is fixed;
-  five isolated regressions pass under normal and via-IR compilation. The
-  earlier Sepolia instance remains historical, with no requester grants.
-  A corrected-source deployment and final validation are now in progress.
-- Fresh fixed-source Slither capture completed in 87 seconds, covering all
-  143 production Solidity files. The baseline retains 44 detector rows:
-  30 Open and 14 reviewed false positives. Excluding test/script compilation
-  from this production scan does not suppress any production finding.
-- Corrected-deployment funding preflight estimates 1.24 ETH total for the
-  replacement stack, demonstration and subscription reserve. An additional
-  1.20 Sepolia ETH has been requested; deployment retains exclusive nonce
-  ownership and separate compiler, broadcast and operational state paths.
-- The pinned real-coordinator fork rehearsal includes all linked libraries:
-  48 transactions, about 100.27 million estimated execution gas. Its largest
-  transaction gas limit is 16,175,894, below Sepolia's 16,777,216 cap.
+- The configured default Foundry suite passes 1,342 tests across 110 suites.
+  All thirteen retained gas snapshots pass with unchanged ceilings.
+- The corrected-source current wrapper passes eleven real-stack integration
+  scenarios and 34 Python checks, plus layout, formatting and Core ABI checks.
+- The maximum-content metadata test also passes with fresh transaction
+  contexts: router 11,391,401 gas within its 12,000,000 allocation; full Core
+  read 12,209,673 gas within a 16,000,000 call. The complete 63,193-byte URI
+  and ABI response envelope are preserved.
+- Fresh Slither capture covers all 143 production Solidity files. Its
+  44 High/Medium detector rows retain 30 Open and 14 reviewed false-positive
+  dispositions. This is not an external audit.
+- Current-stack, Windows and Slither CI pass at `cac42353`. The full default
+  release wrapper and final CI remain in progress. The wrapper found stale
+  receipt/catalog/config hashes in the illustrative non-production candidate;
+  refreshed bindings pass materialization and its exact check.
+- Final checksum/manifest/bytecode/lock verification must run against the
+  final integrated inputs after that correction. Do not treat an earlier
+  artifact check as proof of a later changed tree.
+- All seven CodeRabbit threads have verified fixes or accepted rationale.
+  Recheck incremental review before merge. Issue #670 remains open; PR #739
+  has no automatic issue-closing references.
 
 The default target-isolated Core size evidence remains
-`release-artifacts/latest/bytecode-release-proof.json`. It describes that
-engineering compilation; the exact Sepolia instance compilation is retained
-separately under `deployments/current/sepolia-2026-09-09/compilation` and must
-not be inferred from the default proof.
-Historical proof details are not duplicated in this active run state.
+[`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json).
+It describes the engineering compilation. The exact corrected Sepolia candidate
+compilation is retained separately under
+`deployments/current/sepolia-current-rc-1/compilation` and must not be inferred
+from the default proof. Historical proof details are not duplicated in this active run state.
 
-## Active owners
+## Corrected Sepolia launch
 
-| Owner | Branch | Current output |
-| --- | --- | --- |
-| Integrator | `codex/current-stack-integration` | Actual deployment, whole-stack transactions, interfaces/docs, integration and release decisions |
-| Deployment | `codex/sepolia-current-launch` | Exact-source deployment and actual VRF demonstration; exclusive deployer nonce ownership |
-| Product/tooling | `codex/current-default-release-reconciliation` | Full validation and final default artifact reconciliation |
-| Governance/review | `codex/current-slither-review` | Both earlier PRs merged; fixed-source static analysis complete; retire finished worktrees |
+The exact corrected compilation is retained under
+[`deployments/current/sepolia-current-rc-1/compilation`](../deployments/current/sepolia-current-rc-1/compilation/manifest.json).
+It contains 148 input sources, no tests, Solidity 0.8.19, global via-IR,
+optimizer 200 and Paris. Its manifest retains the exact per-contract size evidence.
+The actual-subscription simulation passes with 36 transactions at a 115%
+gas margin; its largest signed limit is 16,413,798, below 16,777,216.
 
-## Working method
+Broadcast and the full corrected demonstration are pending funding. The
+dedicated deployer is `0x26A3f4505145b5E6164260cc868e50ddd9863697`.
+An additional 1.20 Sepolia ETH was requested for redeployment, demonstration
+and Chainlink's native-payment reserve. Last observed deployer balance is
+0.062757914017426305 ETH with pending nonce 52. These are observations, not
+fixed future preflight values; reread balances and fees before broadcasting.
 
-Builders own disjoint files and communicate shared interfaces directly. They
-commit tested increments; the integrator reviews and incorporates them. No
-independent builder waits for an unrelated PR to merge. Keep one integration
-branch and at most three active builder worktrees. Rotate a builder into
-independent integration review when the first complete flow works.
+The deployment owner alone controls deployer nonces. Reuse the existing
+subscription and isolated RC output, cache, broadcast and operational-state
+paths. Its older pending request may fulfill after reserve funding; record
+that as historical activity and reread reserve before the corrected request.
+The corrected instance needs its own paid mint, actual VRF callback, final
+metadata, both split withdrawals and transfer to the artist. Then export
+public observations, compare deployed bytecode, verify source and audit the
+configuration at one pinned block. Freeze only the supported, tested source
+and matching deployment facts; the current candidate is not frozen yet.
 
-During implementation, use compile, focused behavior tests, and the combined
-current-stack flow. Keep authorization, replay, accounting and failure cases
-alongside new behavior. Broad Foundry, deployment size checks, CI/static
-analysis, and final artifact reconciliation follow on a stable candidate.
-An actual deployment-size failure is an immediate implementation blocker.
+The [9 September prototype](../deployments/current/sepolia-2026-09-09/README.md)
+predates the source correction. Its 45 deployment transactions, paid mint,
+VRF request, 36-instance bytecode comparison, 30 source matches and public
+wiring observations are preserved as historical evidence.
 
-## 48-hour delivery checkpoints
+## Owners and next actions
 
-| Elapsed time | Observable result |
+| Owner | Current responsibility |
 | --- | --- |
-| 0–12 hours | Real genesis and the first complete fixed-price flow work locally |
-| 12–24 hours | Repeatable Anvil deployment and demonstration; auction integration; testnet provider/signing/funding setup |
-| 24–36 hours | Testnet deployment with actual callbacks, withdrawals, metadata, addresses and transaction receipts |
-| 36–48 hours | Stabilize supported behavior, broad validation, frozen source and deployment facts, precise remaining-feature list |
+| Integrator | Final integrated checks, PR/review/merge, developer interfaces, public deployment evidence and checkout cleanup |
+| Deployment | Corrected Sepolia launch and live demonstration; exclusive deployer nonce ownership |
+| Product/tooling | Finish the configured default wrapper and reconcile the final artifact tail |
+| Independent review | Completed flow/tooling/issue reviews; available for bounded follow-up without a retained builder checkout |
 
-These are targets from implementation start, not claims of completion. The
-integrator takes a missed critical-path checkpoint and redirects builders.
+1. Finish the default release checks, reconcile their inputs once, and obtain
+   green CI on the integrated change. Merge after review is resolved.
+2. On funding arrival, complete the corrected launch and public observations.
+   Do not substitute a fork callback for the actual provider callback.
+3. Restore the original checkout to merged main from verified recovery state
+   and retire the remaining builders once their evidence is preserved.
+4. Freeze the candidate and reconcile issue #738 against its actual acceptance.
 
-## Repository recovery and cleanup
+Builders hand over coherent tested increments to one integrator. Independent
+implementation does not wait for unrelated PR cycles. During development use
+focused behavior and current-stack tests; broad release validation follows a
+stable implementation. Ordinary engineering choices do not go to the owner.
 
-The original checkout contains substantial unrelated uncommitted work. Keep
-it intact while useful source is recovered into the current layout. Never
-merge the entire old checkout. Preserve active artist-provenance work.
+## Repository recovery and remaining scope
 
-The September cleanup retired 53 obsolete worktrees and archived 19 superseded
-tasks. Branch references remain. Verified recovery bundles, index and working
-patches, and persistent recovery references preserve the retired dirty artist
-and specification checkouts. Local preservation copies retain ignored notes,
-untracked source and validation transcripts. The original dirty checkout and
-active artist-provenance task remain intact. The original checkout's 129
-changed tracked paths and 31 untracked paths are also preserved in a verified
-recovery bundle and file copies. Restore that checkout to merged main after
-the RC merge, then remove the finished builder checkouts.
-Six registered worktrees remain: the original checkout, integration,
-three active builders and the immutable review baseline. One retired empty
-directory remains after Windows and automatic approval review rejected its
-removal; it has no Git worktree registration or retained source files.
+Cleanup has retired 54 worktrees and archived 19 superseded tasks. Branch refs,
+verified bundles, patches and preserved local files retain the old work. Five
+registered worktrees remain: original checkout, integration, deployment,
+validation and the immutable review baseline. The original 129 changed tracked
+paths and 31 untracked paths are independently preserved and remain untouched.
+The active artist-provenance task is retained. One previously retired empty
+directory remains after automatic approval review blocked its removal; it has
+no worktree registration or source files.
 
-## Remaining full-v1 work
+All 29 open issues were reconciled against current implementation and remaining
+acceptance; ten stale descriptions were corrected without changing acceptance
+or closing unfinished work. Both older PRs #737 and #736 are merged.
 
-Artist lifecycle and recovery, additional payment/sale
-modes, complete deployment inventory, advanced entropy recovery, and external
-release evidence are not implied by the first working flow. Use
-[ROADMAP.md](ROADMAP.md) and [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md) for
-the underlying requirements. Review found issue #670 incorrectly closed by a
-tooling-only PR; merged evidence, not issue status alone, determines completion.
-
-Earlier run-state chronology is preserved in Git history. This file replaces
-the July record naming PR #687 and the conflicting one-PR/eight-lane rules.
+Full artist lifecycle/recovery, ERC-20 and additional sale modes, finality and
+state-export recovery, the complete production deployment/parameter topology,
+advanced entropy recovery and external audit/release evidence remain outside
+this first supported build. Their requirements remain in
+[ROADMAP.md](ROADMAP.md) and [EXECUTION_BACKLOG.md](EXECUTION_BACKLOG.md).
