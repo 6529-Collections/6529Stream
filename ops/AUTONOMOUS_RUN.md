@@ -114,10 +114,14 @@ exporter, a second-artist product demonstration and resumable Sepolia stages.
   reverts or discards. Both the successful-activity check and the deliberately
   corrupted payer-accounting oracle test pass. An initial test-helper compiler
   failure is retained separately from the corrected passing run.
-- The seed-bound campaign command, isolated caches, retained failures and CI
-  wiring pass 19 tooling regressions and independent review. Final canonical-source
-  quick/extended campaigns and the full current compilation are running separately;
-  the focused 112-source result is not a full integration/export result.
+- The campaign command and CI wiring pass 19 tooling regressions and independent
+  review. The canonical-source quick run and two extended seeds pass 42,240 input
+  cases and 133,120 stateful calls across 544 sequences, with no unexpected reverts
+  or discards. The warm extended runs take about two minutes each. A separately
+  labeled tiny tooling fixture proves failure retention, exact saved-case replay
+  under a different seed and full-budget success after correcting the property.
+  The full current compilation/export is still separate from this focused
+  112-source campaign result.
 
 Builders exchange adversarial reviews before integration. The owner explicitly
 requests this testing upgrade and defers Lean verification until traditional
