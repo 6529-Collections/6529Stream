@@ -165,7 +165,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 366)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 365)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -3160,7 +3160,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 366)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 365)
         manifest_paths = [record["path"] for record in manifest["files"]]
         checksum_paths = [
             path for _, path in generator.parse_checksum_file(checksum_text)
@@ -3182,7 +3182,6 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/complete-current-stack-collection.ps1"),
             Path("scripts/collector/field-studies.js"),
             Path("scripts/verify_current_stack_collector.mjs"),
-            Path("packages/stream-client/.gitattributes"),
             Path("packages/stream-client/package-lock.json"),
             Path("packages/stream-client/src/client.ts"),
             Path("packages/stream-client/src/snapshot.ts"),

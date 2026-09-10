@@ -85,7 +85,6 @@ REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
         "scripts/collector",
         "scripts/verify_current_stack_collector.mjs",
         "scripts/test_current_stack_collector.mjs",
-        "packages/stream-client/.gitattributes",
         "packages/stream-client/.gitignore",
         "packages/stream-client/README.md",
         "packages/stream-client/package.json",
@@ -117,11 +116,11 @@ TEST_CANONICAL_COVERED_PATHS = tuple(
     )
 )
 if (
-    len(TEST_CANONICAL_COVERED_PATHS) != 366
-    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 366
+    len(TEST_CANONICAL_COVERED_PATHS) != 365
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 365
 ):
     raise AssertionError(
-        "canonical verifier fixtures require exactly 366 unique coverage roots"
+        "canonical verifier fixtures require exactly 365 unique coverage roots"
     )
 TEST_RELEASE_TOOL_ROOTS = (
     Path("tools/security/generate_risk_register.py"),
@@ -799,12 +798,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
             & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 366)
-        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 366)
-        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 366)
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 365)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 365)
+        self.assertEqual(verifier.CANONICAL_COVERED_PATH_COUNT, 365)
         self.assertEqual(
             verifier.CANONICAL_COVERED_PATHS_SHA256,
-            "90baf0d590ea57fde26c29d04c0cfc5213ba9c73796a8535287aedeeb911f471",
+            "5dcf7f4c7919ddf14d19e8d91a574156882219dc7e367a7d41e92d6ef19109d9",
         )
         self.assertIn(
             "tools/development/test_windows_ci_wrapper.py",

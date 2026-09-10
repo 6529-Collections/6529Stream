@@ -285,8 +285,10 @@ compiling a corrected candidate; earlier addresses remain historical evidence.
 `-DeploymentGasEstimateMultiplier` controls the explicit deployment gas margin
 (default 120 percent). Use the same value when resuming. A complete simulation
 must show every buffered limit below the chain cap before the helper signs;
-the corrected candidate uses 115 percent because its exact genesis estimate
-fits the cap with that margin.
+the 45-transaction plan prepared on 10 September 2026 uses 109 percent, with a
+maximum planned limit of 16,627,237 gas. Its 115 percent plan exceeds the cap.
+Choose the margin from the complete fresh plan for each deployment; an earlier
+candidate's accepted margin does not establish that a later plan fits.
 
 Subscription IDs incorporate a block hash. The live helper therefore waits for
 the actual `SubscriptionCreated` receipt before constructing deployment calldata.
@@ -307,11 +309,12 @@ The helper checks the deployed coordinator's `s_config` and `s_provingKeys` befo
 use: 3 confirmations, 1,500,000 callback gas, a 2,500,000 upstream maximum, and
 native subscription billing.
 
-The complete fork rehearsal at Sepolia block 11670719 includes 48 transactions
+The historical fork rehearsal at Sepolia block 11670719 includes 48 transactions
 and all linked libraries: 100,267,574 estimated execution gas before the demo.
 Its largest transaction gas limit at the helper's 120% multiplier is 16,175,894,
 below Sepolia's 16,777,216 cap. These are simulation measurements, not live
-receipts. Each real deployment is simulated again against its actual subscription.
+receipts, and they predate the current 45-transaction plan. Each real deployment
+is simulated again against its actual subscription.
 
 Run the helper's offline receipt/recovery regression checks with:
 

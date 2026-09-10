@@ -21,3 +21,6 @@ release-artifacts/** text eol=lf
 Makefile text eol=lf
 
 *.ps1 text eol=crlf
+
+# Keep generated client projections identical on Windows and Linux.
+packages/stream-client/** text eol=lf

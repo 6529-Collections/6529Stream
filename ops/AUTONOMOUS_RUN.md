@@ -21,7 +21,8 @@ repository reorganization, independent adversarial review, and testnet delivery.
 
 ## Active work
 
-The owner requested further implementation while Sepolia funding is pending.
+The owner requested further implementation while waiting for Sepolia funding.
+That funding has now arrived and the matching current deployment is running.
 The active branch is `codex/offline-release-completion`, from merged
 [PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
 has completed executable product paths in three parallel lanes. The contract changes are
@@ -120,8 +121,10 @@ exporter, a second-artist product demonstration and resumable Sepolia stages.
   or discards. The warm extended runs take about two minutes each. A separately
   labeled tiny tooling fixture proves failure retention, exact saved-case replay
   under a different seed and full-budget success after correcting the property.
-  The full current compilation/export is still separate from this focused
-  112-source campaign result.
+  The focused campaigns use a 112-source closure. Separately, all 36 current
+  tests across seven suites pass. A fresh deployment compilation exports 86
+  targets from 177 sources; all selected ABI and bytecode files match the prior
+  export exactly. Historical snapshots retain their original input identity.
 
 Builders exchange adversarial reviews before integration. The owner explicitly
 requests this testing upgrade and defers Lean verification until traditional
@@ -138,15 +141,15 @@ entropy correction. The prepared
 [replacement compilation](../deployments/current/sepolia-current-rc-1/compilation/manifest.json)
 is also retained exactly; its source paths predate this reorganization.
 
-Additional test ETH is still outstanding for the replacement deployment and
-Chainlink native-payment reserve. The dedicated deployer is
-`0x26A3f4505145b5E6164260cc868e50ddd9863697`; its last observed balance was
-0.062757914017426305 ETH. Reread live balances, fees and nonces before use.
-Only the deployment owner broadcasts. Funding arrival does not authorize using
-a stale compilation: reconcile the reorganized source and compiler artifacts
-first, then run the matching paid mint, real callback, final metadata, both split
-withdrawals and artist transfer. Publish public source/bytecode/configuration
-verification and freeze the supported candidate after those steps pass.
+Funding was confirmed at Sepolia block 11,678,000 on 10 September at 23:00 UTC:
+2.562757914017426305 ETH was available to the dedicated deployer
+`0x26A3f4505145b5E6164260cc868e50ddd9863697`. The fresh 45-transaction plan passed
+preflight against the matching 177-source compilation, and deployment is running
+from the frozen `codex/sepolia-launch-kit` checkout. Only the deployment owner
+broadcasts. The remaining demonstration is a paid mint, real callback, final
+metadata, both split withdrawals and artist transfer. Publish public
+source/bytecode/configuration verification and freeze the supported candidate
+after those steps pass.
 
 Core runtime measurements belong to the
 [canonical bytecode proof](../release-artifacts/latest/bytecode-release-proof.json)
@@ -159,9 +162,9 @@ replacement Sepolia deployment or a frozen testnet release candidate.
 
 The original checkout is clean on merged main. Prior cleanup retired 55 worktrees
 and archived 19 superseded tasks. All 160 original changed/untracked paths, recovery
-refs/bundles and 6,646 ignored files were preserved and verified. Five registered
-worktrees remain: original, integration, developer launch kit, deployer and
-immutable review baseline. The launch-kit checkout is active implementation work,
+refs/bundles and 6,646 ignored files were preserved and verified. Six registered
+worktrees remain: original, integration, developer launch kit, frozen Sepolia
+launch, historical deployer and immutable review baseline. The launch-kit checkout is active implementation work,
 not an abandoned worktree.
 The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
 directory remains after automatic approval review blocked its removal.

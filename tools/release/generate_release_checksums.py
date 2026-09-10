@@ -446,7 +446,7 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("tools/build/verify_release_artifacts.py"): (
-        "7a3ee9162298257beb2e0ec7a3efd0d3fa8274f1bd4f0ee005aad0ce3980a5e3",
+        "e4c60c581ee3bb743d309397e53065c775217b5d145a35290880e735a56551c3",
         179_203,
     ),
 }
@@ -498,7 +498,6 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/verify_current_stack_collector.mjs"),
     Path("scripts/test_current_stack_collector.mjs"),
     # Cover the portable client without local node_modules or generated dist output.
-    Path("packages/stream-client/.gitattributes"),
     Path("packages/stream-client/.gitignore"),
     Path("packages/stream-client/README.md"),
     Path("packages/stream-client/package.json"),
