@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added modular artist content consent, defensive freeze authorization and
+  unused-authorization revocation, preserving the earlier interfaces and owner
+  storage. Current artist/metadata composition and finality admission have
+  separate acceptance work.
 - Added metadata-host content commitments, one-use approval consumption, actual
   evolution witnesses and defensive artist locks, with real Safe administration
   and relayer tests. Modular artist and executed-finality integration remain open.

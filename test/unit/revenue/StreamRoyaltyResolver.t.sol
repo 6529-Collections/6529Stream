@@ -129,7 +129,7 @@ contract StreamRoyaltyResolverTest is StreamCurrentStackFixture {
         require(receiver == wallet && amount == type(uint256).max / 10, "maximum-price safe math");
         _configureUnbound(bytes32(0), 0);
         uint16 bps;
-        (receiver, bps) = resolver.royaltyReceiverAndBps(address(core), UNBOUND, 1, 1, true);
+        (receiver, bps) = resolver.royaltyReceiverAndBps(address(core), 999, 1, UNBOUND, true);
         require(
             receiver == address(0) && bps == 0,
             "explicit zero shadows default before artist binding"
@@ -185,7 +185,7 @@ contract StreamRoyaltyResolverTest is StreamCurrentStackFixture {
         );
         _configureDefault(bytes32(0), 0);
         (address receiver, uint16 bps) =
-            resolver.royaltyReceiverAndBps(address(core), UNBOUND, 1, 1, true);
+            resolver.royaltyReceiverAndBps(address(core), 999, 1, UNBOUND, true);
         require(receiver == wallet && bps == 500, "frozen snapshot survives default change");
         vm.expectRevert();
         this.configureForTest(UNBOUND, profile, 690);
@@ -197,7 +197,7 @@ contract StreamRoyaltyResolverTest is StreamCurrentStackFixture {
         _freeze(UNBOUND);
         _configureDefault(profile, 500);
         (address receiver, uint16 bps) =
-            resolver.royaltyReceiverAndBps(address(core), UNBOUND, 1, 1, true);
+            resolver.royaltyReceiverAndBps(address(core), 999, 1, UNBOUND, true);
         require(
             receiver == address(0) && bps == 0 && resolver.collectionRoyalty(UNBOUND).frozen,
             "zero snapshot cannot drift"
@@ -453,7 +453,19 @@ contract StreamRoyaltyResolverTest is StreamCurrentStackFixture {
         batch.tokenData[0] = TOKEN_DATA;
         batch.mintCommitments[0] = keccak256("royalty commitment");
         batch.expectedPolicyHash = manager.phasePolicyHash(1, ROYALTY_PHASE);
+        batch.authorizationId = keccak256(
+            abi.encode(
+                "royalty test mint",
+                block.chainid,
+                address(manager),
+                batch.collectionId,
+                batch.phaseId,
+                manager.nextOperationNonce(),
+                batch.mintCommitments[0]
+            )
+        );
         (uint256[] memory ids,,) = manager.executeSingleStepMint(batch, "");
+        require(manager.isAuthorizationUsed(batch.authorizationId), "mint authorization consumed");
         return ids[0];
     }
 }

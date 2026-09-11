@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `8b1a048b` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `bcb43e06` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,15 +30,18 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
-| Artist | `codex/v1-artist-authority` | Collaborator handoff followed by actual template economics consent and remaining artist operations |
-| Revenue | `codex/v1-revenue` | Template-sale handoff followed by shared settlement and explicit permit branches |
+| Artist | `codex/v1-artist-authority` | Content consent and defensive freeze handoff, then remaining identity and authority operations |
+| Revenue | `codex/v1-revenue` | Actual shared settlement and permit consumers, then missing sale mechanisms |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
 expected-binding acceptance are integrated. Collaborator operations 5/6/7
 (`90369bf0`) and current template economics consent (`871046b2`) bring the
-integration source to 15 of the 57 artist operation IDs. Artist work continues
-with authorization revocation, followed by the content-authority operations.
+integration source to 15 of the 57 artist operation IDs. Revocation operation 54
+is integrated as `6a0f5a4f`; content-authority operations 17 and 21 are integrated
+as `bcb43e06`, bringing the source count to 18. Their 96-case domain suite and
+exact production artifacts received independent review. The metadata counterpart
+is committed separately as `f73882e0`; actual composition tests are running.
 
 Collection template materialization and typed economics facts are integrated.
 Template fixed-sale funding (`ddf01864`) passed 76 focused tests and four fuzz
@@ -57,9 +60,12 @@ is preserved. The Safe assertion is corrected in source.
 The new combined snapshot passed all 39 executed Safe, ERC-20, native-sale,
 auction and invariant cases, including actual Safe template consent/purchase/
 escrow/flush/claim and 2,048 stateful calls with zero reverts. Its 11 royalty cases
-were blocked during setup by a one-day execution window below the required
-seven-day floor. The one-line correction is source-reviewed; a separate copied
-snapshot reruns those 11 cases. All original sources/results remain preserved.
+were initially blocked by a one-day execution window below the seven-day floor.
+The corrected window exposed six fixture errors: three omitted authorization
+IDs and three reads passed the wrong mapped collection. Five tests passed.
+The corrected requests pass all 11 cases in a separate unchanged-production
+snapshot, independently reviewed. Original results remain. The evidence is the
+original 39 cases plus this separate 11-case run, not a latest-source full pass.
 These planning gas allowances do not establish normative cold-gas acceptance.
 
 The metadata host counterpart for artist content consent and defensive freezes
@@ -79,8 +85,10 @@ targets retained RC1; migration to the new stack remains explicit work.
 Independently accepted fixture migration checkpoints include 58 historical
 Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factory/
 auction domain tests. The royalty fixture now uses actual current artist consent
-and canonical governance publication. The latest ABI-only check covers 440 Solidity sources with no errors. This is not a broad
-build or candidate acceptance. Client checks pass 47 tests; three new tests also
+and canonical governance publication. The latest ABI-only check covers 443
+Solidity sources with no errors before the content-owner integration; the latest
+check includes 446 sources without errors. This is not a broad build or candidate
+acceptance. Client checks pass 47 tests; three new tests also
 exercise successful and failed calls through actual pinned Safe versions.
 
 The next draft PR will contain a coherent tested implementation increment.

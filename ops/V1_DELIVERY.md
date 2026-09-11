@@ -101,7 +101,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | FOUND-01 | Actual metadata content-state and primary/royalty assignment reads plus required mutation/consent hooks supply the artist floor records | Integrator; parallel with ART-01, no dependency on advanced ART-03 or META-01 | Building |
 | ART-01 | Identity, binding, acceptance, exact mint consent and independent pause; actual economics, first-release and attestation prerequisites make an eligible mint possible | Artist; internal typed/storage decision | Building |
 | ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist + integrator; ART-01 | Building: prospective fixed-profile economics and exact defensive royalty freeze integrated through actual providers and Safe; scoped economics/freeze delegation source integrated; refusal/withdrawal and collaborators active |
-| ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Queued |
+| ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Building: actual content consent/freeze owners and metadata host; wider sanction/dispute/finality admission still pending |
 | ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Queued |
 | ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
 | PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Integrated: `f6cac4ef`, 21 focused tests in both compiler profiles; candidate validation pending |
@@ -283,8 +283,11 @@ artist tests), bringing the integrated source to 15 of the 57 operation IDs.
 Template fixed-sale funding is integrated as `ddf01864` (76 tests and four fuzz
 properties per mode). Governed permit-capability attestations are integrated as
 `3287fcd5` (13 tests plus fuzzing per mode). Independent review accepted these
-increments. Artist work continues with operation 54 and content authority;
-revenue work continues with shared settlement and actual permit consumers.
+increments. Revocation operation 54 is integrated as `6a0f5a4f`, bringing the
+source to 16 operation IDs. Content consent/freeze operations 17 and 21 are
+integrated as `bcb43e06`, bringing the source to 18; 96 domain tests and exact
+production artifacts received independent review. Revenue work continues with
+shared settlement and actual permit consumers.
 
 Root's completed combined snapshot passed 36 cases: all nine ERC-20 and all 22
 native-sale/auction unit cases passed. One new Safe test asserted the wrong event
@@ -298,17 +301,23 @@ auction and invariant cases passing. This includes actual Safe template consent,
 paid mint, deferred profile registration, escrow, deployment, flush and claim,
 plus 2,048 stateful calls without handler reverts. Its 11 royalty cases were
 blocked by a test scheduling window shorter than the required seven-day floor.
-A one-line correction is reviewed and a separate unchanged-production snapshot
-reruns those cases. Exact original sources, compiler outputs and failure remain
-preserved. Planning allowances do not establish normative cold-gas conformance.
+The corrected-window snapshot passed five cases and exposed six fixture errors:
+three omitted mint authorization IDs and three wrong mapped-collection arguments.
+The corrected requests pass all 11 cases in a separate unchanged-production
+snapshot, independently reviewed. The evidence is the original 39 cases plus
+this separate 11-case run, not a latest-source full pass. Original sources,
+compiler outputs and failures remain preserved. Planning allowances do not
+establish cold-gas conformance.
 
 The metadata host now implements content-family commitments, one-use consent
 consumption, actual evolution witnesses, and permissionless defensive freezes.
 Its independently reviewed 30-case domain suite covers replay/staleness, exact
 events, BASE_URI combined-setter closure, actual Safe administration and a
 separate Safe freeze relayer. It uses an explicit artist authorization boundary;
-actual artist operations17/21 and the executed-finality provider remain pending.
-The two narrow content-authority interfaces are integrated as `8b1a048b`.
+actual artist operations 17/21 are now source-integrated, with two actual-current
+content/mint workflows and the five existing Safe cases running together. The
+executed-finality provider remains pending. The two narrow content-authority
+interfaces are integrated as `8b1a048b`.
 
 Migration checkpoints independently accepted during this integration:
 
@@ -319,8 +328,8 @@ Migration checkpoints independently accepted during this integration:
 - 75 resolver/factory/auction domain cases with governed constructor authority.
 
 The royalty suite now uses actual current artist consent and canonical governance
-publication. The latest whole-repository ABI-only check covers 440 Solidity sources with
-zero errors. Broad compilation and candidate
+publication. The latest whole-repository ABI-only check covers 446 Solidity
+sources with zero errors. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
