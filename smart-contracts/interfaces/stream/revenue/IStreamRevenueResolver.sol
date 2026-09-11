@@ -52,6 +52,9 @@ interface IStreamRevenueResolver {
     error UnsupportedAccountSource(bytes32 accountSource);
     /// @notice Reverts when a dynamic account source materializes to zero.
     error InvalidMaterializedAccount(bytes32 accountSource);
+    error MissingArtistMaterializationContext();
+    error UnresolvableArtistBeneficiary(uint256 collectionId);
+    error InsufficientArtistBeneficiaryGas(uint256 requiredCap, uint256 available);
     /// @notice Reverts when a frozen assignment would be changed or cleared.
     error PrimaryAssignmentFrozen(bytes32 revenueClass, uint8 scope, uint256 scopeId);
     /// @notice Reverts when freezing a missing assignment.
@@ -113,6 +116,20 @@ interface IStreamRevenueResolver {
         address salePoster
     );
 
+    /// @notice Current-read witness for a public cache operation, never official sale evidence.
+    event CollectionTemplateMaterialized(
+        bytes32 indexed templateId,
+        bytes32 indexed profileId,
+        uint256 indexed collectionId,
+        uint16 schemaVersion,
+        bytes32 artistId,
+        address payoutAccount,
+        bytes32 designationRecordHash,
+        address wallet,
+        bytes32 entriesHash,
+        bool walletDeployed
+    );
+
     /// @notice Default resolver scope.
     function SCOPE_DEFAULT() external pure returns (uint8);
     /// @notice Collection resolver scope.
@@ -125,6 +142,9 @@ interface IStreamRevenueResolver {
     function ASSIGNMENT_TYPE_TEMPLATE() external pure returns (uint8);
     /// @notice Dynamic account source for the poster attached to a sale.
     function ACCOUNT_SOURCE_SALE_POSTER() external pure returns (bytes32);
+    function ACCOUNT_SOURCE_COLLECTION_ARTIST() external pure returns (bytes32);
+    function ARTIST_LABEL() external pure returns (bytes32);
+    function ARTIST_BENEFICIARY_READ_GAS() external pure returns (bytes32);
     /// @notice The split factory used to verify and materialize profiles.
     function splitFactory() external view returns (address);
     /// @notice Permanent Core whose collection and token identity govern this resolver.
@@ -175,6 +195,15 @@ interface IStreamRevenueResolver {
     function materializePrimaryProfile(bytes32 templateId, address salePoster)
         external
         returns (bytes32 profileId, address wallet, bytes32 entriesHash);
+    /// @notice Collection-aware public cache; reads the currently accepted explicit artist payout.
+    /// @dev Registration-only returns a predicted wallet, which is not proof of deployment.
+    ///      This does not authorize TEMPLATE assignment or a sale; old fixed profiles keep their payees.
+    function materializeCollectionPrimaryProfile(
+        bytes32 templateId,
+        uint256 collectionId,
+        address salePoster,
+        bool deployWallet
+    ) external returns (bytes32 profileId, address wallet, bytes32 entriesHash);
     /// @notice Returns deterministic template metadata.
     function primaryTemplate(bytes32 templateId)
         external
