@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
+import "./StreamArtistNonceAvailability.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -9,11 +10,13 @@ import {
 /// @notice Sole owner of artist identities, authorization replay, liveness and signature bytes.
 /// @dev Supports the onboarding operation subset; no rotation, delegation or recovery is implied.
 contract StreamArtistIdentityAuthority is StreamArtistOwner {
+    using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
     uint256 public nextRegistrationNonce;
     mapping(bytes32 => T.Identity) private _identities;
     mapping(address => bytes32) public activeIdentity;
     mapping(bytes32 => bytes) private _documents;
     mapping(bytes32 => bytes) private _signatures;
+    mapping(bytes32 => StreamArtistNonceAvailability.Index) private _nonceAvailability;
 
     event ArtistIdentityRegistered(
         uint16 schemaVersion,
@@ -47,6 +50,21 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
 
     function identity(bytes32 artistId) external view returns (T.Identity memory) {
         return _identities[artistId];
+    }
+
+    /// @notice Fixed-size authority facts; avoids copying URI/display strings on capped mint reads.
+    function authorityState(bytes32 artistId)
+        external
+        view
+        returns (
+            address authorityAddress,
+            uint8 authorityClass,
+            uint8 status,
+            bytes32 identityRecordHash
+        )
+    {
+        T.Identity storage item = _identities[artistId];
+        return (item.authorityAddress, item.authorityClass, item.status, item.identityRecordHash);
     }
 
     function identityDocumentBytes(bytes32 documentHash) external view returns (bytes memory) {
@@ -263,6 +281,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             keccak256(abi.encode(artistId, a.nonce)),
             digest
         );
+        bytes32 availabilityDelta = _nonceAvailability[artistId].consume(a.nonce);
         bytes32 attestationKey;
         if (c.operationId == 24) {
             attestationKey = _consume(
@@ -272,16 +291,10 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             );
         }
         item.lastAuthorityActionAt = _now();
-        // Relayed nonces remain unordered. Advance the direct-call allocator only when
-        // its value was consumed; each previously consumed slot is skipped at most once.
+        // Relayed nonce validity is independent of the allocator. Updating the hint
+        // uses a fixed-depth index, never a scan across earlier signed submissions.
         if (a.nonce == item.nonceHint) {
-            uint256 candidate = a.nonce;
-            do {
-                unchecked {
-                    ++candidate;
-                }
-            } while (nonceUsed(artistId, candidate));
-            item.nonceHint = candidate;
+            (, item.nonceHint) = _nonceAvailability[artistId].firstUnused();
         }
         _signatures[record] = a.signature;
         _commit(
@@ -292,6 +305,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
                 abi.encode(
                     nonceKey,
                     digest,
+                    availabilityDelta,
                     attestationKey,
                     attestationKey == bytes32(0) ? bytes32(0) : record
                 )

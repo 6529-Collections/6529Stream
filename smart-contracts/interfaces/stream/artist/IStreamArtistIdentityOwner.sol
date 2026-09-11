@@ -7,6 +7,17 @@ import { StreamArtistOnboardingTypes as T } from "./StreamArtistOnboardingTypes.
 /// @notice Typed IdentityAuthority owner boundary for the seven-operation onboarding profile.
 /// @dev Mutations require the immutable coordinator and exact pre-operation owner snapshot.
 interface IStreamArtistIdentityOwner is IStreamArtistOwner {
+    /// @notice Fixed-size operative authority facts for capped mint and consent reads.
+    /// @dev Canonical document bytes and mirrors remain available through identity/document reads.
+    function authorityState(bytes32 artistId)
+        external
+        view
+        returns (
+            address authorityAddress,
+            uint8 authorityClass,
+            uint8 status,
+            bytes32 identityRecordHash
+        );
     function nextRegistrationNonce() external view returns (uint256);
 
     function activeIdentity(address account) external view returns (bytes32);

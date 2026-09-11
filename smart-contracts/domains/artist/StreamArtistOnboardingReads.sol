@@ -34,11 +34,12 @@ contract StreamArtistOnboardingReads {
         b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
         (uint8 state, uint64 generation) =
             IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);
-        T.Identity memory artist = IStreamArtistIdentityOwner(_suite.owners[2]).identity(b.artistId);
+        (address authority, uint8 authorityClass, uint8 identityStatus, bytes32 identityHash) =
+            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         if (
-            !b.accepted || state != 2 || generation != b.generation || artist.status != 1
-                || artist.authorityAddress != b.artistAddress
-                || artist.identityRecordHash != b.identityRecordHash
+            !b.accepted || state != 2 || generation != b.generation || identityStatus != 1
+                || authorityClass != 1 || authority != b.artistAddress
+                || identityHash != b.identityRecordHash
         ) {
             revert T.InvalidAttribution(collectionId);
         }
@@ -54,7 +55,9 @@ contract StreamArtistOnboardingReads {
         (uint8 state,) =
             IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);
         if (!b.accepted || state != 2) return address(0);
-        return IStreamArtistIdentityOwner(_suite.owners[2]).identity(b.artistId).authorityAddress;
+        (address authority,,,) =
+            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
+        return authority;
     }
 
     function attribution(uint256 collectionId)
@@ -63,12 +66,13 @@ contract StreamArtistOnboardingReads {
         returns (IStreamCollectionArtistRegistry.Attribution memory result)
     {
         T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
-        T.Identity memory artist = IStreamArtistIdentityOwner(_suite.owners[2]).identity(b.artistId);
+        (address authority,,, bytes32 identityHash) =
+            IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         IStreamArtistAcceptanceOwner acceptance = IStreamArtistAcceptanceOwner(_suite.owners[3]);
         result = IStreamCollectionArtistRegistry.Attribution(
             b.artistAddress,
-            b.accepted ? artist.authorityAddress : address(0),
-            artist.identityRecordHash,
+            b.accepted ? authority : address(0),
+            identityHash,
             b.bindingHash,
             acceptance.acceptanceRecord(b.bindingHash),
             b.generation,

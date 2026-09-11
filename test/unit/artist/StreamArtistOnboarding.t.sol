@@ -305,7 +305,13 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         p.artistId = id;
         p.artistAddress = address(artist);
         p.identityRecordHash = keccak256("unit identity document");
-        p.identityRecordURI = "urn:artist:identity";
+        // Exercise the normative maximum URI in every capped consent-read scenario.
+        bytes memory uri = new bytes(2048);
+        bytes memory prefix = bytes("urn:artist:");
+        for (uint256 i; i < uri.length; ++i) {
+            uri[i] = i < prefix.length ? prefix[i] : bytes1("a");
+        }
+        p.identityRecordURI = string(uri);
         p.consentMode = 1;
         p.collaborators = new T.CollaboratorRecord[](0);
         p.capabilityPolicyOverrides = new T.CapabilityPolicyOverride[](0);
@@ -861,6 +867,14 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         T.Authorization memory low = T.Authorization(2, high.time, "");
         low.signature = _signature(ingress.policyConsentDigest(p, low));
         ingress.recordPolicyConsent(p, low);
+        T.Authorization memory gap = T.Authorization(1, high.time, "");
+        p.policyHash = keccak256("fill allocator gap");
+        gap.signature = _signature(ingress.policyConsentDigest(p, gap));
+        ingress.recordPolicyConsent(p, gap);
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint == 3,
+            "direct allocator skips previously signed value using bounded index"
+        );
         address other = vm.addr(0xA247);
         T.BindingProposal memory proposal = _proposal(bytes32(0));
         proposal.artistAddress = other;
