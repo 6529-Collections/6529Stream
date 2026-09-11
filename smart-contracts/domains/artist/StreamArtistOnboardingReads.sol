@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 import "./StreamArtistHashes.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
@@ -62,6 +64,37 @@ contract StreamArtistOnboardingReads {
         }
     }
 
+    function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)
+        public
+        view
+        returns (C.Row memory)
+    {
+        T.Binding memory b =
+            IStreamArtistBindingOwner(_suite.owners[0]).bindingAt(collectionId, generation);
+        T.CollaboratorRecord memory p = IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
+            .collaboratorTerm(collectionId, generation, index);
+        C.Join memory j = IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])
+            .acceptedRow(b.bindingHash, p.account, p.role, p.shareLabelId);
+        return C.Row(
+            p.account,
+            p.role,
+            p.shareLabelId,
+            j.artistId,
+            j.acceptanceRecordHash,
+            j.artistId != bytes32(0)
+        );
+    }
+
+    function collaboratorPayoutAccount(bytes32 artistId, address account)
+        public
+        view
+        returns (address, bytes32)
+    {
+        if (!IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])
+                .identityLinked(artistId, account)) return (address(0), bytes32(0));
+        return IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
+    }
+
     function consentMode(uint256 collectionId) external view returns (uint8) {
         T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
         return b.accepted ? b.consentMode : 0;
@@ -77,6 +110,8 @@ contract StreamArtistOnboardingReads {
         return authority;
     }
 
+    /// @notice Acceptance hash/time describe the primary's recorded acceptance, even before set completion.
+    /// @dev The artist field remains zero until all required rows complete; timestamps are not readiness flags.
     function attribution(uint256 collectionId)
         external
         view
@@ -192,6 +227,7 @@ contract StreamArtistOnboardingReads {
         // Both admitted resolvers expose the same splitFactory() ABI. Read this
         // resolver's actual factory, never substitute the primary factory for royalty.
         _requireProfilePayout(
+            p.collectionId,
             p.resolver,
             IStreamRevenueResolver(p.resolver).splitFactory(),
             candidate.profileHash,
@@ -328,10 +364,11 @@ contract StreamArtistOnboardingReads {
         } else {
             revert T.UnsupportedProfile();
         }
-        _requireProfilePayout(resolver, factory, profileId, payout);
+        _requireProfilePayout(collectionId, resolver, factory, profileId, payout);
     }
 
     function _requireProfilePayout(
+        uint256 collectionId,
         address resolver,
         address factory,
         bytes32 profileId,
@@ -355,6 +392,30 @@ contract StreamArtistOnboardingReads {
         }
         if (artistShare == 0 || (resolver == _suite.primaryResolver && artistShare < 500_000)) {
             revert T.InvalidRecord();
+        }
+        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
+        uint32 required =
+            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
+        .bindingTerms(collectionId, b.generation)
+        .count;
+        for (uint256 i; i < required; ++i) {
+            C.Row memory row = collaboratorAt(collectionId, b.generation, i);
+            if (!row.accepted) revert T.InvalidAttribution(collectionId);
+            if (row.shareLabelId == bytes32(0)) continue;
+            (address collaboratorPayout, bytes32 designation) =
+                collaboratorPayoutAccount(row.collaboratorArtistId, row.account);
+            if (collaboratorPayout == address(0) || designation == bytes32(0)) {
+                revert T.MissingMintPrerequisite(keccak256("collaborator_payout"));
+            }
+            uint256 collaboratorShare;
+            for (uint256 j; j < count; ++j) {
+                (address account, uint32 share, bytes32 label) = splits.profileEntry(profileId, j);
+                if (label == row.shareLabelId) {
+                    if (account != collaboratorPayout) revert T.InvalidRecord();
+                    collaboratorShare += share;
+                }
+            }
+            if (collaboratorShare == 0) revert T.InvalidRecord();
         }
     }
 

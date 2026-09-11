@@ -6,6 +6,8 @@ import "../../interfaces/stream/core/IStreamCoreCollectionView.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingTerminationOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionBindingOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol";
 
 /// @notice Linked typed pending-binding recipes behind the Coordinator's authentication, code checks and lock.
 /// @dev Owns no semantic state. Hash functions use the explicit immutable registry environment.
@@ -50,20 +52,25 @@ library StreamArtistBindingOperations {
                 T.ActionContext(2, actor, before_[3]), collectionId, b, proof.signer, a.nonce
             );
         if (actual != record) revert T.InvalidRecord();
-        IStreamArtistBindingOwner(x.suite.owners[0])
-            .accept(T.ActionContext(2, actor, before_[0]), collectionId, b.bindingHash, record);
-        IStreamArtistAttributionOwner(x.suite.owners[4])
-            .accept(T.ActionContext(2, actor, before_[4]), collectionId, b, record);
-        _archive(
-            x,
-            2,
-            actor,
-            record,
-            before_,
-            expected
-                ? abi.encode(collectionId, b, a, proof, expectedGeneration, expectedHash)
-                : abi.encode(collectionId, b, a, proof)
-        );
+        uint32 required =
+            IStreamArtistCollaboratorBindingOwner(x.suite.owners[0])
+        .bindingTerms(collectionId, b.generation)
+        .count;
+        uint32 accepted =
+            IStreamArtistCollaboratorRecordsOwner(x.suite.owners[1]).acceptedCount(b.bindingHash);
+        if (accepted > required) revert T.InvalidRecord();
+        bool complete = accepted == required;
+        if (complete) {
+            IStreamArtistBindingOwner(x.suite.owners[0])
+                .accept(T.ActionContext(2, actor, before_[0]), collectionId, b.bindingHash, record);
+            IStreamArtistAttributionOwner(x.suite.owners[4])
+                .accept(T.ActionContext(2, actor, before_[4]), collectionId, b, record);
+        }
+        bytes memory payload = expected
+            ? abi.encode(collectionId, b, a, proof, expectedGeneration, expectedHash)
+            : abi.encode(collectionId, b, a, proof);
+        if (required != 0) payload = abi.encode(payload, required, accepted, complete);
+        _archive(x, 2, actor, record, before_, payload);
     }
 
     function _verify(
@@ -73,7 +80,9 @@ library StreamArtistBindingOperations {
         bytes32 digest,
         bytes memory signature
     ) private view returns (T.SignerApproval memory) {
-        if (actor == address(0) || signer == address(0)) revert T.InvalidSignature();
+        if (actor == address(0) || signer == address(0)) {
+            revert T.InvalidSignature();
+        }
         bool direct = actor == signer && signature.length == 0;
         if (!direct) {
             (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistBindingOperations.sol";
+import "./StreamArtistCollaboratorHashes.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -12,6 +13,8 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
     mapping(uint256 => T.Binding) private _bindings;
     mapping(uint256 => mapping(uint64 => T.Binding)) private _history;
     mapping(uint256 => mapping(uint64 => L.Terminal)) private _terminals;
+    mapping(uint256 => mapping(uint64 => C.BindingTerms)) private _terms;
+    mapping(uint256 => mapping(uint64 => T.CollaboratorRecord[])) private _collaborators;
     event ArtistBindingProposed(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -87,7 +90,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         uint64 generation = previous.generation + 1;
         if (
             p.consentMode != 1 || p.saleConsentScope != 0 || p.registryImmutabilityElection > 1
-                || p.collabPolicyMode != 0 || p.collabThreshold != 0 || p.collaborators.length != 0
+                || p.collabPolicyMode != 0 || p.collabThreshold != 0
                 || p.capabilityPolicyOverrides.length != 0
         ) revert T.UnsupportedProfile();
         if (bytes(p.reasonURI).length > 2048) {
@@ -105,7 +108,10 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             c.actor,
             false
         );
-        item.bindingHash = StreamArtistHashes.binding(_environment(), collectionId, item);
+        _storeTerms(collectionId, generation, p.collaborators);
+        item.bindingHash = StreamArtistCollaboratorHashes.binding(
+            _environment(), collectionId, item, p.collaborators
+        );
         _bindings[collectionId] = item;
         _history[collectionId][item.generation] = item;
         bytes32 key = _consume(
@@ -132,7 +138,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             item.registryImmutabilityElection,
             0,
             0,
-            StreamArtistHashes.emptyCollaborators(),
+            _terms[collectionId][generation].collaboratorSetHash,
             StreamArtistHashes.emptyCapabilities(),
             c.actor,
             p.reasonHash,
@@ -147,6 +153,25 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         bytes32 acceptanceRecord
     ) external {
         _check(c, 2);
+        _complete(c, collectionId, bindingHash, acceptanceRecord);
+    }
+
+    function completeCollaboratorBinding(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 bindingHash,
+        bytes32 acceptanceRecord
+    ) external {
+        _check(c, 7);
+        _complete(c, collectionId, bindingHash, acceptanceRecord);
+    }
+
+    function _complete(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        bytes32 bindingHash,
+        bytes32 acceptanceRecord
+    ) private {
         T.Binding storage item = _bindings[collectionId];
         if (
             item.generation == 0 || item.accepted || item.bindingHash != bindingHash
@@ -163,6 +188,51 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             keccak256(abi.encode(collectionId, item)),
             bytes32(0),
             bytes32(0)
+        );
+    }
+
+    function bindingTerms(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (C.BindingTerms memory)
+    {
+        return _terms[collectionId][generation];
+    }
+
+    function collaboratorTerm(uint256 collectionId, uint64 generation, uint256 index)
+        external
+        view
+        returns (T.CollaboratorRecord memory)
+    {
+        return _collaborators[collectionId][generation][index];
+    }
+
+    function _storeTerms(
+        uint256 collectionId,
+        uint64 generation,
+        T.CollaboratorRecord[] calldata rows
+    ) private {
+        if (rows.length > 32) revert T.BoundExceeded(rows.length, 32);
+        for (uint256 i; i < rows.length; ++i) {
+            T.CollaboratorRecord calldata row = rows[i];
+            if (row.account == address(0)) revert T.InvalidRecord();
+            if (i != 0) {
+                T.CollaboratorRecord calldata prior = rows[i - 1];
+                // Strict (account,role) ordering also satisfies sorted triples and excludes duplicate pairs.
+                if (
+                    uint160(row.account) < uint160(prior.account)
+                        || (row.account == prior.account
+                            && uint256(row.role) <= uint256(prior.role))
+                ) revert T.InvalidRecord();
+            }
+            _collaborators[collectionId][generation].push(row);
+        }
+        _terms[collectionId][generation] = C.BindingTerms(
+            StreamArtistCollaboratorHashes.collaboratorSetHash(rows),
+            StreamArtistHashes.emptyCapabilities(),
+            0,
+            0,
+            uint32(rows.length)
         );
     }
 
@@ -224,8 +294,8 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
                 || _terminals[p.collectionId][p.generation].kind != 0
         ) revert T.InvalidAttribution(p.collectionId);
         if (p.reasonHash == bytes32(0)) revert T.InvalidRecord();
-        if (bytes(p.reasonURI).length > 2048) revert T.BoundExceeded(
-            bytes(p.reasonURI).length, 2048
-        );
+        if (bytes(p.reasonURI).length > 2048) {
+            revert T.BoundExceeded(bytes(p.reasonURI).length, 2048);
+        }
     }
 }

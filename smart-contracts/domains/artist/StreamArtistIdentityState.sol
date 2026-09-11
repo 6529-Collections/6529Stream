@@ -44,6 +44,45 @@ library StreamArtistIdentityState {
         bytes32 indexed artistId, bytes32 indexed identityRecordHash, string displayName
     );
 
+    function payoutProof(
+        StreamArtistHashes.Environment memory e,
+        T.PayoutDesignation memory p,
+        address signer,
+        T.Authorization memory a
+    ) public pure returns (bytes32 record, bytes32 digest) {
+        return (
+            StreamArtistHashes.payoutRecord(e, p, signer, a.nonce, a.time),
+            StreamArtistHashes.payoutDigest(e, p, a)
+        );
+    }
+
+    function attestationProof(
+        StreamArtistHashes.Environment memory e,
+        T.Binding memory b,
+        T.Attestation memory p,
+        address signer,
+        T.Authorization memory a
+    ) public pure returns (bytes32 record, bytes32 digest) {
+        return (
+            StreamArtistHashes.attestationRecord(e, p, b.artistId, signer, a.nonce, a.time),
+            StreamArtistHashes.attestationDigest(e, p, a)
+        );
+    }
+
+    function ratificationProof(
+        StreamArtistHashes.Environment memory e,
+        T.Binding memory b,
+        T.Ratification memory p,
+        address signer,
+        T.Authorization memory a,
+        uint64 observed
+    ) public pure returns (bytes32 record, bytes32 digest) {
+        return (
+            StreamArtistHashes.ratificationRecord(e, p, b.artistId, signer, a.nonce, observed),
+            StreamArtistHashes.ratificationDigest(e, p, a)
+        );
+    }
+
     function register(
         State storage state,
         mapping(bytes32 => T.ReplayCell) storage replay,

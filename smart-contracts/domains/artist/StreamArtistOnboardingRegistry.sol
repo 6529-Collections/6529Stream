@@ -5,6 +5,7 @@ import "./StreamArtistEconomicsHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegation.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingLifecycle.sol";
 import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorLifecycle.sol";
 
 import "./StreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
@@ -28,6 +29,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistDelegation,
     IStreamArtistBindingLifecycle,
     IStreamArtistBeneficiaryFacts,
+    IStreamArtistCollaboratorLifecycle,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -83,7 +85,102 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistEconomicsAuthority).interfaceId
             || id == type(IStreamArtistDelegation).interfaceId
             || id == type(IStreamArtistBindingLifecycle).interfaceId
-            || id == type(IStreamArtistBeneficiaryFacts).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistBeneficiaryFacts).interfaceId
+            || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
+            || super.supportsInterface(id);
+    }
+
+    function proposeCollaboratorIdentity(C.IdentityProposal calldata p) external returns (bytes32) {
+        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
+            .coordinateProposeCollaboratorIdentity(msg.sender, p);
+    }
+
+    function acceptCollaboratorIdentity(
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
+            .coordinateAcceptCollaboratorIdentity(
+                msg.sender, account, identityRecordHash, a, document, displayName
+            );
+    }
+
+    function acceptCollaborator(C.BindingAcceptance calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
+            .coordinateAcceptCollaborator(msg.sender, p, a);
+    }
+
+    function collaboratorIdentityDigest(
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        return StreamArtistCollaboratorHashes.identityDigest(
+            _environment(), account, identityRecordHash, a
+        );
+    }
+
+    function collaboratorAcceptanceDigest(
+        C.BindingAcceptance calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        return StreamArtistCollaboratorHashes.acceptanceDigest(_environment(), p, a);
+    }
+
+    function collaboratorIdentityProposal(address account, bytes32 identityRecordHash)
+        external
+        view
+        returns (C.IdentityProposalState memory)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistCollaboratorRecordsOwner(s.owners[1])
+            .identityProposal(account, identityRecordHash);
+    }
+
+    function collaboratorRegistrationNonceState(address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistCollaboratorIdentityOwner(s.owners[2])
+            .collaboratorRegistrationNonceState(account, nonce);
+    }
+
+    function collaboratorCount(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (uint256)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistCollaboratorBindingOwner(s.owners[0])
+        .bindingTerms(collectionId, generation)
+        .count;
+    }
+
+    function collaboratorAt(uint256 collectionId, uint64 generation, uint256 index)
+        external
+        view
+        returns (C.Row memory)
+    {
+        return _reads().collaboratorAt(collectionId, generation, index);
+    }
+
+    function collaboratorPayoutAccount(bytes32 artistId, address account)
+        external
+        view
+        returns (address, bytes32)
+    {
+        return _reads().collaboratorPayoutAccount(artistId, account);
     }
 
     function grantArtistDelegation(D.Grant calldata p, T.Authorization calldata a)
@@ -337,6 +434,7 @@ contract StreamArtistOnboardingRegistry is
         return _reads().acceptedArtist(collectionId);
     }
 
+    /// @notice Primary acceptance hash/time are historical evidence; artist is zero until whole-set acceptance.
     function attribution(uint256 collectionId)
         external
         view

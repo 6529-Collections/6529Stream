@@ -5,9 +5,10 @@ profile. Its address is the identity used in artist IDs, EIP712 domains, binding
 records, owner configuration, and archive evidence. `StreamArtistRegistryV2`
 remains the earlier immutable directory; it does not own these new records.
 
-The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, no collaborators
-or capability overrides, and operator-set sale parameters. Operations 1, 2, 3, 4, 14,
-15, 18, 20, 24, 26, 27, and 52 have typed entrypoints. The full 57-operation API is not
+The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
+collaborator rows, no capability overrides, and operator-set sale parameters.
+Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 18, 20, 24, 26, 27, and 52 have typed entrypoints.
+The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
 finality operations.
@@ -24,6 +25,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
 | Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
 | Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
+| Two-sided collaborator registration, row acceptance, and generation-scoped reads | `IStreamArtistCollaboratorLifecycle` |
 | Immutable owner identity, snapshot, and replay cell | `IStreamArtistOwner` |
 | Each domain's typed reads and coordinator-only writes | The seven `IStreamArtist*Owner` interfaces |
 
@@ -48,6 +50,41 @@ append is atomic with every owner write and nonce consumption. The archive is
 evidence storage, not a current-state authority. Identity reuse across a second
 collection validates the existing identity without re-registering it or changing
 its liveness; Binding and Attribution own the new collection records.
+
+Collaborator identities are staged by an admin and allocated only after the
+named account accepts with a direct call or verified signature. Identity stores
+the actual document bytes. The permanent signature omits the global allocation
+nonce, so a separate persistent account nonce/digest lane prevents replay across
+future identity reuse; the same nonce is consumed in the allocated identity too.
+Direct registration uses `collaboratorRegistrationNonceState` to read the account
+lane's unused nonce. Both lanes and the proposal completion roll back if any
+later owner or archive step fails.
+
+Binding owns the immutable sorted `(account, role, shareLabelId)` proposal rows;
+Collaborator owns acceptance-ratified identity joins and counts. Each row and the
+primary artist must accept. Either order works, and partial acceptance stays
+`CLAIMED`; it can still be refused or withdrawn with its evidence preserved.
+Exactly the final required acceptance advances Binding and Attribution. Old
+generation signatures and joins cannot complete a replacement proposal.
+The compatibility attribution read's `acceptanceHash` and `acceptedAt` describe
+the primary artist's acceptance event, including while acceptance is partial.
+Its `artist` field and `acceptedArtist` remain zero until the complete set accepts;
+use authoritative attribution/binding state for readiness, not the timestamp.
+The facade's generation-scoped `collaboratorCount` and `collaboratorAt` expose
+actual rows. The owner's older no-argument empty/zero getters are bootstrap
+compatibility sentinels, not a live inventory.
+
+A nonzero collaborator share label must appear in the actual static economics
+profile and pay that collaborator's explicit designation when consent is
+created. A zero label is an explicitly unpaid credit, whose declaration must
+also be stated in the identity document; this contract does not parse JSON.
+Later payout revisions govern new consent and leave existing fixed profiles
+unchanged. `collaboratorPayoutAccount` takes the collaborator's artist ID and
+acceptance-linked account, returning zero values for an unlinked or undesignated
+pair. Collective co-signature modes, collaborator attestations, and changes to
+an already accepted collaborator set remain subsequent capabilities.
+The maximum-row economics read cost needs separate measured gas admission;
+the earlier 300,000 unit Manager allowance is not a claim about that maximum.
 
 The named artist can refuse a pending proposal with a direct call or a verified
 refusal signature. Only its stored proposer can withdraw it, even if that

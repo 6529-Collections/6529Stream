@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
 import "./StreamArtistBindingOperations.sol";
+import "./StreamArtistCollaboratorOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistCollaboratorCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingLifecycleCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationCoordinator.sol";
 
@@ -28,7 +30,8 @@ contract StreamArtistOnboardingCoordinator is
     IStreamArtistOnboardingCoordinator,
     IStreamArtistEconomicsCoordinator,
     IStreamArtistDelegationCoordinator,
-    IStreamArtistBindingLifecycleCoordinator
+    IStreamArtistBindingLifecycleCoordinator,
+    IStreamArtistCollaboratorCoordinator
 {
     /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
     error MissingMintPrerequisite(bytes32 prerequisite);
@@ -108,6 +111,9 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(2),
                 uint16(3),
                 uint16(4),
+                uint16(5),
+                uint16(6),
+                uint16(7),
                 uint16(14),
                 uint16(15),
                 uint16(18),
@@ -226,6 +232,35 @@ contract StreamArtistOnboardingCoordinator is
         operation
     {
         StreamArtistBindingOperations.withdraw(_economicContext(), actor, p);
+    }
+
+    function coordinateProposeCollaboratorIdentity(address actor, C.IdentityProposal calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistCollaboratorOperations.proposeIdentity(_economicContext(), actor, p);
+    }
+
+    function coordinateAcceptCollaboratorIdentity(
+        address actor,
+        address account,
+        bytes32 identityRecordHash,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external operation returns (bytes32) {
+        return StreamArtistCollaboratorOperations.acceptIdentity(
+            _economicContext(), actor, account, identityRecordHash, a, document, displayName
+        );
+    }
+
+    function coordinateAcceptCollaborator(
+        address actor,
+        C.BindingAcceptance calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistCollaboratorOperations.acceptRow(_economicContext(), actor, p, a);
     }
 
     function coordinateRecordPolicyConsent(

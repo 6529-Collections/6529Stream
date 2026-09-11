@@ -8,6 +8,7 @@ import "./StreamArtistNonceAvailability.sol";
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistBindingOperations.sol";
+import "./StreamArtistCollaboratorIdentityState.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -26,6 +27,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     // Struct members preserve the exact six preexisting physical slots in declaration order.
     StreamArtistIdentityState.State private _identity;
     StreamArtistDelegationState.State private _delegations;
+    StreamArtistCollaboratorIdentityState.State private _collaboratorAccounts;
 
     event ArtistDelegationGranted(
         uint16 schemaVersion,
@@ -132,6 +134,63 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
 
     function delegationRecord(bytes32 grant) external view returns (D.Record memory) {
         return _delegations.records[grant];
+    }
+
+    function collaboratorRegistrationNonceState(address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        return StreamArtistCollaboratorIdentityState.nonceState(
+            _collaboratorAccounts, _replay, _ownerContext(), account, nonce
+        );
+    }
+
+    function registerCollaboratorIdentity(
+        T.ActionContext calldata c,
+        C.IdentityProposal calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        _check(c, 6);
+        _deadline(a.time);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistCollaboratorIdentityState.register(
+            _identity,
+            _collaboratorAccounts,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            a,
+            proof,
+            document,
+            displayName
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function consumeCollaboratorAcceptance(
+        T.ActionContext calldata c,
+        C.BindingAcceptance calldata p,
+        bytes32 artistId,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _check(c, 7);
+        _deadline(a.time);
+        if (proof.signer != p.account) revert T.InvalidSignature();
+        record = StreamArtistCollaboratorHashes.acceptanceRecord(_environment(), p, a.nonce, _now());
+        _authorize(
+            c,
+            artistId,
+            a,
+            proof,
+            StreamArtistCollaboratorHashes.acceptanceDigest(_environment(), p, a),
+            record
+        );
     }
 
     function delegatedNonceState(bytes32 artistId, address delegate, uint256 nonce)
@@ -433,10 +492,9 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 18);
         _signedAt(a.time);
-        record = StreamArtistHashes.payoutRecord(_environment(), p, proof.signer, a.nonce, a.time);
-        _authorize(
-            c, p.artistId, a, proof, StreamArtistHashes.payoutDigest(_environment(), p, a), record
-        );
+        bytes32 digest;
+        (record, digest) = StreamArtistIdentityState.payoutProof(_environment(), p, proof.signer, a);
+        _authorize(c, p.artistId, a, proof, digest, record);
     }
 
     function consumeAttestation(
@@ -448,17 +506,10 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 24);
         _signedAt(a.time);
-        record = StreamArtistHashes.attestationRecord(
-            _environment(), p, b.artistId, proof.signer, a.nonce, a.time
-        );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistHashes.attestationDigest(_environment(), p, a),
-            record
-        );
+        bytes32 digest;
+        (record, digest) =
+            StreamArtistIdentityState.attestationProof(_environment(), b, p, proof.signer, a);
+        _authorize(c, b.artistId, a, proof, digest, record);
     }
 
     function consumeRatification(
@@ -470,17 +521,12 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 52);
         _deadline(a.time);
-        record = StreamArtistHashes.ratificationRecord(
-            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        bytes32 digest;
+        (record, digest) =
+            StreamArtistIdentityState.ratificationProof(
+            _environment(), b, p, proof.signer, a, _now()
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistHashes.ratificationDigest(_environment(), p, a),
-            record
-        );
+        _authorize(c, b.artistId, a, proof, digest, record);
     }
 
     function consumeRoyaltyFreeze(

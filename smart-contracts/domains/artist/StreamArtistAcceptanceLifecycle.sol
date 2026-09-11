@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
+import "./StreamArtistCollaboratorHashes.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -10,6 +11,21 @@ import {
 contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
     mapping(bytes32 => bytes32) public acceptanceRecord;
     mapping(bytes32 => uint64) public acceptedAt;
+    mapping(bytes32 => bytes32) private _collaboratorRecords;
+    event CollaboratorAccepted(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        address indexed collaborator,
+        bytes32 indexed collaboratorArtistId,
+        uint64 bindingGeneration,
+        bytes32 role,
+        bytes32 shareLabelId,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 acceptanceRecordHash,
+        bytes32 bindingHash
+    );
     event ArtistBindingAccepted(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -78,6 +94,64 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             nonce,
             _now(),
             record
+        );
+    }
+
+    function collaboratorAcceptanceRecord(
+        bytes32 bindingHash,
+        address account,
+        bytes32 role,
+        bytes32 shareLabelId
+    ) external view returns (bytes32) {
+        return _collaboratorRecords[
+            StreamArtistCollaboratorHashes.rowKey(bindingHash, account, role, shareLabelId)
+        ];
+    }
+
+    function recordCollaboratorAcceptance(
+        T.ActionContext calldata c,
+        C.BindingAcceptance calldata p,
+        bytes32 artistId,
+        uint256 nonce
+    ) external returns (bytes32 record) {
+        _check(c, 7);
+        if (
+            p.collectionId == 0 || p.generation == 0 || p.bindingHash == bytes32(0)
+                || p.account == address(0) || artistId == bytes32(0)
+        ) revert T.InvalidRecord();
+        record = StreamArtistCollaboratorHashes.acceptanceRecord(_environment(), p, nonce, _now());
+        bytes32 row =
+            StreamArtistCollaboratorHashes.rowKey(p.bindingHash, p.account, p.role, p.shareLabelId);
+        bytes32 key = _consume(
+            keccak256("acceptance_lifecycle.replay.record_uniqueness"),
+            keccak256(
+                abi.encode(
+                    p.collectionId, p.generation, uint8(2), p.account, p.role, p.shareLabelId
+                )
+            ),
+            record
+        );
+        _collaboratorRecords[row] = record;
+        _commit(
+            c,
+            keccak256(abi.encode(p, artistId, nonce)),
+            keccak256(abi.encode(row, artistId, record)),
+            keccak256(abi.encode(key, record)),
+            record
+        );
+        emit CollaboratorAccepted(
+            1,
+            p.collectionId,
+            p.account,
+            artistId,
+            p.generation,
+            p.role,
+            p.shareLabelId,
+            1,
+            nonce,
+            _now(),
+            record,
+            p.bindingHash
         );
     }
 }

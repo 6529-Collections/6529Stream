@@ -209,6 +209,28 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes32 record
     ) external {
         _check(c, 2);
+        _complete(c, collectionId, b, record, b.artistAddress);
+    }
+
+    function completeCollaboratorBinding(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        T.Binding calldata b,
+        bytes32 record,
+        address signer
+    ) external {
+        _check(c, 7);
+        if (signer == address(0)) revert T.InvalidSignature();
+        _complete(c, collectionId, b, record, signer);
+    }
+
+    function _complete(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        T.Binding calldata b,
+        bytes32 record,
+        address signer
+    ) private {
         Attribution storage a = _attributions[collectionId];
         if (a.state != 1 || a.generation != b.generation || record == bytes32(0)) {
             revert T.InvalidAttribution(collectionId);
@@ -222,7 +244,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             bytes32(0)
         );
         emit ArtistAttributionStateChanged(
-            1, collectionId, 2, b.generation, 1, b.artistAddress, 1, record, bytes32(0), ""
+            1, collectionId, 2, b.generation, 1, signer, 1, record, bytes32(0), ""
         );
     }
 

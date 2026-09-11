@@ -174,10 +174,77 @@ contract ArtistUnitMetadata {
     }
 }
 
+/// @dev Algorithm fixture only: clearing the account simulates a future completed rotation.
+/// It is not a production rotation entrypoint or a substitute for Coordinator authentication.
+contract ArtistCollaboratorAccountReplayHarness {
+    StreamArtistIdentityState.State private identities;
+    StreamArtistCollaboratorIdentityState.State private accounts;
+    mapping(bytes32 => T.ReplayCell) private replay;
+    uint64 private revision;
+
+    function context() private view returns (StreamArtistIdentityState.OwnerContext memory) {
+        return StreamArtistIdentityState.OwnerContext(
+            StreamArtistHashes.Environment(block.chainid, address(this), address(1), address(2)),
+            address(3),
+            address(4),
+            keccak256("domain:identity_authority"),
+            revision
+        );
+    }
+
+    function allocate(address account, uint256 nonce, bool direct) external returns (bytes32) {
+        bytes memory doc = bytes("persistent account replay fixture");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            account, keccak256(doc), "urn:fixture", keccak256("fixture"), "urn:reason"
+        );
+        T.Authorization memory a =
+            T.Authorization(nonce, 2000, direct ? bytes("") : bytes("validated fixture proof"));
+        StreamArtistIdentityState.OwnerContext memory o = context();
+        T.SignerApproval memory proof = T.SignerApproval(
+            account,
+            StreamArtistCollaboratorHashes.identityDigest(
+                o.environment, account, p.identityRecordHash, a
+            ),
+            direct
+        );
+        T.Snapshot memory snapshot;
+        StreamArtistIdentityState.Mutation memory m = StreamArtistCollaboratorIdentityState.register(
+            identities,
+            accounts,
+            replay,
+            o,
+            T.ActionContext(6, account, snapshot),
+            p,
+            a,
+            proof,
+            doc,
+            "Replay Fixture"
+        );
+        ++revision;
+        return m.record;
+    }
+
+    function simulateCompletedRotation(address account) external {
+        identities.activeIdentity[account] = bytes32(0);
+    }
+
+    function facts(address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256, uint256, bytes32)
+    {
+        (bool used, uint256 hint) = StreamArtistCollaboratorIdentityState.nonceState(
+            accounts, replay, context(), account, nonce
+        );
+        return (used, hint, identities.nextRegistrationNonce, identities.activeIdentity[account]);
+    }
+}
+
 /// @notice Real artist owners, both economics providers, split profiles and official Safe signatures.
 /// @dev Core, metadata and governance boundaries are explicit unit doubles;
 ///      a separate current-stack test owns integration and eligible token mint proof.
 contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFixture {
+    event CollaboratorBoundMeasurement(uint256 rows, uint256 entries, uint256 gasUsed);
     ArtistTestVm private constant avm =
         ArtistTestVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant PHASE = keccak256("artist unit phase");
@@ -200,6 +267,732 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     StreamMintLedger private ledger;
     uint256 private nextNonce;
     bool private directArtistCalls;
+    bytes32 private collaboratorId;
+
+    function _collaboratorIdentity(bool direct) private {
+        _delegateSetup();
+        bytes memory document = bytes("collaborator unit document");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            address(delegateSafe),
+            keccak256(document),
+            "urn:collaborator:identity",
+            keccak256("collaborator registration"),
+            "urn:collaborator:reason"
+        );
+        ingress.proposeCollaboratorIdentity(p);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        if (direct) {
+            require(
+                executeSafe(
+                    delegateSafe,
+                    delegateKeys,
+                    address(ingress),
+                    0,
+                    abi.encodeCall(
+                        IStreamArtistCollaboratorLifecycle.acceptCollaboratorIdentity,
+                        (p.account, p.identityRecordHash, a, document, "Collaborator Safe")
+                    ),
+                    0
+                ),
+                "direct Safe identity"
+            );
+            collaboratorId = IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(p.account);
+        } else {
+            a.signature = safeThresholdSignature(
+                delegateKeys,
+                safeMessageDigest(
+                    delegateSafe,
+                    abi.encode(
+                        ingress.collaboratorIdentityDigest(p.account, p.identityRecordHash, a)
+                    )
+                )
+            );
+            collaboratorId = ingress.acceptCollaboratorIdentity(
+                p.account, p.identityRecordHash, a, document, "Collaborator Safe"
+            );
+        }
+        require(collaboratorId != bytes32(0), "real collaborator identity");
+    }
+
+    function _collaborativeProposal(bool paid) private returns (C.BindingAcceptance memory p) {
+        ingress.withdrawArtistBinding(_termination(1));
+        T.BindingProposal memory proposal = _proposal(artistId);
+        proposal.collaborators = new T.CollaboratorRecord[](1);
+        proposal.collaborators[0] = T.CollaboratorRecord(
+            address(delegateSafe),
+            keccak256("composer"),
+            paid ? keccak256("composer-share") : bytes32(0)
+        );
+        ingress.proposeArtistBinding(1, proposal, bytes("unit identity document"), "Artist Safe");
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        p = C.BindingAcceptance(
+            1,
+            b.generation,
+            b.bindingHash,
+            address(delegateSafe),
+            proposal.collaborators[0].role,
+            proposal.collaborators[0].shareLabelId
+        );
+    }
+
+    function _collaboratorAcceptance(C.BindingAcceptance memory p, bool direct)
+        private
+        returns (bytes32 record)
+    {
+        uint256 nonce =
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(collaboratorId).nonceHint;
+        T.Authorization memory a = T.Authorization(nonce, 2000, "");
+        if (direct) {
+            require(
+                executeSafe(
+                    delegateSafe,
+                    delegateKeys,
+                    address(ingress),
+                    0,
+                    abi.encodeCall(IStreamArtistCollaboratorLifecycle.acceptCollaborator, (p, a)),
+                    0
+                ),
+                "direct Safe row"
+            );
+            record = ingress.collaboratorAt(p.collectionId, p.generation, 0).acceptanceRecordHash;
+        } else {
+            a.signature = safeThresholdSignature(
+                delegateKeys,
+                safeMessageDigest(
+                    delegateSafe, abi.encode(ingress.collaboratorAcceptanceDigest(p, a))
+                )
+            );
+            record = ingress.acceptCollaborator(p, a);
+        }
+    }
+
+    function testCollaboratorSafeIdentityIsTwoSidedAndConsumesBothNonceLanes() public {
+        uint256 before_ = IStreamArtistIdentityOwner(suite.owners[2]).nextRegistrationNonce();
+        _collaboratorIdentity(true);
+        require(
+            collaboratorId
+                == StreamArtistHashes.identity(
+                    StreamArtistHashes.Environment(
+                        block.chainid, address(ingress), suite.core, suite.mintManager
+                    ),
+                    address(delegateSafe),
+                    keccak256("collaborator unit document"),
+                    before_
+                ),
+            "permanent identity allocation"
+        );
+        (bool used, uint256 hint) =
+            ingress.collaboratorRegistrationNonceState(address(delegateSafe), 0);
+        require(
+            used && hint == 1
+                && IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(collaboratorId, 0),
+            "both persistent nonce lanes"
+        );
+        require(
+            !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, 0),
+            "primary nonce isolated"
+        );
+        C.IdentityProposalState memory proposal = ingress.collaboratorIdentityProposal(
+            address(delegateSafe), keccak256("collaborator unit document")
+        );
+        require(proposal.acceptedArtistId == collaboratorId, "proposal completed");
+        require(
+            keccak256(
+                IStreamArtistIdentityOwner(suite.owners[2])
+                    .identityDocumentBytes(proposal.proposal.identityRecordHash)
+            ) == proposal.proposal.identityRecordHash,
+            "actual stored identity bytes"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(T.AddressAlreadyRegistered.selector, address(delegateSafe))
+        );
+        ingress.proposeCollaboratorIdentity(proposal.proposal);
+    }
+
+    function testCollaboratorPrimaryFirstStaysClaimedUntilLastSafeAcceptance() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory p = _collaborativeProposal(false);
+        _accept();
+        (uint8 state,) = IStreamArtistAttributionOwner(suite.owners[4]).attributionState(1);
+        require(
+            state == 1 && ingress.acceptedArtist(1) == address(0), "partial primary remains claimed"
+        );
+        require(_closed(_mintCall()), "partial cannot mint");
+        IStreamCollectionArtistRegistry.Attribution memory evidence = ingress.attribution(1);
+        require(
+            evidence.artist == address(0) && evidence.acceptanceHash != bytes32(0)
+                && evidence.acceptedAt == 1000,
+            "partial primary acceptance evidence is not readiness"
+        );
+        T.Snapshot memory bindingBefore = IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2();
+        vm.warp(1100);
+        _collaboratorAcceptance(p, true);
+        require(ingress.acceptedArtist(1) == address(artist), "all parties accepted");
+        IStreamCollectionArtistRegistry.Attribution memory completed = ingress.attribution(1);
+        require(
+            completed.artist == address(artist)
+                && completed.acceptanceHash == evidence.acceptanceHash
+                && completed.acceptedAt == 1000 && completed.acceptedAt != block.timestamp,
+            "primary hash and time remain one event after later completion"
+        );
+        require(
+            IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2().revision
+                == bindingBefore.revision + 1,
+            "one final binding transition"
+        );
+        C.Row memory row = ingress.collaboratorAt(1, p.generation, 0);
+        require(
+            row.accepted && row.collaboratorArtistId == collaboratorId
+                && row.shareLabelId == bytes32(0),
+            "permanent accepted join"
+        );
+        _policy();
+        _payout();
+        _economics();
+        _ratify();
+        _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
+    function testCollaboratorFirstLeavesBindingAndAttributionReadOnlyUntilPrimary() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory p = _collaborativeProposal(false);
+        T.Snapshot memory bindingBefore = IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2();
+        T.Snapshot memory attributionBefore =
+            IStreamArtistOwner(suite.owners[4]).ownerStateSnapshotV2();
+        _collaboratorAcceptance(p, false);
+        require(
+            keccak256(abi.encode(bindingBefore))
+                == keccak256(
+                    abi.encode(IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2())
+                ),
+            "incomplete Binding unchanged"
+        );
+        require(
+            keccak256(abi.encode(attributionBefore))
+                == keccak256(
+                    abi.encode(IStreamArtistOwner(suite.owners[4]).ownerStateSnapshotV2())
+                ),
+            "incomplete Attribution unchanged"
+        );
+        require(ingress.acceptedArtist(1) == address(0), "primary still absent");
+        _accept();
+        require(ingress.acceptedArtist(1) == address(artist), "primary completes set");
+    }
+
+    function testCollaboratorPartialPrimaryCanWithdrawButPriorEvidenceCannotCompleteReplacement()
+        public
+    {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory old = _collaborativeProposal(false);
+        _accept();
+        bytes32 primaryRecord =
+            IStreamArtistAcceptanceOwner(suite.owners[3]).acceptanceRecord(old.bindingHash);
+        ingress.withdrawArtistBinding(_termination(1));
+        require(
+            primaryRecord != bytes32(0)
+                && IStreamArtistAcceptanceOwner(suite.owners[3]).acceptanceRecord(old.bindingHash)
+                    == primaryRecord,
+            "partial evidence preserved"
+        );
+        T.BindingProposal memory proposal = _proposal(artistId);
+        proposal.collaborators = new T.CollaboratorRecord[](1);
+        proposal.collaborators[0] = T.CollaboratorRecord(old.account, old.role, old.shareLabelId);
+        ingress.proposeArtistBinding(1, proposal, bytes("unit identity document"), "Artist Safe");
+        T.Authorization memory a = T.Authorization(1, 2000, "");
+        a.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(
+                delegateSafe, abi.encode(ingress.collaboratorAcceptanceDigest(old, a))
+            )
+        );
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.acceptCollaborator(old, a);
+        require(
+            _roots() == before_ && !ingress.collaboratorAt(1, 3, 0).accepted,
+            "stale row cannot migrate"
+        );
+    }
+
+    function testCollaboratorPaidLabelNeedsExplicitDesignationAndMatchingActualProfile() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory p = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(p, false);
+        _payout();
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        T.EconomicsConsent memory consent = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(consent, a));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                T.MissingMintPrerequisite.selector, keccak256("collaborator_payout")
+            )
+        );
+        ingress.recordEconomicsConsent(consent, a);
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(collaboratorId, address(delegateSafe), bytes32(0));
+        T.Authorization memory ca = T.Authorization(2, 1000, "");
+        ca.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(delegateSafe, abi.encode(ingress.payoutDesignationDigest(payout, ca)))
+        );
+        ingress.recordPayoutDesignation(payout, ca);
+        (address account, bytes32 record) =
+            ingress.collaboratorPayoutAccount(collaboratorId, address(delegateSafe));
+        require(account == address(delegateSafe) && record != bytes32(0), "typed payout joined");
+        (account, record) = ingress.collaboratorPayoutAccount(artistId, address(delegateSafe));
+        require(
+            account == address(0) && record == bytes32(0), "wrong identity has no acceptance link"
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordEconomicsConsent(consent, a);
+    }
+
+    function _collaboratorPayout(address account) private {
+        (, bytes32 previous) = ingress.artistPayoutAccount(collaboratorId);
+        T.PayoutDesignation memory p = T.PayoutDesignation(collaboratorId, account, previous);
+        T.Authorization memory a = T.Authorization(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(collaboratorId).nonceHint, 1000, ""
+        );
+        a.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(delegateSafe, abi.encode(ingress.payoutDesignationDigest(p, a)))
+        );
+        ingress.recordPayoutDesignation(p, a);
+    }
+
+    function _collaboratorCandidate(address resolver, address collaboratorAccount)
+        private
+        returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
+    {
+        IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](3);
+        entries[0] = IStreamSplitWallet.SplitEntry(address(artist), 700_000, keccak256("artist"));
+        entries[1] = IStreamSplitWallet.SplitEntry(
+            collaboratorAccount, 200_000, keccak256("composer-share")
+        );
+        entries[2] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
+        IStreamSplitFactory selected =
+            resolver == address(primary) ? IStreamSplitFactory(factory) : royalty.splitFactory();
+        (bytes32 profile,) = selected.createProfile(
+            entries, keccak256(abi.encode("collaborator profile", collaboratorAccount))
+        );
+        candidate = T.FixedEconomicsCandidate(
+            profile, bytes32(0), resolver == address(primary) ? 0 : 500, false
+        );
+        T.AssignmentFact memory fact = resolver == address(primary)
+            ? IStreamArtistPrimaryFacts(resolver)
+                .previewArtistPrimaryAssignment(1, profile, bytes32(0), false)
+            : IStreamArtistRoyaltyPreview(resolver)
+                .previewArtistRoyaltyAssignment(1, profile, 500, false);
+        p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+    }
+
+    function testCollaboratorRealProfilesConsentAndOldWalletSurvivePayoutRevision() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        _payout();
+        _collaboratorPayout(address(delegateSafe));
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _collaboratorCandidate(address(primary), address(delegateSafe));
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, candidate.profileHash, bytes32(0));
+        address wallet = factory.walletFor(candidate.profileHash);
+        (p, candidate) = _collaboratorCandidate(address(royalty), address(delegateSafe));
+        _prospectiveConsent(p, candidate);
+        vm.prank(royalty.owner());
+        royalty.configureCollectionRoyalty(1, candidate.profileHash, 500);
+        _policy();
+        _ratify();
+        _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        _collaboratorPayout(address(0xCAFE));
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        vm.deal(address(this), 1 ether);
+        (bool sent,) = wallet.call{ value: 1 ether }("");
+        require(sent, "fund real fixed wallet");
+        uint256 before_ = address(delegateSafe).balance;
+        IStreamSplitWallet(wallet)
+            .release(address(0), address(delegateSafe), payable(address(delegateSafe)));
+        require(
+            address(delegateSafe).balance == before_ + 0.2 ether
+                && IStreamSplitWallet(wallet).aggregateSharePpm(address(0xCAFE)) == 0,
+            "old collaborator immutable account still paid"
+        );
+        (p, candidate) = _collaboratorCandidate(address(primary), address(delegateSafe));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        (p, candidate) = _collaboratorCandidate(address(primary), address(0xCAFE));
+        _prospectiveConsent(p, candidate);
+    }
+
+    function testCollaboratorIdentityBadSafeProofAndLateArchiveFailureLeaveBothLanesUnused()
+        public
+    {
+        _delegateSetup();
+        bytes memory doc = bytes("collaborator negative identity");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            address(delegateSafe), keccak256(doc), "urn:negative", keccak256("reason"), "urn:reason"
+        );
+        ArtistUnitRoles(suite.roleRegistry).setAdmin(address(artist), true);
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistCollaboratorLifecycle.proposeCollaboratorIdentity, (p))
+        );
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.collaboratorIdentityDigest(p.account, p.identityRecordHash, a);
+        a.signature = safeThresholdSignature(delegateKeys, digest); // Deliberately omits actual SafeMessage domain.
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptCollaboratorIdentity(p.account, p.identityRecordHash, a, doc, "Collaborator");
+        require(_roots() == before_, "wrong domain no owner mutation");
+        a.signature = safeThresholdSignature(
+            delegateKeys, safeMessageDigest(delegateSafe, abi.encode(digest))
+        );
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.acceptCollaboratorIdentity(p.account, p.identityRecordHash, a, doc, "Collaborator");
+        (bool used, uint256 hint) = ingress.collaboratorRegistrationNonceState(p.account, 0);
+        require(
+            _roots() == before_ && !used && hint == 0
+                && IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(p.account)
+                    == bytes32(0),
+            "late archive registration rollback"
+        );
+        avm.clearMockedCalls();
+        require(
+            ingress.acceptCollaboratorIdentity(
+                p.account, p.identityRecordHash, a, doc, "Collaborator"
+            ) != bytes32(0),
+            "exact retry after failure"
+        );
+    }
+
+    function testCollaboratorRowExactEventAndLateArchiveRollbackThenReplayRejection() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory p = _collaborativeProposal(false);
+        _accept();
+        T.Authorization memory a = T.Authorization(1, 2000, "");
+        a.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(delegateSafe, abi.encode(ingress.collaboratorAcceptanceDigest(p, a)))
+        );
+        bytes32 before_ = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.acceptCollaborator(p, a);
+        require(
+            _roots() == before_ && !ingress.collaboratorAt(1, p.generation, 0).accepted
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(collaboratorId, 1),
+            "final transition atomically rolled back"
+        );
+        avm.clearMockedCalls();
+        vm.recordLogs();
+        bytes32 record = ingress.acceptCollaborator(p, a);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool found;
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ACCEPTANCE_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                address(core),
+                uint256(1),
+                p.generation,
+                p.bindingHash,
+                uint8(2),
+                p.account,
+                uint8(1),
+                a.nonce,
+                uint64(1000)
+            )
+        );
+        require(record == expected, "canonical kind2 acceptance record");
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[3]
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "CollaboratorAccepted(uint16,uint256,address,bytes32,uint64,bytes32,bytes32,uint8,uint256,uint64,bytes32,bytes32)"
+                        )
+            ) {
+                require(
+                    logs[i].topics[1] == bytes32(uint256(1))
+                        && logs[i].topics[2] == bytes32(uint256(uint160(p.account)))
+                        && logs[i].topics[3] == collaboratorId,
+                    "canonical collaborator topics"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.generation,
+                                p.role,
+                                p.shareLabelId,
+                                uint8(1),
+                                uint256(1),
+                                uint64(1000),
+                                record,
+                                p.bindingHash
+                            )
+                        ),
+                    "canonical collaborator event body"
+                );
+                found = true;
+            }
+        }
+        require(found, "Acceptance owner emitted exact event");
+        before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.acceptCollaborator(p, a);
+        require(_roots() == before_, "accepted generation cannot replay");
+    }
+
+    function testCollaboratorPartialRowCanBeRefusedAndNeverUnlocksProviders() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory p = _collaborativeProposal(false);
+        _collaboratorAcceptance(p, false);
+        L.Termination memory termination = _termination(1);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.bindingRefusalDigest(termination, a));
+        ingress.refuseArtistBinding(termination, a);
+        require(
+            ingress.collaboratorAt(1, p.generation, 0).accepted
+                && ingress.acceptedArtist(1) == address(0),
+            "partial row evidence survives refusal"
+        );
+        address governor = primary.owner();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
+            )
+        );
+        vm.prank(governor);
+        primary.clearPrimaryAssignment(PRIMARY, 1, 1);
+    }
+
+    function testCollaboratorRejectsUnsortedDuplicateAndOverBoundTermsAtomically() public {
+        _delegateSetup();
+        ingress.withdrawArtistBinding(_termination(1));
+        T.BindingProposal memory p = _proposal(artistId);
+        p.collaborators = new T.CollaboratorRecord[](2);
+        p.collaborators[0] =
+            T.CollaboratorRecord(address(delegateSafe), bytes32(uint256(2)), bytes32(0));
+        p.collaborators[1] =
+            T.CollaboratorRecord(address(delegateSafe), bytes32(uint256(1)), bytes32(0));
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.proposeArtistBinding(1, p, bytes("unit identity document"), "Artist Safe");
+        p.collaborators[1] = T.CollaboratorRecord(
+            address(delegateSafe), bytes32(uint256(2)), keccak256("different label same pair")
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.proposeArtistBinding(1, p, bytes("unit identity document"), "Artist Safe");
+        p.collaborators = new T.CollaboratorRecord[](33);
+        vm.expectRevert(abi.encodeWithSelector(T.BoundExceeded.selector, uint256(33), uint256(32)));
+        ingress.proposeArtistBinding(1, p, bytes("unit identity document"), "Artist Safe");
+        require(_roots() == before_, "invalid sets leave all owner roots unchanged");
+    }
+
+    function testCollaboratorThirtyTwoRolesCompleteExactlyOnce() public {
+        _collaboratorIdentity(false);
+        ingress.withdrawArtistBinding(_termination(1));
+        T.BindingProposal memory p = _proposal(artistId);
+        p.collaborators = new T.CollaboratorRecord[](32);
+        for (uint256 i; i < 32; ++i) {
+            p.collaborators[i] =
+                T.CollaboratorRecord(address(delegateSafe), bytes32(i + 1), bytes32(i + 1));
+        }
+        ingress.proposeArtistBinding(1, p, bytes("unit identity document"), "Artist Safe");
+        _accept();
+        T.Binding memory binding_ = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])
+            .bindingTerms(1, binding_.generation);
+        require(
+            terms.count == 32
+                && terms.collaboratorSetHash
+                    == keccak256(
+                        abi.encode(
+                            keccak256("6529STREAM_ARTIST_COLLABORATOR_SET_V1"), p.collaborators
+                        )
+                    ),
+            "exact sorted array commitment"
+        );
+        uint64 before_ = IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2().revision;
+        for (uint256 i; i < 32; ++i) {
+            C.BindingAcceptance memory row = C.BindingAcceptance(
+                1,
+                binding_.generation,
+                binding_.bindingHash,
+                address(delegateSafe),
+                bytes32(i + 1),
+                bytes32(i + 1)
+            );
+            _collaboratorAcceptance(row, false);
+            require(
+                (ingress.acceptedArtist(1) != address(0)) == (i == 31),
+                "only final required row changes attribution"
+            );
+            require(
+                ingress.collaboratorAt(1, binding_.generation, i).accepted, "row joined exact index"
+            );
+        }
+        require(
+            IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2().revision == before_ + 1,
+            "one completion for32 roles"
+        );
+        _payout();
+        _collaboratorPayout(address(delegateSafe));
+        IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](64);
+        entries[0] = IStreamSplitWallet.SplitEntry(address(artist), 649_000, keccak256("artist"));
+        for (uint256 i; i < 32; ++i) {
+            entries[i + 1] =
+                IStreamSplitWallet.SplitEntry(address(delegateSafe), 10_000, bytes32(i + 1));
+        }
+        for (uint256 i; i < 31; ++i) {
+            entries[i + 33] = IStreamSplitWallet.SplitEntry(address(0xFEE), 1000, bytes32(i + 1000));
+        }
+        (bytes32 profile,) =
+            factory.createProfile(entries, keccak256("maximum supported collaborator profile"));
+        T.AssignmentFact memory fact = IStreamArtistPrimaryFacts(address(primary))
+            .previewArtistPrimaryAssignment(1, profile, bytes32(0), false);
+        T.EconomicsConsent memory consent = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(profile, bytes32(0), 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(consent, a));
+        uint256 start = gasleft();
+        ingress.recordProspectiveEconomicsConsent(consent, candidate, a);
+        uint256 consumed = start - gasleft();
+        emit CollaboratorBoundMeasurement(32, 64, consumed);
+        require(
+            consumed < 16_777_216,
+            "bounded unit observation; separate fresh-transaction gas admission still required"
+        );
+    }
+
+    function testCollaboratorAccountReplaySurvivesSimulatedFutureIdentityReuse() public {
+        ArtistCollaboratorAccountReplayHarness harness =
+            new ArtistCollaboratorAccountReplayHarness();
+        address account = address(0xA77157);
+        bytes32 first = harness.allocate(account, 0, true);
+        harness.simulateCompletedRotation(account);
+        avm.expectPartialRevert(T.Replay.selector);
+        harness.allocate(account, 0, false);
+        (bool used, uint256 hint, uint256 next, bytes32 active) = harness.facts(account, 0);
+        require(
+            used && hint == 1 && next == 1 && active == bytes32(0),
+            "old payload cannot allocate new identity after account reuse"
+        );
+        bytes32 second = harness.allocate(account, 1, true);
+        require(second != first, "new nonce permits separate allocation");
+        harness.simulateCompletedRotation(account);
+        harness.allocate(account, type(uint256).max, false);
+        (used, hint, next,) = harness.facts(account, type(uint256).max);
+        require(used && hint == 2 && next == 3, "sparse maximum nonce leaves bounded direct hint");
+    }
+
+    function testCollaboratorApprovedEmptySafeProofWorksWithoutGivingOwnersTheSafeRole() public {
+        _delegateSetup();
+        bytes memory doc = bytes("approved empty collaborator");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            address(delegateSafe), keccak256(doc), "urn:approved", keccak256("reason"), "urn:reason"
+        );
+        ingress.proposeCollaboratorIdentity(p);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.collaboratorIdentityDigest(p.account, p.identityRecordHash, a);
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptCollaboratorIdentity(p.account, p.identityRecordHash, a, doc, "Collaborator");
+        vm.prank(vm.addr(delegateKeys[0]));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptCollaboratorIdentity(p.account, p.identityRecordHash, a, doc, "Collaborator");
+        require(_roots() == before_, "Safe owner and unapproved empty relay cannot register");
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "Safe approves identity message"
+        );
+        collaboratorId = ingress.acceptCollaboratorIdentity(
+            p.account, p.identityRecordHash, a, doc, "Collaborator"
+        );
+        C.BindingAcceptance memory row = _collaborativeProposal(false);
+        a.nonce = 1;
+        digest = ingress.collaboratorAcceptanceDigest(row, a);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptCollaborator(row, a);
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "Safe approves row message"
+        );
+        ingress.acceptCollaborator(row, a);
+        require(
+            ingress.collaboratorAt(1, row.generation, 0).accepted, "approved empty row recorded"
+        );
+    }
+
+    function testCollaboratorEoaIdentityAcceptsUnorderedNonceButRejectsWrongKey() public {
+        uint256 key = 0xC011AB;
+        address account = vm.addr(key);
+        bytes memory doc = bytes("EOA collaborator");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            account, keccak256(doc), "urn:eoa", keccak256("reason"), "urn:reason"
+        );
+        ingress.proposeCollaboratorIdentity(p);
+        T.Authorization memory a = T.Authorization(91, 2000, "");
+        bytes32 digest = ingress.collaboratorIdentityDigest(account, p.identityRecordHash, a);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(0xBAD, digest);
+        a.signature = abi.encodePacked(r, s, v);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptCollaboratorIdentity(
+            account, p.identityRecordHash, a, doc, "EOA Collaborator"
+        );
+        (v, r, s) = vm.sign(key, digest);
+        a.signature = abi.encodePacked(r, s, v);
+        bytes32 id = ingress.acceptCollaboratorIdentity(
+            account, p.identityRecordHash, a, doc, "EOA Collaborator"
+        );
+        (bool used, uint256 hint) = ingress.collaboratorRegistrationNonceState(account, 91);
+        require(
+            used && hint == 0 && IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(id, 91)
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(id).nonceHint == 0,
+            "unordered91 consumed in both lanes, lowest hint0"
+        );
+    }
 
     function _termination(uint256 collectionId) private view returns (L.Termination memory p) {
         T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);
@@ -1451,8 +2244,15 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 suite.mintManager
             )
         );
-        primary =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, governance, ingress);
+        primary = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            governance,
+            ingress,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
         // Separate real factory/profile proves royalty payout reads cannot substitute
         // the primary resolver's factory, even when both profiles name the same artist.
         StreamSplitFactory royaltyFactory = new StreamSplitFactory(
