@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
 import "./StreamSaleFunding.sol";
+import "./StreamSaleTemplate.sol";
 
 import "../../interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
@@ -15,7 +16,7 @@ import "../revenue/StreamPaymentIntentVerifier.sol";
 
 /// @notice One creator/platform-authorized ERC-20 purchase funds a verified split and mints atomically.
 /// @dev The adapter itself pulls allowances. Relayers require payer-signed intent; direct payers
-///      remain bounded by signed, immutable sale terms. This current fixed-profile lane is not
+///      remain bounded by signed, immutable sale terms. This bounded profile/template lane is not
 ///      the universal official settlement/escrow implementation tracked by issue #694.
 contract StreamERC20FixedPriceSaleAdapter is
     IStreamERC20FixedPriceSaleAdapter,
@@ -179,32 +180,39 @@ contract StreamERC20FixedPriceSaleAdapter is
         override
         returns (bytes32 policyHash, bytes32 profileId, address wallet)
     {
+        StreamSaleTemplate.Selection memory selected = _primarySelection(collectionId, revenueClass);
+        return (
+            StreamSaleTemplate.policyHash(revenueResolver, collectionId, selected),
+            selected.profileId,
+            selected.wallet
+        );
+    }
+
+    function _primarySelection(uint256 collectionId, bytes32 revenueClass)
+        private
+        view
+        returns (StreamSaleTemplate.Selection memory selected)
+    {
         if (revenueClass != REVENUE_CLASS) revert UnsupportedPrimaryAssignment();
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
             revenueResolver.resolvePrimaryAssignment(collectionId, 0, revenueClass);
+        if (assignment.assignmentType == 2) {
+            return StreamSaleTemplate.preview(revenueResolver, collectionId, assignment);
+        }
         if (
             !assignment.exists || assignment.assignmentType != 1 || assignment.scope != 1
                 || assignment.scopeId != collectionId || assignment.templateId != bytes32(0)
                 || assignment.profileId == bytes32(0) || assignment.assignmentHash == bytes32(0)
-        ) revert UnsupportedPrimaryAssignment();
-        profileId = assignment.profileId;
-        if (!splitFactory.splitWalletExists(profileId)) revert UnsupportedPrimaryAssignment();
-        wallet = splitFactory.walletFor(profileId);
-        _requireFundingWallet(profileId, wallet);
-        policyHash = keccak256(
-            abi.encode(
-                PRIMARY_POLICY_DOMAIN,
-                block.chainid,
-                address(revenueResolver),
-                revenueClass,
-                collectionId,
-                uint256(0),
-                bytes32(0),
-                profileId,
-                wallet,
-                assignment.assignmentHash
-            )
-        );
+        ) {
+            revert UnsupportedPrimaryAssignment();
+        }
+        selected.profileId = assignment.profileId;
+        if (!splitFactory.splitWalletExists(selected.profileId)) {
+            revert UnsupportedPrimaryAssignment();
+        }
+        selected.wallet = splitFactory.walletFor(selected.profileId);
+        selected.assignmentHash = assignment.assignmentHash;
+        _requireFundingWallet(selected.profileId, selected.wallet);
     }
 
     function authorizationId(address artist, bytes32 nonce) public view override returns (bytes32) {
@@ -229,6 +237,7 @@ contract StreamERC20FixedPriceSaleAdapter is
         bytes32 operationRoot;
         bytes32 operationId;
         bool escrowed;
+        StreamSaleTemplate.Selection selected;
     }
 
     function buy(
@@ -273,10 +282,19 @@ contract StreamERC20FixedPriceSaleAdapter is
             intent,
             payerSignature
         );
+        StreamSaleTemplate.materialize(
+            revenueResolver, execution.config.collectionId, execution.selected
+        );
         authorizationUsed[authorization.artist][authorization.nonce] = true;
         proceeds[execution.profileId][execution.config.asset] += execution.config.price;
         totalProceeds[execution.config.asset] += execution.config.price;
         execution.escrowed = _pay(authorization.payer, execution);
+        StreamSaleArtist.requireArtist(
+            artistRegistry,
+            artistRegistryCodeHash,
+            execution.config.collectionId,
+            authorization.artist
+        );
         uint256[] memory tokenIds;
         bytes32[] memory operationIds;
         (tokenIds, operationRoot, operationIds) = mintManager.executeSingleStepMint(batch, "");
@@ -333,9 +351,11 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert InvalidSaleSignature(authorization.artist);
         }
         _requireActiveAsset(e.config.asset);
-        bytes32 policy;
-        (policy, e.profileId, e.wallet) =
-            primaryPolicy(e.config.collectionId, e.config.revenueClass);
+        e.selected = _primarySelection(e.config.collectionId, e.config.revenueClass);
+        e.profileId = e.selected.profileId;
+        e.wallet = e.selected.wallet;
+        bytes32 policy =
+            StreamSaleTemplate.policyHash(revenueResolver, e.config.collectionId, e.selected);
         if (policy != e.config.expectedPrimaryPolicyHash) {
             revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
         }
@@ -383,12 +403,22 @@ contract StreamERC20FixedPriceSaleAdapter is
 
     function _pay(address payer, Execution memory e) private returns (bool escrowed) {
         escrowed = _fundERC20(
-            payer, e.config.revenueClass, e.profileId, e.wallet, e.config.asset, e.config.price
+            payer,
+            e.config.revenueClass,
+            e.profileId,
+            e.wallet,
+            e.config.asset,
+            e.config.price,
+            e.selected.templateId != bytes32(0)
         );
         _requireActiveAsset(e.config.asset);
-        (bytes32 policy,,) = primaryPolicy(e.config.collectionId, e.config.revenueClass);
-        if (policy != e.config.expectedPrimaryPolicyHash) {
-            revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
+        if (e.selected.templateId != bytes32(0)) {
+            StreamSaleTemplate.requireCurrent(revenueResolver, e.config.collectionId, e.selected);
+        } else {
+            (bytes32 policy,,) = primaryPolicy(e.config.collectionId, e.config.revenueClass);
+            if (policy != e.config.expectedPrimaryPolicyHash) {
+                revert PrimaryPolicyMismatch(e.config.expectedPrimaryPolicyHash, policy);
+            }
         }
     }
 

@@ -13,7 +13,7 @@ interface IStreamSaleEscrowBinding {
     function walletCodeHash() external view returns (bytes32);
 }
 
-/// @notice Internal fixed-profile funding for current sale adapters.
+/// @notice Internal concrete-profile funding for current sale adapters.
 /// @dev The embedding adapter owns its guard, authorization, preview and final mint comparison.
 ///      ERC20 payer pulls remain in that adapter's frame; only producer funds enter escrow.
 abstract contract StreamSaleFunding is IStreamSaleFunding {
@@ -67,20 +67,50 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
         ) revert SaleFundingProfileInvalid(profile, wallet);
     }
 
+    /// @dev Only a resolver-proven template may fund a registered but undeployed prediction.
+    function _requireFundingProfile(bytes32 profile, address wallet, bool templateOrigin)
+        private
+        view
+        returns (bool deployed)
+    {
+        if (!templateOrigin || wallet.code.length != 0) {
+            _requireFundingWallet(profile, wallet);
+            return true;
+        }
+        _requireFundingBindings();
+        if (!_fundingFactory.profileExists(profile) || _fundingFactory.walletFor(profile) != wallet)
+        {
+            revert SaleFundingProfileInvalid(profile, wallet);
+        }
+        return false;
+    }
+
     function _fundNative(bytes32 revenueClass, bytes32 profile, address wallet, uint256 amount)
         internal
         returns (bool escrowed)
     {
-        _requireFundingWallet(profile, wallet);
+        return _fundNative(revenueClass, profile, wallet, amount, false);
+    }
+
+    function _fundNative(
+        bytes32 revenueClass,
+        bytes32 profile,
+        address wallet,
+        uint256 amount,
+        bool templateOrigin
+    ) internal returns (bool escrowed) {
+        bool deployed = _requireFundingProfile(profile, wallet, templateOrigin);
         if (amount == 0) return false;
         uint256 beforeBalance = address(this).balance;
         uint256 walletBefore = wallet.balance;
-        uint256 cap = _fundingGas(_DEPOSIT_GAS);
-        _requireFundingGas(cap);
-        if (cap < 2300) revert InsufficientSaleFundingGas(cap, gasleft());
-        uint256 forwarded = cap - 2300;
         bool ok;
-        assembly ("memory-safe") { ok := call(forwarded, wallet, amount, 0, 0, 0, 0) }
+        if (deployed) {
+            uint256 cap = _fundingGas(_DEPOSIT_GAS);
+            _requireFundingGas(cap);
+            if (cap < 2300) revert InsufficientSaleFundingGas(cap, gasleft());
+            uint256 forwarded = cap - 2300;
+            assembly ("memory-safe") { ok := call(forwarded, wallet, amount, 0, 0, 0, 0) }
+        }
         if (ok) {
             if (
                 wallet.balance != walletBefore + amount
@@ -90,10 +120,11 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
             }
             return false;
         }
-        // Failed CALL rolled all wallet-frame effects back before this alternate route.
+        // An empty template prediction receives escrow only. Otherwise the failed CALL
+        // rolled back all wallet-frame effects before this alternate route.
         uint256 owed = revenueEscrow.escrowOwed(revenueClass, profile, wallet, address(0));
         uint256 escrowBefore = address(revenueEscrow).balance;
-        revenueEscrow.creditNative{ value: amount }(revenueClass, profile, wallet, false);
+        revenueEscrow.creditNative{ value: amount }(revenueClass, profile, wallet, templateOrigin);
         if (
             address(this).balance != beforeBalance - amount || wallet.balance != walletBefore
                 || address(revenueEscrow).balance != escrowBefore + amount
@@ -113,7 +144,19 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
         address asset,
         uint256 amount
     ) internal returns (bool escrowed) {
-        _requireFundingWallet(profile, wallet);
+        return _fundERC20(payer, revenueClass, profile, wallet, asset, amount, false);
+    }
+
+    function _fundERC20(
+        address payer,
+        bytes32 revenueClass,
+        bytes32 profile,
+        address wallet,
+        address asset,
+        uint256 amount,
+        bool templateOrigin
+    ) internal returns (bool escrowed) {
+        bool deployed = _requireFundingProfile(profile, wallet, templateOrigin);
         uint256 cap = _fundingGas(_DEPOSIT_GAS);
         uint256 initial = _fundingBalance(asset, address(this), cap);
         uint256 payerBefore = _fundingBalance(asset, payer, cap);
@@ -127,9 +170,12 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
         ) {
             revert SaleFundingAmountMismatch(asset);
         }
+        deployed = _requireFundingProfile(profile, wallet, templateOrigin);
         uint256 walletBefore = _fundingBalance(asset, wallet, cap);
-        bool deposited =
-            _fundingTokenCall(asset, abi.encodeCall(IERC20.transfer, (wallet, amount)), cap, true);
+        bool deposited = deployed
+            && _fundingTokenCall(
+                asset, abi.encodeCall(IERC20.transfer, (wallet, amount)), cap, true
+            );
         if (deposited) {
             if (
                 _fundingBalance(asset, wallet, cap) != walletBefore + amount
@@ -139,9 +185,10 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
             }
             return false;
         }
-        // Only CALL failure reaches fallback. Successful false/malformed/no-op/fee behavior
+        // An empty template prediction bypasses direct transfer. Otherwise only CALL failure
+        // reaches fallback. Successful false/malformed/no-op/fee behavior
         // reverts the whole purchase instead of preserving any partial wallet payment.
-        _creditTokenEscrow(revenueClass, profile, wallet, asset, amount, cap);
+        _creditTokenEscrow(revenueClass, profile, wallet, asset, amount, cap, templateOrigin);
         if (
             _fundingBalance(asset, address(this), cap) != initial
                 || _fundingBalance(asset, wallet, cap) != walletBefore
@@ -155,7 +202,8 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
         address wallet,
         address asset,
         uint256 amount,
-        uint256 cap
+        uint256 cap,
+        bool templateOrigin
     ) private {
         uint256 owed = revenueEscrow.escrowOwed(revenueClass, profile, wallet, asset);
         uint256 beforeBalance = _fundingBalance(asset, address(revenueEscrow), cap);
@@ -164,7 +212,7 @@ abstract contract StreamSaleFunding is IStreamSaleFunding {
             asset, abi.encodeCall(IERC20.approve, (address(revenueEscrow), amount)), cap, false
         );
         _requireEscrowAllowance(asset, amount, cap);
-        revenueEscrow.creditERC20(revenueClass, profile, wallet, asset, amount, false);
+        revenueEscrow.creditERC20(revenueClass, profile, wallet, asset, amount, templateOrigin);
         _requireEscrowAllowance(asset, 0, cap);
         if (
             _fundingBalance(asset, address(revenueEscrow), cap) != beforeBalance + amount

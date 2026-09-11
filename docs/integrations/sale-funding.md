@@ -1,7 +1,7 @@
 # Current native and ERC20 sale funding
 
 The current fixed-price adapters fund the explicit collection `PRIMARY_SALE`
-profile before mint completion. Revenue is either transferred to its verified
+profile or supported artist template before mint completion. Revenue is either transferred to its verified
 split wallet or recorded as an exact debt to that wallet in
 [StreamRevenueEscrow](revenue-escrow.md). An escrowed sale is paid, but its funds
 are not yet resident in the wallet. Flush the escrow before claiming that part
@@ -10,9 +10,10 @@ of the proceeds.
 This is a bounded current-product implementation. It does not adopt the
 proposed contract 20/9 orchestration architecture in
 [ADR-0019](../adr/0019-payment-intent-orchestration.md), change that ADR's status,
-or complete the universal settlement specification. Materialized templates,
-undeployed profile funding, permits, prepared/custody mint flows and auction
-migration remain separate work. Existing signature verification still uses the
+or complete the universal settlement specification. The [template funding extension](template-sale-funding.md) registers concrete
+artist profiles and escrows undeployed predictions. Permits, prepared mint flows
+and universal custody settlement remain separate work.
+The [fixed-profile auction path](auction-funding.md) retains its creation-time rights. Existing signature verification still uses the
 native adapter's signature helper and the ERC20 adapter's raise-only signature
 budget; this change adopts the factory's deposit and asset-policy budgets.
 
@@ -38,16 +39,17 @@ SaleAuthorization(uint256 collectionId,bytes32 phaseId,address payer,address rec
 
 There is no version-1 signature or ABI fallback. Obtain the current commitment
 from `primaryPolicy(collectionId)` before signing. It binds the actual resolver,
-chain, revenue class, collection, fixed profile, verified wallet and full
+chain, revenue class, collection, template identity (zero for fixed profiles),
+concrete profile, wallet and full
 assignment commitment, including the resolver's policy/finality facts. The
-signed profile must equal that assignment. A zero underlying no-loosening
+signed profile must equal the selected concrete profile. A zero underlying no-loosening
 policy is valid; the resulting signed canonical commitment must be nonzero.
 
 ERC20 sale authorizations and the PaymentIntent domain remain unchanged. Sale
 registration and policy reads now accept only `keccak256("PRIMARY_SALE")` and
-an explicit collection PROFILE assignment. A preconfigured alternate revenue
-class, token/default inheritance or template cannot stand in for the artist's
-supported economics authority. The adapter itself remains the allowance
+an explicit collection PROFILE assignment or the supported initial artist
+TEMPLATE profile. A preconfigured alternate revenue class or token/default
+inheritance cannot stand in for the artist's supported economics authority. The adapter itself remains the allowance
 spender and PaymentIntent verifying contract. An ERC20 payer approves that
 adapter, never the escrow. An actual Safe payer can call directly through
 `execTransaction`; a distinct relayer needs the Safe's valid ERC-1271
@@ -73,7 +75,7 @@ reserve is required. Insufficient outer gas fails closed. A raised factory
 budget is read by later purchases; fixture values are not a cold-gas sizing
 recommendation.
 
-Only a reverted or out-of-gas direct deposit can fall back: the EVM has already
+For deployed wallets, only a reverted or out-of-gas direct deposit can fall back: the EVM has already
 rolled back every effect of that failed subcall. A successful ERC20 call that
 returns false, a noncanonical return, no transfer, a fee or another nonexact
 balance delta reverts the whole purchase. The fallback never preserves a

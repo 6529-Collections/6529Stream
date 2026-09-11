@@ -10,7 +10,7 @@ import "../../../vendor/openzeppelin/IERC165.sol";
 import "./IStreamSaleFunding.sol";
 
 /// @notice Current-stack fixed-price ERC-20 purchases with creator, platform and payer consent.
-/// @dev Fixed-profile collection primary assignments; bounded deposit/escrow, no templates or permits.
+/// @dev Explicit collection primary profiles or supported artist templates; bounded deposit/escrow, no permits.
 interface IStreamERC20FixedPriceSaleAdapter is IERC165, IStreamSaleFunding {
     struct SaleConfig {
         uint256 collectionId;
@@ -125,7 +125,7 @@ interface IStreamERC20FixedPriceSaleAdapter is IERC165, IStreamSaleFunding {
         external
         view
         returns (bytes32);
-    /// @notice Returns the canonical PRIMARY_SALE commitment for an explicit collection fixed profile.
+    /// @notice Returns the canonical PRIMARY_SALE commitment for an explicit collection profile or its current concrete template preview.
     function primaryPolicy(uint256 collectionId, bytes32 revenueClass)
         external
         view

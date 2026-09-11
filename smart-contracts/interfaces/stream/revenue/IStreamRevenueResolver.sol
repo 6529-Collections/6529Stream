@@ -206,6 +206,13 @@ interface IStreamRevenueResolver {
         address salePoster,
         bool deployWallet
     ) external returns (bytes32 profileId, address wallet, bytes32 entriesHash);
+    /// @notice Previews current concrete rights using the same derivation as materialization.
+    /// @dev Does not register or deploy; a predicted empty wallet is not an official deposit target.
+    function previewCollectionPrimaryProfile(
+        bytes32 templateId,
+        uint256 collectionId,
+        address salePoster
+    ) external view returns (bytes32 profileId, address wallet, bytes32 entriesHash);
     /// @notice Returns deterministic template metadata.
     function primaryTemplate(bytes32 templateId)
         external

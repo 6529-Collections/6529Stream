@@ -68,8 +68,17 @@ contract StreamSaleFundingTest is RevenueV1TestBase, OfficialSafeFixture {
         artists = new SaleFundingArtistMock(address(core));
         core.selectArtist(address(artists), address(artists).codehash);
         manager = new SaleFundingManagerMock(address(core));
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 1_000_000, keccak256("artist"));
         (profile, wallet) = factory.createProfile(entries, keccak256("funding"));
@@ -110,6 +119,50 @@ contract StreamSaleFundingTest is RevenueV1TestBase, OfficialSafeFixture {
         vm.prank(payer);
         token.approve(address(tokenSale), 10_000);
         vm.deal(payer, 10 ether);
+    }
+
+    function testFixedProfilePolicyAndV2DigestPreimagesRemainExact() public view {
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
+            resolver.resolvePrimaryAssignment(1, 0, CLASS);
+        bytes32 policyHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRIMARY_POLICY_V1"),
+                block.chainid,
+                address(resolver),
+                CLASS,
+                uint256(1),
+                uint256(0),
+                bytes32(0),
+                profile,
+                wallet,
+                a.assignmentHash
+            )
+        );
+        (bytes32 nativePolicy,,) = nativeSale.primaryPolicy(1);
+        (bytes32 tokenPolicy,,) = tokenSale.primaryPolicy(1, CLASS);
+        require(nativePolicy == policyHash && tokenPolicy == policyHash, "unchanged PROFILE tuple");
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory sale = _native(address(0xBEEF));
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529StreamFixedPriceSale"),
+                keccak256("2"),
+                block.chainid,
+                address(nativeSale)
+            )
+        );
+        bytes32 typeHash = keccak256(
+            "SaleAuthorization(uint256 collectionId,bytes32 phaseId,address payer,address recipient,address artist,bytes32 profileId,bytes32 expectedPrimaryPolicyHash,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 price,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
+        );
+        require(
+            nativeSale.authorizationDigest(sale)
+                == keccak256(
+                    abi.encodePacked(hex"1901", domain, keccak256(abi.encode(typeHash, sale)))
+                ),
+            "unchanged V2 typed digest"
+        );
     }
 
     function testNativeDirectFundingAndActualWalletPayout() public {
@@ -1007,8 +1060,17 @@ contract StreamSaleFundingTest is RevenueV1TestBase, OfficialSafeFixture {
         artists = new SaleFundingArtistMock(address(core));
         core.selectArtist(address(artists), address(artists).codehash);
         manager = new SaleFundingManagerMock(address(core));
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 1_000_000, keccak256("Safe artist"));
         (profile, wallet) = factory.createProfile(entries, keccak256("Safe funded sale"));

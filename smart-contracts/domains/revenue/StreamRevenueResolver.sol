@@ -522,6 +522,54 @@ contract StreamRevenueResolver is
         private
         returns (bytes32 profileId, address wallet, bytes32 entriesHash)
     {
+        IStreamSplitWallet.SplitEntry[] memory concreteEntries;
+        bytes32 metadataURIHash;
+        (concreteEntries, entriesHash, metadataURIHash) = _concreteProfile(templateId, context);
+        (profileId, wallet) = splitFactoryContract.registerProfile(concreteEntries, metadataURIHash);
+        // Even the deferred path must not produce a usable receipt for an occupied wrong-code address.
+        if (wallet.code.length != 0 && !splitFactoryContract.splitWalletExists(profileId)) {
+            revert UnverifiedSplitProfile(profileId);
+        }
+        if (context.deploy) wallet = splitFactoryContract.deployWallet(profileId);
+        emit PrimaryTemplateMaterialized(
+            templateId, profileId, wallet, entriesHash, metadataURIHash, context.salePoster
+        );
+        if (context.collectionId != 0) {
+            _emitCollectionMaterialization(templateId, profileId, wallet, entriesHash, context);
+        }
+    }
+
+    /// @notice Same concrete derivation as materialization, without registration or deployment.
+    function previewCollectionPrimaryProfile(
+        bytes32 templateId,
+        uint256 collectionId,
+        address salePoster
+    ) external view override returns (bytes32 profileId, address wallet, bytes32 entriesHash) {
+        _requireSelectedArtistRegistry();
+        if (collectionId == 0) revert InvalidPrimaryCollection(collectionId);
+        _resolveCollectionIdentity(collectionId, 0);
+        MaterializationContext memory context;
+        context.collectionId = collectionId;
+        context.salePoster = salePoster;
+        IStreamSplitWallet.SplitEntry[] memory concreteEntries;
+        bytes32 metadataURIHash;
+        (concreteEntries, entriesHash, metadataURIHash) = _concreteProfile(templateId, context);
+        profileId = splitFactoryContract.profileIdFor(concreteEntries, metadataURIHash);
+        wallet = splitFactoryContract.walletFor(profileId);
+        if (wallet.code.length != 0 && !splitFactoryContract.splitWalletExists(profileId)) {
+            revert UnverifiedSplitProfile(profileId);
+        }
+    }
+
+    function _concreteProfile(bytes32 templateId, MaterializationContext memory context)
+        private
+        view
+        returns (
+            IStreamSplitWallet.SplitEntry[] memory concreteEntries,
+            bytes32 entriesHash,
+            bytes32 metadataURIHash
+        )
+    {
         PrimaryTemplate storage template = _templates[templateId];
         if (!template.exists) revert UnknownPrimaryTemplate(templateId);
         // Resolve once; all entries in this materialization share the same current witness.
@@ -533,8 +581,7 @@ contract StreamRevenueResolver is
                 break;
             }
         }
-        IStreamSplitWallet.SplitEntry[] memory concreteEntries =
-            new IStreamSplitWallet.SplitEntry[](template.entries.length);
+        concreteEntries = new IStreamSplitWallet.SplitEntry[](template.entries.length);
         for (uint256 i; i < template.entries.length; ++i) {
             PrimaryTemplateEntry storage entry = template.entries[i];
             address account = entry.account;
@@ -553,7 +600,7 @@ contract StreamRevenueResolver is
         }
         concreteEntries = _canonicalizeConcreteEntries(concreteEntries);
         entriesHash = keccak256(abi.encode(concreteEntries));
-        bytes32 metadataURIHash = keccak256(
+        metadataURIHash = keccak256(
             abi.encode(
                 _MATERIALIZED_PROFILE_METADATA_DOMAIN,
                 uint256(block.chainid),
@@ -562,18 +609,6 @@ contract StreamRevenueResolver is
                 entriesHash
             )
         );
-        (profileId, wallet) = splitFactoryContract.registerProfile(concreteEntries, metadataURIHash);
-        // Even the deferred path must not produce a usable receipt for an occupied wrong-code address.
-        if (wallet.code.length != 0 && !splitFactoryContract.splitWalletExists(profileId)) {
-            revert UnverifiedSplitProfile(profileId);
-        }
-        if (context.deploy) wallet = splitFactoryContract.deployWallet(profileId);
-        emit PrimaryTemplateMaterialized(
-            templateId, profileId, wallet, entriesHash, metadataURIHash, context.salePoster
-        );
-        if (context.collectionId != 0) {
-            _emitCollectionMaterialization(templateId, profileId, wallet, entriesHash, context);
-        }
     }
 
     function _emitCollectionMaterialization(

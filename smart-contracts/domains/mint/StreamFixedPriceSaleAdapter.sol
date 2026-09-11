@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
 import "./StreamSaleFunding.sol";
+import "./StreamSaleTemplate.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 
 import "../../interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol";
@@ -163,6 +164,7 @@ contract StreamFixedPriceSaleAdapter is
         bytes32 previewRoot;
         bytes32 operationId;
         bool escrowed;
+        StreamSaleTemplate.Selection selected;
     }
 
     function primaryPolicy(uint256 collectionId)
@@ -171,8 +173,24 @@ contract StreamFixedPriceSaleAdapter is
         override
         returns (bytes32 policyHash, bytes32 profileId, address wallet)
     {
+        StreamSaleTemplate.Selection memory selected = _primarySelection(collectionId);
+        return (
+            StreamSaleTemplate.policyHash(revenueResolver, collectionId, selected),
+            selected.profileId,
+            selected.wallet
+        );
+    }
+
+    function _primarySelection(uint256 collectionId)
+        private
+        view
+        returns (StreamSaleTemplate.Selection memory selected)
+    {
         IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
             revenueResolver.resolvePrimaryAssignment(collectionId, 0, REVENUE_CLASS);
+        if (a.assignmentType == 2) {
+            return StreamSaleTemplate.preview(revenueResolver, collectionId, a);
+        }
         if (
             !a.exists || a.assignmentType != 1 || a.scope != 1 || a.scopeId != collectionId
                 || a.templateId != bytes32(0) || a.profileId == bytes32(0)
@@ -180,36 +198,23 @@ contract StreamFixedPriceSaleAdapter is
         ) {
             revert NativePrimaryAssignmentUnsupported();
         }
-        profileId = a.profileId;
-        wallet = splitFactory.walletFor(profileId);
-        _requireFundingWallet(profileId, wallet);
-        policyHash = keccak256(
-            abi.encode(
-                PRIMARY_POLICY_DOMAIN,
-                block.chainid,
-                address(revenueResolver),
-                REVENUE_CLASS,
-                collectionId,
-                uint256(0),
-                bytes32(0),
-                profileId,
-                wallet,
-                a.assignmentHash
-            )
-        );
+        selected.profileId = a.profileId;
+        selected.wallet = splitFactory.walletFor(a.profileId);
+        selected.assignmentHash = a.assignmentHash;
+        _requireFundingWallet(selected.profileId, selected.wallet);
     }
 
     function _requirePrimaryPolicy(SaleAuthorization calldata sale)
         private
         view
-        returns (address wallet)
+        returns (StreamSaleTemplate.Selection memory selected)
     {
-        (bytes32 policy, bytes32 profile, address target) = primaryPolicy(sale.collectionId);
-        if (profile != sale.profileId) revert InvalidSplitProfile(sale.profileId);
+        selected = _primarySelection(sale.collectionId);
+        if (selected.profileId != sale.profileId) revert InvalidSplitProfile(sale.profileId);
+        bytes32 policy = StreamSaleTemplate.policyHash(revenueResolver, sale.collectionId, selected);
         if (policy != sale.expectedPrimaryPolicyHash) {
             revert NativePrimaryPolicyMismatch(sale.expectedPrimaryPolicyHash, policy);
         }
-        return target;
     }
 
     function buy(
@@ -227,7 +232,8 @@ contract StreamFixedPriceSaleAdapter is
         e.digest = authorizationDigest(sale);
         _requireSignature(platformSigner, e.digest, platformSignature);
         _requireSignature(sale.artist, e.digest, artistSignature);
-        e.wallet = _requirePrimaryPolicy(sale);
+        e.selected = _requirePrimaryPolicy(sale);
+        e.wallet = e.selected.wallet;
         e.id = authorizationId(sale.artist, sale.nonce);
         IStreamMintManager.MintBatch memory batch = _mintBatch(sale, tokenData, e.digest, e.id);
         bytes32[] memory ids;
@@ -245,11 +251,18 @@ contract StreamFixedPriceSaleAdapter is
         IStreamMintManager.MintBatch memory batch,
         Execution memory e
     ) private returns (uint256 tokenId, bytes32 operationRoot) {
+        StreamSaleTemplate.materialize(revenueResolver, sale.collectionId, e.selected);
         authorizationUsed[sale.artist][sale.nonce] = true;
         nativeProceeds[sale.profileId] += msg.value;
         totalNativeProceeds += msg.value;
-        e.escrowed = _fundNative(REVENUE_CLASS, sale.profileId, e.wallet, msg.value);
-        _requirePrimaryPolicy(sale);
+        e.escrowed = _fundNative(
+            REVENUE_CLASS, sale.profileId, e.wallet, msg.value, e.selected.templateId != bytes32(0)
+        );
+        if (e.selected.templateId == bytes32(0)) _requirePrimaryPolicy(sale);
+        else StreamSaleTemplate.requireCurrent(revenueResolver, sale.collectionId, e.selected);
+        StreamSaleArtist.requireArtist(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
         uint256[] memory tokenIds;
         bytes32[] memory operationIds;
         (tokenIds, operationRoot, operationIds) = mintManager.executeSingleStepMint(batch, "");
