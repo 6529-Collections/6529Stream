@@ -168,6 +168,7 @@ solidity-source-layout-check:
 	$(PYTHON) -m tools.build.check_solidity_source_layout
 	$(PYTHON) -m tools.build.test_solidity_layout_equivalence
 	$(PYTHON) -m tools.build.check_solidity_layout_equivalence --check-receipt
+	$(PYTHON) -m tools.development.check_legacy_snapshot
 
 drop-authorization-fixtures-check:
 	$(PYTHON) -m tools.protocol.test_drop_authorization_payload_generator

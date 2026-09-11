@@ -75,6 +75,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Preserve historical mint and revenue companions in explicitly named, provenance-
+  checked RC1 fixtures so legacy regressions remain separate from evolving v1
+  contract behavior and current deployment artifacts.
 - Admit the narrow artist mint-consent capability at Core and narrow attribution
   reads at sale adapters. Pin provider identity across committed genesis, and
   extract mint phase configuration without changing the Manager ABI or storage.

@@ -86,6 +86,7 @@ fi
 "$python_bin" -m tools.build.check_solidity_source_layout
 "$python_bin" -m tools.build.test_solidity_layout_equivalence
 "$python_bin" -m tools.build.check_solidity_layout_equivalence --check-receipt
+"$python_bin" -m tools.development.check_legacy_snapshot
 "$python_bin" -m tools.development.test_windows_check_wrapper
 "$python_bin" -m tools.development.test_python_toolchain
 "$python_bin" -m tools.development.check_python_toolchain

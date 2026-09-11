@@ -153,6 +153,7 @@ if ($candidateStrictExit -ne 1) {
 & $pythonPath @pythonArgs "-m" "tools.build.check_solidity_source_layout"
 & $pythonPath @pythonArgs "-m" "tools.build.test_solidity_layout_equivalence"
 & $pythonPath @pythonArgs "-m" "tools.build.check_solidity_layout_equivalence" "--check-receipt"
+& $pythonPath @pythonArgs "-m" "tools.development.check_legacy_snapshot"
 & $pythonPath @pythonArgs "-m" "tools.development.test_windows_check_wrapper"
 & $pythonPath @pythonArgs "-m" "tools.development.test_python_toolchain"
 & $pythonPath @pythonArgs "-m" "tools.development.check_python_toolchain"

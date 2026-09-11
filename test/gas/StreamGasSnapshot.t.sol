@@ -10,7 +10,7 @@ import {LegacyStreamCore as StreamCore} from "../regression/legacy/helpers/Legac
 import "../../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
 import "../../smart-contracts/domains/mint/legacy/StreamDrops.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
-import "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import {LegacyRC1StreamMintManager as StreamMintManager} from "../fixtures/legacy-rc1/contracts/LegacyRC1StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
 import "../helpers/DropAuthTestHelper.sol";
 import "../regression/legacy/helpers/StreamFixture.sol";

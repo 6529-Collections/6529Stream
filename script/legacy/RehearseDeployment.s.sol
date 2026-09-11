@@ -6,7 +6,7 @@ import "../../smart-contracts/domains/dependencies/DependencyRegistry.sol";
 import "../../smart-contracts/interfaces/stream/core/IStreamCore.sol";
 import "../../smart-contracts/integrations/randomizers/legacy/RandomizerRNG.sol";
 import "../../smart-contracts/integrations/randomizers/legacy/RandomizerVRF.sol";
-import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
+import {LegacyRC1StreamAssetPolicyRegistry as StreamAssetPolicyRegistry} from "../../test/fixtures/legacy-rc1/contracts/LegacyRC1StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/access/StreamAdmins.sol";
 import "../../smart-contracts/domains/metadata/StreamContractMetadata.sol";
 import "../../smart-contracts/domains/metadata/StreamCollectionMetadata.sol";
@@ -15,13 +15,13 @@ import "../../smart-contracts/domains/revenue/StreamCuratorsPool.sol";
 import "../../smart-contracts/domains/mint/legacy/StreamDrops.sol";
 import "../../smart-contracts/domains/mint/legacy/StreamMinter.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
-import "../../smart-contracts/domains/mint/StreamMintManager.sol";
+import {LegacyRC1StreamMintManager as StreamMintManager} from "../../test/fixtures/legacy-rc1/contracts/LegacyRC1StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintModuleRegistry.sol";
-import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
+import {LegacyRC1StreamPrimarySaleSettlement as StreamPrimarySaleSettlement} from "../../test/fixtures/legacy-rc1/contracts/LegacyRC1StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/preservation/StreamPreservationRecords.sol";
 import "../../smart-contracts/domains/records/StreamRecordFamilyRegistry.sol";
-import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
-import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
+import {LegacyRC1StreamRevenueResolver as StreamRevenueResolver} from "../../test/fixtures/legacy-rc1/contracts/LegacyRC1StreamRevenueResolver.sol";
+import {LegacyRC1StreamSplitFactory as StreamSplitFactory} from "../../test/fixtures/legacy-rc1/contracts/LegacyRC1StreamSplitFactory.sol";
 
 interface ScriptVm {
     function startBroadcast(address broadcaster) external;
