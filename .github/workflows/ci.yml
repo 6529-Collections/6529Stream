@@ -242,6 +242,21 @@ jobs:
           }
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
 
+      - name: Set up Node for operator integration tests
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: "24.16.0"
+          cache: npm
+          cache-dependency-path: packages/stream-client/package-lock.json
+
+      - name: Build client for operator integration tests
+        shell: pwsh
+        run: |
+          npm --prefix packages/stream-client ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm --prefix packages/stream-client run build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Current local and Sepolia runner tests
         shell: pwsh
         run: |
@@ -285,6 +300,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38

@@ -1,6 +1,6 @@
 # Stream delivery state
 
-Updated 10 September 2026. The owner authorizes autonomous implementation,
+Updated 11 September 2026. The owner authorizes autonomous implementation,
 repository reorganization, independent adversarial review, and testnet delivery.
 
 ## Current Repository State
@@ -8,18 +8,42 @@ repository reorganization, independent adversarial review, and testnet delivery.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream` |
-| Active PR branch | `codex/offline-release-completion` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/740` |
+| Active PR branch | `codex/developer-launch-kit` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/741` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/738` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/741` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/742` |
 | Next issue | `TBD` |
-| Source checkpoint | `2e675281b18f8881b341eb47cd26cd60ad63f6b0` (merged baseline) |
+| Source checkpoint | `afa176d3496601abc2c9028a40a757ce2deb838d` (merged PR #741 baseline) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-09-10 UTC` |
+| Last updated | `2026-09-11 UTC` |
 
 ## Active work
+
+[PR #741](https://github.com/6529-Collections/6529Stream/pull/741) merged as
+`afa176d3496601abc2c9028a40a757ce2deb838d` after all four CI jobs passed and all
+seven review threads were resolved. Its merged tree matches the reviewed
+`640cd995` tree. The original checkout is clean on main at that merge.
+
+[PR #742](https://github.com/6529-Collections/6529Stream/pull/742) is the active
+developer-kit increment on `codex/developer-launch-kit`. Current-stack tests,
+campaigns, client validation and the completed public Sepolia flow are recorded
+below. Current release coverage contains 703 files.
+
+Final integration remains pending. The Windows CI job now builds the client
+before operator tests, and the verifier-test fixture binds the reviewed Slither
+source hash. Developer-tool review corrections are being integrated in parallel.
+Refresh the dependent release evidence and finish final local validation,
+independent review and all six CI jobs before merging PR #742. The supported testnet candidate
+freeze and publication follow that merge; neither has occurred. Historical
+production and public-beta gate placeholders remain unchanged.
+
+## Retained PR #741 implementation and validation
+
+The following record retains its original checkpoints and rerun/merge-gate
+language. Those pending references are historical; PR #741's final acceptance
+is recorded above.
 
 The owner requested further implementation while waiting for Sepolia funding.
 That funding has arrived and the matching current deployment and native
@@ -94,10 +118,11 @@ supported behavior stabilizes. Resolve substantive review findings before merge.
 
 ## Developer launch kit and testing upgrade
 
-The next increment is being integrated on `codex/developer-launch-kit` while
-PR #741 completes. No production Solidity behavior is changed by this increment
-so far. Completed pieces include the TypeScript client, a selected-state snapshot
-exporter, a second-artist product demonstration and resumable Sepolia stages.
+The active increment is [PR #742](https://github.com/6529-Collections/6529Stream/pull/742)
+on `codex/developer-launch-kit`, following the now-merged PR #741. It does not
+change production Solidity behavior. Completed pieces include the TypeScript
+client, a selected-state snapshot exporter, a second-artist product demonstration
+and resumable Sepolia stages.
 
 - The client passes 31 tests plus its build, type checks and retained-ABI checks.
   Its snapshot records selected public facts at one block, with explicit coverage,
@@ -181,6 +206,13 @@ refs/bundles and 6,646 ignored files were preserved and verified. Six registered
 worktrees remain: original, integration, developer launch kit, frozen Sepolia
 launch, historical deployer and immutable review baseline. The launch-kit checkout is active implementation work,
 not an abandoned worktree.
+
+After the final merge and validation finish, preserve and hash all remaining
+unique recovery files, compiler outputs, caches and deployment receipts before
+retiring four worktrees. The intended two retained checkouts are the original
+repository and the frozen Sepolia launch checkout. These four retirements have
+not occurred; the retained evidence and prior user changes must remain recoverable.
+
 The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
 directory remains after automatic approval review blocked its removal.
 

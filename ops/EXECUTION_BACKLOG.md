@@ -4,7 +4,7 @@
 
 | Item | Outcome | Gate | Status |
 | --- | --- | --- | --- |
-| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #741 / issue #738, branch `codex/offline-release-completion`; PR #740 merged; ERC-20 purchases, state-export publisher and local deployment flows pass; final validation and review in progress |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #742 / issue #738, branch `codex/developer-launch-kit`; PR #741 merged; current product flows and native Sepolia demonstration pass; developer toolkit, final review and candidate freeze in progress |
 
 Status: historical full-v1 backlog. Current delivery priorities and lane
 ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
