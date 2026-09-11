@@ -13,6 +13,7 @@ import "../../../smart-contracts/domains/artist/StreamArtistAttributionLifecycle
 import "../../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
 import "../../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 import "../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
+import "../../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../../smart-contracts/domains/mint/StreamMintManager.sol";
@@ -81,16 +82,51 @@ contract ArtistUnitModuleRegistry {
 }
 
 contract ArtistUnitGovernance {
+    bool private active;
+    bytes32 private scope;
+    bytes32 private oldState;
+    bytes32 private newState;
+
     function isStreamGovernedParameterAuthority() external pure returns (bool) {
         return true;
     }
 
     function currentAction()
         external
-        pure
+        view
         returns (bool, bytes32, uint8, bytes32, bytes32, bytes32)
     {
-        return (false, bytes32(0), 0, bytes32(0), bytes32(0), bytes32(0));
+        return (
+            active,
+            active ? keccak256("unit authority gas raise") : bytes32(0),
+            active ? 1 : 0,
+            scope,
+            oldState,
+            newState
+        );
+    }
+
+    /// @dev Exact host-context unit double, not proof of actual delayed governance.
+    function raise(IStreamGasParameterHost host, bytes32 id, uint256 value) external {
+        (uint256 previous, uint256 floor, uint8 failure, uint64 revision) =
+            host.gasParameterInfo(id);
+        scope = keccak256(
+            abi.encode(
+                bytes32(0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71),
+                block.chainid,
+                address(host),
+                id
+            )
+        );
+        bytes32 domain = 0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c;
+        oldState = keccak256(abi.encode(domain, scope, previous, floor, failure, revision));
+        newState = keccak256(abi.encode(domain, scope, value, floor, failure, revision + 1));
+        active = true;
+        host.raiseGasParameter(id, value);
+        active = false;
+        scope = bytes32(0);
+        oldState = bytes32(0);
+        newState = bytes32(0);
     }
 }
 
@@ -122,101 +158,15 @@ contract ArtistUnitMetadata {
     }
 }
 
-/// @dev Preview uses the real baseline resolver hash routine; v1 governance admission is integration-owned.
-contract ArtistUnitPrimary is StreamRevenueResolver, IStreamArtistPrimaryFacts {
-    constructor(
-        IStreamCore core_,
-        IStreamSplitFactory factory,
-        address governance,
-        IStreamArtistAttribution registry
-    ) StreamRevenueResolver(core_, factory, governance, registry) { }
-
-    function previewArtistPrimaryAssignment(
-        uint256 id,
-        bytes32 profile,
-        bytes32 policy,
-        bool frozen_
-    ) external view returns (T.AssignmentFact memory) {
-        require(splitFactoryContract.profileExists(profile), "unit candidate profile");
-        bytes32 class_ = keccak256("PRIMARY_FIXED_PRICE_NATIVE");
-        return T.AssignmentFact(
-            address(this),
-            class_,
-            1,
-            id,
-            this.primaryAssignmentHash(class_, 1, id, 1, profile, bytes32(0), policy, frozen_)
-        );
-    }
-}
-
-contract ArtistUnitRoyalty {
-    IStreamRoyaltyResolver.RoyaltyConfig private config;
-    IStreamSplitFactory public immutable splitFactory;
-
-    constructor(IStreamSplitFactory factory_, bytes32 profile, address wallet) {
-        splitFactory = factory_;
-        config = IStreamRoyaltyResolver.RoyaltyConfig(wallet, 500, true, false, 1, profile);
-    }
-
-    function previewArtistRoyaltyAssignment(uint256 id, bytes32 profile, uint16 bps, bool frozen_)
-        external
-        view
-        returns (T.AssignmentFact memory)
-    {
-        require(splitFactory.profileExists(profile) && bps <= 10_000, "unit candidate profile/bps");
-        IStreamRoyaltyResolver.RoyaltyConfig memory next = IStreamRoyaltyResolver.RoyaltyConfig(
-            splitFactory.walletFor(profile), bps, true, frozen_, 1, profile
-        );
-        return T.AssignmentFact(
-            address(this), keccak256("ROYALTY_ERC2981"), 1, id, keccak256(abi.encode(id, next))
-        );
-    }
-
-    function applyArtistRoyaltyFreeze(
-        IStreamArtistEconomicsAuthority authority,
-        uint256 id,
-        bytes32 expected
-    ) external {
-        require(
-            !config.frozen && expected == keccak256(abi.encode(id, config)),
-            "unit exact active hash"
-        );
-        require(authority.isRoyaltyFreezeAuthorized(id, expected), "unit artist authorization");
-        config.frozen = true;
-    }
-
-    function setBps(uint16 bps) external {
-        config.royaltyBps = bps;
-    }
-
-    function collectionRoyalty(uint256)
-        external
-        view
-        returns (IStreamRoyaltyResolver.RoyaltyConfig memory)
-    {
-        return config;
-    }
-
-    function currentArtistRoyaltyAssignment(uint256 id)
-        external
-        view
-        returns (T.AssignmentFact memory)
-    {
-        return T.AssignmentFact(
-            address(this), keccak256("ROYALTY_ERC2981"), 1, id, keccak256(abi.encode(id, config))
-        );
-    }
-}
-
-/// @notice Real seven-owner records, archive, split profiles and official Safe signatures.
-/// @dev Core, metadata, royalty and governance boundaries are explicit unit doubles;
+/// @notice Real artist owners, both economics providers, split profiles and official Safe signatures.
+/// @dev Core, metadata and governance boundaries are explicit unit doubles;
 ///      a separate current-stack test owns integration and eligible token mint proof.
 contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFixture {
     ArtistTestVm private constant avm =
         ArtistTestVm(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 private constant PHASE = keccak256("artist unit phase");
     bytes32 private POLICY;
-    bytes32 private constant PRIMARY = keccak256("PRIMARY_FIXED_PRICE_NATIVE");
+    bytes32 private constant PRIMARY = keccak256("PRIMARY_SALE");
     uint256[] private keys;
     OfficialSafe private artist;
     SafeComponents private safeComponents;
@@ -227,7 +177,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     bytes32 private artistId;
     ArtistUnitCore private core;
     ArtistUnitMetadata private metadata;
-    ArtistUnitRoyalty private royalty;
+    StreamRoyaltyResolver private royalty;
     StreamRevenueResolver private primary;
     StreamSplitFactory private factory;
     StreamMintManager private manager;
@@ -249,6 +199,10 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         ledger = new StreamMintLedger();
         manager =
             new StreamMintManager(IStreamCore(address(core)), ledger, IERC165(address(modules)));
+        // Match the integrated live-provider profile; the real delayed Executor
+        // raise is integration-owned. This fixture exercises the actual host checks.
+        ArtistUnitGovernance(governance)
+            .raise(manager, manager.GGP_ARTIST_AUTHORITY_GAS_LIMIT(), 300_000);
         ledger.setLedgerWriter(address(manager), true);
         suite.core = address(core);
         suite.mintManager = address(manager);
@@ -256,7 +210,9 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         suite.validator = address(new StreamArtistRegistryValidatorBase());
         metadata = new ArtistUnitMetadata();
         suite.metadata = address(metadata);
-        factory = new StreamSplitFactory(new StreamAssetPolicyRegistry());
+        factory = new StreamSplitFactory(
+            new StreamAssetPolicyRegistry(governance), governance, _walletGasConfigs()
+        );
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(address(artist), 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
@@ -342,12 +298,18 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 suite.mintManager
             )
         );
-        primary = new ArtistUnitPrimary(IStreamCore(address(core)), factory, governance, ingress);
+        primary =
+            new StreamRevenueResolver(IStreamCore(address(core)), factory, governance, ingress);
         // Separate real factory/profile proves royalty payout reads cannot substitute
         // the primary resolver's factory, even when both profiles name the same artist.
-        StreamSplitFactory royaltyFactory = new StreamSplitFactory(factory.assetPolicyRegistry());
+        StreamSplitFactory royaltyFactory = new StreamSplitFactory(
+            factory.assetPolicyRegistry(), governance, _walletGasConfigs()
+        );
         (profile, wallet) = royaltyFactory.createProfile(entries, keccak256("royalty unit split"));
-        royalty = new ArtistUnitRoyalty(royaltyFactory, profile, wallet);
+        royalty = new StreamRoyaltyResolver(
+            IStreamCore(address(core)), royaltyFactory, governance, ingress
+        );
+        bytes32 royaltyProfile = profile;
         suite.primaryResolver = address(primary);
         suite.royaltyResolver = address(royalty);
         coordinator = new StreamArtistOnboardingCoordinator(suite);
@@ -358,6 +320,8 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         (profile,) = factory.createProfile(entries, keccak256("artist unit split"));
         vm.prank(governance);
         primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, profile, bytes32(0));
+        vm.prank(governance);
+        royalty.configureCollectionRoyalty(1, royaltyProfile, 500);
         (artistId,) = ingress.proposeArtistBinding(
             1, _proposal(bytes32(0)), bytes("unit identity document"), "Artist Safe"
         );
@@ -378,6 +342,22 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         p.consentMode = 1;
         p.collaborators = new T.CollaboratorRecord[](0);
         p.capabilityPolicyOverrides = new T.CapabilityPolicyOverride[](0);
+    }
+
+    /// @dev Matches the integrated wallet-line planning configuration; cold sizing is a separate gate.
+    function _walletGasConfigs()
+        private
+        pure
+        returns (IStreamGasParameterHost.GasParameterConfig[3] memory configs)
+    {
+        configs[0] = IStreamGasParameterHost.GasParameterConfig(
+            "ERC_1271_GAS_LIMIT", 400_000, 350_000, 2
+        );
+        configs[1] =
+            IStreamGasParameterHost.GasParameterConfig("ASSET_POLICY_GAS_LIMIT", 30_000, 15_000, 2);
+        configs[2] = IStreamGasParameterHost.GasParameterConfig(
+            "WALLET_DEPOSIT_GAS_LIMIT", 50_000, 25_000, 2
+        );
     }
 
     function _authorization(bool signedAt) private returns (T.Authorization memory) {
@@ -688,8 +668,17 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         metadata.setContent(keccak256("changed"));
         require(_closed(_mintCall()), "changed current content");
         require(vm.revertToState(snapshot), "restore");
-        royalty.setBps(600);
-        require(_closed(_mintCall()), "changed royalty");
+        IStreamRoyaltyResolver.RoyaltyConfig memory r = royalty.collectionRoyalty(1);
+        vm.prank(royalty.owner());
+        avm.expectPartialRevert(T.MissingMintPrerequisite.selector);
+        royalty.configureCollectionRoyalty(1, r.profileId, 600);
+        require(
+            royalty.collectionRoyalty(1).royaltyBps == r.royaltyBps,
+            "unconsented royalty mutation rejected"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        core.set(keccak256("ROYALTY_RESOLVER"), address(primary), false);
+        require(_closed(_mintCall()), "changed selected royalty identity");
     }
 
     function testLateArchiveFailureRollsBackEveryOwnerAndNonce() public {
@@ -1303,7 +1292,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         }
         require(found && _closed(_mintCall()), "freeze right independent of mint eligibility");
         IStreamRoyaltyResolver.RoyaltyConfig memory prior = royalty.collectionRoyalty(1);
-        royalty.applyArtistRoyaltyFreeze(ingress, 1, p.expectedAssignmentHash);
+        royalty.applyArtistRoyaltyFreeze(1, p.expectedAssignmentHash);
         IStreamRoyaltyResolver.RoyaltyConfig memory after_ = royalty.collectionRoyalty(1);
         require(
             after_.frozen && prior.wallet == after_.wallet && prior.profileId == after_.profileId
@@ -1315,7 +1304,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     function testFreezeChangesEconomicsHashAndNeedsSeparateConsentForMint() public {
         _all();
         T.RoyaltyFreeze memory p = _authorizeFreeze();
-        royalty.applyArtistRoyaltyFreeze(ingress, 1, p.expectedAssignmentHash);
+        royalty.applyArtistRoyaltyFreeze(1, p.expectedAssignmentHash);
         avm.expectPartialRevert(T.MissingMintPrerequisite.selector);
         ingress.requireMintConsent(1, PHASE, POLICY);
         _economicsRecord(coordinator.reads().currentRoyaltyAssignment(1));
@@ -1334,7 +1323,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
             T.EconomicsConsent(1, fact.resolver, fact.revenueClass, 1, 1, fact.assignmentHash);
         _prospectiveConsent(p, candidate);
         T.RoyaltyFreeze memory freeze = _authorizeFreeze();
-        royalty.applyArtistRoyaltyFreeze(ingress, 1, freeze.expectedAssignmentHash);
+        royalty.applyArtistRoyaltyFreeze(1, freeze.expectedAssignmentHash);
         ingress.requireMintConsent(1, PHASE, POLICY);
         require(
             ingress.supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId),
@@ -1503,5 +1492,127 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
             )
         );
         require(_roots() == before_, "actual Safe has no coordinator privilege");
+    }
+
+    function testActualSafeCallsBothRealPreviewsAndFreezeReads() public {
+        _accept();
+        _payout();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(primary),
+                0,
+                abi.encodeCall(
+                    IStreamArtistPrimaryFacts.previewArtistPrimaryAssignment,
+                    (1, candidate.profileHash, bytes32(0), false)
+                ),
+                0
+            ),
+            "Safe actual primary preview"
+        );
+        _prospectiveConsent(p, candidate);
+        (p, candidate) = _candidate(address(royalty), address(artist), 650, false);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(royalty),
+                0,
+                abi.encodeCall(
+                    IStreamArtistRoyaltyPreview.previewArtistRoyaltyAssignment,
+                    (1, candidate.profileHash, uint16(650), false)
+                ),
+                0
+            ),
+            "Safe actual royalty preview"
+        );
+        _prospectiveConsent(p, candidate);
+        T.RoyaltyFreeze memory freeze = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistEconomicsAuthority.royaltyFreezeDigest, (freeze, a)),
+                0
+            ),
+            "Safe freeze digest read"
+        );
+        require(
+            !ingress.isRoyaltyFreezeAuthorized(1, freeze.expectedAssignmentHash),
+            "no authorization yet"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEconomicsAuthority.isRoyaltyFreezeAuthorized,
+                    (1, freeze.expectedAssignmentHash)
+                ),
+                0
+            ),
+            "Safe authorization read"
+        );
+        a.signature = _signature(ingress.royaltyFreezeDigest(freeze, a));
+        ingress.authorizeArtistRoyaltyFreeze(freeze, a);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(royalty),
+                0,
+                abi.encodeCall(
+                    IStreamRoyaltyFreeze.applyArtistRoyaltyFreeze,
+                    (1, freeze.expectedAssignmentHash)
+                ),
+                0
+            ),
+            "Safe relays real exact defensive freeze"
+        );
+        require(royalty.collectionRoyalty(1).frozen, "real provider freeze applied");
+    }
+
+    function testActualSafeOwnerAppliesRealPrimaryCandidateOnlyAfterArtistConsent() public {
+        _all();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        // Ownership setup is a fixture action; timelock authorization is separately
+        // covered by the actual Executor integration, not by this unit handover.
+        vm.prank(primary.owner());
+        primary.transferOwnership(address(artist));
+        bytes memory data = abi.encodeCall(
+            IStreamRevenueResolver.setPrimaryProfileAssignment,
+            (PRIMARY, uint8(1), uint256(1), candidate.profileHash, bytes32(0))
+        );
+        bytes32 before_ = primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash;
+        vm.prank(address(artist));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, candidate.profileHash, bytes32(0));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(primary), data);
+        require(
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash == before_,
+            "missing consent no mutation"
+        );
+        _prospectiveConsent(p, candidate);
+        require(
+            executeSafe(artist, keys, address(primary), 0, data, 0),
+            "Safe applies actual primary candidate"
+        );
+        require(
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash == p.assignmentHash,
+            "preview equals applied hash"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
     }
 }

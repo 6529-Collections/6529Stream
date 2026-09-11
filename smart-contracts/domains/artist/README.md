@@ -91,8 +91,11 @@ direct artist call with empty proof consumes the current unused allocator nonce;
 long-lived records must supply the current block timestamp. A Safe owner's EOA
 has no implicit authority belonging to the Safe.
 
-The focused onboarding tests use real owners, archive, split factory, primary
-resolver, Manager, Ledger, and official Safe 1.4.1 bytecode. Their explicitly
-named Core, metadata, royalty, registry, and governance doubles isolate protocol
-boundaries. Those tests are not substitutes for the separate real current-Core
-integration and governed-provider tests.
+The focused onboarding tests use real owners, archive, split factories, primary
+and royalty resolvers, Manager, Ledger, and official Safe 1.4.1 bytecode. Their
+explicitly named Core, metadata, module-registry, and governance doubles isolate
+protocol boundaries. Both primary and royalty previews and application use the
+actual providers. The Manager fixture uses an explicit 300,000 authority-read
+allowance raised through the real host with a unit governance context. These
+tests are not substitutes for the separate real current-Core integration and
+governed-provider tests.
