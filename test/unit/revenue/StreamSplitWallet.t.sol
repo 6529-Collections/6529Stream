@@ -29,9 +29,9 @@ contract StreamSplitWalletTest is RevenueV1TestBase {
     bytes32 private constant SPLIT_PROFILE_CREATED_TOPIC =
         keccak256("SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)");
     bytes32 private constant SPLIT_WALLET_DEPLOYED_TOPIC =
-        keccak256("SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)");
+        keccak256("SplitWalletDeployed(bytes32,address,uint16,uint16,bytes32,bytes32)");
     bytes32 private constant SPLIT_WALLET_DISCOVERED_TOPIC =
-        keccak256("SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)");
+        keccak256("SplitWalletDiscovered(bytes32,address,uint16,uint16,bytes32,bytes32)");
     bytes32 private constant ASSET_OBSERVATION_INITIALIZED_TOPIC =
         keccak256("AssetObservationInitialized(bytes32,address,uint256)");
     bytes32 private constant ASSET_SYNCED_TOPIC =

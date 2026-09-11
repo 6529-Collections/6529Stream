@@ -129,8 +129,9 @@ This implementation has no separate immediate policy-update path.
 ## Deployment and verification budgets
 
 The registry constructor takes the governance executor address. The factory
-constructor takes the registry, the governance executor, and exactly two ordered
-`GasParameterConfig` rows: `ERC_1271_GAS_LIMIT` and `ASSET_POLICY_GAS_LIMIT`, both
+constructor takes the registry, the governance executor, and exactly three ordered
+`GasParameterConfig` rows: `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
+`WALLET_DEPOSIT_GAS_LIMIT`, all
 `FAIL_CLOSED_PRECHECK`. The executor must already expose its canonical authority
 and current-action interfaces when these contracts are constructed.
 
@@ -147,8 +148,10 @@ and 15,000 respectively. These are explicit fixture configuration values. The
 tests include heavy contract signers, an actual budget raise and all three
 official Safe versions; their gas observations include fixture access warmth.
 They do not replace a fully cold, release-specific gas admission measurement.
-The factory-wide `WALLET_DEPOSIT_GAS_LIMIT` row and other caller migrations remain
-separate work.
+The factory-wide `WALLET_DEPOSIT_GAS_LIMIT` row is registered. Its consumer
+migrations and all-cold release sizing remain separate work; see
+[split profiles](split-profiles.md) for that row's explicit planning inputs and
+deferred wallet deployment.
 
 The factory links `StreamSplitWalletDeployment` to keep its deployed runtime
 within EIP-170. Library delegatecall preserves the factory as the CREATE2 deployer

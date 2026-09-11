@@ -21,13 +21,17 @@ abstract contract RevenueV1TestBase is CharacterizationTestBase {
     function _walletGasConfigs()
         internal
         pure
-        returns (IStreamGasParameterHost.GasParameterConfig[2] memory configs)
+        returns (IStreamGasParameterHost.GasParameterConfig[3] memory configs)
     {
         configs[0] = IStreamGasParameterHost.GasParameterConfig(
             "ERC_1271_GAS_LIMIT", 400_000, 350_000, 2
         );
         configs[1] =
             IStreamGasParameterHost.GasParameterConfig("ASSET_POLICY_GAS_LIMIT", 30_000, 15_000, 2);
+        // Planning fixture values, not the all-cold release sizing receipt.
+        configs[2] = IStreamGasParameterHost.GasParameterConfig(
+            "WALLET_DEPOSIT_GAS_LIMIT", 50_000, 25_000, 2
+        );
     }
 
     function _prepareAssetPolicy(

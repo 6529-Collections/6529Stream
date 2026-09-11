@@ -617,7 +617,7 @@ contract StreamSplitWalletAuthorizationTest is RevenueV1TestBase, OfficialSafeFi
     }
 
     function testFactoryRejectsMissingAuthorityWrongRowsAndImmediateRaise() public {
-        IStreamGasParameterHost.GasParameterConfig[2] memory configs = _walletGasConfigs();
+        IStreamGasParameterHost.GasParameterConfig[3] memory configs = _walletGasConfigs();
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamGasParameterHost.GasParameterInvalidAuthority.selector, address(0)

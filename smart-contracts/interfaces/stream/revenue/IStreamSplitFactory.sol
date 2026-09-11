@@ -40,6 +40,7 @@ interface IStreamSplitFactory is IStreamGasParameterHost {
         bytes32 indexed profileId,
         uint16 indexed index,
         address indexed account,
+        uint16 schemaVersion,
         uint32 sharePpm,
         bytes32 labelId
     );
@@ -48,6 +49,7 @@ interface IStreamSplitFactory is IStreamGasParameterHost {
         bytes32 indexed profileId,
         address indexed wallet,
         uint16 indexed walletVersion,
+        uint16 schemaVersion,
         bytes32 initCodeHash,
         bytes32 runtimeCodeHash
     );
@@ -56,6 +58,7 @@ interface IStreamSplitFactory is IStreamGasParameterHost {
         bytes32 indexed profileId,
         address indexed wallet,
         uint16 indexed walletVersion,
+        uint16 schemaVersion,
         bytes32 initCodeHash,
         bytes32 runtimeCodeHash
     );
@@ -85,6 +88,18 @@ interface IStreamSplitFactory is IStreamGasParameterHost {
         IStreamSplitWallet.SplitEntry[] calldata entries,
         bytes32 metadataURIHash
     ) external returns (bytes32 profileId, address wallet);
+    /// @notice Registers canonical immutable terms without deploying a wallet.
+    /// @dev Repeated canonical registration is idempotent; wallet is the predicted address.
+    function registerProfile(
+        IStreamSplitWallet.SplitEntry[] calldata entries,
+        bytes32 metadataURIHash
+    ) external returns (bytes32 profileId, address wallet);
+    /// @notice Total profiles ever registered, including those with no deployed wallet.
+    function profileCount() external view returns (uint256);
+    /// @notice Profile at its immutable zero-based registration index; out of range reverts.
+    function profileAt(uint256 index) external view returns (bytes32 profileId);
+    /// @notice Predicted address for profileAt(index), regardless of deployment state.
+    function walletAt(uint256 index) external view returns (address wallet);
     /// @notice Deploys the wallet for an existing profile.
     function deployWallet(bytes32 profileId) external returns (address wallet);
     /// @notice Returns true when a profile exists.

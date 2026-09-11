@@ -5,7 +5,7 @@ import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "./StreamSplitWalletDeployment.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
-/// @notice Creates immutable split profiles and their deterministic native split wallets.
+/// @notice Registers immutable split profiles and deploys their deterministic split wallets.
 contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
     uint8 private constant _ASSET_STATUS_ACTIVE = 1;
 
@@ -35,18 +35,22 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
     }
 
     mapping(bytes32 => Profile) private _profiles;
+    bytes32[] private _profileIds;
 
     constructor(
         IStreamAssetPolicyRegistry assetPolicyRegistry_,
         address authority,
-        GasParameterConfig[2] memory walletGasConfigs
+        GasParameterConfig[3] memory walletGasConfigs
     ) StreamGasParameterHost(authority) {
         if (authority == address(0)) {
             revert GasParameterInvalidAuthority(authority);
         }
-        for (uint256 i; i < 2; ++i) {
-            bytes32 expected =
-                i == 0 ? keccak256("ERC_1271_GAS_LIMIT") : keccak256("ASSET_POLICY_GAS_LIMIT");
+        for (uint256 i; i < 3; ++i) {
+            bytes32 expected = i == 0
+                ? keccak256("ERC_1271_GAS_LIMIT")
+                : i == 1
+                    ? keccak256("ASSET_POLICY_GAS_LIMIT")
+                    : keccak256("WALLET_DEPOSIT_GAS_LIMIT");
             if (
                 keccak256(bytes(walletGasConfigs[i].name)) != expected
                     || walletGasConfigs[i].failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
@@ -98,6 +102,24 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
         IStreamSplitWallet.SplitEntry[] calldata entries,
         bytes32 metadataURIHash
     ) external override returns (bytes32 profileId, address wallet) {
+        profileId = _registerProfile(entries, metadataURIHash);
+        wallet = _deployWallet(profileId);
+    }
+
+    /// @notice Registers or reuses a canonical profile without deploying or funding its wallet.
+    /// @dev The predicted address is not a verified wallet until deployWallet succeeds.
+    function registerProfile(
+        IStreamSplitWallet.SplitEntry[] calldata entries,
+        bytes32 metadataURIHash
+    ) external override returns (bytes32 profileId, address wallet) {
+        profileId = _registerProfile(entries, metadataURIHash);
+        wallet = walletFor(profileId);
+    }
+
+    function _registerProfile(
+        IStreamSplitWallet.SplitEntry[] calldata entries,
+        bytes32 metadataURIHash
+    ) private returns (bytes32 profileId) {
         (
             IStreamSplitWallet.SplitEntry[] memory canonicalEntries,
             address[] memory accounts,
@@ -112,6 +134,7 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
             profile.exists = true;
             profile.entriesHash = entriesHash;
             profile.metadataURIHash = metadataURIHash;
+            _profileIds.push(profileId);
             for (uint256 i = 0; i < canonicalEntries.length; i++) {
                 profile.entries.push(canonicalEntries[i]);
             }
@@ -135,13 +158,27 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
                     // forge-lint: disable-next-line(unsafe-typecast)
                     uint16(i),
                     splitEntry.account,
+                    SCHEMA_VERSION,
                     splitEntry.sharePpm,
                     splitEntry.labelId
                 );
             }
         }
+    }
 
-        wallet = _deployWallet(profileId);
+    /// @notice Number of canonical profiles registered, including undeployed wallets.
+    function profileCount() external view override returns (uint256) {
+        return _profileIds.length;
+    }
+
+    /// @notice Immutable creation-order profile ID; an out-of-range index reverts.
+    function profileAt(uint256 index) external view override returns (bytes32 profileId) {
+        return _profileIds[index];
+    }
+
+    /// @notice Predicted wallet for a creation-order profile, deployed or not.
+    function walletAt(uint256 index) external view override returns (address wallet) {
+        return walletFor(_profileIds[index]);
     }
 
     /// @notice Deploys the deterministic wallet for an existing profile if it is not deployed.
@@ -249,6 +286,7 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
                     profileId,
                     wallet,
                     WALLET_VERSION,
+                    SCHEMA_VERSION,
                     splitWalletInitCodeHash(),
                     splitWalletRuntimeCodeHash()
                 );
@@ -271,6 +309,7 @@ contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
             profileId,
             wallet,
             WALLET_VERSION,
+            SCHEMA_VERSION,
             splitWalletInitCodeHash(),
             splitWalletRuntimeCodeHash()
         );

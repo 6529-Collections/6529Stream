@@ -103,7 +103,7 @@ contract StreamClaimRouterTest is RevenueV1TestBase {
     bytes32 private constant CREATED =
         keccak256("SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)");
     bytes32 private constant ENTRY =
-        keccak256("SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)");
+        keccak256("SplitProfileEntry(bytes32,uint16,address,uint16,uint32,bytes32)");
     bytes32 private constant TRANSFER = keccak256("Transfer(address,address,uint256)");
     bytes32 private constant FAILED =
         keccak256("ClaimFailed(address,address,address,uint16,uint256,bytes4,uint256,bytes)");
