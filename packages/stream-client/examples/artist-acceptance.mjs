@@ -1,3 +1,4 @@
+import { sameHash } from "./hashes.mjs";
 import { getAddress } from "ethers";
 import { artistAcceptanceTypedData } from "../dist/index.js";
 
@@ -19,6 +20,6 @@ export async function acceptArtist(client, { artist, relayer }, collectionId, de
   const receipt = await transaction.wait();
   if (!receipt) throw Error("No confirmed receipt");
   const accepted = client.uniqueEvent(receipt, "artistRegistry", "CollectionArtistAccepted");
-  if (accepted.args.collectionId !== collectionId || getAddress(accepted.args.artist) !== address || accepted.args.acceptanceHash !== payload.digest) throw Error("Acceptance receipt differs from the signed nomination");
+  if (accepted.args.collectionId !== collectionId || getAddress(accepted.args.artist) !== address || !sameHash(accepted.args.acceptanceHash, payload.digest)) throw Error("Acceptance receipt differs from the signed nomination");
   return { transactionHash: receipt.hash, collectionId, artist: address, acceptanceHash: payload.digest };
 }
