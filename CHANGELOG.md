@@ -7,6 +7,28 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added independently checked Sepolia deployment and native-sale demonstration
+  evidence, public addresses and client configuration, including real Chainlink
+  fulfillment, final metadata, withdrawals and artist transfer.
+- Run release checksum and verifier suites concurrently with Solidity compilation
+  in a separate CI job with the same pinned tooling and retained logs.
+
+- Added current-stack input fuzzing and stateful conservation checks, with
+  successful-action counters, per-payer accounting, reproducible quick/extended
+  campaigns and retained failure traces. CI runs the quick campaign; an explicit
+  workflow dispatch can select the extended campaign.
+- Added governed local collection completion and a portable collector package
+  that reconstructs its retained metadata and artwork without RPC access.
+- Added a TypeScript client with retained current ABIs, typed contract calls,
+  EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.
+- Added repeatable local product scenarios covering a second artist, native and
+  ERC-20 purchases, auction bidding/refunds/settlement and state-export publication.
+  Local test-token preparation uses its own source-bound compilation without
+  modifying the retained deployment output.
+- Added credential-free Sepolia status and transaction recovery that preserves
+  the exact signed intent across interrupted runs, plus explicit entropy and
+  metadata delivery retries.
+
 - Added current-stack ERC-20 fixed-price sales with payer-bound intents,
   canonical primary-policy commitments, exact allowance settlement and atomic
   Core minting. Supported primary assignments use fixed collection/default profiles.
@@ -30,14 +52,20 @@ the release policy in `docs/release-policy.md`.
 - Added committed one-time genesis initialization, real system discovery and
   current-stack tests covering paid mint, auction custody/refunds, withdrawals,
   metadata, transfer/burn, receiver rollback and delayed governance rotation.
-  Normal governance delays remain after genesis. An earlier prototype completed
-  a Sepolia paid mint. The corrected, extended source requires a new deployment;
-  its real randomness callback and final demonstration are pending subscription
-  funding. The prototype is historical development evidence, not the current
-  candidate or a production release.
+  Normal governance delays remain after genesis. The current Sepolia instance
+  completes the real randomness callback and native demonstration; earlier
+  prototype records retain their historical source and deployment identity.
 
 ### Changed
 
+- Compare client commitment and receipt hashes by their hexadecimal bytes so
+  equivalent letter casing does not reject a valid purchase or auction.
+- Order resumed scenario authorizations by contract ABI fields across supported
+  PowerShell versions, and check current auction terms before wallet prompts.
+- Report local snapshot and collector-package errors clearly, and keep campaign
+  lock conflicts from creating empty output directories.
+- Build the client before Windows operator tests and avoid retaining checkout
+  credentials in the client CI job.
 - Reuse compiler caches within the pinned toolchain and profile while retaining
   unconditional builds, tests and source validation. Mixed current build-info
   after a fallback restore triggers one fresh build before export validation.

@@ -11,6 +11,10 @@ the development/testnet flows below; the wider protocol specification includes
 features that are still being implemented. See [supported scope](docs/current-stack.md)
 and [release readiness](docs/release-readiness.md) before making deployment claims.
 
+The [verified Sepolia instance](deployments/current/sepolia-2026-09-10/README.md)
+includes public addresses and a completed paid mint, real Chainlink callback,
+final metadata, revenue withdrawals and artist transfer.
+
 ## Start developing
 
 Use Foundry **v1.7.1**, Solidity **0.8.19**, and Python **3.12**. Start with
@@ -31,6 +35,11 @@ The full release validation is a separate `python scripts/dev.py release` comman
 For a paid mint, asynchronous entropy, final artwork, revenue withdrawals, and
 NFT transfer against a local Anvil node, follow the
 [executable demo](script/current/README.md#local-anvil).
+
+Continue with the [product scenarios](docs/integrations/product-demo.md) to onboard
+another artist, buy with ETH or ERC-20, settle an auction and publish a state
+export. Applications can use the [TypeScript client](docs/integrations/typescript-client.md)
+for typed contract calls, signing payloads and portable snapshots.
 
 ## Understand the code
 
@@ -56,6 +65,7 @@ NFT transfer against a local Anvil node, follow the
 | `test/` | Current integration, domain unit, historical regression, and gas tests |
 | `script/current/` | Current deployment and genesis planning |
 | `scripts/` | Small developer entrypoints and platform runners |
+| `packages/stream-client/` | Typed application calls, exact signing payloads and selected-state exports |
 | `tools/` | Maintainer Python packages for build, protocol, docs, deployment, release and security |
 | `docs/` | Developer guides, integration contracts, specifications, and reference |
 | `deployments/`, `release-artifacts/` | Explicit instance evidence and reproducible release outputs |

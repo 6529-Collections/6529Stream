@@ -1,12 +1,19 @@
 # Deployment
 
+For the current development/testnet stack, use the
+[current deployment guide](../script/current/README.md) and its tested runners.
+The rehearsal commands below retain the legacy stack and historical release
+evidence procedures; they do not deploy the current Core and satellites. The
+[Sepolia instance package](../deployments/current/sepolia-2026-09-10/README.md)
+records the completed current-stack deployment and native demonstration.
+
 Baseline record — not a specification. This document describes as-built
 or operational state; the normative target is the specification set
 indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
 document conflicts with a specification home, the specification wins.
 
 
-6529Stream uses immutable, versioned redeployments for the current public-beta
+6529Stream uses immutable, versioned redeployments for the historical public-beta
 plan. Deployment manifests are mandatory release artifacts and follow ADR 0007.
 
 ## Local Rehearsal

@@ -168,12 +168,17 @@ configuration; no upstream coordinator, key hash, or subscription is invented.
 | `STREAM_VRF_MAX_CALLBACK_GAS` | Configured upstream limit; defaults to 2,500,000 |
 | `STREAM_VRF_NATIVE_PAYMENT` | Native subscription billing; defaults to true |
 
-Use an existing secure Foundry signer and the intended RPC endpoint:
+Inspect the unsigned deployment simulation against the intended RPC endpoint:
 
 ```powershell
 $env:FOUNDRY_PROFILE = 'current'
-forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER --account stream-deployer --broadcast --slow
+forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack --via-ir --build-info --isolate --skip test --rpc-url $env:SEPOLIA_RPC_URL --sender $env:STREAM_DEPLOYER
 ```
+
+For broadcasting, use the resumable Sepolia helper below. It checks the complete
+unsigned plan against the transaction gas cap before its first deployment send.
+Choose `-DeploymentGasEstimateMultiplier` from that fresh complete-plan result;
+Forge's default margin exceeds the cap for the demonstrated 45-transaction plan.
 
 The adapter must be added as a consumer of the supplied subscription, and that
 subscription must be funded before requesting entropy. This script does not
@@ -193,16 +198,22 @@ keystores under `$env:USERPROFILE/.codex/stream-testnet/`. Password records rema
 protected by Windows DPAPI. Signing uses a temporary password file restricted to
 the current Windows identity and SYSTEM, removed in `finally`; password values
 never enter child-process arguments.
-The helper never exports a private key or saves signatures in its public report.
+The helper never exports a private key. Its local operational checkpoint retains
+the exact call arguments, including sale signatures, so an interrupted send can
+be recovered. Keep that checkpoint private and outside tracked release evidence.
+The `Status` report omits those arguments and needs no account or keystore file.
 Use PowerShell 7. Its default invocation performs live reads only:
 
 ```powershell
 pwsh -NoProfile -File scripts/run-current-stack-sepolia.ps1 -Stage Preflight
+pwsh -NoProfile -File scripts/run-current-stack-sepolia.ps1 -Stage Status -OutputDirectory $env:TEMP/6529stream-current-sepolia
 ```
 
 It verifies the actual coordinator and proving key, reads recent base fees and
-the deployer balance, and calculates a full-flow budget before allowing any
-transaction. The expected fee budget includes a modest reserve; the per-call
+the deployer balance, and calculates a full-flow budget before deployment.
+Individual calls check their own maximum cost; delivery retries can proceed
+without funding another deployment or another randomness request.
+The expected fee budget includes a modest reserve; the per-call
 maximum fee remains a separate bound. The default demo mint price is 0.000001
 Sepolia ETH. The default native subscription reserve is 1.2 Sepolia ETH for this
 500 gwei lane and 1,500,000 callback limit. This is refundable subscription capital,
@@ -229,10 +240,40 @@ After funding, run these stages in order with `-Broadcast`:
 | `Mint` | Makes the low-price signed purchase and submits a real VRF request |
 | `Readback` | Reads provider delivery, final metadata, royalties, subscription state, and live runtime code hashes; no `-Broadcast` needed |
 | `Settle` | After final metadata, releases both shares and transfers the token to the artist |
+| `Status` | Reads checkpoint progress, pending transactions, subscription and token state without credentials, signing or checkpoint changes |
+| `RetryEntropyDelivery` | Retries delivery of randomness already held by the provider; never requests a new random draw |
+| `RetryMetadataNotification` | Retries an outstanding Core metadata notification after terminal entropy |
 
 If the paid mint succeeds but the request does not, `RequestEntropy` resumes from
-the recorded token. Each confirmed transaction is retained immediately in
-`$env:TEMP/6529stream-current-sepolia/state.json`, without raw signing arguments.
+the recorded token. `Mint` also resumes its existing purchase/request rather
+than buying another token. Before publication, the helper signs in memory,
+validates the complete transaction envelope, and atomically saves its hash,
+nonce and exact arguments in the local checkpoint. Signed transaction bytes
+are sent over stdin and are never stored. A restart retrieves the same hash
+or recreates that exact transaction; it does not allocate a replacement nonce.
+An unknown or replaced nonce, reverted transaction, or changed chain inclusion
+stops with a reconciliation message. Confirmed subscription, acceptance,
+purchase, request and settlement steps are recovered before new inputs are built.
+
+Keep `$env:TEMP/6529stream-current-sepolia/state.json` and its output directory
+for the lifetime of this run. A sender lock prevents concurrent runner processes
+from managing the same Sepolia account. `-ReceiptWaitSeconds` bounds receipt
+waiting (default 30); a pending transaction can be checked with `Status` and
+recovered by rerunning its original stage. This workflow does not automatically
+raise fees or replace a transaction whose outcome is uncertain.
+
+Delivery retry calls may mine successfully while the inner delivery remains
+pending. The helper rereads the actual provider/pending state before reporting
+completion. Retries use an explicit `-RetryGasLimit` (default 2,000,000), because
+gas estimation can otherwise settle on a cheap unsuccessful inner delivery.
+If another attempt is needed, use the next `-RetryAttempt` number. Reusing a
+completed attempt only reconciles its receipt and current result.
+
+```powershell
+pwsh -NoProfile -File scripts/run-current-stack-sepolia.ps1 -Stage RetryEntropyDelivery -RetryAttempt 1 -Broadcast
+pwsh -NoProfile -File scripts/run-current-stack-sepolia.ps1 -Stage RetryMetadataNotification -RetryAttempt 1 -Broadcast
+```
+
 For an interrupted Forge deployment, retain its standard broadcast files and use
 `ResumeDeploy` on the same source commit. The helper verifies each recorded
 transaction's sender, nonce, target, value, and calldata hash. A fresh `Deploy`
@@ -249,8 +290,10 @@ compiling a corrected candidate; earlier addresses remain historical evidence.
 `-DeploymentGasEstimateMultiplier` controls the explicit deployment gas margin
 (default 120 percent). Use the same value when resuming. A complete simulation
 must show every buffered limit below the chain cap before the helper signs;
-the corrected candidate uses 115 percent because its exact genesis estimate
-fits the cap with that margin.
+the 45-transaction plan prepared on 10 September 2026 uses 109 percent, with a
+maximum planned limit of 16,627,237 gas. Its 115 percent plan exceeds the cap.
+Choose the margin from the complete fresh plan for each deployment; an earlier
+candidate's accepted margin does not establish that a later plan fits.
 
 Subscription IDs incorporate a block hash. The live helper therefore waits for
 the actual `SubscriptionCreated` receipt before constructing deployment calldata.
@@ -271,14 +314,17 @@ The helper checks the deployed coordinator's `s_config` and `s_provingKeys` befo
 use: 3 confirmations, 1,500,000 callback gas, a 2,500,000 upstream maximum, and
 native subscription billing.
 
-The complete fork rehearsal at Sepolia block 11670719 includes 48 transactions
+The historical fork rehearsal at Sepolia block 11670719 includes 48 transactions
 and all linked libraries: 100,267,574 estimated execution gas before the demo.
 Its largest transaction gas limit at the helper's 120% multiplier is 16,175,894,
 below Sepolia's 16,777,216 cap. These are simulation measurements, not live
-receipts. Each real deployment is simulated again against its actual subscription.
+receipts, and they predate the current 45-transaction plan. Each real deployment
+is simulated again against its actual subscription.
 
 Run the helper's offline receipt/recovery regression checks with:
 
 ```powershell
 pwsh -NoProfile -File scripts/test_current_stack_sepolia.ps1
+pwsh -NoProfile -File scripts/test_current_stack_transaction_journal.ps1
+pwsh -NoProfile -File scripts/test_current_stack_launch_status.ps1
 ```

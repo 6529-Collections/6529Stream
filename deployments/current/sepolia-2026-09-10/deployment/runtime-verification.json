@@ -1,0 +1,2866 @@
+{
+  "schema": "6529stream.current-deployment-bytecode-check.v1",
+  "chain_id": 11155111,
+  "verification_block": "0xb2316f",
+  "verification_block_hash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+  "result": "bytecode comparisons passed",
+  "contracts": [
+    {
+      "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+      "creation": {
+        "transaction_hash": "0xe1d04ae34aa5cdae12015432154e7efbb20167e9f290f006022ddec1b53c8b19",
+        "receipt_block": "0xb23141",
+        "receipt_block_hash": "0x6db16befca23680fd33bcee2e32e8f074cedebf13b0e18d50440ff7e54b00e2e",
+        "type": "CREATE2",
+        "deployer": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+        "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "proof": "successful deployer calldata and CREATE2 address commitment; no internal trace"
+      },
+      "initcode_keccak256": "0x4a1b8a135d11b13824fb5162f6e4c62c1e7e675d9db938d9ed9e70bb5a285b91",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "eff49eab8d5943407e27f59a26dbe77dfdf5cc7ce303333b981fde0a57fcc473"
+      ],
+      "creation_prefix_bytes": 16789,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x1e1c2b5dde7304f0db942f6f8ae404d64950df0de6d1aab767889349da24f4e9",
+      "runtime_bytes": 16755,
+      "compiler_runtime_template_keccak256": "0x1e1c2b5dde7304f0db942f6f8ae404d64950df0de6d1aab767889349da24f4e9",
+      "non_immutable_bytes_verified": 16755,
+      "immutable_observations": [],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+          "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+          "offsets": [
+            1469,
+            10370,
+            10494
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+          "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+          "offsets": [
+            2734,
+            2803,
+            3483,
+            7482,
+            8439,
+            8603,
+            11741,
+            11896
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+          "address": "0x4203324f708730eea0fa8389b782d7d7c2c284aa",
+          "offsets": [
+            2855,
+            2926,
+            3372,
+            3568,
+            3630,
+            3698,
+            9557,
+            10277,
+            15595
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+          "address": "0xe8fd763180a5df256037123dc75f6ebced7757d3",
+          "offsets": [
+            3174,
+            11357
+          ]
+        }
+      ],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 8,
+            "length": 32
+          }
+        ],
+        "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x5a5050dc889c01704069119a8a6ec5cf78bbc281",
+      "creation": {
+        "transaction_hash": "0xf3f4f8601ea00564eb36885ee25885b2ba4b3c4fc07da86ee5692c8a2c35b979",
+        "receipt_block": "0xb23142",
+        "receipt_block_hash": "0x4a84a1055c65f492a1eee1bc9e09c79b243e31825a0e1a8525606da83b254963",
+        "type": "CREATE2",
+        "deployer": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+        "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "proof": "successful deployer calldata and CREATE2 address commitment; no internal trace"
+      },
+      "initcode_keccak256": "0xceb3e0e9f39e52dd2b3387160f383fd2c596d5832823acaf7155ec5e97129187",
+      "contract": "smart-contracts/domains/governance/StreamStateExport.sol:StreamStateExport",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "6f0dd5f111bb712064c3717c83b4380f22707dd9414450e0dd05bbdb640aaaab"
+      ],
+      "creation_prefix_bytes": 4567,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xcdaa2ce47088d3da3159d3d1e2927c5c525dafda5218ad3d5ce0d1966dd72663",
+      "runtime_bytes": 4533,
+      "compiler_runtime_template_keccak256": "0xcdaa2ce47088d3da3159d3d1e2927c5c525dafda5218ad3d5ce0d1966dd72663",
+      "non_immutable_bytes_verified": 4533,
+      "immutable_observations": [],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+          "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+          "offsets": [
+            1324
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+          "address": "0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+          "offsets": [
+            4343
+          ]
+        }
+      ],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 107,
+            "length": 32
+          }
+        ],
+        "address": "0x5a5050dc889c01704069119a8a6ec5cf78bbc281",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x70b914e90cf02edacdea4772708fbd979683ce23",
+      "creation": {
+        "transaction_hash": "0xcdb25f25bf16f86abf0ec4b0a23947193c2ff5c8df95aad559a80d0413af7558",
+        "receipt_block": "0xb23143",
+        "receipt_block_hash": "0x9f577aa5e0696c39f869c70bd32accf425447326d9b816d221ff448a50696761",
+        "type": "CREATE2",
+        "deployer": "0x4e59b44847b379578588920ca78fbf26c0b4956c",
+        "salt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "proof": "successful deployer calldata and CREATE2 address commitment; no internal trace"
+      },
+      "initcode_keccak256": "0x503590c09649a78966bdd0696b5fb6cb3925e3d2bd9dda53be93ee9b33a1b5c2",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:StreamGovernanceScheduling",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "fc97f8d3f9b30f5bd909f7871018b8e5e82b9d07d9d7aa0311e048b66a10d9c1"
+      ],
+      "creation_prefix_bytes": 5397,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x4d75f172572817aec6972ca6f4286a8935c4e90072069421cf275c8411ce9d75",
+      "runtime_bytes": 5363,
+      "compiler_runtime_template_keccak256": "0x4d75f172572817aec6972ca6f4286a8935c4e90072069421cf275c8411ce9d75",
+      "non_immutable_bytes_verified": 5363,
+      "immutable_observations": [],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+          "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+          "offsets": [
+            2608,
+            2727
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+          "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+          "offsets": [
+            1500,
+            1583,
+            1755,
+            1837,
+            1927,
+            2314,
+            2943,
+            3016,
+            3293,
+            3354
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+          "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+          "offsets": [
+            2380,
+            2541,
+            2836,
+            2891,
+            4105,
+            4160,
+            4335,
+            4388
+          ]
+        }
+      ],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 7,
+            "length": 32
+          }
+        ],
+        "address": "0x70b914e90cf02edacdea4772708fbd979683ce23",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "creation": {
+        "transaction_hash": "0xff264f3a9b74f2d0ee783022e68848c1da7035c149b2754465137cc4bdbfecdf",
+        "receipt_block": "0xb23144",
+        "receipt_block_hash": "0xe3b5b2cea32a5147c35988e4d7473cb3902d6bcd4b0b237ad159ee223035a630",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xf00808dacc50407c4a2ba3bda6bb5c3ba3dd7ad2d2fe35b22170d5cb556d6288",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "f8bc4e8e71530dc8f0465cd8764560174484a72953101184a25bd6c3d6425118"
+      ],
+      "creation_prefix_bytes": 24034,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x8291b5d8db246a03544c9f07bbc1bb9f8b8127e87ce43d66cbfc9d5fb162a0e0",
+      "runtime_bytes": 23741,
+      "compiler_runtime_template_keccak256": "0x0f0dcf0364480800983dfa5771e82e7e5fbcefa974a8ffc440776c72b84fc89c",
+      "non_immutable_bytes_verified": 23453,
+      "immutable_observations": [
+        {
+          "ast_id": "42361",
+          "name": "genesisBootstrapAuthority",
+          "source": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 3438,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 6613,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 8644,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 10970,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 14189,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 16222,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 17909,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 18921,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 23365,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+          "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+          "offsets": [
+            21700,
+            21819
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+          "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+          "offsets": [
+            1915,
+            2594,
+            4555,
+            5427,
+            7120,
+            7567,
+            8795,
+            9365,
+            10192,
+            12087,
+            12386,
+            12980,
+            19620,
+            19901,
+            19999,
+            20534,
+            20986,
+            21391,
+            22178,
+            22283,
+            22862,
+            22924
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+          "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+          "offsets": [
+            3362,
+            5750,
+            6789,
+            8293,
+            8696,
+            11037,
+            17963,
+            18576,
+            20900,
+            21488,
+            21644,
+            21883,
+            21937,
+            23212,
+            23266
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+          "address": "0xe8fd763180a5df256037123dc75f6ebced7757d3",
+          "offsets": [
+            3960,
+            5221,
+            7301,
+            7723,
+            8982,
+            9850,
+            11144,
+            11662,
+            13306,
+            13440,
+            14544,
+            14951,
+            20091,
+            23021
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:StreamGovernanceScheduling",
+          "address": "0x70b914e90cf02edacdea4772708fbd979683ce23",
+          "offsets": [
+            19154,
+            19239,
+            19391
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/governance/StreamStateExport.sol:StreamStateExport",
+          "address": "0x5a5050dc889c01704069119a8a6ec5cf78bbc281",
+          "offsets": [
+            5095,
+            7023,
+            9183,
+            10284,
+            11814,
+            15854
+          ]
+        }
+      ],
+      "library_self_address": null
+    },
+    {
+      "address": "0xb57f26fcc674059ef20180e29c530db5f3321c77",
+      "creation": {
+        "transaction_hash": "0x4fd956b465d6d456f482c2e4b711964aa0896fea9ff60a604fae3ae8466b4cb8",
+        "receipt_block": "0xb23145",
+        "receipt_block_hash": "0x2e8dea7cec590491e35144182348d073d21aa0c915ef0e571e0a9cace7cd3d4f",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xa6e746a7ded1c9775d9a5fc74ad29d942e2e890aa89edbaf91336be0b4892718",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "ee59e978f4ab43e40812a0a08d229f661e837f084d8d1d9e9a7718adcba9aa9b"
+      ],
+      "creation_prefix_bytes": 851,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtime_bytes": 688,
+      "compiler_runtime_template_keccak256": "0x3f28ba0ce8a57f80ebae3cb546aea4c7f6c23a7ce8038bce54cfb9ff1997e3a1",
+      "non_immutable_bytes_verified": 624,
+      "immutable_observations": [
+        {
+          "ast_id": "33260",
+          "name": "controller",
+          "source": "smart-contracts/domains/governance/StreamGovernanceActor.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 90,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 244,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xcd711cb4c8e55a5425d94a5311df01a35cd9175d",
+      "creation": {
+        "transaction_hash": "0x130abc5813836c4089be2a405a22b7e9a2696f60b9e3df2df7b1c93db7d34fb4",
+        "receipt_block": "0xb23146",
+        "receipt_block_hash": "0xb143fd29e82eea8c1c344b4eee0d7bafb862df256ccb499ce283b69a862c2cde",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xa6e746a7ded1c9775d9a5fc74ad29d942e2e890aa89edbaf91336be0b4892718",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "ee59e978f4ab43e40812a0a08d229f661e837f084d8d1d9e9a7718adcba9aa9b"
+      ],
+      "creation_prefix_bytes": 851,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtime_bytes": 688,
+      "compiler_runtime_template_keccak256": "0x3f28ba0ce8a57f80ebae3cb546aea4c7f6c23a7ce8038bce54cfb9ff1997e3a1",
+      "non_immutable_bytes_verified": 624,
+      "immutable_observations": [
+        {
+          "ast_id": "33260",
+          "name": "controller",
+          "source": "smart-contracts/domains/governance/StreamGovernanceActor.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 90,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 244,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x015779ebd0aa2484cab510bbfe6b184517a2a66a",
+      "creation": {
+        "transaction_hash": "0x9c35618f20c28934fa4e16ef942923d4f1d35930aa9ebd9d70861892a77cd49d",
+        "receipt_block": "0xb23147",
+        "receipt_block_hash": "0x9ace6bbf0bff805964833aa9c012bdf83dad2de53dad25fdea9c98118784b550",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xa6e746a7ded1c9775d9a5fc74ad29d942e2e890aa89edbaf91336be0b4892718",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "ee59e978f4ab43e40812a0a08d229f661e837f084d8d1d9e9a7718adcba9aa9b"
+      ],
+      "creation_prefix_bytes": 851,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtime_bytes": 688,
+      "compiler_runtime_template_keccak256": "0x3f28ba0ce8a57f80ebae3cb546aea4c7f6c23a7ce8038bce54cfb9ff1997e3a1",
+      "non_immutable_bytes_verified": 624,
+      "immutable_observations": [
+        {
+          "ast_id": "33260",
+          "name": "controller",
+          "source": "smart-contracts/domains/governance/StreamGovernanceActor.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 90,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            },
+            {
+              "offset": 244,
+              "length": 32,
+              "value": "0x00000000000000000000000026a3f4505145b5e6164260cc868e50ddd9863697"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+      "creation": {
+        "transaction_hash": "0x1c57cd497d6602fef28ce31b8e4175bd04aa3cd25a9cf2af6cffab0a3d50c8d5",
+        "receipt_block": "0xb2314a",
+        "receipt_block_hash": "0x1998efe645bfb2e7affad935a81852292417a378fd9f6b532127b225290d8ed7",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xb9345e1c8484106f0bcd96791917b65ae06f968a661579b26fb87035175fa515",
+      "contract": "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "c6c134be51161d5c3fc2fc6ed11767fcd53a50f377c4831c0a002e12ce7b6b90"
+      ],
+      "creation_prefix_bytes": 11395,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xd70c2703c72e963a3cec63512ab950d54bd962e27768295a21cfb1e702b24ebe",
+      "runtime_bytes": 11052,
+      "compiler_runtime_template_keccak256": "0xd70c2703c72e963a3cec63512ab950d54bd962e27768295a21cfb1e702b24ebe",
+      "non_immutable_bytes_verified": 11052,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+      "creation": {
+        "transaction_hash": "0xc1f18f71a06225fa45b88d4239bc19d176c369a76329294bd3b030450f652134",
+        "receipt_block": "0xb2314b",
+        "receipt_block_hash": "0x5f91296d146a9dd42f5dc509b72b182041a0b266dc0a2dbd9ddd778d5e851d35",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xbfec61e69b8cc7b28465ab803a24ad265476d689be77698fee330c06f396d9ff",
+      "contract": "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "0b6ea3e1fc02d777ae130127f59453914318fa1d6a68c38ff0cbeb447dcc0b33"
+      ],
+      "creation_prefix_bytes": 11990,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f351b420fbeaaf0b7aa692b023522c7e9d63df174af66c8dd1ee8d6cb13d03f05a90000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002375726e3a3635323973747265616d3a646576656c6f706d656e743a72656769737472790000000000000000000000000000000000000000000000000000000000",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xe51412e2edbc2e0d0e0276f46f657c47d61467a5a46d0bfd4d18651f54284292",
+      "runtime_bytes": 10536,
+      "compiler_runtime_template_keccak256": "0xcc55985db90ae4aa44db79982e97d4a90e5914b5fb3cd601ffc98df58581555a",
+      "non_immutable_bytes_verified": 10408,
+      "immutable_observations": [
+        {
+          "ast_id": "78057",
+          "name": "governanceExecutor",
+          "source": "smart-contracts/domains/modules/StreamModuleRegistry.sol",
+          "type": "contract IStreamGovernanceExecutor",
+          "observed_words": [
+            {
+              "offset": 772,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 2034,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 2234,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 3706,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "creation": {
+        "transaction_hash": "0x82aa8ecbd987d52f16f1dcecefc3f7d23ac9b482259bd22f4c98fb506fdc9eff",
+        "receipt_block": "0xb2314c",
+        "receipt_block_hash": "0x91b6b1cc0a2297d87c6d74f4a07c72fc0a4414d5134850d157dceaa7428ab51c",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x6b1e65e0743fa3b8b1b2c1b10bf31b78b67b0850b2677bac40754287941877bb",
+      "contract": "smart-contracts/core/StreamCore.sol:StreamCore",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "519b140c62505b4120d104a40cbae824d53f8f57dd3f4cda8eeedf85044898b5"
+      ],
+      "creation_prefix_bytes": 22435,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x0000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000014000000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785ee51412e2edbc2e0d0e0276f46f657c47d61467a5a46d0bfd4d18651f542842921b420fbeaaf0b7aa692b023522c7e9d63df174af66c8dd1ee8d6cb13d03f05a9edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000000b363532392053747265616d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000653545245414d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000049bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda00000000000000000000000000000000000000000000000000000000000186a000000000000000000000000000000000000000000000000000000000000061a800000000000000000000000000000000000000000000000000000000000000010af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be700000000000000000000000000000000000000000000000000000000002c67300000000000000000000000000000000000000000000000000000000000164720000000000000000000000000000000000000000000000000000000000000000102ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e930000000000000000000000000000000000000000000000000000000000b71b00000000000000000000000000000000000000000000000000000000000003d090000000000000000000000000000000000000000000000000000000000000000151125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17000000000000000000000000000000000000000000000000000000000007a120000000000000000000000000000000000000000000000000000000000001d4c00000000000000000000000000000000000000000000000000000000000000002",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x6dd45e4e52993c3b5109cfd8f776a9b49232810f3d98a9374462a343bc31aade",
+      "runtime_bytes": 18997,
+      "compiler_runtime_template_keccak256": "0x6b74b532c012acd27ded142aa5c5735e1fb069eaa41305915ba156075b8e7103",
+      "non_immutable_bytes_verified": 18901,
+      "immutable_observations": [
+        {
+          "ast_id": "7816",
+          "name": "_governanceExecutor",
+          "source": "smart-contracts/core/StreamCore.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 2373,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 4572,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 16060,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+          "address": "0x477677ce83ff4b91f006439ef299006426008ace",
+          "offsets": [
+            2414,
+            4627,
+            8589,
+            13024,
+            13659,
+            14313,
+            16125,
+            17220
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+          "address": "0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+          "offsets": [
+            13113,
+            13277,
+            13353,
+            13741,
+            13853,
+            13922
+          ]
+        }
+      ],
+      "library_self_address": null
+    },
+    {
+      "address": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+      "creation": {
+        "transaction_hash": "0xb940d5e0d02fe96b99f4d1447f705efdaf8c3f5ec9fa6a990a7046d646c86dd9",
+        "receipt_block": "0xb2314d",
+        "receipt_block_hash": "0x6c5815e3566a908caaa237b6a7a0f70837802fb6cdd65b06d197b834aac130cf",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xe3d0b370c8c3301c9e663a3cefe4f1bcade8fd59b2c1bc031819f87f04d6a8b3",
+      "contract": "smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "63973ff11070eb87e53961c992b84e175b227ce13d9eb137b2c7b31bf0adae39"
+      ],
+      "creation_prefix_bytes": 14332,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x516da91323184220b08971b6be80faa8f6f9983b72f6d05faf4ecd2be4b8a1b5",
+      "runtime_bytes": 13807,
+      "compiler_runtime_template_keccak256": "0xc63a23d9c18df52238c1ca1628263f37ae44342e6b6593e4629df37f7aa7f958",
+      "non_immutable_bytes_verified": 13263,
+      "immutable_observations": [
+        {
+          "ast_id": "54889",
+          "name": "core",
+          "source": "smart-contracts/domains/governance/StreamSystemManifest.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 151,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6507,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7660,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 8456,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 9114,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 9576,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 10038,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 10500,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 10962,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 11424,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 11886,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 12644,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "54891",
+          "name": "governanceExecutor",
+          "source": "smart-contracts/domains/governance/StreamSystemManifest.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 750,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1098,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1226,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 2225,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 4820,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+          "address": "0x4203324f708730eea0fa8389b782d7d7c2c284aa",
+          "offsets": [
+            1730,
+            1807
+          ]
+        }
+      ],
+      "library_self_address": null
+    },
+    {
+      "address": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+      "creation": {
+        "transaction_hash": "0x6758203e4fedf52ca12f79776579cc2b06ad829bc90fd8b0547fc44b017f353f",
+        "receipt_block": "0xb2314e",
+        "receipt_block_hash": "0x9f0100369d616398278980b1c7f725f0b2a762ff11a75cc51915409a341f8e5c",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x32bc441d6a4bcbddd339452b60e36a3903faeefde063bfc4b0f2b2cbcbd9516a",
+      "contract": "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "a50f543c57ce30df175233e9dbef067e543e1861af9412a0f9fa2e9058d2174d"
+      ],
+      "creation_prefix_bytes": 8102,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x21b4c8be348b373308a615706f49965db405243d37c248faa1f8bd49a612ea92",
+      "runtime_bytes": 8005,
+      "compiler_runtime_template_keccak256": "0x21b4c8be348b373308a615706f49965db405243d37c248faa1f8bd49a612ea92",
+      "non_immutable_bytes_verified": 8005,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "creation": {
+        "transaction_hash": "0x510a5fd79703196621ab4b2982bde9432debcd761a16a38a9dda19d0e948387b",
+        "receipt_block": "0xb2314f",
+        "receipt_block_hash": "0x9f66b374e0f51212b98b3696db6d59127b5ff4bbfac9297634f13757b0c2fbe2",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xfb38378bbacfc6826c867f10c76d4687e9d9291f845cecffc3854614f8ba9b52",
+      "contract": "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "808f4b1fa17ada1ceff94d0ba2364181b1b076193835255c83912aedf7d492ff"
+      ],
+      "creation_prefix_bytes": 22571,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xdfbe3c56260b260ea846fccf558e4e99deb32590b71da1bd56fdcb5cada3ffbf",
+      "runtime_bytes": 21614,
+      "compiler_runtime_template_keccak256": "0x2cadcc962c603f576fcb58d846d43e3b55b5ffc2627563a2aef9563b000973d7",
+      "non_immutable_bytes_verified": 20814,
+      "immutable_observations": [
+        {
+          "ast_id": "69483",
+          "name": "core",
+          "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+          "type": "contract IStreamCore",
+          "observed_words": [
+            {
+              "offset": 841,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 2181,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 2863,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7414,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 16853,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "69487",
+          "name": "mintLedger",
+          "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+          "type": "contract IStreamMintLedger",
+          "observed_words": [
+            {
+              "offset": 1828,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 2227,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 4932,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 6099,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 6927,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 7705,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 8017,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 10394,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 10476,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 16541,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 16899,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 18737,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 18942,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 19631,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            },
+            {
+              "offset": 20092,
+              "length": 32,
+              "value": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "69491",
+          "name": "moduleRegistry",
+          "source": "smart-contracts/domains/mint/StreamMintManager.sol",
+          "type": "contract IERC165",
+          "observed_words": [
+            {
+              "offset": 1601,
+              "length": 32,
+              "value": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e"
+            },
+            {
+              "offset": 5403,
+              "length": 32,
+              "value": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e"
+            },
+            {
+              "offset": 9182,
+              "length": 32,
+              "value": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e"
+            },
+            {
+              "offset": 16314,
+              "length": 32,
+              "value": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e"
+            },
+            {
+              "offset": 20138,
+              "length": 32,
+              "value": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+          "address": "0xd75cd4cc0c2b81657ffb9402987eed71ebeaf45a",
+          "offsets": [
+            2784,
+            7392
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/mint/StreamMintGateValidator.sol:StreamMintGateValidator",
+          "address": "0x5ae4f3c8e3e69ecb2f0c0d05ff043882c316d84a",
+          "offsets": [
+            1658,
+            9235,
+            16371
+          ]
+        },
+        {
+          "library": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+          "address": "0xc0ea43fa70904c274dd01d71d52acc19594b1866",
+          "offsets": [
+            2028,
+            2682,
+            5192,
+            16700,
+            17354,
+            20562
+          ]
+        }
+      ],
+      "library_self_address": null
+    },
+    {
+      "address": "0xa9d6791502849519e16cdf335c0959fd920b765f",
+      "creation": {
+        "transaction_hash": "0x30b165415f887999ea41d11785c4adef14b651505d4365a2e984ee7afd7c0980",
+        "receipt_block": "0xb23151",
+        "receipt_block_hash": "0x917684b0d28b9e4c199e6069294585d2eb177dcfe6b8c223919694f7fbe97b24",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xe46dc08aa93b0c8edf6fde61443edf21d2a62b6c07610d0af7bc4cfcbdaf1a2e",
+      "contract": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "72c848b235564a7a35c1a87a4c8762eac9f8960c4751bd5c3201fbda0a1fef5b"
+      ],
+      "creation_prefix_bytes": 1768,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xc24ee18d13a607e27fb8dad10f81df9ab6ec74b755235d5b680deb71a14d330c",
+      "runtime_bytes": 1671,
+      "compiler_runtime_template_keccak256": "0xc24ee18d13a607e27fb8dad10f81df9ab6ec74b755235d5b680deb71a14d330c",
+      "non_immutable_bytes_verified": 1671,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+      "creation": {
+        "transaction_hash": "0x3eaf807c051a2326e7f796c1c67282fe3b0cbf5aed8de8c2b0a9d4c9ca2ef8ca",
+        "receipt_block": "0xb23152",
+        "receipt_block_hash": "0x8a6b64a218a672d8d0d1046782d6e2876e46f6f823ff20b97a4f3de84567ef85",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x1f56fb5d057e1878a40ff498bb813b5bcf3c9092220340637e23f4cb6fc5949c",
+      "contract": "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "432691046108ae2d3c9704e8ca4ee9287a249eacd27d891526117fb453db9643"
+      ],
+      "creation_prefix_bytes": 17257,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x82713ddb14a45b88cf6d809b2a58a358bf70c11c9c1c13ac196518a9cac22b8f",
+      "runtime_bytes": 16691,
+      "compiler_runtime_template_keccak256": "0x24bd604a24f52e80d69a56c6a01a6e32ede826659c70802995fa5b11ed7491e5",
+      "non_immutable_bytes_verified": 16627,
+      "immutable_observations": [
+        {
+          "ast_id": "90462",
+          "name": "assetPolicyRegistry",
+          "source": "smart-contracts/domains/revenue/StreamSplitFactory.sol",
+          "type": "contract IStreamAssetPolicyRegistry",
+          "observed_words": [
+            {
+              "offset": 287,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 4330,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "creation": {
+        "transaction_hash": "0x6a19dfb5e423c4fb5ba3d6fd627e8f171606de3d26736fe7768392f228b53d98",
+        "receipt_block": "0xb23153",
+        "receipt_block_hash": "0x5d949643e0112a92505cc86ab015091b8a5978bf2b0aaaa62898a2b754073293",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xde9a6418f9f6a17e9b8ef6f49da3e72360605d978e32ba5cf35e63250ae3c4bd",
+      "contract": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "2e98d436f0328e6b6e8b24005550adb7429793e6e5fa1f2859bcee4ae42f3404"
+      ],
+      "creation_prefix_bytes": 3985,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b91700000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x35b5346c94e163d06061387ac0b34a7d7b628b30119f24dc396da5fcf074ab5e",
+      "runtime_bytes": 3628,
+      "compiler_runtime_template_keccak256": "0xecb5daacf1de99b31e8b7f96457f7a6ed62bf1cc942c38a9a28ae1adf3039829",
+      "non_immutable_bytes_verified": 3436,
+      "immutable_observations": [
+        {
+          "ast_id": "89965",
+          "name": "boundCore",
+          "source": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+          "type": "contract IStreamCore",
+          "observed_words": [
+            {
+              "offset": 2102,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 3011,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 3401,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "89968",
+          "name": "splitFactory",
+          "source": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol",
+          "type": "contract IStreamSplitFactory",
+          "observed_words": [
+            {
+              "offset": 636,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 1760,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 2641,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "creation": {
+        "transaction_hash": "0x33c606b6fef324ad84afcf6a6e4afa8a946ff64015b630a3d8e177d00dc3a9bc",
+        "receipt_block": "0xb23154",
+        "receipt_block_hash": "0x6c11ec11edd09587d9fbf3ebbb0c1b8d74c56851024da73fe570b9c5de2b8e2b",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x8893da8498f1fcbc0937eddd53527d9db8e4730eedc0545ec73bbdf8134eac51",
+      "contract": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol:StreamCollectionArtistRegistry",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "62bd7eaa35982015f2b1f4d869a6898669e3e4787d06fc8e4710127b0253d642"
+      ],
+      "creation_prefix_bytes": 5570,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f00000000000000000000000000000000000000000000000000000000000000a060728c340208badac25a59c94896c4448750e14530ba5bc94725bc609309e4d8000000000000000000000000000000000000000000000000000000000000002175726e3a3635323973747265616d3a646576656c6f706d656e743a61727469737400000000000000000000000000000000000000000000000000000000000000",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x664d23a2c0040d2a843efae1e7bd41e28534acece6941435d51b503d679e13db",
+      "runtime_bytes": 4526,
+      "compiler_runtime_template_keccak256": "0xd2d3dd09f6e100e96be137993f93d8b75edc71432ed450d0b0d73040d52d8fdd",
+      "non_immutable_bytes_verified": 4206,
+      "immutable_observations": [
+        {
+          "ast_id": "15258",
+          "name": "core",
+          "source": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 326,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 1826,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 3484,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 3673,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "15260",
+          "name": "authority",
+          "source": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 1072,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1603,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77704",
+          "name": "_schemaHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 396,
+              "length": 32,
+              "value": "0xc3d12309e3c03222535f5470c6bcf346626e52c8758740e3bbbd2b2abe50f883"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77706",
+          "name": "_supersedes",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 2266,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77708",
+          "name": "_deploymentManifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 1516,
+              "length": 32,
+              "value": "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77710",
+          "name": "_manifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 2784,
+              "length": 32,
+              "value": "0x60728c340208badac25a59c94896c4448750e14530ba5bc94725bc609309e4d8"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "creation": {
+        "transaction_hash": "0x7bcf6a81fe1045ccec1f00e4ee4de69c78cf882912951c063dd02fb835e2fafb",
+        "receipt_block": "0xb23155",
+        "receipt_block_hash": "0x887439ea2c6f3d7c9976fda508d0a497da4bbd442ecb8d3c3e5f64bd746bae08",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x080682ab4237a154bbfaa5052c22e4b6e3ed7ec23e48f82e42ed28582de2238a",
+      "contract": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "3cd57ed7418cacd372f9111286a39caac129c2c28e8b41014c3f458a39081497"
+      ],
+      "creation_prefix_bytes": 8062,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b9170000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xeca15c54c2ecba6bfb9ef43d9bd82d666cda09800cca93bf5f886e5f9de7b0eb",
+      "runtime_bytes": 6877,
+      "compiler_runtime_template_keccak256": "0xad7783d89d95ec18388024a815214e1d670e583f4b3282a88d61de96b9cd84ec",
+      "non_immutable_bytes_verified": 6621,
+      "immutable_observations": [
+        {
+          "ast_id": "65118",
+          "name": "mintManager",
+          "source": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol",
+          "type": "contract IStreamMintManager",
+          "observed_words": [
+            {
+              "offset": 2266,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            },
+            {
+              "offset": 4384,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "65121",
+          "name": "splitFactory",
+          "source": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol",
+          "type": "contract IStreamSplitFactory",
+          "observed_words": [
+            {
+              "offset": 1263,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 1349,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 4623,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "65124",
+          "name": "artistRegistry",
+          "source": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol",
+          "type": "contract IStreamCollectionArtistRegistry",
+          "observed_words": [
+            {
+              "offset": 1044,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 1139,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 4315,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+      "creation": {
+        "transaction_hash": "0x5639e1e723db7289e85607593c3d3a2c333cbbdbd330a74e5c8a04d73d0bb932",
+        "receipt_block": "0xb23156",
+        "receipt_block_hash": "0x13346e534f9e0400e03dde3126d0a4da27b0debe198685bdc38242c98194fc7d",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x8d06e113e949b2ca2af0441f2496d54606305f70b76ebdad268cf19ff87b832e",
+      "contract": "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "297a755b0317d462b9c4187851f48dee635965982ae7270fae796932789118d7"
+      ],
+      "creation_prefix_bytes": 12530,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x729be916543a01fa555738f2e24464fc4401952801b49693d9bc18c00bc99789",
+      "runtime_bytes": 11637,
+      "compiler_runtime_template_keccak256": "0xbace596d2fe5bdeeabacbe7db66feefc4baf5d1e79064cbf7e65ba7433029e3f",
+      "non_immutable_bytes_verified": 10837,
+      "immutable_observations": [
+        {
+          "ast_id": "87500",
+          "name": "splitFactoryContract",
+          "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
+          "type": "contract IStreamSplitFactory",
+          "observed_words": [
+            {
+              "offset": 1188,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 1616,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 2174,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 2934,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 3431,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 4426,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 8866,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 9423,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 9706,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 10125,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 10579,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 10754,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 10915,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "87503",
+          "name": "_assetPolicyRegistry",
+          "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
+          "type": "contract IStreamAssetPolicyRegistry",
+          "observed_words": [
+            {
+              "offset": 1662,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 2973,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 8905,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 9462,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 9745,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 10164,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "87505",
+          "name": "_splitWalletRuntimeCodeHash",
+          "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 1701,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            },
+            {
+              "offset": 3012,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            },
+            {
+              "offset": 8944,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            },
+            {
+              "offset": 9501,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            },
+            {
+              "offset": 9784,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            },
+            {
+              "offset": 10203,
+              "length": 32,
+              "value": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "creation": {
+        "transaction_hash": "0x809c7587573b0a7d6ff2f05722c905399d0c7757af41bfdab431bba14651faf5",
+        "receipt_block": "0xb23157",
+        "receipt_block_hash": "0x0ba082ce56550e53988752d0ae1190ae95e8c725e02defada1299218ab7a37c1",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x441c797e959cab035a8426bd5b0e8c58d0f7e96d499c929b15d2b8f28df03f15",
+      "contract": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol:StreamERC20FixedPriceSaleAdapter",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "86f8315bc5db6a69e9b434ab4c9dc4e8698ca88fa0574ffb56313b247e42d726"
+      ],
+      "creation_prefix_bytes": 15515,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e000000000000000000000000a05044f746e64c16cc229889a08e113d7f953dac0000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xa91c65d6324598ad000c0e17c918af1bca8020d4fc07355e1b7273e0c846a9c3",
+      "runtime_bytes": 13777,
+      "compiler_runtime_template_keccak256": "0x3adb52ecb1761118b15d7a497558801bcc3c09188d5e977c33fa2db1447dba90",
+      "non_immutable_bytes_verified": 13361,
+      "immutable_observations": [
+        {
+          "ast_id": "63315",
+          "name": "mintManager",
+          "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+          "type": "contract IStreamMintManager",
+          "observed_words": [
+            {
+              "offset": 2926,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            },
+            {
+              "offset": 3844,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            },
+            {
+              "offset": 6482,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            },
+            {
+              "offset": 8413,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "63319",
+          "name": "revenueResolver",
+          "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+          "type": "contract IStreamRevenueResolver",
+          "observed_words": [
+            {
+              "offset": 5845,
+              "length": 32,
+              "value": "0x000000000000000000000000a05044f746e64c16cc229889a08e113d7f953dac"
+            },
+            {
+              "offset": 9906,
+              "length": 32,
+              "value": "0x000000000000000000000000a05044f746e64c16cc229889a08e113d7f953dac"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "63323",
+          "name": "splitFactory",
+          "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+          "type": "contract IStreamSplitFactory",
+          "observed_words": [
+            {
+              "offset": 6964,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 10022,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "63327",
+          "name": "assetPolicyRegistry",
+          "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+          "type": "contract IStreamAssetPolicyRegistry",
+          "observed_words": [
+            {
+              "offset": 1137,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            },
+            {
+              "offset": 11771,
+              "length": 32,
+              "value": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "63331",
+          "name": "artistRegistry",
+          "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+          "type": "contract IStreamCollectionArtistRegistry",
+          "observed_words": [
+            {
+              "offset": 2122,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 2216,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 6413,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "creation": {
+        "transaction_hash": "0xf2405520b2b35cd67abb4898dfb570f517247bece1879d99741ccdf0d9a4ab4b",
+        "receipt_block": "0xb23158",
+        "receipt_block_hash": "0x0c2beefd45183aa194de180394456ed0ba09d7ca972688d847821af93aa812b3",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x9c7580eaa13d479dc6088866ff0661cd6b92cb1a47d565c029e1a470ad999789",
+      "contract": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "9879bae2effc086b8c9b8519c3e03292e8a06f902a62ca998a78b8e82a2d2a5b"
+      ],
+      "creation_prefix_bytes": 12565,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b9170000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xbbfabb58875af278975d6736b6e59b06ceb03c7e2327af71b542a6516e72ee4e",
+      "runtime_bytes": 11399,
+      "compiler_runtime_template_keccak256": "0xc2c8d9dc29af5d772f5477babe37a4e254f77ac87ad5796491f34c3ef278e364",
+      "non_immutable_bytes_verified": 10951,
+      "immutable_observations": [
+        {
+          "ast_id": "15904",
+          "name": "core",
+          "source": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "type": "contract IStreamCore",
+          "observed_words": [
+            {
+              "offset": 2104,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 4155,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6458,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6812,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7539,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 9935,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "15907",
+          "name": "mintManager",
+          "source": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "type": "contract IStreamMintManager",
+          "observed_words": [
+            {
+              "offset": 1958,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            },
+            {
+              "offset": 5716,
+              "length": 32,
+              "value": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "15910",
+          "name": "splitFactory",
+          "source": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "type": "contract IStreamSplitFactory",
+          "observed_words": [
+            {
+              "offset": 1028,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 1120,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            },
+            {
+              "offset": 6235,
+              "length": 32,
+              "value": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "15913",
+          "name": "artistRegistry",
+          "source": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol",
+          "type": "contract IStreamCollectionArtistRegistry",
+          "observed_words": [
+            {
+              "offset": 805,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 900,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 5618,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+      "creation": {
+        "transaction_hash": "0xc79c10d0caaeb310a0b57bfbc65e0607aee9b74e74b55b97437a488e02882d83",
+        "receipt_block": "0xb23159",
+        "receipt_block_hash": "0x8998d16fc0dfa7b4a85411b5d468e07f9ebb5b0ba52959369d458ebb18ded1f0",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x30f00653712adb64b83ded45fd8e9e86788951bdf96f33bfd9208931a469a78f",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "a8167cbb285b1420eeb159e57410c13fe69d615c6ef18fad7eafa69c47a93425"
+      ],
+      "creation_prefix_bytes": 13784,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f00000000000000000000000000000000000000000000000000000000000000a0fa1b7e2995b9152e3a3ac696d035319c913fd260852476f2fd4e54bb79958220000000000000000000000000000000000000000000000000000000000000002275726e3a3635323973747265616d3a646576656c6f706d656e743a656e74726f7079000000000000000000000000000000000000000000000000000000000000",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x9d18e73e88de146103a03b1dfc0ec5953b92f825535c50276847602736d73ffb",
+      "runtime_bytes": 12599,
+      "compiler_runtime_template_keccak256": "0x0829db12c7851a832774693f6c68a4a76ce414b4b3eadf2a3c0d7b3d0781fecc",
+      "non_immutable_bytes_verified": 11799,
+      "immutable_observations": [
+        {
+          "ast_id": "21273",
+          "name": "core",
+          "source": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "type": "contract IStreamCore",
+          "observed_words": [
+            {
+              "offset": 1066,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 2123,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 3664,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 5428,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6142,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6420,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 6587,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7695,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 8681,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 9034,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 11469,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 12187,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "21275",
+          "name": "authority",
+          "source": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 601,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1143,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1896,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 2059,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 3434,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 6213,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 7954,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 8554,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 9415,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77704",
+          "name": "_schemaHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 1776,
+              "length": 32,
+              "value": "0x53aa3f7474e06506fa5c705f5dafc2e6cbe6bc5d84338681b6ef41717af3e012"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77706",
+          "name": "_supersedes",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 9845,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77708",
+          "name": "_deploymentManifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 7886,
+              "length": 32,
+              "value": "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77710",
+          "name": "_manifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 10453,
+              "length": 32,
+              "value": "0xfa1b7e2995b9152e3a3ac696d035319c913fd260852476f2fd4e54bb79958220"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "creation": {
+        "transaction_hash": "0x5c5bcbecfff495ac3f6b85b1ba67ed861b6c4b0916df6f5caed0fa187537a9b6",
+        "receipt_block": "0xb2315a",
+        "receipt_block_hash": "0x6f81c1b9d98a685f86c021cd0fb36be7eefa819fe0d9b605f499012bb1bde9f0",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0x9cf1b6d6715411387cf7692ca7305b76cbecec6693f7655b4f5c7081f0801268",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "40785087ea57cd3abdb2992e30a7f0acd89aaf9a78410eccc719c495fe42397e"
+      ],
+      "creation_prefix_bytes": 15534,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f00000000000000000000000000000000000000000000000000000000000000c0bea9ddfa815a4412d1efaff98e6dde03f76d0b570deaf2c228a55c80955ca470000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746000000000000000000000000000000000000000000000000000000000000002375726e3a3635323973747265616d3a646576656c6f706d656e743a6d657461646174610000000000000000000000000000000000000000000000000000000000",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xc9bd03c98bcbab73c4e21fa20438a226005922966f76bdee68dcb9c2934bc9e8",
+      "runtime_bytes": 13997,
+      "compiler_runtime_template_keccak256": "0x43885f286b0d1cd3f98cd5db5867703d70f0b15a7394059da9250ecbfde7949b",
+      "non_immutable_bytes_verified": 13389,
+      "immutable_observations": [
+        {
+          "ast_id": "62058",
+          "name": "core",
+          "source": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+          "type": "contract IStreamCore",
+          "observed_words": [
+            {
+              "offset": 607,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 957,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 1632,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7891,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 7998,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 9189,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 10013,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 11576,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 12486,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            },
+            {
+              "offset": 12804,
+              "length": 32,
+              "value": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "62060",
+          "name": "authority",
+          "source": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 840,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1341,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 12445,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "62063",
+          "name": "artistRegistry",
+          "source": "smart-contracts/domains/metadata/StreamMetadataRouter.sol",
+          "type": "contract IStreamCollectionArtistRegistry",
+          "observed_words": [
+            {
+              "offset": 6329,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            },
+            {
+              "offset": 10328,
+              "length": 32,
+              "value": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77704",
+          "name": "_schemaHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 751,
+              "length": 32,
+              "value": "0x9437800c4e95208abb746860748c09ea58abf33fe4833288636424b92a4b41e9"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77706",
+          "name": "_supersedes",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 6582,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77708",
+          "name": "_deploymentManifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 6400,
+              "length": 32,
+              "value": "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77710",
+          "name": "_manifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 6761,
+              "length": 32,
+              "value": "0xbea9ddfa815a4412d1efaff98e6dde03f76d0b570deaf2c228a55c80955ca470"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [
+        {
+          "library": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+          "address": "0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+          "offsets": [
+            1382,
+            2300,
+            2390,
+            2429,
+            2516,
+            2552,
+            2649,
+            2685,
+            2793,
+            2916,
+            2996,
+            3074,
+            3465,
+            5509
+          ]
+        }
+      ],
+      "library_self_address": null
+    },
+    {
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "creation": {
+        "transaction_hash": "0xd2e49752898eec5f19360912dedf1c315556c20ac6e1051fc9c3471411900b22",
+        "receipt_block": "0xb2315b",
+        "receipt_block_hash": "0x0faa5fcaf36b5a029d60dd31289891eb58ed4fcb6c0c247289875c9e09d320a6",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xf9c83b90f6c75237285cc2d570c3a7bd875ee895232ac32f3cb57cdc262633f9",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "d256c6790a429c6b997689bbd3cc02f10105b4494e383658146d8e6cfe905c84"
+      ],
+      "creation_prefix_bytes": 7120,
+      "creation_prefix_verified": true,
+      "constructor_arguments_hex": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b500000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f350000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1ba38758f32d9d46124cff72e3ffddcdd7a141e978c107412d2dae2a88e67ccbbe787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae0000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000016e36000000000000000000000000000000000000000000000000000000000002625a00000000000000000000000000000000000000000000000000000000000000001edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000180e0fa3b7704596f32de6a46da9fdd9c5d05fb5f2b500f9c6330725530e6dd9835000000000000000000000000000000000000000000000000000000000000001e75726e3a3635323973747265616d3a646576656c6f706d656e743a7672660000",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0x42a2f98dfb34b294784c13b97d3b93f17b684a63535f3fac50d22a255b7f4040",
+      "runtime_bytes": 5496,
+      "compiler_runtime_template_keccak256": "0x6b8c90ac4c76530853728fd1dac99920f8630c33aed553862f6ec159325e9075",
+      "non_immutable_bytes_verified": 4760,
+      "immutable_observations": [
+        {
+          "ast_id": "114999",
+          "name": "vrfCoordinator",
+          "source": "smart-contracts/vendor/chainlink/VRFConsumerBaseV2.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 3394,
+              "length": 32,
+              "value": "0x0000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23430",
+          "name": "coordinator",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 473,
+              "length": 32,
+              "value": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b5"
+            },
+            {
+              "offset": 2078,
+              "length": 32,
+              "value": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b5"
+            },
+            {
+              "offset": 3712,
+              "length": 32,
+              "value": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b5"
+            },
+            {
+              "offset": 4591,
+              "length": 32,
+              "value": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b5"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23432",
+          "name": "authority",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 1213,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            },
+            {
+              "offset": 1516,
+              "length": 32,
+              "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23434",
+          "name": "vrfCoordinatorAddress",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 512,
+              "length": 32,
+              "value": "0x0000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+            },
+            {
+              "offset": 1701,
+              "length": 32,
+              "value": "0x0000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+            },
+            {
+              "offset": 2477,
+              "length": 32,
+              "value": "0x0000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23436",
+          "name": "keyHash",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 551,
+              "length": 32,
+              "value": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
+            },
+            {
+              "offset": 1887,
+              "length": 32,
+              "value": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
+            },
+            {
+              "offset": 2145,
+              "length": 32,
+              "value": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23438",
+          "name": "requestConfirmations",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "uint16",
+          "observed_words": [
+            {
+              "offset": 592,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000003"
+            },
+            {
+              "offset": 1344,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000003"
+            },
+            {
+              "offset": 2269,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000003"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23440",
+          "name": "maximumCallbackGasLimit",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "uint32",
+          "observed_words": [
+            {
+              "offset": 1985,
+              "length": 32,
+              "value": "0x00000000000000000000000000000000000000000000000000000000002625a0"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "23442",
+          "name": "callbackGasLimit",
+          "source": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol",
+          "type": "uint32",
+          "observed_words": [
+            {
+              "offset": 2315,
+              "length": 32,
+              "value": "0x000000000000000000000000000000000000000000000000000000000016e360"
+            },
+            {
+              "offset": 3240,
+              "length": 32,
+              "value": "0x000000000000000000000000000000000000000000000000000000000016e360"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77704",
+          "name": "_schemaHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 1131,
+              "length": 32,
+              "value": "0x2fb4740cb986f51993721adf138388388a97f43d37ab908594915867129e6c0c"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77706",
+          "name": "_supersedes",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "address",
+          "observed_words": [
+            {
+              "offset": 3165,
+              "length": 32,
+              "value": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77708",
+          "name": "_deploymentManifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 1771,
+              "length": 32,
+              "value": "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f"
+            }
+          ],
+          "semantic_value_verified": false
+        },
+        {
+          "ast_id": "77710",
+          "name": "_manifestHash",
+          "source": "smart-contracts/domains/modules/StreamModuleBase.sol",
+          "type": "bytes32",
+          "observed_words": [
+            {
+              "offset": 3904,
+              "length": 32,
+              "value": "0xe0fa3b7704596f32de6a46da9fdd9c5d05fb5f2b500f9c6330725530e6dd9835"
+            }
+          ],
+          "semantic_value_verified": false
+        }
+      ],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x293f7e9b89f1045f081a9ef45bc430155e084697",
+      "creation": {
+        "transaction_hash": "0x39a5d9b5945cc91f0bf20222a9d2084d5ee88631a69d861971ef9b2af1505aa9",
+        "receipt_block": "0xb2316b",
+        "receipt_block_hash": "0x7a8ea1319c416d897b18abd7157d58ba2b766755b9ab71d6a56c1b7773b8eda6",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xb7dcea0bf036b70e8d4522a7e66f431965ef8e0c1c93fe3422ac0f9227d7cfc3",
+      "contract": "SSTORE2 data",
+      "creation_prefix_verified": true,
+      "runtime_keccak256": "0xdc09dce05260c6a7575d06de87af676d1441fde113302300c016a2413b87574d",
+      "runtime_bytes": 85,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0x19f18bbb8edb6f09a7b1c96d23170e6c00d31b88",
+      "creation": {
+        "transaction_hash": "0x2dec7b101dcaf191fcdc4340d2e4e972ba2e7a1e3cc821365ca5d3ba0970a97f",
+        "receipt_block": "0xb2316c",
+        "receipt_block_hash": "0xe1a295572a7e86626e48a0c664ea7c46de44577459d5b49e4e9f5c30185f5334",
+        "type": "CREATE"
+      },
+      "initcode_keccak256": "0xc0ba713be65644260088d0f44ef6d368da8211c7e5a92f9206599341b3592dfc",
+      "contract": "SSTORE2 data",
+      "creation_prefix_verified": true,
+      "runtime_keccak256": "0x472c2dd3cc7d0751e256c80428ffc3fcfd4f096940c1a738b3d5820572151f23",
+      "runtime_bytes": 353,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0x52fef8a501bbdb79cf5f4597ac83667cb880e778",
+      "enclosing_transaction_hash": "0x49ddd4851852c634b9bbc05826fffd859caa0bf316adc19090c53e43475f7b46",
+      "creation_prefix_verified": false,
+      "creation_limitation": "Internal initcode supplied by Foundry; no independent public execution trace",
+      "supplied_initcode_keccak256": "0xb260bea5307eba28703173b2dad16c6a962932c84f5c911807675fc08ef45528",
+      "contract": "smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "d9ad6e876365bfbce60e02ad137b49d7186f49a20a1c8115c6bd75e3277a7082"
+      ],
+      "supplied_creation_prefix_matches_compiler": true,
+      "constructor_arguments_hex": "0x",
+      "constructor_arguments_semantically_verified": false,
+      "runtime_keccak256": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19",
+      "runtime_bytes": 5451,
+      "compiler_runtime_template_keccak256": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19",
+      "non_immutable_bytes_verified": 5451,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x56d34c345bd65c1f673bef5c4a6bb6d4696b6936",
+      "enclosing_transaction_hash": "0x7c093f3962855b872f8fa2ed2dcc988d60877f58f1e4389d6ce5bf62da16a883",
+      "creation_prefix_verified": false,
+      "creation_limitation": "Internal initcode supplied by Foundry; no independent public execution trace",
+      "supplied_initcode_keccak256": "0xca6cb4df0ffd2c4b5a0d4d0595250c2e87ef65884dd4c43338fa0795f46e5d2b",
+      "contract": "SSTORE2 data",
+      "runtime_keccak256": "0x9eba9586c358c3c561bc70fd97867c25893f042000706889514d5bdfa4ed1b89",
+      "runtime_bytes": 6593,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0x15377b5fc202bf55faf9cf6e712738636c578d86",
+      "enclosing_transaction_hash": "0x7c093f3962855b872f8fa2ed2dcc988d60877f58f1e4389d6ce5bf62da16a883",
+      "creation_prefix_verified": false,
+      "creation_limitation": "Internal initcode supplied by Foundry; no independent public execution trace",
+      "supplied_initcode_keccak256": "0x423c7664b7689672fd51a0f8ea4ac9d780c58d86c8483a33622828bcc3290ab0",
+      "contract": "SSTORE2 data",
+      "runtime_keccak256": "0x210f97ed601db251aaec9e45d45caff9c28b63db98fb1d3f4b7afecaa2cc55c5",
+      "runtime_bytes": 1345,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0x317a97c7e92da2fafa6baa5a874481281079f662",
+      "enclosing_transaction_hash": "0x7c093f3962855b872f8fa2ed2dcc988d60877f58f1e4389d6ce5bf62da16a883",
+      "creation_prefix_verified": false,
+      "creation_limitation": "Internal initcode supplied by Foundry; no independent public execution trace",
+      "supplied_initcode_keccak256": "0x1f834991004c3c96c6f94ce22133ad23b4ea2785917f4e5075f7db440b76c0f2",
+      "contract": "SSTORE2 data",
+      "runtime_keccak256": "0x0c921c8302698c407f9aa0ee4cb99d2f963599fe6f3cef0f39b4d3de3b7a6208",
+      "runtime_bytes": 193,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0xf5b01110b7251f908e4f45c0d8afdd6b746fccb9",
+      "enclosing_transaction_hash": "0x7c093f3962855b872f8fa2ed2dcc988d60877f58f1e4389d6ce5bf62da16a883",
+      "creation_prefix_verified": false,
+      "creation_limitation": "Internal initcode supplied by Foundry; no independent public execution trace",
+      "supplied_initcode_keccak256": "0xaffd231210d4ebd520d693abf425b7e8542a0fb6dde49790f5d6bf3b650fdb8d",
+      "contract": "SSTORE2 data",
+      "runtime_keccak256": "0x798f4c7fa9737dad8220840cdbfb4797d09bed3d4dfd5c674a61316184a8cb0e",
+      "runtime_bytes": 705,
+      "exact_data_runtime_verified": true
+    },
+    {
+      "address": "0x477677ce83ff4b91f006439ef299006426008ace",
+      "contract": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "bc7cd22abdde64d69a9fb7da3c988f1cc203ccc03e9bbe2ca908e50913ece14a"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x02233d1379e07cc6187ec6f66d8dd314641e16bb7d26ab66981206ec5ba85de4",
+      "runtime_bytes": 9009,
+      "compiler_runtime_template_keccak256": "0x02233d1379e07cc6187ec6f66d8dd314641e16bb7d26ab66981206ec5ba85de4",
+      "non_immutable_bytes_verified": 9009,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "889cf6ba239fd6e4aeec9f42dfe4c0697394a792ef4ee314f1d0147acb778352"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0xbc3dcbcc64f0e95f658889ee197b57ee0b33c81c57c3cc7cca93f1a7c7e9bba8",
+      "runtime_bytes": 6561,
+      "compiler_runtime_template_keccak256": "0xbc3dcbcc64f0e95f658889ee197b57ee0b33c81c57c3cc7cca93f1a7c7e9bba8",
+      "non_immutable_bytes_verified": 6561,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 7,
+            "length": 32
+          }
+        ],
+        "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "d1ac3f385ded6769c95849ea267f6afba24a5e8a9aee024f241361a6b25ca28a"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x7d8392b60fb9cf315cdb2e1eb94a45985c53ef9653b2957be541d394bbe8d1f0",
+      "runtime_bytes": 21380,
+      "compiler_runtime_template_keccak256": "0x7d8392b60fb9cf315cdb2e1eb94a45985c53ef9653b2957be541d394bbe8d1f0",
+      "non_immutable_bytes_verified": 21380,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 7,
+            "length": 32
+          }
+        ],
+        "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x4203324f708730eea0fa8389b782d7d7c2c284aa",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "57d338d791bf67a6714a8690fa95ef3ef0bf3c13d8d353bb87b6fefd8c3f02eb"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x5eeeb086ba534178e9a4d5f7825c60efe3a032022c3ae71a07619c5d3290fe03",
+      "runtime_bytes": 17930,
+      "compiler_runtime_template_keccak256": "0x5eeeb086ba534178e9a4d5f7825c60efe3a032022c3ae71a07619c5d3290fe03",
+      "non_immutable_bytes_verified": 17930,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xe8fd763180a5df256037123dc75f6ebced7757d3",
+      "contract": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "49e2eefe9c1e40ead1c773492bc28f63be7699e1ade4f977b7d7a12e9edee9e7"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x1dbb9cd3727332e2c154ce4eac21df6e6d6d41439740cf047942bc010a4d18fd",
+      "runtime_bytes": 11468,
+      "compiler_runtime_template_keccak256": "0x1dbb9cd3727332e2c154ce4eac21df6e6d6d41439740cf047942bc010a4d18fd",
+      "non_immutable_bytes_verified": 11468,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 7,
+            "length": 32
+          }
+        ],
+        "address": "0xe8fd763180a5df256037123dc75f6ebced7757d3",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "426767e25de3662ed7a20e600927c5c02cd01841465841a2067fd5f8d85840d0"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x0420f512e839a109bfa6028d3c75e1507a7df6e66de6da6e651bf87adf2c4842",
+      "runtime_bytes": 16398,
+      "compiler_runtime_template_keccak256": "0x0420f512e839a109bfa6028d3c75e1507a7df6e66de6da6e651bf87adf2c4842",
+      "non_immutable_bytes_verified": 16398,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xd75cd4cc0c2b81657ffb9402987eed71ebeaf45a",
+      "contract": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "8cc3686796a0c6019f74fe3598f5679456f45f63988084c5353bff44bd6626a1"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0xb95e2df516482ab72f56b313b7366d8e21d8458076ba2f2941d67d5f2b80968e",
+      "runtime_bytes": 1853,
+      "compiler_runtime_template_keccak256": "0xb95e2df516482ab72f56b313b7366d8e21d8458076ba2f2941d67d5f2b80968e",
+      "non_immutable_bytes_verified": 1853,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": {
+        "encoding": "compiler library_deploy_address immutable",
+        "references": [
+          {
+            "offset": 7,
+            "length": 32
+          }
+        ],
+        "address": "0xd75cd4cc0c2b81657ffb9402987eed71ebeaf45a",
+        "verified": true
+      }
+    },
+    {
+      "address": "0x5ae4f3c8e3e69ecb2f0c0d05ff043882c316d84a",
+      "contract": "smart-contracts/domains/mint/StreamMintGateValidator.sol:StreamMintGateValidator",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "1ab2691154e45b26a06c4a1ea942683edc8c8881c1d8c4a23d601dbdbe4a0299"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0x856a5ecd37028e3e9e2266efed4158f23f2353d31c709ef947408461398afe7c",
+      "runtime_bytes": 6347,
+      "compiler_runtime_template_keccak256": "0x856a5ecd37028e3e9e2266efed4158f23f2353d31c709ef947408461398afe7c",
+      "non_immutable_bytes_verified": 6347,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    },
+    {
+      "address": "0xc0ea43fa70904c274dd01d71d52acc19594b1866",
+      "contract": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "build_info_sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "artifact_sha256": [
+        "dd20c38b00130dbcb9a162bac6e4b2cbc17ee7f1f5ef651187b2bfb89e50c164"
+      ],
+      "creation_prefix_verified": false,
+      "creation_limitation": "Runtime-only read; no creation transaction or internal trace supplied",
+      "runtime_keccak256": "0xd3cab84a5c8a5c58cd87754e4a6a2147c70db49546fb7c1f6f29fd205edaebb9",
+      "runtime_bytes": 9262,
+      "compiler_runtime_template_keccak256": "0xd3cab84a5c8a5c58cd87754e4a6a2147c70db49546fb7c1f6f29fd205edaebb9",
+      "non_immutable_bytes_verified": 9262,
+      "immutable_observations": [],
+      "linked_libraries": [],
+      "library_self_address": null
+    }
+  ],
+  "limitations": [
+    "Compiler outputs are supplied evidence, not independently recompiled by this helper.",
+    "Constructor arguments and observed immutable values are not semantically validated.",
+    "Runtime-only records do not prove their creation path.",
+    "This report does not assert audit completion or release readiness."
+  ],
+  "builds": [
+    {
+      "file": "08bf9887250da673.json",
+      "sha256": "ba0cf70efc2449ad4656e5d980e13dad6d6b3292e887911aa37cfc8c93bd2c3e",
+      "compiler": "0.8.19",
+      "compiler_input_sha256": "a8bb3aff8b766ed1ee07ad4b1274b95416020fae2f203d22e9fa9de7c24f6e2b"
+    }
+  ],
+  "broadcast_sha256": "552b3ccbe24314f762b94417ed0ed7c23f1050efc47f74600159a3e9ec381243"
+}

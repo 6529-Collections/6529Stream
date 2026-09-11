@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:ebef8f9bd993f50a774b24dbf716a9a0bfa1019b7c536836482985cddf10f808"
+      "sha256": "sha256:5a7138ba3e28cd0c329908619d479951f68b8ab3532e02fa338716f6e020d0a1"
     },
     {
       "path": "docs/audit-package.md",
@@ -46,11 +46,11 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:ba349dcd195fc084b7bbc21ab7fdf55e3ffc76daec477aa89e5a3d52c08a882c"
+      "sha256": "sha256:8c0004651751fa6b77c2d3996bcb580ad64cda2a46f937c439964f7838872c4f"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:ef66bed71885bd7f33c3c6b1514e4c60fb6bf1ebd4888bb89c1f3162d8cdaacd"
+      "sha256": "sha256:fad5a67c7ebd431c1f19c287ef9184269b84cd733c98b62de5bcbe4da2d6fb8f"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -150,7 +150,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:ebef8f9bd993f50a774b24dbf716a9a0bfa1019b7c536836482985cddf10f808"
+          "sha256": "sha256:5a7138ba3e28cd0c329908619d479951f68b8ab3532e02fa338716f6e020d0a1"
         }
       ],
       "risk_acceptance": null
@@ -473,7 +473,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:ebef8f9bd993f50a774b24dbf716a9a0bfa1019b7c536836482985cddf10f808"
+          "sha256": "sha256:5a7138ba3e28cd0c329908619d479951f68b8ab3532e02fa338716f6e020d0a1"
         },
         {
           "path": "docs/metadata.md",
@@ -601,7 +601,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:adc2c01fad26a8d36942e85c922dd78bb41e9b394fd5b849460f2f4890a2601d"
+          "sha256": "sha256:3747428383fee43acee4101bd1cc8a58306e93b13d7de44f4a9227feee821897"
         },
         {
           "path": "release-artifacts/latest/abi-checksums.json",
@@ -635,11 +635,11 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.json",
-          "sha256": "sha256:ba349dcd195fc084b7bbc21ab7fdf55e3ffc76daec477aa89e5a3d52c08a882c"
+          "sha256": "sha256:8c0004651751fa6b77c2d3996bcb580ad64cda2a46f937c439964f7838872c4f"
         },
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:ef66bed71885bd7f33c3c6b1514e4c60fb6bf1ebd4888bb89c1f3162d8cdaacd"
+          "sha256": "sha256:fad5a67c7ebd431c1f19c287ef9184269b84cd733c98b62de5bcbe4da2d6fb8f"
         },
         {
           "path": "docs/slither.md",
@@ -647,7 +647,7 @@
         },
         {
           "path": "tools/security/check_slither_baseline.py",
-          "sha256": "sha256:f9f9ba30d144b05769f16f80ebff26216c99b62cb09c06b1acf5ac25ced37e5a"
+          "sha256": "sha256:4bd12e50ac34108097fd4e3741d3820bde7036bf013bcb0406c59ca9ea0f2189"
         }
       ],
       "risk_acceptance": null
@@ -680,11 +680,11 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:ebef8f9bd993f50a774b24dbf716a9a0bfa1019b7c536836482985cddf10f808"
+          "sha256": "sha256:5a7138ba3e28cd0c329908619d479951f68b8ab3532e02fa338716f6e020d0a1"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:ed67df24de003b4bdf61264bc54e3036e307510bbbc8af9d3ba382a95db74dc8"
+          "sha256": "sha256:630b708682e3cf5de9fe145062c66e929c3071307d45410dc65c179592baf840"
         },
         {
           "path": "docs/warning-dispositions.md",

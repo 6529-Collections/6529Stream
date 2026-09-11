@@ -119,7 +119,12 @@ class DeploymentRehearsalGateTests(unittest.TestCase):
         workflow = (repo_root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         foundry_header = workflow.split("  foundry:", 1)[1].split("    steps:", 1)[0]
 
-        self.assertIn("timeout-minutes: 90", foundry_header)
+        timeout_minutes = next(
+            line.split(":", 1)[1].strip()
+            for line in foundry_header.splitlines()
+            if line.strip().startswith("timeout-minutes:")
+        )
+        self.assertGreaterEqual(int(timeout_minutes), 90)
 
     def test_rejects_foundry_timeout_without_rehearsal_headroom(self) -> None:
         """The checker fails closed when the aggregate lane cannot finish."""

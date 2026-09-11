@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "pinnedBlock": 11678063,
+  "pinnedBlockHash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+  "core": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+  "executor": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+  "compilerAstDeclarationId": "7816",
+  "allThreeImmutableOccurrencesMatchExecutor": true,
+  "observedWords": [
+    {
+      "offset": 2373,
+      "length": 32,
+      "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+    },
+    {
+      "offset": 4572,
+      "length": 32,
+      "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+    },
+    {
+      "offset": 16060,
+      "length": 32,
+      "value": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35"
+    }
+  ],
+  "constructorBindings": {
+    "name": "6529 Stream",
+    "symbol": "STREAM",
+    "executor": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+    "registry": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+    "registryRuntimeHash": "0xe51412e2edbc2e0d0e0276f46f657c47d61467a5a46d0bfd4d18651f54284292"
+  },
+  "boundary": "Checks the private Core governance authority and named constructor bindings. Does not promote all constructors or immutable fields to semantic validation."
+}

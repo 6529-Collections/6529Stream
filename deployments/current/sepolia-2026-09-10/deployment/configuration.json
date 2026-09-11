@@ -1,0 +1,1374 @@
+{
+  "result": "PASS",
+  "pinnedBlock": 11678063,
+  "pinnedBlockHash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+  "addresses": {
+    "core": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+    "executor": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+    "roles": "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+    "registry": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+    "manager": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+    "ledger": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+    "sale": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+    "erc20": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+    "primary": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+    "auction": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+    "factory": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+    "assets": "0xa9d6791502849519e16cdf335c0959fd920b765f",
+    "royalty": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+    "artists": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+    "entropy": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+    "router": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+    "provider": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+    "manifest": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+    "root": "0xb57f26fcc674059ef20180e29c530db5f3321c77"
+  },
+  "checks": [
+    {
+      "target": "registry",
+      "address": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+      "signature": "governanceExecutor()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "mintLedger()",
+      "arguments": [],
+      "expected": [
+        "0xc1fff76f146458fc96f10f1f52e428080eb21be6"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xc1fff76f146458fc96f10f1f52e428080eb21be6"
+      ],
+      "rawReturnData": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be6",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "moduleRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e"
+      ],
+      "rawReturnData": "0x000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "ledger",
+      "address": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "artistRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "rawReturnData": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "mintManager()",
+      "arguments": [],
+      "expected": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "rawReturnData": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "splitFactory()",
+      "arguments": [],
+      "expected": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "rawReturnData": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "artistRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "rawReturnData": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "mintManager()",
+      "arguments": [],
+      "expected": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "rawReturnData": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "splitFactory()",
+      "arguments": [],
+      "expected": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "rawReturnData": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "revenueResolver()",
+      "arguments": [],
+      "expected": [
+        "0xa05044f746e64c16cc229889a08e113d7f953dac"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xa05044f746e64c16cc229889a08e113d7f953dac"
+      ],
+      "rawReturnData": "0x000000000000000000000000a05044f746e64c16cc229889a08e113d7f953dac",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "primary",
+      "address": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+      "signature": "splitFactory()",
+      "arguments": [],
+      "expected": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "rawReturnData": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "result": "PASS"
+    },
+    {
+      "target": "primary",
+      "address": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "artistRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "rawReturnData": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "mintManager()",
+      "arguments": [],
+      "expected": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "rawReturnData": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3e",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "splitFactory()",
+      "arguments": [],
+      "expected": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "rawReturnData": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "authority()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "coordinator()",
+      "arguments": [],
+      "expected": [
+        "0x258d07d853be34ac022f24e255f02a21d6d340b5"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x258d07d853be34ac022f24e255f02a21d6d340b5"
+      ],
+      "rawReturnData": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b5",
+      "result": "PASS"
+    },
+    {
+      "target": "entropy",
+      "address": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "entropy",
+      "address": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+      "signature": "authority()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "router",
+      "address": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "router",
+      "address": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "signature": "authority()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "router",
+      "address": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "signature": "artistRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746"
+      ],
+      "rawReturnData": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746",
+      "result": "PASS"
+    },
+    {
+      "target": "royalty",
+      "address": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "signature": "boundCore()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "royalty",
+      "address": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "signature": "splitFactory()",
+      "arguments": [],
+      "expected": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x5102aa2d3162df520857ada9e3beb3849ed1b917"
+      ],
+      "rawReturnData": "0x0000000000000000000000005102aa2d3162df520857ada9e3beb3849ed1b917",
+      "result": "PASS"
+    },
+    {
+      "target": "royalty",
+      "address": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "artists",
+      "address": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "artists",
+      "address": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "signature": "authority()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0xb57f26fcc674059ef20180e29c530db5f3321c77"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xb57f26fcc674059ef20180e29c530db5f3321c77"
+      ],
+      "rawReturnData": "0x000000000000000000000000b57f26fcc674059ef20180e29c530db5f3321c77",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "roleRegistry()",
+      "arguments": [],
+      "expected": [
+        "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4"
+      ],
+      "rawReturnData": "0x0000000000000000000000008cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+      "result": "PASS"
+    },
+    {
+      "target": "roles",
+      "address": "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "assets",
+      "address": "0xa9d6791502849519e16cdf335c0959fd920b765f",
+      "signature": "owner()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "factory",
+      "address": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+      "signature": "assetPolicyRegistry()",
+      "arguments": [],
+      "expected": [
+        "0xa9d6791502849519e16cdf335c0959fd920b765f"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0xa9d6791502849519e16cdf335c0959fd920b765f"
+      ],
+      "rawReturnData": "0x000000000000000000000000a9d6791502849519e16cdf335c0959fd920b765f",
+      "result": "PASS"
+    },
+    {
+      "target": "manifest",
+      "address": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+      "signature": "core()",
+      "arguments": [],
+      "expected": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x05914c6f62c819c861f01c5edd4b6b17e935e75b"
+      ],
+      "rawReturnData": "0x00000000000000000000000005914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "result": "PASS"
+    },
+    {
+      "target": "manifest",
+      "address": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+      "signature": "governanceExecutor()",
+      "arguments": [],
+      "expected": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35"
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "platformSigner()",
+      "arguments": [],
+      "expected": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "rawReturnData": "0x0000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "paused()",
+      "arguments": [],
+      "expected": [
+        false
+      ],
+      "expectedFields": null,
+      "observed": [
+        false
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "sale",
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "signature": "signerEpoch()",
+      "arguments": [],
+      "expected": [
+        1
+      ],
+      "expectedFields": null,
+      "observed": [
+        1
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "platformSigner()",
+      "arguments": [],
+      "expected": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "rawReturnData": "0x0000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "paused()",
+      "arguments": [],
+      "expected": [
+        false
+      ],
+      "expectedFields": null,
+      "observed": [
+        false
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "erc20",
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "signature": "signerEpoch()",
+      "arguments": [],
+      "expected": [
+        1
+      ],
+      "expectedFields": null,
+      "observed": [
+        1
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "platformSigner()",
+      "arguments": [],
+      "expected": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x0a69cdd0d8de0680779237aff610c90b61b83b2d"
+      ],
+      "rawReturnData": "0x0000000000000000000000000a69cdd0d8de0680779237aff610c90b61b83b2d",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "paused()",
+      "arguments": [],
+      "expected": [
+        false
+      ],
+      "expectedFields": null,
+      "observed": [
+        false
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "auction",
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "signature": "signerEpoch()",
+      "arguments": [],
+      "expected": [
+        1
+      ],
+      "expectedFields": null,
+      "observed": [
+        1
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "genesisInitialized()",
+      "arguments": [],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "pendingScheduledActionCount()",
+      "arguments": [],
+      "expected": [
+        0
+      ],
+      "expectedFields": null,
+      "observed": [
+        0
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "registry",
+      "address": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+      "signature": "moduleCount()",
+      "arguments": [],
+      "expected": [
+        9
+      ],
+      "expectedFields": null,
+      "observed": [
+        9
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000009",
+      "result": "PASS"
+    },
+    {
+      "target": "ledger",
+      "address": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+      "signature": "ledgerWriter(address)",
+      "arguments": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e"
+      ],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "vrfCoordinatorAddress()",
+      "arguments": [],
+      "expected": [
+        "0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x9ddfaca8183c41ad55329bdeed9f6a8d53168b1b"
+      ],
+      "rawReturnData": "0x0000000000000000000000009ddfaca8183c41ad55329bdeed9f6a8d53168b1b",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "subscriptionId()",
+      "arguments": [],
+      "expected": [
+        73966132582566812656063189452102645361939437343677100907667208994508112710590
+      ],
+      "expectedFields": null,
+      "observed": [
+        73966132582566812656063189452102645361939437343677100907667208994508112710590
+      ],
+      "rawReturnData": "0xa38758f32d9d46124cff72e3ffddcdd7a141e978c107412d2dae2a88e67ccbbe",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "callbackGasLimit()",
+      "arguments": [],
+      "expected": [
+        1500000
+      ],
+      "expectedFields": null,
+      "observed": [
+        1500000
+      ],
+      "rawReturnData": "0x000000000000000000000000000000000000000000000000000000000016e360",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "maximumCallbackGasLimit()",
+      "arguments": [],
+      "expected": [
+        2500000
+      ],
+      "expectedFields": null,
+      "observed": [
+        2500000
+      ],
+      "rawReturnData": "0x00000000000000000000000000000000000000000000000000000000002625a0",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "requestConfirmations()",
+      "arguments": [],
+      "expected": [
+        3
+      ],
+      "expectedFields": null,
+      "observed": [
+        3
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "keyHash()",
+      "arguments": [],
+      "expected": [
+        "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae"
+      ],
+      "rawReturnData": "0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "nativePayment()",
+      "arguments": [],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "provider",
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "signature": "NUM_WORDS()",
+      "arguments": [],
+      "expected": [
+        1
+      ],
+      "expectedFields": null,
+      "observed": [
+        1
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "minimumDelay(uint8)",
+      "arguments": [
+        0
+      ],
+      "expected": [
+        0
+      ],
+      "expectedFields": null,
+      "observed": [
+        0
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "minimumDelay(uint8)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        172800
+      ],
+      "expectedFields": null,
+      "observed": [
+        172800
+      ],
+      "rawReturnData": "0x000000000000000000000000000000000000000000000000000000000002a300",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "minimumDelay(uint8)",
+      "arguments": [
+        2
+      ],
+      "expected": [
+        259200
+      ],
+      "expectedFields": null,
+      "observed": [
+        259200
+      ],
+      "rawReturnData": "0x000000000000000000000000000000000000000000000000000000000003f480",
+      "result": "PASS"
+    },
+    {
+      "target": "executor",
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "signature": "minimumDelay(uint8)",
+      "arguments": [
+        3
+      ],
+      "expected": [
+        172800
+      ],
+      "expectedFields": null,
+      "observed": [
+        172800
+      ],
+      "rawReturnData": "0x000000000000000000000000000000000000000000000000000000000002a300",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0x695c55174dcd311c801c81147aa24826980bdf3e",
+        "0xdfbe3c56260b260ea846fccf558e4e99deb32590b71da1bd56fdcb5cada3ffbf",
+        false,
+        "0x136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2",
+        "0xb4074ed7",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0x1d11b6728647121065f7e543e065d1d73f9a2ab881a37347af31c85cc407852e",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x000000000000000000000000695c55174dcd311c801c81147aa24826980bdf3edfbe3c56260b260ea846fccf558e4e99deb32590b71da1bd56fdcb5cada3ffbf0000000000000000000000000000000000000000000000000000000000000000136326f089f522351128a5fb79275bd12b2d84fe5bb50d5e46c9f5508d6df7e2b4074ed700000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e00000000000000000000000000000000000000000000000000000000000000011d11b6728647121065f7e543e065d1d73f9a2ab881a37347af31c85cc407852eedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0xe5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+        "0x21b4c8be348b373308a615706f49965db405243d37c248faa1f8bd49a612ea92",
+        false,
+        "0xe5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd",
+        "0x27d4bae6",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0x92e77432d1cdc7101420a9c0f4d8f6c575c48ba0cdff95d0cb01c59819a96b6a",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x000000000000000000000000c1fff76f146458fc96f10f1f52e428080eb21be621b4c8be348b373308a615706f49965db405243d37c248faa1f8bd49a612ea920000000000000000000000000000000000000000000000000000000000000000e5dd56591e517e4085238d3b93e69c570fcfba756eed59ca2c4e234606e661cd27d4bae600000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e000000000000000000000000000000000000000000000000000000000000000192e77432d1cdc7101420a9c0f4d8f6c575c48ba0cdff95d0cb01c59819a96b6aedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0xb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+        "0x9d18e73e88de146103a03b1dfc0ec5953b92f825535c50276847602736d73ffb",
+        false,
+        "0xb3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb",
+        "0x979b977f",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0xfa1b7e2995b9152e3a3ac696d035319c913fd260852476f2fd4e54bb79958220",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x000000000000000000000000258d07d853be34ac022f24e255f02a21d6d340b59d18e73e88de146103a03b1dfc0ec5953b92f825535c50276847602736d73ffb0000000000000000000000000000000000000000000000000000000000000000b3b3ef20764c647bdeda70b21ab009ff2783106d6995be14389ec6f42ea6dfbb979b977f00000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e0000000000000000000000000000000000000000000000000000000000000001fa1b7e2995b9152e3a3ac696d035319c913fd260852476f2fd4e54bb79958220edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0x7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+        "0xc9bd03c98bcbab73c4e21fa20438a226005922966f76bdee68dcb9c2934bc9e8",
+        false,
+        "0x7024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a",
+        "0x222d4427",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0xbea9ddfa815a4412d1efaff98e6dde03f76d0b570deaf2c228a55c80955ca470",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x00000000000000000000000084a67c06d7f17d44690d263a66463c6a92a8723bc9bd03c98bcbab73c4e21fa20438a226005922966f76bdee68dcb9c2934bc9e800000000000000000000000000000000000000000000000000000000000000007024d3e2544fc48a261933c43d901dca0ee3fc26ea2b857748ab0c295a16f20a222d442700000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e0000000000000000000000000000000000000000000000000000000000000001bea9ddfa815a4412d1efaff98e6dde03f76d0b570deaf2c228a55c80955ca470edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0xafcd60ac064e6f5b3428ca05e721b02c16a658af3989d079e29e38df5fab9c91"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+        "0x35b5346c94e163d06061387ac0b34a7d7b628b30119f24dc396da5fcf074ab5e",
+        false,
+        "0x217d16181cfb7c9bb7e1687d0b13ef4b864e9154dc37b60f75a88bec454b5467",
+        "0xaa4a9cc6",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0xcc60a76812aa98ea5961cf5a85409bc2e869dc798eee432a7afc4af2882fdde6",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x0000000000000000000000008d5ff93956fd63bcfa762076f5309b92c5f2a0f035b5346c94e163d06061387ac0b34a7d7b628b30119f24dc396da5fcf074ab5e0000000000000000000000000000000000000000000000000000000000000000217d16181cfb7c9bb7e1687d0b13ef4b864e9154dc37b60f75a88bec454b5467aa4a9cc600000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e0000000000000000000000000000000000000000000000000000000000000001cc60a76812aa98ea5961cf5a85409bc2e869dc798eee432a7afc4af2882fdde6edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0xaef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+        "0x664d23a2c0040d2a843efae1e7bd41e28534acece6941435d51b503d679e13db",
+        false,
+        "0xaef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4",
+        "0xddc81fc2",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0x60728c340208badac25a59c94896c4448750e14530ba5bc94725bc609309e4d8",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x000000000000000000000000f11c4f30bbb02c28e3934c001fc56f90be852746664d23a2c0040d2a843efae1e7bd41e28534acece6941435d51b503d679e13db0000000000000000000000000000000000000000000000000000000000000000aef5244b535c06d7f8e259ec85024ebdfc2d95b38d64f6570dc627a2684749f4ddc81fc200000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e000000000000000000000000000000000000000000000000000000000000000160728c340208badac25a59c94896c4448750e14530ba5bc94725bc609309e4d8edcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "getSatellitePointer(bytes32)",
+      "arguments": [
+        "0x03f5dfc0687afbbc9c86bda58667bf3bb235a2d1cbe7273bbbe4d5301fb0b6d2"
+      ],
+      "expected": null,
+      "expectedFields": {
+        "0": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+        "2": false,
+        "5": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        "6": 1
+      },
+      "observed": [
+        "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+        "0x8291b5d8db246a03544c9f07bbc1bb9f8b8127e87ce43d66cbfc9d5fb162a0e0",
+        false,
+        "0xa79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e",
+        "0x77faad4f",
+        "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+        1,
+        "0xe6f01b9552c94a2ecdfcec2eeae2bb67168ad88e4bcc0cf9f3021011e14c855f",
+        "0xedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f",
+        1
+      ],
+      "rawReturnData": "0x00000000000000000000000009e676013be9ac977a4ac41fe5fe4aab269d8f358291b5d8db246a03544c9f07bbc1bb9f8b8127e87ce43d66cbfc9d5fb162a0e00000000000000000000000000000000000000000000000000000000000000000a79066eedc862e1122885d62af037de32376da824a17eceb77f7332aef89ce4e77faad4f00000000000000000000000000000000000000000000000000000000000000000000000000000000e2c0bd803eccb3a95b82485197381d7d7530785e0000000000000000000000000000000000000000000000000000000000000001e6f01b9552c94a2ecdfcec2eeae2bb67168ad88e4bcc0cf9f3021011e14c855fedcb0e60eaf7caebdf842710640c51b9eb81b542662baeac0fd461250281a06f0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "collectionExists(uint256)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "collectionMaxSupply(uint256)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        10
+      ],
+      "expectedFields": null,
+      "observed": [
+        10
+      ],
+      "rawReturnData": "0x000000000000000000000000000000000000000000000000000000000000000a",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "collectionStatus(uint256)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        0
+      ],
+      "expectedFields": null,
+      "observed": [
+        0
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "core",
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "signature": "collectionMintedEver(uint256)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        0
+      ],
+      "expectedFields": null,
+      "observed": [
+        0
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "phaseExecutor(uint256,bytes32,address)",
+      "arguments": [
+        1,
+        "0x9097b43320fd7757709222ed1b348465e24c94cdae005c30d4dd5c8421f6ddc8",
+        "0x09047c394020bf49bcba95616412a2e91cc8031f"
+      ],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "phaseExecutor(uint256,bytes32,address)",
+      "arguments": [
+        1,
+        "0xcede4e8d991818d244b65cdc1e66348486572445b1d525a544d452bacadf6d80",
+        "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca"
+      ],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "manager",
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "signature": "phaseExecutor(uint256,bytes32,address)",
+      "arguments": [
+        1,
+        "0x9460f8faf27e2fec481fb99dd3a4795f9a8b7fe5885faa865f8f832c409b3733",
+        "0xba804032dc5aeb8282490c49098a6a5057dfb8f0"
+      ],
+      "expected": [
+        true
+      ],
+      "expectedFields": null,
+      "observed": [
+        true
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "result": "PASS"
+    },
+    {
+      "target": "artists",
+      "address": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "signature": "acceptedArtist(uint256)",
+      "arguments": [
+        1
+      ],
+      "expected": [
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "expectedFields": null,
+      "observed": [
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "rawReturnData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "result": "PASS"
+    }
+  ],
+  "boundary": "Deployment-completion state only; activation, paid mint, VRF callback and settlement are later proof obligations."
+}

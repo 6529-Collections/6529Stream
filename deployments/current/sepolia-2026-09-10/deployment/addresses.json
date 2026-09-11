@@ -1,0 +1,354 @@
+{
+  "schema": "6529stream.public-sepolia-addressbook.v1",
+  "chainId": 11155111,
+  "network": "Sepolia",
+  "sourceCommit": "d636056b835c9c3ed0b1c4fe7951609429a5789c",
+  "sourceTag": "evidence/sepolia-deployment-2026-09-10",
+  "sourceTagObject": "5addbfe33741b299a2218daccbeb13abbd98c5bb",
+  "deploymentCompletionBlock": 11678063,
+  "deploymentCompletionBlockHash": "0x08f49b98d8834c26e0ce4ad8a0b1f8c6c2a46c9a6b24dc7e5b77705c97c5d0dc",
+  "maturity": "Unaudited development/testnet deployment; not a production or public-beta readiness claim.",
+  "modules": {
+    "core": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+    "executor": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+    "roles": "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+    "registry": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+    "manager": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+    "ledger": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+    "sale": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+    "erc20": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+    "primary": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+    "auction": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+    "factory": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+    "assets": "0xa9d6791502849519e16cdf335c0959fd920b765f",
+    "royalty": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+    "artists": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+    "entropy": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+    "router": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+    "provider": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+    "manifest": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+    "root": "0xb57f26fcc674059ef20180e29c530db5f3321c77"
+  },
+  "verifiedContracts": [
+    {
+      "address": "0xf2fdb2e17b5c959ba94167c383be83ecda3667ee",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceManifest.sol:StreamGovernanceManifest",
+      "runtimeKeccak256": "0x1e1c2b5dde7304f0db942f6f8ae404d64950df0de6d1aab767889349da24f4e9",
+      "runtimeBytes": 16755,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x5a5050dc889c01704069119a8a6ec5cf78bbc281",
+      "contract": "smart-contracts/domains/governance/StreamStateExport.sol:StreamStateExport",
+      "runtimeKeccak256": "0xcdaa2ce47088d3da3159d3d1e2927c5c525dafda5218ad3d5ce0d1966dd72663",
+      "runtimeBytes": 4533,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x70b914e90cf02edacdea4772708fbd979683ce23",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceScheduling.sol:StreamGovernanceScheduling",
+      "runtimeKeccak256": "0x4d75f172572817aec6972ca6f4286a8935c4e90072069421cf275c8411ce9d75",
+      "runtimeBytes": 5363,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceExecutor.sol:StreamGovernanceExecutor",
+      "runtimeKeccak256": "0x8291b5d8db246a03544c9f07bbc1bb9f8b8127e87ce43d66cbfc9d5fb162a0e0",
+      "runtimeBytes": 23741,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xb57f26fcc674059ef20180e29c530db5f3321c77",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "runtimeKeccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtimeBytes": 688,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xcd711cb4c8e55a5425d94a5311df01a35cd9175d",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "runtimeKeccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtimeBytes": 688,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x015779ebd0aa2484cab510bbfe6b184517a2a66a",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActor.sol:StreamGovernanceActor",
+      "runtimeKeccak256": "0xa81f97f42078b2868a3c7a312ae51cd6032984dbcfd2d51316b1be24731632eb",
+      "runtimeBytes": 688,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x8cf3e2ac56958fc5e37f9738c4b61e95c278a5d4",
+      "contract": "smart-contracts/domains/governance/StreamRoleRegistry.sol:StreamRoleRegistry",
+      "runtimeKeccak256": "0xd70c2703c72e963a3cec63512ab950d54bd962e27768295a21cfb1e702b24ebe",
+      "runtimeBytes": 11052,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xe2c0bd803eccb3a95b82485197381d7d7530785e",
+      "contract": "smart-contracts/domains/modules/StreamModuleRegistry.sol:StreamModuleRegistry",
+      "runtimeKeccak256": "0xe51412e2edbc2e0d0e0276f46f657c47d61467a5a46d0bfd4d18651f54284292",
+      "runtimeBytes": 10536,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+      "contract": "smart-contracts/core/StreamCore.sol:StreamCore",
+      "runtimeKeccak256": "0x6dd45e4e52993c3b5109cfd8f776a9b49232810f3d98a9374462a343bc31aade",
+      "runtimeBytes": 18997,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x7e6c446b036119f67e3e2086bd628c6d49a5d957",
+      "contract": "smart-contracts/domains/governance/StreamSystemManifest.sol:StreamSystemManifest",
+      "runtimeKeccak256": "0x516da91323184220b08971b6be80faa8f6f9983b72f6d05faf4ecd2be4b8a1b5",
+      "runtimeBytes": 13807,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xc1fff76f146458fc96f10f1f52e428080eb21be6",
+      "contract": "smart-contracts/domains/mint/StreamMintLedger.sol:StreamMintLedger",
+      "runtimeKeccak256": "0x21b4c8be348b373308a615706f49965db405243d37c248faa1f8bd49a612ea92",
+      "runtimeBytes": 8005,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+      "contract": "smart-contracts/domains/mint/StreamMintManager.sol:StreamMintManager",
+      "runtimeKeccak256": "0xdfbe3c56260b260ea846fccf558e4e99deb32590b71da1bd56fdcb5cada3ffbf",
+      "runtimeBytes": 21614,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xa9d6791502849519e16cdf335c0959fd920b765f",
+      "contract": "smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol:StreamAssetPolicyRegistry",
+      "runtimeKeccak256": "0xc24ee18d13a607e27fb8dad10f81df9ab6ec74b755235d5b680deb71a14d330c",
+      "runtimeBytes": 1671,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+      "contract": "smart-contracts/domains/revenue/StreamSplitFactory.sol:StreamSplitFactory",
+      "runtimeKeccak256": "0x82713ddb14a45b88cf6d809b2a58a358bf70c11c9c1c13ac196518a9cac22b8f",
+      "runtimeBytes": 16691,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x8d5ff93956fd63bcfa762076f5309b92c5f2a0f0",
+      "contract": "smart-contracts/domains/revenue/StreamRoyaltyResolver.sol:StreamRoyaltyResolver",
+      "runtimeKeccak256": "0x35b5346c94e163d06061387ac0b34a7d7b628b30119f24dc396da5fcf074ab5e",
+      "runtimeBytes": 3628,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+      "contract": "smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol:StreamCollectionArtistRegistry",
+      "runtimeKeccak256": "0x664d23a2c0040d2a843efae1e7bd41e28534acece6941435d51b503d679e13db",
+      "runtimeBytes": 4526,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+      "contract": "smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol:StreamFixedPriceSaleAdapter",
+      "runtimeKeccak256": "0xeca15c54c2ecba6bfb9ef43d9bd82d666cda09800cca93bf5f886e5f9de7b0eb",
+      "runtimeBytes": 6877,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+      "contract": "smart-contracts/domains/revenue/StreamRevenueResolver.sol:StreamRevenueResolver",
+      "runtimeKeccak256": "0x729be916543a01fa555738f2e24464fc4401952801b49693d9bc18c00bc99789",
+      "runtimeBytes": 11637,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+      "contract": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol:StreamERC20FixedPriceSaleAdapter",
+      "runtimeKeccak256": "0xa91c65d6324598ad000c0e17c918af1bca8020d4fc07355e1b7273e0c846a9c3",
+      "runtimeBytes": 13777,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+      "contract": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol:StreamEnglishAuctionHouse",
+      "runtimeKeccak256": "0xbbfabb58875af278975d6736b6e59b06ceb03c7e2327af71b542a6516e72ee4e",
+      "runtimeBytes": 11399,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyCoordinator.sol:StreamEntropyCoordinator",
+      "runtimeKeccak256": "0x9d18e73e88de146103a03b1dfc0ec5953b92f825535c50276847602736d73ffb",
+      "runtimeBytes": 12599,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x84a67c06d7f17d44690d263a66463c6a92a8723b",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRouter.sol:StreamMetadataRouter",
+      "runtimeKeccak256": "0xc9bd03c98bcbab73c4e21fa20438a226005922966f76bdee68dcb9c2934bc9e8",
+      "runtimeBytes": 13997,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0xa7a9c0af6166a02216421ab0b7dca44b1c9b19cd",
+      "contract": "smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol:StreamEntropyProviderVRF",
+      "runtimeKeccak256": "0x42a2f98dfb34b294784c13b97d3b93f17b684a63535f3fac50d22a255b7f4040",
+      "runtimeBytes": 5496,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x293f7e9b89f1045f081a9ef45bc430155e084697",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0xdc09dce05260c6a7575d06de87af676d1441fde113302300c016a2413b87574d",
+      "runtimeBytes": 85,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x19f18bbb8edb6f09a7b1c96d23170e6c00d31b88",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0x472c2dd3cc7d0751e256c80428ffc3fcfd4f096940c1a738b3d5820572151f23",
+      "runtimeBytes": 353,
+      "creationPrefixVerified": true,
+      "creationLimitation": null
+    },
+    {
+      "address": "0x52fef8a501bbdb79cf5f4597ac83667cb880e778",
+      "contract": "smart-contracts/domains/revenue/StreamSplitWallet.sol:StreamSplitWallet",
+      "runtimeKeccak256": "0xb9f42fcae4e676e94171beab1d5b699e37518d1c64e1f3e1d54308ddc889ce19",
+      "runtimeBytes": 5451,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Internal initcode supplied by Foundry; no independent public execution trace"
+    },
+    {
+      "address": "0x56d34c345bd65c1f673bef5c4a6bb6d4696b6936",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0x9eba9586c358c3c561bc70fd97867c25893f042000706889514d5bdfa4ed1b89",
+      "runtimeBytes": 6593,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Internal initcode supplied by Foundry; no independent public execution trace"
+    },
+    {
+      "address": "0x15377b5fc202bf55faf9cf6e712738636c578d86",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0x210f97ed601db251aaec9e45d45caff9c28b63db98fb1d3f4b7afecaa2cc55c5",
+      "runtimeBytes": 1345,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Internal initcode supplied by Foundry; no independent public execution trace"
+    },
+    {
+      "address": "0x317a97c7e92da2fafa6baa5a874481281079f662",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0x0c921c8302698c407f9aa0ee4cb99d2f963599fe6f3cef0f39b4d3de3b7a6208",
+      "runtimeBytes": 193,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Internal initcode supplied by Foundry; no independent public execution trace"
+    },
+    {
+      "address": "0xf5b01110b7251f908e4f45c0d8afdd6b746fccb9",
+      "contract": "SSTORE2 data",
+      "runtimeKeccak256": "0x798f4c7fa9737dad8220840cdbfb4797d09bed3d4dfd5c674a61316184a8cb0e",
+      "runtimeBytes": 705,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Internal initcode supplied by Foundry; no independent public execution trace"
+    },
+    {
+      "address": "0x477677ce83ff4b91f006439ef299006426008ace",
+      "contract": "smart-contracts/core/StreamCoreExternalReads.sol:StreamCoreExternalReads",
+      "runtimeKeccak256": "0x02233d1379e07cc6187ec6f66d8dd314641e16bb7d26ab66981206ec5ba85de4",
+      "runtimeBytes": 9009,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0x4d1c5bc16b0f667549accac1d8e967c8fa1ec9d6",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceActionPolicy.sol:StreamGovernanceActionPolicy",
+      "runtimeKeccak256": "0xbc3dcbcc64f0e95f658889ee197b57ee0b33c81c57c3cc7cca93f1a7c7e9bba8",
+      "runtimeBytes": 6561,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0x1d63762bd2de327fa883e57a9ed94d7130e77b3a",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol:StreamGovernanceBootstrap",
+      "runtimeKeccak256": "0x7d8392b60fb9cf315cdb2e1eb94a45985c53ef9653b2957be541d394bbe8d1f0",
+      "runtimeBytes": 21380,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0x4203324f708730eea0fa8389b782d7d7c2c284aa",
+      "contract": "smart-contracts/domains/governance/StreamGovernanceEvidence.sol:StreamGovernanceEvidence",
+      "runtimeKeccak256": "0x5eeeb086ba534178e9a4d5f7825c60efe3a032022c3ae71a07619c5d3290fe03",
+      "runtimeBytes": 17930,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0xe8fd763180a5df256037123dc75f6ebced7757d3",
+      "contract": "smart-contracts/domains/governance/StreamGovernancePolicy.sol:StreamGovernancePolicy",
+      "runtimeKeccak256": "0x1dbb9cd3727332e2c154ce4eac21df6e6d6d41439740cf047942bc010a4d18fd",
+      "runtimeBytes": 11468,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0x1e09486dca528ce70c72a4f1c5b32dc7d5f6676e",
+      "contract": "smart-contracts/domains/metadata/StreamMetadataRenderer.sol:StreamMetadataRenderer",
+      "runtimeKeccak256": "0x0420f512e839a109bfa6028d3c75e1507a7df6e66de6da6e651bf87adf2c4842",
+      "runtimeBytes": 16398,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0xd75cd4cc0c2b81657ffb9402987eed71ebeaf45a",
+      "contract": "smart-contracts/domains/mint/StreamMintCoreExecutor.sol:StreamMintCoreExecutor",
+      "runtimeKeccak256": "0xb95e2df516482ab72f56b313b7366d8e21d8458076ba2f2941d67d5f2b80968e",
+      "runtimeBytes": 1853,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0x5ae4f3c8e3e69ecb2f0c0d05ff043882c316d84a",
+      "contract": "smart-contracts/domains/mint/StreamMintGateValidator.sol:StreamMintGateValidator",
+      "runtimeKeccak256": "0x856a5ecd37028e3e9e2266efed4158f23f2353d31c709ef947408461398afe7c",
+      "runtimeBytes": 6347,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    },
+    {
+      "address": "0xc0ea43fa70904c274dd01d71d52acc19594b1866",
+      "contract": "smart-contracts/domains/mint/StreamMintOperationIdentity.sol:StreamMintOperationIdentity",
+      "runtimeKeccak256": "0xd3cab84a5c8a5c58cd87754e4a6a2147c70db49546fb7c1f6f29fd205edaebb9",
+      "runtimeBytes": 9262,
+      "creationPrefixVerified": false,
+      "creationLimitation": "Runtime-only read; no creation transaction or internal trace supplied"
+    }
+  ]
+}

@@ -145,6 +145,11 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         return new GovernanceActionPolicyEntry[](0);
     }
 
+    /// @dev Ordinary examples retain ten tokens; stateful campaigns can raise this test-only limit.
+    function _fixtureSupplyLimit() internal pure virtual returns (uint64) {
+        return 10;
+    }
+
     function _configureMintPhase(bytes32 phase, address phaseExecutor) internal {
         bytes32[] memory counters = new bytes32[](1);
         counters[0] = keccak256("supply");
@@ -155,7 +160,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             IStreamMintManager.CounterKeyMode.CONSTANT,
             IStreamMintLedger.CounterCapMode.STATIC,
             IStreamMintLedger.CounterDeltaMode.STATIC,
-            10,
+            _fixtureSupplyLimit(),
             1,
             keccak256("counter")
         );
@@ -200,7 +205,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             batches[0].callDatas[i] = registrationData[i];
         }
         (batches[0].calls[records.length], batches[0].callDatas[records.length]) =
-            StreamCurrentStackPlan.createCollectionCall(core, 1, 10);
+            StreamCurrentStackPlan.createCollectionCall(core, 1, _fixtureSupplyLimit());
         bytes memory data = abi.encodeCall(
             entropy.configureCollection,
             (1, address(provider), keccak256("collection salt"), true, uint64(100))

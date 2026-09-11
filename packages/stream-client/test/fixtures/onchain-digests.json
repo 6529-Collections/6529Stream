@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "description": "Read-only digest calls pinned to the frozen local Anvil collection block; arbitrary public payloads, no signatures or transactions. These are encoding vectors, not valid sale authorizations or recommended deployment addresses. Compiler input identifies the current client ABI export, whose 86 selected artifact bytes equal the original deployment compilation.",
+  "compilerInputSha256": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+  "blockNumber": 375,
+  "blockHash": "0x27c1299cef09a71edb4b9c6018c8c54cbb76b75b07a409a13fedd27d2a320ea5",
+  "vectors": [
+    {
+      "request": {
+        "kind": "nativeSale",
+        "chainId": "31337",
+        "verifyingContract": "0x666d0c3da3dbc946d5128d06115bb4eed4595580",
+        "message": {
+          "collectionId": "100",
+          "phaseId": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "payer": "0x000000000000000000000000000000000000000d",
+          "recipient": "0x000000000000000000000000000000000000000e",
+          "artist": "0x000000000000000000000000000000000000000f",
+          "profileId": "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "tokenDataHash": "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "mintCommitment": "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "mintPolicyHash": "0x0000000000000000000000000000000000000000000000000000000000000027",
+          "price": "109",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000000029",
+          "deadline": "2000000000",
+          "signerEpoch": "112"
+        }
+      },
+      "digest": "0xb1a9d1e5881c1052d2382458ceedee5b94cc9c522b8aba401ee00d7731ed004b"
+    },
+    {
+      "request": {
+        "kind": "erc20Sale",
+        "chainId": "31337",
+        "verifyingContract": "0x1d8d70ad07c8e7e442ad78e4ac0a16f958eba7f0",
+        "message": {
+          "saleId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "saleConfigHash": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "payer": "0x000000000000000000000000000000000000000d",
+          "recipient": "0x000000000000000000000000000000000000000e",
+          "artist": "0x000000000000000000000000000000000000000f",
+          "tokenDataHash": "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "mintCommitment": "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000000026",
+          "deadline": "2000000000",
+          "signerEpoch": "109"
+        }
+      },
+      "digest": "0x2ab31ea3cdd7d677a61f31a16007533f97a394bf03cf677350f5479bb87724d4"
+    },
+    {
+      "request": {
+        "kind": "paymentIntent",
+        "chainId": "31337",
+        "verifyingContract": "0x1d8d70ad07c8e7e442ad78e4ac0a16f958eba7f0",
+        "message": {
+          "payer": "0x000000000000000000000000000000000000000b",
+          "asset": "0x000000000000000000000000000000000000000c",
+          "maxAmount": "102",
+          "saleRef": "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "expectedPrimaryPolicyHash": "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "deadline": "2000000000"
+        }
+      },
+      "digest": "0x5a058ba8db50fd624b3b6e9054aa705b9b375976b3b406cb312fc534d05fb7f8"
+    },
+    {
+      "request": {
+        "kind": "paymentIntentRevocation",
+        "chainId": "31337",
+        "verifyingContract": "0x1d8d70ad07c8e7e442ad78e4ac0a16f958eba7f0",
+        "message": {
+          "payer": "0x000000000000000000000000000000000000000b",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "deadline": "2000000000"
+        }
+      },
+      "digest": "0x7d7471e696a3dd26da196885be61a9c4cd62d4e56da29dc367b280908641c813"
+    },
+    {
+      "request": {
+        "kind": "artistAcceptance",
+        "chainId": "31337",
+        "verifyingContract": "0xb22c255250d74b0add1bfb936676d2a299bf48bd",
+        "message": {
+          "core": "0x4593ed9cbe6003e687e5e77368534bb04b162503",
+          "collectionId": "101",
+          "nominationHash": "0x0000000000000000000000000000000000000000000000000000000000000021",
+          "nonce": "103",
+          "deadline": "2000000000"
+        }
+      },
+      "digest": "0x3cfb907d1b11182440936a585515025a4afc9ecba0a1e43cda9e690aa9d97a29"
+    },
+    {
+      "request": {
+        "kind": "auction",
+        "chainId": "31337",
+        "verifyingContract": "0xa9e6bfa2bf53de88feb19761d9b2ee2e821bf1bf",
+        "message": {
+          "collectionId": "100",
+          "phaseId": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "artist": "0x000000000000000000000000000000000000000d",
+          "profileId": "0x0000000000000000000000000000000000000000000000000000000000000022",
+          "tokenDataHash": "0x0000000000000000000000000000000000000000000000000000000000000023",
+          "mintCommitment": "0x0000000000000000000000000000000000000000000000000000000000000024",
+          "mintPolicyHash": "0x0000000000000000000000000000000000000000000000000000000000000025",
+          "reservePrice": "107",
+          "startTime": "108",
+          "endTime": "109",
+          "extensionWindow": "110",
+          "minBidIncrementBps": "111",
+          "nonce": "0x000000000000000000000000000000000000000000000000000000000000002b",
+          "deadline": "2000000000",
+          "signerEpoch": "114"
+        }
+      },
+      "digest": "0x656dad06a112b5575cd459f3e5eb6cc33cad33827cc98888c6c5a8248a79a6b1"
+    }
+  ]
+}

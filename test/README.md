@@ -14,6 +14,7 @@ a complete transaction.
 | Path | Responsibility | Command |
 | --- | --- | --- |
 | `current/` | Product, adversarial flow and catalog replacement integration | `python scripts/dev.py test` |
+| `current/StreamCurrentStackFuzz.t.sol`, `current/StreamCurrentStackInvariant.t.sol` | Varied signed inputs and dependent handler sequences | `python scripts/dev.py campaign --mode quick --seed 0x6529` |
 | `unit/<domain>/` | Current contract/library behavior and focused target components | `python scripts/dev.py test --suite unit` |
 | `regression/legacy/<domain>/` | Earlier behavior whose import closure reaches LegacyStreamCore | `python scripts/dev.py test --suite legacy` |
 | `gas/` | Scenario snapshots and gas budgets | `python scripts/dev.py test --suite gas` |
@@ -31,6 +32,12 @@ Use actual contract/test names from `.t.sol` files. `--match-test` and other For
 filters are forwarded. Current integration uses global via-IR; unit/legacy/gas/all
 use the default regression profile. A cold full build is substantially more
 expensive than a warm focused test.
+
+Use `python scripts/dev.py campaign --mode extended --seed 0x6529` for the larger
+input/sequence campaign. The [campaign guide](../docs/tooling.md#reproducible-fuzz-and-invariant-campaigns)
+documents budgets, cache isolation, failure traces and replay. The handler's
+opening sequence and `afterInvariant` success counters complement Foundry's
+attempted-call metrics; rejected operations alone must not satisfy the campaign.
 
 Place isolated behavior regressions beside their domain. Put cross-contract
 ownership, payment, authorization and rollback assertions in `current/`. Avoid

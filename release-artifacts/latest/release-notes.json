@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b765e275a25b0eff318b6abf85cfd0eb7d4c5fff6012801d79f665e0e938d1a8",
-      "size_bytes": 168324
+      "sha256": "sha256:591281c21f7bff4b73d0a40e08901118bd2518f790574503640da52dd31ebfe3",
+      "size_bytes": 170205
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:34a4596e1d345bb6abd70633c773bea1ae8d5e39e4fe5bb5f98fdefe5624ba80",
+      "sha256": "sha256:bf90b030edab70697656ad0a4c357c2a52094395f4b505b3c82a8f43a9f4bdac",
       "size_bytes": 34457
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,13 +45,24 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added independently checked Sepolia deployment and native-sale demonstration evidence, public addresses and client configuration, including real Chainlink fulfillment, final metadata, withdrawals and artist transfer.",
+      "Run release checksum and verifier suites concurrently with Solidity compilation in a separate CI job with the same pinned tooling and retained logs.",
+      "Added current-stack input fuzzing and stateful conservation checks, with successful-action counters, per-payer accounting, reproducible quick/extended campaigns and retained failure traces. CI runs the quick campaign; an explicit workflow dispatch can select the extended campaign.",
+      "Added governed local collection completion and a portable collector package that reconstructs its retained metadata and artwork without RPC access.",
+      "Added a TypeScript client with retained current ABIs, typed contract calls, EIP-712 payloads, receipt decoding and block-pinned selected-state snapshots.",
+      "Added repeatable local product scenarios covering a second artist, native and ERC-20 purchases, auction bidding/refunds/settlement and state-export publication. Local test-token preparation uses its own source-bound compilation without modifying the retained deployment output.",
+      "Added credential-free Sepolia status and transaction recovery that preserves the exact signed intent across interrupted runs, plus explicit entropy and metadata delivery retries.",
       "Added current-stack ERC-20 fixed-price sales with payer-bound intents, canonical primary-policy commitments, exact allowance settlement and atomic Core minting. Supported primary assignments use fixed collection/default profiles.",
       "Added state-export publication on the actual governance Executor, live-role authorization, permissionless challenges, forward supersession and historical reads. Scheduling validation is linked separately to retain runtime headroom.",
       "Added local transaction demonstrations with receipt-bound token/request IDs, final metadata notification, split withdrawals and a fresh-transaction VRF adapter callback rehearsal against an explicitly local upstream mock.",
       "Added focused Core, mint and governance caller interfaces, shared request types, and interface compatibility regressions. Added a portable developer command for the supported stack and explicit unit, legacy, gas and full suites.",
       "Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.",
       "Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.",
-      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. An earlier prototype completed a Sepolia paid mint. The corrected, extended source requires a new deployment; its real randomness callback and final demonstration are pending subscription funding. The prototype is historical development evidence, not the current candidate or a production release.",
+      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The current Sepolia instance completes the real randomness callback and native demonstration; earlier prototype records retain their historical source and deployment identity.",
+      "Compare client commitment and receipt hashes by their hexadecimal bytes so equivalent letter casing does not reject a valid purchase or auction.",
+      "Order resumed scenario authorizations by contract ABI fields across supported PowerShell versions, and check current auction terms before wallet prompts.",
+      "Report local snapshot and collector-package errors clearly, and keep campaign lock conflicts from creating empty output directories.",
+      "Build the client before Windows operator tests and avoid retaining checkout credentials in the client CI job.",
       "Reuse compiler caches within the pinned toolchain and profile while retaining unconditional builds, tests and source validation. Mixed current build-info after a fallback restore triggers one fresh build before export validation.",
       "Publish writable compilation workspaces only after copying and validation succeed, and reject unreachable governance-policy validation in the source gate.",
       "Organized Solidity interfaces by domain, isolated legacy implementations and regression tests, and grouped maintenance tools into Python packages. Rewrote contributor and integration guides around the current APIs; older examples and detailed maintenance instructions now have separate reference sections.",

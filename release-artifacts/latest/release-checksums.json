@@ -25,6 +25,10 @@
       "release-artifacts/natspec-coverage.json",
       "release-artifacts/current-contracts.json",
       "release-artifacts/current",
+      "deployments/current/sepolia-2026-09-10",
+      "tools/deployment/prepare_current_stack_test_token.py",
+      "tools/deployment/test_prepare_current_stack_test_token.py",
+      "test/mocks/MockStreamPaymentToken.sol",
       "tools/deployment/generate_current_stack_artifacts.py",
       "tools/deployment/test_current_stack_artifacts.py",
       "tools/deployment/verify_current_stack_deployment.py",
@@ -39,6 +43,35 @@
       "scripts/rehearse-current-stack-vrf.ps1",
       "scripts/test_current_stack_local.ps1",
       "scripts/test_current_stack_sepolia.ps1",
+      "scripts/current-stack-transaction-journal.ps1",
+      "scripts/current-stack-launch-status.ps1",
+      "scripts/test_current_stack_transaction_journal.ps1",
+      "scripts/test_current_stack_launch_status.ps1",
+      "scripts/run-current-stack-scenarios.ps1",
+      "scripts/test_current_stack_scenarios.ps1",
+      "scripts/complete-current-stack-collection.ps1",
+      "scripts/test_current_stack_completion.ps1",
+      "scripts/collector",
+      "scripts/verify_current_stack_collector.mjs",
+      "scripts/test_current_stack_collector.mjs",
+      "packages/stream-client/.gitignore",
+      "packages/stream-client/README.md",
+      "packages/stream-client/package.json",
+      "packages/stream-client/package-lock.json",
+      "packages/stream-client/tsconfig.json",
+      "packages/stream-client/tsconfig.test.json",
+      "packages/stream-client/src",
+      "packages/stream-client/examples",
+      "packages/stream-client/scripts",
+      "packages/stream-client/test",
+      "test/README.md",
+      "test/current",
+      "test/helpers/StreamCurrentStackFixture.sol",
+      "test/helpers/StreamCurrentStackHandler.sol",
+      "docs/README.md",
+      "docs/integrations/typescript-client.md",
+      "docs/integrations/product-demo.md",
+      "docs/integrations/collector-package.md",
       "script/current/README.md",
       "docs/reference/tooling",
       "requirements-tools.txt",
@@ -347,7 +380,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:f225ccf70db07ba4014a2dec1319e47c4b17a8d6454da721b5c5c22d0c4fe361"
+    "sha256": "sha256:c2aa1a2d6117bb1450379e768767eda9c23de9357615d6d0954c0600f0cd0cdd"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -356,8 +389,8 @@
   "files": [
     {
       "path": ".gitattributes",
-      "sha256": "sha256:7080c2742cdba0c871e671cc7bc9bbd7232bb5ea768a8ae4e557b6673e3b17d9",
-      "size_bytes": 394
+      "sha256": "sha256:5a651c28e288734e1f9a395269a0e4da599cc88975d4b5838bfdd9e3bf7d4ba2",
+      "size_bytes": 600
     },
     {
       "path": ".github/ISSUE_TEMPLATE/audit_finding.yml",
@@ -396,8 +429,8 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:c6f56c1cbff670700519ec982e881c064de290178a22b0ff93b7f66572eb9e0b",
-      "size_bytes": 70466
+      "sha256": "sha256:650ab8a2f9b26706dde673cd14325a53b3fc3c1d019c724c0d889a318339aead",
+      "size_bytes": 75270
     },
     {
       "path": ".github/workflows/release-mode.yml",
@@ -406,8 +439,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b765e275a25b0eff318b6abf85cfd0eb7d4c5fff6012801d79f665e0e938d1a8",
-      "size_bytes": 168324
+      "sha256": "sha256:591281c21f7bff4b73d0a40e08901118bd2518f790574503640da52dd31ebfe3",
+      "size_bytes": 170205
     },
     {
       "path": "Makefile",
@@ -416,8 +449,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "sha256:0e30c4bcd145afce0a4837e3a65932ee10cf80baf607c6ba307816c36ad31661",
-      "size_bytes": 4254
+      "sha256": "sha256:e81d35e02b6e34d4ed5a52f7100a3ba21487df4609f3967f53721460c2161e45",
+      "size_bytes": 4902
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -471,7 +504,7 @@
     },
     {
       "path": "deployments/config/canonical-deployment-candidate-non-production.json",
-      "sha256": "sha256:4844e98ccf226d2054b2a7ad0a60c0f9d88c78a8638975c1250daf82fa56e04d",
+      "sha256": "sha256:0d3af6ee5351b3727bd1fc5a14b48af15f6bffc4d9f5e086de9d8c1a3ba47a74",
       "size_bytes": 2208
     },
     {
@@ -493,6 +526,116 @@
       "path": "deployments/config/sepolia-6529stream-v0.1.0-001.template.json",
       "sha256": "sha256:0aeac12a2c00ddc5d8bfd040437c746ef8c9ae3a8ac72443cbea9e06b45c7937",
       "size_bytes": 12337
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/README.md",
+      "sha256": "sha256:95c7c7a581cbb5ae380cfdf9b66fedb961e874093559fba20d1aa37696b75ee2",
+      "size_bytes": 3831
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/SHA256SUMS",
+      "sha256": "sha256:dc695dfc75fbcd08b9a7f5e906bc5284dbbe99a79aad9ce5919c5012f51c1625",
+      "size_bytes": 2006
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/README.md",
+      "sha256": "sha256:a13f7ffe25313ac3a6d43d1ba7dff97f8dd2de321ba6c64cb2861a2bfe49e04d",
+      "size_bytes": 1050
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/anchor-block.json",
+      "sha256": "sha256:b16c4cb84a5f76fa989fbe84d9259dce2d42de4288b4113706915f7c37cbe7b8",
+      "size_bytes": 15144
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/client-config.json",
+      "sha256": "sha256:24264b890afca1b38d752dfa4812a7cad4eb292cc19beb0d748b9e1d8e58049b",
+      "size_bytes": 833
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/pinned-readbacks.json",
+      "sha256": "sha256:3edb2957661f128825c6d9b7ebf85778fc42ae62eff58fa331feebf437b28dff",
+      "size_bytes": 17782
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/receipt-blocks.json",
+      "sha256": "sha256:cbde86c0371adeae79a57601a5cb637649f714517a7c6cb87b75ce444ca3d771",
+      "size_bytes": 115909
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/receipts.json",
+      "sha256": "sha256:cbae163cba240cb24269cbf58947280259ebc0e9ce417a396de8956e414716c7",
+      "size_bytes": 38617
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/summary.json",
+      "sha256": "sha256:43b1ef18eb60301dbc9e6d79abe9fdf015e6b1fa32571a3c9fafcc7ef48c416b",
+      "size_bytes": 2767
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/token.animation.html",
+      "sha256": "sha256:93d8d0eb7b5e231263e979405da30bb020b8372f20b4a49545a6fa7ccd4cacec",
+      "size_bytes": 605
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/token.metadata.json",
+      "sha256": "sha256:7e6f44177d2975c1e7488ffbbe6434025732d825bdcc0203751a61cc437cde7b",
+      "size_bytes": 1447
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/demonstration/transaction-inventory.json",
+      "sha256": "sha256:4e29b919e3a1a4a2141a5746cfcbc0997e80247a2fa7fa7f337a9903ec5e18bb",
+      "size_bytes": 6343
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/README.md",
+      "sha256": "sha256:7c88d0199e528a5dd1781fb9d12d8fc86a51683669dacaf5a8b859cb75ba21c4",
+      "size_bytes": 2102
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/addresses.json",
+      "sha256": "sha256:9521b928c4f4393384f0919e9570a259f82cc34de59b41bbe5086bfbef799fc8",
+      "size_bytes": 17293
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/compiler-binding.json",
+      "sha256": "sha256:60e3c63aca65d9ff3867fc0481c2f925fe7ed80292dc948eff18c3afd763ae51",
+      "size_bytes": 32172
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/configuration.json",
+      "sha256": "sha256:bf08bd56af712d712ca2e687d0e45e467df1ded4769898bade97dd59d0d82ad9",
+      "size_bytes": 46852
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/core-authority-binding.json",
+      "sha256": "sha256:29cccf23ce313f98737e2bc01be6440f7224ef3d122a9f4c96a78a18644f6b7b",
+      "size_bytes": 1266
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/receipts.json",
+      "sha256": "sha256:1b8a442753074564405b2d90d633580dafedbc42c7eff00256c3a6ef7026e36b",
+      "size_bytes": 25171
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/runtime-verification.json",
+      "sha256": "sha256:8519792b47a204bc494ac0b0c77fd1c1c911a5d178b54f2774090b8c3d358b2e",
+      "size_bytes": 118536
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/deployment/summary.json",
+      "sha256": "sha256:40d63a477d91c57a230349d574fb1450578597fd690527cab474d866a15faf75",
+      "size_bytes": 2584
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/source-verification.json",
+      "sha256": "sha256:ce587d66fe40eb0549667414d50f17be22dad790784f4bfafb5f972ace31d72c",
+      "size_bytes": 58005
+    },
+    {
+      "path": "deployments/current/sepolia-2026-09-10/verification-summary.json",
+      "sha256": "sha256:7a943148efbce3886c2ce14129a743290088a3e10b028324d7d603153168f6be",
+      "size_bytes": 6177
     },
     {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -583,6 +726,11 @@
       "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
       "sha256": "sha256:d48e39db97b235ac0228ef151404e7b6c485f361aa3c1e5945170560855df489",
       "size_bytes": 24859
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "sha256:935b314f6fc9bc472e5e7079d130420155249bd4d9fa9bff9f604c5641b0f844",
+      "size_bytes": 2971
     },
     {
       "path": "docs/adr/0004-admin-governance.md",
@@ -726,8 +874,8 @@
     },
     {
       "path": "docs/deployment.md",
-      "sha256": "sha256:43d359cfc9991723bf3734b3830d6978a3a1a13fd01c7cdbd45ebb368fd83528",
-      "size_bytes": 41449
+      "sha256": "sha256:bb6bd0727f6b6b756341fd2b8eca3283653aaebc215d45869603be9101abe9ea",
+      "size_bytes": 41890
     },
     {
       "path": "docs/drop-authorization-signing.md",
@@ -746,13 +894,18 @@
     },
     {
       "path": "docs/integrations/README.md",
-      "sha256": "sha256:cd8dc6f24286e8c2bc30502cba541bd40b2cf8ef07351eebaead8dda97b68ec0",
-      "size_bytes": 2946
+      "sha256": "sha256:161d6078d93a1f1e1aeb604252f27dc9453d8b4565a8260b9daee34c1169b3da",
+      "size_bytes": 3288
     },
     {
       "path": "docs/integrations/auction-flows.md",
       "sha256": "sha256:06567be3c9021fc134df59f09b055015bf521df47534ac4cdbcdc74b8d7e2ee9",
       "size_bytes": 4050
+    },
+    {
+      "path": "docs/integrations/collector-package.md",
+      "sha256": "sha256:9f4942013a75c272a97d7c39cb0055b59476888169698bb69fe50ef29df19c83",
+      "size_bytes": 5772
     },
     {
       "path": "docs/integrations/contract-flows.md",
@@ -773,6 +926,16 @@
       "path": "docs/integrations/metadata-rendering.md",
       "sha256": "sha256:8121746fe17e79d1503400e1d78341a7d311c5ca15f57dbb15e1d1025bd87daf",
       "size_bytes": 3810
+    },
+    {
+      "path": "docs/integrations/product-demo.md",
+      "sha256": "sha256:c7111fc53c5a5305751113c7441b27eef96ebec414736b893f6825873121b408",
+      "size_bytes": 6770
+    },
+    {
+      "path": "docs/integrations/typescript-client.md",
+      "sha256": "sha256:bb4f83fe4128f347217fd5dada3ea6370d7b3a3b54381a06c59dd87193e88645",
+      "size_bytes": 15470
     },
     {
       "path": "docs/integrations/wallets-and-signatures.md",
@@ -991,8 +1154,8 @@
     },
     {
       "path": "docs/status.md",
-      "sha256": "sha256:adc2c01fad26a8d36942e85c922dd78bb41e9b394fd5b849460f2f4890a2601d",
-      "size_bytes": 39143
+      "sha256": "sha256:3747428383fee43acee4101bd1cc8a58306e93b13d7de44f4a9227feee821897",
+      "size_bytes": 39552
     },
     {
       "path": "docs/stream-artist-authority.md",
@@ -1026,8 +1189,8 @@
     },
     {
       "path": "docs/tooling.md",
-      "sha256": "sha256:ed67df24de003b4bdf61264bc54e3036e307510bbbc8af9d3ba382a95db74dc8",
-      "size_bytes": 3624
+      "sha256": "sha256:630b708682e3cf5de9fe145062c66e929c3071307d45410dc65c179592baf840",
+      "size_bytes": 8057
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -1036,13 +1199,13 @@
     },
     {
       "path": "foundry.toml",
-      "sha256": "sha256:e1018ca7758fd0b49f329437ee9162e1a9fb6c43ed5fb5b2eb0f98800f3b3c26",
-      "size_bytes": 2485
+      "sha256": "sha256:3e7d0f6f798d6039a02aad42fb791ed1b6b6521f40dd6b5f71264425051e9bfe",
+      "size_bytes": 2825
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:ebef8f9bd993f50a774b24dbf716a9a0bfa1019b7c536836482985cddf10f808",
-      "size_bytes": 211813
+      "sha256": "sha256:5a7138ba3e28cd0c329908619d479951f68b8ab3532e02fa338716f6e020d0a1",
+      "size_bytes": 211819
     },
     {
       "path": "ops/EXTERNAL_CALL_GAS_INVENTORY.json",
@@ -1056,13 +1219,158 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:ba349dcd195fc084b7bbc21ab7fdf55e3ffc76daec477aa89e5a3d52c08a882c",
+      "sha256": "sha256:8c0004651751fa6b77c2d3996bcb580ad64cda2a46f937c439964f7838872c4f",
       "size_bytes": 107483
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:ef66bed71885bd7f33c3c6b1514e4c60fb6bf1ebd4888bb89c1f3162d8cdaacd",
+      "sha256": "sha256:fad5a67c7ebd431c1f19c287ef9184269b84cd733c98b62de5bcbe4da2d6fb8f",
       "size_bytes": 50880
+    },
+    {
+      "path": "packages/stream-client/.gitignore",
+      "sha256": "sha256:488d014193ec25869d6c7835e7e91e00a8c80c79a9ff48e43b6988b2aaffbba5",
+      "size_bytes": 22
+    },
+    {
+      "path": "packages/stream-client/README.md",
+      "sha256": "sha256:d7133d3b2800e1df4c30466407a10ba4cac758a3a69e080eb6ce14005a9031bc",
+      "size_bytes": 2513
+    },
+    {
+      "path": "packages/stream-client/examples/artist-acceptance.mjs",
+      "sha256": "sha256:8f32915cabee08c10de81d5faf1f20ea5cc98b4814ec23ca4ec57170589b4d00",
+      "size_bytes": 2074
+    },
+    {
+      "path": "packages/stream-client/examples/auction.mjs",
+      "sha256": "sha256:9cdedf6da621dc48c6a3d6d6f21c4c3db84ffb3a273aed5a8127e532cbeafcbd",
+      "size_bytes": 2718
+    },
+    {
+      "path": "packages/stream-client/examples/check-digests.mjs",
+      "sha256": "sha256:297f4170ed3f99355a5a346848448fffbe90d2f1314652c604ed8666c093ea56",
+      "size_bytes": 2146
+    },
+    {
+      "path": "packages/stream-client/examples/erc20-purchase.mjs",
+      "sha256": "sha256:124f5954d80e935a77fd6ebf09d8039fb78bb078955d084d03693ad39c3c9f66",
+      "size_bytes": 4362
+    },
+    {
+      "path": "packages/stream-client/examples/hashes.mjs",
+      "sha256": "sha256:b4c1d893c0b3a605f1f4b34a0e5ba3d26af20591eb504499d9e2e7d24bb4fc72",
+      "size_bytes": 312
+    },
+    {
+      "path": "packages/stream-client/examples/native-purchase.mjs",
+      "sha256": "sha256:f586cb6aafaa3a35a86327b0c9d53fa5dd2d3ab0c1e8eb61817d1ef899799be3",
+      "size_bytes": 2908
+    },
+    {
+      "path": "packages/stream-client/examples/prepare.mjs",
+      "sha256": "sha256:620935c8acf0583d8d10ea65eba7892baa5a1b92a3035c414827528319553120",
+      "size_bytes": 604
+    },
+    {
+      "path": "packages/stream-client/examples/snapshot.mjs",
+      "sha256": "sha256:4b0c63fe48efa085db9e711025ca93f6b280c73cdde17bdecab73804e9aa419a",
+      "size_bytes": 4091
+    },
+    {
+      "path": "packages/stream-client/package-lock.json",
+      "sha256": "sha256:e07fb909cc493cb6f00a3ba7e14028986aeaaaabb5e7d52ab68d760e9b677d8d",
+      "size_bytes": 4663
+    },
+    {
+      "path": "packages/stream-client/package.json",
+      "sha256": "sha256:13eaa4de93b6a2372d4be7023493f43513b85bb2127e17df0bf75533142995f3",
+      "size_bytes": 809
+    },
+    {
+      "path": "packages/stream-client/scripts/generate.mjs",
+      "sha256": "sha256:8de281d641d417a446d8563e7ca1a2626e0348dfcc52791c850df11a80a5e3b7",
+      "size_bytes": 5942
+    },
+    {
+      "path": "packages/stream-client/src/client.ts",
+      "sha256": "sha256:ead4955d91dcb604fb5e120bcdd79f56d3de2e80535d6df904dd9aa0295861e4",
+      "size_bytes": 7894
+    },
+    {
+      "path": "packages/stream-client/src/generated/abis.ts",
+      "sha256": "sha256:65fffee98365140884e136fcceb5a8b02274b115fa87bf9392caa7ef193a67c4",
+      "size_bytes": 427154
+    },
+    {
+      "path": "packages/stream-client/src/generated/contracts.ts",
+      "sha256": "sha256:1b4afd6cbd92cc7d46fd8191bfab0b2ad9c69d5f411f43987dd1cc1009310f2a",
+      "size_bytes": 65640
+    },
+    {
+      "path": "packages/stream-client/src/generated/provenance.ts",
+      "sha256": "sha256:904e644db8ecc6fba6df68bd1688b71d46d1062e7455c6f235f9719ae5ba468a",
+      "size_bytes": 1910
+    },
+    {
+      "path": "packages/stream-client/src/index.ts",
+      "sha256": "sha256:7b33968330f6259e799332faf732daf1c6c1944a27dbe39f2400525e362f7099",
+      "size_bytes": 271
+    },
+    {
+      "path": "packages/stream-client/src/signing.ts",
+      "sha256": "sha256:5d1f0d4f32f34d038e23ac58f5b4592e3217fe4af1dd7fc4b9913d454034cab8",
+      "size_bytes": 7570
+    },
+    {
+      "path": "packages/stream-client/src/snapshot.ts",
+      "sha256": "sha256:59d6f66d911533b9527854143126e85359c1f932151fe73ed6d2c0a627ae50d8",
+      "size_bytes": 26564
+    },
+    {
+      "path": "packages/stream-client/test/client.test.mjs",
+      "sha256": "sha256:6fd2dfcf0a2ef0a86a96b79942a14cb3230ad93db276e501fe21811662479180",
+      "size_bytes": 9045
+    },
+    {
+      "path": "packages/stream-client/test/examples.test.mjs",
+      "sha256": "sha256:e73590d3b5b107debc485493b11292446ea4d455427764bc2c54994f0d543a18",
+      "size_bytes": 14446
+    },
+    {
+      "path": "packages/stream-client/test/fixtures/onchain-digests.json",
+      "sha256": "sha256:a5b11b0513a3a499967980af1aea2b324a74c9450dacffb22d558f6a3d7d04e7",
+      "size_bytes": 5847
+    },
+    {
+      "path": "packages/stream-client/test/generation.test.mjs",
+      "sha256": "sha256:7e9e45e374832acbddbcb2e450389f7db347bb2c3f4f72c8c7d11c17afeb64c2",
+      "size_bytes": 1390
+    },
+    {
+      "path": "packages/stream-client/test/snapshot.test.mjs",
+      "sha256": "sha256:03525f4389f48e5cfe0ace3912a02bc20b8d2de42a5fd82633f305d49df2564b",
+      "size_bytes": 15105
+    },
+    {
+      "path": "packages/stream-client/test/types.ts",
+      "sha256": "sha256:248d1c194100338ad2374a446e7f6dedfe53482adc1516420faa96b67c6d492c",
+      "size_bytes": 900
+    },
+    {
+      "path": "packages/stream-client/test/vectors.test.mjs",
+      "sha256": "sha256:fb27ff83224f610592fec6af490c83f15fa90d8e33130897a017c7a484d7cc79",
+      "size_bytes": 796
+    },
+    {
+      "path": "packages/stream-client/tsconfig.json",
+      "sha256": "sha256:7b2e499c6eb51c209d8761804f74fceeb6727fe05cceb035a3e6c66ce81581fe",
+      "size_bytes": 339
+    },
+    {
+      "path": "packages/stream-client/tsconfig.test.json",
+      "sha256": "sha256:c10cfd9eaf70676ba7b971febfe547762b2e7c1034882e876911f7bcb39b69ac",
+      "size_bytes": 139
     },
     {
       "path": "release-artifacts/README.md",
@@ -1551,13 +1859,13 @@
     },
     {
       "path": "release-artifacts/current/compiler-input.json",
-      "sha256": "sha256:324de037215da2d864e4f301e454983f3d6cdd5f275d433e6c03dfc3fcd702f0",
-      "size_bytes": 1875554
+      "sha256": "sha256:5d3fe6538a8dd16675c8a5f5d87675c99bdbaf14516514cdfe8c7a46b9ad2a1f",
+      "size_bytes": 1752112
     },
     {
       "path": "release-artifacts/current/manifest.json",
-      "sha256": "sha256:dbceba9d1a5b8fce165bb65b0e98ac04b535f087b49a4caee00055cd825d9bc3",
-      "size_bytes": 72535
+      "sha256": "sha256:e474537c6a2cc6b2d33896d68de92565f10fcc080cf6f753022675e19615510b",
+      "size_bytes": 70986
     },
     {
       "path": "release-artifacts/dependencies/README.md",
@@ -2176,7 +2484,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:bd1c3b22f260bc31a221ee5b360dbcd6e747c72f21c3d64d294f08c1ab3cf451",
+      "sha256": "sha256:c27ace11acc2c43de1d98d2f58b749fa7b06a0c0c6c72413874fcd7a73ca4c75",
       "size_bytes": 151729
     },
     {
@@ -2241,7 +2549,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:4dece5f2dcd8ac26c8bc8f316804f009361e0ab1e95a8adcfd5a68100953400c",
+      "sha256": "sha256:21cab7288bc7f55226a4d8d818286e62f529bed963614a81e26c67c8caa67272",
       "size_bytes": 13846
     },
     {
@@ -2291,22 +2599,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:455b44004a9975dbac7135e89eba221d16f2d5373c9dac542d44c43b77e5d498",
+      "sha256": "sha256:8b81a7731c2d65de8def24e3feeb837cd8050adc724a5db8904d84dadee61428",
       "size_bytes": 150606
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:3fff6ae1c0c4fdc6ce25e93d538bc1d164bce3ad5c6e021334bfeebe43f9a19c",
-      "size_bytes": 169040
+      "sha256": "sha256:108a287c14b3473ea02941f3e417a8cdb24f5f1700c18c13c1d30bf6bb2fec17",
+      "size_bytes": 170966
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:ed1f397950703778c83bf57f1c9ac61fb398c2a7c33797f069db912c86c3a70b",
-      "size_bytes": 165288
+      "sha256": "sha256:9f511b3710cf41927154013e6d4322f9249d01c71737af320b703369262f6d7b",
+      "size_bytes": 167137
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:34a4596e1d345bb6abd70633c773bea1ae8d5e39e4fe5bb5f98fdefe5624ba80",
+      "sha256": "sha256:bf90b030edab70697656ad0a4c357c2a52094395f4b505b3c82a8f43a9f4bdac",
       "size_bytes": 34457
     },
     {
@@ -2356,8 +2664,8 @@
     },
     {
       "path": "release-artifacts/release-tool-call-policy.json",
-      "sha256": "sha256:a615f98d1025be2e3bac3ecf789645810306c7bdaedd167fef16adf961fa4c57",
-      "size_bytes": 2503909
+      "sha256": "sha256:bae896814bb3dcbf58b33c2caae66dcda4a9060b53761a9607bc6850c1f95890",
+      "size_bytes": 2511334
     },
     {
       "path": "release-artifacts/schema/drop-authorization-signing-evidence.schema.json",
@@ -2471,8 +2779,8 @@
     },
     {
       "path": "script/current/README.md",
-      "sha256": "sha256:6d03ae2a5ff184faa6d683289c093c38e77aab3ed5951039dc3f912e7514b11e",
-      "size_bytes": 17089
+      "sha256": "sha256:32ddb38972497f03b435591558af7aa0224e2b2a73b68fb2739a56b4f37df094",
+      "size_bytes": 20350
     },
     {
       "path": "script/legacy/RehearseDeployment.s.sol",
@@ -2495,14 +2803,34 @@
       "size_bytes": 20059
     },
     {
+      "path": "scripts/collector/field-studies.js",
+      "sha256": "sha256:9d8dddf5414ab1a8c65fc678d5f529426577084273ac142ce2eb7d8c78e67b83",
+      "size_bytes": 2022
+    },
+    {
+      "path": "scripts/complete-current-stack-collection.ps1",
+      "sha256": "sha256:d598e8c3dd7587a9d939410d175d391b652778006eee754c79e1a57d08b936c7",
+      "size_bytes": 19012
+    },
+    {
+      "path": "scripts/current-stack-launch-status.ps1",
+      "sha256": "sha256:ab51b7cb6c7d614390d06d0e2975390a563054bb13a1a4248ab3192c58d32c74",
+      "size_bytes": 8013
+    },
+    {
       "path": "scripts/current-stack-local-functions.ps1",
       "sha256": "sha256:ee5e3026853dd810906d9bd5aef6b6f5db760d0295f7748ccd0f1574a29704f8",
       "size_bytes": 7625
     },
     {
+      "path": "scripts/current-stack-transaction-journal.ps1",
+      "sha256": "sha256:b6be1cdb07469bd2d05a3afa9cc504418a6b4f28ff073057724b64304dd22016",
+      "size_bytes": 11692
+    },
+    {
       "path": "scripts/dev.py",
-      "sha256": "sha256:a5af7f54097cfb954faf2c599cb7a51b89e36305edc504a5317861c2c4b3c644",
-      "size_bytes": 8550
+      "sha256": "sha256:0af1da3d251ed548d2760b71bd5fe32755c9e9ff6e9b099f8302d4c0a998e2d0",
+      "size_bytes": 21507
     },
     {
       "path": "scripts/rehearse-current-stack-vrf.ps1",
@@ -2510,9 +2838,14 @@
       "size_bytes": 9780
     },
     {
+      "path": "scripts/run-current-stack-scenarios.ps1",
+      "sha256": "sha256:d4befbfc1d67fc07731f752d9bfc8e5d4bc1fae75012b53b77732ea6591fa77e",
+      "size_bytes": 46852
+    },
+    {
       "path": "scripts/run-current-stack-sepolia.ps1",
-      "sha256": "sha256:8cbf1c1c0f518222c18f3e2f4e9d1da1b0fe8d463b42741bdc4b13659251196e",
-      "size_bytes": 36485
+      "sha256": "sha256:a1b26cbc5c5cd1dfa33619f43a5a2848bcbcdfdbc0094ffc90202d9f739c74c8",
+      "size_bytes": 42076
     },
     {
       "path": "scripts/run-current-stack.ps1",
@@ -2520,14 +2853,44 @@
       "size_bytes": 18459
     },
     {
+      "path": "scripts/test_current_stack_collector.mjs",
+      "sha256": "sha256:df99cccad68463ffdb365903864c87ce9f458afa7582684312b012d686db5576",
+      "size_bytes": 5993
+    },
+    {
+      "path": "scripts/test_current_stack_completion.ps1",
+      "sha256": "sha256:c028ce7922682ff62d7a4f510c57852fab63979b5bc43d9f0cbb6b61df23b11d",
+      "size_bytes": 8427
+    },
+    {
+      "path": "scripts/test_current_stack_launch_status.ps1",
+      "sha256": "sha256:0d18647ff4a4cce7eb693b15f51208c1ba19d291dfc6b264c1f0a77c65204f5e",
+      "size_bytes": 17541
+    },
+    {
       "path": "scripts/test_current_stack_local.ps1",
       "sha256": "sha256:1790f7a4b4ecf43db70fcfe8e7985227ec679063c25716c86a75308bcf327e13",
       "size_bytes": 10251
     },
     {
+      "path": "scripts/test_current_stack_scenarios.ps1",
+      "sha256": "sha256:e499ba27983271560e62f70d8069c7123173ac2d60330110679e5720cc0cb5cc",
+      "size_bytes": 15097
+    },
+    {
       "path": "scripts/test_current_stack_sepolia.ps1",
-      "sha256": "sha256:38767d0adbfed04253dd8b4b66cae9e760fe75667d836cd0b74901807d3b573c",
-      "size_bytes": 7374
+      "sha256": "sha256:04620aa457ac3f6c6ceedb24eb4fc83b4a89d1079593bc3e39965408e7b887f5",
+      "size_bytes": 10109
+    },
+    {
+      "path": "scripts/test_current_stack_transaction_journal.ps1",
+      "sha256": "sha256:e51812d2673b3412eed5098962fe27b0f74d8ba53685847b8ae865a9def063d0",
+      "size_bytes": 33118
+    },
+    {
+      "path": "scripts/verify_current_stack_collector.mjs",
+      "sha256": "sha256:7ec41bc122d0f1f16e292bf893ae6ab64d4fb2e4b5f9e04fef6aa24fdb0c2557",
+      "size_bytes": 9148
     },
     {
       "path": "slither.config.json",
@@ -2630,6 +2993,46 @@
       "size_bytes": 16973
     },
     {
+      "path": "test/README.md",
+      "sha256": "sha256:6615bbe2cd0400b7a1a2bc750febe45186e88e11f20123ed5201129402115d13",
+      "size_bytes": 3020
+    },
+    {
+      "path": "test/current/StreamCurrentStack.t.sol",
+      "sha256": "sha256:48d28c3cd872a3734ce3c28043fa9d32bb26bd0cf8efca3fc528dc250526d2c9",
+      "size_bytes": 12544
+    },
+    {
+      "path": "test/current/StreamCurrentStackAdversarial.t.sol",
+      "sha256": "sha256:ffaaa04428373a9bc9d9085f8c9c902fe9e233963838ebdf70043dab2ec0813e",
+      "size_bytes": 18992
+    },
+    {
+      "path": "test/current/StreamCurrentStackCatalog.t.sol",
+      "sha256": "sha256:2a0fda33a62d37734e2f1a53c06e0e7f6ffe2d5846b0bc5bf4401275a25f21a0",
+      "size_bytes": 7989
+    },
+    {
+      "path": "test/current/StreamCurrentStackERC20.t.sol",
+      "sha256": "sha256:5a39c416b5c5d46d220591117540e75facecf5a95ea4549aff3b8be914df60a2",
+      "size_bytes": 15501
+    },
+    {
+      "path": "test/current/StreamCurrentStackFuzz.t.sol",
+      "sha256": "sha256:2fc4328e3b50d2815e8731f0437550f4427d8d8254e42df61deac232f4420e9d",
+      "size_bytes": 8879
+    },
+    {
+      "path": "test/current/StreamCurrentStackInvariant.t.sol",
+      "sha256": "sha256:5aa89a556319f44d2361971b644e0b55782dfa6097148331e2f7a45200dfbcea",
+      "size_bytes": 5969
+    },
+    {
+      "path": "test/current/StreamCurrentStateExport.t.sol",
+      "sha256": "sha256:7edbc4034b9e7d7a209a366e1d0a5a46de00e56589b517aa15d9f621ae8c596d",
+      "size_bytes": 25777
+    },
+    {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",
       "sha256": "sha256:cfda8943b7523f84ef05ceb6575cf3a067c02e39f1df6ac23d0e475665b4bc57",
       "size_bytes": 5587
@@ -2675,9 +3078,24 @@
       "size_bytes": 7948
     },
     {
+      "path": "test/helpers/StreamCurrentStackFixture.sol",
+      "sha256": "sha256:54b7e55c1803421a390f3f866cda27773bfee13dab1507519f4ead93c4a26754",
+      "size_bytes": 29653
+    },
+    {
+      "path": "test/helpers/StreamCurrentStackHandler.sol",
+      "sha256": "sha256:2463edd03f72db4f85be0b82457f9c3e874be3e269edebacbc9fc3dc45ba599b",
+      "size_bytes": 23452
+    },
+    {
       "path": "test/helpers/StreamPostEntropyCompletionGasHarness.sol",
       "sha256": "sha256:84fe1db03e74d3e662bfea1695cc8d725a1fd51a7f031f0b0b9c6fcb1a382251",
       "size_bytes": 9158
+    },
+    {
+      "path": "test/mocks/MockStreamPaymentToken.sol",
+      "sha256": "sha256:d3f1fa93c3c204024be3a5e6ddb8e3868132845f8894022d3a1f2cfd857e497e",
+      "size_bytes": 3010
     },
     {
       "path": "test/regression/legacy/metadata/StreamCollectionMetadata.t.sol",
@@ -2786,12 +3204,12 @@
     },
     {
       "path": "tools/build/test_verify_release_artifacts.py",
-      "sha256": "sha256:8dc52cb2523157212485172e37772ca01d0bd6b76d6767f112fae7cfa6b8d846",
-      "size_bytes": 176577
+      "sha256": "sha256:a46119024d0224d62bce8d60ca2d882121bb8c1295b5e3eebfe9918b002ec59c",
+      "size_bytes": 178163
     },
     {
       "path": "tools/build/verify_release_artifacts.py",
-      "sha256": "sha256:db4d5f2b51f98572f8458041461fa543f757a6a5b95a238713813989adaedc2d",
+      "sha256": "sha256:c27d1c2187e4d2edac0adfc12f2723f59324396f4e2470f7f12cfba9a491e22e",
       "size_bytes": 179203
     },
     {
@@ -2830,6 +3248,11 @@
       "size_bytes": 6388
     },
     {
+      "path": "tools/deployment/prepare_current_stack_test_token.py",
+      "sha256": "sha256:7d8d9963be8bbc8d92f49560f68652eaa07e044e37095e7d6f63c40f75874ba7",
+      "size_bytes": 7595
+    },
+    {
       "path": "tools/deployment/test_admin_ceremony_evidence.py",
       "sha256": "sha256:fab2026ad07bd5a6f0e80854bbab18bccf2b280d218735372a22d43b5495f41c",
       "size_bytes": 19074
@@ -2865,6 +3288,11 @@
       "size_bytes": 7590
     },
     {
+      "path": "tools/deployment/test_prepare_current_stack_test_token.py",
+      "sha256": "sha256:9fa3fb993914a98f8c7b95f9cffaee167287cf25096f6f43cb8984b0c871acef",
+      "size_bytes": 7232
+    },
+    {
       "path": "tools/deployment/verify_current_stack_deployment.py",
       "sha256": "sha256:51397476a2f6f508a5c1afe599eb5413a8d4f6034b4852e3457bc7eaf57dc721",
       "size_bytes": 24621
@@ -2876,18 +3304,18 @@
     },
     {
       "path": "tools/development/check_python_toolchain.py",
-      "sha256": "sha256:f9b69c6f8ff9abf1d60f5b3d75907b8f7a33f8377b4e81dfb75a53e60ba55941",
-      "size_bytes": 30405
+      "sha256": "sha256:a4dc64a89938059ace2eeb961f5fc7cfac179c1d0a7e7a3e77c49c0076df2a4f",
+      "size_bytes": 30620
     },
     {
       "path": "tools/development/test_dev.py",
-      "sha256": "sha256:c813ecf58f5b86f975ce8bd609782295a547ff80f51465cb21b83b20ba01a31e",
-      "size_bytes": 5864
+      "sha256": "sha256:05db6c3154016dc19b6c77059892dfd7f2f8e248b98d6fb7e41185e449599359",
+      "size_bytes": 15839
     },
     {
       "path": "tools/development/test_python_toolchain.py",
-      "sha256": "sha256:d7be3004a9f8f19fa6b5aa90c2c0c8ca4cba471518b246457d72958bd14e5064",
-      "size_bytes": 36873
+      "sha256": "sha256:c055f780a75259ce599a89622a27cfeb3c26ffc539ed89afb6dce417754b0f9e",
+      "size_bytes": 37550
     },
     {
       "path": "tools/development/test_windows_ci_wrapper.py",
@@ -3321,8 +3749,8 @@
     },
     {
       "path": "tools/release/generate_release_checksums.py",
-      "sha256": "sha256:ecfff6d751a3d081f0fd9d92d39150b8dda40a9a374647167de7b897f3309678",
-      "size_bytes": 188122
+      "sha256": "sha256:825888cfd891d3ea11cdbadb2c20cdfc5e5e47272102385e092cb08be291ec44",
+      "size_bytes": 189859
     },
     {
       "path": "tools/release/generate_release_manifest.py",
@@ -3381,8 +3809,8 @@
     },
     {
       "path": "tools/release/test_release_checksums.py",
-      "sha256": "sha256:894abfbafcf36cc63b817cb9b571a597be72b26830cd0c30e25c8a44fe61147f",
-      "size_bytes": 213298
+      "sha256": "sha256:1385e49a46c798d608d796ec29058e4b629f845e712efc416c82fc234b139353",
+      "size_bytes": 214773
     },
     {
       "path": "tools/release/test_release_evidence_issue_links.py",
@@ -3436,7 +3864,7 @@
     },
     {
       "path": "tools/security/check_slither_baseline.py",
-      "sha256": "sha256:f9f9ba30d144b05769f16f80ebff26216c99b62cb09c06b1acf5ac25ced37e5a",
+      "sha256": "sha256:4bd12e50ac34108097fd4e3741d3820bde7036bf013bcb0406c59ca9ea0f2189",
       "size_bytes": 49634
     },
     {

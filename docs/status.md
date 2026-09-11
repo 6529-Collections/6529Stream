@@ -13,6 +13,12 @@ signed native and fixed-profile ERC-20 sales, English auctions, accepted attribu
 split withdrawals, entropy, metadata and governance-hosted state exports. Use the [current developer commands](tooling.md) to exercise
 that implementation. Broader specification and release acceptance remain separate.
 
+The current stack has completed a native paid-mint demonstration on Sepolia,
+including actual oracle fulfillment, final metadata, split withdrawals and artist
+transfer. The [public instance evidence](../deployments/current/sepolia-2026-09-10/README.md)
+records exact source, deployed runtime, configuration and transaction readbacks.
+It is separate from the historical and production acceptance gates below.
+
 The historical Gate A regression/evidence baseline records:
 
 - The checked fresh-contributor path in

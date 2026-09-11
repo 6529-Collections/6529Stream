@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "chainId": "11155111",
+  "addresses": {
+    "core": "0x05914c6f62c819c861f01c5edd4b6b17e935e75b",
+    "manager": "0x695c55174dcd311c801c81147aa24826980bdf3e",
+    "nativeSale": "0x09047c394020bf49bcba95616412a2e91cc8031f",
+    "erc20Sale": "0xba804032dc5aeb8282490c49098a6a5057dfb8f0",
+    "auction": "0x8dea43d1400ef286f8386d1b3c58f24997f2ebca",
+    "artistRegistry": "0xf11c4f30bbb02c28e3934c001fc56f90be852746",
+    "entropy": "0x258d07d853be34ac022f24e255f02a21d6d340b5",
+    "splitFactory": "0x5102aa2d3162df520857ada9e3beb3849ed1b917",
+    "primaryRevenue": "0xa05044f746e64c16cc229889a08e113d7f953dac",
+    "assetPolicy": "0xa9d6791502849519E16CDF335C0959Fd920B765F",
+    "executor": "0x09e676013be9ac977a4ac41fe5fe4aab269d8f35",
+    "splitWallet": "0x52FeF8A501BBDB79cF5F4597Ac83667cB880E778"
+  }
+}

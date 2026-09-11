@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Preflight','Subscription','Deploy','ResumeDeploy','Activate','Mint','RequestEntropy','Readback','Settle')]
+    [ValidateSet('Preflight','Status','Subscription','Deploy','ResumeDeploy','Activate','Mint','RequestEntropy','Readback','Settle','RetryEntropyDelivery','RetryMetadataNotification')]
     [string]$Stage = 'Preflight',
     [string]$RpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com',
     [string]$AccountsPath = (Join-Path $env:USERPROFILE '.codex/stream-testnet/accounts.json'),
@@ -12,6 +12,9 @@ param(
     [string]$MintPriceWei = '1000000000000',
     [string]$MaxFeePerGasWei = '0',
     [string]$PriorityFeeWei = '1000000',
+    [ValidateRange(0,60)][int]$ReceiptWaitSeconds = 30,
+    [ValidateRange(1,10000)][int]$RetryAttempt = 1,
+    [ValidateRange(100000,16777216)][long]$RetryGasLimit = 2000000,
     [switch]$Broadcast
 )
 
@@ -31,15 +34,6 @@ $state = [ordered]@{schema='6529stream.current-sepolia.v1';chainId=11155111;rece
 if (Test-Path -LiteralPath $statePath) {
     $state = Get-Content -Raw -LiteralPath $statePath | ConvertFrom-Json -AsHashtable
 }
-$accounts = Get-Content -Raw -LiteralPath $AccountsPath | ConvertFrom-Json
-$deployer = @($accounts | Where-Object role -eq 'stream-deployer')[0]
-$artist = @($accounts | Where-Object role -eq 'stream-artist')[0]
-$platform = @($accounts | Where-Object role -eq 'stream-platform')[0]
-foreach ($account in @($deployer,$artist,$platform)) {
-    if ($account.chainId -ne 11155111 -or $account.address -notmatch '^0x[0-9a-fA-F]{40}$') {
-        throw 'Dedicated Sepolia account metadata required.'
-    }
-}
 
 function Invoke-Tool([string]$Program, [string[]]$Arguments, [AllowNull()][string]$StandardInput=$null) {
     # Keep captured errors private: RPC endpoints or signer arguments may be sensitive.
@@ -51,6 +45,18 @@ function Invoke-Tool([string]$Program, [string[]]$Arguments, [AllowNull()][strin
         throw "$Program $($Arguments[0]) failed $selector; command output withheld."
     }
     return ($captured -join "`n").Trim()
+}
+function Restore-DeploymentEnvironment([System.Collections.IDictionary]$Saved) {
+    foreach ($key in $Saved.Keys) {
+        $environmentPath="Env:$key"
+        # Passing null to the .NET string setter can leave an empty variable.
+        # Missing, explicitly empty, and nonempty caller values are distinct.
+        if ($null -eq $Saved[$key]) {
+            if (Test-Path -LiteralPath $environmentPath) {Remove-Item -LiteralPath $environmentPath}
+        } else {
+            Set-Item -LiteralPath $environmentPath -Value $Saved[$key]
+        }
+    }
 }
 function Cast([string[]]$Arguments) {
     # Genesis calldata and deployed runtime exceed Windows' command-line limit.
@@ -120,19 +126,8 @@ function Record-Receipt([string]$Label,[object]$Receipt) {
     }
     Save-State
 }
-function Send([string]$Label,[string]$Target,[string]$Signature,[string[]]$Arguments=@(),[string]$Value='0') {
-    $base = @($Target,$Signature)+$Arguments+@('--from',$deployer.address,'--rpc-url',$RpcUrl,'--value',$Value)
-    $estimate = Uint (Cast (@('estimate')+$base))
-    $limit = [bigint]::Max(21000,[bigint]::Divide(($estimate*120+99),100))
-    if ($limit -gt $transactionGasCap) { throw "$Label estimate exceeds the transaction cap." }
-    $balance = Uint (Cast @('balance',$deployer.address,'--rpc-url',$RpcUrl))
-    if ($balance -lt $limit*$maxFee+(Uint $Value)) { throw "Insufficient balance for $Label." }
-    $receipt = With-Signer $deployer 'cast' (@('send')+$base+@(
-        '--gas-limit',$limit.ToString(),'--gas-price',$maxFee.ToString(),
-        '--priority-gas-price',$tip.ToString(),'--confirmations','1','--json'
-    )) | ConvertFrom-Json -AsHashtable
-    Record-Receipt $Label $receipt
-    return $receipt
+function Send([string]$Label,[string]$Target,[string]$Signature,[string[]]$Arguments=@(),[string]$Value='0',[long]$GasLimit=0) {
+    return Send-JournaledTransaction $Label $Target $Signature $Arguments $Value $GasLimit
 }
 function Sign-Typed([object]$Account,[object]$Data) {
     return With-Signer $Account 'cast' @('wallet','sign','--data',($Data | ConvertTo-Json -Depth 30 -Compress))
@@ -199,12 +194,76 @@ function Checked-UnsignedDeploymentGas([object]$Run) {
     return $total
 }
 
+. (Join-Path $PSScriptRoot 'current-stack-transaction-journal.ps1')
+. (Join-Path $PSScriptRoot 'current-stack-launch-status.ps1')
+if ($Stage -eq 'Status') {
+    if ($Broadcast) {throw 'Status is read-only; omit -Broadcast.'}
+    Get-LaunchStatus | ConvertTo-Json -Depth 20
+    return
+}
+$accounts = Get-Content -Raw -Encoding UTF8 -LiteralPath $AccountsPath | ConvertFrom-Json
+$deployer = @($accounts | Where-Object role -eq 'stream-deployer')[0]
+$artist = @($accounts | Where-Object role -eq 'stream-artist')[0]
+$platform = @($accounts | Where-Object role -eq 'stream-platform')[0]
+foreach ($account in @($deployer,$artist,$platform)) {
+    if ($account.chainId -ne 11155111 -or $account.address -notmatch '^0x[0-9a-fA-F]{40}$') {
+        throw 'Dedicated Sepolia account metadata required.'
+    }
+}
+$senderLock=[Threading.Mutex]::new($false,('6529Stream-Sepolia-'+$deployer.address.ToLowerInvariant()))
+$ownsSenderLock=$false
+try {$ownsSenderLock=$senderLock.WaitOne(0)} catch [Threading.AbandonedMutexException] {$ownsSenderLock=$true}
+if (-not $ownsSenderLock) {$senderLock.Dispose();throw 'Another launch process owns this Sepolia deployer. Wait for it to finish.'}
 Push-Location $repoRoot
 try {
+    # Another completed process may have updated this checkpoint before the lock was acquired.
+    if (Test-Path -LiteralPath $statePath) {$state=Get-Content -Raw -Encoding UTF8 -LiteralPath $statePath | ConvertFrom-Json -AsHashtable}
+    if ($state.schema -ne '6529stream.current-sepolia.v1' -or $state.chainId -ne 11155111) {throw 'Incompatible Sepolia checkpoint.'}
+    if ($state.Contains('accounts') -and ($state.accounts.deployer -ine $deployer.address -or
+        $state.accounts.artist -ine $artist.address -or $state.accounts.platform -ine $platform.address)) {
+        throw 'Checkpoint account identities differ from the selected accounts.'
+    }
     if ((Uint (Cast @('chain-id','--rpc-url',$RpcUrl))) -ne 11155111) { throw 'Sepolia RPC required.' }
+    # Recover the exact recorded transaction before admission checks for any new send.
+    # Its fees and call arguments are already fixed in the journal.
+    if ($Broadcast) {
+        Initialize-TransactionJournal
+        $stageLabels=switch ($Stage) {
+            'Subscription' {@('^createSubscription$','^fundSubscription(?:Topup-\d+)?$')}
+            'Activate' {@('^addConsumer$','^acceptArtist$')}
+            'Mint' {@('^paidMint$','^requestEntropy$')}
+            'RequestEntropy' {@('^paidMint$','^requestEntropy$')}
+            'Settle' {@('^artistWithdrawal$','^protocolWithdrawal$','^transfer$')}
+            default {@()}
+        }
+        $allRecordedLabels=@(@($state.transactionIntents.Keys)+@($state.receipts.Keys) | Select-Object -Unique)
+        $recordedLabels=@(foreach ($pattern in $stageLabels) {$allRecordedLabels | Where-Object {$_ -match $pattern}})
+        foreach ($label in $recordedLabels) {
+            if (-not $state.transactionIntents.Contains($label)) {
+                $historicalCall=switch -Regex ($label) {
+                    '^createSubscription$' {@($coordinator,'createSubscription()');break}
+                    '^fundSubscription(?:Topup-\d+)?$' {@($coordinator,'fundSubscriptionWithNative(uint256)');break}
+                    '^addConsumer$' {@($coordinator,'addConsumer(uint256,address)');break}
+                    '^acceptArtist$' {@($state.addresses.artists,'acceptArtist(uint256,bytes32,uint256,uint64,bytes)');break}
+                    '^paidMint$' {@($state.addresses.sale,'buy((uint256,bytes32,address,address,address,bytes32,bytes32,bytes32,bytes32,uint256,bytes32,uint64,uint64),bytes,bytes,bytes)');break}
+                    '^requestEntropy$' {@($state.addresses.entropy,'requestEntropy(uint256)');break}
+                    '^(artistWithdrawal|protocolWithdrawal)$' {@($state.wallet,'release(address,address,address)');break}
+                    '^transfer$' {@($state.addresses.core,'transferFrom(address,address,uint256)');break}
+                }
+                Import-HistoricalIntent $label $historicalCall[0] $historicalCall[1]
+            }
+            $recovered=Resume-RecordedTransaction $label
+            if ($label -eq 'createSubscription') {
+                Restore-SubscriptionCreated $recovered
+            }
+            if ($label -eq 'paidMint') {Restore-MintSettlement $recovered}
+            if ($label -eq 'requestEntropy') {Restore-EntropyRequest $recovered}
+        }
+    }
     $config = Read $coordinator 's_config()(uint16,uint32,bool,uint32,uint32,uint32,uint32,uint8,uint8)'
     $provingKey = Read $coordinator 's_provingKeys(bytes32)(bool,uint64)' @($keyHash)
-    if (-not $provingKey[0] -or (Uint $config[0]) -gt 3 -or (Uint $config[1]) -lt 1500000) {
+    if ($Stage -notin @('Readback','Settle','RetryEntropyDelivery','RetryMetadataNotification') -and
+        (-not $provingKey[0] -or (Uint $config[0]) -gt 3 -or (Uint $config[1]) -lt 1500000)) {
         throw 'Live VRF configuration does not support the selected parameters.'
     }
     $latest = Rpc 'eth_getBlockByNumber' @('latest','false')
@@ -236,7 +295,8 @@ try {
     $subscriptionTarget=if (-not $PSBoundParameters.ContainsKey('SubscriptionFundingWei') -and $state.Contains('subscriptionReserveTargetWei')) {
         Uint $state.subscriptionReserveTargetWei
     } else {Uint $SubscriptionFundingWei}
-    if ($subscriptionTarget -lt $minimumVRFReserve) {throw 'Selected subscription funding is below the gas-lane fulfillment reserve.'}
+    if ($Stage -notin @('Readback','Settle','RetryEntropyDelivery','RetryMetadataNotification') -and
+        $subscriptionTarget -lt $minimumVRFReserve) {throw 'Selected subscription funding is below the gas-lane fulfillment reserve.'}
     $subscriptionBalance=if ($state.Contains('subscriptionId')) {Uint (Subscription-State)[1]} else {[bigint]0}
     $nativeFunding=if ($state.Contains('oracleFulfillment')) {[bigint]0} else {[bigint]::Max(0,$subscriptionTarget-$subscriptionBalance)}
     $expectedFee = $baseFee+$tip
@@ -259,7 +319,7 @@ try {
         Write-Output "Read-only plan: $statePath"
         return
     }
-    if ($Stage -notin @('Readback') -and -not $receiptOnlyRecovery -and $balance -lt $required) {
+    if ($Stage -in @('Deploy','ResumeDeploy') -and -not $receiptOnlyRecovery -and $balance -lt $required) {
         throw 'Full-flow budget is not funded; no transaction was signed or sent.'
     }
 
@@ -267,11 +327,7 @@ try {
         $state.subscriptionReserveTargetWei=$subscriptionTarget.ToString()
         if (-not $state.Contains('subscriptionId')) {
             $receipt = Send 'createSubscription' $coordinator 'createSubscription()'
-            $topic = Cast @('keccak','SubscriptionCreated(uint256,address)')
-            $log = @($receipt.logs | Where-Object { $_.address -ieq $coordinator -and $_.topics[0] -eq $topic })
-            if ($log.Count -ne 1) { throw 'Expected one real SubscriptionCreated receipt.' }
-            $state.subscriptionId = (Uint $log[0].topics[1]).ToString()
-            Save-State
+            Restore-SubscriptionCreated $receipt
         }
         $subscription = Subscription-State
         if ($subscription[3] -ine $deployer.address) { throw 'Dedicated deployer does not own subscription.' }
@@ -352,7 +408,7 @@ try {
             Save-State
             $null = With-Signer $deployer 'forge' ($forgeArguments+@('--broadcast'))
             }
-        } finally {foreach ($key in $saved.Keys) {[Environment]::SetEnvironmentVariable($key,$saved[$key])}}
+        } finally {Restore-DeploymentEnvironment $saved}
         $run = Get-Content -Raw -LiteralPath $broadcastFile | ConvertFrom-Json -AsHashtable
         Validate-RecordedDeployment $run
         if ($run.receipts.Count -ne $run.transactions.Count) { throw 'Deployment receipts are incomplete; use ResumeDeploy.' }
@@ -408,8 +464,8 @@ try {
 
     if ($Stage -eq 'Mint') {
         Require-Addresses
-        if (-not $state.Contains('activated')) {throw 'Run Activate first.'}
-        if ($state.Contains('tokenId')) {throw 'Demo token already recorded; use Readback.'}
+        if (-not $state.Contains('activated') -or -not $state.activated) {throw 'Run Activate first.'}
+        if (-not $state.Contains('tokenId')) {
         $phase=Cast @('keccak','current-stack fixed price')
         $entries="[($($artist.address),900000,$(Cast @('keccak','artist'))),($($deployer.address),100000,$(Cast @('keccak','protocol')))]"
         $profile=(Read $state.addresses.factory 'profileIdFor((address,uint32,bytes32)[],bytes32)(bytes32)' @($entries,(Cast @('keccak','development split'))))[0]
@@ -428,23 +484,47 @@ try {
         $tuple='('+(($message.Values)-join ',')+')'
         $paidMint=Send 'paidMint' $state.addresses.sale 'buy((uint256,bytes32,address,address,address,bytes32,bytes32,bytes32,bytes32,uint256,bytes32,uint64,uint64),bytes,bytes,bytes)' @($tuple,$tokenData,$platformSignature,$artistSignature) $MintPriceWei
         $artistSignature=$null;$platformSignature=$null
-        $state.tokenId=Mint-TokenId $paidMint $state.addresses.sale
-        $state.mintPriceWei=$MintPriceWei
-        $state.wallet=(Read $state.addresses.factory 'walletFor(bytes32)(address)' @($profile))[0]
-        Save-State
+        Restore-MintSettlement $paidMint
+        }
     }
-    if ($Stage -in @('Mint','RequestEntropy')) {
+    if ($Stage -in @('Mint','RequestEntropy') -and -not $state.Contains('entropyRequested')) {
         Require-Addresses
         if (-not $state.Contains('tokenId')) {throw 'Mint a token before requesting entropy.'}
-        if ($state.Contains('entropyRequested')) {throw 'Entropy already requested; use Readback.'}
+        if ((Uint (Subscription-State)[1]) -lt $minimumVRFReserve) {throw 'Fund the subscription before requesting randomness.'}
         $receipt=Send 'requestEntropy' $state.addresses.entropy 'requestEntropy(uint256)' @($state.tokenId)
-        $requestTopic=Cast @('keccak','VRFEntropyRequested(uint16,bytes32,uint256,uint256,uint32,bytes32,uint16,uint32,uint32)')
-        $requestLog=@($receipt.logs | Where-Object {$_.address -ieq $state.addresses.provider -and $_.topics[0] -eq $requestTopic})
-        if ($requestLog.Count -ne 1) {throw 'Missing provider request receipt.'}
-        $state.providerRequestId=(Uint $requestLog[0].topics[2]).ToString()
-        $state.requestKey=$requestLog[0].topics[1]
-        $state.entropyRequested=$true
+        Restore-EntropyRequest $receipt
+    }
+
+    if ($Stage -in @('RetryEntropyDelivery','RetryMetadataNotification')) {
+        Require-Addresses
+        if (-not $state.Contains('tokenId')) {throw 'A recorded token is required for delivery recovery.'}
+        $tokenId=[string]$state.tokenId
+        $boundCoordinator=(Read $state.addresses.core 'coordinatorAtMint(uint256)(address)' @($tokenId))[0]
+        $label="$Stage-$tokenId-$RetryAttempt"
+        $recovered=Resume-RecordedTransaction $label
+        if ($Stage -eq 'RetryEntropyDelivery') {
+            $token=Read $boundCoordinator 'tokenEntropy(uint256)(uint8,bytes32,address,uint32,bytes32,bytes32,uint256,uint16)' @($tokenId)
+            if ((Uint $token[6]) -eq 0) {throw 'Token has no randomness request to redeliver.'}
+            $result=Read $token[2] 'providerResultStatus(uint256)(uint8,bytes32,bytes32,bool,bool)' @([string]$token[6])
+            if ($result[1] -ine $token[5]) {throw 'Provider result is not bound to the token request.'}
+            if ((Uint $result[0]) -eq 2 -and $null -eq $recovered) {
+                $null=Send $label $token[2] 'retryCoordinatorFulfillment(uint256)' @([string]$token[6]) '0' $RetryGasLimit
+            } elseif ((Uint $result[0]) -notin @(2,3)) {throw 'The provider has no retryable randomness result.'}
+            $result=Read $token[2] 'providerResultStatus(uint256)(uint8,bytes32,bytes32,bool,bool)' @([string]$token[6])
+            $complete=(Uint $result[0]) -eq 3
+        } else {
+            $pending=Read $boundCoordinator 'metadataNotificationPending(uint256)(bool)' @($tokenId)
+            if ($pending[0] -and $null -eq $recovered) {
+                $null=Send $label $boundCoordinator 'retryMetadataNotification(uint256)' @($tokenId) '0' $RetryGasLimit
+            }
+            $pending=Read $boundCoordinator 'metadataNotificationPending(uint256)(bool)' @($tokenId)
+            $complete=-not [bool]$pending[0]
+        }
+        if (-not $state.Contains('deliveryRetries')) {$state.deliveryRetries=[ordered]@{}}
+        $state.deliveryRetries[$label]=@{complete=$complete;observedAtBlock=(Uint (Rpc 'eth_blockNumber')).ToString();gasAllocation=$RetryGasLimit}
         Save-State
+        if ($complete) {Write-Output "$Stage is complete."}
+        else {Write-Output "$Stage remains pending. Inspect Status; a further explicit attempt uses -RetryAttempt $($RetryAttempt+1)."}
     }
 
     if ($Stage -eq 'Readback') {
@@ -534,4 +614,4 @@ try {
     $state.deployerBalanceWei=(Uint (Cast @('balance',$deployer.address,'--rpc-url',$RpcUrl))).ToString()
     Save-State
     Write-Output $statePath
-} finally {Pop-Location}
+} finally {Pop-Location;$senderLock.ReleaseMutex();$senderLock.Dispose()}

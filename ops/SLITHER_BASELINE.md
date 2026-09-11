@@ -9,8 +9,8 @@ public beta or production. 30 current rows remain `Open` and 15 have reviewed di
 
 | Field | Value |
 | --- | --- |
-| Analyzed commit | `db8e31ed886faa838a9dc83926d8bad869ce549b` |
-| Captured at | `2026-09-10T19:32:07Z` |
+| Analyzed commit | `687bfc86c60faa19eaa3a0aa4194832b4c0d6242` |
+| Captured at | `2026-09-10T22:57:21Z` |
 | Slither | `0.11.5` |
 | crytic-compile | `0.3.11` |
 | Solidity compiler | `0.8.19` |
@@ -18,12 +18,12 @@ public beta or production. 30 current rows remain `Open` and 15 have reviewed di
 | Foundry | `1.7.1` |
 | Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:0897290bac4ba9bb826d0cb873bc9068fd88ddc39e6e5314fe4f385bb0b264ab` |
 | Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
-| Foundry config | `sha256:e1018ca7758fd0b49f329437ee9162e1a9fb6c43ed5fb5b2eb0f98800f3b3c26` |
+| Foundry config | `sha256:3e7d0f6f798d6039a02aad42fb791ed1b6b6521f40dd6b5f71264425051e9bfe` |
 | Current gate tool requirements | `sha256:2e172ef4fa182914cba1a2b5222577b69575cb5fd818d4c112f1c2d6539136a2` |
 | Capture command | `python -m slither . --config-file slither.config.json --json-types detectors --json <temp-file> --fail-none` |
 | Gate command | `python -m slither . --config-file slither.config.json --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
-| Capture process | Native exit `0`; JSON `success=true`; `35335555` bytes |
-| Raw JSON SHA-256 | `sha256:059ed9c73c7a75cf39d31dc12c51570a61d111371cf1a5c88d2b4e60aa2831ac` |
+| Capture process | Native exit `0`; JSON `success=true`; `35315410` bytes |
+| Raw JSON SHA-256 | `sha256:6a405f273095fc6155c9f7033a673550ccd58f3a705459c73191fc04a386b919` |
 
 The default Slither process exit is non-zero while findings exist. The checked
 gate uses `--fail-none`, then independently requires native success, JSON
