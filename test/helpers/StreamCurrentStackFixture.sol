@@ -127,13 +127,17 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
     function _walletGasConfigs()
         internal
         pure
-        returns (IStreamGasParameterHost.GasParameterConfig[2] memory rows)
+        returns (IStreamGasParameterHost.GasParameterConfig[3] memory rows)
     {
         rows[0] = IStreamGasParameterHost.GasParameterConfig(
             "ERC_1271_GAS_LIMIT", 400_000, 350_000, 2
         );
         rows[1] =
             IStreamGasParameterHost.GasParameterConfig("ASSET_POLICY_GAS_LIMIT", 30_000, 15_000, 2);
+        // Planning value only; full cold-wallet deployment sizing is a release acceptance item.
+        rows[2] = IStreamGasParameterHost.GasParameterConfig(
+            "WALLET_DEPOSIT_GAS_LIMIT", 50_000, 25_000, 2
+        );
     }
 
     /// @dev Deploy additional products before the immutable genesis action catalog is committed.

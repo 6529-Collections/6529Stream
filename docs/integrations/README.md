@@ -14,6 +14,9 @@ deployment evidence.
 | Buy with an ERC-20 and payer consent | [ERC-20 sales](erc20-sales.md) |
 | Discover, publish or challenge a state export | [State exports](state-exports.md) |
 | Build both signatures | [Wallets and EIP-712](wallets-and-signatures.md) |
+| Approve fixed-profile economics and freeze royalties on the modular artist line | [Artist economics](artist-economics.md) |
+| Register and discover immutable split profiles on the new factory line | [Split profiles](split-profiles.md) |
+| Authorize split releases and handle deprecated assets | [Split-wallet releases](split-wallet-releases.md) |
 | Create, bid on and settle an auction | [English auctions](auction-flows.md) |
 | Index purchases and state changes | [Events and indexing](events-and-indexing.md) |
 | Display pending and final artwork | [Metadata and rendering](metadata-rendering.md) |

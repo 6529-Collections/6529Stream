@@ -380,7 +380,7 @@ contract StreamArtistLiveProvidersTest is RevenueV1TestBase {
         metadata.currentArtistContentState(1);
     }
 
-    function testBoundArtistRoyaltyTermsCannotChangeButProtectiveFreezeWorks() public {
+    function testBoundArtistRoyaltyChangesAndGovernedFreezeRequireEconomicsConsent() public {
         royalty.configureCollectionRoyalty(1, profile, 500);
         artist.setBound(true);
         vm.expectRevert(
@@ -396,8 +396,13 @@ contract StreamArtistLiveProvidersTest is RevenueV1TestBase {
         );
         royalty.configureCollectionRoyalty(1, bytes32(0), 0);
         require(royalty.collectionRoyalty(1).royaltyBps == 500, "bound terms changed");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRoyaltyResolver.ArtistEconomicsAuthorizationRequired.selector, 1
+            )
+        );
         royalty.freezeCollectionRoyalty(1);
-        require(royalty.collectionRoyalty(1).frozen, "protective freeze blocked");
+        require(!royalty.collectionRoyalty(1).frozen, "governed freeze lacked consent");
     }
 
     function _configureContent(uint256 id) private {

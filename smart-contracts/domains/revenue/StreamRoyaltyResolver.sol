@@ -7,6 +7,9 @@ import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
+import "../../interfaces/stream/revenue/IStreamRoyaltyFreeze.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
@@ -17,6 +20,8 @@ import "../../vendor/openzeppelin/Ownable.sol";
 contract StreamRoyaltyResolver is
     IStreamRoyaltyResolver,
     IStreamArtistRoyaltyFacts,
+    IStreamArtistRoyaltyPreview,
+    IStreamRoyaltyFreeze,
     ERC165,
     Ownable
 {
@@ -60,7 +65,31 @@ contract StreamRoyaltyResolver is
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
         return id == type(IStreamRoyaltyResolver).interfaceId
-            || id == type(IStreamArtistRoyaltyFacts).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistRoyaltyFacts).interfaceId
+            || id == type(IStreamArtistRoyaltyPreview).interfaceId
+            || id == type(IStreamRoyaltyFreeze).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @inheritdoc IStreamArtistRoyaltyPreview
+    function previewArtistRoyaltyAssignment(
+        uint256 collectionId,
+        bytes32 profileHash,
+        uint16 royaltyBps,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
+        _requireCollection(collectionId);
+        _requireSelectedArtistRegistry();
+        // Zero-profile disablement is not part of the current prospective artist profile.
+        if (profileHash == bytes32(0)) revert InvalidRoyaltySplitProfile(profileHash);
+        RoyaltyConfig memory candidate = _candidate(profileHash, royaltyBps);
+        candidate.frozen = frozen;
+        fact = StreamArtistOnboardingTypes.AssignmentFact(
+            address(this),
+            keccak256("ROYALTY_ERC2981"),
+            1,
+            collectionId,
+            _assignmentHash(candidate, 1, collectionId)
+        );
     }
 
     /// @notice Live per-key RSR commitment, including bps, for artist economics consent.
@@ -88,7 +117,7 @@ contract StreamRoyaltyResolver is
         }
     }
 
-    function _assignmentHash(RoyaltyConfig storage item, uint8 scope, uint256 scopeId)
+    function _assignmentHash(RoyaltyConfig memory item, uint8 scope, uint256 scopeId)
         private
         view
         returns (bytes32)
@@ -178,19 +207,32 @@ contract StreamRoyaltyResolver is
         onlyOwner
     {
         _requireCollection(collectionId);
-        RoyaltyConfig storage prior = _collectionRoyalties[collectionId];
-        if (!prior.configured || prior.profileId != profileId || prior.royaltyBps != royaltyBps) {
-            _requireUnboundArtist(collectionId);
-        }
+        _requireSelectedArtistRegistry();
+        RoyaltyConfig memory candidate = _candidate(profileId, royaltyBps);
+        _requireArtistEconomics(collectionId, candidate);
         _configure(_collectionRoyalties[collectionId], collectionId, profileId, royaltyBps);
     }
 
-    /// @dev Until prospective economics consent is implemented, first-sale terms are configured
-    ///      before binding and cannot be replaced after an artist proposal exists.
-    function _requireUnboundArtist(uint256 collectionId) private view {
-        _requireSelectedArtistRegistry();
+    function _requireArtistEconomics(uint256 collectionId, RoyaltyConfig memory candidate)
+        private
+        view
+    {
         if (artistRegistry.attribution(collectionId).nominationHash != bytes32(0)) {
-            revert ArtistEconomicsAuthorizationRequired(collectionId);
+            if (
+                candidate.profileId == bytes32(0)
+                    || !IERC165(address(artistRegistry))
+                        .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
+            ) {
+                revert ArtistEconomicsAuthorizationRequired(collectionId);
+            }
+            IStreamArtistEconomicsAuthority(address(artistRegistry))
+                .requireEconomicsConsent(
+                    collectionId,
+                    keccak256("ROYALTY_ERC2981"),
+                    1,
+                    collectionId,
+                    _assignmentHash(candidate, 1, collectionId)
+                );
         }
     }
 
@@ -212,12 +254,38 @@ contract StreamRoyaltyResolver is
     /// @notice Materializes inherited defaults before freezing, including an inherited zero rate.
     function freezeCollectionRoyalty(uint256 collectionId) external override onlyOwner {
         _requireCollection(collectionId);
+        _requireSelectedArtistRegistry();
         RoyaltyConfig storage item = _collectionRoyalties[collectionId];
+        RoyaltyConfig memory candidate = item.configured ? item : _defaultRoyalty;
+        candidate.frozen = true;
+        _requireArtistEconomics(collectionId, candidate);
         if (!item.configured) {
             item.wallet = _defaultRoyalty.wallet;
             item.royaltyBps = _defaultRoyalty.royaltyBps;
             item.profileId = _defaultRoyalty.profileId;
         }
+        _freeze(item, collectionId);
+    }
+
+    /// @inheritdoc IStreamRoyaltyFreeze
+    function applyArtistRoyaltyFreeze(uint256 collectionId, bytes32 expectedAssignmentHash)
+        external
+        override
+    {
+        _requireCollection(collectionId);
+        _requireSelectedArtistRegistry();
+        RoyaltyConfig storage item = _collectionRoyalties[collectionId];
+        bytes32 currentHash = item.configured ? _assignmentHash(item, 1, collectionId) : bytes32(0);
+        if (expectedAssignmentHash == bytes32(0) || expectedAssignmentHash != currentHash) {
+            revert ArtistRoyaltyAssignmentChanged(collectionId, expectedAssignmentHash, currentHash);
+        }
+        if (item.frozen) revert RoyaltyConfigurationFrozen(collectionId);
+        if (
+            !IERC165(address(artistRegistry))
+                    .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
+                || !IStreamArtistEconomicsAuthority(address(artistRegistry))
+                    .isRoyaltyFreezeAuthorized(collectionId, currentHash)
+        ) revert ArtistRoyaltyFreezeNotAuthorized(collectionId, currentHash);
         _freeze(item, collectionId);
     }
 
@@ -241,6 +309,20 @@ contract StreamRoyaltyResolver is
         uint16 royaltyBps
     ) private {
         if (item.frozen) revert RoyaltyConfigurationFrozen(collectionId);
+        RoyaltyConfig memory candidate = _candidate(profileId, royaltyBps);
+        item.wallet = candidate.wallet;
+        item.royaltyBps = royaltyBps;
+        item.profileId = profileId;
+        item.configured = true;
+        item.revision += 1;
+        emit RoyaltyConfigured(collectionId, profileId, candidate.wallet, royaltyBps, item.revision);
+    }
+
+    function _candidate(bytes32 profileId, uint16 royaltyBps)
+        private
+        view
+        returns (RoyaltyConfig memory candidate)
+    {
         if (royaltyBps > MAX_ROYALTY_BPS || (royaltyBps == 0) != (profileId == bytes32(0))) {
             revert InvalidRoyaltyConfiguration();
         }
@@ -251,12 +333,10 @@ contract StreamRoyaltyResolver is
             }
             wallet = splitFactory.walletFor(profileId);
         }
-        item.wallet = wallet;
-        item.royaltyBps = royaltyBps;
-        item.profileId = profileId;
-        item.configured = true;
-        item.revision += 1;
-        emit RoyaltyConfigured(collectionId, profileId, wallet, royaltyBps, item.revision);
+        candidate.wallet = wallet;
+        candidate.royaltyBps = royaltyBps;
+        candidate.profileId = profileId;
+        candidate.configured = true;
     }
 
     function _freeze(RoyaltyConfig storage item, uint256 collectionId) private {

@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added prospective fixed-profile artist economics approval and exact defensive
+  royalty freeze authorization, with typed resolver previews and consent before
+  governed mutations. Defensive freezing preserves royalty terms; new minting
+  still requires consent to the resulting frozen hash.
+- Added deferred split-profile registration and append-only wallet discovery.
 - Connected modular artist onboarding and exact consent records to actual current
   native/ERC-20 minting, auctions, metadata and primary/royalty facts. Added real
   Safe artist, buyer, custody, payout and delayed-governance integration scenarios.

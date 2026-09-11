@@ -13,7 +13,11 @@ not select a different contract or grant a caller additional authority.
 | Durable counters and replay protection | [mint/IStreamMintLedger.sol](mint/IStreamMintLedger.sol) | [StreamMintLedger](../../domains/mint/StreamMintLedger.sol) |
 | Optional eligibility gate | [mint/IStreamMintGate.sol](mint/IStreamMintGate.sol) | A registered gate module |
 | Auction custody, bidding, and settlement | [auctions/IStreamEnglishAuctionHouse.sol](auctions/IStreamEnglishAuctionHouse.sol) | [StreamEnglishAuctionHouse](../../domains/auctions/StreamEnglishAuctionHouse.sol) |
-| Artist nomination and acceptance | [artist/IStreamCollectionArtistRegistry.sol](artist/IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol) |
+| Modular artist onboarding and mandatory mint consent | [IStreamArtistOnboarding](artist/IStreamArtistOnboarding.sol), [IStreamArtistMintConsent](artist/IStreamArtistMintConsent.sol) | [StreamArtistOnboardingRegistry](../../domains/artist/StreamArtistOnboardingRegistry.sol) |
+| Artist attribution reads | [IStreamArtistAttribution](artist/IStreamArtistAttribution.sol) | The selected artist facade |
+| Prospective artist economics and defensive royalty authorization | [IStreamArtistEconomicsAuthority](artist/IStreamArtistEconomicsAuthority.sol) | The same modular artist facade |
+| Preview primary/royalty economics or apply an authorized royalty freeze | [IStreamArtistPrimaryFacts](artist/IStreamArtistPrimaryFacts.sol), [IStreamArtistRoyaltyPreview](artist/IStreamArtistRoyaltyPreview.sol), [IStreamRoyaltyFreeze](revenue/IStreamRoyaltyFreeze.sol) | The respective primary or royalty resolver |
+| Earlier collection nomination and acceptance | [artist/IStreamCollectionArtistRegistry.sol](artist/IStreamCollectionArtistRegistry.sol) | [StreamCollectionArtistRegistry](../../domains/artist/StreamCollectionArtistRegistry.sol), the RC1 artist line |
 | Entropy registration and requests | [entropy/IStreamEntropyCoordinator.sol](entropy/IStreamEntropyCoordinator.sol) | [StreamEntropyCoordinator](../../domains/entropy/StreamEntropyCoordinator.sol) |
 | Entropy status and final seed | [entropy/IStreamEntropyView.sol](entropy/IStreamEntropyView.sol) | The token's coordinator at mint |
 | External randomness provider | [entropy/IStreamEntropyProvider.sol](entropy/IStreamEntropyProvider.sol) | [StreamEntropyProviderVRF](../../domains/entropy/StreamEntropyProviderVRF.sol) |
@@ -71,6 +75,6 @@ module inventory and supported-flow evidence before enabling a feature.
 The previous sale and randomness stack is explicitly under `legacy/mint/`,
 `legacy/auctions/`, and `legacy/entropy/`. Its requests are not interchangeable
 with the current paid-mint or entropy APIs. The old mint-only registry is under
-[mint/compatibility](mint/compatibility/IStreamMintModuleRegistry.sol); new
-systems use the canonical registry in `modules/`. The manager retains that
-older registry vocabulary only for compatibility.
+[mint/compatibility](mint/compatibility/IStreamMintModuleRegistry.sol). The current
+Manager requires the canonical registry in `modules/` and the selected modular
+artist mint-consent capability; the old vocabulary does not supply those checks.

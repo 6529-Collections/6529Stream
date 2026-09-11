@@ -6,13 +6,21 @@ import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
+import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
 /// @notice Core-bound primary assignments with immutable artist-facade admission.
-/// @dev The supported artist profile is a collection-scoped fixed profile configured before
-///      artist nomination. Prospective economics consent and advertised loosening are not
-///      implemented: all assignment mutation, including freeze, closes after nomination.
-contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
+/// @dev Bound artist collections support fixed PRIMARY_SALE profiles with prospective artist
+///      consent and independent governance admission. Other bound assignment modes stay closed.
+contract StreamRevenueResolver is
+    IStreamRevenueResolver,
+    IStreamArtistPrimaryFacts,
+    ERC165,
+    Ownable
+{
     bytes32 private constant _PRIMARY_TEMPLATE_DOMAIN = keccak256("6529STREAM_PRIMARY_TEMPLATE_V1");
     bytes32 private constant _PRIMARY_ASSIGNMENT_DOMAIN =
         keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1");
@@ -140,6 +148,44 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     /// @notice Returns true for deployment validation.
     function isStreamRevenueResolver() external pure override returns (bool) {
         return true;
+    }
+
+    function supportsInterface(bytes4 id) public view override returns (bool) {
+        return id == type(IStreamArtistPrimaryFacts).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryFacts
+    function previewArtistPrimaryAssignment(
+        uint256 collectionId,
+        bytes32 profileHash,
+        bytes32 policyHash,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
+        _requireSelectedArtistRegistry();
+        _requireScope(SCOPE_COLLECTION, collectionId);
+        _resolveCollectionIdentity(collectionId, 0);
+        if (policyHash != bytes32(0)) revert InvalidPrimaryPolicyHash();
+        if (
+            profileHash == bytes32(0) || !splitFactoryContract.profileExists(profileHash)
+                || !splitFactoryContract.splitWalletExists(profileHash)
+        ) revert UnverifiedSplitProfile(profileHash);
+        bytes32 revenueClass = keccak256("PRIMARY_SALE");
+        fact = StreamArtistOnboardingTypes.AssignmentFact(
+            address(this),
+            revenueClass,
+            SCOPE_COLLECTION,
+            collectionId,
+            _primaryAssignmentHash(
+                revenueClass,
+                SCOPE_COLLECTION,
+                collectionId,
+                ASSIGNMENT_TYPE_PROFILE,
+                profileHash,
+                bytes32(0),
+                policyHash,
+                frozen
+            )
+        );
     }
 
     /// @notice The split factory used to verify and materialize profiles.
@@ -271,7 +317,11 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
-        _requireMutableArtistScope(scope, scopeId);
+        if (scope == SCOPE_COLLECTION && revenueClass == keccak256("PRIMARY_SALE")) {
+            _requireSelectedArtistRegistry();
+        } else {
+            _requireMutableArtistScope(scope, scopeId);
+        }
         bytes32 key = _assignmentKey(revenueClass, scope, scopeId);
         PrimaryAssignment storage assignment = _primaryAssignments[key];
         if (!assignment.exists) {
@@ -281,8 +331,20 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
             revert PrimaryAssignmentFrozen(revenueClass, scope, scopeId);
         }
         bytes32 previousHash = _assignmentHash(revenueClass, scope, scopeId, assignment);
+        frozenAssignmentHash = _primaryAssignmentHash(
+            revenueClass,
+            scope,
+            scopeId,
+            assignment.assignmentType,
+            assignment.profileId,
+            assignment.templateId,
+            assignment.policyHash,
+            true
+        );
+        _requireArtistEconomics(
+            revenueClass, scope, scopeId, assignment.assignmentType, frozenAssignmentHash
+        );
         assignment.frozen = true;
-        frozenAssignmentHash = _assignmentHash(revenueClass, scope, scopeId, assignment);
         emit PrimaryAssignmentFrozenEvent(
             revenueClass, scope, scopeId, previousHash, frozenAssignmentHash, msg.sender
         );
@@ -426,6 +488,10 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         if (previous.frozen) {
             revert PrimaryAssignmentFrozen(revenueClass, scope, scopeId);
         }
+        assignmentHash = _primaryAssignmentHash(
+            revenueClass, scope, scopeId, assignmentType, profileId, templateId, policyHash, false
+        );
+        _requireArtistEconomics(revenueClass, scope, scopeId, assignmentType, assignmentHash);
         _primaryAssignments[key] = PrimaryAssignment({
             exists: true,
             assignmentType: assignmentType,
@@ -434,9 +500,6 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
             policyHash: policyHash,
             frozen: false
         });
-        assignmentHash = _primaryAssignmentHash(
-            revenueClass, scope, scopeId, assignmentType, profileId, templateId, policyHash, false
-        );
         emit PrimaryAssignmentSet(
             revenueClass,
             scope,
@@ -833,7 +896,34 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         if (policyHash != bytes32(0)) {
             revert InvalidPrimaryPolicyHash();
         }
-        _requireMutableArtistScope(scope, scopeId);
+        _requireSelectedArtistRegistry();
+    }
+
+    /// @dev The consent read happens before any assignment write. A bound collection's
+    ///      unsupported token/template/other-class mutations remain unavailable.
+    function _requireArtistEconomics(
+        bytes32 revenueClass,
+        uint8 scope,
+        uint256 scopeId,
+        uint8 assignmentType,
+        bytes32 assignmentHash
+    ) private view {
+        if (scope == SCOPE_DEFAULT) return;
+        uint256 collectionId = scope == SCOPE_COLLECTION
+            ? _resolveCollectionIdentity(scopeId, 0)
+            : _resolveCollectionIdentity(0, scopeId);
+        if (
+            IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+                == bytes32(0)
+        ) return;
+        if (
+            scope != SCOPE_COLLECTION || assignmentType != ASSIGNMENT_TYPE_PROFILE
+                || revenueClass != keccak256("PRIMARY_SALE")
+                || !IERC165(artistRegistry)
+                    .supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId)
+        ) revert PrimaryArtistConsentRequired(collectionId);
+        IStreamArtistEconomicsAuthority(artistRegistry)
+            .requireEconomicsConsent(collectionId, revenueClass, scope, scopeId, assignmentHash);
     }
 
     function _requireSelectedArtistRegistry() private view {
