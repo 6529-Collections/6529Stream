@@ -60,6 +60,12 @@ re-registers the Ledger. Content ratification does not authorize a later content
 write: the separate typed content-consent operation is required before that
 mutation can be supported.
 
+Manager links `StreamMintPhaseState` for configuration and executor bookkeeping
+to stay within the EIP-170 runtime limit. These delegatecalls operate on the
+Manager's original storage and emit events from Manager; owner checks and the
+reentrancy lock remain on its public entry points. Full artist consent still
+precedes Ledger registration, and a failed registration rolls back the phase.
+
 EOA signatures use canonical ECDSA. Contract signatures remain opaque, bounded
 ERC1271 proof bytes. For a Safe, threshold owners sign the handler's SafeMessage
 wrapping of the Stream digest, or approve that message through the real Safe

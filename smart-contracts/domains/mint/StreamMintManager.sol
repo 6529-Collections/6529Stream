@@ -12,6 +12,7 @@ import "./StreamMintCoreExecutor.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
 import "./StreamMintArtistConsent.sol";
+import "./StreamMintPhaseState.sol";
 import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
@@ -92,11 +93,6 @@ contract StreamMintManager is
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public override nextOperationNonce;
 
-    struct PhaseState {
-        bool exists;
-        MintPhaseConfig config;
-    }
-
     struct OperationTranscript {
         uint256 quantity;
         uint256 firstOperationNonce;
@@ -108,7 +104,7 @@ contract StreamMintManager is
         StreamMintOperationIdentity.MintAuthorization authorization;
     }
 
-    mapping(uint256 => mapping(bytes32 => PhaseState)) private _phases;
+    mapping(uint256 => mapping(bytes32 => StreamMintPhaseState.PhaseState)) private _phases;
     mapping(uint256 => mapping(bytes32 => MintGateConfig)) private _phaseGateConfigs;
     /// @notice Active manager policy hash for each configured phase.
     mapping(uint256 => mapping(bytes32 => bytes32)) public override phasePolicyHash;
@@ -182,43 +178,25 @@ contract StreamMintManager is
         if (_phases[collectionId][phaseId].exists) {
             revert MintPhaseAlreadyConfigured(collectionId, phaseId);
         }
-        _requirePhaseConfig(collectionId, phaseId, config);
-        if (counterIds.length == 0 || counterIds.length != counterConfigs.length) {
-            revert MintArrayLengthMismatch();
-        }
-        if (counterIds.length > MAX_PHASE_COUNTERS) {
-            revert MintCounterCountLimitExceeded(counterIds.length, MAX_PHASE_COUNTERS);
-        }
-
-        bytes32[] memory ids = _copyCounterIds(counterIds);
-        IStreamMintLedger.LedgerCounterPolicy[] memory ledgerPolicies =
-            new IStreamMintLedger.LedgerCounterPolicy[](counterIds.length);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _requireNoDuplicateCounterId(counterIds, i);
-            _requireStaticCounterConfig(counterIds[i], counterConfigs[i]);
-            ledgerPolicies[i] = _ledgerPolicy(counterConfigs[i]);
-        }
-        MintGateConfig memory validatedGateConfig =
-            StreamMintGateValidator.validateConfiguration(gateConfig, moduleRegistry);
-
-        _replacePhaseCounters(collectionId, phaseId, ids, counterConfigs);
-        _phaseGateConfigs[collectionId][phaseId] = validatedGateConfig;
-        _phases[collectionId][phaseId] = PhaseState({ exists: true, config: config });
-
-        policyHash = _computePolicyHash(collectionId, phaseId);
-        _recordArtistConsent(collectionId, phaseId, policyHash);
-        phasePolicyHash[collectionId][phaseId] = policyHash;
-        mintLedger.registerPhasePolicy(
-            address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
+        return StreamMintPhaseState.configure(
+            _phases[collectionId][phaseId],
+            _phaseGateConfigs[collectionId],
+            _phaseCounterIds[collectionId][phaseId],
+            _counterConfigs[collectionId][phaseId],
+            _phaseExecutors[collectionId][phaseId],
+            phasePolicyHash[collectionId],
+            config,
+            gateConfig,
+            counterIds,
+            counterConfigs,
+            StreamMintPhaseState.ConfigurationContext(
+                _policyContext(collectionId, phaseId),
+                address(core),
+                _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT),
+                MAX_PHASE_BATCH_QUANTITY,
+                MAX_PHASE_COUNTERS
+            )
         );
-
-        _emitPhaseConfigured(collectionId, phaseId, config, policyHash);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _emitCounterConfigured(
-                collectionId, phaseId, counterIds[i], counterConfigs[i], policyHash
-            );
-        }
-        _emitGateConfigured(collectionId, phaseId, validatedGateConfig, policyHash);
     }
 
     /// @notice Enables or disables a caller for a configured phase.
@@ -229,23 +207,14 @@ contract StreamMintManager is
         nonReentrant
     {
         _requireConfiguredPhase(collectionId, phaseId);
-        if (executor == address(0)) {
-            revert InvalidMintExecutor(executor);
-        }
-        if (phaseExecutor[collectionId][phaseId][executor] == allowed) {
-            return;
-        }
-        phaseExecutor[collectionId][phaseId][executor] = allowed;
-        if (allowed) {
-            uint256 executorCount = _phaseExecutors[collectionId][phaseId].length;
-            if (executorCount >= MAX_PHASE_EXECUTORS) {
-                revert MintExecutorCountLimitExceeded(executorCount + 1, MAX_PHASE_EXECUTORS);
-            }
-            _phaseExecutorIndex[collectionId][phaseId][executor] = executorCount + 1;
-            _phaseExecutors[collectionId][phaseId].push(executor);
-        } else {
-            _removePhaseExecutor(collectionId, phaseId, executor);
-        }
+        if (!StreamMintPhaseState.setExecutor(
+                phaseExecutor[collectionId][phaseId],
+                _phaseExecutors[collectionId][phaseId],
+                _phaseExecutorIndex[collectionId][phaseId],
+                executor,
+                allowed,
+                MAX_PHASE_EXECUTORS
+            )) return;
 
         bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId);
         emit MintPhaseExecutorUpdated(
@@ -260,7 +229,8 @@ contract StreamMintManager is
         onlyOwner
         nonReentrant
     {
-        PhaseState storage phaseState = _requireConfiguredPhase(collectionId, phaseId);
+        StreamMintPhaseState.PhaseState storage phaseState =
+            _requireConfiguredPhase(collectionId, phaseId);
         if (phaseState.config.paused == paused) {
             return;
         }
@@ -367,7 +337,7 @@ contract StreamMintManager is
         override
         returns (bool exists, MintPhaseConfig memory config)
     {
-        PhaseState storage phaseState = _phases[collectionId][phaseId];
+        StreamMintPhaseState.PhaseState storage phaseState = _phases[collectionId][phaseId];
         return (phaseState.exists, phaseState.config);
     }
 
@@ -472,7 +442,7 @@ contract StreamMintManager is
     function _requireConfiguredPhase(uint256 collectionId, bytes32 phaseId)
         private
         view
-        returns (PhaseState storage phaseState)
+        returns (StreamMintPhaseState.PhaseState storage phaseState)
     {
         phaseState = _phases[collectionId][phaseId];
         if (!phaseState.exists) {
@@ -483,7 +453,7 @@ contract StreamMintManager is
     function _requireExecutablePhase(MintBatch calldata request)
         private
         view
-        returns (PhaseState storage phaseState)
+        returns (StreamMintPhaseState.PhaseState storage phaseState)
     {
         _requirePhaseIdentity(request.collectionId, request.phaseId);
         phaseState = _requireConfiguredPhase(request.collectionId, request.phaseId);
@@ -533,7 +503,7 @@ contract StreamMintManager is
         bytes calldata gateData,
         bytes32 executionPath
     ) private view returns (OperationTranscript memory transcript) {
-        PhaseState storage phaseState = _requireExecutablePhase(batch);
+        StreamMintPhaseState.PhaseState storage phaseState = _requireExecutablePhase(batch);
         transcript.quantity = _validateMintBatch(batch, phaseState.config);
         transcript.currentPolicyHash = _computePolicyHash(batch.collectionId, batch.phaseId);
         bytes32 registeredPolicyHash = phasePolicyHash[batch.collectionId][batch.phaseId];
@@ -742,76 +712,30 @@ contract StreamMintManager is
         view
         returns (bytes32)
     {
-        bytes32[] storage storedCounterIds = _phaseCounterIds[collectionId][phaseId];
-        bytes32[] memory counterIds = new bytes32[](storedCounterIds.length);
-        MintCounterConfig[] memory counterConfigs = new MintCounterConfig[](storedCounterIds.length);
-        for (uint256 i = 0; i < storedCounterIds.length; i++) {
-            bytes32 counterId = storedCounterIds[i];
-            counterIds[i] = counterId;
-            counterConfigs[i] = _counterConfigs[collectionId][phaseId][counterId];
-        }
-        StreamMintOperationIdentity.PolicyContext memory context =
-            StreamMintOperationIdentity.PolicyContext({
-                chainId: block.chainid,
-                manager: address(this),
-                ledger: address(mintLedger),
-                moduleRegistry: address(moduleRegistry),
-                schemaVersion: SCHEMA_VERSION,
-                collectionId: collectionId,
-                phaseId: phaseId
-            });
-        return StreamMintOperationIdentity.computePolicyHash(
-            _phases[collectionId][phaseId].config,
+        return StreamMintPhaseState.computeStoredPolicyHash(
+            _phases[collectionId][phaseId],
             _phaseGateConfigs[collectionId][phaseId],
-            counterIds,
-            counterConfigs,
+            _phaseCounterIds[collectionId][phaseId],
+            _counterConfigs[collectionId][phaseId],
             _phaseExecutors[collectionId][phaseId],
-            context
+            _policyContext(collectionId, phaseId)
         );
     }
 
-    function _replacePhaseCounters(
-        uint256 collectionId,
-        bytes32 phaseId,
-        bytes32[] memory counterIds,
-        MintCounterConfig[] calldata counterConfigs
-    ) private {
-        bytes32[] storage existing = _phaseCounterIds[collectionId][phaseId];
-        for (uint256 i = 0; i < existing.length; i++) {
-            delete _counterConfigs[collectionId][phaseId][existing[i]];
-        }
-        delete _phaseCounterIds[collectionId][phaseId];
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            _phaseCounterIds[collectionId][phaseId].push(counterIds[i]);
-            _counterConfigs[collectionId][phaseId][counterIds[i]] = counterConfigs[i];
-        }
-    }
-
-    function _removePhaseExecutor(uint256 collectionId, bytes32 phaseId, address executor) private {
-        uint256 indexPlusOne = _phaseExecutorIndex[collectionId][phaseId][executor];
-        if (indexPlusOne == 0) {
-            return;
-        }
-        uint256 index = indexPlusOne - 1;
-        address[] storage executors = _phaseExecutors[collectionId][phaseId];
-        address last = executors[executors.length - 1];
-        if (index != executors.length - 1) {
-            executors[index] = last;
-            _phaseExecutorIndex[collectionId][phaseId][last] = indexPlusOne;
-        }
-        executors.pop();
-        delete _phaseExecutorIndex[collectionId][phaseId][executor];
-    }
-
-    function _copyCounterIds(bytes32[] calldata counterIds)
+    function _policyContext(uint256 collectionId, bytes32 phaseId)
         private
-        pure
-        returns (bytes32[] memory ids)
+        view
+        returns (StreamMintOperationIdentity.PolicyContext memory)
     {
-        ids = new bytes32[](counterIds.length);
-        for (uint256 i = 0; i < counterIds.length; i++) {
-            ids[i] = counterIds[i];
-        }
+        return StreamMintOperationIdentity.PolicyContext(
+            block.chainid,
+            address(this),
+            address(mintLedger),
+            address(moduleRegistry),
+            SCHEMA_VERSION,
+            collectionId,
+            phaseId
+        );
     }
 
     function _ledgerPolicy(MintCounterConfig memory config)
@@ -833,116 +757,5 @@ contract StreamMintManager is
         if (collectionId == 0 || phaseId == bytes32(0)) {
             revert InvalidMintPhase(collectionId, phaseId);
         }
-    }
-
-    function _requirePhaseConfig(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintPhaseConfig calldata config
-    ) private pure {
-        if (config.endTime != 0 && config.startTime != 0 && config.endTime < config.startTime) {
-            revert InvalidMintPhase(collectionId, phaseId);
-        }
-        if (config.maxBatchQuantity == 0 || config.maxBatchQuantity > MAX_PHASE_BATCH_QUANTITY) {
-            revert InvalidMintBatchLimit(config.maxBatchQuantity, MAX_PHASE_BATCH_QUANTITY);
-        }
-    }
-
-    function _requireNoDuplicateCounterId(bytes32[] calldata counterIds, uint256 index)
-        private
-        pure
-    {
-        bytes32 counterId = counterIds[index];
-        if (counterId == bytes32(0)) {
-            revert InvalidMintCounter(counterId);
-        }
-        for (uint256 i = 0; i < index; i++) {
-            if (counterIds[i] == counterId) {
-                revert DuplicateMintCounter(counterId);
-            }
-        }
-    }
-
-    function _requireStaticCounterConfig(bytes32 counterId, MintCounterConfig calldata config)
-        private
-        pure
-    {
-        if (
-            !config.enabled || config.keyMode == CounterKeyMode.UNKNOWN
-                || config.staticIncrement == 0 || config.counterConfigHash == bytes32(0)
-        ) {
-            revert InvalidMintCounter(counterId);
-        }
-        if (
-            config.deltaMode != IStreamMintLedger.CounterDeltaMode.STATIC
-                || config.capMode == IStreamMintLedger.CounterCapMode.RESOLVER
-        ) {
-            revert UnsupportedMintCounterMode(counterId);
-        }
-        if (config.capMode == IStreamMintLedger.CounterCapMode.STATIC && config.staticCap == 0) {
-            revert InvalidMintCounter(counterId);
-        }
-        if (config.capMode == IStreamMintLedger.CounterCapMode.NONE && config.staticCap != 0) {
-            revert InvalidMintCounter(counterId);
-        }
-    }
-
-    function _emitCounterConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        bytes32 counterId,
-        MintCounterConfig calldata config,
-        bytes32 policyHash
-    ) private {
-        emit MintCounterConfigured(
-            collectionId,
-            phaseId,
-            counterId,
-            config.keyMode,
-            config.capMode,
-            config.deltaMode,
-            config.staticCap,
-            config.staticIncrement,
-            config.counterConfigHash,
-            policyHash
-        );
-    }
-
-    function _emitPhaseConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintPhaseConfig calldata config,
-        bytes32 policyHash
-    ) private {
-        emit MintPhaseConfigured(
-            collectionId,
-            phaseId,
-            policyHash,
-            config.startTime,
-            config.endTime,
-            config.maxBatchQuantity,
-            config.configHash,
-            config.metadataHash,
-            msg.sender
-        );
-    }
-
-    function _emitGateConfigured(
-        uint256 collectionId,
-        bytes32 phaseId,
-        MintGateConfig memory gateConfig,
-        bytes32 policyHash
-    ) private {
-        emit MintPhaseGateConfigured(
-            collectionId,
-            phaseId,
-            gateConfig.gate,
-            gateConfig.gateConfigHash,
-            gateConfig.gateCodehash,
-            gateConfig.gateMetadataHash,
-            gateConfig.gateSemanticVersion,
-            gateConfig.gateGasLimit,
-            policyHash
-        );
     }
 }

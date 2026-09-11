@@ -895,4 +895,139 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
             "identity nonce spaces independent"
         );
     }
+
+    function executeTargetSafe(address target, bytes calldata data) external returns (bool) {
+        require(msg.sender == address(this), "test-only entry");
+        return executeSafe(artist, keys, target, 0, data, 0);
+    }
+
+    function _executorPolicy(address[] memory executors) private {
+        (bytes32[] memory ids, IStreamMintManager.MintCounterConfig[] memory configs) = _counters();
+        IStreamMintManager.MintGateConfig memory gate;
+        POLICY =
+            manager.previewPhasePolicyHash(1, PHASE, _phaseConfig(), gate, ids, configs, executors);
+        (bool consented,) = ingress.isPolicyConsented(1, PHASE, POLICY);
+        if (!consented) _policy();
+    }
+
+    function _safeExecutor(address executor, bool allowed) private {
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(manager),
+                0,
+                abi.encodeCall(IStreamMintManager.setPhaseExecutor, (1, PHASE, executor, allowed)),
+                0
+            ),
+            "Safe phase executor change"
+        );
+        require(
+            manager.phasePolicyHash(1, PHASE) == POLICY
+                && ledger.registeredPhasePolicyHash(address(manager), 1, PHASE) == POLICY,
+            "stored and Ledger policy parity"
+        );
+    }
+
+    function testManagerLinkedConfigurationPreservesEventsAndDeployableRuntime() public {
+        require(address(manager).code.length <= 24_576, "Manager EIP170 deployment limit");
+        _all();
+        vm.recordLogs();
+        (bool ok, bytes memory reason) = address(manager).call(_configureData());
+        if (!ok) assembly ("memory-safe") { revert(add(reason, 32), mload(reason)) }
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32[4] memory expected;
+        expected[0] =
+            keccak256("MintPhaseConsentRecorded(uint16,uint256,bytes32,bytes32,uint8,bytes32)");
+        expected[1] = keccak256(
+            "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)"
+        );
+        expected[2] = keccak256(
+            "MintCounterConfigured(uint256,bytes32,bytes32,uint8,uint8,uint8,uint64,uint64,bytes32,bytes32)"
+        );
+        expected[3] = keccak256(
+            "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)"
+        );
+        uint256 found;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(manager)) continue;
+            require(found < 4 && logs[i].topics[0] == expected[found], "Manager event order/topic");
+            require(
+                logs[i].topics[1] == bytes32(uint256(1)) && logs[i].topics[2] == PHASE,
+                "Manager event scope"
+            );
+            if (found == 0 || found == 1) require(logs[i].topics[3] == POLICY, "event policy");
+            if (found == 1) {
+                (
+                    uint64 start,
+                    uint64 end,
+                    uint32 limit,
+                    bytes32 configHash,
+                    bytes32 metadataHash,
+                    address admin
+                ) = abi.decode(logs[i].data, (uint64, uint64, uint32, bytes32, bytes32, address));
+                require(
+                    start == 0 && end == 0 && limit == 1 && configHash == keccak256("phase config")
+                        && metadataHash == keccak256("phase metadata") && admin == address(this),
+                    "delegatecall original admin and payload"
+                );
+            }
+            ++found;
+        }
+        require(found == 4, "all configuration events emitted by Manager");
+        require(manager.phasePolicyHash(1, PHASE) == POLICY, "prospective/stored hash parity");
+    }
+
+    function testSafeExecutorSwapRemovalAndLateLedgerFailureRollBackLinkedStorage() public {
+        _all();
+        (bool ok, bytes memory reason) = address(manager).call(_configureData());
+        if (!ok) assembly ("memory-safe") { revert(add(reason, 32), mload(reason)) }
+        manager.transferOwnership(address(artist));
+        address first = address(0x1111);
+        address second = address(0x2222);
+        address[] memory intended = new address[](1);
+        intended[0] = first;
+        _executorPolicy(intended);
+        _safeExecutor(first, true);
+        intended = new address[](2);
+        intended[0] = second;
+        intended[1] = first;
+        _executorPolicy(intended);
+        _safeExecutor(second, true);
+        intended = new address[](1);
+        intended[0] = second;
+        _executorPolicy(intended);
+        _safeExecutor(first, false);
+        require(
+            !manager.phaseExecutor(1, PHASE, first) && manager.phaseExecutor(1, PHASE, second),
+            "swap removal retains last executor"
+        );
+        bytes32 before_ = _roots();
+        _safeExecutor(first, false);
+        require(_roots() == before_, "unchanged permission no artist replay mutation");
+        intended = new address[](0);
+        _executorPolicy(intended);
+        _safeExecutor(second, false);
+        require(!manager.phaseExecutor(1, PHASE, second), "swapped index removal");
+
+        intended = new address[](1);
+        intended[0] = first;
+        _executorPolicy(intended);
+        bytes32 oldHash = manager.phasePolicyHash(1, PHASE);
+        before_ = _roots();
+        ledger.setLedgerWriter(address(manager), false);
+        vm.expectRevert();
+        this.executeTargetSafe(
+            address(manager),
+            abi.encodeCall(IStreamMintManager.setPhaseExecutor, (1, PHASE, first, true))
+        );
+        require(
+            !manager.phaseExecutor(1, PHASE, first) && manager.phasePolicyHash(1, PHASE) == oldHash
+                && ledger.registeredPhasePolicyHash(address(manager), 1, PHASE) == oldHash
+                && _roots() == before_,
+            "late Ledger failure rolls back helper maps/hash/index"
+        );
+        ledger.setLedgerWriter(address(manager), true);
+        _safeExecutor(first, true);
+    }
 }
