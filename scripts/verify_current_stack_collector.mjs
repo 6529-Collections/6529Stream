@@ -11,7 +11,13 @@ const directory = resolve(process.argv[2] ?? '.');
 const materialize = process.argv.includes('--materialize');
 const expectedIndex = process.argv.indexOf('--expected-manifest-sha256');
 const expectedHash = expectedIndex < 0 ? undefined : process.argv[expectedIndex + 1];
-const read = name => readFileSync(join(directory, name));
+const read = name => {
+  try { return readFileSync(join(directory, name)); }
+  catch (error) {
+    if (error?.code === 'ENOENT') fail(`Missing collector package file: ${name}.`);
+    throw error;
+  }
+};
 if (materialize && existsSync(join(directory,'manifest.json'))) fail('Refusing to replace an existing collector manifest.');
 const renderer = read('field-studies.js');
 if (sha(renderer) !== RENDERER_SHA256) fail('Unsupported renderer: this verifier executes only its exact reviewed Field Studies bytes.');

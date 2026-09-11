@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdtempSync, readFileSync, writeFileSync, copyFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, copyFileSync, rmSync, existsSync, unlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +45,18 @@ try {
   }
   rejects(()=>run(['--expected-manifest-sha256']),/exactly64 lowercase hex/);
   rejects(()=>run(['--expected-manifest-sha256','00'.repeat(32)]),/independently retained expected hash/);
+
+  // Every missing member is data for the trusted repository verifier, even verify.mjs itself.
+  for (const file of ['field-studies.js','collection.json','token-2.html','token-2.metadata.json','token-2.svg','index.html','README.txt','verify.mjs','manifest.json']) {
+    const path=join(root,file),before=readFileSync(path);unlinkSync(path);
+    try {
+      assert.throws(
+        ()=>execFileSync(process.execPath,[join(here,'verify_current_stack_collector.mjs'),root,'--expected-manifest-sha256',expected],{stdio:['ignore','pipe','pipe']}),
+        error=>(error.stderr?.toString()??'').includes(`Missing collector package file: ${file}.`)
+      );count++;
+    } finally {writeFileSync(path,before);}
+  }
+  assert.equal(createHash('sha256').update(readFileSync(join(root,'manifest.json'))).digest('hex'),expected);count++;
 
   const verifierPath=join(root,'verify.mjs'), verifierBytes=readFileSync(verifierPath), marker=join(root,'UNTRUSTED-EXECUTED');
   writeFileSync(verifierPath,`import{writeFileSync}from'node:fs';writeFileSync(${JSON.stringify(marker)},'executed');`);
