@@ -12,7 +12,7 @@ import "../../mocks/MockVRFCoordinatorV2Plus.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
-import "../../../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
+import "../../mocks/StreamMetadataArtistBoundary.sol";
 import "../../../smart-contracts/core/StreamCore.sol";
 import "../../../smart-contracts/core/StreamCoreExternalReads.sol";
 import "../../../smart-contracts/interfaces/stream/mint/IStreamMintManager.sol";
@@ -32,7 +32,7 @@ contract NativeMetadataEncodingHarness is StreamMetadataRouter {
         address core_,
         address authority_,
         bytes32 manifest_,
-        IStreamCollectionArtistRegistry artist_
+        IStreamArtistAttribution artist_
     )
         StreamMetadataRouter(core_, authority_, manifest_, "ipfs://local-test", manifest_, artist_)
     { }
@@ -42,7 +42,8 @@ contract NativeMetadataEncodingHarness is StreamMetadataRouter {
     }
 }
 
-/// @notice Domain tests use the real permanent Core; only external actors/registry are fixtures.
+/// @notice Real Core, entropy and rendering with explicit governance and artist read boundaries.
+/// @dev Direct Core minting isolates entropy/metadata; current-stack tests prove artist eligibility.
 contract StreamEntropyMetadataTest is CharacterizationTestBase {
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
     event log_named_uint(string key, uint256 value);
@@ -61,7 +62,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
     PermanentTargetModuleRegistry private registry;
     StreamEntropyCoordinator private entropy;
     StreamMetadataRouter private router;
-    StreamCollectionArtistRegistry private artistRegistry;
+    StreamMetadataArtistBoundary private artistRegistry;
     MockStreamEntropyProvider private provider;
 
     function supportsInterface(bytes4 id) external pure returns (bool) {
@@ -105,9 +106,7 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         entropy = new StreamEntropyCoordinator(
             address(core), address(this), MANIFEST, "ipfs://local-test", MANIFEST
         );
-        artistRegistry = new StreamCollectionArtistRegistry(
-            address(core), address(this), MANIFEST, "ipfs://local-artist", MANIFEST
-        );
+        artistRegistry = new StreamMetadataArtistBoundary(address(core), address(this), RECIPIENT);
         router = new NativeMetadataEncodingHarness(
             address(core), address(this), MANIFEST, artistRegistry
         );
@@ -147,14 +146,10 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         );
         executor.setAction(1, scope, oldState, newState);
         executor.execute(address(core), abi.encodeCall(core.createCollection, (2, false, 0, 0)));
-        artistRegistry.nominateArtist(1, RECIPIENT, keccak256("artist identity"));
-        bytes32 nomination = artistRegistry.attribution(1).nominationHash;
-        vm.prank(RECIPIENT);
-        artistRegistry.acceptArtist(1, nomination, 0, uint64(block.timestamp + 1 days), "");
         _install(
             keccak256("ARTIST_REGISTRY"),
             address(artistRegistry),
-            type(IStreamCollectionArtistRegistry).interfaceId
+            type(IStreamArtistMintConsent).interfaceId
         );
         entropy.configureCollection(1, address(provider), keccak256("collection-salt"), true, 10);
         router.setCollectionMetadata(
@@ -349,6 +344,39 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
         string memory json = router.tokenMetadataJSON(address(core), id);
         string memory animation = abi.decode(vm.parseJson(json, ".animation_url"), (string));
         require(bytes(animation).length > 100, "actual onchain HTML");
+    }
+
+    function testRatificationBlocksRenderMutationButKeepsExactContentAndEditorialEdits() public {
+        router.setCollectionScript(1, "document.body.textContent=tokenHash;");
+        (, bytes32 beforeHash) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(beforeHash);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentAuthorizationRequired.selector, 1
+            )
+        );
+        router.setCollectionScript(1, "document.body.textContent='changed';");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentAuthorizationRequired.selector, 1
+            )
+        );
+        router.setCollectionMetadata(1, "Name", "Description", "ipfs://changed", "");
+        router.setCollectionScript(1, "document.body.textContent=tokenHash;");
+        router.setCollectionMetadata(
+            1, "Edited name", "Edited description", "ipfs://image", "https://example.test/art/"
+        );
+        (, bytes32 afterHash) = router.currentArtistContentState(1);
+        require(afterHash == beforeHash, "ratified rendering inputs unchanged");
+    }
+
+    function testArtistBoundaryCannotStandInForActualMintConsent() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataArtistBoundary.MintConsentOutsideMetadataFixture.selector
+            )
+        );
+        artistRegistry.requireMintConsent(1, keccak256("phase"), keccak256("policy"));
     }
 
     function testMetadataExposesAcceptedArtistEvidence() public {
