@@ -6,6 +6,7 @@ import "./StreamArtistEconomicOperations.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorOperations.sol";
 import "./StreamArtistAuthorizationState.sol";
+import "./StreamArtistContentOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingLifecycleCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationCoordinator.sol";
@@ -117,8 +118,10 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(7),
                 uint16(14),
                 uint16(15),
+                uint16(17),
                 uint16(18),
                 uint16(20),
+                uint16(21),
                 uint16(24),
                 uint16(26),
                 uint16(27),
@@ -446,6 +449,22 @@ contract StreamArtistOnboardingCoordinator is
                 ? abi.encode(b, p, a, statement, proof)
                 : abi.encode(b, p, a, statement, proof, effective)
         );
+    }
+
+    function coordinateRecordContentConsent(
+        address actor,
+        Content.Consent calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistContentOperations.consent(_economicContext(), actor, p, a);
+    }
+
+    function coordinateAuthorizeArtistContentFreeze(
+        address actor,
+        Content.Freeze calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistContentOperations.freeze(_economicContext(), actor, p, a);
     }
 
     function coordinateRecordContentRatification(

@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import {
+    IStreamArtistContentAuthority
+} from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegation.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingLifecycle.sol";
 import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
@@ -31,6 +34,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistBeneficiaryFacts,
     IStreamArtistCollaboratorLifecycle,
     IStreamArtistAuthorizationRevocation,
+    IStreamArtistContentAuthority,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -89,7 +93,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
             || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
             || id == type(IStreamArtistAuthorizationRevocation).interfaceId
-            || super.supportsInterface(id);
+            || id == type(IStreamArtistContentAuthority).interfaceId || super.supportsInterface(id);
     }
 
     function revokeArtistAuthorization(
@@ -444,6 +448,80 @@ contract StreamArtistOnboardingRegistry is
     ) external returns (bytes32) {
         return IStreamArtistOnboardingCoordinator(operationCoordinator)
             .coordinateRecordArtistAttestation(msg.sender, p, a, statement);
+    }
+
+    function recordContentConsent(Content.Consent calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistContentCoordinator(operationCoordinator)
+            .coordinateRecordContentConsent(msg.sender, p, a);
+    }
+
+    function authorizeArtistContentFreeze(Content.Freeze calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistContentCoordinator(operationCoordinator)
+            .coordinateAuthorizeArtistContentFreeze(msg.sender, p, a);
+    }
+
+    function contentConsentDigest(Content.Consent calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistContentHashes.consentDigest(_environment(), p, a);
+    }
+
+    function contentFreezeDigest(Content.Freeze calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistContentHashes.freezeDigest(_environment(), p, a);
+    }
+
+    function requireContentConsent(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
+        external
+        view
+    {
+        StreamArtistContentOperations.consentEvidence(
+            _contentSuite(), collectionId, familyId, newStateHash
+        );
+    }
+
+    function contentConsentEvidence(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistContentOperations.consentEvidence(
+            _contentSuite(), collectionId, familyId, newStateHash
+        );
+    }
+
+    function isContentFreezeAuthorized(uint256 collectionId, bytes32 lockClass)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return StreamArtistContentOperations.freezeAuthorized(
+            _contentSuite(), collectionId, lockClass
+        );
+    }
+
+    function contentFreezeAuthorization(bytes32 recordHash)
+        external
+        view
+        returns (Content.FreezeRecord memory)
+    {
+        return IStreamArtistContentRecordsOwner(_contentSuite().owners[6])
+            .contentFreezeRecord(recordHash);
+    }
+
+    function _contentSuite() private view returns (T.SuiteConfiguration memory) {
+        return StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
     }
 
     function recordContentRatification(T.Ratification calldata p, T.Authorization calldata a)

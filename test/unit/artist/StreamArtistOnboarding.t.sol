@@ -164,13 +164,102 @@ contract ArtistUnitRoles {
 
 contract ArtistUnitMetadata {
     bytes32 public content = keccak256("initial unit content");
+    IStreamArtistContentAuthority public artistContent;
+    IStreamArtistContentRatification public artistRatification;
+    mapping(bytes32 => bool) public consumedContentRecord;
+    mapping(uint256 => mapping(bytes32 => bool)) public contentLocks;
+    mapping(uint256 => bytes32) private evolutionRatification;
+    mapping(uint256 => bytes32) private evolutionContent;
+
+    function configureArtist(address registry) external {
+        artistContent = IStreamArtistContentAuthority(registry);
+        artistRatification = IStreamArtistContentRatification(registry);
+    }
 
     function setContent(bytes32 value) external {
         content = value;
     }
 
     function currentArtistContentState(uint256 id) external view returns (address, bytes32) {
+        require(content != bytes32(0), "unit nonempty artwork floor");
         return (address(this), keccak256(abi.encode(id, content)));
+    }
+
+    function artistContentFamilyState(uint256 id, bytes32 family)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return (family == keccak256("SCRIPT"), familyState(id, content));
+    }
+
+    function familyState(uint256 id, bytes32 candidate) public pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("SCRIPT"), id, candidate));
+    }
+
+    function artistContentLockState(uint256 id, bytes32 lockClass)
+        external
+        view
+        returns (bool, bool)
+    {
+        if (lockClass == keccak256("DEPENDENCIES")) return (true, true);
+        bool supported = lockClass == keccak256("SCRIPT")
+            || lockClass == keccak256("MEDIA_MANIFEST") || lockClass == keccak256("BASE_URI");
+        return (supported, contentLocks[id][lockClass]);
+    }
+
+    function artistContentFreezeState(uint256 id) external view returns (bytes32) {
+        return keccak256(abi.encode(id, content));
+    }
+
+    function artistContentEvolution(uint256 id) external view returns (bytes32, bytes32) {
+        return (evolutionRatification[id], evolutionContent[id]);
+    }
+
+    /// @dev Unit host application boundary, distinct from root's actual current router tests.
+    function applyContent(uint256 id, bytes32 candidate) external {
+        require(!contentLocks[id][keccak256("SCRIPT")], "unit script locked");
+        (bool exists, bytes32 ratified, bytes32 ratification) =
+            artistRatification.firstReleaseRatification(id);
+        bytes32 before_ = keccak256(abi.encode(id, content));
+        require(
+            exists
+                && (ratified == before_
+                    || (evolutionRatification[id] == ratification
+                        && evolutionContent[id] == before_)),
+            "unit predecessor"
+        );
+        bytes32 record = artistContent.contentConsentEvidence(
+            id, keccak256("SCRIPT"), familyState(id, candidate)
+        );
+        require(!consumedContentRecord[record], "unit consent consumed");
+        require(candidate != content, "unit no-op");
+        consumedContentRecord[record] = true;
+        content = candidate;
+        evolutionRatification[id] = ratification;
+        evolutionContent[id] = keccak256(abi.encode(id, candidate));
+    }
+
+    function applyFreeze(uint256 id, bytes32 record) external {
+        Content.FreezeRecord memory r = artistContent.contentFreezeAuthorization(record);
+        require(
+            r.recordHash == record && r.expectedStateHash == keccak256(abi.encode(id, content)),
+            "unit stale freeze"
+        );
+        for (uint256 i; i < r.lockClasses.length; ++i) {
+            (bool authorized, bytes32 exact) =
+                artistContent.isContentFreezeAuthorized(id, r.lockClasses[i]);
+            require(authorized && exact == record, "unit freeze authority");
+        }
+        for (uint256 i; i < r.lockClasses.length; ++i) {
+            contentLocks[id][r.lockClasses[i]] = true;
+        }
+    }
+
+    /// @dev Deliberately forged fixture witness for negative tests, never a production authority.
+    function setEvolution(uint256 id, bytes32 ratification, bytes32 resulting) external {
+        evolutionRatification[id] = ratification;
+        evolutionContent[id] = resulting;
     }
 }
 
@@ -308,6 +397,613 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         primary.setPrimaryTemplateAssignment(PRIMARY, 1, 1, templateFixtureId, bytes32(0));
     }
 
+    function _contentProposal(bytes32 candidate) private view returns (Content.Consent memory) {
+        return Content.Consent(
+            1, address(metadata), keccak256("SCRIPT"), metadata.familyState(1, candidate)
+        );
+    }
+
+    function _contentConsent(bytes32 candidate) private returns (bytes32) {
+        Content.Consent memory p = _contentProposal(candidate);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        return ingress.recordContentConsent(p, a);
+    }
+
+    function _contentFreezeProposal() private view returns (Content.Freeze memory) {
+        bytes32[] memory locks = new bytes32[](1);
+        locks[0] = keccak256("SCRIPT");
+        return Content.Freeze(1, address(metadata), locks, metadata.artistContentFreezeState(1));
+    }
+
+    function _contentFreeze() private returns (bytes32) {
+        Content.Freeze memory p = _contentFreezeProposal();
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.contentFreezeDigest(p, a));
+        return ingress.authorizeArtistContentFreeze(p, a);
+    }
+
+    function testContentActualSafeDirectWriterPinsTypedDigestAndProtocolGuards() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(keccak256("direct Safe artwork"));
+        T.Authorization memory a = _authorization(false);
+        StreamArtistHashes.Environment memory e = StreamArtistHashes.Environment(
+            block.chainid, address(ingress), address(core), address(manager)
+        );
+        bytes32 expectedDigest = StreamArtistHashes.typed(
+            e,
+            keccak256(
+                abi.encode(
+                    bytes32(0x7908964dc70554ffd5c82353690255d1a8c338be77ffc0f8fb925a27d890587d),
+                    address(core),
+                    address(metadata),
+                    uint256(1),
+                    p.familyId,
+                    p.newStateHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(
+            ingress.contentConsentDigest(p, a) == expectedDigest, "canonical content typehash/order"
+        );
+        Content.Freeze memory freeze = _contentFreezeProposal();
+        bytes32 expectedFreeze = StreamArtistHashes.typed(
+            e,
+            keccak256(
+                abi.encode(
+                    bytes32(0xfcb15d96b29996a5852bf06058ae82a7e8acaf7d7601b13fe881ada5d30fc63b),
+                    address(core),
+                    address(metadata),
+                    uint256(1),
+                    keccak256(abi.encodePacked(freeze.lockClasses)),
+                    freeze.expectedStateHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(
+            ingress.contentFreezeDigest(freeze, a) == expectedFreeze,
+            "canonical freeze array/typehash/order"
+        );
+        bytes memory prepared =
+            abi.encodeCall(IStreamArtistContentAuthority.recordContentConsent, (p, a));
+        vm.warp(1030);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, prepared, 0),
+            "actual queued Safe direct content writer"
+        );
+        bytes32 record = ingress.contentConsentEvidence(1, p.familyId, p.newStateHash);
+        (,, T.Authorization memory saved, T.SignerApproval memory proof,) = abi.decode(
+            _operationPayload(17, address(artist), record),
+            (T.Binding, Content.Consent, T.Authorization, T.SignerApproval, bytes32)
+        );
+        require(
+            proof.direct && proof.signer == address(artist) && proof.digest == expectedDigest
+                && saved.signature.length == 0 && saved.time == a.time,
+            "direct proof distinct from empty relay"
+        );
+        bytes32 expectedRecord = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CONTENT_CONSENT_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                address(metadata),
+                address(core),
+                uint256(1),
+                p.familyId,
+                p.newStateHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                uint64(1030)
+            )
+        );
+        require(record == expectedRecord, "observed inclusion record time");
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        T.ActionContext memory c = T.ActionContext(
+            17, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        bytes memory callback =
+            abi.encodeCall(
+            IStreamArtistContentIdentityOwner.consumeContentConsent, (c, b, p, a, proof)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], callback);
+        c.expected = IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2();
+        callback = abi.encodeCall(
+            IStreamArtistContentRecordsOwner.recordContentConsent,
+            (c, b, p, address(artist), a.nonce)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[6], callback);
+        callback = abi.encodeCall(
+            IStreamArtistContentCoordinator.coordinateRecordContentConsent, (address(artist), p, a)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(coordinator), callback);
+    }
+
+    function testContentSafeConsentEvolutionRepeatedTargetAndOldRecords() public {
+        _all();
+        bytes32 initial = metadata.content();
+        bytes32 candidate = keccak256("artist approved second artwork");
+        bytes32 first = _contentConsent(candidate);
+        metadata.applyContent(1, candidate);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "unit consent consumed"));
+        metadata.applyContent(1, candidate);
+        bytes32 back = _contentConsent(initial);
+        metadata.applyContent(1, initial);
+        bytes32 third = _contentConsent(candidate);
+        require(first != back && first != third, "fresh one-use record for repeated destination");
+        metadata.applyContent(1, candidate);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            metadata.consumedContentRecord(first) && metadata.consumedContentRecord(back)
+                && metadata.consumedContentRecord(third),
+            "each applied write consumed its own record"
+        );
+        IStreamArtistContentRecordsOwner.ConsentRecord memory historical =
+            IStreamArtistContentRecordsOwner(suite.owners[6]).contentConsentRecord(first);
+        require(
+            historical.recordHash == first
+                && historical.terms.newStateHash == metadata.familyState(1, candidate),
+            "history never overwritten"
+        );
+        _ratify();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        bytes32 next = keccak256("after new operative ratification");
+        _contentConsent(next);
+        metadata.applyContent(1, next);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
+    function testContentRecordCanonicalEventArchiveAndDirectSafeRead() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(keccak256("new content"));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CONTENT_CONSENT_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                address(metadata),
+                address(core),
+                uint256(1),
+                p.familyId,
+                p.newStateHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                uint64(block.timestamp)
+            )
+        );
+        vm.recordLogs();
+        bytes32 record = ingress.recordContentConsent(p, a);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool eventSeen;
+        bool contextSeen;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != suite.owners[6]) continue;
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistContentConsentRecorded(uint16,uint256,bytes32,address,bytes32,uint8,uint256,uint64,bytes32)"
+                    )
+            ) {
+                require(
+                    logs[i].topics[1] == bytes32(uint256(1)) && logs[i].topics[2] == p.familyId
+                        && logs[i].topics[3] == bytes32(uint256(uint160(address(artist)))),
+                    "exact event identity"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.newStateHash,
+                                uint8(1),
+                                a.nonce,
+                                uint64(block.timestamp),
+                                expected
+                            )
+                        ),
+                    "exact observed event preimage"
+                );
+                eventSeen = true;
+            }
+            if (
+                logs[i].topics[0]
+                    == keccak256("ArtistContentRecordContext(uint16,bytes32,address,bytes32)")
+            ) {
+                require(
+                    logs[i].topics[1] == record
+                        && keccak256(logs[i].data)
+                            == keccak256(abi.encode(uint16(1), address(metadata), artistId)),
+                    "reconstruction context"
+                );
+                contextSeen = true;
+            }
+        }
+        require(
+            record == expected && eventSeen && contextSeen, "canonical content record and events"
+        );
+        (
+            ,
+            Content.Consent memory archived,
+            T.Authorization memory authorization,
+            T.SignerApproval memory proof,
+        ) = abi.decode(
+            _operationPayload(17, address(this), record),
+            (T.Binding, Content.Consent, T.Authorization, T.SignerApproval, bytes32)
+        );
+        require(
+            archived.newStateHash == p.newStateHash && authorization.time == a.time
+                && proof.signer == address(artist),
+            "original signed proof archive"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistContentAuthority.contentConsentDigest, (p, a)),
+                0
+            ),
+            "Safe digest read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistContentAuthority.requireContentConsent,
+                    (uint256(1), p.familyId, p.newStateHash)
+                ),
+                0
+            ),
+            "Safe canonical require read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistContentAuthority.contentConsentEvidence,
+                    (uint256(1), p.familyId, p.newStateHash)
+                ),
+                0
+            ),
+            "Safe validating evidence read"
+        );
+    }
+
+    function testContentDelayedDirectSafeDefensiveFreezeNeedsNoMintFloors() public {
+        _accept();
+        metadata.setContent(bytes32(0));
+        Content.Freeze memory p = _contentFreezeProposal();
+        T.Authorization memory a = _authorization(false);
+        bytes memory prepared =
+            abi.encodeCall(IStreamArtistContentAuthority.authorizeArtistContentFreeze, (p, a));
+        vm.warp(1050);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, prepared, 0),
+            "queued defensive Safe action"
+        );
+        (bool valid, bytes32 record) = ingress.isContentFreezeAuthorized(1, keccak256("SCRIPT"));
+        Content.FreezeRecord memory r = ingress.contentFreezeAuthorization(record);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_CONTENT_FREEZE_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                address(metadata),
+                address(core),
+                uint256(1),
+                p.lockClasses,
+                p.expectedStateHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                uint64(1050)
+            )
+        );
+        require(
+            valid && record == expected && r.authorityClass == 1 && r.artistId == artistId
+                && r.bindingGeneration == 1,
+            "actual verified authority record"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistContentAuthority.contentFreezeDigest, (p, a)),
+                0
+            ),
+            "Safe freeze digest"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistContentAuthority.isContentFreezeAuthorized,
+                    (uint256(1), keccak256("SCRIPT"))
+                ),
+                0
+            ),
+            "Safe freeze authority read"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistContentAuthority.contentFreezeAuthorization, (record)),
+                0
+            ),
+            "Safe historical freeze read"
+        );
+        metadata.applyFreeze(1, record);
+        require(
+            metadata.contentLocks(1, keccak256("SCRIPT")),
+            "permissionless one-way application with empty artwork"
+        );
+        (valid,) = ingress.isContentFreezeAuthorized(1, keccak256("SCRIPT"));
+        require(!valid, "already locked cannot be reapplied");
+    }
+
+    function testContentStaleFreezeCanRefreshWithoutDeletingHistory() public {
+        _accept();
+        bytes32 first = _contentFreeze();
+        metadata.setContent(keccak256("pre-ratification iteration"));
+        (bool valid,) = ingress.isContentFreezeAuthorized(1, keccak256("SCRIPT"));
+        require(!valid, "old expected state no longer current");
+        bytes32 second = _contentFreeze();
+        require(
+            first != second && ingress.contentFreezeAuthorization(first).recordHash == first,
+            "stale authorization remains historical"
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "unit stale freeze"));
+        metadata.applyFreeze(1, first);
+        metadata.applyFreeze(1, second);
+    }
+
+    function testContentDisputedBoundaryBlocksConsentButPreservesDefensiveFreeze() public {
+        _accept();
+        // Explicit attribution-owner read boundary; this does not implement a dispute operation.
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (uint256(1))),
+            abi.encode(uint8(4), uint64(1))
+        );
+        Content.Consent memory p = _contentProposal(keccak256("disputed change"));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.recordContentConsent(p, a);
+        require(_roots() == before_, "dispute rejection atomic");
+        bytes32 record = _contentFreeze();
+        metadata.applyFreeze(1, record);
+        require(
+            metadata.contentLocks(1, keccak256("SCRIPT")),
+            "defense still available in disputed boundary"
+        );
+        avm.clearMockedCalls();
+    }
+
+    function testContentLateArchiveFailureRollsBackBothOwnersAndLookupPointers() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(keccak256("late rollback"));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        bytes memory failure = abi.encodeWithSignature("Error(string)", "content archive failed");
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            failure
+        );
+        vm.expectRevert(failure);
+        ingress.recordContentConsent(p, a);
+        require(
+            _roots() == before_
+                && !ingress.artistAuthorizationState(artistId, bytes32(0), a.nonce).nonceConsumed,
+            "content nonce and both roots restored"
+        );
+        avm.clearMockedCalls();
+        bytes32 record = ingress.recordContentConsent(p, a);
+        require(
+            ingress.contentConsentEvidence(1, p.familyId, p.newStateHash) == record,
+            "exact retry succeeds"
+        );
+        Content.Freeze memory freeze = _contentFreezeProposal();
+        a = _authorization(false);
+        a.signature = _signature(ingress.contentFreezeDigest(freeze, a));
+        before_ = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            failure
+        );
+        vm.expectRevert(failure);
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        require(_roots() == before_, "freeze rollback preserves both owners");
+        avm.clearMockedCalls();
+        (bool valid,) = ingress.isContentFreezeAuthorized(1, keccak256("SCRIPT"));
+        require(!valid, "failed freeze leaves no lookup record");
+        ingress.authorizeArtistContentFreeze(freeze, a);
+    }
+
+    function testContentBadProofRevocationAndHostSubstitutionHaveNoEffects() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(keccak256("future denied"));
+        T.Authorization memory a = T.Authorization(71, 2000, "");
+        bytes32 digest = ingress.contentConsentDigest(p, a);
+        address ownerEoa = vm.addr(keys[0]);
+        vm.prank(ownerEoa);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordContentConsent(p, a);
+        a.signature = _signature(keccak256("wrong domain"));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordContentConsent(p, a);
+        a.time = 999;
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, uint64(999)));
+        ingress.recordContentConsent(p, a);
+        a.time = 2000;
+        StreamArtistAuthorizationTypes.Revocation memory revoke =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory cancel = _authorization(false);
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(revoke, cancel));
+        ingress.revokeArtistAuthorization(revoke, cancel);
+        bytes32 deny = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[2],
+                keccak256("domain:identity_authority"),
+                keccak256("identity_authority.replay.digest_revocation"),
+                keccak256(abi.encode(artistId, digest))
+            )
+        );
+        a.signature = _signature(digest);
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, deny));
+        ingress.recordContentConsent(p, a);
+        p.metadataContract = address(0xBAD);
+        vm.expectRevert(abi.encodeWithSelector(T.ComponentChanged.selector, address(0xBAD)));
+        ingress.recordContentConsent(p, a);
+        require(_roots() == before_, "denied content never changes records");
+    }
+
+    function testContentRejectsUnknownNoopAndMalformedLocksBeforeNonce() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(metadata.content());
+        T.Authorization memory a = T.Authorization(nextNonce, 2000, "");
+        a.signature = _signature(ingress.contentConsentDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordContentConsent(p, a);
+        p.familyId = keccak256("UNKNOWN");
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordContentConsent(p, a);
+        Content.Freeze memory freeze = _contentFreezeProposal();
+        freeze.lockClasses[0] = keccak256("DEPENDENCIES");
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        freeze.lockClasses[0] = bytes32(0);
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        freeze.lockClasses = new bytes32[](2);
+        freeze.lockClasses[0] = keccak256("SCRIPT");
+        freeze.lockClasses[1] = freeze.lockClasses[0];
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        freeze.lockClasses[0] = bytes32(uint256(2));
+        freeze.lockClasses[1] = bytes32(uint256(1));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        freeze.lockClasses = new bytes32[](17);
+        vm.expectRevert(abi.encodeWithSelector(T.BoundExceeded.selector, uint256(17), uint256(16)));
+        ingress.authorizeArtistContentFreeze(freeze, a);
+        require(
+            !ingress.artistAuthorizationState(artistId, bytes32(0), a.nonce).nonceConsumed,
+            "invalid shape never authorizes"
+        );
+    }
+
+    function testContentApprovedEmptySafeAndProtocolCallbacksRemainDistinct() public {
+        _accept();
+        Content.Consent memory p = _contentProposal(keccak256("approved empty content"));
+        T.Authorization memory a = _authorization(false);
+        bytes32 digest = ingress.contentConsentDigest(p, a);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordContentConsent(p, a);
+        _approveMessage(digest);
+        ingress.recordContentConsent(p, a);
+        Content.Freeze memory freeze = _contentFreezeProposal();
+        a = _authorization(false);
+        digest = ingress.contentFreezeDigest(freeze, a);
+        _approveMessage(digest);
+        bytes32 record = ingress.authorizeArtistContentFreeze(freeze, a);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        T.ActionContext memory c = T.ActionContext(
+            21, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof = T.SignerApproval(address(artist), digest, true);
+        bytes memory call_ = abi.encodeCall(
+            IStreamArtistContentIdentityOwner.consumeContentFreeze, (c, b, freeze, a, proof)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], call_);
+        c.expected = IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2();
+        call_ = abi.encodeCall(
+            IStreamArtistContentRecordsOwner.authorizeContentFreeze,
+            (c, b, freeze, address(artist), a.nonce)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[6], call_);
+        call_ = abi.encodeCall(
+            IStreamArtistContentCoordinator.coordinateAuthorizeArtistContentFreeze,
+            (address(artist), freeze, a)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(coordinator), call_);
+        require(
+            ingress.contentFreezeAuthorization(record).recordHash == record,
+            "direct callback rejection leaves signed record intact"
+        );
+    }
+
+    function testContentEvolutionWitnessMustMatchActualStateAndCurrentRatification() public {
+        _all();
+        (, bytes32 ratified, bytes32 record) = ingress.firstReleaseRatification(1);
+        bytes32 candidate = keccak256("unconsented drift");
+        metadata.setContent(candidate);
+        bytes memory failure = abi.encodeWithSelector(
+            T.MissingMintPrerequisite.selector, keccak256("content-ratification")
+        );
+        vm.expectRevert(failure);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        metadata.setEvolution(1, record, ratified);
+        vm.expectRevert(failure);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        metadata.setEvolution(
+            1, keccak256("wrong operative record"), metadata.artistContentFreezeState(1)
+        );
+        vm.expectRevert(failure);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        // Even a valid new target signature cannot extend an unconsented predecessor.
+        bytes32 next = keccak256("next state");
+        _contentConsent(next);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "unit predecessor"));
+        metadata.applyContent(1, next);
+        _ratify();
+        metadata.applyContent(1, next);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
     function testCurrentTemplateSafeConsentMaterializesLatestPayoutAndOldWalletStillPaysOldAccount()
         public
     {
@@ -395,8 +1091,10 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 uint16(7),
                 uint16(14),
                 uint16(15),
+                uint16(17),
                 uint16(18),
                 uint16(20),
+                uint16(21),
                 uint16(24),
                 uint16(26),
                 uint16(27),
@@ -3034,6 +3732,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         require(address(coordinator) == predictedCoordinator, "fixed constructor pins");
         core.set(keccak256("ARTIST_REGISTRY"), address(ingress), false);
         core.set(keccak256("METADATA_ROUTER"), address(metadata), false);
+        metadata.configureArtist(address(ingress));
         core.set(keccak256("ROYALTY_RESOLVER"), address(royalty), false);
         (profile,) = factory.createProfile(entries, keccak256("artist unit split"));
         _installInitialPrimary(governance, profile);

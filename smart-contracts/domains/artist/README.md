@@ -7,7 +7,7 @@ remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
 collaborator rows, no capability overrides, and operator-set sale parameters.
-Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 18, 20, 24, 26, 27, 52, and 54 have typed entrypoints.
+Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 26, 27, 52, and 54 have typed entrypoints.
 The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
@@ -21,6 +21,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Manager consent checks and dependency reads | `IStreamArtistMintConsent` |
 | Accepted attribution for metadata and other readers | `IStreamArtistAttribution` |
 | Existing content ratification | `IStreamArtistContentRatification` |
+| Exact content consent and defensive one-way content freeze | `IStreamArtistContentAuthority` |
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
 | Preventive identity-scoped nonce or digest cancellation | `IStreamArtistAuthorizationRevocation` |
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
@@ -31,7 +32,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Each domain's typed reads and coordinator-only writes | The seven `IStreamArtist*Owner` interfaces |
 
 `StreamArtistOnboardingTypes` owns the shared payloads. The `Authorization.time`
-field is a deadline for acceptance, policy, economics, royalty freeze, and ratification; it is
+field is a deadline for acceptance, policy, economics, content consent, freezes, and ratification; it is
 the signed timestamp for payout and attestations. Direct payout/attestation calls
 can set it to zero to record the eventual inclusion timestamp, so a queued Safe
 transaction need not predict its execution time. This convention applies only
@@ -114,15 +115,15 @@ All floors are required both at phase registration and before mint effects:
 - Accepted binding and consent over the exact prospective Manager policy hash.
 - Operative artist payout designation.
 - Consent over both actual collection-level primary and ERC2981 assignments.
-- Ratification matching the currently selected router's live content commitment.
+- Initial ratification, followed only by its exact content or a host-proven consented evolution.
 - Deployment attestation matching the current binding generation.
 - Personhood evidence or an explicit waiver bound to the operative identity record.
 
 A waiver records the absence of evidence. It does not certify a person. Fixed
 split profiles must actually pay the designated artist account when economics
 consent is recorded. A later payout designation does not rewrite an existing
-fixed split wallet. Unknown or dynamic assignment modes are rejected by this
-initial profile.
+fixed split wallet. Unsupported assignment modes are rejected; the separately
+described current primary template profile is the supported dynamic path.
 
 Prospective economics consent uses the admitted resolver's typed candidate
 preview and its actual split factory. The signed hash must equal that preview,
@@ -210,12 +211,49 @@ the Coordinator keeps facade authentication, immutable target checks and its
 reentrancy lock. These helpers are deployment dependencies, not additional
 semantic owners or public protocol ingress points.
 
+Content operation 17 records permission for one exact resulting family state.
+The supplied host must equal the immutable metadata host and Core's current
+`METADATA_ROUTER`; the artist facade must also remain Core-selected. Unknown
+families, unchanged target states, unsupported consent/collaborator modes and
+inactive attribution reject. An actual host consumes the returned record once
+before applying a write. A fresh nonce can consent to a previously used target
+again, so returning to an earlier artwork state does not erase history or reuse
+an earlier permission. Permanent records and the latest applicable lookup are
+separate. Content signatures remain nondelegable in this signed-policy profile.
+
+Operation 21 authorizes exact current-state one-way locks, with sorted unique
+nonzero lock classes and a maximum of 16. It needs accepted-generation authority,
+but no payout, economics, ratification or nonempty artwork. The defensive read
+also accepts a `DISPUTED` attribution boundary; this does not implement dispute
+creation. Unknown or already locked classes reject. The current router's
+dependencies are supported but already immutable, so their authorization is a
+no-op and rejects. A stale unused freeze can be replaced with a fresh signed
+record while its prior evidence stays readable. The host validates the exact
+record and expected state, then applies locks permissionlessly. Its event uses
+the verified authority class stored in that record.
+
+`requireContentConsent` and `contentConsentEvidence` perform the same current
+host, generation and authority validation; the latter returns the exact record
+for host consumption. The host's evolution witness must extend an already valid
+ratified or consented state. Mint checks that the witness names the current
+operative ratification and actual current content. Re-ratification is optional
+after compliant evolution and cannot make an old witness describe a new baseline.
+`StreamArtistContentHashes` and `StreamArtistContentOperations` are linked,
+stateless dependencies; Identity and ConsentFinality retain the only semantic
+writes and share the existing atomic archive and revocation-aware nonce path.
+
+The current suite does not yet admit an actual executed-finality provider.
+That mandatory gate remains an explicit integration dependency before full-v1
+acceptance. Neither Core collection freeze nor an empty/default boolean stands
+in for executed finality. Entropy families, successor authority and collective
+content policies also remain outside this current router profile.
+
 Policy consent can be recorded before Manager registration. Use
 `IStreamMintReads.previewPhasePolicyHash` with the intended executor set. Manager
 pause is outside the policy hash and never calls the artist registry or
 re-registers the Ledger. Content ratification does not authorize a later content
-write: the separate typed content-consent operation is required before that
-mutation can be supported.
+write; the separate typed content-consent operation must be consumed by the
+actual host before that mutation.
 
 Manager links `StreamMintPhaseState` for configuration and executor bookkeeping
 to stay within the EIP-170 runtime limit. These delegatecalls operate on the

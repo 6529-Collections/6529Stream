@@ -11,6 +11,7 @@ import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistConsentOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
@@ -298,10 +299,13 @@ contract StreamArtistOnboardingReads {
         _requireEconomics(consents, collectionId, royalty);
         (address metadata, bytes32 content) = currentContent(collectionId);
         T.RatificationRecord memory r = consents.firstReleaseRatification(collectionId);
-        if (
-            r.recordHash == bytes32(0) || r.metadataContract != metadata
-                || r.contentStateHash != content
-        ) {
+        bool validContent = r.recordHash != bytes32(0) && r.metadataContract == metadata;
+        if (validContent && r.contentStateHash != content) {
+            (bytes32 ratification, bytes32 resultingContent) =
+                IStreamArtistContentMutationFacts(metadata).artistContentEvolution(collectionId);
+            validContent = ratification == r.recordHash && resultingContent == content;
+        }
+        if (!validContent) {
             revert T.MissingMintPrerequisite(keccak256("content-ratification"));
         }
         IStreamArtistAttributionOwner attribution_ = IStreamArtistAttributionOwner(_suite.owners[4]);

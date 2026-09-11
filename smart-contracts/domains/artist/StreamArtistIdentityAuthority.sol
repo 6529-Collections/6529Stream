@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamArtistContentHashes.sol";
+
 import "./StreamArtistEconomicsHashes.sol";
 
 import "./StreamArtistOwner.sol";
@@ -525,6 +527,52 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             a,
             proof,
             StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
+            record
+        );
+    }
+
+    function consumeContentConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Consent calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _check(c, 17);
+        _deadline(a.time);
+        StreamArtistContentHashes.validateConsent(p);
+        record = StreamArtistContentHashes.consentRecord(
+            _environment(), p, b.artistId, proof.signer, 1, a.nonce, _now()
+        );
+        _authorize(
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistContentHashes.consentDigest(_environment(), p, a),
+            record
+        );
+    }
+
+    function consumeContentFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Freeze calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _check(c, 21);
+        _deadline(a.time);
+        StreamArtistContentHashes.validateFreeze(p);
+        record = StreamArtistContentHashes.freezeRecord(
+            _environment(), p, b.artistId, proof.signer, 1, a.nonce, _now()
+        );
+        _authorize(
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistContentHashes.freezeDigest(_environment(), p, a),
             record
         );
     }

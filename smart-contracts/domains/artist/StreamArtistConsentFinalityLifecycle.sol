@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistContentHashes.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
 
 import "./StreamArtistOwner.sol";
 import {
@@ -17,6 +19,37 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     mapping(bytes32 => T.RatificationRecord) private _ratificationRecords;
     mapping(bytes32 => T.RoyaltyFreezeRecord) private _royaltyFreezes;
     mapping(bytes32 => bytes32) public recordDelegation;
+    mapping(bytes32 => IStreamArtistContentRecordsOwner.ConsentRecord) private _contentConsents;
+    mapping(bytes32 => bytes32) private _latestContentConsent;
+    mapping(bytes32 => Content.FreezeRecord) private _contentFreezes;
+    mapping(bytes32 => bytes32) private _latestContentFreeze;
+
+    event ArtistContentConsentRecorded(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed familyId,
+        address indexed signer,
+        bytes32 newStateHash,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 consentRecordHash
+    );
+    event ArtistContentFreezeAuthorized(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        address indexed signer,
+        bytes32[] lockClasses,
+        bytes32 expectedStateHash,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 freezeRecordHash
+    );
+    /// @notice Context omitted by the permanent normative event, needed to reconstruct its exact record.
+    event ArtistContentRecordContext(
+        uint16 schemaVersion, bytes32 indexed recordHash, address metadataContract, bytes32 artistId
+    );
     /// @notice Permanent grant witness and missing contextual preimage fields for a delegated canonical record.
     event ArtistRecordDelegation(
         uint16 schemaVersion,
@@ -351,6 +384,127 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         if (grant != bytes32(0)) {
             emit ArtistRecordDelegation(1, record, grant, b.artistId, p.resolver, p.revenueClass, 2);
         }
+    }
+
+    function contentConsentRecord(bytes32 recordHash)
+        external
+        view
+        returns (IStreamArtistContentRecordsOwner.ConsentRecord memory)
+    {
+        return _contentConsents[recordHash];
+    }
+
+    function contentConsentAt(Content.Consent calldata p, uint64 generation)
+        external
+        view
+        returns (IStreamArtistContentRecordsOwner.ConsentRecord memory)
+    {
+        return _contentConsents[_latestContentConsent[keccak256(abi.encode(p, generation))]];
+    }
+
+    function contentFreezeRecord(bytes32 recordHash)
+        external
+        view
+        returns (Content.FreezeRecord memory)
+    {
+        return _contentFreezes[recordHash];
+    }
+
+    function contentFreezeAt(
+        uint256 collectionId,
+        uint64 generation,
+        address metadata,
+        bytes32 lockClass
+    ) external view returns (Content.FreezeRecord memory) {
+        return _contentFreezes[
+            _latestContentFreeze[
+                keccak256(abi.encode(collectionId, generation, metadata, lockClass))
+            ]
+        ];
+    }
+
+    function recordContentConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Consent calldata p,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32 record) {
+        _check(c, 17);
+        _requireAccepted(b, signer);
+        StreamArtistContentHashes.validateConsent(p);
+        record = StreamArtistContentHashes.consentRecord(
+            _environment(), p, b.artistId, signer, 1, nonce, _now()
+        );
+        bytes32 scope = keccak256(abi.encode(p, b.generation));
+        bytes32 key = _consume(
+            keccak256("consent_finality.replay.content_consent_key"),
+            keccak256(abi.encode(scope, record)),
+            record
+        );
+        IStreamArtistContentRecordsOwner.ConsentRecord memory item =
+            IStreamArtistContentRecordsOwner.ConsentRecord(record, b.artistId, b.generation, p, 1);
+        _contentConsents[record] = item;
+        _latestContentConsent[scope] = record;
+        _commit(
+            c,
+            keccak256(abi.encode(b, p, signer, nonce)),
+            keccak256(abi.encode(scope, item)),
+            keccak256(abi.encode(key, record)),
+            record
+        );
+        emit ArtistContentConsentRecorded(
+            1, p.collectionId, p.familyId, signer, p.newStateHash, 1, nonce, _now(), record
+        );
+        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
+    }
+
+    function authorizeContentFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Freeze calldata p,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32 record) {
+        _check(c, 21);
+        _requireAccepted(b, signer);
+        StreamArtistContentHashes.validateFreeze(p);
+        record = StreamArtistContentHashes.freezeRecord(
+            _environment(), p, b.artistId, signer, 1, nonce, _now()
+        );
+        bytes32 key = _consume(
+            keccak256("consent_finality.replay.freeze_key"),
+            keccak256(abi.encode(keccak256("CONTENT"), p.collectionId, b.generation, record)),
+            record
+        );
+        Content.FreezeRecord memory item = Content.FreezeRecord(
+            record,
+            b.artistId,
+            b.generation,
+            p.metadataContract,
+            p.lockClasses,
+            p.expectedStateHash,
+            1
+        );
+        _contentFreezes[record] = item;
+        for (uint256 i; i < p.lockClasses.length; ++i) {
+            _latestContentFreeze[
+                keccak256(
+                    abi.encode(p.collectionId, b.generation, p.metadataContract, p.lockClasses[i])
+                )
+            ] = record;
+        }
+        _commit(
+            c,
+            keccak256(abi.encode(b, p, signer, nonce)),
+            keccak256(abi.encode(p.collectionId, item)),
+            keccak256(abi.encode(key, record)),
+            record
+        );
+        emit ArtistContentFreezeAuthorized(
+            1, p.collectionId, signer, p.lockClasses, p.expectedStateHash, 1, nonce, _now(), record
+        );
+        emit ArtistContentRecordContext(1, record, p.metadataContract, b.artistId);
     }
 
     function _requireDelegated(T.Binding calldata b, address signer, bytes32 grant) private pure {
