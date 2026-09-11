@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `4e9a41b1` (independently tested integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `f9162df3` (native domain handoff), `49b3261b` (tested operator setup), `4e9a41b1` (tested current payment composition); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -31,7 +31,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
 | Artist | `codex/v1-artist-authority` | Guardian configuration and two-sided principal rotation (operations 28–32) |
-| Revenue | `codex/v1-revenue` | Native shared settlement and template consumer |
+| Revenue | `codex/v1-revenue` | Signed free claims, open editions and pay-what-you-want programs; refund-window lifecycle next |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
@@ -56,8 +56,13 @@ properties per compiler mode. Governed asset permit-capability attestations
 independent review. Shared settlement, the ERC-20 payer adapter and signed
 fixed-profile consumer are integrated as `18dbe54c`. Their 29 tests plus 256 fuzz
 inputs pass with independent source/artifact review. Current-Core composition now
-passes in the ten-case snapshot below. Native official settlement and other orchestration
-profiles remain open; the payment builder is implementing the native branch.
+passes in the ten-case snapshot below. Native shared settlement is integrated as
+`f9162df3`: 55 domain cases and three fuzz properties with 256 inputs each pass
+with independent source/artifact review. Both product compiler profiles fit the
+runtime caps and preserve the preceding recorder interface/storage and ERC-20
+payer implementation. The native domain suite uses actual resolver, factory,
+wallet, escrow and Safe contracts; actual Core/Manager/artist composition is
+running separately with three native cases and three ERC-20 regressions.
 The canonical full-digest Manager authorization correction is integrated as
 `5ecae362`, with two focused tests and independent source/artifact review. A
 ten-case actual-current run passes all three new universal payment workflows,

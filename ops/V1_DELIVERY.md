@@ -110,7 +110,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
 | PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native and broader orchestration pending |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
-| SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
+| SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs after native domain handoff; refund-window lifecycle follows; unsigned programs still require canonical artist sale-parameter consent |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Queued |
 | SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Queued |
@@ -335,8 +335,12 @@ publication. Five preserved resolver tests pass independently after retirement o
 the uninstalled foundation settlement API (`f803f482`). The universal recorder,
 sole ERC-20 payer adapter and signed fixed-profile consumer (`18dbe54c`) pass 29
 domain tests plus 256 fuzz inputs with independent review. Actual Core/Manager/
-artist composition now passes; native official settlement is the next payment
-slice. The separate correction `5ecae362` binds the ERC-20 Manager authorization
+artist composition now passes. Native official settlement and its fixed-profile/
+COLLECTION_ARTIST consumer are integrated as `f9162df3`. The independently
+reviewed domain snapshot passes 55 cases and three properties with 256 fuzz inputs
+each. Actual Core/Manager/artist native composition is running alongside the
+existing three ERC-20 cases against the changed recorder. The separate correction
+`5ecae362` binds the ERC-20 Manager authorization
 ID to the full signed message digest required by MPA-TICKET; two focused cases
 and exact unchanged interface/storage checks received independent review. The
 ten-case current run passes three universal payment cases, two content and five
@@ -346,8 +350,8 @@ all 218 Solidity sources and three Safe fixtures to `4e9a41b1`, all 237 relevant
 artifacts to retained compiler outputs, and confirms all 90 nonempty production
 runtimes fit. Later native and rotation changes require their own acceptance.
 
-The latest whole-repository ABI-only check covers 474 Solidity sources with zero
-errors, including the operator setup tests. Broad compilation and candidate
+The latest whole-repository ABI-only check covers 488 Solidity sources with zero
+errors, including the operator and native setup tests. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
