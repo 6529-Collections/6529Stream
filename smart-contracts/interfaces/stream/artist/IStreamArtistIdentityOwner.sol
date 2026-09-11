@@ -86,4 +86,12 @@ interface IStreamArtistIdentityOwner is IStreamArtistOwner {
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32 record);
+
+    function consumeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record);
 }

@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamArtistEconomicsHashes.sol";
+
 import "./StreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../modules/StreamModuleBase.sol";
 import "../parameters/StreamGasParameterHost.sol";
 import {
@@ -18,6 +21,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistMintConsent,
     IStreamArtistAttribution,
     IStreamArtistContentRatification,
+    IStreamArtistEconomicsAuthority,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -70,6 +74,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistAttribution).interfaceId
             || id == type(IStreamArtistOnboarding).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
+            || id == type(IStreamArtistEconomicsAuthority).interfaceId
             || super.supportsInterface(id);
     }
 
@@ -113,6 +118,39 @@ contract StreamArtistOnboardingRegistry is
     {
         return IStreamArtistOnboardingCoordinator(operationCoordinator)
             .coordinateRecordPayoutDesignation(msg.sender, p, a);
+    }
+
+    function recordProspectiveEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistEconomicsCoordinator(operationCoordinator)
+            .coordinateRecordProspectiveEconomicsConsent(msg.sender, p, candidate, a);
+    }
+
+    function authorizeArtistRoyaltyFreeze(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistEconomicsCoordinator(operationCoordinator)
+            .coordinateAuthorizeArtistRoyaltyFreeze(msg.sender, p, a);
+    }
+
+    function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)
+        external
+        view
+        returns (bool)
+    {
+        return _reads().isRoyaltyFreezeAuthorized(collectionId, expectedAssignmentHash);
+    }
+
+    function royaltyFreezeDigest(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time);
     }
 
     function recordArtistAttestation(
@@ -224,7 +262,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistHashes.economicsDigest(_environment(), p, a);
+        return StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time);
     }
 
     function payoutDesignationDigest(T.PayoutDesignation calldata p, T.Authorization calldata a)

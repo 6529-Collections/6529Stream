@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamArtistEconomicsHashes.sol";
+
 import "./StreamArtistOwner.sol";
 import {
     StreamArtistOnboardingTypes as T
@@ -13,6 +15,17 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     mapping(bytes32 => bytes32) private _economics;
     mapping(uint256 => T.RatificationRecord) private _ratifications;
     mapping(bytes32 => T.RatificationRecord) private _ratificationRecords;
+    mapping(bytes32 => T.RoyaltyFreezeRecord) private _royaltyFreezes;
+    event ArtistRoyaltyFreezeAuthorized(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed expectedAssignmentHash,
+        address indexed signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 freezeRecordHash
+    );
     event ArtistPolicyConsentRecorded(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -133,7 +146,7 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         ) {
             revert T.InvalidRecord();
         }
-        record = StreamArtistHashes.economicsRecord(
+        record = StreamArtistEconomicsHashes.economicsRecord(
             _environment(), p, designation.recordHash, b.artistId, signer, nonce, _now()
         );
         bytes32 scope = keccak256(abi.encode(p));
@@ -200,6 +213,50 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         );
         emit ArtistContentRatificationRecorded(
             1, p.collectionId, p.contentStateHash, signer, 1, nonce, _now(), record
+        );
+    }
+
+    function royaltyFreezeRecord(T.RoyaltyFreeze calldata p, bytes32 artistId, uint64 generation)
+        external
+        view
+        returns (T.RoyaltyFreezeRecord memory)
+    {
+        return _royaltyFreezes[keccak256(abi.encode(p, artistId, generation))];
+    }
+
+    function authorizeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32 record) {
+        _check(c, 20);
+        _requireAccepted(b, signer);
+        if (
+            p.resolver == address(0) || p.collectionId == 0
+                || p.revenueClass != keccak256("ROYALTY_ERC2981")
+                || p.expectedAssignmentHash == bytes32(0)
+        ) {
+            revert T.InvalidRecord();
+        }
+        record = StreamArtistEconomicsHashes.royaltyFreezeRecord(
+            _environment(), p, b.artistId, signer, nonce, _now()
+        );
+        bytes32 scope = keccak256(abi.encode(p, b.artistId, b.generation));
+        bytes32 key = _consume(keccak256("consent_finality.replay.freeze_key"), scope, record);
+        T.RoyaltyFreezeRecord memory authorization =
+            T.RoyaltyFreezeRecord(record, b.artistId, b.generation);
+        _royaltyFreezes[scope] = authorization;
+        _commit(
+            c,
+            keccak256(abi.encode(b, p, signer, nonce)),
+            keccak256(abi.encode(scope, authorization)),
+            keccak256(abi.encode(key, record)),
+            record
+        );
+        emit ArtistRoyaltyFreezeAuthorized(
+            1, p.collectionId, p.expectedAssignmentHash, signer, 1, nonce, _now(), record
         );
     }
 

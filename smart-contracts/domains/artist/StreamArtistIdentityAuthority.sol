@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamArtistEconomicsHashes.sol";
+
 import "./StreamArtistOwner.sol";
 import "./StreamArtistNonceAvailability.sol";
 import {
@@ -177,7 +179,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         _check(c, 15);
         _deadline(a.time);
         if (designation == bytes32(0)) revert T.InvalidRecord();
-        record = StreamArtistHashes.economicsRecord(
+        record = StreamArtistEconomicsHashes.economicsRecord(
             _environment(), p, designation, b.artistId, proof.signer, a.nonce, _now()
         );
         _authorize(
@@ -185,7 +187,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             b.artistId,
             a,
             proof,
-            StreamArtistHashes.economicsDigest(_environment(), p, a),
+            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
             record
         );
     }
@@ -244,6 +246,28 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             a,
             proof,
             StreamArtistHashes.ratificationDigest(_environment(), p, a),
+            record
+        );
+    }
+
+    function consumeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _check(c, 20);
+        _deadline(a.time);
+        record = StreamArtistEconomicsHashes.royaltyFreezeRecord(
+            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        );
+        _authorize(
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
             record
         );
     }

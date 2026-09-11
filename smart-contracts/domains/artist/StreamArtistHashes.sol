@@ -255,6 +255,56 @@ library StreamArtistHashes {
         );
     }
 
+    function royaltyFreezeDigest(
+        Environment memory e,
+        StreamArtistOnboardingTypes.RoyaltyFreeze memory p,
+        StreamArtistOnboardingTypes.Authorization memory a
+    ) internal pure returns (bytes32) {
+        return typed(
+            e,
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "StreamArtistRoyaltyFreeze(address core,address resolver,uint256 collectionId,bytes32 revenueClass,bytes32 expectedAssignmentHash,uint256 nonce,uint64 deadline)"
+                    ),
+                    e.core,
+                    p.resolver,
+                    p.collectionId,
+                    p.revenueClass,
+                    p.expectedAssignmentHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+    }
+
+    function royaltyFreezeRecord(
+        Environment memory e,
+        StreamArtistOnboardingTypes.RoyaltyFreeze memory p,
+        bytes32 artistId,
+        address signer,
+        uint256 nonce,
+        uint64 signedAt
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                p.resolver,
+                p.collectionId,
+                p.revenueClass,
+                p.expectedAssignmentHash,
+                artistId,
+                signer,
+                uint8(1),
+                nonce,
+                signedAt
+            )
+        );
+    }
+
     function payoutRecord(
         Environment memory e,
         StreamArtistOnboardingTypes.PayoutDesignation memory p,

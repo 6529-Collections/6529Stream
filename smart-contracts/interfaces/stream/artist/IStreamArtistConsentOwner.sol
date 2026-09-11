@@ -21,6 +21,19 @@ interface IStreamArtistConsentOwner is IStreamArtistOwner {
 
     function ratificationRecord(bytes32 record) external view returns (T.RatificationRecord memory);
 
+    function royaltyFreezeRecord(T.RoyaltyFreeze calldata p, bytes32 artistId, uint64 generation)
+        external
+        view
+        returns (T.RoyaltyFreezeRecord memory);
+
+    function authorizeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32 record);
+
     function recordPolicy(
         T.ActionContext calldata c,
         T.Binding calldata b,

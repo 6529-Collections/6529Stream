@@ -10,6 +10,8 @@ import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistConsentOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
@@ -118,6 +120,15 @@ contract StreamArtistOnboardingReads {
         primary = T.AssignmentFact(
             _suite.primaryResolver, _suite.primaryRevenueClass, p.scope, p.scopeId, p.assignmentHash
         );
+        royalty = currentRoyaltyAssignment(collectionId);
+    }
+
+    /// @notice Reads royalty independently of primary or mint floors for defensive artist rights.
+    function currentRoyaltyAssignment(uint256 collectionId)
+        public
+        view
+        returns (T.AssignmentFact memory royalty)
+    {
         _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
         royalty = IStreamArtistRoyaltyFacts(_suite.royaltyResolver)
             .currentArtistRoyaltyAssignment(collectionId);
@@ -126,6 +137,83 @@ contract StreamArtistOnboardingReads {
                 || royalty.revenueClass != keccak256("ROYALTY_ERC2981") || royalty.scope != 1
                 || royalty.scopeId != collectionId || royalty.assignmentHash == bytes32(0)
         ) revert T.InvalidRecord();
+    }
+
+    /// @notice Checks the exact immutable provider's real prospective profile against current payout rights.
+    function requireProspectiveEconomics(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        address payout
+    ) external view returns (T.AssignmentFact memory fact) {
+        if (
+            candidate.profileHash == bytes32(0) || candidate.policyHash != bytes32(0)
+                || p.scope != 1 || p.scopeId != p.collectionId
+        ) revert T.UnsupportedProfile();
+        if (p.resolver == _suite.primaryResolver) {
+            if (candidate.royaltyBps != 0 || p.revenueClass != _suite.primaryRevenueClass) {
+                revert T.UnsupportedProfile();
+            }
+            fact = IStreamArtistPrimaryFacts(p.resolver)
+                .previewArtistPrimaryAssignment(
+                    p.collectionId, candidate.profileHash, candidate.policyHash, candidate.frozen
+                );
+        } else if (p.resolver == _suite.royaltyResolver) {
+            _requireSelected(keccak256("ROYALTY_RESOLVER"), p.resolver);
+            if (p.revenueClass != keccak256("ROYALTY_ERC2981")) revert T.UnsupportedProfile();
+            fact = IStreamArtistRoyaltyPreview(p.resolver)
+                .previewArtistRoyaltyAssignment(
+                    p.collectionId, candidate.profileHash, candidate.royaltyBps, candidate.frozen
+                );
+        } else {
+            revert T.UnsupportedProfile();
+        }
+        if (
+            fact.resolver != p.resolver || fact.revenueClass != p.revenueClass
+                || fact.scope != p.scope || fact.scopeId != p.scopeId
+                || fact.assignmentHash == bytes32(0) || fact.assignmentHash != p.assignmentHash
+        ) {
+            revert T.InvalidRecord();
+        }
+        // Both admitted resolvers expose the same splitFactory() ABI. Read this
+        // resolver's actual factory, never substitute the primary factory for royalty.
+        _requireProfilePayout(
+            p.resolver,
+            IStreamRevenueResolver(p.resolver).splitFactory(),
+            candidate.profileHash,
+            payout
+        );
+    }
+
+    function requireRoyaltyFreezeProposal(T.RoyaltyFreeze calldata p) external view {
+        T.AssignmentFact memory fact = currentRoyaltyAssignment(p.collectionId);
+        if (
+            p.resolver != fact.resolver || p.revenueClass != fact.revenueClass
+                || p.expectedAssignmentHash != fact.assignmentHash
+                || IStreamRoyaltyResolver(p.resolver).collectionRoyalty(p.collectionId).frozen
+        ) {
+            revert T.InvalidRecord();
+        }
+    }
+
+    function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)
+        external
+        view
+        returns (bool)
+    {
+        if (block.chainid != _chainId) revert T.InvalidBinding();
+        _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
+        _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
+        T.Binding memory b = acceptedBinding(collectionId);
+        T.RoyaltyFreeze memory p = T.RoyaltyFreeze(
+            _suite.royaltyResolver,
+            collectionId,
+            keccak256("ROYALTY_ERC2981"),
+            expectedAssignmentHash
+        );
+        T.RoyaltyFreezeRecord memory r = IStreamArtistConsentOwner(_suite.owners[6])
+            .royaltyFreezeRecord(p, b.artistId, b.generation);
+        return r.recordHash != bytes32(0) && r.artistId == b.artistId
+            && r.bindingGeneration == b.generation;
     }
 
     function requireMintConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
@@ -218,12 +306,24 @@ contract StreamArtistOnboardingReads {
                 IStreamRoyaltyResolver(resolver).collectionRoyalty(collectionId);
             if (!p.configured || p.profileId == bytes32(0)) revert T.UnsupportedProfile();
             profileId = p.profileId;
-            factory = IStreamRevenueResolver(_suite.primaryResolver).splitFactory();
+            factory = IStreamRevenueResolver(resolver).splitFactory();
             if (IStreamSplitFactory(factory).walletFor(profileId) != p.wallet) {
                 revert T.InvalidRecord();
             }
         } else {
             revert T.UnsupportedProfile();
+        }
+        _requireProfilePayout(resolver, factory, profileId, payout);
+    }
+
+    function _requireProfilePayout(
+        address resolver,
+        address factory,
+        bytes32 profileId,
+        address payout
+    ) private view {
+        if (payout == address(0)) {
+            revert T.MissingMintPrerequisite(keccak256("payout"));
         }
         IStreamSplitFactory splits = IStreamSplitFactory(factory);
         uint256 count = splits.profileEntryCount(profileId);

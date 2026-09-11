@@ -23,6 +23,9 @@ interface ArtistTestVm {
     function computeCreateAddress(address deployer, uint256 nonce) external pure returns (address);
     function expectRevert(bytes4 selector) external;
     function expectPartialRevert(bytes4 selector) external;
+    function mockCallRevert(address callee, bytes calldata data, bytes calldata returnData) external;
+    function mockCall(address callee, bytes calldata data, bytes calldata returnData) external;
+    function clearMockedCalls() external;
 }
 
 /// @dev Unit boundary double. These tests do not establish real Core/metadata/royalty integration.
@@ -119,11 +122,67 @@ contract ArtistUnitMetadata {
     }
 }
 
+/// @dev Preview uses the real baseline resolver hash routine; v1 governance admission is integration-owned.
+contract ArtistUnitPrimary is StreamRevenueResolver, IStreamArtistPrimaryFacts {
+    constructor(
+        IStreamCore core_,
+        IStreamSplitFactory factory,
+        address governance,
+        IStreamArtistAttribution registry
+    ) StreamRevenueResolver(core_, factory, governance, registry) { }
+
+    function previewArtistPrimaryAssignment(
+        uint256 id,
+        bytes32 profile,
+        bytes32 policy,
+        bool frozen_
+    ) external view returns (T.AssignmentFact memory) {
+        require(splitFactoryContract.profileExists(profile), "unit candidate profile");
+        bytes32 class_ = keccak256("PRIMARY_FIXED_PRICE_NATIVE");
+        return T.AssignmentFact(
+            address(this),
+            class_,
+            1,
+            id,
+            this.primaryAssignmentHash(class_, 1, id, 1, profile, bytes32(0), policy, frozen_)
+        );
+    }
+}
+
 contract ArtistUnitRoyalty {
     IStreamRoyaltyResolver.RoyaltyConfig private config;
+    IStreamSplitFactory public immutable splitFactory;
 
-    constructor(bytes32 profile, address wallet) {
+    constructor(IStreamSplitFactory factory_, bytes32 profile, address wallet) {
+        splitFactory = factory_;
         config = IStreamRoyaltyResolver.RoyaltyConfig(wallet, 500, true, false, 1, profile);
+    }
+
+    function previewArtistRoyaltyAssignment(uint256 id, bytes32 profile, uint16 bps, bool frozen_)
+        external
+        view
+        returns (T.AssignmentFact memory)
+    {
+        require(splitFactory.profileExists(profile) && bps <= 10_000, "unit candidate profile/bps");
+        IStreamRoyaltyResolver.RoyaltyConfig memory next = IStreamRoyaltyResolver.RoyaltyConfig(
+            splitFactory.walletFor(profile), bps, true, frozen_, 1, profile
+        );
+        return T.AssignmentFact(
+            address(this), keccak256("ROYALTY_ERC2981"), 1, id, keccak256(abi.encode(id, next))
+        );
+    }
+
+    function applyArtistRoyaltyFreeze(
+        IStreamArtistEconomicsAuthority authority,
+        uint256 id,
+        bytes32 expected
+    ) external {
+        require(
+            !config.frozen && expected == keccak256(abi.encode(id, config)),
+            "unit exact active hash"
+        );
+        require(authority.isRoyaltyFreezeAuthorized(id, expected), "unit artist authorization");
+        config.frozen = true;
     }
 
     function setBps(uint16 bps) external {
@@ -203,18 +262,11 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         entries[1] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
         (bytes32 profile, address wallet) =
             factory.createProfile(entries, keccak256("artist unit split"));
-        primary = new StreamRevenueResolver(factory);
-        primary.setPrimaryProfileAssignment(
-            PRIMARY, 1, 1, profile, keccak256("primary unit policy")
-        );
-        royalty = new ArtistUnitRoyalty(profile, wallet);
-        suite.primaryResolver = address(primary);
-        suite.royaltyResolver = address(royalty);
         suite.primaryRevenueClass = PRIMARY;
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
-        address predictedCoordinator = avm.computeCreateAddress(address(this), nonce + 9);
+        address predictedCoordinator = avm.computeCreateAddress(address(this), nonce + 12);
         ingress = new StreamArtistOnboardingRegistry(
             suite.core,
             suite.mintManager,
@@ -290,11 +342,22 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 suite.mintManager
             )
         );
+        primary = new ArtistUnitPrimary(IStreamCore(address(core)), factory, governance, ingress);
+        // Separate real factory/profile proves royalty payout reads cannot substitute
+        // the primary resolver's factory, even when both profiles name the same artist.
+        StreamSplitFactory royaltyFactory = new StreamSplitFactory(factory.assetPolicyRegistry());
+        (profile, wallet) = royaltyFactory.createProfile(entries, keccak256("royalty unit split"));
+        royalty = new ArtistUnitRoyalty(royaltyFactory, profile, wallet);
+        suite.primaryResolver = address(primary);
+        suite.royaltyResolver = address(royalty);
         coordinator = new StreamArtistOnboardingCoordinator(suite);
         require(address(coordinator) == predictedCoordinator, "fixed constructor pins");
         core.set(keccak256("ARTIST_REGISTRY"), address(ingress), false);
         core.set(keccak256("METADATA_ROUTER"), address(metadata), false);
         core.set(keccak256("ROYALTY_RESOLVER"), address(royalty), false);
+        (profile,) = factory.createProfile(entries, keccak256("artist unit split"));
+        vm.prank(governance);
+        primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, profile, bytes32(0));
         (artistId,) = ingress.proposeArtistBinding(
             1, _proposal(bytes32(0)), bytes("unit identity document"), "Artist Safe"
         );
@@ -931,6 +994,12 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
 
     function testManagerLinkedConfigurationPreservesEventsAndDeployableRuntime() public {
         require(address(manager).code.length <= 24_576, "Manager EIP170 deployment limit");
+        require(
+            suite.owners[2].code.length <= 24_576 && address(coordinator).code.length <= 24_576
+                && address(ingress).code.length <= 24_576 && suite.owners[6].code.length <= 24_576
+                && address(coordinator.reads()).code.length <= 24_576,
+            "artist EIP170 deployment limits"
+        );
         _all();
         vm.recordLogs();
         (bool ok, bytes memory reason) = address(manager).call(_configureData());
@@ -1029,5 +1098,410 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         );
         ledger.setLedgerWriter(address(manager), true);
         _safeExecutor(first, true);
+    }
+
+    function _candidate(address resolver, address account, uint16 bps, bool frozen_)
+        private
+        returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
+    {
+        IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
+        entries[0] = IStreamSplitWallet.SplitEntry(account, 900_000, keccak256("artist"));
+        entries[1] = IStreamSplitWallet.SplitEntry(address(0xFEE), 100_000, keccak256("protocol"));
+        IStreamSplitFactory selectedFactory =
+            resolver == address(primary) ? IStreamSplitFactory(factory) : royalty.splitFactory();
+        (bytes32 profile,) =
+            selectedFactory.createProfile(entries, keccak256(abi.encode(account, bps)));
+        candidate = T.FixedEconomicsCandidate(profile, bytes32(0), bps, frozen_);
+        T.AssignmentFact memory fact = resolver == address(primary)
+            ? IStreamArtistPrimaryFacts(resolver)
+                .previewArtistPrimaryAssignment(1, profile, bytes32(0), frozen_)
+            : IStreamArtistRoyaltyPreview(resolver)
+                .previewArtistRoyaltyAssignment(1, profile, bps, frozen_);
+        p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+    }
+
+    function _prospectiveConsent(
+        T.EconomicsConsent memory p,
+        T.FixedEconomicsCandidate memory candidate
+    ) private {
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        _artistCall(
+            abi.encodeCall(
+                IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent, (p, candidate, a)
+            )
+        );
+    }
+
+    function _freezePayload() private view returns (T.RoyaltyFreeze memory p) {
+        T.AssignmentFact memory fact = coordinator.reads().currentRoyaltyAssignment(1);
+        p = T.RoyaltyFreeze(address(royalty), 1, fact.revenueClass, fact.assignmentHash);
+    }
+
+    function _authorizeFreeze() private returns (T.RoyaltyFreeze memory p) {
+        p = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.royaltyFreezeDigest(p, a));
+        _artistCall(
+            abi.encodeCall(IStreamArtistEconomicsAuthority.authorizeArtistRoyaltyFreeze, (p, a))
+        );
+    }
+
+    function testSafeProspectiveEconomicsUsesActualCandidateAndSharedReplay() public {
+        _accept();
+        _payout();
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory installed =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        T.EconomicsConsent memory p =
+            T.EconomicsConsent(1, address(primary), PRIMARY, 1, 1, installed.assignmentHash);
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(installed.profileId, bytes32(0), 0, false);
+        _prospectiveConsent(p, candidate);
+        bytes32 record = IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p);
+        require(record != bytes32(0), "prospective owner record");
+        // Both ingresses admit this exact active fixed candidate; they must consume
+        // the same owner replay key, without any resolver mutation between calls.
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordEconomicsConsent(p, a);
+        require(
+            _roots() == before_
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "shared consent key late rollback"
+        );
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == record,
+            "record unchanged"
+        );
+    }
+
+    function testProspectiveRejectsMissingPayoutWrongHashAndWrongProfileWithoutReplay() public {
+        _accept();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.MissingMintPrerequisite.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(_roots() == before_, "missing payout unchanged");
+        _payout();
+        before_ = _roots();
+        p.assignmentHash = keccak256("unverified caller claim");
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(_roots() == before_, "wrong hash unchanged");
+        (p, candidate) = _candidate(address(primary), address(0xBAD), 0, false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(
+            _roots() == before_
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "wrong operative payout unchanged"
+        );
+    }
+
+    function testStaticConsentSurvivesPayoutRevisionAndOldWalletStillPaysOldAccount() public {
+        _all();
+        (T.AssignmentFact memory old,) = coordinator.reads().currentAssignments(1);
+        (, bytes32 designation) = ingress.artistPayoutAccount(artistId);
+        address newAccount = address(0xBEEF);
+        T.PayoutDesignation memory update = T.PayoutDesignation(artistId, newAccount, designation);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(update, a));
+        ingress.recordPayoutDesignation(update, a);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        require(assignment.assignmentHash == old.assignmentHash, "fixed assignment unchanged");
+        address wallet = factory.walletFor(assignment.profileId);
+        vm.deal(address(this), 1 ether);
+        (bool sent,) = wallet.call{ value: 1 ether }("");
+        require(sent, "fund immutable wallet");
+        uint256 balanceBefore = address(artist).balance;
+        IStreamSplitWallet(wallet).release(address(0), address(artist), payable(address(artist)));
+        require(
+            address(artist).balance == balanceBefore + 0.9 ether
+                && IStreamSplitWallet(wallet).aggregateSharePpm(newAccount) == 0,
+            "old account retains fixed economics"
+        );
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        (p, candidate) = _candidate(address(primary), newAccount, 0, false);
+        _prospectiveConsent(p, candidate);
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) != bytes32(0),
+            "new designation governs new consent"
+        );
+    }
+
+    function testSafeDefensiveFreezeHasExactRecordAndNoMintFloorDependency() public {
+        _accept();
+        // No payout, economics, policy, content or attestation records. An explicitly
+        // failing primary read proves the defensive route never consults that provider.
+        avm.mockCallRevert(
+            address(primary),
+            abi.encodePacked(IStreamRevenueResolver.resolvePrimaryAssignment.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.royaltyFreezeDigest(p, a));
+        vm.recordLogs();
+        bytes32 record = ingress.authorizeArtistRoyaltyFreeze(p, a);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                p.resolver,
+                p.collectionId,
+                p.revenueClass,
+                p.expectedAssignmentHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                uint64(block.timestamp)
+            )
+        );
+        require(
+            record == expected && ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "exact freeze record and read"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool found;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != suite.owners[6]) continue;
+            require(
+                logs[i].topics[0]
+                        == keccak256(
+                            "ArtistRoyaltyFreezeAuthorized(uint16,uint256,bytes32,address,uint8,uint256,uint64,bytes32)"
+                        ) && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == p.expectedAssignmentHash
+                    && logs[i].topics[3] == bytes32(uint256(uint160(address(artist)))),
+                "exact freeze event"
+            );
+            (uint16 schema, uint8 authority, uint256 nonce, uint64 time, bytes32 emitted) =
+                abi.decode(logs[i].data, (uint16, uint8, uint256, uint64, bytes32));
+            require(
+                schema == 1 && authority == 1 && nonce == a.nonce && time == block.timestamp
+                    && emitted == record,
+                "freeze event payload"
+            );
+            found = true;
+        }
+        require(found && _closed(_mintCall()), "freeze right independent of mint eligibility");
+        IStreamRoyaltyResolver.RoyaltyConfig memory prior = royalty.collectionRoyalty(1);
+        royalty.applyArtistRoyaltyFreeze(ingress, 1, p.expectedAssignmentHash);
+        IStreamRoyaltyResolver.RoyaltyConfig memory after_ = royalty.collectionRoyalty(1);
+        require(
+            after_.frozen && prior.wallet == after_.wallet && prior.profileId == after_.profileId
+                && prior.royaltyBps == after_.royaltyBps,
+            "only frozen bit changes"
+        );
+    }
+
+    function testFreezeChangesEconomicsHashAndNeedsSeparateConsentForMint() public {
+        _all();
+        T.RoyaltyFreeze memory p = _authorizeFreeze();
+        royalty.applyArtistRoyaltyFreeze(ingress, 1, p.expectedAssignmentHash);
+        avm.expectPartialRevert(T.MissingMintPrerequisite.selector);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        _economicsRecord(coordinator.reads().currentRoyaltyAssignment(1));
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
+    function testActualSafeDirectProspectiveFrozenConsentAndFreezeKeepMintEligible() public {
+        directArtistCalls = true;
+        _all();
+        IStreamRoyaltyResolver.RoyaltyConfig memory r = royalty.collectionRoyalty(1);
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(r.profileId, bytes32(0), r.royaltyBps, true);
+        T.AssignmentFact memory fact =
+            royalty.previewArtistRoyaltyAssignment(1, r.profileId, r.royaltyBps, true);
+        T.EconomicsConsent memory p =
+            T.EconomicsConsent(1, fact.resolver, fact.revenueClass, 1, 1, fact.assignmentHash);
+        _prospectiveConsent(p, candidate);
+        T.RoyaltyFreeze memory freeze = _authorizeFreeze();
+        royalty.applyArtistRoyaltyFreeze(ingress, 1, freeze.expectedAssignmentHash);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            ingress.supportsInterface(type(IStreamArtistEconomicsAuthority).interfaceId),
+            "narrow economics API advertised"
+        );
+    }
+
+    function testFreezeRejectsWrongTargetClassHashAndSignatureWithoutMutation() public {
+        _accept();
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        bytes32 correct = p.expectedAssignmentHash;
+        bytes32 before_ = _roots();
+        p.resolver = address(primary);
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        p.resolver = address(royalty);
+        p.revenueClass = PRIMARY;
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        p.revenueClass = keccak256("ROYALTY_ERC2981");
+        p.expectedAssignmentHash = keccak256("wrong assignment");
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        a.signature = _signature(ingress.royaltyFreezeDigest(p, a));
+        p.expectedAssignmentHash = correct;
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        require(
+            _roots() == before_
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "invalid freeze no mutations"
+        );
+        a.signature = _signature(ingress.royaltyFreezeDigest(p, a));
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        require(_roots() == before_, "freeze replay unchanged");
+    }
+
+    function testFreezeArchiveFailureRollsBackBothOwnersAndAllowsExactRetry() public {
+        _accept();
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.royaltyFreezeDigest(p, a));
+        bytes32 before_ = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        require(
+            _roots() == before_ && !ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash)
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "late archive atomic rollback"
+        );
+        avm.clearMockedCalls();
+        ingress.authorizeArtistRoyaltyFreeze(p, a);
+        require(
+            ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "same signed operation retry"
+        );
+    }
+
+    function _approveMessage(bytes32 digest) private {
+        require(
+            executeSafe(
+                artist,
+                keys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "Safe message approval"
+        );
+    }
+
+    function testSafeApprovedEmptyProofWorksForBothNewEconomicsEndpoints() public {
+        _accept();
+        _payout();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        T.Authorization memory a = _authorization(false);
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(_roots() == before_, "unapproved economics empty proof rejected");
+        _approveMessage(ingress.economicsConsentDigest(p, a));
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        T.RoyaltyFreeze memory freeze = _freezePayload();
+        a = _authorization(false);
+        before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.authorizeArtistRoyaltyFreeze(freeze, a);
+        require(_roots() == before_, "unapproved freeze empty proof rejected");
+        _approveMessage(ingress.royaltyFreezeDigest(freeze, a));
+        ingress.authorizeArtistRoyaltyFreeze(freeze, a);
+        require(
+            ingress.isRoyaltyFreezeAuthorized(1, freeze.expectedAssignmentHash),
+            "preapproved empty freeze proof"
+        );
+    }
+
+    function testFreezeAuthorizationCannotFollowAnotherBindingGeneration() public {
+        _accept();
+        T.RoyaltyFreeze memory p = _authorizeFreeze();
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        ++b.generation;
+        b.bindingHash = keccak256("later binding");
+        // Model future authoritative owner reads only; no currently unsupported
+        // rebind operation is claimed. An old authorization must not follow them.
+        avm.mockCall(
+            suite.owners[0], abi.encodeCall(IStreamArtistBindingOwner.binding, (1)), abi.encode(b)
+        );
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(2), b.generation)
+        );
+        require(
+            !ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "binding generation isolates freeze authority"
+        );
+        avm.clearMockedCalls();
+        require(
+            ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "original binding record preserved"
+        );
+    }
+
+    function testActualSafeCannotCallNewProtocolOnlyEconomicsCallbacks() public {
+        _accept();
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = _authorization(false);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        T.SignerApproval memory proof =
+            T.SignerApproval(address(artist), ingress.royaltyFreezeDigest(p, a), true);
+        bytes32 before_ = _roots();
+        vm.expectRevert();
+        this.executeTargetSafe(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistEconomicsCoordinator.coordinateAuthorizeArtistRoyaltyFreeze,
+                (address(artist), p, a)
+            )
+        );
+        T.ActionContext memory c = T.ActionContext(
+            20, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        vm.expectRevert();
+        this.executeTargetSafe(
+            suite.owners[2],
+            abi.encodeCall(IStreamArtistIdentityOwner.consumeRoyaltyFreeze, (c, b, p, a, proof))
+        );
+        c.expected = IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2();
+        vm.expectRevert();
+        this.executeTargetSafe(
+            suite.owners[6],
+            abi.encodeCall(
+                IStreamArtistConsentOwner.authorizeRoyaltyFreeze,
+                (c, b, p, address(artist), a.nonce)
+            )
+        );
+        require(_roots() == before_, "actual Safe has no coordinator privilege");
     }
 }

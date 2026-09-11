@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamArtistEconomicsHashes.sol";
+
 import "./StreamArtistOnboardingReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorOwner.sol";
 import "./StreamArtistRegistryValidatorBase.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboardingCoordinator.sol";
+import "../../interfaces/stream/artist/IStreamArtistEconomicsCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import "../../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../../interfaces/stream/artist/IStreamArtistIngressBinding.sol";
@@ -15,9 +18,12 @@ import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
-/// @notice Immutable typed orchestration of seven real artist-authority recipes.
+/// @notice Immutable typed orchestration of the supported artist-authority recipes.
 /// @dev No generic route, semantic record or nonce lives here. Only the operation lock mutates.
-contract StreamArtistOnboardingCoordinator is IStreamArtistOnboardingCoordinator {
+contract StreamArtistOnboardingCoordinator is
+    IStreamArtistOnboardingCoordinator,
+    IStreamArtistEconomicsCoordinator
+{
     T.SuiteConfiguration private _suite;
     address[16] private _targets;
     bytes32[16] private _runtimeHashes;
@@ -95,6 +101,7 @@ contract StreamArtistOnboardingCoordinator is IStreamArtistOnboardingCoordinator
                 uint16(14),
                 uint16(15),
                 uint16(18),
+                uint16(20),
                 uint16(24),
                 uint16(52)
             )
@@ -239,17 +246,47 @@ contract StreamArtistOnboardingCoordinator is IStreamArtistOnboardingCoordinator
                 || p.scope != expected.scope || p.scopeId != expected.scopeId
                 || p.assignmentHash != expected.assignmentHash
         ) revert T.InvalidRecord();
-        T.Payout memory payout;
+        T.Payout memory payout = _payout(b.artistId);
+        reads.requireStaticArtistPayout(p.collectionId, p.resolver, payout.account);
+        return _recordEconomics(actor, b, p, payout, a, before_, "");
+    }
+
+    function coordinateRecordProspectiveEconomicsConsent(
+        address actor,
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        T.Snapshot[7] memory before_ = _snapshots(15);
+        T.Binding memory b = reads.acceptedBinding(p.collectionId);
+        _collection(p.collectionId);
+        T.Payout memory payout = _payout(b.artistId);
+        T.AssignmentFact memory actual =
+            reads.requireProspectiveEconomics(p, candidate, payout.account);
+        return _recordEconomics(actor, b, p, payout, a, before_, abi.encode(candidate, actual));
+    }
+
+    function _payout(bytes32 artistId) private view returns (T.Payout memory payout) {
         (payout.account, payout.recordHash) =
-            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(b.artistId);
+            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
         if (payout.account == address(0) || payout.recordHash == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
         }
-        reads.requireStaticArtistPayout(p.collectionId, p.resolver, payout.account);
+    }
+
+    function _recordEconomics(
+        address actor,
+        T.Binding memory b,
+        T.EconomicsConsent calldata p,
+        T.Payout memory payout,
+        T.Authorization calldata a,
+        T.Snapshot[7] memory before_,
+        bytes memory candidateEvidence
+    ) private returns (bytes32 record) {
         T.SignerApproval memory proof = _verify(
             actor,
             b.artistAddress,
-            StreamArtistHashes.economicsDigest(_environment(), p, a),
+            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
             a.signature
         );
         record = IStreamArtistIdentityOwner(_suite.owners[2])
@@ -257,7 +294,33 @@ contract StreamArtistOnboardingCoordinator is IStreamArtistOnboardingCoordinator
         bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
             .recordEconomics(_context(15, actor, before_[6]), b, p, payout, proof.signer, a.nonce);
         if (actual != record) revert T.InvalidRecord();
-        _archive(15, actor, record, before_, abi.encode(b, p, payout, a, proof));
+        bytes memory payload = candidateEvidence.length == 0
+            ? abi.encode(b, p, payout, a, proof)
+            : abi.encode(b, p, payout, a, proof, candidateEvidence);
+        _archive(15, actor, record, before_, payload);
+    }
+
+    function coordinateAuthorizeArtistRoyaltyFreeze(
+        address actor,
+        T.RoyaltyFreeze calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32 record) {
+        T.Snapshot[7] memory before_ = _snapshots(20);
+        T.Binding memory b = reads.acceptedBinding(p.collectionId);
+        _collection(p.collectionId);
+        reads.requireRoyaltyFreezeProposal(p);
+        T.SignerApproval memory proof = _verify(
+            actor,
+            b.artistAddress,
+            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
+            a.signature
+        );
+        record = IStreamArtistIdentityOwner(_suite.owners[2])
+            .consumeRoyaltyFreeze(_context(20, actor, before_[2]), b, p, a, proof);
+        bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
+            .authorizeRoyaltyFreeze(_context(20, actor, before_[6]), b, p, proof.signer, a.nonce);
+        if (actual != record) revert T.InvalidRecord();
+        _archive(20, actor, record, before_, abi.encode(b, p, a, proof));
     }
 
     function coordinateRecordPayoutDesignation(
@@ -373,9 +436,11 @@ contract StreamArtistOnboardingCoordinator is IStreamArtistOnboardingCoordinator
     }
 
     function _snapshots(uint16 op) private view returns (T.Snapshot[7] memory result) {
+        // acceptedBinding also consumes Attribution's state/generation. Commit
+        // that read for every recipe using it, without adding an owner mutation.
         uint256 mask = op == 1
             ? 0x15
-            : op == 2 ? 0x1f : op == 15 ? 0x67 : op == 18 ? 0x24 : op == 24 ? 0x17 : 0x47;
+            : op == 2 ? 0x1f : op == 15 ? 0x77 : op == 18 ? 0x24 : op == 24 ? 0x17 : 0x57;
         for (uint256 i; i < 7; ++i) {
             if ((mask & (1 << i)) != 0) {
                 result[i] = IStreamArtistOwner(_suite.owners[i]).ownerStateSnapshotV2();
