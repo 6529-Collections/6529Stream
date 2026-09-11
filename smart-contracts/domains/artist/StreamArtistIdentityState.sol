@@ -31,6 +31,124 @@ library StreamArtistIdentityState {
         bytes32 state;
         bytes32 replay;
     }
+    event ArtistDelegationGranted(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        address indexed delegate,
+        uint256 indexed collectionId,
+        uint32 capabilities,
+        uint64 notBefore,
+        uint64 expiresAt,
+        uint64 maxUses,
+        bytes32 constraintsHash,
+        uint256 nonce,
+        bytes32 delegationRecordHash
+    );
+    event ArtistDelegationRevoked(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        address indexed delegate,
+        bytes32 indexed delegationRecordHash,
+        bytes32 reasonHash,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    );
+
+    function grantDelegation(
+        State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistDelegationState.State storage delegations,
+        OwnerContext memory o,
+        T.ActionContext memory c,
+        D.Grant memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (Mutation memory m) {
+        (bytes32 record, bytes32 delta) = StreamArtistDelegationState.grant(
+            delegations, o.environment, p, proof.signer, a.nonce
+        );
+        bytes32 digest = StreamArtistDelegationState.grantDigest(o.environment, p, a.nonce);
+        Mutation memory authorization = authorize(
+            identity,
+            replay,
+            o,
+            c,
+            p.artistId,
+            a,
+            proof,
+            digest,
+            record,
+            identity.identities[p.artistId].authorityAddress
+        );
+        bytes32 key =
+            _consume(
+            replay, o, keccak256("identity_authority.replay.delegation_key"), record, record
+        );
+        m = Mutation(
+            record,
+            keccak256(abi.encode(p, a, proof)),
+            keccak256(abi.encode(delta, identity.identities[p.artistId])),
+            keccak256(abi.encode(authorization.replay, key, record))
+        );
+        emit ArtistDelegationGranted(
+            1,
+            p.artistId,
+            p.delegate,
+            p.collectionId,
+            p.capabilities,
+            p.notBefore,
+            p.expiresAt,
+            p.maxUses,
+            p.constraintsHash,
+            a.nonce,
+            record
+        );
+    }
+
+    function revokeDelegation(
+        State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistDelegationState.State storage delegations,
+        OwnerContext memory o,
+        T.ActionContext memory c,
+        D.Revocation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (Mutation memory m) {
+        address grantor = delegations.records[p.delegationRecordHash].grantor;
+        (bytes32 record, bytes32 delta) = StreamArtistDelegationState.revoke(
+            delegations, o.environment, p, proof.signer, a.nonce, _now()
+        );
+        bytes32 digest = StreamArtistDelegationState.revokeDigest(o.environment, p, a.nonce, a.time);
+        Mutation memory authorization =
+            authorize(identity, replay, o, c, p.artistId, a, proof, digest, record, grantor);
+        bytes32 key = _consume(
+            replay,
+            o,
+            keccak256("identity_authority.replay.one_way_delegation_revocation"),
+            p.delegationRecordHash,
+            record
+        );
+        m = Mutation(
+            record,
+            keccak256(abi.encode(p, a, proof)),
+            keccak256(abi.encode(delta, identity.identities[p.artistId])),
+            keccak256(abi.encode(authorization.replay, key, record))
+        );
+        emit ArtistDelegationRevoked(
+            1,
+            p.artistId,
+            p.delegate,
+            p.delegationRecordHash,
+            p.reasonHash,
+            proof.signer,
+            1,
+            a.nonce,
+            _now()
+        );
+    }
     event ArtistIdentityRegistered(
         uint16 schemaVersion,
         bytes32 indexed artistId,
@@ -167,6 +285,7 @@ library StreamArtistIdentityState {
             keccak256(abi.encode(artistId, digest))
         );
         if (replay[digestKey].status != 0) revert T.Replay(digestKey);
+        bytes32 observation = _observeDigest(replay, o, artistId, digest);
         bytes32 nonceKey = _consume(
             replay,
             o,
@@ -198,7 +317,8 @@ library StreamArtistIdentityState {
                 digest,
                 availabilityDelta,
                 attestationKey,
-                attestationKey == bytes32(0) ? bytes32(0) : record
+                attestationKey == bytes32(0) ? bytes32(0) : record,
+                observation
             )
         );
 
@@ -231,6 +351,13 @@ library StreamArtistIdentityState {
                 || item.authorityAddress != b.artistAddress
         ) revert T.InvalidIdentity(b.artistId);
         bytes32 lane = StreamArtistDelegationState.lane(b.artistId, proof.signer);
+        bytes32 identityDeny = _key(
+            o,
+            keccak256("identity_authority.replay.digest_revocation"),
+            keccak256(abi.encode(b.artistId, digest))
+        );
+        if (replay[identityDeny].status != 0) revert T.Replay(identityDeny);
+        bytes32 observation = _observeDigest(replay, o, b.artistId, digest);
         bytes32 digestKey = _key(
             o,
             keccak256("identity_authority.replay.delegated_digest_revocation"),
@@ -252,8 +379,25 @@ library StreamArtistIdentityState {
             bytes32(0),
             keccak256(abi.encode(b, grant, a, proof, record)),
             keccak256(abi.encode(delta, record, keccak256(a.signature))),
-            keccak256(abi.encode(key, digest, delta))
+            keccak256(abi.encode(key, digest, delta, observation))
         );
+    }
+
+    // Observation is distinct from revocation: two existing delegate lanes may
+    // execute the same digest, but a previously executed digest cannot be revoked.
+    function _observeDigest(
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        OwnerContext memory o,
+        bytes32 artistId,
+        bytes32 digest
+    ) private returns (bytes32) {
+        bytes32 key = _key(
+            o,
+            keccak256("identity_authority.replay.authorization_consumed_digest"),
+            keccak256(abi.encode(artistId, digest))
+        );
+        if (replay[key].status == 0) replay[key] = T.ReplayCell(digest, o.revision + 1, 1, 2);
+        return keccak256(abi.encode(key, replay[key]));
     }
 
     function _key(OwnerContext memory o, bytes32 surface, bytes32 scope)

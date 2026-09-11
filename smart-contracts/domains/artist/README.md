@@ -7,7 +7,7 @@ remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
 collaborator rows, no capability overrides, and operator-set sale parameters.
-Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 18, 20, 24, 26, 27, and 52 have typed entrypoints.
+Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 18, 20, 24, 26, 27, 52, and 54 have typed entrypoints.
 The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
@@ -22,6 +22,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Accepted attribution for metadata and other readers | `IStreamArtistAttribution` |
 | Existing content ratification | `IStreamArtistContentRatification` |
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
+| Preventive identity-scoped nonce or digest cancellation | `IStreamArtistAuthorizationRevocation` |
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
 | Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
 | Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
@@ -146,6 +147,21 @@ an explicit operative designation, and the exact current economics record.
 `FixedEconomicsCandidate.profileHash` keeps its fixed-profile meaning; it is not
 a template ID, and current template consent grants no prospective replacement
 permission. The previous `requireStaticArtistPayout` read remains static-only.
+
+Operation 54 lets the current identity authority cancel an outstanding principal
+nonce or exact action digest. It is independent of collection acceptance and mint
+readiness. Exactly one target is nonzero; an authorization using nonce zero can
+be cancelled by its exact digest. Already executed or revoked targets reject.
+The revocation consumes its own authorization and records observed execution
+time. Direct Safe calls and relayed Safe proofs use the same canonical payload.
+
+Principal nonce revocation updates the existing bounded nonce index. Delegate
+nonce lanes remain separate; an explicitly revoked identity-scoped digest also
+blocks delegated execution. Successful digest observation prevents retrospective
+revocation but does not itself collapse distinct delegate lanes. Existing grant
+revocation remains the way to remove an entire delegate's authority. Initial
+collaborator registration has its separate account replay lane before an identity
+exists; no cross-identity account revocation right is implied for future reuse.
 
 Operation 20 authorizes freezing one exact current royalty assignment. It does
 not require policy, payout, economics or content mint floors. The authorization

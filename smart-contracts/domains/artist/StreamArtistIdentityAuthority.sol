@@ -9,6 +9,7 @@ import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorIdentityState.sol";
+import "./StreamArtistAuthorizationState.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -23,11 +24,46 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     error AddressAlreadyRegistered(address authority);
     error InvalidSignature();
     error InvalidIdentity(bytes32 artistId);
+    error Replay(bytes32 replayKey);
     using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
     // Struct members preserve the exact six preexisting physical slots in declaration order.
     StreamArtistIdentityState.State private _identity;
     StreamArtistDelegationState.State private _delegations;
     StreamArtistCollaboratorIdentityState.State private _collaboratorAccounts;
+
+    event ArtistAuthorizationRevoked(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        bytes32 revokedDigest,
+        uint256 revokedNonce,
+        uint256 nonce,
+        uint64 revokedAt,
+        bytes32 revocationRecordHash
+    );
+
+    function revokeAuthorization(
+        T.ActionContext calldata c,
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _check(c, 54);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistAuthorizationState.revoke(
+            _identity, _replay, _ownerContext(), c, p, a, proof
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
+        external
+        view
+        returns (StreamArtistAuthorizationTypes.State memory)
+    {
+        return StreamArtistAuthorizationState.authorizationState(
+            _identity, _replay, _ownerContext(), artistId, digest, nonce
+        );
+    }
 
     event ArtistDelegationGranted(
         uint16 schemaVersion,
@@ -216,42 +252,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 26);
         if (a.time != 0) revert T.InvalidRecord();
-        bytes32 delta;
-        (record, delta) = StreamArtistDelegationState.grant(
-            _delegations, _environment(), p, proof.signer, a.nonce
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.grantDelegation(
+            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
         );
-        bytes32 digest = StreamArtistDelegationState.grantDigest(_environment(), p, a.nonce);
-        bytes32 replay = _authorizeState(
-            c,
-            p.artistId,
-            a,
-            proof,
-            digest,
-            record,
-            _identity.identities[p.artistId].authorityAddress
-        );
-        bytes32 key =
-            _consume(keccak256("identity_authority.replay.delegation_key"), record, record);
-        _commit(
-            c,
-            keccak256(abi.encode(p, a, proof)),
-            keccak256(abi.encode(delta, _identity.identities[p.artistId])),
-            keccak256(abi.encode(replay, key, record)),
-            record
-        );
-        emit ArtistDelegationGranted(
-            1,
-            p.artistId,
-            p.delegate,
-            p.collectionId,
-            p.capabilities,
-            p.notBefore,
-            p.expiresAt,
-            p.maxUses,
-            p.constraintsHash,
-            a.nonce,
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
     }
 
     function revokeDelegation(
@@ -262,37 +267,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 27);
         _deadline(a.time);
-        address grantor = _delegations.records[p.delegationRecordHash].grantor;
-        bytes32 delta;
-        (record, delta) = StreamArtistDelegationState.revoke(
-            _delegations, _environment(), p, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.revokeDelegation(
+            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
         );
-        bytes32 digest =
-            StreamArtistDelegationState.revokeDigest(_environment(), p, a.nonce, a.time);
-        bytes32 replay = _authorizeState(c, p.artistId, a, proof, digest, record, grantor);
-        bytes32 key = _consume(
-            keccak256("identity_authority.replay.one_way_delegation_revocation"),
-            p.delegationRecordHash,
-            record
-        );
-        _commit(
-            c,
-            keccak256(abi.encode(p, a, proof)),
-            keccak256(abi.encode(delta, _identity.identities[p.artistId])),
-            keccak256(abi.encode(replay, key, record)),
-            record
-        );
-        emit ArtistDelegationRevoked(
-            1,
-            p.artistId,
-            p.delegate,
-            p.delegationRecordHash,
-            p.reasonHash,
-            proof.signer,
-            1,
-            a.nonce,
-            _now()
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
     }
 
     function consumeDelegatedEconomics(
@@ -522,8 +501,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         _check(c, 52);
         _deadline(a.time);
         bytes32 digest;
-        (record, digest) =
-            StreamArtistIdentityState.ratificationProof(
+        (record, digest) = StreamArtistIdentityState.ratificationProof(
             _environment(), b, p, proof.signer, a, _now()
         );
         _authorize(c, b.artistId, a, proof, digest, record);
@@ -573,31 +551,6 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
                 _identity.identities[artistId].authorityAddress
             );
         _commit(c, m.action, m.state, m.replay, m.record);
-    }
-
-    function _authorizeState(
-        T.ActionContext calldata c,
-        bytes32 artistId,
-        T.Authorization calldata a,
-        T.SignerApproval calldata proof,
-        bytes32 digest,
-        bytes32 record,
-        address expectedSigner
-    ) private returns (bytes32) {
-        StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityState.authorize(
-                _identity,
-                _replay,
-                _ownerContext(),
-                c,
-                artistId,
-                a,
-                proof,
-                digest,
-                record,
-                expectedSigner
-            );
-        return m.replay;
     }
 
     function _deadline(uint64 deadline) private view {

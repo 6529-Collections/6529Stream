@@ -5,6 +5,7 @@ import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorOperations.sol";
+import "./StreamArtistAuthorizationState.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingLifecycleCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationCoordinator.sol";
@@ -121,7 +122,8 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(24),
                 uint16(26),
                 uint16(27),
-                uint16(52)
+                uint16(52),
+                uint16(54)
             )
         );
         reads = new StreamArtistOnboardingReads(suite);
@@ -261,6 +263,14 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistCollaboratorOperations.acceptRow(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRevokeArtistAuthorization(
+        address actor,
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32 record) {
+        return StreamArtistEconomicOperations.revokeAuthorization(_economicContext(), actor, p, a);
     }
 
     function coordinateRecordPolicyConsent(

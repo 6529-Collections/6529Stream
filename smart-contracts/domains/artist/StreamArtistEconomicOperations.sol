@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAuthorizationState.sol";
 
 import "./StreamArtistOnboardingReads.sol";
 import "./StreamArtistEconomicsHashes.sol";
@@ -228,6 +229,27 @@ library StreamArtistEconomicOperations {
         }
     }
 
+    function revokeAuthorization(
+        D.CoordinatorContext memory x,
+        address actor,
+        StreamArtistAuthorizationTypes.Revocation memory p,
+        T.Authorization memory a
+    ) public returns (bytes32 record) {
+        T.Snapshot[7] memory before_ = _snapshots(x, 54);
+        (address signer,,,) =
+            IStreamArtistIdentityOwner(x.suite.owners[2]).authorityState(p.artistId);
+        T.SignerApproval memory proof = _verify(
+            x,
+            actor,
+            signer,
+            StreamArtistAuthorizationState.digest(_environment(x), p, a),
+            a.signature
+        );
+        record = IStreamArtistAuthorizationOwner(x.suite.owners[2])
+            .revokeAuthorization(T.ActionContext(54, actor, before_[2]), p, a, proof);
+        _archive(x, 54, actor, record, before_, abi.encode(p, a, proof));
+    }
+
     function _verify(
         D.CoordinatorContext memory x,
         address actor,
@@ -273,7 +295,7 @@ library StreamArtistEconomicOperations {
         view
         returns (T.Snapshot[7] memory result)
     {
-        uint256 mask = op == 26 || op == 27 ? 4 : op == 15 ? 0x77 : 0x57;
+        uint256 mask = op == 26 || op == 27 || op == 54 ? 4 : op == 15 ? 0x77 : 0x57;
         for (uint256 i; i < 7; ++i) {
             if ((mask & (1 << i)) != 0) {
                 result[i] = IStreamArtistOwner(x.suite.owners[i]).ownerStateSnapshotV2();

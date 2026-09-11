@@ -30,6 +30,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistBindingLifecycle,
     IStreamArtistBeneficiaryFacts,
     IStreamArtistCollaboratorLifecycle,
+    IStreamArtistAuthorizationRevocation,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -87,7 +88,34 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistBindingLifecycle).interfaceId
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
             || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
+            || id == type(IStreamArtistAuthorizationRevocation).interfaceId
             || super.supportsInterface(id);
+    }
+
+    function revokeArtistAuthorization(
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistAuthorizationCoordinator(operationCoordinator)
+            .coordinateRevokeArtistAuthorization(msg.sender, p, a);
+    }
+
+    function authorizationRevocationDigest(
+        StreamArtistAuthorizationTypes.Revocation calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        return StreamArtistAuthorizationState.digest(_environment(), p, a);
+    }
+
+    function artistAuthorizationState(bytes32 artistId, bytes32 digest, uint256 nonce)
+        external
+        view
+        returns (StreamArtistAuthorizationTypes.State memory)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistAuthorizationOwner(s.owners[2])
+            .artistAuthorizationState(artistId, digest, nonce);
     }
 
     function proposeCollaboratorIdentity(C.IdentityProposal calldata p) external returns (bytes32) {

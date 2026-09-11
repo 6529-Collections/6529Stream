@@ -354,6 +354,498 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         );
     }
 
+    function _cancelAuthorization(StreamArtistAuthorizationTypes.Revocation memory p)
+        private
+        returns (bytes32)
+    {
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        return ingress.revokeArtistAuthorization(p, a);
+    }
+
+    function testAuthorizationRevocationConfigurationPinsEverySupportedOperationAndRuntime()
+        public
+    {
+        bytes32[16] memory runtimeHashes;
+        for (uint256 i; i < 7; ++i) {
+            runtimeHashes[i] = suite.owners[i].codehash;
+        }
+        runtimeHashes[7] = suite.registry.codehash;
+        runtimeHashes[8] = suite.archive.codehash;
+        runtimeHashes[9] = suite.core.codehash;
+        runtimeHashes[10] = suite.mintManager.codehash;
+        runtimeHashes[11] = suite.roleRegistry.codehash;
+        runtimeHashes[12] = suite.metadata.codehash;
+        runtimeHashes[13] = suite.primaryResolver.codehash;
+        runtimeHashes[14] = suite.royaltyResolver.codehash;
+        runtimeHashes[15] = suite.validator.codehash;
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_CONFIGURATION_V1"),
+                block.chainid,
+                address(coordinator),
+                suite,
+                runtimeHashes,
+                uint16(1),
+                uint16(2),
+                uint16(3),
+                uint16(4),
+                uint16(5),
+                uint16(6),
+                uint16(7),
+                uint16(14),
+                uint16(15),
+                uint16(18),
+                uint16(20),
+                uint16(24),
+                uint16(26),
+                uint16(27),
+                uint16(52),
+                uint16(54)
+            )
+        );
+        require(coordinator.configurationHash() == expected, "full executable operation commitment");
+    }
+
+    function testAuthorizationRevocationDelayedDirectSafeHasExactRecordEventAndAdjacentHint()
+        public
+    {
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), 1);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.authorizationRevocationDigest(p, a);
+        bytes memory prepared =
+            abi.encodeCall(IStreamArtistAuthorizationRevocation.revokeArtistAuthorization, (p, a));
+        T.Snapshot[7] memory before_;
+        for (uint256 i; i < 7; ++i) {
+            before_[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+        }
+        vm.warp(1100);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_AUTH_REVOCATION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                bytes32(0),
+                uint256(1),
+                uint256(0),
+                uint64(1100)
+            )
+        );
+        vm.recordLogs();
+        this.executeTargetSafe(address(ingress), prepared);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool found;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != suite.owners[2]
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistAuthorizationRevoked(uint16,bytes32,bytes32,uint256,uint256,uint64,bytes32)"
+                        )
+            ) continue;
+            require(
+                logs[i].topics.length == 2 && logs[i].topics[1] == artistId,
+                "exact revocation topics"
+            );
+            (
+                uint16 schema,
+                bytes32 revokedDigest,
+                uint256 target,
+                uint256 nonce,
+                uint64 observed,
+                bytes32 record
+            ) = abi.decode(logs[i].data, (uint16, bytes32, uint256, uint256, uint64, bytes32));
+            require(
+                schema == 1 && revokedDigest == 0 && target == 1 && nonce == 0 && observed == 1100
+                    && record == expected,
+                "canonical event and observed time"
+            );
+            found = true;
+        }
+        require(found, "Identity emits exact record");
+        StreamArtistAuthorizationTypes.State memory s =
+            ingress.artistAuthorizationState(artistId, digest, 1);
+        require(
+            s.digestObserved && !s.digestRevoked && s.nonceConsumed && s.nonceRevoked
+                && s.nextUnusedNonce == 2,
+            "own nonce followed by adjacent target"
+        );
+        for (uint256 i; i < 7; ++i) {
+            if (i != 2) {
+                require(
+                    keccak256(abi.encode(before_[i]))
+                        == keccak256(
+                            abi.encode(IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2())
+                        ),
+                    "defensive Identity-only mutation"
+                );
+            }
+        }
+        (
+            StreamArtistAuthorizationTypes.Revocation memory submitted,
+            T.Authorization memory auth,
+            T.SignerApproval memory proof
+        ) = abi.decode(
+            _operationPayload(54, address(artist), expected),
+            (StreamArtistAuthorizationTypes.Revocation, T.Authorization, T.SignerApproval)
+        );
+        require(
+            submitted.revokedNonce == 1 && auth.time == 2000 && proof.direct
+                && proof.digest == digest,
+            "archive original authorization"
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(
+                IStreamArtistAuthorizationRevocation.artistAuthorizationState, (artistId, digest, 1)
+            )
+        );
+    }
+
+    function testAuthorizationRevocationCancelsFuturePolicyNonceAndExactDigest() public {
+        _accept();
+        T.PolicyConsent memory p = T.PolicyConsent(1, PHASE, POLICY);
+        T.Authorization memory a = T.Authorization(71, 2000, "");
+        a.signature = _signature(ingress.policyConsentDigest(p, a));
+        _cancelAuthorization(StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), 71));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordPolicyConsent(p, a);
+        require(_roots() == before_, "revoked nonce leaves record unchanged");
+        a.nonce = 72;
+        bytes32 digest = ingress.policyConsentDigest(p, a);
+        a.signature = _signature(digest);
+        _cancelAuthorization(StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0));
+        before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordPolicyConsent(p, a);
+        StreamArtistAuthorizationTypes.State memory s =
+            ingress.artistAuthorizationState(artistId, digest, 72);
+        require(
+            _roots() == before_ && s.digestRevoked && !s.digestObserved && !s.nonceConsumed,
+            "digest revocation does not consume target nonce"
+        );
+        _policy();
+    }
+
+    function testAuthorizationRevocationCanCancelNonceZeroAcceptanceByItsExactDigest() public {
+        T.Authorization memory acceptance = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.acceptanceDigest(1, acceptance);
+        acceptance.signature = _signature(digest);
+        StreamArtistAuthorizationTypes.Revocation memory target =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory cancel = T.Authorization(99, 2000, "");
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(target, cancel));
+        ingress.revokeArtistAuthorization(target, cancel);
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.acceptArtistBinding(1, acceptance);
+        StreamArtistAuthorizationTypes.State memory s =
+            ingress.artistAuthorizationState(artistId, digest, 0);
+        require(
+            _roots() == before_ && s.digestRevoked && !s.nonceConsumed && s.nextUnusedNonce == 0
+                && ingress.acceptedArtist(1) == address(0),
+            "nonce zero cancellation is exact digest scoped"
+        );
+    }
+
+    function testAuthorizationRevocationRejectsPreviouslyExecutedDigestAndNonce() public {
+        _accept();
+        T.PolicyConsent memory p = T.PolicyConsent(1, PHASE, POLICY);
+        T.Authorization memory old =
+            T.Authorization(nextNonce, uint64(block.timestamp + 1 days), "");
+        bytes32 digest = ingress.policyConsentDigest(p, old);
+        _policy();
+        StreamArtistAuthorizationTypes.Revocation memory target =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.authorizationRevocationDigest(target, a));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.revokeArtistAuthorization(target, a);
+        target.revokedDigest = 0;
+        target.revokedNonce = old.nonce;
+        a.signature = _signature(ingress.authorizationRevocationDigest(target, a));
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.revokeArtistAuthorization(target, a);
+        require(
+            _roots() == before_
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "preventive only and own nonce rolls back"
+        );
+    }
+
+    function testAuthorizationRevocationLateArchiveFailureRollsBackDenyObservationAndIndex()
+        public
+    {
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), 1);
+        T.Authorization memory a = _authorization(false);
+        bytes32 digest = ingress.authorizationRevocationDigest(p, a);
+        a.signature = _signature(digest);
+        bytes32 before_ = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        StreamArtistAuthorizationTypes.State memory s =
+            ingress.artistAuthorizationState(artistId, digest, 1);
+        require(
+            _roots() == before_ && !s.digestObserved && !s.nonceConsumed && !s.nonceRevoked
+                && s.nextUnusedNonce == 0,
+            "all late effects rolled back"
+        );
+        avm.clearMockedCalls();
+        ingress.revokeArtistAuthorization(p, a);
+        before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        require(_roots() == before_, "exact repeat cannot revoke twice");
+    }
+
+    function testAuthorizationRevocationSafeApprovedEmptyAndProtocolOnlyGuards() public {
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), 90);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.authorizationRevocationDigest(p, a);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        _approveMessage(digest);
+        ingress.revokeArtistAuthorization(p, a);
+        require(
+            ingress.artistAuthorizationState(artistId, digest, 90).nonceRevoked,
+            "real preapproved empty Safe relay"
+        );
+        T.ActionContext memory c = T.ActionContext(
+            54, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof = T.SignerApproval(address(artist), digest, true);
+        bytes memory ownerCall =
+            abi.encodeCall(IStreamArtistAuthorizationOwner.revokeAuthorization, (c, p, a, proof));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], ownerCall);
+        bytes memory coordinatorCall = abi.encodeCall(
+            IStreamArtistAuthorizationCoordinator.coordinateRevokeArtistAuthorization,
+            (address(artist), p, a)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(coordinator), coordinatorCall);
+    }
+
+    function testAuthorizationRevocationRejectsBadTargetsAuthorityDomainAndExpiry() public {
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), 33);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        address ownerEoa = vm.addr(keys[0]);
+        vm.prank(ownerEoa);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        a.signature = _signature(keccak256("wrong domain"));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        a.time = 999;
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, uint64(999)));
+        ingress.revokeArtistAuthorization(p, a);
+        a.time = 2000;
+        p.revokedDigest = keccak256("both targets");
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        p.revokedDigest = 0;
+        p.revokedNonce = 0;
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        p.revokedNonce = 1;
+        a.nonce = 1;
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.revokeArtistAuthorization(p, a);
+        require(
+            ingress.artistAuthorizationState(artistId, 0, 0).nextUnusedNonce == 0,
+            "all invalid branches preserve allocator"
+        );
+    }
+
+    function testAuthorizationRevocationSparseMaximumAndReversePrefixKeepDirectHintBounded()
+        public
+    {
+        for (uint256 i = 16; i != 0; --i) {
+            StreamArtistAuthorizationTypes.Revocation memory p =
+                StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), i);
+            T.Authorization memory a = T.Authorization(100 + i, 2000, "");
+            a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+            ingress.revokeArtistAuthorization(p, a);
+        }
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(artistId, bytes32(0), type(uint256).max);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        a.signature = _signature(ingress.authorizationRevocationDigest(p, a));
+        ingress.revokeArtistAuthorization(p, a);
+        require(
+            ingress.artistAuthorizationState(artistId, 0, type(uint256).max).nextUnusedNonce == 17,
+            "bounded prefix and maximum leaf"
+        );
+        p.revokedNonce = 18;
+        a.nonce = 17;
+        a.signature = "";
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistAuthorizationRevocation.revokeArtistAuthorization, (p, a))
+        );
+        require(
+            ingress.artistAuthorizationState(artistId, 0, 18).nextUnusedNonce == 19,
+            "direct exact hint after reverse ordered signatures"
+        );
+    }
+
+    function testAuthorizationRevocationDelayedEoaIsIdentityScopedWithoutAcceptance() public {
+        address account = vm.addr(0xA54);
+        T.BindingProposal memory proposal = _proposal(bytes32(0));
+        proposal.artistAddress = account;
+        (bytes32 second,) = ingress.proposeArtistBinding(
+            2, proposal, bytes("unit identity document"), "Artist Safe"
+        );
+        StreamArtistAuthorizationTypes.Revocation memory p =
+            StreamArtistAuthorizationTypes.Revocation(second, bytes32(0), 19);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes memory prepared =
+            abi.encodeCall(IStreamArtistAuthorizationRevocation.revokeArtistAuthorization, (p, a));
+        vm.warp(1200);
+        vm.prank(account);
+        (bool ok,) = address(ingress).call(prepared);
+        require(
+            ok && ingress.artistAuthorizationState(second, 0, 19).nonceRevoked,
+            "delayed direct EOA defensive action"
+        );
+        require(
+            !ingress.artistAuthorizationState(artistId, 0, 19).nonceConsumed
+                && ingress.acceptedArtist(2) == address(0),
+            "no cross identity or acceptance prerequisite"
+        );
+        p.artistId = artistId;
+        p.revokedNonce = 20;
+        a.nonce = 1;
+        vm.prank(account);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.revokeArtistAuthorization(p, a);
+    }
+
+    function testAuthorizationRevocationDelegatedDigestObservationPreservesSeparateLanes() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 firstGrant = _grant(_delegation(1, 4, 1000, 2000, 0));
+        uint256[] memory otherKeys = new uint256[](2);
+        otherKeys[0] = 0xED1;
+        otherKeys[1] = 0xED2;
+        OfficialSafe other =
+            createOfficialSafe(safeComponents, safeOwnerAddresses(otherKeys), 2, 540);
+        D.Grant memory otherTerms = _delegation(1, 4, 1000, 2000, 0);
+        otherTerms.delegate = address(other);
+        bytes32 secondGrant = _grant(otherTerms);
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        T.Authorization memory a = T.Authorization(40, 2000, "");
+        bytes32 digest = ingress.economicsConsentDigest(p, a);
+        a.signature = _delegateSignature(digest);
+        bytes32 first = ingress.recordDelegatedEconomicsConsent(p, firstGrant, a);
+        a.signature =
+            safeThresholdSignature(otherKeys, safeMessageDigest(other, abi.encode(digest)));
+        bytes32 consentKey = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[6],
+                keccak256("domain:consent_finality"),
+                keccak256("consent_finality.replay.consent_key"),
+                keccak256(abi.encode(p))
+            )
+        );
+        bytes32 unchanged = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, consentKey));
+        ingress.recordDelegatedEconomicsConsent(p, secondGrant, a);
+        require(_roots() == unchanged, "existing duplicate economics record rule preserved");
+        // Explicit unit protocol boundary: isolate Identity's replay lane from
+        // Consent's independent one-record-per-assignment rule after verifying
+        // the second actual Safe proof. This is not a second full consent record.
+        bytes32 second = _consumeDelegateIdentityOnly(p, a, secondGrant, address(other), digest);
+        require(
+            first != second && ingress.artistAuthorizationState(artistId, digest, 40).digestObserved
+                && !ingress.artistAuthorizationState(artistId, digest, 40).nonceConsumed,
+            "same digest succeeds in distinct Identity lanes"
+        );
+        StreamArtistAuthorizationTypes.Revocation memory target =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory cancel = _authorization(false);
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(target, cancel));
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.revokeArtistAuthorization(target, cancel);
+        a.nonce = 41;
+        digest = ingress.economicsConsentDigest(p, a);
+        target.revokedDigest = digest;
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(target, cancel));
+        ingress.revokeArtistAuthorization(target, cancel);
+        bytes32 before_ = _roots();
+        bytes32 denyKey = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[2],
+                keccak256("domain:identity_authority"),
+                keccak256("identity_authority.replay.digest_revocation"),
+                keccak256(abi.encode(artistId, digest))
+            )
+        );
+        a.signature = _delegateSignature(digest);
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, denyKey));
+        ingress.recordDelegatedEconomicsConsent(p, firstGrant, a);
+        a.signature =
+            safeThresholdSignature(otherKeys, safeMessageDigest(other, abi.encode(digest)));
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, denyKey));
+        ingress.recordDelegatedEconomicsConsent(p, secondGrant, a);
+        (bool used,) = ingress.delegatedNonceState(artistId, address(delegateSafe), 41);
+        require(
+            !used && _roots() == before_ && ingress.delegationRecord(firstGrant).uses == 1
+                && ingress.delegationRecord(secondGrant).uses == 1,
+            "deny does not consume delegate nonce or grant use"
+        );
+    }
+
+    function _consumeDelegateIdentityOnly(
+        T.EconomicsConsent memory p,
+        T.Authorization memory a,
+        bytes32 grant,
+        address signer,
+        bytes32 digest
+    ) private returns (bytes32) {
+        require(
+            StreamArtistRegistryValidatorBase(suite.validator)
+                .validateSignerProof(signer, digest, a.signature, 150_000),
+            "actual second Safe proof"
+        );
+        T.Binding memory binding_ = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        (, bytes32 designation) = ingress.artistPayoutAccount(artistId);
+        T.ActionContext memory c = T.ActionContext(
+            15, address(this), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof = T.SignerApproval(signer, digest, false);
+        vm.prank(address(coordinator));
+        return IStreamArtistDelegationOwner(suite.owners[2])
+            .consumeDelegatedEconomics(c, binding_, p, designation, grant, a, proof);
+    }
+
     function testCurrentTemplateSupplementaryTermsAndCanonicalRecordAreBothReconstructable()
         public
     {
@@ -1757,9 +2249,14 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 record
             )
         );
-        (,,,,,,, payload) = abi.decode(
+        bytes32 configuration;
+        (, configuration,,,,,, payload) = abi.decode(
             archive.artistEvidenceBytesV2(id, 1),
             (uint16, bytes32, uint16, address, bytes32, T.Snapshot[7], T.Snapshot[7], bytes)
+        );
+        require(
+            configuration == coordinator.configurationHash(),
+            "archived supported operation configuration"
         );
     }
 
