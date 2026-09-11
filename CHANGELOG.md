@@ -52,14 +52,18 @@ the release policy in `docs/release-policy.md`.
 - Added committed one-time genesis initialization, real system discovery and
   current-stack tests covering paid mint, auction custody/refunds, withdrawals,
   metadata, transfer/burn, receiver rollback and delayed governance rotation.
-  Normal governance delays remain after genesis. An earlier prototype completed
-  a Sepolia paid mint. The corrected, extended source requires a new deployment;
-  its real randomness callback and final demonstration are pending subscription
-  funding. The prototype is historical development evidence, not the current
-  candidate or a production release.
+  Normal governance delays remain after genesis. The current Sepolia instance
+  completes the real randomness callback and native demonstration; earlier
+  prototype records retain their historical source and deployment identity.
 
 ### Changed
 
+- Order resumed scenario authorizations by contract ABI fields across supported
+  PowerShell versions, and check current auction terms before wallet prompts.
+- Report local snapshot and collector-package errors clearly, and keep campaign
+  lock conflicts from creating empty output directories.
+- Build the client before Windows operator tests and avoid retaining checkout
+  credentials in the client CI job.
 - Reuse compiler caches within the pinned toolchain and profile while retaining
   unconditional builds, tests and source validation. Mixed current build-info
   after a fallback restore triggers one fresh build before export validation.

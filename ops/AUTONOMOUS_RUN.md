@@ -33,7 +33,8 @@ below. Current release coverage contains 703 files.
 
 Final integration remains pending. The Windows CI job now builds the client
 before operator tests, and the verifier-test fixture binds the reviewed Slither
-source hash. Developer-tool review corrections are being integrated in parallel.
+source hash. Developer-tool review corrections have focused passing tests and
+independent review, including ABI-ordered PowerShell authorization recovery.
 Refresh the dependent release evidence and finish final local validation,
 independent review and all six CI jobs before merging PR #742. The supported testnet candidate
 freeze and publication follow that merge; neither has occurred. Historical
@@ -124,7 +125,7 @@ change production Solidity behavior. Completed pieces include the TypeScript
 client, a selected-state snapshot exporter, a second-artist product demonstration
 and resumable Sepolia stages.
 
-- The client passes 31 tests plus its build, type checks and retained-ABI checks.
+- The client passes 33 tests plus its build, type checks and retained-ABI checks.
   Its snapshot records selected public facts at one block, with explicit coverage,
   canonical hashes and fresh RPC readback. It is not a complete archival export.
 - The product demonstration executes 31 local transactions across native/ERC-20
@@ -148,7 +149,7 @@ and resumable Sepolia stages.
   reverts or discards. Both the successful-activity check and the deliberately
   corrupted payer-accounting oracle test pass. An initial test-helper compiler
   failure is retained separately from the corrected passing run.
-- The campaign command and CI wiring pass 19 tooling regressions and independent
+- The campaign command and CI wiring pass 20 tooling regressions and independent
   review. The canonical-source quick run and two extended seeds pass 42,240 input
   cases and 133,120 stateful calls across 544 sequences, with no unexpected reverts
   or discards. The warm extended runs take about two minutes each. A separately
@@ -200,18 +201,20 @@ A frozen testnet release candidate still requires the final reviewed package.
 
 ## Recovery and remaining scope
 
-The original checkout is clean on merged main. Prior cleanup retired 55 worktrees
-and archived 19 superseded tasks. All 160 original changed/untracked paths, recovery
-refs/bundles and 6,646 ignored files were preserved and verified. Six registered
-worktrees remain: original, integration, developer launch kit, frozen Sepolia
-launch, historical deployer and immutable review baseline. The launch-kit checkout is active implementation work,
-not an abandoned worktree.
+The original checkout is clean on merged main. Cleanup has retired 58 registered
+worktrees and archived 19 superseded tasks. All 160 original changed/untracked
+paths, recovery refs/bundles and 6,646 original ignored files were preserved and
+verified. The latest three retirements additionally preserve 2,064 ignored files
+and verified source bundles. Three registered worktrees remain: original,
+developer launch kit and frozen Sepolia launch. The launch-kit checkout is active
+implementation work. The retired integration directory is empty but a process
+still holds its directory handle; its Git worktree registration has been removed.
 
-After the final merge and validation finish, preserve and hash all remaining
-unique recovery files, compiler outputs, caches and deployment receipts before
-retiring four worktrees. The intended two retained checkouts are the original
-repository and the frozen Sepolia launch checkout. These four retirements have
-not occurred; the retained evidence and prior user changes must remain recoverable.
+After the final merge and validation finish, preserve and hash the developer
+kit's remaining compiler outputs, caches and recovery files before retiring that
+worktree. The intended two retained checkouts are the original repository and
+the frozen Sepolia launch checkout. Retained evidence and prior user changes
+must remain recoverable.
 
 The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
 directory remains after automatic approval review blocked its removal.
