@@ -29,3 +29,5 @@ packages/stream-client/** text eol=lf
 
 # Preserve the official Safe package license bytes in Windows checkouts.
 test/fixtures/safe/LICENSE-* text eol=lf
+# Preserve the official Permit2/Solmate license bytes in Windows checkouts.
+test/fixtures/permit2/LICENSE-* text eol=lf

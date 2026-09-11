@@ -21,6 +21,26 @@ ignored `out/current` and `cache/current`. The default profile and full release
 checks retain their historical scope. This focused command does not regenerate
 release evidence or replace the broader domain and release validation.
 
+### Settlement test boundaries
+
+`test/unit/revenue/StreamUniversalSettlement*.t.sol`, `StreamUniversalPermits.t.sol`
+and `StreamUniversalSafe.t.sol` exercise the new official recorder and ERC-20
+payer adapter with the actual module registry, wallet, escrow, and pinned
+Permit2/Safe implementations. Their Core, mint manager and artist boundaries
+are explicit domain fixtures. Current-stack tests must independently prove
+composition with the actual selected Core and artist owners.
+
+`StreamRevenueAssignments.t.sol` keeps resolver precedence, frozen assignments,
+clear fallthrough, wallet runtime validation and the legacy public SALE_POSTER
+materialization primitive independent of settlement construction. The former
+`StreamPrimarySaleSettlement.t.sol` exercised an uninstalled foundation API with
+an owner allowlist and direct payer pulls by the recorder. Those APIs are removed.
+Its still-supported accounting, transfer-failure, replay and event guarantees are
+covered by the universal suites; its resolver guarantees are preserved separately.
+Native recorder settlement, SALE_POSTER sale admission, token-scoped settlement
+and ALLOW_CURRENT success are not implied by that migration. The first universal
+consumer accepts strict collection PROFILE, signed, single-step ERC-20 minting.
+
 Fresh contributors should start with
 [`first-30-minutes.md`](../../first-30-minutes.md). That checked guide explains the
 minimal setup path, `forge` not being on `PATH`, Windows wrapper usage, known

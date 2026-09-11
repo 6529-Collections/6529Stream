@@ -7,13 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the shared official revenue recorder, sole ERC-20 payer adapter and a
+  signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
+  exact settlement events, replay protection and Safe domain tests. Current-Core
+  composition and broader sale orchestration remain in progress.
+- Preserved resolver and public SALE_POSTER materialization regressions in their
+  own fixture while retiring the uninstalled settlement API's owner allowlist
+  and direct payer-pull tests. New graph tests cover current transfer/replay rules.
 - Added modular artist content consent, defensive freeze authorization and
   unused-authorization revocation, preserving the earlier interfaces and owner
-  storage. Current artist/metadata composition and finality admission have
-  separate acceptance work.
+  storage. Current artist/metadata composition passes the actual Safe mint flows;
+  executed-finality admission remains separate work.
 - Added metadata-host content commitments, one-use approval consumption, actual
   evolution witnesses and defensive artist locks, with real Safe administration
-  and relayer tests. Modular artist and executed-finality integration remain open.
+  and relayer tests. Modular artist composition passes; executed-finality integration
+  remains open.
 - Added exact Safe CALL payload conversion and receipt verification for the expected
   Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
   Client ABI/signing documentation now explicitly identifies its retained RC1 scope.
