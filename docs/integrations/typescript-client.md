@@ -1,9 +1,11 @@
 # Use the TypeScript client
 
 The [client package](../../packages/stream-client/README.md) gives applications
-typed calls and EIP-712 payloads for the current native sale, ERC-20 sale, artist
-acceptance and auction contracts. It uses the exact retained current ABIs. Full
-Artist V2, universal settlement and finality recovery are outside this package.
+typed calls and EIP-712 payloads for the retained testnet RC1 native sale, ERC-20
+sale, artist acceptance and auction contracts. Its generated ABIs and signing
+payloads are pinned to that export. The ongoing v1 implementation changes these
+interfaces; a matching export and client migration remain required. Full Artist
+V2, universal settlement and finality recovery are outside this package.
 
 ## Build and connect
 
@@ -98,9 +100,9 @@ separate artist/payer nonce spaces. `saleRef` is the canonical `saleId`, not the
 config hash or authorization digest. The payer approves the **adapter** as token
 spender separately; the client never sends an unlimited token approval.
 
-Artist acceptance is immutable and must happen before the first mint or
-collection freeze. A relayer can pay gas without becoming the artist. Nomination
-alone does not authorize a sale. The current registry does not implement signer
+In the retained RC1 registry, artist acceptance is immutable and must happen
+before the first mint or collection freeze. A relayer can pay gas without becoming
+the artist. Nomination alone does not authorize a sale. The retained registry does not implement signer
 rotation, collaborators or estate recovery.
 
 For ERC-1271 wallets, use the wallet's actual signing integration and simulate
@@ -108,6 +110,47 @@ its opaque signature bytes. EOA recovery is not a contract-wallet validity test.
 The general `prepare` API accepts those bytes; the examples require a compatible
 caller-supplied ethers Signer abstraction. The contract's actual signature gas
 budget remains authoritative.
+
+## Submit through a Safe
+
+Prepare each operation for the Safe address that actually owns the permission,
+funds, refund or NFT. The same CALL conversion works for purchases, token
+approvals, withdrawals, artist operations and governance calls, provided their
+calldata is encoded from the matching deployed contract ABI. A token approval
+must name the spender used by that deployment.
+
+```typescript
+import { toSafeCall, requireSafeExecution } from "@6529/stream-client";
+
+const safeCall = toSafeCall(call);
+// Give safeCall to your Safe integration for review, threshold signing and execution.
+// Keep the expected Safe transaction hash computed from the reviewed transaction.
+requireSafeExecution(receipt, safeAddress, expectedSafeTxHash);
+// Then verify the expected Stream event, identifiers, amount and resulting state.
+```
+
+`toSafeCall` returns the exact target, calldata, decimal native value and operation
+`0` (CALL). It neither signs nor submits. Simulate the intended direct call using
+the Safe as sender, then simulate the complete signed Safe transaction through
+your Safe integration to check its signature, nonce and gas settings.
+
+The outer receipt can succeed even when a Safe target call fails.
+`requireSafeExecution` requires exactly one successful execution from the expected
+Safe for an independently verified Safe transaction hash. Do not substitute the
+outer Ethereum transaction hash. It rejects failed executions, missing or duplicate
+matches, and malformed events. The helper accepts the unindexed hash in
+[Safe 1.3.0](https://github.com/safe-fndn/safe-smart-account/blob/186a21a74b327f17fc41217a927dea7064f74604/contracts/GnosisSafe.sol)
+and the indexed hash in
+[Safe 1.4.1](https://github.com/safe-fndn/safe-smart-account/blob/bf943f80fec5ac647159d26161446ac5d716a294/contracts/Safe.sol)
+and [1.5.0](https://github.com/safe-fndn/safe-smart-account/blob/dc437e8fba8b4805d76bcbd1c668c9fd3d1e83be/contracts/Safe.sol).
+Tests execute both successful and failed calls through all three pinned upstream
+versions with actual threshold signatures.
+
+This receipt check covers `execTransaction`. Module execution needs its own
+verification, and batches need checks for their intended inner operations and
+application state. Transaction execution and ERC-1271 message signing are separate:
+use the Safe's signing integration for opaque contract signatures, including any
+required message wrapping or onchain approval.
 
 ## Read receipts and continue a flow
 

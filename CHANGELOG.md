@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added exact Safe CALL payload conversion and receipt verification for the expected
+  Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
+  Client ABI/signing documentation now explicitly identifies its retained RC1 scope.
 - Added prospective fixed-profile artist economics approval and exact defensive
   royalty freeze authorization, with typed resolver previews and consent before
   governed mutations. Defensive freezing preserves royalty terms; new minting

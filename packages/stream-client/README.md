@@ -1,7 +1,9 @@
 # Stream client
 
-Typed calls, receipt decoding and EIP-712 payloads for the **implemented current
-stack**. This private development package is not published to npm. It contains
+Typed calls, receipt decoding and EIP-712 payloads for the **retained testnet RC1
+export**. The ongoing v1 contracts have changed; their ABIs and signing payloads
+must be exported and verified before using this client against that new stack.
+This private development package is not published to npm. It contains
 no wallet keys, RPC credentials, deployment defaults or automatic transactions.
 
 From this directory, with Node.js 22 or newer:
@@ -25,6 +27,13 @@ projection without writing. Generation does not compile Solidity or update
 release evidence. A source export update requires reviewing the client diff and
 rechecking its onchain digest vectors; the client is not a source-verification
 or deployment-attestation tool.
+
+`toSafeCall` preserves any prepared call's target, calldata and native value for
+a Safe transaction builder. `requireSafeExecution` checks the expected Safe and
+its independently verified transaction hash against actual execution success,
+including the different event layouts in Safe 1.3.0, 1.4.1 and 1.5.0. Applications
+also verify the expected Stream events and resulting state. See the
+[Safe workflow](../../docs/integrations/typescript-client.md#submit-through-a-safe).
 
 The examples are executable functions accepting caller-supplied ethers wallets:
 
