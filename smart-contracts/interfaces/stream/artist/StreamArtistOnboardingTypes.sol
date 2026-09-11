@@ -159,6 +159,30 @@ library StreamArtistOnboardingTypes {
         bytes32 assignmentHash;
     }
 
+    /// @notice Actual factory profile and assignment settings covered by prospective economics consent.
+    /// @dev The supported collection profile requires policyHash zero; primary also requires royaltyBps zero.
+    struct FixedEconomicsCandidate {
+        bytes32 profileHash;
+        bytes32 policyHash;
+        uint16 royaltyBps;
+        bool frozen;
+    }
+
+    /// @notice Exact current royalty assignment that the artist authorizes to become permanently frozen.
+    struct RoyaltyFreeze {
+        address resolver;
+        uint256 collectionId;
+        bytes32 revenueClass;
+        bytes32 expectedAssignmentHash;
+    }
+
+    /// @notice Durable authorization with its operative artist identity and binding-generation admission.
+    struct RoyaltyFreezeRecord {
+        bytes32 recordHash;
+        bytes32 artistId;
+        uint64 bindingGeneration;
+    }
+
     /// @notice Constructor-fixed target set; owners use the ADR0023 domain order.
     struct SuiteConfiguration {
         address registry;
