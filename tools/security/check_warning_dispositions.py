@@ -8,8 +8,60 @@ import re
 import sys
 from pathlib import Path
 
+from tools.protocol.check_external_call_gas_inventory import (
+    mask_comments_and_strings,
+    matching_closing_brace,
+)
+
 
 DEFAULT_WARNING_DISPOSITIONS = Path("docs/warning-dispositions.md")
+EXECUTOR_SOURCE = "smart-contracts/domains/governance/StreamGovernanceExecutor.sol"
+
+# These ABI names are retained deliberately. Pin each complete forwarding wrapper,
+# and bind diagnostic lines to its enclosing function rather than accepting generic
+# excerpts such as `bytes32 exportHash,` anywhere in the Executor.
+SCOPED_EXECUTOR_FORWARDERS = {
+    "latestStateExport": """function latestStateExport() external view override returns (
+        uint256 blockNumber, bytes32 blockHash, bytes32 exportHash, bytes32 manifestHash,
+        string memory manifestURI
+    ) {
+        bytes memory encoded = StreamStateExport.encodeLatest();
+        assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }
+    }""",
+    "publishStateExport": """function publishStateExport(
+        uint256 blockNumber, bytes32 blockHash, bytes32 exportHash, bytes32 manifestHash,
+        string calldata manifestURI
+    ) external override { StreamStateExport.write(_manifest, _executing, msg.data); }""",
+    "challengeStateExport": """function challengeStateExport(
+        bytes32 exportHash, bytes32 challengeHash, string calldata challengeURI
+    ) external override { StreamStateExport.write(_manifest, _executing, msg.data); }""",
+    "supersedeStateExport": """function supersedeStateExport(
+        bytes32 oldExportHash, bytes32 newExportHash, bytes32 reasonHash, string calldata reasonURI
+    ) external override { StreamStateExport.write(_manifest, _executing, msg.data); }""",
+    "stateExport": """function stateExport(bytes32 exportHash) external view override
+        returns (StreamStateExportRecord memory record, bytes32 supersededBy) {
+        bytes memory encoded = StreamStateExport.encodeRecord(exportHash);
+        assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }
+    }""",
+}
+SCOPED_EXECUTOR_EXCERPTS = {
+    "latestStateExport": (
+        "uint256 blockNumber,", "bytes32 blockHash,", "bytes32 exportHash,",
+        "bytes32 manifestHash,", "string memory manifestURI",
+    ),
+    "publishStateExport": (
+        "uint256 blockNumber,", "bytes32 blockHash,", "bytes32 exportHash,",
+        "bytes32 manifestHash,", "string calldata manifestURI",
+    ),
+    "challengeStateExport": (
+        "bytes32 exportHash,", "bytes32 challengeHash,", "string calldata challengeURI",
+    ),
+    "supersedeStateExport": (
+        "bytes32 oldExportHash,", "bytes32 newExportHash,", "bytes32 reasonHash,",
+        "string calldata reasonURI",
+    ),
+    "stateExport": ("returns (StreamStateExportRecord memory record, bytes32 supersededBy)",),
+}
 
 EXPECTED_SOLC_WARNINGS = {
     (
@@ -63,6 +115,11 @@ EXPECTED_SOLC_WARNINGS = {
         "function isMinterContract() external view returns (bool) {",
     ),
 }
+EXPECTED_SOLC_WARNINGS.update(
+    ("5667", EXECUTOR_SOURCE, f"{function} :: {excerpt}")
+    for function, excerpts in SCOPED_EXECUTOR_EXCERPTS.items()
+    for excerpt in excerpts
+)
 
 REQUIRED_SOLC_LOG_MARKERS = (
     "Compiler run successful",
@@ -97,6 +154,7 @@ REQUIRED_PHRASES = [
     "SOLC-UNUSED-RANDOMIZER-SALT-VRF",
     "SOLC-TEST-UNUSED-LEGACY-ROYALTY-TOKENID",
     "SOLC-UNUSED-EXECUTOR-ENCODED-PAGE-RETURNS",
+    "SOLC-UNUSED-EXECUTOR-STATE-EXPORT-FORWARDERS",
     "SOLC-PURE-RANDOMIZER-NXT",
     "SOLC-PURE-RANDOMIZER-RNG",
     "SOLC-PURE-RANDOMIZER-VRF",
@@ -151,6 +209,8 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/domains/dependencies/DependencyRegistry.sol",
     "smart-contracts/domains/governance/StreamGovernanceExecutor.sol",
     "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol",
+    "smart-contracts/domains/governance/StreamStateExport.sol",
+    "test/current/StreamCurrentStateExport.t.sol",
     "test/unit/governance/StreamGovernanceExecutor.t.sol",
     "smart-contracts/integrations/delegation/NFTdelegation.sol",
     "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol",
@@ -194,6 +254,14 @@ SOURCE_MARKERS = {
     "smart-contracts/domains/governance/StreamGovernanceBootstrap.sol": [
         "function encodeTerminalFreezeActionPage(",
         "return abi.encode(ids, deadlines, next);",
+    ],
+    "smart-contracts/domains/governance/StreamStateExport.sol": [
+        "bytes4 selector = bytes4(input[:4]);",
+        "abi.decode(input[4:], (bytes32, bytes32, string));",
+        "abi.decode(input[4:], (uint256, bytes32, bytes32, bytes32, string));",
+        "abi.decode(input[4:], (bytes32, bytes32, bytes32, string));",
+        "return abi.encode( record.blockNumber, record.blockHash, record.exportHash, record.manifestHash, record.manifestURI );",
+        "return abi.encode(state.records[exportHash], state.supersededBy[exportHash]);",
     ],
     "smart-contracts/integrations/randomizers/legacy/RandomizerNXT.sol": [
         "function calculateTokenHash(uint256 _collectionID, uint256 _mintIndex, uint256 _saltfun_o)",
@@ -364,6 +432,15 @@ def validate_source_markers(repo_root: Path) -> None:
             if normalize_whitespace(snippet) not in source:
                 missing.append(f"{relative}: {snippet}")
 
+    executor_path = repo_root / EXECUTOR_SOURCE
+    if executor_path.is_file():
+        source = executor_path.read_text(encoding="utf-8")
+        blocks = function_blocks(source)
+        for function, expected in SCOPED_EXECUTOR_FORWARDERS.items():
+            matching = [source[start:end] for name, start, end in blocks if name == function]
+            if len(matching) != 1 or normalize_whitespace(matching[0]) != normalize_whitespace(expected):
+                missing.append(f"{EXECUTOR_SOURCE}: {function} forwarding body")
+
     if missing:
         raise WarningDispositionError(
             "warning disposition source markers drifted: " + ", ".join(missing)
@@ -375,11 +452,45 @@ def normalize_solidity_warning_path(raw_path: str) -> str:
     return raw_path.strip().replace("\\", "/")
 
 
-def parse_solc_warnings(log_text: str) -> set[tuple[str, str, str]]:
+def function_blocks(source: str) -> list[tuple[str, int, int]]:
+    """Locate actual function bodies without treating comments or strings as code."""
+    masked = mask_comments_and_strings(source)
+    blocks = []
+    for match in re.finditer(r"\bfunction\s+([A-Za-z_]\w*)\s*\(", masked):
+        opening = masked.find("{", match.end())
+        semicolon = masked.find(";", match.end())
+        if opening == -1 or (semicolon != -1 and semicolon < opening):
+            continue
+        closing = matching_closing_brace(masked, opening)
+        if closing is not None:
+            blocks.append((match.group(1), match.start(), closing + 1))
+    return blocks
+
+
+def scoped_executor_excerpt(repo_root: Path, line_number: int, excerpt: str) -> str:
+    """Bind a new generic ABI-parameter warning to its exact live function and line."""
+    source_path = repo_root / EXECUTOR_SOURCE
+    if not source_path.is_file():
+        return f"<unbound> :: {excerpt}"
+    source = source_path.read_text(encoding="utf-8")
+    lines = source.splitlines(keepends=True)
+    if line_number < 1 or line_number > len(lines) or normalize_whitespace(lines[line_number - 1]).strip() != excerpt:
+        return f"<unbound> :: {excerpt}"
+    offset = sum(len(line) for line in lines[:line_number - 1])
+    for function, start, end in function_blocks(source):
+        if start <= offset < end:
+            return f"{function} :: {excerpt}"
+    return f"<unbound> :: {excerpt}"
+
+
+def parse_solc_warnings(log_text: str, repo_root: Path | None = None) -> set[tuple[str, str, str]]:
     """Extract solc warning code, source path, and source excerpt from forge output."""
     warnings = set()
     pending_code: str | None = None
     pending_path: str | None = None
+    pending_line = 0
+    source_root = repo_root if repo_root is not None else Path(__file__).resolve().parents[2]
+    scoped_excerpts = {excerpt for values in SCOPED_EXECUTOR_EXCERPTS.values() for excerpt in values}
     for line in log_text.splitlines():
         warning_match = SOLC_WARNING_RE.search(line)
         if warning_match:
@@ -393,16 +504,20 @@ def parse_solc_warnings(log_text: str) -> set[tuple[str, str, str]]:
             if not source_match:
                 continue
             pending_path = normalize_solidity_warning_path(source_match.group("path"))
+            pending_line = int(source_match.group("line"))
             continue
 
         source_excerpt_match = SOLC_SOURCE_EXCERPT_RE.match(line)
         if not source_excerpt_match:
             continue
+        excerpt = normalize_whitespace(source_excerpt_match.group("source")).strip()
+        if pending_code == "5667" and pending_path == EXECUTOR_SOURCE and excerpt in scoped_excerpts:
+            excerpt = scoped_executor_excerpt(source_root, pending_line, excerpt)
         warnings.add(
             (
                 pending_code,
                 pending_path,
-                normalize_whitespace(source_excerpt_match.group("source")).strip(),
+                excerpt,
             )
         )
         pending_code = None
@@ -416,7 +531,7 @@ def format_solc_warning(warning: tuple[str, str, str]) -> str:
     return f"Warning({code}) {path} :: {source_excerpt}"
 
 
-def validate_solc_warning_log(log_path: Path) -> None:
+def validate_solc_warning_log(log_path: Path, repo_root: Path | None = None) -> None:
     """Validate live forge output against the reviewed solc warning baseline."""
     if not log_path.is_file():
         raise WarningDispositionError(
@@ -435,7 +550,7 @@ def validate_solc_warning_log(log_path: Path) -> None:
             + f"; run python -m tools.build.run_forge_size_log --log {log_path} first"
         )
 
-    actual = parse_solc_warnings(log_text)
+    actual = parse_solc_warnings(log_text, repo_root)
     missing = sorted(EXPECTED_SOLC_WARNINGS - actual)
     unexpected = sorted(actual - EXPECTED_SOLC_WARNINGS)
     if missing or unexpected:
@@ -534,7 +649,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         validate_warning_dispositions(repo_root, document_path.resolve())
         if solc_warnings_log is not None:
-            validate_solc_warning_log(solc_warnings_log.resolve())
+            validate_solc_warning_log(solc_warnings_log.resolve(), repo_root)
     except WarningDispositionError as exc:
         print(f"warning disposition check failed: {exc}", file=sys.stderr)
         return 1

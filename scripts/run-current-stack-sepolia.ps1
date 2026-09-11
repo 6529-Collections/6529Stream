@@ -185,6 +185,20 @@ function Remaining-DeploymentGas([object]$Run) {
     return $remaining
 }
 
+function Checked-UnsignedDeploymentGas([object]$Run) {
+    $rows=@($Run.transactions)
+    if ($rows.Count -eq 0) {throw 'Unsigned deployment plan is empty; no deployment was signed.'}
+    $total=[bigint]0
+    for ($index=0;$index -lt $rows.Count;$index++) {
+        $row=$rows[$index];$gas=Uint $row.transaction.gas
+        if ($gas -le 0 -or $gas -gt $transactionGasCap) {
+            throw "Unsigned deployment transaction $index ($($row.contractName): $($row.function)) has gas limit $gas; the cap is $transactionGasCap at multiplier $DeploymentGasEstimateMultiplier%. No deployment was signed. Review a lower -DeploymentGasEstimateMultiplier and rerun preflight; limits are never reduced automatically."
+        }
+        $total+=$gas
+    }
+    return $total
+}
+
 Push-Location $repoRoot
 try {
     if ((Uint (Cast @('chain-id','--rpc-url',$RpcUrl))) -ne 11155111) { throw 'Sepolia RPC required.' }
@@ -282,6 +296,7 @@ try {
         $subscription = Subscription-State
         if ($subscription[3] -ine $deployer.address -or (Uint $subscription[1]) -eq 0) { throw 'Owned funded subscription required.' }
         $environment = @{
+            FOUNDRY_PROFILE='current'
             FOUNDRY_BROADCAST=$BroadcastDirectory
             STREAM_DEPLOYER=$deployer.address;STREAM_PROTOCOL_TREASURY=$deployer.address
             STREAM_ARTIST=$artist.address;STREAM_PLATFORM_SIGNER=$platform.address
@@ -293,8 +308,6 @@ try {
         foreach ($key in $environment.Keys) {$saved[$key]=[Environment]::GetEnvironmentVariable($key);[Environment]::SetEnvironmentVariable($key,$environment[$key])}
         try {
             $skip = @('--skip','test')
-            Get-ChildItem script -Recurse -Filter '*.s.sol' | Where-Object Name -ne 'DeployCurrentStack.s.sol' |
-                ForEach-Object {$skip+=@('--skip',$_.Name)}
             $forgeArguments = @('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
                 '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
                 '--rpc-url',$RpcUrl,'--sender',$deployer.address,'--slow',
@@ -315,12 +328,7 @@ try {
             $null = Invoke-Tool 'forge' $forgeArguments
             $dryRunFile = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/11155111/dry-run/run-latest.json'
             $dryRun = Get-Content -Raw -LiteralPath $dryRunFile | ConvertFrom-Json -AsHashtable
-            $estimatedTotal = [bigint]0
-            foreach ($tx in $dryRun.transactions) {
-                $gas = Uint $tx.transaction.gas
-                if ($gas -gt $transactionGasCap) {throw 'Deployment transaction exceeds Sepolia gas cap.'}
-                $estimatedTotal += $gas
-            }
+            $estimatedTotal = Checked-UnsignedDeploymentGas $dryRun
             $expectedGas = [bigint]::Divide(($estimatedTotal*100+$DeploymentGasEstimateMultiplier-1),$DeploymentGasEstimateMultiplier)+3000000
             if ([bigint]::Divide(($expectedGas*$expectedFee*110+99),100)+(Uint $MintPriceWei) -gt $balance) {
                 throw 'Exact deployment simulation exceeds the complete-flow funding budget.'
@@ -354,6 +362,12 @@ try {
             $tx = @($run.transactions | Where-Object { $_.contractName -eq $names[$key] -and $_.transactionType -eq 'CREATE' })
             if ($tx.Count -ne 1) {throw "Missing deployment receipt for $key."}
             $completedAddresses[$key]=$tx[0].contractAddress
+        }
+        $optionalNames=@{erc20Sale='StreamERC20FixedPriceSaleAdapter';primaryRevenueResolver='StreamRevenueResolver'}
+        foreach ($key in $optionalNames.Keys) {
+            $tx=@($run.transactions | Where-Object {$_.contractName -eq $optionalNames[$key] -and $_.transactionType -eq 'CREATE'})
+            if ($tx.Count -gt 1) {throw "Ambiguous deployment receipt for $key."}
+            if ($tx.Count -eq 1) {$completedAddresses[$key]=$tx[0].contractAddress}
         }
         foreach ($receipt in $run.receipts) {
             if ($receipt.status -notin @('0x1','1',1)) {throw 'A deployment transaction reverted; inspect its receipt before recovery.'}

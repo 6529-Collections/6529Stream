@@ -207,6 +207,30 @@
       "lane": "minting",
       "issue": "#669",
       "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol",
+      "site": "_requireActiveAsset",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "30000",
+      "expected_count": 1,
+      "path_class": "mixed-control-plane-and-user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/domains/revenue/StreamPaymentIntentVerifier.sol",
+      "site": "_validSignature",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "limit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
     }
   ],
   "explicit_probe_call_gas_expressions": [],

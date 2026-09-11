@@ -1,0 +1,2124 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ACCOUNT_SOURCE_SALE_POSTER",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSIGNMENT_TYPE_PROFILE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "ASSIGNMENT_TYPE_TEMPLATE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCOPE_COLLECTION",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCOPE_DEFAULT",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "SCOPE_TOKEN",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "clearPrimaryAssignment",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+          "name": "entries",
+          "type": "tuple[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "createPrimaryTemplate",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "freezePrimaryAssignment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "frozenAssignmentHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isStreamRevenueResolver",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "salePoster",
+          "type": "address"
+        }
+      ],
+      "name": "materializePrimaryProfile",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "entriesHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "assignmentType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bool",
+          "name": "frozen",
+          "type": "bool"
+        }
+      ],
+      "name": "primaryAssignmentHash",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "primaryTemplate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "entriesHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "primaryTemplateEntry",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "primaryTemplateEntryCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        }
+      ],
+      "name": "resolvePrimaryAssignment",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+          "name": "assignment",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setPrimaryProfileAssignment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "assignmentHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "setPrimaryTemplateAssignment",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "assignmentHash",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "splitFactory",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "previousAssignmentHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "PrimaryAssignmentCleared",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "previousAssignmentHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "frozenAssignmentHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "PrimaryAssignmentFrozenEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "assignmentType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "assignmentHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        }
+      ],
+      "name": "PrimaryAssignmentSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "entriesHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "schemaVersion",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "templateVersion",
+          "type": "uint16"
+        }
+      ],
+      "name": "PrimaryTemplateCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint16",
+          "name": "index",
+          "type": "uint16"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "sharePpm",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "PrimaryTemplateEntryRecorded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "entriesHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "metadataURIHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "salePoster",
+          "type": "address"
+        }
+      ],
+      "name": "PrimaryTemplateMaterialized",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidAssignmentScope",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint8",
+          "name": "assignmentType",
+          "type": "uint8"
+        }
+      ],
+      "name": "InvalidAssignmentType",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidMaterializedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPrimaryPolicyHash",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidPrimaryTemplateEntry",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "totalSharePpm",
+          "type": "uint256"
+        }
+      ],
+      "name": "InvalidPrimaryTemplateTotal",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        }
+      ],
+      "name": "InvalidRevenueClass",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PrimaryAssignmentFrozen",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PrimaryAssignmentMissing",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnknownPrimaryTemplate",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnsupportedAccountSource",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UnverifiedSplitProfile",
+      "type": "error"
+    }
+  ],
+  "bytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "deployedBytecode": {
+    "linkReferences": {},
+    "object": "0x",
+    "sourceMap": ""
+  },
+  "metadata": {
+    "compiler": {
+      "version": "0.8.19+commit.7dd6d404"
+    },
+    "language": "Solidity",
+    "output": {
+      "abi": [
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidAssignmentScope",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            }
+          ],
+          "name": "InvalidAssignmentType",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidMaterializedAccount",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidPrimaryPolicyHash",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidPrimaryTemplateEntry",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "totalSharePpm",
+              "type": "uint256"
+            }
+          ],
+          "name": "InvalidPrimaryTemplateTotal",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "InvalidRevenueClass",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "PrimaryAssignmentFrozen",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "PrimaryAssignmentMissing",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnknownPrimaryTemplate",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnsupportedAccountSource",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "UnverifiedSplitProfile",
+          "type": "error"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentCleared",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "previousAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentFrozenEvent",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "admin",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryAssignmentSet",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "schemaVersion",
+              "type": "uint16"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint16",
+              "name": "templateVersion",
+              "type": "uint16"
+            }
+          ],
+          "name": "PrimaryTemplateCreated",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "uint16",
+              "name": "index",
+              "type": "uint16"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "PrimaryTemplateEntryRecorded",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            },
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "name": "PrimaryTemplateMaterialized",
+          "type": "event"
+        },
+        {
+          "inputs": [],
+          "name": "ACCOUNT_SOURCE_SALE_POSTER",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSIGNMENT_TYPE_PROFILE",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "ASSIGNMENT_TYPE_TEMPLATE",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCOPE_COLLECTION",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCOPE_DEFAULT",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "SCOPE_TOKEN",
+          "outputs": [
+            {
+              "internalType": "uint8",
+              "name": "",
+              "type": "uint8"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "clearPrimaryAssignment",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "account",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "accountSource",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint32",
+                  "name": "sharePpm",
+                  "type": "uint32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "labelId",
+                  "type": "bytes32"
+                }
+              ],
+              "internalType": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+              "name": "entries",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "createPrimaryTemplate",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            }
+          ],
+          "name": "freezePrimaryAssignment",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "frozenAssignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "isStreamRevenueResolver",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "salePoster",
+              "type": "address"
+            }
+          ],
+          "name": "materializePrimaryProfile",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint8",
+              "name": "assignmentType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bool",
+              "name": "frozen",
+              "type": "bool"
+            }
+          ],
+          "name": "primaryAssignmentHash",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "primaryTemplate",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "entriesHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "metadataURIHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "index",
+              "type": "uint256"
+            }
+          ],
+          "name": "primaryTemplateEntry",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "accountSource",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "sharePpm",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "labelId",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            }
+          ],
+          "name": "primaryTemplateEntryCount",
+          "outputs": [
+            {
+              "internalType": "uint256",
+              "name": "",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "uint256",
+              "name": "collectionId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "tokenId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            }
+          ],
+          "name": "resolvePrimaryAssignment",
+          "outputs": [
+            {
+              "components": [
+                {
+                  "internalType": "bool",
+                  "name": "exists",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "scope",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "scopeId",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "assignmentType",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "profileId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "templateId",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "policyHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "assignmentHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "frozen",
+                  "type": "bool"
+                }
+              ],
+              "internalType": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+              "name": "assignment",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "profileId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setPrimaryProfileAssignment",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "revenueClass",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "scope",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scopeId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "templateId",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "policyHash",
+              "type": "bytes32"
+            }
+          ],
+          "name": "setPrimaryTemplateAssignment",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "assignmentHash",
+              "type": "bytes32"
+            }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [],
+          "name": "splitFactory",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ],
+      "devdoc": {
+        "kind": "dev",
+        "methods": {},
+        "version": 1
+      },
+      "userdoc": {
+        "errors": {
+          "InvalidAssignmentScope(uint8,uint256)": [
+            {
+              "notice": "Reverts when an assignment scope is unsupported or has invalid identity."
+            }
+          ],
+          "InvalidAssignmentType(uint8)": [
+            {
+              "notice": "Reverts when an assignment type is unsupported."
+            }
+          ],
+          "InvalidMaterializedAccount(bytes32)": [
+            {
+              "notice": "Reverts when a dynamic account source materializes to zero."
+            }
+          ],
+          "InvalidPrimaryPolicyHash()": [
+            {
+              "notice": "Reverts when assignment evidence hash is zero."
+            }
+          ],
+          "InvalidPrimaryTemplateEntry(uint256)": [
+            {
+              "notice": "Reverts when a template entry is invalid."
+            }
+          ],
+          "InvalidPrimaryTemplateTotal(uint256)": [
+            {
+              "notice": "Reverts when template shares do not sum to the share denominator."
+            }
+          ],
+          "InvalidRevenueClass(bytes32)": [
+            {
+              "notice": "Reverts when a revenue class is zero."
+            }
+          ],
+          "PrimaryAssignmentFrozen(bytes32,uint8,uint256)": [
+            {
+              "notice": "Reverts when a frozen assignment would be changed or cleared."
+            }
+          ],
+          "PrimaryAssignmentMissing(bytes32,uint8,uint256)": [
+            {
+              "notice": "Reverts when freezing a missing assignment."
+            }
+          ],
+          "UnknownPrimaryTemplate(bytes32)": [
+            {
+              "notice": "Reverts when the template does not exist."
+            }
+          ],
+          "UnsupportedAccountSource(bytes32)": [
+            {
+              "notice": "Reverts when a dynamic account source is unsupported."
+            }
+          ],
+          "UnverifiedSplitProfile(bytes32)": [
+            {
+              "notice": "Reverts when a split profile is unknown or lacks a verified wallet."
+            }
+          ]
+        },
+        "events": {
+          "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)": {
+            "notice": "Emitted when a primary assignment is cleared."
+          },
+          "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)": {
+            "notice": "Emitted when a primary assignment is frozen against later mutation."
+          },
+          "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)": {
+            "notice": "Emitted when a primary assignment is set."
+          },
+          "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)": {
+            "notice": "Emitted once when a primary split template is created."
+          },
+          "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)": {
+            "notice": "Emitted for each canonical template entry."
+          },
+          "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)": {
+            "notice": "Emitted when a dynamic template is materialized into a fixed split profile."
+          }
+        },
+        "kind": "user",
+        "methods": {
+          "ACCOUNT_SOURCE_SALE_POSTER()": {
+            "notice": "Dynamic account source for the poster attached to a sale."
+          },
+          "ASSIGNMENT_TYPE_PROFILE()": {
+            "notice": "Fixed split profile assignment type."
+          },
+          "ASSIGNMENT_TYPE_TEMPLATE()": {
+            "notice": "Dynamic primary template assignment type."
+          },
+          "SCOPE_COLLECTION()": {
+            "notice": "Collection resolver scope."
+          },
+          "SCOPE_DEFAULT()": {
+            "notice": "Default resolver scope."
+          },
+          "SCOPE_TOKEN()": {
+            "notice": "Token resolver scope."
+          },
+          "clearPrimaryAssignment(bytes32,uint8,uint256)": {
+            "notice": "Clears a mutable primary assignment."
+          },
+          "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)": {
+            "notice": "Creates or reuses a primary split template."
+          },
+          "freezePrimaryAssignment(bytes32,uint8,uint256)": {
+            "notice": "Freezes an existing primary assignment."
+          },
+          "isStreamRevenueResolver()": {
+            "notice": "Returns true for deployment validation."
+          },
+          "materializePrimaryProfile(bytes32,address)": {
+            "notice": "Materializes a dynamic template into a deterministic split profile."
+          },
+          "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)": {
+            "notice": "Computes the current assignment hash for explicit inputs."
+          },
+          "primaryTemplate(bytes32)": {
+            "notice": "Returns deterministic template metadata."
+          },
+          "primaryTemplateEntry(bytes32,uint256)": {
+            "notice": "Returns one canonical template entry."
+          },
+          "primaryTemplateEntryCount(bytes32)": {
+            "notice": "Returns the number of canonical entries in a template."
+          },
+          "resolvePrimaryAssignment(uint256,uint256,bytes32)": {
+            "notice": "Resolves token, collection, then default primary assignment for a sale context."
+          },
+          "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)": {
+            "notice": "Sets a fixed-profile primary assignment."
+          },
+          "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)": {
+            "notice": "Sets a dynamic-template primary assignment."
+          },
+          "splitFactory()": {
+            "notice": "The split factory used to verify and materialize profiles."
+          }
+        },
+        "notice": "Interface for outside-Core primary revenue assignment resolution.",
+        "version": 1
+      }
+    },
+    "settings": {
+      "compilationTarget": {
+        "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol": "IStreamRevenueResolver"
+      },
+      "evmVersion": "paris",
+      "libraries": {},
+      "metadata": {
+        "appendCBOR": false,
+        "bytecodeHash": "none"
+      },
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "remappings": [],
+      "viaIR": true
+    },
+    "sources": {
+      "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol": {
+        "keccak256": "0x28791b4e242e681e79866a9d31e19977157eb9bfc99ba575882d2f2802a64429",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://77f795da1fd43fdeeeabb956f970b4ffc77176345143b26f21fa90da11a2fc6b",
+          "dweb:/ipfs/QmRErD4tWh1KKdt6qR54M6StEdzN6t1ZNpXeM8KNVwvXJy"
+        ]
+      },
+      "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol": {
+        "keccak256": "0xee002101da7ca6a334d4c4ebf4ca1a2b7e6628b1aba18a11361806c0db12cb64",
+        "license": "MIT",
+        "urls": [
+          "bzz-raw://b7abee91ca6f30024cedee8374791f31c7d09c63a80288ed54d7c2fec29d8329",
+          "dweb:/ipfs/QmeGaE5ng9241X9EG2tSj5oSXXgTE94jSQkokpzvGAJf2u"
+        ]
+      }
+    },
+    "version": 1
+  },
+  "methodIdentifiers": {
+    "ACCOUNT_SOURCE_SALE_POSTER()": "93197046",
+    "ASSIGNMENT_TYPE_PROFILE()": "32943255",
+    "ASSIGNMENT_TYPE_TEMPLATE()": "94d464e9",
+    "SCOPE_COLLECTION()": "09195c81",
+    "SCOPE_DEFAULT()": "3f1ca966",
+    "SCOPE_TOKEN()": "2571ae1f",
+    "clearPrimaryAssignment(bytes32,uint8,uint256)": "ccd963df",
+    "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)": "898e4875",
+    "freezePrimaryAssignment(bytes32,uint8,uint256)": "14f0e30d",
+    "isStreamRevenueResolver()": "af446d7a",
+    "materializePrimaryProfile(bytes32,address)": "0dcd6d8e",
+    "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)": "1e39dcdd",
+    "primaryTemplate(bytes32)": "23fb037e",
+    "primaryTemplateEntry(bytes32,uint256)": "e2d1e20a",
+    "primaryTemplateEntryCount(bytes32)": "9ab871eb",
+    "resolvePrimaryAssignment(uint256,uint256,bytes32)": "d6938915",
+    "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)": "a68c7f3e",
+    "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)": "829477ad",
+    "splitFactory()": "5720babb"
+  }
+}

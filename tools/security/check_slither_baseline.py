@@ -30,8 +30,8 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = '7b4ef22b052419e88d56cf7f207a7a7738dba7a7'
-EXPECTED_CAPTURED_AT_UTC = '2026-09-10T15:04:05Z'
+EXPECTED_ANALYZED_COMMIT = 'db8e31ed886faa838a9dc83926d8bad869ce549b'
+EXPECTED_CAPTURED_AT_UTC = '2026-09-10T19:32:07Z'
 EXPECTED_CAPTURE_COMMAND = (
     "python -m slither . --config-file slither.config.json "
     "--json-types detectors --json <temp-file> --fail-none"
@@ -42,14 +42,14 @@ EXPECTED_GATE_COMMAND = (
     "--json-types detectors --json <temp-file> --fail-none"
 )
 EXPECTED_CAPTURE_NATIVE_EXIT_CODE = 0
-EXPECTED_RAW_JSON_SIZE_BYTES = 35734817
-EXPECTED_RAW_JSON_SHA256 = 'sha256:7260359bea13d719f00ef7241fb530dc386a9360a733196e088ddabb9fa74dc6'
+EXPECTED_RAW_JSON_SIZE_BYTES = 35335555
+EXPECTED_RAW_JSON_SHA256 = 'sha256:059ed9c73c7a75cf39d31dc12c51570a61d111371cf1a5c88d2b4e60aa2831ac'
 
 IMPACTS = ("High", "Medium")
-EXPECTED_COUNTS = {"High": 4, "Medium": 40, "total": 44}
-EXPECTED_CAPTURE_COUNTS = {'High': 5, 'Medium': 49, 'Low': 102, 'Informational': 619, 'Optimization': 8, 'total': 783}
+EXPECTED_COUNTS = {'High': 4, 'Medium': 41, 'total': 45}
+EXPECTED_CAPTURE_COUNTS = {'High': 5, 'Medium': 50, 'Low': 106, 'Informational': 627, 'Optimization': 8, 'total': 796}
 EXPECTED_SCOPE_COUNTS = {
-    "first_party_production": {"High": 4, "Medium": 40, "total": 44},
+    "first_party_production": {"High": 4, "Medium": 41, "total": 45},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
     "test": {"High": 0, "Medium": 0, "total": 0},
     "script": {"High": 0, "Medium": 0, "total": 0},
@@ -59,11 +59,11 @@ EXPECTED_TRIAGE_COUNTS = {
     "confirmed_gap": 0,
     "design_review": 6,
     "pending_disposition": 24,
-    "false_positive": 14,
+    "false_positive": 15,
 }
 EXPECTED_STATUS_COUNTS = {
     "Open": 30,
-    "False Positive": 14,
+    "False Positive": 15,
 }
 EXPECTED_DETECTOR_COUNTS = {
     ("High", "arbitrary-send-eth"): 2,
@@ -74,7 +74,7 @@ EXPECTED_DETECTOR_COUNTS = {
     ("Medium", "locked-ether"): 1,
     ("Medium", "reentrancy-no-eth"): 8,
     ("Medium", "uninitialized-local"): 10,
-    ("Medium", "unused-return"): 17,
+    ("Medium", "unused-return"): 18,
 }
 VENDORED_PATHS = (
     "smart-contracts/vendor/openzeppelin/Base64.sol",

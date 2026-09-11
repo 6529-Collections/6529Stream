@@ -77,6 +77,7 @@ if ($CurrentStack) {
         forge test -vvv
         & $pythonPath @pythonArgs "-m" "tools.build.test_release_artifacts"
         & $pythonPath @pythonArgs "-m" "tools.deployment.test_current_stack_artifacts"
+        & $pythonPath @pythonArgs "-m" "tools.deployment.test_prepare_current_stack_compilation"
         & $pythonPath @pythonArgs "-m" "tools.deployment.test_current_stack_deployment_verification"
         & $pythonPath @pythonArgs "-m" "tools.deployment.test_current_stack_observations"
         & $pythonPath @pythonArgs "-m" "tools.build.check_solidity_formatting"

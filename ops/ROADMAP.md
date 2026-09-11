@@ -254,7 +254,7 @@ reference inputs for roadmap quality, not automatic implementation mandates.
 | Production size | The canonical permanent `StreamCore` proof passes the non-waivable 2,000-byte production margin and approved 22,184-byte objective | `forge build --sizes --via-ir --skip test --skip script --force`; `python -m tools.build.check_contract_size_budget`; `python -m tools.release.check_release_mode --phase production-release`; `release-artifacts/latest/bytecode-release-proof.json` | Core size passes without an exception; candidate, audit, static-analysis, and live-evidence blockers remain independent |
 | Governed parameters | The schema-validated 22-GGP/3-GTP inventory pins exact raise-only policy, 50 parameter/profile bindings, evidence requirements, and fixed-stipend review obligations. Concrete candidate bindings remain honestly `not_available` and guarded-consumer lists remain `planning`, so the ordinary structural gate passes while production `--require-complete` fails closed; candidate completion is also blocked pending #656's structured instance/linked-library model | `python -m tools.protocol.test_governed_parameter_inventory`; `python -m tools.protocol.check_governed_parameter_inventory`; production decision: `python -m tools.protocol.test_governed_parameter_inventory --require-complete`; `release-artifacts/governed-parameter-inventory.json` | No public-beta blocker by itself; production remains blocked by [issue #684](https://github.com/6529-Collections/6529Stream/issues/684), [issue #656](https://github.com/6529-Collections/6529Stream/issues/656), and `RISK-GOV-004` until every required host instance, value, floor, exhaustive consumer review, reviewed evidence binding, fixed-stipend decision, and linked-library binding is complete |
 | Formatting | Merged PR #322 keeps 34 formatting-required files passing `forge fmt --check` and converts the raw all-files diagnostic allowance into 17 explicit vendored/provenance formatting exemptions documented in checker tests, tooling docs, and vendored-library provenance policy | `python -m tools.build.test_solidity_formatting`, `python -m tools.build.check_solidity_formatting`, `make fmt-check`; raw diagnostic: `forge fmt --check smart-contracts`; CI run `27494893331` | Scoped gate passes in CI; vendored/provenance exemptions are explicit, reviewed, and unable to hide new first-party formatting drift |
-| Static analysis | The normalized first-party production baseline contains 44 retained findings: 4 High and 40 Medium. Thirty remain Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24 pending dispositions); 14 rows have focused, source-traced False Positive dispositions (2 High, 12 Medium). `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issue #685 adds the closed-world runtime/catalog boundary without accepting the residual deployment/review risk | `python -m tools.security.test_slither_baseline`; `python -m tools.security.check_slither_baseline --baseline-only`; `python -m tools.security.check_slither_baseline --run-slither`; `python -m tools.protocol.check_governance_action_policy`; `ops/SLITHER_BASELINE.json`; `ops/SLITHER_BASELINE.md`; `release-artifacts/governance-action-policy.json`; `release-artifacts/latest/risk-register.json` | [Issue #658](https://github.com/6529-Collections/6529Stream/issues/658) remains an explicit public-beta/audit/production blocker until every row and `RISK-GOV-003` have reviewed remediation or disposition proof and the exact drift gate stays green; issue #656 owns exact action-policy candidate deployment binding |
+| Static analysis | The normalized first-party production baseline contains 45 retained findings: 4 High and 41 Medium. Thirty remain Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24 pending dispositions); 15 rows have focused, source-traced False Positive dispositions (2 High, 13 Medium). `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issue #685 adds the closed-world runtime/catalog boundary without accepting the residual deployment/review risk | `python -m tools.security.test_slither_baseline`; `python -m tools.security.check_slither_baseline --baseline-only`; `python -m tools.security.check_slither_baseline --run-slither`; `python -m tools.protocol.check_governance_action_policy`; `ops/SLITHER_BASELINE.json`; `ops/SLITHER_BASELINE.md`; `release-artifacts/governance-action-policy.json`; `release-artifacts/latest/risk-register.json` | [Issue #658](https://github.com/6529-Collections/6529Stream/issues/658) remains an explicit public-beta/audit/production blocker until every row and `RISK-GOV-003` have reviewed remediation or disposition proof and the exact drift gate stays green; issue #656 owns exact action-policy candidate deployment binding |
 | Deployment | Partial local baseline: deploy-and-wire rehearsal script, local auction ceremony rehearsal, local emergency redeployment rehearsal, deployment-rehearsal generated metadata browser sandbox proof, manifest schema, address-book schema, ceremony evidence schema, randomizer operations evidence schema, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated Anvil and broadcast-derived address books, reviewed fork-mainnet broadcast, generated fork-mainnet broadcast manifest/address book, reviewed fork ceremony evidence bundle, local Anvil ceremony evidence bundle, local Anvil randomizer operations evidence bundle, manifest parsing test, and generated ABI/bytecode checksum inputs exist; testnet rehearsal, production broadcast retention, live ceremony evidence contents, and fork/testnet/live randomizer operations evidence contents remain missing | `forge script script/legacy/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `forge script script/legacy/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`, `forge script script/legacy/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`, `tools/deployment/check_rehearsal_metadata_browser_sandbox.py`, `test/regression/legacy/protocol/StreamDeploymentManifest.t.sol`, `tools/deployment/generate_broadcast_manifest_input.py --check`, `tools/deployment/generate_broadcast_manifest_input.py --template deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --broadcast deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json --output deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --manifest-output deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `tools/deployment/generate_deployment_manifest.py --check`, `tools/deployment/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`, `tools/deployment/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `tools/deployment/generate_address_books.py --check`, `tools/deployment/test_ceremony_evidence.py`, `tools/deployment/check_ceremony_evidence.py`, `tools/deployment/test_randomizer_operations.py`, `tools/deployment/check_randomizer_operations.py`, `deployments/broadcasts/`, `deployments/schema/deployment-manifest.schema.json`, `deployments/schema/address-book.schema.json`, `deployments/schema/ceremony-evidence.schema.json`, `deployments/schema/randomizer-operations-evidence.schema.json`, `deployments/address-books/`, `deployments/ceremony-evidence/`, `deployments/randomizer-operations/`, and `release-artifacts/latest/abi-checksums.json` | Anvil deployment, local metadata browser rehearsal, local auction ceremony rehearsal, local emergency redeployment rehearsal, local ceremony evidence, local randomizer operations evidence, reviewed fork retained evidence, and fork ceremony evidence pass |
 | Release artifacts | Deterministic local release artifacts include ABI/bytecode checksums, a generated protocol surface report, source verification inputs, dependency manifests, address books, release manifests, checksum bundles, signed-tag/signature gates, a generated risk register, and a bytecode-to-release proof tying committed deployment manifests/address books/source-verification inputs to expected local runtime/creation bytecode hashes; reviewed live bytecode/explorer proof remains future evidence | `python -m tools.build.test_protocol_surface_report`, `python -m tools.build.generate_protocol_surface_report --check`, `python -m tools.security.test_risk_register`, `python -m tools.security.check_risk_register`, `python -m tools.security.generate_risk_register --check`, `python -m tools.release.generate_release_manifest --check`, `python -m tools.release.test_release_manifest`, `python -m tools.build.test_bytecode_release_proof`, `python -m tools.build.generate_bytecode_release_proof --check`, `python -m tools.release.test_release_checksums`, `python -m tools.release.generate_release_checksums --check`, `release-artifacts/latest/protocol-surface-report.json`, `release-artifacts/latest/risk-register.json`, `release-artifacts/latest/bytecode-release-proof.json` | Local/fork bytecode proof is generated, checksum-covered, and checked without claiming live production verification; the generated protocol surface report keeps functions, selectors, events, topic0 values, custom errors, ABI hashes, bytecode hashes, and runtime sizes visible for reviewers; the generated risk register keeps launch blockers and accepted local-baseline risks visible; public beta still requires reviewed non-local evidence and production requires live bytecode/explorer proof |
 | Docs | Architecture map, threat model, audit package, incident-response runbook, drop authorization signing guide with unsigned payload generator and retained signing evidence template, signer custody readiness guide/template, release-readiness dashboard, public-beta evidence status, generated public-beta and production-release blocker reports, per-requirement public-beta and production-release evidence templates, external audit retained-artifact template/checker, non-local release evidence intake, metadata schema, and metadata generator, status, known blockers, ADRs, security, deployment, release, metadata, dependency, randomizer, auction-custody, tooling, and release-policy docs exist for the local baseline; completed external audit report and actual testnet/live retained evidence remain missing | `python -m tools.docs.check_architecture_threat_model`, `python -m tools.docs.check_audit_package`, `python -m tools.docs.check_incident_response`, `python -m tools.protocol.check_drop_authorization_fixtures`, `python -m tools.release.test_drop_authorization_signing_evidence`, `python -m tools.release.check_drop_authorization_signing_evidence`, `python -m tools.release.test_signer_custody_readiness`, `python -m tools.release.check_signer_custody_readiness`, `python -m tools.release.check_release_readiness`, `python -m tools.release.test_public_beta_blocker_report`, `python -m tools.release.generate_public_beta_blocker_report --check`, `python -m tools.release.test_production_release_blocker_report`, `python -m tools.release.generate_production_release_blocker_report --check`, `python -m tools.release.check_public_beta_evidence`, `python -m tools.release.test_non_local_release_evidence_generator`, `python -m tools.release.test_external_audit_report_evidence`, `python -m tools.release.check_external_audit_report_evidence`, `python -m tools.release.check_non_local_release_evidence`, `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`, `docs/incident-response.md`, `docs/drop-authorization-signing.md`, `docs/signer-custody-readiness.md`, `docs/release-readiness.md`, `docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`, `release-artifacts/evidence/public-beta-templates/`, `release-artifacts/evidence/production-release-templates/`, `docs/status.md`, `docs/known-blockers.md`, and `SECURITY.md` | Architecture, security, deployment, protocol, operations, incident response, drop authorization signing, payload generation, retained signing evidence, signer custody readiness evidence, public-beta evidence, external audit evidence template/checker, per-requirement public-beta and production-release templates, generated blocker reports, non-local release evidence, release-readiness, and audit docs merged as a local baseline, with completed external audit/review artifacts linked when available |
@@ -1854,8 +1854,8 @@ Problem:
 Current behavior:
 
 - `ops/SLITHER_BASELINE.json` records the exact normalized first-party
-  production set: 44 retained rows (4 High, 40 Medium), comprising 30 Open
-  rows (2 High, 28 Medium) and 14 reviewed False Positives. A fast metadata/parity
+  production set: 45 retained rows (4 High, 41 Medium), comprising 30 Open
+  rows (2 High, 28 Medium) and 15 reviewed False Positives. A fast metadata/parity
   gate runs in the aggregate checks and a dedicated CI job reruns the pinned
   analyzer for exact semantic-set drift. This establishes truthful inventory,
   not safety or acceptance. The separate High open blocker `RISK-GOV-003`
@@ -1889,7 +1889,7 @@ Acceptance criteria:
 
 - Normalized rows retain detector, impact, confidence, repo-relative semantic
   location, classification, owner, rationale, issue, and required proof.
-- JSON and Markdown views agree exactly, all current rows are Open, and the
+- JSON and Markdown views agree exactly, each row retains its reviewed status, and the
   source/config/tool provenance is machine checked.
 - Every Open finding has a canonical GitHub issue link that owns remediation or
   reviewed disposition.
@@ -2837,8 +2837,8 @@ Before any "best-in-class 1/1" release claim:
 Source of truth: `ops/SLITHER_BASELINE.json`; the checked reviewer mirror is
 `ops/SLITHER_BASELINE.md`.
 
-The current first-party production status is only `Open`. A future PR may move
-a row to a reviewed resolution only with issue-linked proof; matching the
+The current first-party production statuses are `Open` and `False Positive`.
+A row moves to a reviewed resolution only with issue-linked proof; matching the
 baseline does not accept a finding. Vendored, test, and script scopes are
 reported separately by the live checker and cannot reduce the production set.
 
@@ -2848,16 +2848,17 @@ Current capture:
 - Compiler: Solidity `0.8.19`.
 - Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
   Solidity `0.8.19`, and Foundry `1.7.1`.
-- Source commit: `baf459c1f29ec6ee9bfdac81006c8cc71b83d982`.
-- Captured at: `2026-08-09T19:48:03Z`.
+- Source commit: `db8e31ed886faa838a9dc83926d8bad869ce549b`.
+- Captured at: `2026-09-10T19:32:07Z`.
 - Live gate: `python -m tools.security.check_slither_baseline --run-slither`.
-- Status: exact normalized drift is gated; 30 of 32 retained first-party
-  production rows remain Open under issue #658, while two `StreamSplitWallet`
-  `incorrect-equality` rows have focused False Positive dispositions.
-- Raw analyzed run: 3,242 findings across all impacts/scopes: 49 High, 847
-  Medium, 1,269 Low, 1,035 Informational, and 42 Optimization. High/Medium scope
-  totals are first-party production `2/30/32`, vendored `1/9/10`, test
-  `46/801/847`, script `0/7/7`, and other `0/0/0`.
+- Status: exact normalized drift is gated; 30 of 45 retained first-party
+  production rows remain Open under issue #658, with 15 reviewed False Positive
+  dispositions. Open rows comprise 2 High and 28 Medium findings.
+- Raw analyzed run: 796 findings across all impacts/scopes: 5 High, 50 Medium,
+  106 Low, 627 Informational, and 8 Optimization. High/Medium scope totals are
+  first-party production `4/41/45`, vendored `1/9/10`, test `0/0/0`, script
+  `0/0/0`, and other `0/0/0`. The production capture excludes test and script
+  compilation and covers all 171 production source files.
 - Bounded assembly makes the Governance Executor's proposal-selected
   native-value call invisible to Slither's `arbitrary-send-eth` detector
   without removing the authority. The issue #685 slice adds the closed-world
@@ -2869,8 +2870,8 @@ Impact summary:
 
 | Impact | Count |
 | --- | ---: |
-| High | 2 |
-| Medium | 30 |
+| High | 4 |
+| Medium | 41 |
 
 Classification summary:
 
@@ -2878,7 +2879,8 @@ Classification summary:
 | --- | ---: | --- | --- |
 | Confirmed gap | 0 | Open | No current row; any future confirmed gap must be remediated with issue-linked evidence |
 | Design review | 6 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
-| Pending disposition | 26 | Open | Complete row-level review; no implicit acceptance or suppression |
+| Pending disposition | 24 | Open | Complete row-level review; no implicit acceptance or suppression |
+| False positive | 15 | False Positive | Preserve the retained row-level rationale and proof; baseline equality is not an audit |
 
 ## Appendix B: Test Matrix
 

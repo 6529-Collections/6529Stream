@@ -41,7 +41,7 @@ forge test -vvv
 forge snapshot --match-path test/gas/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python -m tools.protocol.test_external_call_gas_inventory
 python -m tools.protocol.check_external_call_gas_inventory
-forge build --sizes --via-ir --skip test --skip script --force
+forge build --sizes --via-ir --skip test --skip script --force --out out-diagnostics --cache-path cache-diagnostics
 python -m tools.build.test_release_build_artifacts
 python -m tools.build.build_release_artifacts
 python -m tools.build.build_release_artifacts --check

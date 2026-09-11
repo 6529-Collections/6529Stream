@@ -30,7 +30,9 @@ def seed_required_targets(root: Path) -> None:
     """Create placeholder files for required links and source markers."""
     marker_paths = set(checker.SOURCE_MARKERS)
     for relative in checker.REQUIRED_LINK_TARGETS:
-        if relative in marker_paths:
+        if relative == checker.EXECUTOR_SOURCE:
+            write_text(root / relative, (SCRIPT_PATH.parents[2] / relative).read_text(encoding="utf-8"))
+        elif relative in marker_paths:
             snippets = "\n".join(checker.SOURCE_MARKERS[relative])
             write_text(root / relative, f"// SPDX-License-Identifier: MIT\n{snippets}\n")
         elif relative.startswith("smart-contracts/") and relative.endswith(".sol"):
@@ -107,13 +109,26 @@ def solc_warning_log(
         "Compiler run successful with warnings:",
     ]
     for code, path, source_excerpt in sorted(selected):
+        line_number = 1
+        if path == checker.EXECUTOR_SOURCE and " :: " in source_excerpt:
+            function, source_excerpt = source_excerpt.split(" :: ", 1)
+            source = (SCRIPT_PATH.parents[2] / path).read_text(encoding="utf-8")
+            spans = [(start, end) for name, start, end in checker.function_blocks(source)
+                     if name == function]
+            assert len(spans) == 1
+            start, end = spans[0]
+            matches = [index for index, line in enumerate(source.splitlines(), 1)
+                       if checker.normalize_whitespace(line).strip() == source_excerpt
+                       and start <= sum(len(item) for item in source.splitlines(keepends=True)[:index - 1]) < end]
+            assert len(matches) == 1
+            line_number = matches[0]
         blocks.append(
             "\n".join(
                 [
                     f"Warning ({code}): retained warning",
-                    f"  --> {path}:1:1:",
+                    f"  --> {path}:{line_number}:1:",
                     "   |",
-                    f"1 | {source_excerpt}",
+                    f"{line_number} | {source_excerpt}",
                 ]
             )
         )
@@ -319,6 +334,80 @@ class WarningDispositionTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.WarningDispositionError, "unexpected warning"):
                 checker.validate_solc_warning_log(path)
 
+    def test_rejects_changed_state_export_writer_forwarding(self) -> None:
+        """Names are accepted only while the entire calldata/context forwarding is retained."""
+        for replacement in (
+            "StreamStateExport.write(_manifest, false, msg.data);",
+            "StreamStateExport.write(_manifest, _executing, msg.data[4:]);",
+        ):
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                seed_required_targets(root)
+                path = root / checker.EXECUTOR_SOURCE
+                write_text(path, path.read_text(encoding="utf-8").replace(
+                    "StreamStateExport.write(_manifest, _executing, msg.data);", replacement, 1
+                ))
+                with self.assertRaisesRegex(checker.WarningDispositionError, "publishStateExport forwarding body"):
+                    checker.validate_source_markers(root)
+
+    def test_rejects_changed_state_export_encoder(self) -> None:
+        """The accepted record return still requires both tuple members in the encoder."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            path = root / "smart-contracts/domains/governance/StreamStateExport.sol"
+            write_text(path, path.read_text(encoding="utf-8").replace(
+                "abi.encode(state.records[exportHash], state.supersededBy[exportHash])",
+                "abi.encode(state.records[exportHash])",
+            ))
+            with self.assertRaisesRegex(checker.WarningDispositionError, "source markers drifted"):
+                checker.validate_source_markers(root)
+
+    def test_rejects_identical_parameter_in_another_executor_function(self) -> None:
+        """A generic parameter spelling does not admit an unrelated Executor warning."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_required_targets(root)
+            path = root / checker.EXECUTOR_SOURCE
+            source = path.read_text(encoding="utf-8")
+            source += "\nfunction unrelated(\n    bytes32 exportHash,\n    uint256 value\n) external {}\n"
+            write_text(path, source)
+            line = len(source.splitlines()) - 2
+            log = solc_warning_log() + (
+                f"Warning (5667): unused parameter\n  --> {checker.EXECUTOR_SOURCE}:{line}:5:\n"
+                f"{line} |     bytes32 exportHash,\n"
+            )
+            self.assertIn(("5667", checker.EXECUTOR_SOURCE, "unrelated :: bytes32 exportHash,"),
+                          checker.parse_solc_warnings(log, root))
+            log_path = root / "warnings.log"
+            write_text(log_path, log)
+            with self.assertRaisesRegex(checker.WarningDispositionError, "unexpected warning"):
+                checker.validate_solc_warning_log(log_path, root)
+
+    def test_rejects_unbound_warning_location_code_and_path(self) -> None:
+        """Wrong locations, codes, and source paths cannot borrow a scoped disposition."""
+        warning = ("5667", checker.EXECUTOR_SOURCE, "latestStateExport :: bytes32 exportHash,")
+        valid_log = solc_warning_log({warning})
+        actual_line = next(line for line in valid_log.splitlines() if "-->" in line)
+        mutations = (
+            valid_log.replace(actual_line, f"  --> {checker.EXECUTOR_SOURCE}:1:1:"),
+            valid_log.replace("Warning (5667)", "Warning (2018)"),
+            valid_log.replace(checker.EXECUTOR_SOURCE, "smart-contracts/Other.sol"),
+        )
+        for log in mutations:
+            with self.subTest(log=log):
+                self.assertTrue(checker.parse_solc_warnings(log) - checker.EXPECTED_SOLC_WARNINGS)
+
+    def test_missing_scoped_warning_still_requires_baseline_update(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "warnings.log"
+            warnings = checker.EXPECTED_SOLC_WARNINGS - {
+                ("5667", checker.EXECUTOR_SOURCE, "latestStateExport :: bytes32 exportHash,")
+            }
+            write_text(path, solc_warning_log(warnings))
+            with self.assertRaisesRegex(checker.WarningDispositionError, "missing expected warning"):
+                checker.validate_solc_warning_log(path)
+
     def test_accepts_expected_solc_warning_log(self) -> None:
         """The live solc-warning baseline accepts exactly documented warnings."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -346,7 +435,8 @@ class WarningDispositionTests(unittest.TestCase):
             },
         }
         expected = {(code, historical_paths.get(path, path), excerpt)
-                    for code, path, excerpt in checker.EXPECTED_SOLC_WARNINGS}
+                    for code, path, excerpt in checker.EXPECTED_SOLC_WARNINGS
+                    if " :: " not in excerpt}
         self.assertEqual(actual, expected)
 
     def test_historical_capture_cannot_pass_current_warning_baseline(self) -> None:

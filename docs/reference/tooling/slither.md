@@ -15,8 +15,8 @@ toolchain. That target invokes `tools/security/check_slither_baseline.py --run-s
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline retains 44 findings: 4 High and 40 Medium.
-Thirty remain Open and 14 have reviewed, detector-specific False Positive
+The current checked baseline retains 45 findings: 4 High and 41 Medium.
+Thirty remain Open and 15 have reviewed, detector-specific False Positive
 dispositions. The compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../../../ops/SLITHER_BASELINE.json), with source-traced
 rationales and focused regression references in
@@ -26,9 +26,9 @@ The live gate uses Crytic Compile's production-only Foundry mode: every
 `smart-contracts/**/*.sol` input is compiled, while `test/` and `script/`
 constructor closures are excluded. It omits `--foundry-compile-all` and retains
 the exact first-party High/Medium comparison. The current unfiltered
-production capture contains 784 results (5 High, 49 Medium, 102 Low,
-620 Informational, 8 Optimization), including all 143 production source files.
-High/Medium scope totals are production `4/40/44`, vendored `1/9/10`, and zero
+production capture contains 796 results (5 High, 50 Medium, 106 Low,
+627 Informational, 8 Optimization), including all 171 production source files.
+High/Medium scope totals are production `4/41/45`, vendored `1/9/10`, and zero
 for excluded test/script scopes and other sources. Exact source commit,
 capture time, tool versions, and raw digest remain in the canonical baseline.
 Raw Slither JSON is temporary analyzer output and is never committed.

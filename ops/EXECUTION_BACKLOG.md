@@ -4,7 +4,7 @@
 
 | Item | Outcome | Gate | Status |
 | --- | --- | --- | --- |
-| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #740 / issue #738, branch `codex/developer-experience-reorganization`; prior PR #739 merged |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #741 / issue #738, branch `codex/offline-release-completion`; PR #740 merged; ERC-20 purchases, state-export publisher and local deployment flows pass; final validation and review in progress |
 
 Status: historical full-v1 backlog. Current delivery priorities and lane
 ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
@@ -4212,7 +4212,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture retains 44 rows under issue #658 (4 High, 40 Medium). Thirty remain Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24 pending dispositions), while 14 rows have focused False Positive dispositions (2 High, 12 Medium). `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; #658 plus the #656 candidate/evidence dependency remain blockers |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture retains 45 rows under issue #658 (4 High, 41 Medium). Thirty remain Open (2 High, 28 Medium; zero confirmed gaps, six design-review rows, and 24 pending dispositions), while 15 rows have focused False Positive dispositions (2 High, 13 Medium). `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; #658 plus the #656 candidate/evidence dependency remain blockers |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |

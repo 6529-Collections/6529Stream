@@ -8,6 +8,8 @@ deployment evidence.
 | Task | Guide |
 | --- | --- |
 | Buy one NFT with native ETH | [Fixed-price purchase](contract-flows.md) |
+| Buy with an ERC-20 and payer consent | [ERC-20 sales](erc20-sales.md) |
+| Discover, publish or challenge a state export | [State exports](state-exports.md) |
 | Build both signatures | [Wallets and EIP-712](wallets-and-signatures.md) |
 | Create, bid on and settle an auction | [English auctions](auction-flows.md) |
 | Index purchases and state changes | [Events and indexing](events-and-indexing.md) |
@@ -26,7 +28,8 @@ Use the exact ABI from your build or deployment's retained compiler export;
 universal current address book. Inspect [deployment records](../../deployments/README.md)
 for each retained deployment's identity and limitations.
 
-The current stack supports signed native sales, English auctions, immutable split
+The current stack supports signed native and ERC-20 sales, governance-hosted
+state-export publication, English auctions, immutable split
 wallets, accepted collection attribution, mint-time entropy binding and onchain
 metadata. Configured Sepolia uses Chainlink VRF; the local demo uses explicitly
 insecure development entropy. Full Artist V2, finality and broader revenue-routing

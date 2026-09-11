@@ -89,6 +89,11 @@ python -m tools.build.run_forge_size_log --log cache/forge-size.log
 python -m tools.security.check_warning_dispositions --solc-warnings-log cache/forge-size.log
 ```
 
+The wrapper retains the required fresh `--force` compilation but uses
+`out-diagnostics/` and `cache-diagnostics/`. These ignored directories are separate
+from normal `out/`, `cache/`, and nested current-profile outputs, so the diagnostic
+does not clear reusable compiler evidence. The requested log path is unchanged.
+
 [`warning-dispositions.md`](../../warning-dispositions.md) is the checked `ONE-007`
 baseline for compiler, NatSpec, documentation, linter, vendored, test-only,
 ABI-compatibility, and `StreamCore` size-tradeoff warning decisions. The

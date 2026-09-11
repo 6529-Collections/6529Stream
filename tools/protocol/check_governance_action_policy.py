@@ -35,6 +35,7 @@ MANIFEST_PATH = (
 BOOTSTRAP_PATH = (
     ROOT / "smart-contracts" / "domains" / "governance" / "StreamGovernanceBootstrap.sol"
 )
+SCHEDULING_PATH = EXECUTOR_PATH.with_name("StreamGovernanceScheduling.sol")
 
 EXPECTED_ACTION_CLASSES = {
     0: "IMMEDIATE_TIGHTENING",
@@ -135,6 +136,185 @@ def validate_catalog_snapshot_source(executor_source: str, bootstrap_source: str
         and "revertIStreamGovernanceExecutor.GovernanceActionPolicySnapshotMismatch(" in bootstrap,
         "scheduled catalog snapshot check",
     )
+
+
+# Pure lexical helpers copied from tools/protocol/check_external_call_gas_inventory.py
+# at e7a6550c8f22315d954c7141e00d7ec1fda66342. Keep these algorithms local so the
+# deliberately closed release verifier does not import the inventory CLI runtime.
+def mask_comments_and_strings(source: str) -> str:
+    """Replace comments and string contents with spaces while preserving offsets."""
+
+    masked = list(source)
+    index = 0
+    state = "code"
+    quote = ""
+    while index < len(source):
+        current = source[index]
+        following = source[index + 1] if index + 1 < len(source) else ""
+
+        if state == "code":
+            if current == "/" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "line-comment"
+                index += 2
+                continue
+            if current == "/" and following == "*":
+                masked[index] = masked[index + 1] = " "
+                state = "block-comment"
+                index += 2
+                continue
+            if current in {'"', "'"}:
+                quote = current
+                masked[index] = " "
+                state = "string"
+                index += 1
+                continue
+            index += 1
+            continue
+
+        if state == "line-comment":
+            if current == "\n":
+                state = "code"
+            else:
+                masked[index] = " "
+            index += 1
+            continue
+
+        if state == "block-comment":
+            if current == "*" and following == "/":
+                masked[index] = masked[index + 1] = " "
+                state = "code"
+                index += 2
+            else:
+                if current not in "\r\n":
+                    masked[index] = " "
+                index += 1
+            continue
+
+        if current == "\\":
+            masked[index] = " "
+            if index + 1 < len(source):
+                if source[index + 1] not in "\r\n":
+                    masked[index + 1] = " "
+                index += 2
+            else:
+                index += 1
+            continue
+        masked[index] = " " if current not in "\r\n" else current
+        if current == quote:
+            state = "code"
+        index += 1
+
+    return "".join(masked)
+
+def matching_closing_brace(source: str, opening: int) -> int | None:
+    depth = 0
+    for index in range(opening, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def _function_body(source: str, name: str) -> str:
+    """Read one real function body, excluding comment/string lookalikes."""
+    masked = mask_comments_and_strings(source)
+    matches = list(re.finditer(r"\bfunction\s+" + re.escape(name) + r"\s*\(", masked))
+    require(len(matches) == 1, f"policy validation path: unique {name} function")
+    opening = masked.find("{", matches[0].end())
+    semicolon = masked.find(";", matches[0].end())
+    require(opening >= 0 and (semicolon < 0 or opening < semicolon),
+            f"policy validation path: {name} body")
+    closing = matching_closing_brace(masked, opening)
+    require(closing is not None, f"policy validation path: {name} closing brace")
+    return masked[opening + 1:closing]
+
+
+def _top_level_statements(body: str) -> list[str]:
+    """Flatten unconditional blocks while retaining unbraced conditional prefixes."""
+    statements = []
+    depth = parens = start = block_start = 0
+    unconditional_block = False
+    for index, char in enumerate(body):
+        if char == "(":
+            parens += 1
+        elif char == ")":
+            parens -= 1
+        elif char == "{":
+            if depth == 0 and parens == 0:
+                block_start = index + 1
+                unconditional_block = body[start:index].strip() in {"", "unchecked"}
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0 and parens == 0:
+                if unconditional_block:
+                    statements.extend(_top_level_statements(body[block_start:index]))
+                start = index + 1
+        elif char == ";" and depth == 0 and parens == 0:
+            statements.append(body[start:index + 1])
+            start = index + 1
+    return statements
+
+
+def validate_policy_call_path(executor_source: str, scheduling_source: str) -> None:
+    """Bind scheduling's library route and execution's separate policy validation."""
+    masked = mask_comments_and_strings(executor_source)
+    imports = list(re.finditer(r'import\s+"\./StreamGovernanceScheduling\.sol"\s*;', executor_source))
+    require(any(masked[m.start():m.start() + 6] == "import" for m in imports),
+            "policy validation path: scheduling source import")
+    schedule_body = _function_body(executor_source, "_schedule")
+    prepare_body = _function_body(scheduling_source, "prepare")
+    execute_body = _function_body(executor_source, "_execute")
+    prepare_statements = _top_level_statements(prepare_body)
+    execute_statements = _top_level_statements(execute_body)
+    prepare = [re.sub(r"\s+", "", statement) for statement in prepare_statements]
+    execute = [re.sub(r"\s+", "", statement) for statement in execute_statements]
+    expected_delegation = """StreamGovernanceScheduling.Prepared memory prepared =
+        StreamGovernanceScheduling.prepare(_admin, _policy, _actionPolicy, _manifest,
+            StreamGovernanceScheduling.Runtime({owner: owner(),
+                bootstrapAuthority: genesisBootstrapAuthority, nonce: _nonce,
+                pendingCount: _pendingScheduledActionCount, executing: _executing,
+                genesisPlanHash: genesisPlanHash, genesisInitialized: genesisInitialized}),
+            ctx, calls);"""
+    require(re.sub(r"\s+", "", schedule_body).startswith(re.sub(r"\s+", "", expected_delegation)),
+            "policy validation path: schedule delegation and bound arguments")
+    expected_prepare = """StreamGovernanceActionPolicy.validateCalls(actionPolicy,
+        manifest.actionPolicyCandidateProfileHash, manifest.actionPolicyCatalogHash,
+        manifest.actionPolicyEntryCount, ctx.actionClass, calls, callDatas);"""
+    require(prepare.count(re.sub(r"\s+", "", expected_prepare)) == 1,
+            "policy validation path: scheduling policy validation")
+    expected_execute = """StreamGovernanceActionPolicy.validateCalls(_actionPolicy,
+        _manifest.actionPolicyCandidateProfileHash, _manifest.actionPolicyCatalogHash,
+        _manifest.actionPolicyEntryCount, action.actionClass, calls, scheduledCallDatas);"""
+    execution_call = re.sub(r"\s+", "", expected_execute)
+    executed = "action.status=GovernanceActionStatus.EXECUTED;"
+    require(execute.count(execution_call) == 1 and executed in execute
+            and execute.index(execution_call) < execute.index(executed),
+            "policy validation path: execution policy validation before effects")
+    for statements, call_index in (
+        (prepare_statements, prepare.index(re.sub(r"\s+", "", expected_prepare))),
+        (execute_statements, execute.index(execution_call)),
+    ):
+        require(
+            not any(re.match(r"\s*revert\b", statement) for statement in statements[:call_index]),
+            "policy validation path: unconditional revert before policy validation",
+        )
+        # Literal false guards also terminate this unconditional path. This is
+        # deliberately not a general Solidity constant-expression evaluator.
+        require(
+            not any(re.fullmatch(
+                r"\s*(?:require|assert)\s*\(\s*(?:\(\s*)*false"
+                r"(?:\s*\))*\s*(?:,[^;]*)?\)\s*;\s*", statement
+            ) for statement in statements[:call_index]),
+            "policy validation path: literal failing guard before policy validation",
+        )
+    require(not any(re.search(r"\b(return|assembly)\b", body)
+                    for body in (schedule_body, prepare_body, execute_body)),
+            "policy validation path: early return or assembly bypass")
 
 
 def _uint_word(value: int) -> bytes:
@@ -420,11 +600,8 @@ def check(policy: dict) -> None:
     executor_source = EXECUTOR_PATH.read_text(encoding="utf-8")
     policy_source = POLICY_LIBRARY_PATH.read_text(encoding="utf-8")
     manifest_source = MANIFEST_PATH.read_text(encoding="utf-8")
-    require(
-        executor_source.count("StreamGovernanceActionPolicy.validateCalls(") >= 2
-        and "function validateCalls(" in policy_source,
-        "executor must validate at schedule and execution",
-    )
+    validate_policy_call_path(executor_source, SCHEDULING_PATH.read_text(encoding="utf-8"))
+    _function_body(policy_source, "validateCalls")
     validate_catalog_snapshot_source(
         executor_source, BOOTSTRAP_PATH.read_text(encoding="utf-8")
     )

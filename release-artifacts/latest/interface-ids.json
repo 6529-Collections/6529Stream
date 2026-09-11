@@ -37,6 +37,7 @@
     "IStreamCoreMint": "0xc4f58dce",
     "IStreamCorePointers": "0x54fb352a",
     "IStreamDrops": "0xd7c2abe3",
+    "IStreamERC20FixedPriceSaleAdapter": "0x55c94d74",
     "IStreamEnglishAuctionHouse": "0x37ee10c1",
     "IStreamEntropyCoordinator": "0x979b977f",
     "IStreamEntropyProvider": "0x9cd4388e",
@@ -61,6 +62,7 @@
     "IStreamMinter": "0x0f48ec25",
     "IStreamModule": "0x1f04274a",
     "IStreamModuleRegistry": "0xefc33fae",
+    "IStreamPaymentIntentVerifier": "0x88136d5a",
     "IStreamPreservationRecords": "0xa30cfc7c",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRecordFamilyAuthorityProvider": "0xb5d5c966",
@@ -70,6 +72,9 @@
     "IStreamRoyaltyResolver": "0xaa4a9cc6",
     "IStreamSplitFactory": "0x1748deee",
     "IStreamSplitWallet": "0x0ea5f02c",
+    "IStreamStateExportHistory": "0x18ac5014",
+    "IStreamStateExportOperations": "0xf2a72cbb",
+    "IStreamStateExportPublisher": "0x77faad4f",
     "IStreamSystemManifest": "0x37660ede",
     "IStreamTimeParameterHost": "0xc185242a",
     "IVRFCoordinatorV2Plus": "0x9b1c385e"
@@ -1520,6 +1525,112 @@
         }
       ]
     },
+    "IStreamERC20FixedPriceSaleAdapter": {
+      "source": "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol",
+      "artifact_path": "out-release/IStreamERC20FixedPriceSaleAdapter.sol/IStreamERC20FixedPriceSaleAdapter.json",
+      "abi_sha256": "sha256:bc9aacb7eb10cb716a3020111dbe0e19a96d8a342b5eea354a5bd17746a53d44",
+      "interface_id": "0x55c94d74",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x543684d3",
+      "function_selectors": [
+        {
+          "signature": "artistRegistry()",
+          "selector": "0x81703be7"
+        },
+        {
+          "signature": "assetPolicyRegistry()",
+          "selector": "0xdecadc35"
+        },
+        {
+          "signature": "authorizationDigest((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64))",
+          "selector": "0x544042e3"
+        },
+        {
+          "signature": "authorizationId(address,bytes32)",
+          "selector": "0xe743cd7e"
+        },
+        {
+          "signature": "authorizationUsed(address,bytes32)",
+          "selector": "0x162ce8bc"
+        },
+        {
+          "signature": "buy((bytes32,bytes32,address,address,address,bytes32,bytes32,bytes32,uint64,uint64),bytes,bytes,bytes,(address,address,uint256,bytes32,bytes32,bytes32,uint64),bytes)",
+          "selector": "0xa763265a"
+        },
+        {
+          "signature": "cancelAuthorization(bytes32)",
+          "selector": "0x845ab94f"
+        },
+        {
+          "signature": "cancelSale(bytes32)",
+          "selector": "0x0bea8985"
+        },
+        {
+          "signature": "mintManager()",
+          "selector": "0x7e4edf70"
+        },
+        {
+          "signature": "nextSaleNonce()",
+          "selector": "0x7ba1cb7f"
+        },
+        {
+          "signature": "paused()",
+          "selector": "0x5c975abb"
+        },
+        {
+          "signature": "platformSigner()",
+          "selector": "0xba92ddbc"
+        },
+        {
+          "signature": "primaryPolicy(uint256,bytes32)",
+          "selector": "0x64a6c855"
+        },
+        {
+          "signature": "proceeds(bytes32,address)",
+          "selector": "0x9acd8c56"
+        },
+        {
+          "signature": "registerSale((uint256,bytes32,address,bytes32,uint256,bytes32,bytes32,uint64,uint64))",
+          "selector": "0x143b863c"
+        },
+        {
+          "signature": "revenueResolver()",
+          "selector": "0x86624fc7"
+        },
+        {
+          "signature": "saleIdFor(uint256,bytes32,uint256)",
+          "selector": "0x8d92b3e6"
+        },
+        {
+          "signature": "saleRecord(bytes32)",
+          "selector": "0xee25a57f"
+        },
+        {
+          "signature": "setPaused(bool)",
+          "selector": "0x16c38b3c"
+        },
+        {
+          "signature": "setPlatformSigner(address)",
+          "selector": "0x3b79c44f"
+        },
+        {
+          "signature": "signerEpoch()",
+          "selector": "0x5b814063"
+        },
+        {
+          "signature": "splitFactory()",
+          "selector": "0x5720babb"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "totalProceeds(address)",
+          "selector": "0x4afb66d5"
+        }
+      ]
+    },
     "IStreamEnglishAuctionHouse": {
       "source": "smart-contracts/interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol",
       "artifact_path": "out-release/IStreamEnglishAuctionHouse.sol/IStreamEnglishAuctionHouse.json",
@@ -2728,6 +2839,48 @@
         }
       ]
     },
+    "IStreamPaymentIntentVerifier": {
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol",
+      "artifact_path": "out-release/IStreamPaymentIntentVerifier.sol/IStreamPaymentIntentVerifier.json",
+      "abi_sha256": "sha256:7d2bd042f3b13ee2a0d03d168546aff0fdc1c90c3cea00e5927acb3f91c1d52d",
+      "interface_id": "0x88136d5a",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x88136d5a",
+      "function_selectors": [
+        {
+          "signature": "eip712Domain()",
+          "selector": "0x84b0196e"
+        },
+        {
+          "signature": "isPaymentIntentNonceUsed(address,bytes32)",
+          "selector": "0x667adbed"
+        },
+        {
+          "signature": "paymentIntentDigest((address,address,uint256,bytes32,bytes32,bytes32,uint64))",
+          "selector": "0xa710aa25"
+        },
+        {
+          "signature": "paymentIntentRevocationDigest(address,bytes32,uint64)",
+          "selector": "0x4a87133d"
+        },
+        {
+          "signature": "raiseSignatureGasLimit(uint256)",
+          "selector": "0xaaec2423"
+        },
+        {
+          "signature": "revokePaymentIntent(bytes32)",
+          "selector": "0x3afb62b3"
+        },
+        {
+          "signature": "revokePaymentIntentBySignature(address,bytes32,uint64,bytes)",
+          "selector": "0xc3bfed35"
+        },
+        {
+          "signature": "signatureGasLimit()",
+          "selector": "0xd4e6bd64"
+        }
+      ]
+    },
     "IStreamPreservationRecords": {
       "source": "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol",
       "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
@@ -3411,6 +3564,68 @@
         {
           "signature": "uniqueAccountCount()",
           "selector": "0x3e6f2291"
+        }
+      ]
+    },
+    "IStreamStateExportHistory": {
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol",
+      "artifact_path": "out-release/IStreamStateExportHistory.sol/IStreamStateExportHistory.json",
+      "abi_sha256": "sha256:c87b08eea3f95d4b0840b515152e6004e4f80a6e2cbb5e2beb6d7575fa8f467c",
+      "interface_id": "0x18ac5014",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x18ac5014",
+      "function_selectors": [
+        {
+          "signature": "stateExport(bytes32)",
+          "selector": "0xbb274137"
+        },
+        {
+          "signature": "stateExportChallengeExists(bytes32,bytes32)",
+          "selector": "0x5eca51f6"
+        },
+        {
+          "signature": "stateExportCount()",
+          "selector": "0x30d4fa1c"
+        },
+        {
+          "signature": "stateExportHashAt(uint256)",
+          "selector": "0xcd95bac9"
+        }
+      ]
+    },
+    "IStreamStateExportOperations": {
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol",
+      "artifact_path": "out-release/IStreamStateExportOperations.sol/IStreamStateExportOperations.json",
+      "abi_sha256": "sha256:67810379a21ffe52ddc01970db27f6faa1cd47065931c01523acfbc6d6f394a4",
+      "interface_id": "0xf2a72cbb",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xf2a72cbb",
+      "function_selectors": [
+        {
+          "signature": "challengeStateExport(bytes32,bytes32,string)",
+          "selector": "0x23ebf4a4"
+        },
+        {
+          "signature": "publishStateExport(uint256,bytes32,bytes32,bytes32,string)",
+          "selector": "0x10e32cee"
+        },
+        {
+          "signature": "supersedeStateExport(bytes32,bytes32,bytes32,string)",
+          "selector": "0xc1aff4f1"
+        }
+      ]
+    },
+    "IStreamStateExportPublisher": {
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol",
+      "artifact_path": "out-release/IStreamStateExportPublisher.sol/IStreamStateExportPublisher.json",
+      "abi_sha256": "sha256:1c6027fa1e793f49b89bc2aa98a82924947730384e5eb5634595dc951da272df",
+      "interface_id": "0x77faad4f",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0x77faad4f",
+      "function_selectors": [
+        {
+          "signature": "latestStateExport()",
+          "selector": "0x77faad4f"
         }
       ]
     },

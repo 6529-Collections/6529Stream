@@ -6,7 +6,7 @@ $path=Join-Path $PSScriptRoot 'run-current-stack-sepolia.ps1'
 $ast=[System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)
 if ($parseErrors.Count -ne 0) {throw 'Sepolia helper syntax errors.'}
 # Load only pure receipt/recovery functions. No account files, RPC calls or signers run.
-$names=@('Invoke-Tool','Cast','Uint','With-Signer','Mint-TokenId','Require-FreshDeployment','Transaction-Value','Validate-RecordedDeployment','Remaining-DeploymentGas')
+$names=@('Invoke-Tool','Cast','Uint','With-Signer','Mint-TokenId','Require-FreshDeployment','Transaction-Value','Validate-RecordedDeployment','Remaining-DeploymentGas','Checked-UnsignedDeploymentGas')
 foreach ($definition in $ast.FindAll({param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst]},$true)) {
     if ($definition.Name -in $names) {Invoke-Expression $definition.Extent.Text}
 }
@@ -41,6 +41,17 @@ try {
 } finally {Remove-Item -LiteralPath $unusedPath -ErrorAction SilentlyContinue}
 $deployer=@{address=$sale}
 $transactionGasCap=[bigint]16777216
+$DeploymentGasEstimateMultiplier=115
+$unsigned=@{transactions=@(
+    @{contractName='First';function='configure()';transaction=@{gas='0x5208'}},
+    @{contractName='Executor';function='initializeGenesis()';transaction=@{gas='0x1000000'}}
+)}
+Check ((Checked-UnsignedDeploymentGas $unsigned) -eq 16798216) 'The complete unsigned plan includes its final exact-cap transaction.'
+$unsigned.transactions[1].transaction.gas='0x1000001'
+$failure=$null
+try {Checked-UnsignedDeploymentGas $unsigned | Out-Null} catch {$failure=$_.Exception.Message}
+Check ($failure -like '*transaction 1*initializeGenesis()*16777217*115%*DeploymentGasEstimateMultiplier*') 'A late Sepolia cap violation must identify the transaction and adjustable multiplier before signing.'
+Reject {Checked-UnsignedDeploymentGas @{transactions=@()}} 'An empty unsigned Sepolia plan must fail.'
 $state.deploymentAttempt=@{transactions=@(
     @{nonce='7';to=$other;value='0';inputHash=(Cast @('keccak','0x1234'))},
     @{nonce='8';to='';value='0';inputHash=(Cast @('keccak','0x5678'))}

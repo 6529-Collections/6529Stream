@@ -21,6 +21,10 @@ FORGE_SIZE_COMMAND = [
     "--skip",
     "script",
     "--force",
+    "--out",
+    "out-diagnostics",
+    "--cache-path",
+    "cache-diagnostics",
 ]
 EXPECTED_TEST_ONLY_RUNTIME_OVERFLOWS = {
     "LegacyStreamCore": (24_587, -11),
@@ -76,6 +80,14 @@ def accepted_test_only_runtime_overflow(log_text: str) -> bool:
 
 
 def run_with_log(log_path: Path) -> int:
+    # --force clears Forge's selected outputs. Keep this diagnostic independent
+    # of both the default build and the nested current-profile evidence, including
+    # when a local symlink or Windows junction would otherwise alias those paths.
+    root = Path.cwd().resolve()
+    for option in ("--out", "--cache-path"):
+        path = root / FORGE_SIZE_COMMAND[FORGE_SIZE_COMMAND.index(option) + 1]
+        if path.is_symlink() or path.resolve() != path or (path.exists() and not path.is_dir()):
+            raise ValueError(f"Diagnostic output must be an unlinked directory: {path}")
     log_path.parent.mkdir(parents=True, exist_ok=True)
     temp_log_path = log_path.with_name(f"{log_path.name}.tmp")
     for stale_path in (log_path, temp_log_path):

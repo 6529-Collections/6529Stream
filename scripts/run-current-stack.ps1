@@ -1,7 +1,14 @@
 param(
     [string]$RpcUrl = 'http://127.0.0.1:8547',
     [string]$OutputDirectory = (Join-Path $env:TEMP '6529stream-current-local'),
-    [switch]$DeployOnly
+    [string]$ArtifactDirectory,
+    [string]$CacheDirectory,
+    [string]$BroadcastDirectory,
+    [ValidateRange(100,150)][int]$DeploymentGasEstimateMultiplier = 115,
+    [switch]$DeployOnly,
+    [switch]$DemonstrateOnly,
+    [switch]$RequireExtendedStack,
+    [string]$MockVrfCoordinator
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,42 +17,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $deployer = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
 $protocol = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
 
-function Invoke-Rpc([string]$Method, [object[]]$Parameters) {
-    $body = @{jsonrpc='2.0'; id=1; method=$Method; params=$Parameters} | ConvertTo-Json -Depth 30 -Compress
-    $response = Invoke-RestMethod -Uri $RpcUrl -Method Post -ContentType 'application/json' -Body $body
-    if ($response.PSObject.Properties.Name -contains 'error') { throw ($response.error | ConvertTo-Json -Compress) }
-    return $response.result
-}
-
-function Invoke-Cast([string[]]$Arguments) {
-    $result = & cast @Arguments
-    if ($LASTEXITCODE -ne 0) { throw "cast failed: $($Arguments[0])" }
-    return ($result -join "`n").Trim()
-}
-
-function Read-Contract([string]$Target, [string]$Signature, [string[]]$Arguments = @()) {
-    return Invoke-Cast (@('call',$Target,$Signature) + $Arguments + @('--rpc-url',$RpcUrl,'--gas-limit','16000000'))
-}
-
-function Send-LocalTransaction(
-    [string]$Target, [string]$Signature, [string[]]$Arguments = @(), [string]$Value = '0'
-) {
-    $result = Invoke-Cast (@('send',$Target,$Signature) + $Arguments + @(
-        '--value',$Value,'--unlocked','--from',$deployer,'--rpc-url',$RpcUrl,'--gas-limit','16000000','--json'
-    )) | ConvertFrom-Json
-    if ($result.status -notin @('0x1','1',1)) { throw "Transaction reverted: $($result.transactionHash)" }
-    return $result
-}
-
-function Get-DeploymentAddress([object]$Broadcast, [string]$Name) {
-    $matches = @($Broadcast.transactions | Where-Object { $_.contractName -eq $Name -and $_.transactionType -eq 'CREATE' })
-    if ($matches.Count -eq 0) { throw "No deployment receipt for $Name" }
-    return $matches[0].contractAddress
-}
-
-function Write-PublicResult([object]$Result) {
-    $Result | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'current-stack.json') -Encoding utf8
-}
+. (Join-Path $PSScriptRoot 'current-stack-local-functions.ps1')
 
 # This helper deliberately uses only an existing loopback Anvil node and its standard
 # public, unlocked development accounts. It never reads or writes a private key.
@@ -58,60 +30,136 @@ if ($deployer.ToLowerInvariant() -notin @($accounts | ForEach-Object { $_.ToLowe
     throw 'The standard first Anvil account is not unlocked.'
 }
 New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
+$OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
+foreach ($name in @('ArtifactDirectory','CacheDirectory','BroadcastDirectory')) {
+    $value = Get-Variable -Name $name -ValueOnly
+    if (-not $value) {
+        $leaf = @{ArtifactDirectory='out';CacheDirectory='cache';BroadcastDirectory='broadcast'}[$name]
+        $value = Join-Path $OutputDirectory $leaf
+    } elseif (-not [IO.Path]::IsPathRooted($value)) { $value = Join-Path $repoRoot $value }
+    Set-Variable -Name $name -Value ([IO.Path]::GetFullPath($value))
+}
+$broadcastPath = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/31337/run-latest.json'
+$dryRunPath = Join-Path $BroadcastDirectory 'DeployCurrentStack.s.sol/31337/dry-run/run-latest.json'
+if ($DeployOnly -and $DemonstrateOnly) { throw 'DeployOnly and DemonstrateOnly are mutually exclusive.' }
+if (-not $DemonstrateOnly) { Require-FreshLocalRun (Join-Path $OutputDirectory 'current-stack.json') $broadcastPath $dryRunPath }
 Push-Location $repoRoot
 $savedDeployer = $env:STREAM_DEPLOYER
 $savedTreasury = $env:STREAM_PROTOCOL_TREASURY
 $savedArtist = $env:STREAM_ARTIST
 $savedPlatform = $env:STREAM_PLATFORM_SIGNER
+$savedProfile = $env:FOUNDRY_PROFILE
+$savedBroadcast = $env:FOUNDRY_BROADCAST
 try {
+    $env:FOUNDRY_PROFILE = 'current'
+    $env:FOUNDRY_BROADCAST = $BroadcastDirectory
     $env:STREAM_DEPLOYER = $deployer
     $env:STREAM_PROTOCOL_TREASURY = $protocol
     $env:STREAM_ARTIST = $deployer
     $env:STREAM_PLATFORM_SIGNER = $deployer
-    $skip = @('--skip','test')
-    Get-ChildItem script -Recurse -Filter '*.s.sol' |
-        Where-Object { $_.Name -ne 'DeployCurrentStack.s.sol' } |
-        ForEach-Object { $skip += @('--skip',$_.Name) }
-    & forge script script/current/DeployCurrentStack.s.sol:DeployCurrentStack @skip `
-        --via-ir --isolate --out out/current-stack-development --cache-path cache/current-stack-development `
-        --rpc-url $RpcUrl --sender $deployer --unlocked --broadcast --slow
-    if ($LASTEXITCODE -ne 0) { throw 'Current-stack deployment failed.' }
+    if (-not $DemonstrateOnly) {
+        $skip = @('--skip','test')
+        $sourceCommit=((& git rev-parse HEAD) -join '').Trim()
+        if ($LASTEXITCODE -ne 0 -or $sourceCommit -notmatch '^[0-9a-f]{40}$') {throw 'Cannot bind the unsigned deployment to a source commit.'}
+        $firstNonce=Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'latest'))
+        $forgeArguments=@('script','script/current/DeployCurrentStack.s.sol:DeployCurrentStack')+$skip+@(
+            '--via-ir','--build-info','--isolate','--out',$ArtifactDirectory,'--cache-path',$CacheDirectory,
+            '--rpc-url',$RpcUrl,'--sender',$deployer,'--slow',
+            '--gas-estimate-multiplier',$DeploymentGasEstimateMultiplier.ToString()
+        )
+        & forge @forgeArguments
+        if ($LASTEXITCODE -ne 0) { throw 'Current-stack unsigned deployment simulation failed; no deployment was broadcast.' }
+        $currentCommit=((& git rev-parse HEAD) -join '').Trim()
+        if ($LASTEXITCODE -ne 0 -or $currentCommit -ne $sourceCommit) {throw 'Source commit changed during planning; no deployment was broadcast.'}
+        $dryRun=Get-Content -Raw -Encoding UTF8 -LiteralPath $dryRunPath | ConvertFrom-Json -AsHashtable
+        $plan=Assert-LocalDeploymentPlan $dryRun $deployer $firstNonce $DeploymentGasEstimateMultiplier
+        if ((Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'latest'))) -ne $firstNonce -or
+            (Convert-UInt (Invoke-Rpc 'eth_getTransactionCount' @($deployer,'pending'))) -ne $firstNonce) {
+            throw 'Deployer nonce changed during planning; no deployment was broadcast.'
+        }
+        $plan.unsignedPlan=$dryRunPath
+        $plan.unsignedPlanSha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $dryRunPath).Hash.ToLowerInvariant()
+        $result = [ordered]@{
+            schema='6529stream.current-local-demo.v1';state='deployment-started';chainId=31337;rpcUrl=$RpcUrl
+            sourceCommit=$sourceCommit;compilerProfile='current';deploymentPlan=$plan
+            artifactDirectory=$ArtifactDirectory;cacheDirectory=$CacheDirectory;broadcastReceipts=$broadcastPath
+        }
+        Write-PublicResult $result
+        & forge @forgeArguments --unlocked --broadcast
+        if ($LASTEXITCODE -ne 0) { throw 'Current-stack deployment failed.' }
 
-    $broadcastPath = Join-Path $repoRoot 'broadcast/DeployCurrentStack.s.sol/31337/run-latest.json'
-    $broadcast = Get-Content -Raw -LiteralPath $broadcastPath | ConvertFrom-Json
-    $addresses = [ordered]@{}
-    $names = [ordered]@{
-        core='StreamCore'; executor='StreamGovernanceExecutor'; governanceRoot='StreamGovernanceActor'
-        registry='StreamModuleRegistry'; manifest='StreamSystemManifest'; manager='StreamMintManager'
-        ledger='StreamMintLedger'; sale='StreamFixedPriceSaleAdapter'; auction='StreamEnglishAuctionHouse'
-        factory='StreamSplitFactory'; entropy='StreamEntropyCoordinator'; metadata='StreamMetadataRouter'
-        royalty='StreamRoyaltyResolver'; artistRegistry='StreamCollectionArtistRegistry'; provider='DevelopmentEntropyProvider'
+        $broadcast = Get-Content -Raw -LiteralPath $broadcastPath | ConvertFrom-Json
+        if (@($broadcast.receipts).Count -ne @($broadcast.transactions).Count) {throw 'Deployment receipts are incomplete; retain the checkpoint and recover the existing attempt.'}
+        if (@($broadcast.receipts | Where-Object { $_.status -notin @('0x1','1',1) }).Count -ne 0) { throw 'A deployment receipt failed.' }
+        $addresses = [ordered]@{}
+        $names = [ordered]@{
+            core='StreamCore'; executor='StreamGovernanceExecutor'
+            registry='StreamModuleRegistry'; manifest='StreamSystemManifest'; manager='StreamMintManager'
+            ledger='StreamMintLedger'; sale='StreamFixedPriceSaleAdapter'; auction='StreamEnglishAuctionHouse'
+            factory='StreamSplitFactory'; entropy='StreamEntropyCoordinator'; metadata='StreamMetadataRouter'
+            royalty='StreamRoyaltyResolver'; artistRegistry='StreamCollectionArtistRegistry'; provider='DevelopmentEntropyProvider'
+        }
+        foreach ($item in $names.GetEnumerator()) { $addresses[$item.Key] = Get-DeploymentAddress $broadcast $item.Value }
+        $extensions=@{erc20Sale='StreamERC20FixedPriceSaleAdapter';primaryRevenueResolver='StreamRevenueResolver'}
+        foreach ($item in $extensions.GetEnumerator()) {
+            $address=Get-DeploymentAddress $broadcast $item.Value -Optional
+            if ($address) {$addresses[$item.Key]=$address}
+        }
+        $addresses.governanceRoot = (Read-Contract $addresses.executor 'governanceRootState()(address,bytes32,uint64)')[0]
+        $addresses.roleRegistry = Read-Value $addresses.executor 'roleRegistry()(address)'
+        $addresses.assetPolicyRegistry = Read-Value $addresses.factory 'assetPolicyRegistry()(address)'
+        $artistLabel = Invoke-Cast @('keccak','artist')
+        $protocolLabel = Invoke-Cast @('keccak','protocol')
+        $splitMetadata = Invoke-Cast @('keccak','development split')
+        $entries = "[($deployer,900000,$artistLabel),($protocol,100000,$protocolLabel)]"
+        $profile = Read-Value $addresses.factory 'profileIdFor((address,uint32,bytes32)[],bytes32)(bytes32)' @($entries,$splitMetadata)
+        $addresses.wallet = Read-Value $addresses.factory 'walletFor(bytes32)(address)' @($profile)
+        $result.state='deployed';$result.developmentEntropy=$true
+        $result.randomnessDisclosure='Controller-supplied local values; not secure randomness.'
+        $result.deployer=$deployer;$result.protocol=$protocol;$result.addresses=$addresses;$result.profile=$profile
+        $result.demoReceipts=[ordered]@{}
+        Write-PublicResult $result
+    } else {
+        $result=Get-Content -Raw -LiteralPath (Join-Path $OutputDirectory 'current-stack.json') | ConvertFrom-Json -AsHashtable
+        if ($result.state -ne 'deployed' -or $result.chainId -ne 31337 -or $result.deployer -ine $deployer) { throw 'Demonstration requires a local deployment with no previous mint attempt.' }
+        $addresses=$result.addresses;$profile=$result.profile
     }
-    foreach ($item in $names.GetEnumerator()) { $addresses[$item.Key] = Get-DeploymentAddress $broadcast $item.Value }
-    $artistLabel = Invoke-Cast @('keccak','artist')
-    $protocolLabel = Invoke-Cast @('keccak','protocol')
-    $splitMetadata = Invoke-Cast @('keccak','development split')
-    $entries = "[($deployer,900000,$artistLabel),($protocol,100000,$protocolLabel)]"
-    $profile = Read-Contract $addresses.factory 'profileIdFor((address,uint32,bytes32)[],bytes32)(bytes32)' @($entries,$splitMetadata)
-    $addresses.wallet = Read-Contract $addresses.factory 'walletFor(bytes32)(address)' @($profile)
-    $result = [ordered]@{
-        schema='6529stream.current-local-demo.v1'; state='deployed'; chainId=31337; rpcUrl=$RpcUrl
-        developmentEntropy=$true; randomnessDisclosure='Controller-supplied local values; not secure randomness.'
-        deployer=$deployer; protocol=$protocol; addresses=$addresses; profile=$profile
-        broadcastReceipts='broadcast/DeployCurrentStack.s.sol/31337/run-latest.json'; demoReceipts=[ordered]@{}
-    }
+    if ($RequireExtendedStack -and (-not $addresses.Contains('erc20Sale') -or -not $addresses.Contains('primaryRevenueResolver'))) {throw 'The extended stack requires ERC20 sale and primary revenue resolver deployments.'}
+    $publisherType=Invoke-Cast @('keccak','STATE_EXPORT_PUBLISHER')
+    $publisher=Read-Contract $addresses.core 'getSatellitePointer(bytes32)(address,bytes32,bool,bytes32,bytes4,address,uint8,bytes32,bytes32,uint64)' @($publisherType)
+    if ($publisher[0] -ne '0x0000000000000000000000000000000000000000') {
+        Assert-ExtendedPublisherPointer $publisher $addresses.executor $addresses.registry
+        if (-not (Read-Value $addresses.executor 'supportsInterface(bytes4)(bool)' @('0x77faad4f'))) {throw 'Publisher interface is not supported by its target.'}
+        $addresses.stateExportPublisher=$publisher[0]
+        $result.publisherPointer=$publisher
+    } elseif ($RequireExtendedStack) {throw 'The extended stack requires its active state export publisher pointer.'}
     Write-PublicResult $result
     if ($DeployOnly) { Write-Output (Join-Path $OutputDirectory 'current-stack.json'); return }
+    if ($MockVrfCoordinator) {
+        if ((Read-Value $addresses.provider 'vrfCoordinatorAddress()(address)') -ine $MockVrfCoordinator) { throw 'VRF adapter upstream differs from the explicit local mock.' }
+        $result.developmentEntropy=$false
+        $result.randomnessDisclosure='Real Stream VRF adapter with a local mock upstream; excludes Chainlink proof verification, service operation and billing.'
+        $result.mockVrfCoordinator=$MockVrfCoordinator
+    }
+    $result.state='demonstration-started'
+    Write-PublicResult $result
 
     $phase = Invoke-Cast @('keccak','current-stack fixed price')
     $tokenData = '0x' + [Convert]::ToHexString([Text.Encoding]::UTF8.GetBytes('Stream local demonstration'))
     $tokenDataHash = Invoke-Cast @('keccak',$tokenData)
     $commitment = Invoke-Cast @('keccak','local demo commitment')
     $nonce = Invoke-Cast @('keccak','local demo sale 1')
-    $policy = Read-Contract $addresses.manager 'phasePolicyHash(uint256,bytes32)(bytes32)' @('1',$phase)
-    $epoch = Read-Contract $addresses.sale 'signerEpoch()(uint64)'
+    $policy = Read-Value $addresses.manager 'phasePolicyHash(uint256,bytes32)(bytes32)' @('1',$phase)
+    $epoch = Read-Value $addresses.sale 'signerEpoch()(uint64)'
     $block = Invoke-Rpc 'eth_getBlockByNumber' @('latest',$false)
     $deadline = ([Convert]::ToUInt64($block.timestamp.Substring(2),16) + 3600).ToString()
+    if ((Read-Value $addresses.artistRegistry 'acceptedArtist(uint256)(address)' @('1')) -ine $deployer) {
+        $attribution = Read-Value $addresses.artistRegistry 'attribution(uint256)((address,address,bytes32,bytes32,bytes32,uint64,uint64))' @('1')
+        $acceptanceNonce = Read-Value $addresses.artistRegistry 'acceptanceNonces(address)(uint256)' @($deployer)
+        $result.demoReceipts.acceptArtist = Send-LocalTransaction $addresses.artistRegistry 'acceptArtist(uint256,bytes32,uint256,uint64,bytes)' @('1',$attribution[3],$acceptanceNonce,$deadline,'0x')
+        Write-PublicResult $result
+    }
+    if ((Read-Value $addresses.artistRegistry 'acceptedArtist(uint256)(address)' @('1')) -ine $deployer) { throw 'Artist attribution was not accepted.' }
     $price = '10000000000000000'
     $fields = @(
         @('collectionId','uint256'),@('phaseId','bytes32'),@('payer','address'),@('recipient','address')
@@ -137,12 +185,32 @@ try {
     $result.demoReceipts.buy = Send-LocalTransaction $addresses.sale `
         'buy((uint256,bytes32,address,address,address,bytes32,bytes32,bytes32,bytes32,uint256,bytes32,uint64,uint64),bytes,bytes,bytes)' `
         @($tuple,$tokenData,$signature,$signature) $price
-    $tokenId = Read-Contract $addresses.core 'lastAllocatedTokenId()(uint256)'
-    $providerRequestId = Read-Contract $addresses.provider 'nextRequestId()(uint256)'
+    $tokenId = Get-MintedTokenId $result.demoReceipts.buy $addresses.sale
+    $result.tokenId=$tokenId
+    Write-PublicResult $result
     $result.demoReceipts.requestEntropy = Send-LocalTransaction $addresses.entropy 'requestEntropy(uint256)' @($tokenId)
+    $request = Get-EntropyRequest $result.demoReceipts.requestEntropy $addresses.entropy $tokenId $addresses.provider
+    $result.entropyRequest=$request
+    Write-PublicResult $result
     $raw = Invoke-Cast @('keccak','DEVELOPMENT ONLY deterministic demonstration output')
-    $result.demoReceipts.fulfillEntropy = Send-LocalTransaction $addresses.provider 'fulfill(uint256,bytes32)' @($providerRequestId,$raw)
-    $tokenURI = Read-Contract $addresses.core 'tokenURI(uint256)(string)' @($tokenId) | ConvertFrom-Json
+    $result.demoReceipts.fulfillEntropy = if ($MockVrfCoordinator) {
+        Send-LocalTransaction $MockVrfCoordinator 'fulfill(uint256,uint256)' @($request.providerRequestId,(Convert-UInt $raw).ToString())
+    } else {
+        Send-LocalTransaction $addresses.provider 'fulfill(uint256,bytes32)' @($request.providerRequestId,$raw)
+    }
+    $seed=Read-Contract $addresses.entropy 'tokenSeed(uint256)(bytes32,bool)' @($tokenId)
+    if (-not $seed[1] -or $seed[0] -eq ('0x'+('0'*64))) { throw 'Entropy seed was not finalized.' }
+    if ((Read-Value $addresses.entropy 'pendingRequestCount()(uint256)') -ne 0) { throw 'Entropy remains pending.' }
+    $result.seed=$seed[0]
+    $result.providerResult=Read-Contract $addresses.provider 'providerResultStatus(uint256)(uint8,bytes32,bytes32,bool,bool)' @($request.providerRequestId)
+    if (-not $result.providerResult[3] -or -not $result.providerResult[4]) { throw 'Provider result was not stored and delivered.' }
+    if ((Convert-UInt $result.demoReceipts.fulfillEntropy.blockNumber) -le (Convert-UInt $result.demoReceipts.requestEntropy.blockNumber)) { throw 'Callback must be mined in a later transaction/block.' }
+    Write-PublicResult $result
+    $notification = Find-ReceiptEvent $result.demoReceipts.fulfillEntropy $addresses.core 'MetadataUpdate(uint256)' 1
+    $notifiedToken = Invoke-Cast @('abi-decode','notification()(uint256)',$notification.data,'--json') | ConvertFrom-Json
+    if ([string]$notifiedToken[0] -ne $tokenId -or (Read-Value $addresses.entropy 'metadataNotificationPending(uint256)(bool)' @($tokenId))) { throw 'Core metadata notification did not complete.' }
+    $result.metadataNotificationDelivered=$true
+    $tokenURI = Read-Value $addresses.core 'tokenURI(uint256)(string)' @($tokenId)
     if (-not $tokenURI.StartsWith('data:application/json;base64,')) { throw 'Expected onchain metadata data URI.' }
     $metadataJson = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($tokenURI.Split(',')[1]))
     $metadata = $metadataJson | ConvertFrom-Json
@@ -153,9 +221,16 @@ try {
             Set-Content -LiteralPath (Join-Path $OutputDirectory 'token-1.artwork.html') -Encoding utf8
     }
     $result.demoReceipts.artistWithdrawal = Send-LocalTransaction $addresses.wallet 'release(address,address,address)' @('0x0000000000000000000000000000000000000000',$deployer,$deployer)
+    Write-PublicResult $result
     $result.demoReceipts.protocolWithdrawal = Send-LocalTransaction $addresses.wallet 'release(address,address,address)' @('0x0000000000000000000000000000000000000000',$protocol,$protocol)
+    Write-PublicResult $result
+    $asset='0x0000000000000000000000000000000000000000'
+    $artistReleased=Read-Value $addresses.wallet 'accountReleased(address,address)(uint256)' @($asset,$deployer)
+    $protocolReleased=Read-Value $addresses.wallet 'accountReleased(address,address)(uint256)' @($asset,$protocol)
+    if ((Convert-UInt $artistReleased) -ne ((Convert-UInt $price)*9/10) -or (Convert-UInt $protocolReleased) -ne ((Convert-UInt $price)/10)) { throw 'Split withdrawal accounting differs from the paid sale.' }
+    $result.withdrawals=[ordered]@{artistWei=$artistReleased;protocolWei=$protocolReleased}
     $result.demoReceipts.transfer = Send-LocalTransaction $addresses.core 'transferFrom(address,address,uint256)' @($deployer,$protocol,$tokenId)
-    $owner = Read-Contract $addresses.core 'ownerOf(uint256)(address)' @($tokenId)
+    $owner = Read-Value $addresses.core 'ownerOf(uint256)(address)' @($tokenId)
     if ($owner.ToLowerInvariant() -ne $protocol.ToLowerInvariant()) { throw 'NFT transfer did not complete.' }
     $result.tokenId = $tokenId
     $result.owner = $owner
@@ -169,5 +244,7 @@ try {
     $env:STREAM_PROTOCOL_TREASURY = $savedTreasury
     $env:STREAM_ARTIST = $savedArtist
     $env:STREAM_PLATFORM_SIGNER = $savedPlatform
+    $env:FOUNDRY_PROFILE = $savedProfile
+    $env:FOUNDRY_BROADCAST = $savedBroadcast
     Pop-Location
 }

@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -452,13 +454,18 @@ class PythonToolchainTests(unittest.TestCase):
         ):
             with self.subTest(profile=profile):
                 block = jobs[job]
-                self.assertNotIn("restore-keys:", block)
                 restore = block.index(f"- name: Restore {profile} compiler outputs")
                 build = block.index(f"- name: {build_name}\n")
                 save = block.index(f"- name: Save {profile} compiler outputs")
                 self.assertLess(restore, build)
                 self.assertLess(build, save)
                 self.assertLess(save, block.index(test_command))
+                restore_step = block[restore:build]
+                prefix = "${{ runner.os }}-${{ runner.arch }}-forge-1.7.1-solc-0.8.19-" + profile + "-v2-${{ hashFiles('foundry.toml') }}-"
+                fallback = restore_step.split("          restore-keys: |\n", 1)[1]
+                self.assertEqual(fallback.strip().splitlines(), [prefix])
+                self.assertEqual(block.count("restore-keys:"), 1)
+                self.assertIn("          key: " + prefix + "${{ steps." + profile + "_compiler_inputs.outputs.digest }}", restore_step)
                 build_step = block[build:save]
                 self.assertNotIn("        if:", build_step)
                 self.assertIn("forge build", build_step)
@@ -476,11 +483,17 @@ class PythonToolchainTests(unittest.TestCase):
                 ):
                     self.assertIn(source_input, identity)
                 self.assertIn(f"steps.{profile}_compiler_inputs.outputs.digest", block[restore:build])
-                self.assertIn(f"-forge-1.7.1-solc-0.8.19-{profile}-v1-", block)
+                self.assertIn(f"-forge-1.7.1-solc-0.8.19-{profile}-v2-", block)
         current = jobs["current-stack"]
         before_save = current[:current.index("- name: Save current compiler outputs")]
         self.assertIn("FOUNDRY_PROFILE=current forge build", before_save)
         self.assertIn("--output-dir ci-logs/current-candidate --check", before_save)
+        self.assertIn("CACHE_MATCHED_KEY: ${{ steps.current_compiler_cache.outputs.cache-matched-key }}", before_save)
+        self.assertIn("CACHE_EXACT_HIT: ${{ steps.current_compiler_cache.outputs.cache-hit }}", before_save)
+        self.assertEqual(before_save.count("forge build --force"), 1)
+        self.assertIn('if [ -z "$CACHE_MATCHED_KEY" ] || [ "$CACHE_EXACT_HIT" = "true" ]; then', before_save)
+        self.assertIn("tee ci-logs/current-stack-export.log", before_save)
+        self.assertIn("tee -a ci-logs/current-stack-export.log", before_save)
         self.assertEqual(current.count("            out/current\n"), 2)
         self.assertEqual(current.count("            cache/current\n"), 2)
         self.assertLess(
@@ -488,6 +501,68 @@ class PythonToolchainTests(unittest.TestCase):
             jobs["foundry"].index("- name: Aggregate size and warning diagnostic"),
         )
         self.assertIn("- name: Canonical release build", jobs["foundry"])
+
+    def test_current_cache_recovery_runs_once_only_after_fallback_export_failure(self) -> None:
+        git_bash = Path("C:/Program Files/Git/bin/bash.exe")
+        bash = str(git_bash) if git_bash.is_file() else shutil.which("bash")
+        if not bash:
+            self.skipTest("Bash is required to execute the CI command regression")
+        workflow = (SCRIPT_PATH.parents[2] / checker.CI_WORKFLOW_PATH).read_text(encoding="utf-8")
+        current = checker.workflow_job_blocks(workflow)["current-stack"]
+        build = current.split("      - name: Build current compilation\n", 1)[1].split(
+            "      - name: Save current compiler outputs\n", 1
+        )[0]
+        commands = "\n".join(
+            line[10:] for line in build.split("        run: |\n", 1)[1].splitlines()
+        )
+        # Execute the actual workflow shell with fake compiler/exporter functions.
+        # Failure modes exercise pipeline exit status, retry count and the final check.
+        stubs = r"""
+forge() {
+  printf 'forge %s\n' "$*" >> calls.log
+  case "$*" in
+    *--force*) [ "$FORCE_FAILURE" != true ] ;;
+    *) [ "$BUILD_FAILURE" != true ] ;;
+  esac
+}
+python() {
+  printf 'python %s\n' "$*" >> calls.log
+  case " $* " in
+    *" --check "*) [ "$CHECK_FAILURE" != true ]; return $? ;;
+  esac
+  if [ "$EXPORT_MODE" = always ]; then return 1; fi
+  if [ "$EXPORT_MODE" = once ] && [ ! -f first-export ]; then
+    touch first-export
+    return 1
+  fi
+  return 0
+}
+"""
+        cases = [
+            # fallback, export mode, build/forced/check failure, success, force/check counts
+            ("false", "once", "false", "false", "false", False, 0, 0),
+            ("exact", "once", "false", "false", "false", False, 0, 0),
+            ("true", "once", "false", "false", "false", True, 1, 1),
+            ("true", "never", "false", "false", "false", True, 0, 1),
+            ("false", "never", "false", "false", "false", True, 0, 1),
+            ("true", "once", "false", "true", "false", False, 1, 0),
+            ("true", "always", "false", "false", "false", False, 1, 0),
+            ("true", "never", "false", "false", "true", False, 0, 1),
+            ("true", "never", "true", "false", "false", False, 0, 0),
+        ]
+        for fallback, mode, build_fail, force_fail, check_fail, success, forces, checks in cases:
+            with self.subTest(fallback=fallback, mode=mode, build=build_fail, force=force_fail, check=check_fail):
+                with tempfile.TemporaryDirectory() as directory:
+                    env = dict(os.environ, CACHE_MATCHED_KEY="same-profile-key" if fallback != "false" else "",
+                               CACHE_EXACT_HIT="true" if fallback == "exact" else "false", EXPORT_MODE=mode,
+                               BUILD_FAILURE=build_fail, FORCE_FAILURE=force_fail, CHECK_FAILURE=check_fail)
+                    result = subprocess.run([bash, "-c", stubs + commands], cwd=directory,
+                                            env=env, capture_output=True, text=True)
+                    calls = (Path(directory) / "calls.log").read_text(encoding="utf-8").splitlines()
+                    self.assertEqual(result.returncode == 0, success, result.stderr)
+                    self.assertEqual(calls.count("forge build --force"), forces)
+                    self.assertEqual(sum(line.endswith(" --check") for line in calls), checks)
+                    self.assertEqual(calls[0], "forge build")
 
     def test_git_compiler_identity_changes_for_same_content_path_rename(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

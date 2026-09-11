@@ -18,6 +18,10 @@
       "source": "smart-contracts/core/StreamCore.sol"
     },
     {
+      "name": "StreamERC20FixedPriceSaleAdapter",
+      "source": "smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol"
+    },
+    {
       "name": "StreamEnglishAuctionHouse",
       "source": "smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol"
     },
@@ -56,6 +60,10 @@
     {
       "name": "StreamModuleRegistry",
       "source": "smart-contracts/domains/modules/StreamModuleRegistry.sol"
+    },
+    {
+      "name": "StreamRevenueResolver",
+      "source": "smart-contracts/domains/revenue/StreamRevenueResolver.sol"
     },
     {
       "name": "StreamRoleRegistry",
@@ -168,6 +176,11 @@
       "name": "IStreamCorePointers",
       "source": "smart-contracts/interfaces/stream/core/IStreamCorePointers.sol",
       "interface_id": "0x54fb352a"
+    },
+    {
+      "name": "IStreamERC20FixedPriceSaleAdapter",
+      "source": "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol",
+      "interface_id": "0x55c94d74"
     },
     {
       "name": "IStreamEnglishAuctionHouse",
@@ -285,6 +298,16 @@
       "interface_id": "0xefc33fae"
     },
     {
+      "name": "IStreamPaymentIntentVerifier",
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol",
+      "interface_id": "0x88136d5a"
+    },
+    {
+      "name": "IStreamRevenueResolver",
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamRevenueResolver.sol",
+      "interface_id": "0x3503c22e"
+    },
+    {
       "name": "IStreamRoleRegistry",
       "source": "smart-contracts/interfaces/stream/governance/IStreamRoleRegistry.sol",
       "interface_id": "0xd77ee305"
@@ -303,6 +326,21 @@
       "name": "IStreamSplitWallet",
       "source": "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol",
       "interface_id": "0x0ea5f02c"
+    },
+    {
+      "name": "IStreamStateExportHistory",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol",
+      "interface_id": "0x18ac5014"
+    },
+    {
+      "name": "IStreamStateExportOperations",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol",
+      "interface_id": "0xf2a72cbb"
+    },
+    {
+      "name": "IStreamStateExportPublisher",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol",
+      "interface_id": "0x77faad4f"
     },
     {
       "name": "IStreamSystemManifest",

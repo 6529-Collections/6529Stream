@@ -8,12 +8,12 @@ repository reorganization, independent adversarial review, and testnet delivery.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream` |
-| Active PR branch | `codex/developer-experience-reorganization` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/739` |
+| Active PR branch | `codex/offline-release-completion` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/740` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/738` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/740` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/741` |
 | Next issue | `TBD` |
-| Source checkpoint | `7b4ef22b052419e88d56cf7f207a7a7738dba7a7` |
+| Source checkpoint | `2e675281b18f8881b341eb47cd26cd60ad63f6b0` (merged baseline) |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -21,45 +21,63 @@ repository reorganization, independent adversarial review, and testnet delivery.
 
 ## Active work
 
-PR [#739](https://github.com/6529-Collections/6529Stream/pull/739) merged as
-`330ac1d40b1a0d385399ca68423503c892ea0c04`. Its tree matches the tested integration:
-1,342 default Foundry tests, eleven current-stack scenarios, all final CI checks,
-and eight resolved review threads. These results describe that revision.
+The owner requested further implementation while Sepolia funding is pending.
+The active branch is `codex/offline-release-completion`, from merged
+[PR #740](https://github.com/6529-Collections/6529Stream/pull/740). This increment
+has completed executable product paths in three parallel lanes. Source is now
+stable; final aggregate validation and PR review are in progress.
 
-The active branch is `codex/developer-experience-reorganization`, based on that
-merged commit. The owner requested a full first-principles organization and
-documentation pass before freezing the supported release candidate. The work
-includes coherent public interfaces, accurate integration guides, a focused
-contributor workflow, organized tests and maintenance tooling, and a separate
-adversarial reviewer. A final review and validation pass must cover the actual
-reorganized tree; earlier tests alone do not validate later edits.
-
-The reorganization is now in [PR #740](https://github.com/6529-Collections/6529Stream/pull/740).
-Its source checkpoint passes 1,346 configured Foundry tests across 111 suites,
-including maximum-size artwork through the current Core. All eleven current
-integration scenarios and thirteen retained gas snapshots pass. The fresh current
-export contains 76 targets from one exact 168-source compiler input. The independent
-offline verifier passes all 589 covered files; the full native wrapper and PR CI
-are still running. These results do not complete the funded Sepolia demonstration.
-
-Independent adversarial review has cleared the source/API organization, developer
-commands, current export, historical provenance, cleanup, and package integrity
-changes. One instruction-surface defect remains: automatic approval review rejected
-the attempted `AGENTS.md` update with only `rejected: blocked by policy`. That file
-retains stale flat-script commands. The contributor guides and `scripts/dev.py`
-contain the working commands; no retry or bypass of the rejected edit was attempted.
-
-| Owner | Responsibility |
+| Owner | Delivery |
 | --- | --- |
-| Integrator | Tooling, test organization, shared decisions, final integration and delivery |
-| Solidity builder | Domain interfaces, caller capabilities, NatSpec and ABI/runtime comparison |
-| Documentation builder | Current developer journey, integration examples and reference organization |
-| Independent reviewer | Adversarial newcomer tasks and repeated review of the resulting repository |
+| Integrator | Governance-hosted state-export publication, challenge, supersession and historical reads ([#668](https://github.com/6529-Collections/6529Stream/issues/668)); shared integration and release evidence |
+| Payment builder | Real ERC-20 fixed-price purchase using pinned payer intents, canonical primary policy, exact token settlement and current Core mint ([#664](https://github.com/6529-Collections/6529Stream/issues/664)) |
+| Deployment builder | Corrected local/Sepolia runners, artist acceptance and receipt-based token discovery; actual local transactions and fresh-transaction entropy callback proof |
+| Independent reviewer | Adversarial review of each implementation and integrated behavior; no implementation ownership |
+
+The publisher stays on the actual Executor. Linked scheduling validation frees
+runtime space without moving existing storage or the execution loop. The payment
+lane installs the existing primary revenue resolver for supported fixed-profile
+assignments; unsupported primary templates and deferred escrow remain explicit.
+Both features are covered by real current-stack integration tests. The integrated
+revision passes 1,379 default Foundry tests across 114 suites and 28 current-stack
+tests across five suites. The current Windows wrapper also passes its 44 Python
+tests. The exact current compilation exports 86 targets from 186 sources; the
+independent release verifier and packaging review pass all 625 checksummed files.
+The earlier 1,390-execution run included twelve additional via-IR executions of
+the Core target suite. The latest run retains every distinct test and adds one
+payment-cap regression; its smaller count reflects that compiler-profile duplicate.
+
+The patched deployment runner completed a fresh local deployment with its normal
+115% gas multiplier: all 43 deployment transactions succeeded after the complete
+unsigned plan passed preflight. Paid native mint, final metadata, the Core update
+event, both 90/10 split withdrawals, artist transfer and 40 bytecode readbacks
+passed. A separate fresh-transaction VRF rehearsal passed with 500,000 gas
+forwarded to the real provider/coordinator/Core path; its upstream coordinator is
+a local mock, so this does not attest Chainlink service, billing or live fulfilment.
+Independent reviewers cleared the implementation, package and local evidence.
+
+The aggregate native check found a stale test-discovery assertion after three
+diagnostic tests were added. Its count is corrected to 127 while retaining every
+existing suite-partition assertion. Final native validation and required PR CI
+remain merge gates; this state does not claim they have completed.
+
+The merged baseline passed 1,346 configured Foundry tests across 111 suites,
+eleven current-stack scenarios, thirteen gas snapshots, the complete native
+wrapper and all four CI jobs. Its current export has 76 targets from one exact
+168-source compiler input; the independent verifier covers 606 files. The source
+layout evidence tag preserves the pre-squash provenance required by the release
+package. These are completed baseline results, not results for this increment.
+
+The reorganization received independent adversarial review. Automatic approval
+review rejected the attempted `AGENTS.md` correction with only
+`rejected: blocked by policy`; that file still has stale flat-script commands.
+Working commands are in the contributor guides and `scripts/dev.py`. Do not retry
+or bypass the rejected edit.
 
 Builders hand over coherent changes to one integrator. Ordinary implementation
-choices do not require owner decisions. The reviewer remains independent of
-implementation. Review ends when meaningful findings are resolved, not after a
-fixed number of passes.
+choices do not require owner decisions. Run focused checks during implementation;
+run the broad integrated validation and deterministic artifact refresh after the
+supported behavior stabilizes. Resolve substantive review findings before merge.
 
 ## Sepolia and release
 
@@ -83,7 +101,8 @@ Core runtime measurements belong to the
 [canonical bytecode proof](../release-artifacts/latest/bytecode-release-proof.json)
 and its bound compiler/ABI inputs; they are not duplicated in this active run state.
 Reread that proof after the reorganized tree is rebuilt and its evidence refreshed.
-The previous revision's passing checks above do not attest the new compilation.
+The integrated checks above attest local behavior and compiler packaging, not a
+replacement Sepolia deployment or a frozen testnet release candidate.
 
 ## Recovery and remaining scope
 
@@ -91,11 +110,11 @@ The original checkout is clean on merged main. Prior cleanup retired 55 worktree
 and archived 19 superseded tasks. All 160 original changed/untracked paths, recovery
 refs/bundles and 6,646 ignored files were preserved and verified. Four registered
 worktrees remain: original, integration, deployer and immutable review baseline.
-The active artist-provenance task is retained. An empty previously retired
+The separate Seize artist-provenance task completed; it is not a Stream implementation lane. An empty previously retired
 directory remains after automatic approval review blocked its removal.
 
 Issue [#738](https://github.com/6529-Collections/6529Stream/issues/738) tracks the
 supported working release and testnet outcome. Full artist lifecycle/recovery,
-additional payment modes, finality/state-export recovery, the full production
+broader payment modes, finality recovery, archival export operations, the full production
 configuration and external audit evidence remain explicit unfinished work.
 See [the roadmap](ROADMAP.md) and [execution backlog](EXECUTION_BACKLOG.md).

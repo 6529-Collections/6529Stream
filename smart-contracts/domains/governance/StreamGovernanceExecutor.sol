@@ -12,6 +12,9 @@ import "./StreamGovernanceBootstrap.sol";
 import "./StreamGovernanceActionPolicy.sol";
 import "./StreamGovernanceManifest.sol";
 import "./StreamGovernancePolicy.sol";
+import "./StreamGovernanceScheduling.sol";
+import "./StreamStateExport.sol";
+import "../../vendor/openzeppelin/IERC165.sol";
 
 /// @notice Staged governance executor for 6529Stream implementing ADR 0004
 ///         [GOV-ACTION-ID] canonical action identity, [GOV-BATCH] atomic
@@ -28,6 +31,10 @@ contract StreamGovernanceExecutor is
     IStreamGenesisInitializer,
     IStreamGovernanceCatalog,
     IStreamGovernedParameterAuthority,
+    IStreamStateExportPublisher,
+    IStreamStateExportOperations,
+    IStreamStateExportHistory,
+    IERC165,
     Ownable,
     ReentrancyGuard
 {
@@ -91,6 +98,92 @@ contract StreamGovernanceExecutor is
     bool public override genesisInitialized;
 
     bytes32 private constant GENESIS_PLAN_V1 = keccak256("6529STREAM_GENESIS_PLAN_V1");
+
+    /// @notice State-export discovery and its separate operations/history capabilities.
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
+        return interfaceId == type(IERC165).interfaceId
+            || interfaceId == type(IStreamStateExportPublisher).interfaceId
+            || interfaceId == type(IStreamStateExportOperations).interfaceId
+            || interfaceId == type(IStreamStateExportHistory).interfaceId;
+    }
+
+    /// @inheritdoc IStreamStateExportPublisher
+    function latestStateExport()
+        external
+        view
+        override
+        returns (
+            uint256 blockNumber,
+            bytes32 blockHash,
+            bytes32 exportHash,
+            bytes32 manifestHash,
+            string memory manifestURI
+        )
+    {
+        bytes memory encoded = StreamStateExport.encodeLatest();
+        assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }
+    }
+
+    /// @inheritdoc IStreamStateExportOperations
+    function publishStateExport(
+        uint256 blockNumber,
+        bytes32 blockHash,
+        bytes32 exportHash,
+        bytes32 manifestHash,
+        string calldata manifestURI
+    ) external override {
+        StreamStateExport.write(_manifest, _executing, msg.data);
+    }
+
+    /// @inheritdoc IStreamStateExportOperations
+    function challengeStateExport(
+        bytes32 exportHash,
+        bytes32 challengeHash,
+        string calldata challengeURI
+    ) external override {
+        StreamStateExport.write(_manifest, _executing, msg.data);
+    }
+
+    /// @inheritdoc IStreamStateExportOperations
+    function supersedeStateExport(
+        bytes32 oldExportHash,
+        bytes32 newExportHash,
+        bytes32 reasonHash,
+        string calldata reasonURI
+    ) external override {
+        StreamStateExport.write(_manifest, _executing, msg.data);
+    }
+
+    /// @inheritdoc IStreamStateExportHistory
+    function stateExport(bytes32 exportHash)
+        external
+        view
+        override
+        returns (StreamStateExportRecord memory record, bytes32 supersededBy)
+    {
+        bytes memory encoded = StreamStateExport.encodeRecord(exportHash);
+        assembly ("memory-safe") { return(add(encoded, 0x20), mload(encoded)) }
+    }
+
+    /// @inheritdoc IStreamStateExportHistory
+    function stateExportCount() external view override returns (uint256) {
+        return StreamStateExport.count();
+    }
+
+    /// @inheritdoc IStreamStateExportHistory
+    function stateExportHashAt(uint256 index) external view override returns (bytes32) {
+        return StreamStateExport.hashAt(index);
+    }
+
+    /// @inheritdoc IStreamStateExportHistory
+    function stateExportChallengeExists(bytes32 exportHash, bytes32 challengeHash)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return StreamStateExport.challengeExists(exportHash, challengeHash);
+    }
 
     function _checkOwner() internal view override {
         if (!_manifest.isSealed) revert SystemManifestBootstrapNotSealed();
@@ -1045,112 +1138,39 @@ contract StreamGovernanceExecutor is
         StreamGovernanceBootstrap.ScheduleContext memory ctx,
         GovernanceCall[] memory calls
     ) private returns (bytes32 actionId) {
-        if (_executing) revert GovernanceSchedulingDuringExecution();
-        if (genesisPlanHash != bytes32(0) && !genesisInitialized) revert InvalidGenesisPlan();
-        bool bootstrapAuthority =
-            _manifest.bound && !_manifest.isSealed && msg.sender == genesisBootstrapAuthority;
-        bool privilegedProposer = bootstrapAuthority || msg.sender == owner();
-        if (_manifest.isSealed) _requireGovernanceRootCodeHash();
-        if (!privilegedProposer && !_admin.proposers[msg.sender]) {
-            revert GovernanceActorNotAuthorized(msg.sender);
-        }
-        if (!_manifest.bound) {
-            revert SystemManifestBootstrapNotBound();
-        }
-        if (!_manifest.isSealed) {
-            if (msg.sender != genesisBootstrapAuthority) {
-                revert GenesisBootstrapActorRequired(msg.sender);
-            }
-            if (_pendingScheduledActionCount != 0) {
-                revert PendingGovernanceActionExists(_pendingScheduledActionCount);
-            }
-            _requireBootstrapCodeHashes();
-        }
-        // [GOV-BATCH] rule 5: the exact calldata preimages must already be
-        // published onchain; the action record stores the pointer for the
-        // full open-to-execute window.
-        address callDataPointer = _requirePublishedCallData(calls);
-        bytes[] memory canonicalCallDatas = _readCanonicalCallDatas(callDataPointer);
-        uint256 totalValue = _validateCalls(ctx.actionClass, calls, canonicalCallDatas);
-        bytes32 callsHash = _callsHash(calls);
-        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
-            _deriveBatchTransitionHashes(calls, callsHash);
-        if (ctx.scopeHash != derivedScopeHash) {
-            revert BatchScopeHashMismatch(derivedScopeHash, ctx.scopeHash);
-        }
-        if (ctx.oldValueHash != derivedOldValueHash) {
-            revert BatchOldValueHashMismatch(derivedOldValueHash, ctx.oldValueHash);
-        }
-        if (ctx.newValueHash != derivedNewValueHash) {
-            revert BatchNewValueHashMismatch(derivedNewValueHash, ctx.newValueHash);
-        }
-        // This state exists only inside the non-reentrant atomic initializer;
-        // successful initialization seals, and a failed initialization rolls back.
-        if (genesisInitialized && !_manifest.isSealed) {
-            if (!bootstrapAuthority) {
-                revert InvalidGenesisPlan();
-            }
-        } else {
-            _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
-        }
+        StreamGovernanceScheduling.Prepared memory prepared =
+            StreamGovernanceScheduling.prepare(
+                _admin,
+                _policy,
+                _actionPolicy,
+                _manifest,
+                StreamGovernanceScheduling.Runtime({
+                    owner: owner(),
+                    bootstrapAuthority: genesisBootstrapAuthority,
+                    nonce: _nonce,
+                    pendingCount: _pendingScheduledActionCount,
+                    executing: _executing,
+                    genesisPlanHash: genesisPlanHash,
+                    genesisInitialized: genesisInitialized
+                }),
+                ctx,
+                calls
+            );
+        actionId = prepared.actionId;
         uint256 nonceUsed = _nonce;
-        actionId = _computeActionId(ctx, callsHash, nonceUsed);
-        _validateManifestTailComposition(
-            actionId,
-            msg.sender,
-            ctx.actionClass,
-            calls,
-            !_manifest.isSealed,
-            true,
-            privilegedProposer
-        );
-        StreamGovernanceActionPolicy.validateCalls(
-            _actionPolicy,
-            _manifest.actionPolicyCandidateProfileHash,
-            _manifest.actionPolicyCatalogHash,
-            _manifest.actionPolicyEntryCount,
-            ctx.actionClass,
-            calls,
-            canonicalCallDatas
-        );
-
-        if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            _requireBoundRoleRegistry();
-            StreamGovernanceBootstrap.validateTerminalFreezeGuardians(_manifest.roleRegistry, calls);
-        }
-
         _nonce = nonceUsed + 1;
-
-        GovernanceAction storage action = _actions[actionId];
-        if (action.status != GovernanceActionStatus.NONE) {
-            revert GovernanceActionNotScheduled(actionId);
-        }
-        action.status = GovernanceActionStatus.SCHEDULED;
-        action.actionClass = ctx.actionClass;
-        action.target = calls[0].target;
-        action.value = totalValue;
-        action.selector = calls[0].selector;
-        action.callHash = callsHash;
-        action.scopeHash = ctx.scopeHash;
-        action.oldValueHash = ctx.oldValueHash;
-        action.newValueHash = ctx.newValueHash;
-        action.notBefore = ctx.notBefore;
-        action.expiresAfter = ctx.expiresAfter;
-        action.proposer = msg.sender;
-        action.reasonHash = ctx.reasonHash;
-        action.reasonURI = ctx.reasonURI;
-        action.manifestHash = ctx.manifestHash;
+        StreamGovernanceScheduling.storeAction(_actions[actionId], ctx, calls[0], prepared);
 
         _actionNonces[actionId] = nonceUsed;
         _actionPolicyCatalogHashes[actionId] = _actionPolicy.catalogHash;
-        _callDataPointers[actionId] = callDataPointer;
+        _callDataPointers[actionId] = prepared.callDataPointer;
         _firstCallTransitionHashes[actionId] =
             [calls[0].scopeHash, calls[0].oldValueHash, calls[0].newValueHash];
         _pendingScheduledActionCount += 1;
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
             StreamGovernanceBootstrap.appendTerminalFreeze(
-                _policy, actionId, ctx.notBefore, calls, msg.sender, privilegedProposer
+                _policy, actionId, ctx.notBefore, calls, msg.sender, prepared.privilegedProposer
             );
             bytes32 guardianConfigCommitment =
                 StreamGovernancePolicy.terminalFreezeGuardianConfigCommitment(
@@ -1163,7 +1183,13 @@ contract StreamGovernanceExecutor is
         }
 
         StreamGovernanceBootstrap.emitActionScheduled(
-            actionId, ctx, calls[0].target, calls[0].selector, totalValue, callsHash, nonceUsed
+            actionId,
+            ctx,
+            calls[0].target,
+            calls[0].selector,
+            prepared.totalValue,
+            prepared.callsHash,
+            nonceUsed
         );
         emit GovernanceActionPolicyValidated(
             SCHEMA_VERSION,
@@ -1448,50 +1474,6 @@ contract StreamGovernanceExecutor is
         emit GovernanceActionPolicyValidated(
             SCHEMA_VERSION, actionId, 2, _actionPolicy.candidateProfileHash, currentCatalogHash
         );
-    }
-
-    function _validateCalls(
-        uint8 actionClass,
-        GovernanceCall[] memory calls,
-        bytes[] memory callDatas
-    ) private view returns (uint256) {
-        return StreamGovernanceBootstrap.validateCalls(
-            _policy,
-            address(_manifest.roleRegistry),
-            _manifest.systemManifestSatellite,
-            actionClass,
-            calls,
-            callDatas,
-            this.sealSystemManifestBootstrap.selector
-        );
-    }
-
-    function _validateWindow(uint8 actionClass, uint64 notBefore, uint64 expiresAfter)
-        private
-        view
-    {
-        StreamGovernanceBootstrap.validateActionWindow(actionClass, notBefore, expiresAfter);
-    }
-
-    function _computeActionId(
-        StreamGovernanceBootstrap.ScheduleContext memory ctx,
-        bytes32 callsHash,
-        uint256 nonceUsed
-    ) private view returns (bytes32) {
-        StreamGovernanceBootstrap.ActionIdentity memory identity =
-            StreamGovernanceBootstrap.ActionIdentity({
-                actionClass: ctx.actionClass,
-                callsHash: callsHash,
-                scopeHash: ctx.scopeHash,
-                oldValueHash: ctx.oldValueHash,
-                newValueHash: ctx.newValueHash,
-                nonce: nonceUsed,
-                notBefore: ctx.notBefore,
-                expiresAfter: ctx.expiresAfter,
-                reasonHash: ctx.reasonHash,
-                manifestHash: ctx.manifestHash
-            });
-        return StreamGovernanceBootstrap.governanceActionId(identity);
     }
 
     function _firstSelector(bytes memory callData) private pure returns (bytes4 selector) {

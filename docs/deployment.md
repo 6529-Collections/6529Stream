@@ -310,7 +310,7 @@ retained transcript must replace them with `<redacted>`.
 Preflight from a clean checkout:
 
 ```sh
-forge build --sizes --via-ir --skip test --skip script --force
+forge build --sizes --via-ir --skip test --skip script --force --out out-diagnostics --cache-path cache-diagnostics
 forge test -vvv
 python -m tools.build.test_release_build_artifacts
 python -m tools.build.build_release_artifacts
@@ -506,7 +506,7 @@ protocol surface report inputs are generated from the canonical target-isolated
 only:
 
 ```sh
-forge build --sizes --via-ir --skip test --skip script --force
+forge build --sizes --via-ir --skip test --skip script --force --out out-diagnostics --cache-path cache-diagnostics
 python -m tools.build.test_release_build_artifacts
 python -m tools.build.build_release_artifacts
 python -m tools.build.build_release_artifacts --check

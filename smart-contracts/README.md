@@ -13,7 +13,7 @@ you are integrating.
 | [domains/entropy](domains/entropy/StreamEntropyCoordinator.sol) | Token/scope registration, external randomness requests and final seeds |
 | [domains/metadata](domains/metadata/StreamMetadataRouter.sol) | Collection presentation, token metadata and artwork rendering |
 | [domains/revenue](domains/revenue/StreamSplitFactory.sol) | Immutable split profiles, pull withdrawals, asset policies and revenue assignments |
-| [domains/governance](domains/governance/StreamGovernanceExecutor.sol) | Scheduled governance, roles, one-time genesis setup and deployment discovery |
+| [domains/governance](domains/governance/StreamGovernanceExecutor.sol) | Scheduled governance, roles, one-time genesis setup, deployment discovery and state-export publication |
 | [domains/modules](domains/modules/StreamModuleRegistry.sol) | Canonical registration and eligibility of installed modules |
 | Other `domains/` folders | Finality, preservation, dependencies and records; implementation maturity varies by component |
 | `interfaces/` | Public protocol, external integration and historical interfaces |

@@ -252,10 +252,10 @@ custody, audit and operational evidence remain distinct acceptance requirements.
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 44 retained
-  findings: 4 High and 40 Medium. Thirty rows remain Open (2 High, 28 Medium):
+- The normalized first-party production Slither baseline contains 45 retained
+  findings: 4 High and 41 Medium. Thirty rows remain Open (2 High, 28 Medium):
   zero confirmed gaps, six design-review rows, and 24 pending dispositions.
-  Fourteen rows have narrow False Positive dispositions (2 High, 12 Medium),
+  Fifteen rows have narrow False Positive dispositions (2 High, 13 Medium),
   including the two previously reviewed `StreamSplitWallet` equality rows. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue

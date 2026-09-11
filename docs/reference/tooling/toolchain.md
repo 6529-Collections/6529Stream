@@ -28,17 +28,23 @@ current profile's complete build-info. Keys bind the operating system,
 architecture, pinned Forge/Solc versions, profile, workflow, Foundry settings,
 source/test/script/dependency trees and remapping inputs. The input digest uses
 staged Git paths and blob IDs, including submodule commits, so a same-content
-source rename also invalidates it. There are no fallback keys.
-Documentation or Python-only changes can reuse an exact compilation; Solidity
-test changes invalidate the key along with other compiler inputs.
+source rename also invalidates it. If the exact key is absent, one fallback
+prefix permits the latest cache for the same operating system, architecture,
+Forge/Solc versions, profile and `foundry.toml` content digest. Changing compiler
+settings therefore cannot restore an older configuration's outputs, including
+through the fallback key. Foundry still rebuilds changed sources; a test or
+workflow edit can reuse unrelated compiled output.
 
 Every run still executes its build, tests and current artifact validation.
-Successful compiler outputs are saved before later checks can fail or the
-forced size diagnostic can replace the default output. The current cache is
-saved only after its export validates one matching full compiler input and
-source freshness. Cache hits provide reusable compiler data, not new test or
-release evidence. The canonical target-isolated release builder still runs
-fresh with `--force`; its outputs and receipts are not cached here.
+Successful compiler outputs are saved before later checks; the forced size
+diagnostic uses separate output directories. The current cache is saved only
+after its export validates one matching full compiler input and source freshness.
+If an actual fallback restore leaves mixed incremental build-info and that export
+fails, the job preserves the failure log, performs one forced current-profile
+rebuild, and requires export and check to pass. Fresh builds and exact cache hits
+do not use this retry. Cache data is never test or release evidence. The canonical
+target-isolated release builder still runs fresh with `--force`; its outputs and
+receipts are not cached here.
 
 ## Reproducible Python Audit And Release Toolchain
 

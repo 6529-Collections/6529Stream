@@ -55,6 +55,7 @@ current-stack-check:
 	forge test -vvv
 	$(PYTHON) -m tools.build.test_release_artifacts
 	$(PYTHON) -m tools.deployment.test_current_stack_artifacts
+	$(PYTHON) -m tools.deployment.test_prepare_current_stack_compilation
 	$(PYTHON) -m tools.deployment.test_current_stack_deployment_verification
 	$(PYTHON) -m tools.deployment.test_current_stack_observations
 	$(PYTHON) -m tools.build.check_solidity_formatting

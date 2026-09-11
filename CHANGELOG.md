@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added current-stack ERC-20 fixed-price sales with payer-bound intents,
+  canonical primary-policy commitments, exact allowance settlement and atomic
+  Core minting. Supported primary assignments use fixed collection/default profiles.
+- Added state-export publication on the actual governance Executor, live-role
+  authorization, permissionless challenges, forward supersession and historical
+  reads. Scheduling validation is linked separately to retain runtime headroom.
+- Added local transaction demonstrations with receipt-bound token/request IDs,
+  final metadata notification, split withdrawals and a fresh-transaction VRF
+  adapter callback rehearsal against an explicitly local upstream mock.
+
 - Added focused Core, mint and governance caller interfaces, shared request
   types, and interface compatibility regressions. Added a portable developer
   command for the supported stack and explicit unit, legacy, gas and full suites.
@@ -20,13 +30,19 @@ the release policy in `docs/release-policy.md`.
 - Added committed one-time genesis initialization, real system discovery and
   current-stack tests covering paid mint, auction custody/refunds, withdrawals,
   metadata, transfer/burn, receiver rollback and delayed governance rotation.
-  Normal governance delays remain after genesis. The stack is deployed on
-  Sepolia with a successful paid mint; the real randomness callback and final
-  demonstration are pending subscription funding. This is a development
-  deployment, not an audit or production release.
+  Normal governance delays remain after genesis. An earlier prototype completed
+  a Sepolia paid mint. The corrected, extended source requires a new deployment;
+  its real randomness callback and final demonstration are pending subscription
+  funding. The prototype is historical development evidence, not the current
+  candidate or a production release.
 
 ### Changed
 
+- Reuse compiler caches within the pinned toolchain and profile while retaining
+  unconditional builds, tests and source validation. Mixed current build-info
+  after a fallback restore triggers one fresh build before export validation.
+- Publish writable compilation workspaces only after copying and validation
+  succeed, and reject unreachable governance-policy validation in the source gate.
 - Organized Solidity interfaces by domain, isolated legacy implementations and
   regression tests, and grouped maintenance tools into Python packages. Rewrote
   contributor and integration guides around the current APIs; older examples and

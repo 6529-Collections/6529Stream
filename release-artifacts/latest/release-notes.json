@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:88fbf6f59a3b573fbb906ff4f8dfce749a2a6288536b5101449867b931b42deb",
-      "size_bytes": 167145
+      "sha256": "sha256:b765e275a25b0eff318b6abf85cfd0eb7d4c5fff6012801d79f665e0e938d1a8",
+      "size_bytes": 168324
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:ec2b02de6004db81e52bb1131e388718461bb1443c97158ee8e5224bdd06524b",
+      "sha256": "sha256:34a4596e1d345bb6abd70633c773bea1ae8d5e39e4fe5bb5f98fdefe5624ba80",
       "size_bytes": 34457
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,10 +45,15 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added current-stack ERC-20 fixed-price sales with payer-bound intents, canonical primary-policy commitments, exact allowance settlement and atomic Core minting. Supported primary assignments use fixed collection/default profiles.",
+      "Added state-export publication on the actual governance Executor, live-role authorization, permissionless challenges, forward supersession and historical reads. Scheduling validation is linked separately to retain runtime headroom.",
+      "Added local transaction demonstrations with receipt-bound token/request IDs, final metadata notification, split withdrawals and a fresh-transaction VRF adapter callback rehearsal against an explicitly local upstream mock.",
       "Added focused Core, mint and governance caller interfaces, shared request types, and interface compatibility regressions. Added a portable developer command for the supported stack and explicit unit, legacy, gas and full suites.",
       "Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.",
       "Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.",
-      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The stack is deployed on Sepolia with a successful paid mint; the real randomness callback and final demonstration are pending subscription funding. This is a development deployment, not an audit or production release.",
+      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. An earlier prototype completed a Sepolia paid mint. The corrected, extended source requires a new deployment; its real randomness callback and final demonstration are pending subscription funding. The prototype is historical development evidence, not the current candidate or a production release.",
+      "Reuse compiler caches within the pinned toolchain and profile while retaining unconditional builds, tests and source validation. Mixed current build-info after a fallback restore triggers one fresh build before export validation.",
+      "Publish writable compilation workspaces only after copying and validation succeed, and reject unreachable governance-policy validation in the source gate.",
       "Organized Solidity interfaces by domain, isolated legacy implementations and regression tests, and grouped maintenance tools into Python packages. Rewrote contributor and integration guides around the current APIs; older examples and detailed maintenance instructions now have separate reference sections.",
       "Preserved historical compilation, source-layout and documentation snapshots while refreshing current evidence. Exported interface IDs now follow Solidity's own-selector rules, including the inheritance-only Core aggregate's zero ID.",
       "Build cleanup preserves broadcast receipts and deployment records. Offline release verification binds package initializers and isolates cached first-party modules when validating a materialized release snapshot.",

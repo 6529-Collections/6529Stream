@@ -440,13 +440,13 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
         129_908,
     ),
     Path("tools/security/check_slither_baseline.py"): (
-        "5c05ea6621e60a584e1ea9727884178598120e68c9306fd4cfae0b269cf6b375",
+        "f9f9ba30d144b05769f16f80ebff26216c99b62cb09c06b1acf5ac25ced37e5a",
         49_634,
     ),
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("tools/build/verify_release_artifacts.py"): (
-        "afa0bf7990646ba7e8ea79f70d6b612817b2296e5edaeaa38986e8acf6a69592",
+        "db4d5f2b51f98572f8458041461fa543f757a6a5b95a238713813989adaedc2d",
         179_203,
     ),
 }
@@ -478,6 +478,15 @@ DEFAULT_COVERED_PATHS = [
     Path("tools/deployment/test_current_stack_deployment_verification.py"),
     Path("tools/deployment/export_current_stack_observations.py"),
     Path("tools/deployment/test_current_stack_observations.py"),
+    Path("tools/deployment/prepare_current_stack_compilation.py"),
+    Path("tools/deployment/test_prepare_current_stack_compilation.py"),
+    Path("scripts/run-current-stack.ps1"),
+    Path("scripts/run-current-stack-sepolia.ps1"),
+    Path("scripts/current-stack-local-functions.ps1"),
+    Path("scripts/rehearse-current-stack-vrf.ps1"),
+    Path("scripts/test_current_stack_local.ps1"),
+    Path("scripts/test_current_stack_sepolia.ps1"),
+    Path("script/current/README.md"),
     Path("docs/reference/tooling"),
     Path("requirements-tools.txt"),
     Path("requirements-tools.lock"),

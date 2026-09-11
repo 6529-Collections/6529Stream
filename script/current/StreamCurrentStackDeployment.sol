@@ -10,10 +10,12 @@ import "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
 import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
+import "../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/auctions/StreamEnglishAuctionHouse.sol";
 import "../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
+import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "./StreamCurrentStackPlan.sol";
@@ -25,6 +27,8 @@ import "../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 abstract contract StreamCurrentStackDeployment {
     bytes32 internal constant PHASE = keccak256("current-stack fixed price");
     bytes32 internal constant AUCTION_PHASE = keccak256("current-stack auction");
+    bytes32 internal constant ERC20_PHASE = keccak256("current-stack ERC20 fixed price");
+    bytes32 internal constant PRIMARY_REVENUE_CLASS = keccak256("current primary sale");
     bytes32 internal constant DEPLOYMENT_HASH =
         keccak256("current-stack development deployment v1; unaudited; not release evidence");
     bytes32 internal constant REGISTRY_HASH = keccak256("current-stack development registry v1");
@@ -41,6 +45,8 @@ abstract contract StreamCurrentStackDeployment {
     StreamMintManager internal manager;
     StreamMintLedger internal ledger;
     StreamFixedPriceSaleAdapter internal sale;
+    StreamERC20FixedPriceSaleAdapter internal erc20Sale;
+    StreamRevenueResolver internal primaryRevenue;
     StreamEnglishAuctionHouse internal auction;
     StreamSplitFactory internal factory;
     StreamAssetPolicyRegistry internal assetPolicy;
@@ -92,6 +98,9 @@ abstract contract StreamCurrentStackDeployment {
             keccak256("development artist module")
         );
         sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
+        primaryRevenue = new StreamRevenueResolver(factory);
+        erc20Sale =
+            new StreamERC20FixedPriceSaleAdapter(manager, primaryRevenue, platform, artistRegistry);
         auction = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
         entropy = new StreamEntropyCoordinator(
             address(core),
@@ -105,9 +114,12 @@ abstract contract StreamCurrentStackDeployment {
         bytes memory routerInitcode = bytes.concat(
             type(StreamMetadataRouter).creationCode,
             abi.encode(
-                address(core), address(executor), DEPLOYMENT_HASH,
+                address(core),
+                address(executor),
+                DEPLOYMENT_HASH,
                 "urn:6529stream:development:metadata",
-                keccak256("development metadata module"), artistRegistry
+                keccak256("development metadata module"),
+                artistRegistry
             )
         );
         address deployedRouter;
@@ -130,13 +142,19 @@ abstract contract StreamCurrentStackDeployment {
         }
         _configureMintPhase(PHASE, address(sale));
         _configureMintPhase(AUCTION_PHASE, address(auction));
+        _configureMintPhase(ERC20_PHASE, address(erc20Sale));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(protocol, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("development split"));
+        primaryRevenue.setPrimaryProfileAssignment(
+            PRIMARY_REVENUE_CLASS, 1, 1, profile, keccak256("development ERC20 primary assignment")
+        );
         ledger.transferOwnership(address(executor));
         manager.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
+        erc20Sale.transferOwnership(address(executor));
+        primaryRevenue.transferOwnership(address(executor));
         auction.transferOwnership(address(executor));
         assetPolicy.transferOwnership(address(executor));
         _initializeProductGenesis();
@@ -257,7 +275,7 @@ abstract contract StreamCurrentStackDeployment {
     }
 
     function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
-        records = new StreamModuleRegistration[](8);
+        records = new StreamModuleRegistration[](9);
         records[0] = _record(
             address(registry),
             keccak256("MODULE_REGISTRY"),
@@ -306,11 +324,20 @@ abstract contract StreamCurrentStackDeployment {
             type(IStreamCollectionArtistRegistry).interfaceId,
             keccak256("development artist module")
         );
+        records[8] = _record(
+            address(executor),
+            keccak256("GOVERNANCE_LAYER"),
+            type(IStreamStateExportPublisher).interfaceId,
+            keccak256("development state export publisher")
+        );
     }
 
     function _pointerType(bytes32 moduleType) private pure returns (bytes32) {
         if (moduleType == 0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6) {
             return keccak256("SYSTEM_MANIFEST");
+        }
+        if (moduleType == keccak256("GOVERNANCE_LAYER")) {
+            return keccak256("STATE_EXPORT_PUBLISHER");
         }
         if (moduleType == keccak256("REVENUE_RESOLVER")) return keccak256("ROYALTY_RESOLVER");
         return moduleType;
@@ -423,6 +450,7 @@ abstract contract StreamCurrentStackDeployment {
         modules.mintLedger = address(ledger);
         modules.streamAdminsOrGovernance = address(executor);
         modules.moduleRegistry = address(registry);
+        modules.stateExportPublisher = address(executor);
         (batches[3].calls[1], batches[3].callDatas[1]) =
             StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
@@ -498,7 +526,7 @@ abstract contract StreamCurrentStackDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 52 : 53);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 59 : 60);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -568,6 +596,17 @@ abstract contract StreamCurrentStackDeployment {
                 1, address(provider), StreamEntropyProviderVRF.updateSubscription.selector
             );
         }
+        rows[i++] = _operatingPolicy(address(erc20Sale), erc20Sale.registerSale.selector);
+        rows[i++] = _operatingPolicy(address(erc20Sale), erc20Sale.cancelSale.selector);
+        rows[i++] = _operatingPolicy(address(erc20Sale), erc20Sale.setPlatformSigner.selector);
+        rows[i++] = _operatingPolicy(address(erc20Sale), erc20Sale.setPaused.selector);
+        rows[i++] = _operatingPolicy(address(erc20Sale), erc20Sale.raiseSignatureGasLimit.selector);
+        rows[i++] = _operatingPolicy(
+            address(primaryRevenue), primaryRevenue.setPrimaryProfileAssignment.selector
+        );
+        rows[i++] = _operatingPolicy(
+            2, address(primaryRevenue), primaryRevenue.freezePrimaryAssignment.selector
+        );
         // Artist nomination and metadata/entropy configuration are also collected from genesis.
         assert(i == rows.length);
     }

@@ -9,8 +9,8 @@ document conflicts with a specification home, the specification wins.
 6529Stream is pre-audit and not production-ready.
 
 The working permanent-Core product is documented in [current stack](current-stack.md):
-signed native sales, English auctions, accepted attribution, split withdrawals,
-entropy and metadata. Use the [current developer commands](tooling.md) to exercise
+signed native and fixed-profile ERC-20 sales, English auctions, accepted attribution,
+split withdrawals, entropy, metadata and governance-hosted state exports. Use the [current developer commands](tooling.md) to exercise
 that implementation. Broader specification and release acceptance remain separate.
 
 The historical Gate A regression/evidence baseline records:
@@ -29,7 +29,7 @@ The historical Gate A regression/evidence baseline records:
   breaking-change approval references before review.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
-- `forge build --sizes --via-ir --skip test --skip script --force` remains an
+- `forge build --sizes --via-ir --skip test --skip script --force --out out-diagnostics --cache-path cache-diagnostics` remains an
   aggregate diagnostic and warning-collection build. Canonical release
   bytecode instead comes from `python -m tools.build.build_release_artifacts`,
   which compiles each configured source and import closure in isolation,
@@ -513,10 +513,10 @@ The historical Gate A regression/evidence baseline records:
 - `tools/security/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
-  dedicated pinned exact-drift analysis in CI. The current set is 44 retained
-  rows (4 High, 40 Medium): 30 remain Open (2 High, 28 Medium), comprising zero
+  dedicated pinned exact-drift analysis in CI. The current set is 45 retained
+  rows (4 High, 41 Medium): 30 remain Open (2 High, 28 Medium), comprising zero
   confirmed gaps, six design-review rows, and 24 pending dispositions.
-  Fourteen rows have narrow False Positive dispositions (2 High, 12 Medium),
+  Fifteen rows have narrow False Positive dispositions (2 High, 13 Medium),
   including the two previously reviewed `StreamSplitWallet` equality rows. The remaining Open set is a release
   blocker and the dispositions do not promote maturity.
   Bounded assembly made the Governance Executor's proposal-selected

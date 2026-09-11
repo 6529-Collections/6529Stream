@@ -15,6 +15,7 @@ is retained for historical modules and regression fixtures.
 | `StreamMintManager` | Phase policy, permitted executors, counter configuration, mint execution | Mint execution, reads, administration |
 | `StreamMintLedger` | Shared counters and consumed authorizations/operation roots | Manager-authorized writer |
 | `StreamFixedPriceSaleAdapter` | Artist/platform consent and native fixed-price purchase | `SaleAuthorization` and `buy` |
+| `StreamERC20FixedPriceSaleAdapter` | Registered sale terms, payer intent, exact token settlement and atomic mint | ERC-20 purchase and payment-intent interfaces |
 | `StreamEnglishAuctionHouse` | Auction NFT custody, bids, end time, refunds, settlement | `AuctionAuthorization`, bid/settlement API |
 | `StreamCollectionArtistRegistry` | Nomination and permanent accepted attribution for a collection | Artist acceptance and attribution reads |
 | `StreamSplitFactory` / `StreamSplitWallet` | Canonical immutable split profile and pull-payment shares | Profile discovery and asset release |
@@ -22,7 +23,9 @@ is retained for historical modules and regression fixtures.
 | `StreamEntropyProviderVRF` | Chainlink request binding and retained result delivery | Provider request/status/callback API |
 | `StreamMetadataRouter` | Collection presentation, on-chain artwork, metadata composition | Core-routed metadata reads |
 | `StreamRoyaltyResolver` | Collection/default ERC-2981 disclosure policy | Core-routed royalty reads |
+| `StreamRevenueResolver` | Primary collection/default split assignments for ERC-20 sales | Primary policy and assignment reads |
 | `StreamGovernanceExecutor` / `StreamRoleRegistry` | Delayed actions, per-call context, root and guardian authority | Governance execution, administration, reads |
+| Executor-hosted state exports | Recent block commitments, challenges and immutable publication history | Separate publisher reads, operations and history interfaces |
 | `StreamModuleRegistry` | Exact module records, code hashes, interfaces, eligibility | Canonical module discovery |
 | `StreamSystemManifest` | Published commitments and installed-module discovery | Manifest reads and governed publication |
 
@@ -56,12 +59,18 @@ flowchart LR
   Recipients[Split recipients] --> Wallet
 ```
 
-A fixed-price purchase checks both signatures and current policy, consumes its
+A native fixed-price purchase checks both signatures and current policy, consumes its
 authorization, and funds the signed split wallet before manager → ledger → Core
 minting. A mint or receiver failure reverts the entire transaction, including
 payment and replay state. An auction mints into auction-house custody first;
 bids escrow ETH, prior bids become withdrawable refunds, and final settlement
 funds the wallet and transfers the NFT atomically.
+
+An ERC-20 purchase binds an immutable sale record and the live primary split
+policy. The adapter itself pulls the payer's allowance; a relayer needs a signed
+payer intent in addition to artist/platform consent. It previews manager mint
+identities, checks exact token balance changes, and compares the minted result
+before committing the transaction. See [ERC-20 sales](integrations/erc20-sales.md).
 
 Minted supply is lifetime issuance. Burning a token does not replenish that
 budget. Token IDs and collection serials remain recorded, and each token keeps
@@ -89,6 +98,14 @@ different authority: the nominated artist accepts directly or by signature;
 the current attribution is permanent once accepted. It is not the full Artist
 V2 recovery/lifecycle system.
 
+State-export publication is an operational role, separate from proposing or
+executing governance. The actual Executor hosts the history and emits its
+events; a linked library keeps the runtime within the deployment limit. Every
+write checks the Core publisher pointer and cannot run inside an executing
+governance batch. Publication and supersession additionally require the live
+export role. Challenges are permissionless; supersession retains the original
+claim. See [state exports](integrations/state-exports.md).
+
 ## Entropy and metadata
 
 Core registers minted token identity with its coordinator. A request binds
@@ -110,7 +127,9 @@ must not be presented as proof that final metadata is absent.
 
 ## Value and custody boundaries
 
-- The fixed-price payer is the signed caller and sends exactly the signed price.
+- A native fixed-price payer is the signed caller and sends exactly the signed price.
+- An ERC-20 payer approves the adapter; a relayed purchase additionally requires
+  its signed intent. Recipient, sale terms and exact token amount remain bound.
 - An auction bidder owns its refund credit; its NFT delivery recipient can differ.
 - Split recipients own wallet release rights. Anyone can release to the account
   itself; only that account may redirect its share to another recipient.
@@ -150,8 +169,8 @@ Current integration tests use actual protocol contracts and a controlled
 external provider. Domain tests isolate behavior; legacy regressions preserve
 earlier modules. See [the test guide](../test/README.md) for their distinct scopes.
 
-The working native sale/auction stack does not establish full-v1 typed primary
-settlement, complete artist lifecycle/recovery, every optional module, additional
-payment modes, or external audit completion. [Known blockers](known-blockers.md),
+The working sale/auction stack and publisher do not establish full-v1 typed primary
+settlement, complete artist lifecycle/recovery, archival reconstruction, every
+optional module, broader payment modes, or external audit completion. [Known blockers](known-blockers.md),
 the [conformance matrix](launch-conformance-matrix.md), and
 [backlog](../ops/EXECUTION_BACKLOG.md) retain those requirements.

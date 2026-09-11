@@ -7,6 +7,7 @@ import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
 import "../../smart-contracts/domains/governance/StreamSystemManifest.sol";
+import "../../smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol";
 import "../../smart-contracts/domains/mint/StreamMintManager.sol";
 import "../../smart-contracts/domains/mint/StreamMintLedger.sol";
 import "../../smart-contracts/domains/mint/StreamFixedPriceSaleAdapter.sol";
@@ -116,6 +117,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("fixture split"));
+        _configureAdditionalProducts();
         ledger.transferOwnership(address(executor));
         manager.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
@@ -129,7 +131,21 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         artists.acceptArtist(1, attribution.nominationHash, 0, deadline, abi.encodePacked(r, s, v));
     }
 
-    function _configureMintPhase(bytes32 phase, address phaseExecutor) private {
+    /// @dev Runs after product/profile construction, before ownership transfer and genesis sealing.
+    ///      Derived fixtures own transferring any added product authority to executor.
+    function _configureAdditionalProducts() internal virtual { }
+
+    /// @dev Additional exact-target operating selectors are included in the committed genesis catalog.
+    function _additionalOperatingPolicies()
+        internal
+        view
+        virtual
+        returns (GovernanceActionPolicyEntry[] memory)
+    {
+        return new GovernanceActionPolicyEntry[](0);
+    }
+
+    function _configureMintPhase(bytes32 phase, address phaseExecutor) internal {
         bytes32[] memory counters = new bytes32[](1);
         counters[0] = keccak256("supply");
         IStreamMintManager.MintCounterConfig[] memory configs =
@@ -231,7 +247,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
     }
 
     function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
-        records = new StreamModuleRegistration[](8);
+        records = new StreamModuleRegistration[](9);
         records[0] = _record(
             address(registry),
             keccak256("MODULE_REGISTRY"),
@@ -280,6 +296,12 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             type(IStreamCollectionArtistRegistry).interfaceId,
             keccak256("fixture artist module")
         );
+        records[8] = _record(
+            address(executor),
+            keccak256("GOVERNANCE_LAYER"),
+            type(IStreamStateExportPublisher).interfaceId,
+            keccak256("fixture state export publisher")
+        );
     }
 
     function _pointerType(bytes32 moduleType) private pure returns (bytes32) {
@@ -287,6 +309,9 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
             return keccak256("SYSTEM_MANIFEST");
         }
         if (moduleType == keccak256("REVENUE_RESOLVER")) return keccak256("ROYALTY_RESOLVER");
+        if (moduleType == keccak256("GOVERNANCE_LAYER")) {
+            return keccak256("STATE_EXPORT_PUBLISHER");
+        }
         return moduleType;
     }
 
@@ -395,6 +420,7 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         modules.mintLedger = address(ledger);
         modules.streamAdminsOrGovernance = address(executor);
         modules.moduleRegistry = address(registry);
+        modules.stateExportPublisher = address(executor);
         (batches[3].calls[1], batches[3].callDatas[1]) =
             StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
@@ -468,7 +494,8 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](52);
+        GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
+        rows = new GovernanceActionPolicyEntry[](52 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -536,6 +563,9 @@ abstract contract StreamCurrentStackFixture is CharacterizationTestBase {
         rows[i++] =
             _operatingPolicy(2, address(manifest), manifest.publishStreamSystemManifest.selector);
         // Artist nomination and metadata/entropy configuration are also collected from genesis.
+        for (uint256 j; j < additional.length; ++j) {
+            rows[i++] = additional[j];
+        }
         assert(i == rows.length);
     }
 

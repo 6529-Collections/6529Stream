@@ -328,6 +328,11 @@
       "interface_id": "0xd7c2abe3"
     },
     {
+      "name": "IStreamERC20FixedPriceSaleAdapter",
+      "source": "smart-contracts/interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol",
+      "interface_id": "0x55c94d74"
+    },
+    {
       "name": "IStreamEnglishAuctionHouse",
       "source": "smart-contracts/interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol",
       "interface_id": "0x37ee10c1"
@@ -448,6 +453,11 @@
       "interface_id": "0xefc33fae"
     },
     {
+      "name": "IStreamPaymentIntentVerifier",
+      "source": "smart-contracts/interfaces/stream/revenue/IStreamPaymentIntentVerifier.sol",
+      "interface_id": "0x88136d5a"
+    },
+    {
       "name": "IStreamPreservationRecords",
       "source": "smart-contracts/interfaces/stream/preservation/IStreamPreservationRecords.sol",
       "interface_id": "0xa30cfc7c"
@@ -491,6 +501,21 @@
       "name": "IStreamSplitWallet",
       "source": "smart-contracts/interfaces/stream/revenue/IStreamSplitWallet.sol",
       "interface_id": "0x0ea5f02c"
+    },
+    {
+      "name": "IStreamStateExportHistory",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportHistory.sol",
+      "interface_id": "0x18ac5014"
+    },
+    {
+      "name": "IStreamStateExportOperations",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportOperations.sol",
+      "interface_id": "0xf2a72cbb"
+    },
+    {
+      "name": "IStreamStateExportPublisher",
+      "source": "smart-contracts/interfaces/stream/governance/IStreamStateExportPublisher.sol",
+      "interface_id": "0x77faad4f"
     },
     {
       "name": "IStreamSystemManifest",
