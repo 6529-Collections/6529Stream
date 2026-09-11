@@ -1,566 +1,391 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../interfaces/standards/IERC20.sol";
-
-import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
+import "./StreamSettlementContext.sol";
+import "./StreamPrimarySettlementHash.sol";
+import "../mint/StreamSaleTemplate.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
-import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "../../vendor/openzeppelin/ERC165.sol";
 
-/// @notice Outside-Core adapter for recording official primary-sale settlement evidence.
-contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, ReentrancyGuard {
-    bytes32 private constant _SETTLEMENT_KEY_DOMAIN =
-        keccak256("6529STREAM_PRIMARY_SETTLEMENT_KEY_V1");
-    bytes32 private constant _OFFICIAL_SETTLED_DOMAIN =
-        keccak256("6529STREAM_OFFICIAL_PRIMARY_SETTLED_V1");
-    bytes32 private constant _SALE_CONTEXT_DOMAIN = keccak256("6529STREAM_PRIMARY_SALE_CONTEXT_V1");
-    uint8 private constant _ASSET_STATUS_ACTIVE = 1;
-    uint256 private constant _ASSET_POLICY_GAS_LIMIT = 30_000;
-    uint256 private constant _ASSET_POLICY_PARENT_GAS_MIN = 31_000;
-
-    bytes32 public constant override PRIMARY_POLICY_DOMAIN = keccak256("STREAM_PRIMARY_POLICY_V1");
-    uint8 public constant override POLICY_MODE_STRICT_MATCH = 0;
-    uint8 public constant override POLICY_MODE_ALLOW_CURRENT = 1;
-
-    IStreamRevenueResolver public immutable override revenueResolver;
-    IStreamSplitFactory public immutable splitFactory;
-    IStreamAssetPolicyRegistry public immutable assetPolicyRegistry;
-
-    mapping(address => bool) public override settlementCaller;
+/// @notice Universal official recorder's first ERC20 single-step profile.
+/// @dev The registered sale adapter calls directly. Only its immutable bound contract20 funds
+///      this recorder. No owner, caller allowlist, payer allowance or arbitrary transfer route.
+contract StreamPrimarySaleSettlement is
+    IStreamPrimarySaleSettlement,
+    StreamSettlementContext,
+    ReentrancyGuard,
+    ERC165
+{
+    bytes32 private constant _CLASS = keccak256("PRIMARY_SALE");
+    bytes32 private constant _TOTAL = keccak256("6529STREAM_OFFICIAL_PRIMARY_SETTLED_V1");
+    IStreamRevenueEscrow public immutable override revenueEscrow;
+    bytes32 public immutable escrowCodeHash;
+    bytes32 public immutable walletCodeHash;
     mapping(bytes32 => bool) public override settlementConsumed;
+    mapping(bytes32 => StreamPrimarySettlementTypes.PrimarySettlementResult) private _results;
     mapping(bytes32 => uint256) private _officialSettled;
     mapping(address => uint256) public override totalOfficialSettled;
 
-    struct SaleResolution {
-        bytes32 profileId;
-        address wallet;
-        uint8 assignmentType;
+    struct ContextEventData {
+        uint16 schemaVersion;
+        address settlementCaller;
+        bytes32 settlementId;
+        uint8 policyMode;
+        uint256 collectionId;
+        uint256 tokenId;
+        bytes32 operationRoot;
+        bytes32 operationId;
+        uint256 saleNonce;
+        address poster;
+        address beneficiary;
         bytes32 templateId;
-        bytes32 assignmentHash;
-        bytes32 resolvedPolicyHash;
+    }
+    bytes32 private constant _CONTEXT_EVENT = keccak256(
+        "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,uint16,address,bytes32,uint8,uint256,uint256,bytes32,bytes32,uint256,address,address,bytes32)"
+    );
+
+    constructor(IStreamRevenueResolver resolver, address registry, IStreamRevenueEscrow escrow)
+        StreamSettlementContext(resolver, registry)
+    {
+        if (
+            !StreamSettlementAdmission.isContract(address(escrow))
+                || _read(address(escrow), abi.encodeWithSignature("splitFactory()"), gasleft())
+                    != uint256(uint160(address(splitFactory)))
+                || _read(
+                        address(escrow), abi.encodeWithSignature("assetPolicyRegistry()"), gasleft()
+                    ) != uint256(uint160(address(assetPolicyRegistry)))
+                || _read(address(escrow), abi.encodeWithSignature("factoryCodeHash()"), gasleft())
+                    != uint256(factoryCodeHash)
+                || escrow.governanceAuthority() != splitFactory.governanceAuthority()
+        ) revert InvalidSettlementContext(address(escrow));
+        revenueEscrow = escrow;
+        escrowCodeHash = address(escrow).codehash;
+        walletCodeHash = splitFactory.splitWalletRuntimeCodeHash();
+        if (
+            _read(address(escrow), abi.encodeWithSignature("walletCodeHash()"), gasleft())
+                != uint256(walletCodeHash)
+        ) {
+            revert InvalidSettlementContext(address(escrow));
+        }
     }
 
-    constructor(IStreamRevenueResolver revenueResolver_) {
-        if (address(revenueResolver_).code.length == 0) {
-            revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-        }
-        try revenueResolver_.isStreamRevenueResolver() returns (bool ok) {
-            if (!ok) {
-                revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-            }
-        } catch {
-            revert PrimaryAssignmentMissing(bytes32(0), 0, 0);
-        }
-
-        IStreamSplitFactory splitFactory_ = IStreamSplitFactory(revenueResolver_.splitFactory());
-        if (address(splitFactory_).code.length == 0) {
-            revert UnverifiedSplitWallet(bytes32(0), address(0));
-        }
-        IStreamAssetPolicyRegistry assetPolicyRegistry_ = splitFactory_.assetPolicyRegistry();
-        if (address(assetPolicyRegistry_).code.length == 0) {
-            revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-        }
-        try assetPolicyRegistry_.ASSET_STATUS_ACTIVE() returns (uint8 activeStatus) {
-            if (activeStatus != _ASSET_STATUS_ACTIVE) {
-                revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-            }
-        } catch {
-            revert AssetPolicyReadFailed(address(assetPolicyRegistry_), address(0));
-        }
-
-        revenueResolver = revenueResolver_;
-        splitFactory = splitFactory_;
-        assetPolicyRegistry = assetPolicyRegistry_;
-    }
-
-    /// @notice Returns true for deployment validation.
     function isStreamPrimarySaleSettlement() external pure override returns (bool) {
         return true;
     }
 
-    /// @notice Enables or disables a settlement caller.
-    function setSettlementCaller(address caller, bool enabled) external override onlyOwner {
-        if (caller == address(0)) {
-            revert InvalidSettlementCaller(caller);
-        }
-        settlementCaller[caller] = enabled;
-        emit SettlementCallerUpdated(caller, enabled, msg.sender);
+    function supportsInterface(bytes4 id) public view override returns (bool) {
+        return id == type(IStreamPrimarySaleSettlement).interfaceId || super.supportsInterface(id);
     }
 
-    /// @notice Settles a native ETH primary sale into the resolved split wallet.
-    function settleNativePrimarySale(PrimarySale calldata sale)
-        external
-        payable
+    function settlementKey(address saleAdapter, bytes32 executionId)
+        public
+        view
         override
-        nonReentrant
-        returns (bytes32 key, bytes32 profileId, address wallet)
+        returns (bytes32)
     {
-        _requireSettlementCaller();
-        _validateSale(sale);
-        if (msg.value != sale.amount) {
-            revert IncorrectNativeValue(sale.amount, msg.value);
-        }
-        key = _settlementKey(sale);
-        _requireSettlementUnconsumed(key);
-        SaleResolution memory resolution = _resolveSale(sale);
-        _consumeSettlementKey(key);
-        profileId = resolution.profileId;
-        wallet = resolution.wallet;
-
-        (bool success,) = payable(wallet).call{ value: sale.amount }("");
-        if (!success) {
-            revert NativeTransferFailed(wallet, sale.amount);
-        }
-
-        _recordOfficialSettlement(key, sale, address(0), resolution);
+        return StreamPrimarySettlementHash.settlementKey(address(this), saleAdapter, executionId);
     }
 
-    /// @notice Settles an approved standard ERC-20 primary sale into the resolved split wallet.
-    function settleERC20PrimarySale(PrimarySale calldata sale, address asset)
+    function settlementResult(bytes32 key)
         external
+        view
         override
-        nonReentrant
-        returns (bytes32 key, bytes32 profileId, address wallet)
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory)
     {
-        _requireSettlementCaller();
-        _validateSale(sale);
-        _requireActiveAsset(asset);
-        key = _settlementKey(sale);
-        _requireSettlementUnconsumed(key);
-        SaleResolution memory resolution = _resolveSale(sale);
-        _consumeSettlementKey(key);
-        profileId = resolution.profileId;
-        wallet = resolution.wallet;
-
-        _transferFromERC20(asset, sale.payer, address(this), sale.amount);
-        _transferERC20(asset, address(this), wallet, sale.amount);
-
-        _recordOfficialSettlement(key, sale, asset, resolution);
+        return _results[key];
     }
 
-    /// @notice Computes the consumed settlement key for a sale context.
-    function settlementKey(PrimarySale calldata sale) external view override returns (bytes32) {
-        return _settlementKey(sale);
-    }
-
-    /// @notice Computes the resolved primary policy hash for explicit settlement inputs.
-    function resolvedPrimaryPolicyHash(
-        bytes32 revenueClass,
-        uint256 collectionId,
-        uint256 tokenId,
-        bytes32 templateId,
-        bytes32 profileId,
-        address wallet,
-        bytes32 assignmentHash
-    ) external view override returns (bytes32) {
-        return _resolvedPrimaryPolicyHash(
-            revenueClass, collectionId, tokenId, templateId, profileId, wallet, assignmentHash
-        );
-    }
-
-    /// @notice Returns official primary revenue settled for a wallet/profile/revenue class/asset.
     function officialSettled(bytes32 revenueClass, bytes32 profileId, address wallet, address asset)
         external
         view
         override
         returns (uint256)
     {
-        return _officialSettled[_officialSettledKey(revenueClass, profileId, wallet, asset)];
+        return _officialSettled[_totalKey(revenueClass, profileId, wallet, asset)];
     }
 
-    function _requireSettlementCaller() private view {
-        if (!settlementCaller[msg.sender]) {
-            revert UnauthorizedSettlementCaller(msg.sender);
-        }
-    }
-
-    function _validateSale(PrimarySale calldata sale) private pure {
-        if (
-            sale.settlementId == bytes32(0) || sale.revenueClass == bytes32(0)
-                || sale.expectedPolicyHash == bytes32(0) || sale.payer == address(0)
-                || sale.amount == 0
-        ) {
-            revert InvalidPrimarySale(sale.settlementId);
-        }
-        if (
-            sale.policyMode != POLICY_MODE_STRICT_MATCH
-                && sale.policyMode != POLICY_MODE_ALLOW_CURRENT
-        ) {
-            revert InvalidPolicyMode(sale.policyMode);
-        }
-    }
-
-    function _requireSettlementUnconsumed(bytes32 key) private view {
-        if (settlementConsumed[key]) {
-            revert SettlementAlreadyConsumed(key);
-        }
-    }
-
-    function _consumeSettlementKey(bytes32 key) private {
-        settlementConsumed[key] = true;
-    }
-
-    function _resolveSale(PrimarySale calldata sale)
-        private
-        returns (SaleResolution memory resolution)
+    function settleERC20PrimarySaleFromAdapter(
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate calldata candidate
+    )
+        external
+        override
+        nonReentrant
+        returns (StreamPrimarySettlementTypes.PrimarySettlementResult memory result)
     {
-        IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
-            revenueResolver.resolvePrimaryAssignment(
-                sale.collectionId, sale.tokenId, sale.revenueClass
-            );
-        if (!assignment.exists) {
-            revert PrimaryAssignmentMissing(sale.revenueClass, sale.collectionId, sale.tokenId);
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c = candidate;
+        _validate(paymentAdapter, c);
+        bytes32 key = settlementKey(c.saleAdapter, c.executionBinding.executionId);
+        if (settlementConsumed[key]) revert SettlementAlreadyConsumed(key);
+        StreamSaleTemplate.Selection memory rights = _resolve(c);
+        StreamSaleTemplate.materialize(revenueResolver, c.sale.collectionId, rights);
+        _requireWallet(rights);
+        settlementConsumed[key] = true;
+        uint256 cap = _gas(_DEPOSIT_GAS);
+        uint256 original = _balance(c.asset, address(this), cap);
+        bytes32 commitment =
+            StreamPrimarySettlementHash.candidateCommitment(paymentAdapter, address(this), c);
+        IStreamERC20PrimarySettlementAdapter(paymentAdapter)
+            .fundERC20PrimarySale(commitment, key, c.asset, c.sale.amount);
+        if (_balance(c.asset, address(this), cap) != original + c.sale.amount) {
+            revert SettlementAmountMismatch(c.asset);
         }
-
-        if (assignment.assignmentType == revenueResolver.ASSIGNMENT_TYPE_PROFILE()) {
-            resolution.profileId = assignment.profileId;
-            resolution.wallet = splitFactory.walletFor(resolution.profileId);
-            if (!splitFactory.splitWalletExists(resolution.profileId)) {
-                revert UnverifiedSplitWallet(resolution.profileId, resolution.wallet);
-            }
-        } else if (assignment.assignmentType == revenueResolver.ASSIGNMENT_TYPE_TEMPLATE()) {
-            (resolution.profileId, resolution.wallet,) =
-                revenueResolver.materializePrimaryProfile(assignment.templateId, sale.poster);
-            resolution.templateId = assignment.templateId;
-            address expectedWallet = splitFactory.walletFor(resolution.profileId);
-            if (
-                resolution.wallet != expectedWallet
-                    || !splitFactory.splitWalletExists(resolution.profileId)
-            ) {
-                revert UnverifiedSplitWallet(resolution.profileId, resolution.wallet);
-            }
-        } else {
-            revert PrimaryAssignmentMissing(sale.revenueClass, sale.collectionId, sale.tokenId);
+        _requireContext();
+        _requireActive(c.asset);
+        StreamSettlementAdmission.requireAdmission(moduleRegistry, paymentAdapter, c);
+        _requireCurrent(c, rights);
+        bool escrowed = _route(c, rights, cap);
+        if (_balance(c.asset, address(this), cap) != original) {
+            revert SettlementAmountMismatch(c.asset);
         }
-
-        resolution.assignmentType = assignment.assignmentType;
-        resolution.assignmentHash = assignment.assignmentHash;
-        resolution.resolvedPolicyHash = _resolvedPrimaryPolicyHash(
-            sale.revenueClass,
-            sale.collectionId,
-            sale.tokenId,
-            resolution.templateId,
-            resolution.profileId,
-            resolution.wallet,
-            assignment.assignmentHash
+        _requireContext();
+        _requireActive(c.asset);
+        StreamSettlementAdmission.requireAdmission(moduleRegistry, paymentAdapter, c);
+        _requireCurrent(c, rights);
+        result = StreamPrimarySettlementTypes.PrimarySettlementResult(
+            commitment,
+            key,
+            rights.profileId,
+            rights.wallet,
+            c.asset,
+            c.sale.amount,
+            c.executor,
+            c.executionBinding.executionId,
+            escrowed,
+            c.operationIdentityCommitment,
+            c.currentPolicyHash,
+            c.boundPolicyHash
         );
+        _results[key] = result;
+        _officialSettled[
+            _totalKey(c.sale.revenueClass, rights.profileId, rights.wallet, c.asset)
+        ] += c.sale.amount;
+        totalOfficialSettled[c.asset] += c.sale.amount;
+        _emit(c, result, paymentAdapter);
+    }
+
+    function _validate(
+        address paymentAdapter,
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
+    ) private view {
         if (
-            sale.policyMode == POLICY_MODE_STRICT_MATCH
-                && resolution.resolvedPolicyHash != sale.expectedPolicyHash
+            msg.sender != c.saleAdapter || c.saleAdapter == address(0) || c.executor == address(0)
+                || c.sale.settlementId == 0 || c.sale.revenueClass != _CLASS
+                || c.sale.policyMode != 0 || c.sale.collectionId == 0 || c.sale.tokenId != 0
+                || c.sale.saleNonce == 0 || c.sale.payer == address(0)
+                || c.sale.payer == address(this) || c.sale.payer == paymentAdapter
+                || c.sale.payer == c.rights.wallet || c.sale.payer == address(revenueEscrow)
+                || c.sale.beneficiary == address(0) || c.sale.amount == 0
+                || c.sale.expectedPrimaryPolicyHash == 0 || c.orchestrationOrder != 1
+                || c.executionBinding.authorityMode != 1 || c.executionBinding.executionNonce == 0
+                || c.executionBinding.saleAuthorizationDigest == 0
+                || c.operationIdentityCommitment == 0 || c.operationId == 0
+                || c.currentPolicyHash == 0 || c.boundPolicyHash == 0 || c.saleExecutionHash == 0
+                || c.executionBinding.executionId != StreamPrimarySettlementHash.executionId(c)
         ) {
-            revert PrimaryPolicyHashMismatch(sale.expectedPolicyHash, resolution.resolvedPolicyHash);
+            revert InvalidPrimarySale();
+        }
+        _requireContext();
+        _requireActive(c.asset);
+        StreamSettlementAdmission.requireAdmission(moduleRegistry, paymentAdapter, c);
+        if (
+            _read(paymentAdapter, abi.encodeWithSignature("primarySaleSettlement()"), gasleft())
+                    != uint256(uint160(address(this)))
+                || _read(paymentAdapter, abi.encodeWithSignature("core()"), gasleft())
+                    != uint256(uint160(core))
+                || _read(paymentAdapter, abi.encodeWithSignature("moduleRegistry()"), gasleft())
+                    != uint256(uint160(moduleRegistry))
+                || _read(paymentAdapter, abi.encodeWithSignature("revenueResolver()"), gasleft())
+                    != uint256(uint160(address(revenueResolver)))
+                || _read(
+                        c.saleAdapter, abi.encodeWithSignature("primarySaleSettlement()"), gasleft()
+                    ) != uint256(uint160(address(this)))
+                || _read(c.saleAdapter, abi.encodeWithSignature("core()"), gasleft())
+                    != uint256(uint160(core))
+                || _read(c.saleAdapter, abi.encodeWithSignature("mintManager()"), gasleft())
+                    != uint256(uint160(c.mintManager))
+        ) {
+            revert PrimarySettlementPaymentBindingInvalid(paymentAdapter);
         }
     }
 
-    function _recordOfficialSettlement(
-        bytes32 key,
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution
-    ) private {
-        bytes32 totalsKey = _officialSettledKey(
-            sale.revenueClass, resolution.profileId, resolution.wallet, asset
-        );
-        _officialSettled[totalsKey] += sale.amount;
-        totalOfficialSettled[asset] += sale.amount;
-        bool policyDrift = sale.expectedPolicyHash != resolution.resolvedPolicyHash;
-        bytes32 contextHash = _saleContextHash(sale, asset, resolution);
-
-        _emitPrimaryRevenueSettled(key, sale, asset, resolution, contextHash, policyDrift);
-        _emitPrimaryRevenueSettlementContext(key, sale, resolution.profileId, resolution.templateId);
-        _emitPrimaryRevenueSettlementPolicy(key, sale, resolution);
-    }
-
-    function _emitPrimaryRevenueSettled(
-        bytes32 key,
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution,
-        bytes32 contextHash,
-        bool policyDrift
-    ) private {
-        emit PrimaryRevenueSettled(
-            key,
-            sale.revenueClass,
-            resolution.profileId,
-            resolution.wallet,
-            asset,
-            sale.payer,
-            sale.amount,
-            contextHash,
-            policyDrift,
-            resolution.assignmentType
-        );
-    }
-
-    function _emitPrimaryRevenueSettlementContext(
-        bytes32 key,
-        PrimarySale calldata sale,
-        bytes32 profileId,
-        bytes32 templateId
-    ) private {
-        emit PrimaryRevenueSettlementContext(
-            key,
-            sale.revenueClass,
-            profileId,
-            msg.sender,
-            sale.settlementId,
-            sale.policyMode,
-            sale.collectionId,
-            sale.tokenId,
-            sale.saleId,
-            sale.poster,
-            sale.beneficiary,
-            templateId
-        );
-    }
-
-    function _emitPrimaryRevenueSettlementPolicy(
-        bytes32 key,
-        PrimarySale calldata sale,
-        SaleResolution memory resolution
-    ) private {
-        emit PrimaryRevenueSettlementPolicy(
-            key,
-            sale.revenueClass,
-            resolution.profileId,
-            sale.expectedPolicyHash,
-            resolution.resolvedPolicyHash,
-            resolution.assignmentHash,
-            resolution.templateId
-        );
-    }
-
-    function _requireActiveAsset(address asset) private view {
-        if (asset == address(0) || asset.code.length == 0) {
-            revert UnsupportedAsset(asset);
-        }
-        address registry = address(assetPolicyRegistry);
-        (bool success, uint256 statusWord) = _readAssetStatusWord(registry, asset);
-        if (!success || statusWord > type(uint8).max) {
-            revert AssetPolicyReadFailed(registry, asset);
-        }
-        // Safe because statusWord is bounded to uint8 above.
-        // forge-lint: disable-next-line(unsafe-typecast)
-        uint8 status = uint8(statusWord);
-        if (status != _ASSET_STATUS_ACTIVE) {
-            revert AssetNotActive(asset, status);
-        }
-    }
-
-    function _settlementKey(PrimarySale calldata sale) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                _SETTLEMENT_KEY_DOMAIN,
-                uint256(block.chainid),
-                address(this),
-                sale.settlementId,
-                sale.revenueClass,
-                sale.collectionId,
-                sale.tokenId,
-                sale.saleId,
-                sale.payer,
-                sale.poster,
-                sale.beneficiary,
-                sale.amount
-            )
-        );
-    }
-
-    function _officialSettledKey(
-        bytes32 revenueClass,
-        bytes32 profileId,
-        address wallet,
-        address asset
-    ) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(_OFFICIAL_SETTLED_DOMAIN, revenueClass, profileId, wallet, asset)
-        );
-    }
-
-    function _saleContextHash(
-        PrimarySale calldata sale,
-        address asset,
-        SaleResolution memory resolution
-    ) private view returns (bytes32) {
-        bytes32 saleIdentityHash = keccak256(
-            abi.encode(sale.settlementId, sale.collectionId, sale.tokenId, sale.saleId)
-        );
-        bytes32 participantHash =
-            keccak256(abi.encode(msg.sender, sale.payer, sale.poster, sale.beneficiary));
-        bytes32 policyHash = keccak256(
-            abi.encode(
-                sale.policyMode,
-                sale.expectedPolicyHash,
-                resolution.resolvedPolicyHash,
-                resolution.assignmentHash
-            )
-        );
-        return keccak256(
-            abi.encode(
-                _SALE_CONTEXT_DOMAIN,
-                uint256(block.chainid),
-                address(this),
-                sale.revenueClass,
-                saleIdentityHash,
-                participantHash,
-                asset,
-                sale.amount,
-                policyHash,
-                resolution.templateId,
-                resolution.profileId,
-                resolution.wallet
-            )
-        );
-    }
-
-    function _resolvedPrimaryPolicyHash(
-        bytes32 revenueClass,
-        uint256 collectionId,
-        uint256 tokenId,
-        bytes32 templateId,
-        bytes32 profileId,
-        address wallet,
-        bytes32 assignmentHash
-    ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                PRIMARY_POLICY_DOMAIN,
-                uint256(block.chainid),
-                address(revenueResolver),
-                revenueClass,
-                collectionId,
-                tokenId,
-                templateId,
-                profileId,
-                wallet,
-                assignmentHash
-            )
-        );
-    }
-
-    function _readAssetStatusWord(address registry, address asset)
+    function _resolve(StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c)
         private
         view
-        returns (bool success, uint256 statusWord)
+        returns (StreamSaleTemplate.Selection memory rights)
     {
-        if (gasleft() < _ASSET_POLICY_PARENT_GAS_MIN) {
-            return (false, 0);
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
+            revenueResolver.resolvePrimaryAssignment(c.sale.collectionId, 0, _CLASS);
+        if (a.assignmentType == 2) {
+            rights = StreamSaleTemplate.preview(revenueResolver, c.sale.collectionId, a);
+        } else {
+            if (
+                !a.exists || a.assignmentType != 1 || a.scope != 1
+                    || a.scopeId != c.sale.collectionId || a.profileId == 0 || a.templateId != 0
+                    || a.assignmentHash == 0 || a.policyHash != 0
+            ) revert PrimarySettlementRightsMismatch();
+            rights = StreamSaleTemplate.Selection(
+                a.profileId,
+                splitFactory.walletFor(a.profileId),
+                0,
+                a.assignmentHash,
+                splitFactory.profileEntriesHash(a.profileId)
+            );
         }
-        uint256 selector = uint32(bytes4(keccak256("assetStatus(address)")));
-        uint256 gasLimit = _ASSET_POLICY_GAS_LIMIT;
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), asset)
-            success := staticcall(gasLimit, registry, ptr, 0x24, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                statusWord := mload(ptr)
-            }
+        if (keccak256(abi.encode(rights)) != keccak256(abi.encode(c.rights))) {
+            revert PrimarySettlementRightsMismatch();
         }
+        if (
+            StreamSaleTemplate.policyHash(revenueResolver, c.sale.collectionId, rights)
+                != c.sale.expectedPrimaryPolicyHash
+        ) revert PrimarySettlementPolicyMismatch();
     }
 
-    function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {
-        bool success;
-        uint256 selector = uint32(IERC20.balanceOf.selector);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), account)
-            success := staticcall(gas(), asset, ptr, 0x24, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                amount := mload(ptr)
-            }
-        }
-        if (!success) {
-            revert ERC20BalanceReadFailed(asset, account);
-        }
-    }
-
-    function _transferFromERC20(address asset, address from, address to, uint256 amount) private {
-        uint256 fromBefore = _erc20BalanceOf(asset, from);
-        uint256 toBefore = _erc20BalanceOf(asset, to);
-        _callTransferFrom(asset, from, to, amount);
-        _assertERC20TransferDelta(asset, from, to, amount, fromBefore, toBefore);
-    }
-
-    function _transferERC20(address asset, address from, address to, uint256 amount) private {
-        uint256 fromBefore = _erc20BalanceOf(asset, from);
-        uint256 toBefore = _erc20BalanceOf(asset, to);
-        _callTransfer(asset, to, amount);
-        _assertERC20TransferDelta(asset, from, to, amount, fromBefore, toBefore);
-    }
-
-    function _assertERC20TransferDelta(
-        address asset,
-        address from,
-        address to,
-        uint256 amount,
-        uint256 fromBefore,
-        uint256 toBefore
+    function _requireCurrent(
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        StreamSaleTemplate.Selection memory rights
     ) private view {
-        uint256 fromAfter = _erc20BalanceOf(asset, from);
-        uint256 toAfter = _erc20BalanceOf(asset, to);
-        if (fromBefore < amount || type(uint256).max - toBefore < amount) {
-            revert ERC20TransferInvariantBroken(
-                asset, from, to, fromBefore, fromAfter, toBefore, toAfter
-            );
+        if (rights.templateId != 0) {
+            StreamSaleTemplate.requireCurrent(revenueResolver, c.sale.collectionId, rights);
+        } else {
+            _resolve(c);
         }
-        uint256 expectedFrom = fromBefore - amount;
-        uint256 expectedTo = toBefore + amount;
-        if (fromAfter != expectedFrom || toAfter != expectedTo) {
-            revert ERC20TransferInvariantBroken(
-                asset, from, to, expectedFrom, fromAfter, expectedTo, toAfter
-            );
+        _requireWallet(rights);
+    }
+
+    function _requireWallet(StreamSaleTemplate.Selection memory rights) private view {
+        if (
+            splitFactory.walletFor(rights.profileId) != rights.wallet
+                || !splitFactory.profileExists(rights.profileId)
+                || (rights.wallet.code.length == 0 && rights.templateId == 0)
+                || (rights.wallet.code.length != 0
+                    && (rights.wallet.codehash != walletCodeHash
+                        || !splitFactory.splitWalletExists(rights.profileId)))
+        ) {
+            revert PrimarySettlementRightsMismatch();
         }
     }
 
-    function _callTransferFrom(address asset, address from, address to, uint256 amount) private {
-        bool success;
-        uint256 transferResult;
-        uint256 selector = uint32(IERC20.transferFrom.selector);
-        assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), from)
-            mstore(add(ptr, 0x24), to)
-            mstore(add(ptr, 0x44), amount)
-            success := call(gas(), asset, 0, ptr, 0x64, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                transferResult := mload(ptr)
-            }
+    function _route(
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        StreamSaleTemplate.Selection memory rights,
+        uint256 cap
+    ) private returns (bool escrowed) {
+        _requireWallet(rights);
+        if (
+            rights.wallet.code.length != 0
+                && _transfer(c.asset, rights.wallet, c.sale.amount, cap, true)
+        ) return false;
+        if (address(revenueEscrow).codehash != escrowCodeHash) {
+            revert InvalidSettlementContext(address(revenueEscrow));
         }
-        if (!success || transferResult != 1) {
-            revert ERC20TransferFailed(asset, from, to, amount);
+        uint256 beforeEscrow = _balance(c.asset, address(revenueEscrow), cap);
+        uint256 beforeWallet = _balance(c.asset, rights.wallet, cap);
+        uint256 owed = revenueEscrow.escrowOwed(_CLASS, rights.profileId, rights.wallet, c.asset);
+        if (_allowance(c.asset, address(this), address(revenueEscrow), cap) != 0) {
+            revert PrimarySettlementEscrowMismatch();
         }
+        _tokenCall(
+            c.asset,
+            abi.encodeCall(IERC20.approve, (address(revenueEscrow), c.sale.amount)),
+            cap,
+            false
+        );
+        if (_allowance(c.asset, address(this), address(revenueEscrow), cap) != c.sale.amount) {
+            revert PrimarySettlementEscrowMismatch();
+        }
+        revenueEscrow.creditERC20(
+            _CLASS, rights.profileId, rights.wallet, c.asset, c.sale.amount, rights.templateId != 0
+        );
+        if (
+            _allowance(c.asset, address(this), address(revenueEscrow), cap) != 0
+                || _balance(c.asset, address(revenueEscrow), cap) != beforeEscrow + c.sale.amount
+                || _balance(c.asset, rights.wallet, cap) != beforeWallet
+                || revenueEscrow.escrowOwed(_CLASS, rights.profileId, rights.wallet, c.asset)
+                    != owed + c.sale.amount
+        ) {
+            revert PrimarySettlementEscrowMismatch();
+        }
+        return true;
     }
 
-    function _callTransfer(address asset, address to, uint256 amount) private {
-        bool success;
-        uint256 transferResult;
-        uint256 selector = uint32(IERC20.transfer.selector);
+    function _totalKey(bytes32 revenueClass, bytes32 profileId, address wallet, address asset)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(_TOTAL, revenueClass, profileId, wallet, asset));
+    }
+
+    function _emit(
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory r,
+        address paymentAdapter
+    ) private {
+        emit PrimaryRevenueSettled(
+            r.settlementKey,
+            _CLASS,
+            r.profileId,
+            1,
+            r.wallet,
+            r.asset,
+            c.sale.payer,
+            r.amount,
+            keccak256(abi.encode(c.sale)),
+            false,
+            c.rights.templateId == 0 ? 1 : 2
+        );
+        _emitContext(c, r);
+        emit PrimaryRevenueSettlementPolicy(
+            r.settlementKey,
+            _CLASS,
+            r.profileId,
+            1,
+            c.sale.expectedPrimaryPolicyHash,
+            c.sale.expectedPrimaryPolicyHash,
+            c.rights.assignmentHash,
+            c.rights.templateId
+        );
+        emit PrimaryRevenueExecutionBound(
+            r.settlementKey,
+            c.saleAdapter,
+            r.executionId,
+            1,
+            c.executor,
+            paymentAdapter,
+            r.candidateCommitment,
+            c.currentPolicyHash,
+            c.boundPolicyHash
+        );
+    }
+
+    function _emitContext(
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c,
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory r
+    ) private {
+        ContextEventData memory context;
+        context.schemaVersion = 1;
+        context.settlementCaller = c.saleAdapter;
+        context.settlementId = c.sale.settlementId;
+        context.policyMode = c.sale.policyMode;
+        context.collectionId = c.sale.collectionId;
+        context.tokenId = c.sale.tokenId;
+        context.operationRoot = c.operationIdentityCommitment;
+        context.operationId = c.operationId;
+        context.saleNonce = c.sale.saleNonce;
+        context.poster = c.sale.poster;
+        context.beneficiary = c.sale.beneficiary;
+        context.templateId = c.rights.templateId;
+        // A static tuple is the exact twelve nonindexed ABI words. Explicit LOG4 avoids
+        // the legacy compiler's stack limit without changing the normative event layout.
+        bytes memory data = abi.encode(context);
+        bytes32 topic = _CONTEXT_EVENT;
+        bytes32 key = r.settlementKey;
+        bytes32 profile = r.profileId;
+        bytes32 revenueClass = _CLASS;
         assembly ("memory-safe") {
-            let ptr := mload(0x40)
-            mstore(ptr, shl(224, selector))
-            mstore(add(ptr, 0x04), to)
-            mstore(add(ptr, 0x24), amount)
-            success := call(gas(), asset, 0, ptr, 0x44, 0, 0)
-            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
-            if success {
-                returndatacopy(ptr, 0, 0x20)
-                transferResult := mload(ptr)
-            }
-        }
-        if (!success || transferResult != 1) {
-            revert ERC20TransferFailed(asset, address(this), to, amount);
+            log4(add(data, 32), mload(data), topic, key, revenueClass, profile)
         }
     }
 }
