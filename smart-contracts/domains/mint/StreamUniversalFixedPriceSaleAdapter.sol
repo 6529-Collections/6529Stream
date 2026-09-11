@@ -32,7 +32,8 @@ contract StreamUniversalFixedPriceSaleAdapter is
     );
     bytes32 private constant _CONFIG = keccak256("6529STREAM_UNIVERSAL_FIXED_PRICE_CONFIG_V1");
     bytes32 private constant _CLASS = keccak256("PRIMARY_SALE");
-    bytes32 private constant _NONCE = keccak256("6529STREAM_UNIVERSAL_SALE_NONCE_V1");
+    bytes32 private constant _TICKET_AUTHORIZATION =
+        keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1");
     IStreamMintManager public immutable mintManager;
     bytes32 public immutable mintManagerCodeHash;
     address public immutable primarySaleSettlement;
@@ -383,8 +384,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
         b.mintCommitments = new bytes32[](1);
         b.mintCommitments[0] = a.mintCommitment;
         b.expectedPolicyHash = config.mintPolicyHash;
-        b.authorizationId =
-            keccak256(abi.encode(_NONCE, block.chainid, address(this), a.artist, a.nonce));
+        b.authorizationId = keccak256(abi.encode(_TICKET_AUTHORIZATION, digest));
         b.contextHash = digest;
     }
 
