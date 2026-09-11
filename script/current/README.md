@@ -2,8 +2,10 @@
 
 The full-v1 integration branch is migrating this workflow to the modular artist
 suite and version-2 native/auction authorizations. Deployment now returns a
-scheduled authority-activation batch; it does not yet complete artist onboarding,
-phase consent or the Manager ownership handoff. See
+scheduled authority-activation batch; it does not yet complete artist onboarding.
+After onboarding, the [phase setup planner](../../docs/integrations/current-mint-setup.md)
+prepares exact EOA/Safe consent, configuration and final Manager handoff calls.
+Seven actual-current integration tests pass. See
 [current artist activation](../../docs/integrations/current-artist-activation.md).
 The PowerShell recipes and measurements below describe the retained RC1 workflow
 until their migration and a fresh complete rehearsal pass. Use the frozen RC1

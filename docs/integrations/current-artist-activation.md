@@ -67,8 +67,12 @@ before both its initial configuration and its executor admission. The Manager
 stays deployer-owned until this setup is complete, then ownership must transfer
 to the governance Executor and be read back.
 
-The modular onboarding/operator workflow and the older PowerShell runners are
-still being migrated on this development branch. Use the frozen RC1 checkout
+The [phase setup planner](current-mint-setup.md) prepares the exact subsequent
+artist-consent, Manager configuration and final ownership-transfer calls for an
+EOA or Safe. Seven actual-current tests pass, including real Safe calls, resumed
+setup, final ownership readback and paid minting. The identity
+onboarding consumer and older PowerShell runners are still being migrated on
+this development branch. Use the frozen RC1 checkout
 for its demonstrated workflow. A new release will require its own complete
 deployment, setup and mint evidence.
 

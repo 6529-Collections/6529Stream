@@ -93,9 +93,15 @@ the separate seven-case current run. Executed-finality composition and the
 source export/client projection still require implementation and migration.
 
 The saved artist-authority activation plan publishes calldata and checks exact
-commitments, submission headroom, resumption and prior execution. Operator
-onboarding, phase completion and final Manager ownership handoff still need a
-complete resumable consumer. A proposed immediate genesis activation failed
+commitments, submission headroom, resumption and prior execution. The new
+stateless phase setup planner passes seven actual-current tests with real
+two-owner Safes, exact direct consent nonces, confirmed-state resumption,
+multiple phases, final Manager handoff and an actual paid mint/reveal. Its JSON
+encoder uses the matching compiled planner ABI. Independent review verified
+203 Solidity inputs, three Safe fixtures and 223 exact compiler artifacts; the
+planner runtime is 11,219 bytes and the protocol contracts are unchanged.
+Full identity onboarding and
+the older deployment runners still need a complete consumer. A proposed immediate genesis activation failed
 three actual tests because the bootstrap actor cannot propose final-root role
 mutations. That prototype is withdrawn; the same snapshot's five existing Safe
 cases pass. The accepted delayed activation and production guards are retained.
@@ -108,8 +114,8 @@ Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factor
 auction domain tests. The royalty fixture now uses actual current artist consent
 and canonical governance publication. Five preserved resolver tests (`f803f482`)
 replace the old fixture's still-supported resolver assertions; the obsolete
-settlement API is retired. The latest ABI-only check covers 471 Solidity sources,
-including work-in-progress universal current-stack tests, with zero
+settlement API is retired. The latest ABI-only check covers 474 Solidity sources,
+including the operator setup tests, with zero
 errors. This is not a broad build or candidate
 acceptance. Client checks pass 47 tests; three new tests also
 exercise successful and failed calls through actual pinned Safe versions.

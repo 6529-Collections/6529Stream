@@ -128,6 +128,11 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         _configureMintPhase(PHASE, address(sale));
         _configureMintPhase(AUCTION_PHASE, address(auction));
         _configureAdditionalProducts();
+        _handoffManager();
+    }
+
+    /// @dev Operator scenarios can retain their real initial owner until setup completes.
+    function _handoffManager() internal virtual {
         manager.transferOwnership(address(executor));
     }
 

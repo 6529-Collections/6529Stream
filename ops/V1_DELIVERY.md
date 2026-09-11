@@ -123,7 +123,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | FIN-02 | Governance-owned recovery, owner notice/objection, recovered-route lineage and bounded refresh/cutover work end to end | Artist + integrator; FIN-01, owner records, ADR 0020 reconciliation | Queued |
 | ARCH-01 | Complete state/event reconstruction and export preservation can rebuild required records, lineage and artwork without relying on the app | Integrator / freed builder; current publisher, META/ART/FIN | Queued |
 | GOV-01 | Complete governed parameter hosts, call-budget behavior and distinct fallback instances fit the real candidate | Integrator; integrated modules | Queued |
-| APP-01 | SDK, human-readable artist signing, event-based claims and operator recovery expose every supported new workflow | Integrator / freed builder; each accepted interface increment | Building: Safe CALL/receipt helpers integrated; matching v1 ABI/signing and operator migration pending |
+| APP-01 | SDK, human-readable artist signing, event-based claims and operator recovery expose every supported new workflow | Integrator / freed builder; each accepted interface increment | Building: Safe CALL/receipt helpers integrated; exact phase setup/Safe handoff planner passes seven actual-current tests; matching v1 ABI/signing, full identity onboarding and runner migration pending |
 | VERIFY-01 | Full mandatory feature traceability, integrated hostile tests, fuzz/stateful campaigns, normative all-cold collector gas ceilings and interaction measurements, and real candidate demonstrations | Reviewer + integrator; all implementation rows | Queued |
 | RELEASE-01 | Complete genesis inventory, exact compiler/deployment binding, new frozen source and matching testnet evidence | Integrator; VERIFY-01 | Queued |
 
@@ -346,8 +346,8 @@ all 218 Solidity sources and three Safe fixtures to `4e9a41b1`, all 237 relevant
 artifacts to retained compiler outputs, and confirms all 90 nonempty production
 runtimes fit. Later native and rotation changes require their own acceptance.
 
-The latest whole-repository ABI-only check covers 471 Solidity sources with zero
-errors, including work-in-progress universal integration tests. Broad compilation and candidate
+The latest whole-repository ABI-only check covers 474 Solidity sources with zero
+errors, including the operator setup tests. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
@@ -361,7 +361,12 @@ The exact saved artist-activation plan is implemented. A proposed immediate
 genesis version failed three execution tests at the required final-root proposer
 check; it is withdrawn without changing production authorization. That snapshot's
 five existing Safe cases still pass. Delayed activation remains the supported
-operator path. The operator onboarding,
-phase-consent and final Manager handoff consumer remains to be built. Complete
+operator path. The stateless phase-consent/configuration/final Manager handoff
+planner now passes seven actual-current tests with real two-owner Safes, sparse
+nonce handling, confirmed-state resumption, two-phase ordering and an actual paid
+mint/reveal. Independent review verified 203 Solidity inputs, three Safe fixtures
+and 223 exact compiler artifacts. The planner runtime is 11,219 bytes; existing
+protocol contracts are unchanged. The initial identity onboarding consumer and older deployment
+runners remain to be completed. Complete
 ABI/client migration, metadata, entropy, finality, recovery, new sale mechanisms
 and every other ledger row remain in scope. No new candidate is claimed.

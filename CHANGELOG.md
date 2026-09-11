@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a stateless phase-setup planner and JSON encoder for exact EOA/Safe calls,
+  confirmed-state resumption, current artist nonce checks and final Manager
+  ownership handoff. Seven actual-current tests cover real Safe setup, failed
+  target calls, sparse nonce use and paid minting. Identity onboarding and the
+  complete deployment runner remain separate migration work.
 - Added operative artist identity document revisions with immutable registration
   and binding history, exact document-hash personhood matching, and preserved
   existing consent records. Current-stack Safe and payment composition passes.
