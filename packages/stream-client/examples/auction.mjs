@@ -8,6 +8,8 @@ export async function createAuction(client, { submitter, platform, artist }, aut
   if (getAddress(await platform.getAddress()) !== getAddress(await client.read("auction", "platformSigner", []))) throw Error("Platform signer changed");
   if (getAddress(await client.read("artistRegistry", "acceptedArtist", [authorization.collectionId])) !== getAddress(authorization.artist)) throw Error("Artist attribution is not accepted");
   if (keccak256(tokenData) !== authorization.tokenDataHash) throw Error("Token bytes differ from the signed commitment");
+  if (await client.read("auction", "signerEpoch", []) !== authorization.signerEpoch) throw Error("Signer epoch changed");
+  if (await client.read("manager", "phasePolicyHash", [authorization.collectionId, authorization.phaseId]) !== authorization.mintPolicyHash) throw Error("Phase policy changed");
   const payload = auctionTypedData(client.config.chainId, client.address("auction"), authorization);
   await client.assertDigest(payload, "auction", "authorizationDigest", [authorization]);
   const platformSignature = await platform.signTypedData(payload.domain, payload.types, payload.message);

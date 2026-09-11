@@ -87,4 +87,17 @@ test("auction example creates escrow and rejects token-byte substitution before 
   const bad = fixture("auction", H);
   await assert.rejects(createAuction(bad.client, bad.wallets, auction, "0x5678"), /Token bytes/);
   assert.equal(bad.trace.filter(x => x.kind === "sign" || x.kind === "send").length, 0);
+  for (const [method, changed, message] of [["signerEpoch", 2n, /Signer epoch changed/], ["phasePolicyHash", "0x" + "22".repeat(32), /Phase policy changed/]]) {
+    const stale = fixture("auction", H), read = stale.client.read;
+    stale.client.read = async (contract, name, args) => {
+      if (name === method) {
+        assert.equal(contract, method === "signerEpoch" ? "auction" : "manager");
+        assert.deepEqual(args, method === "signerEpoch" ? [] : [auction.collectionId, auction.phaseId]);
+        return changed;
+      }
+      return read(contract, name, args);
+    };
+    await assert.rejects(createAuction(stale.client, stale.wallets, auction, tokenData), message);
+    assert.equal(stale.trace.filter(x => ["sign", "simulate", "send"].includes(x.kind)).length, 0);
+  }
 });

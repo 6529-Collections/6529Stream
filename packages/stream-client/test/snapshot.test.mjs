@@ -1,5 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawn } from "node:child_process";
+import { createServer } from "node:http";
 import { id, keccak256, ZeroAddress, ZeroHash, JsonRpcProvider } from "ethers";
 import { StreamClient, contractInterface, snapshotSelectionFromJSON, captureSupportedState, packageSnapshot, verifySnapshotPackage, verifySnapshotReadback, canonicalJSON, validateSnapshot } from "../dist/index.js";
 
@@ -137,4 +143,69 @@ test("readback rejects coherently rehashed false facts and a changed canonical b
   const changed = json(JSON.parse(original.snapshot)); changed.block.hash = ZeroHash;
   const rebundled = packageSnapshot(changed); // Integrity alone cannot authenticate a chain observation.
   await assert.rejects(verifySnapshotReadback(mock().client, rebundled), /readback differs/);
+});
+
+async function captureCLI(directory, rpcURL) {
+  await writeFile(join(directory, "config.json"), JSON.stringify({ schemaVersion: 1, chainId: "31337", addresses }));
+  await writeFile(join(directory, "selection.json"), JSON.stringify({ blockNumber: "100", collectionIds: ["1"], tokenIds: ["1"], saleIds: [H], phases: [{ collectionId: "1", phaseId: H }] }));
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [fileURLToPath(new URL("../examples/snapshot.mjs", import.meta.url)), "capture", join(directory, "config.json"), join(directory, "selection.json"), join(directory, "capture")], { env: { ...process.env, STREAM_RPC_URL: rpcURL } });
+    let stdout = "", stderr = "";
+    child.stdout.on("data", data => { stdout += data; });
+    child.stderr.on("data", data => { stderr += data; });
+    child.on("error", reject);
+    child.on("close", code => resolve({ code, stdout, stderr }));
+  });
+}
+
+test("snapshot CLI reports an existing destination before contacting RPC", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "stream-snapshot-cli-"));
+  try {
+    await mkdir(join(directory, "capture"));
+    const result = await captureCLI(directory, "https://credential.example.invalid/private-rpc-secret");
+    assert.equal(result.code, 1);
+    assert.equal(result.stderr.trim(), "Snapshot output already exists; choose a new directory");
+    assert.equal(result.stdout, "");
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test("snapshot CLI preserves a destination appearing during capture and sanitizes transport failures", async () => {
+  for (const transportFailure of [false, true]) {
+    const directory = await mkdtemp(join(tmpdir(), "stream-snapshot-cli-")), fixture = mock();
+    let requests = 0;
+    const server = createServer(async (request, response) => {
+      let raw = "";
+      for await (const chunk of request) raw += chunk;
+      const payload = JSON.parse(raw);
+      const answer = async item => {
+        if (++requests === 1 && !transportFailure) {
+          await mkdir(join(directory, "capture"));
+          await writeFile(join(directory, "capture", "sentinel.txt"), "existing capture");
+        }
+        if (transportFailure) return { id: item.id, jsonrpc: "2.0", error: { code: -32000, message: "credentialed RPC failed: private-rpc-secret" } };
+        return { id: item.id, jsonrpc: "2.0", result: await fixture.client.provider.send(item.method, item.params) };
+      };
+      response.setHeader("content-type", "application/json");
+      response.end(JSON.stringify(Array.isArray(payload) ? await Promise.all(payload.map(answer)) : await answer(payload)));
+    });
+    await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+    try {
+      const result = await captureCLI(directory, `http://127.0.0.1:${server.address().port}/private-rpc-secret`);
+      assert.equal(result.code, 1);
+      assert.equal(result.stdout, "");
+      assert.ok(requests > 0);
+      assert.doesNotMatch(result.stderr, /private-rpc-secret/);
+      if (transportFailure) assert.match(result.stderr, /Snapshot operation failed; no capture was published/);
+      else {
+        assert.equal(result.stderr.trim(), "Snapshot output appeared during capture");
+        assert.equal(await readFile(join(directory, "capture", "sentinel.txt"), "utf8"), "existing capture");
+        assert.deepEqual(await readdir(join(directory, "capture")), ["sentinel.txt"]);
+      }
+      assert.equal((await readdir(directory)).some(name => name.startsWith(".stream-snapshot-")), false);
+    } finally {
+      server.closeAllConnections();
+      await new Promise(resolve => server.close(resolve));
+      await rm(directory, { recursive: true, force: true });
+    }
+  }
 });

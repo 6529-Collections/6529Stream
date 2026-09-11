@@ -127,7 +127,6 @@ def campaign(args: argparse.Namespace) -> int:
     if not forge:
         print("Missing forge. See docs/first-30-minutes.md.", file=sys.stderr)
         return 127
-    artifact.mkdir(parents=True, exist_ok=False)
     lock = cache.parent / (cache.name + ".campaign.lock")
     lock.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -136,6 +135,12 @@ def campaign(args: argparse.Namespace) -> int:
         print(f"A campaign already owns this cache: {lock}. Do not remove an active lock.", file=sys.stderr)
         return 1
     os.close(lock_fd)
+    try:
+        artifact.mkdir(parents=True, exist_ok=False)
+    except OSError as error:
+        lock.unlink()
+        print(f"Could not create campaign artifact directory: {error}", file=sys.stderr)
+        return 1
     report: dict[str, object] = {"schemaVersion": 1, "mode": args.mode, "profile": "current",
         "seed": args.seed, "runs": runs, "depth": depth, "fuzzRuns": fuzz_runs, "status": "STARTED",
         "artifactDirectory": str(artifact), "out": str(out), "cache": str(cache)}

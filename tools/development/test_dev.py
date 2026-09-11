@@ -118,6 +118,26 @@ class DeveloperCommands(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertFalse(child)
             self.assertEqual(lock.read_text(), "active owner")
+            self.assertFalse((root / "locked").exists())
+            lock.unlink()  # The fixture owner releases its lock; reuse needs no artifact cleanup.
+            code, child = self._campaign(root, ["--artifacts", "locked", "--reuse-current"])
+            self.assertEqual(code, 0)
+            self.assertTrue(child)
+
+    def test_campaign_releases_acquired_lock_if_artifact_creation_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            mkdir = Path.mkdir
+            def guarded_mkdir(path, *args, **kwargs):
+                if path.resolve() == (root / "unwritable").resolve():
+                    raise PermissionError("denied by fixture")
+                return mkdir(path, *args, **kwargs)
+            with patch.object(Path, "mkdir", guarded_mkdir):
+                code, child = self._campaign(root, ["--artifacts", "unwritable", "--reuse-current"])
+            self.assertEqual(code, 1)
+            self.assertFalse(child)
+            self.assertFalse((root / "cache/current.campaign.lock").exists())
+            self.assertFalse((root / "unwritable").exists())
 
     def test_campaign_rejects_ambiguous_seed_and_forge_overrides(self):
         for arguments in (["--seed", "123"], ["--seed", "0x" + "1" * 65], ["--no-match-test", "invariant"]):
