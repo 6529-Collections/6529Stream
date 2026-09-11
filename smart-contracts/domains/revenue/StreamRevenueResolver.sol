@@ -8,6 +8,7 @@ import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/artist/IStreamArtistEconomicsAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
 import "../parameters/StreamGasParameterHost.sol";
@@ -38,10 +39,12 @@ abstract contract StreamPrimaryResolverState {
 
 /// @notice Core-bound primary assignments with immutable artist-facade admission.
 /// @dev Bound artist collections support fixed PRIMARY_SALE profiles with prospective artist
-///      consent and independent governance admission. Other bound assignment modes stay closed.
+///      consent and independent governance admission. Initial supported templates may be read
+///      after nomination, but their bound writes and sale-adapter admission stay closed.
 contract StreamRevenueResolver is
     IStreamRevenueResolver,
     IStreamArtistPrimaryFacts,
+    IStreamArtistPrimaryTemplateFacts,
     ERC165,
     Ownable,
     StreamPrimaryResolverState,
@@ -181,8 +184,74 @@ contract StreamRevenueResolver is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamArtistPrimaryFacts).interfaceId
+        return id == type(IStreamArtistPrimaryTemplateFacts).interfaceId
+            || id == type(IStreamArtistPrimaryFacts).interfaceId
             || id == type(IStreamGasParameterHost).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryTemplateFacts
+    function primaryTemplateEconomicsFacts(bytes32 templateId)
+        external
+        view
+        override
+        returns (bytes32 entriesHash, bytes32 metadataURIHash, uint32 artistSharePpm)
+    {
+        _requireSelectedArtistRegistry();
+        PrimaryTemplate storage template = _templates[templateId];
+        artistSharePpm = _requireArtistTemplate(templateId);
+        return (template.entriesHash, template.metadataURIHash, artistSharePpm);
+    }
+
+    /// @inheritdoc IStreamArtistPrimaryTemplateFacts
+    function previewArtistPrimaryTemplateAssignment(
+        uint256 collectionId,
+        bytes32 templateId,
+        bytes32 policyHash,
+        bool frozen
+    ) external view override returns (StreamArtistOnboardingTypes.AssignmentFact memory fact) {
+        _requireSelectedArtistRegistry();
+        _requireScope(SCOPE_COLLECTION, collectionId);
+        _resolveCollectionIdentity(collectionId, 0);
+        if (policyHash != bytes32(0)) revert InvalidPrimaryPolicyHash();
+        _requireArtistTemplate(templateId);
+        bytes32 revenueClass = keccak256("PRIMARY_SALE");
+        return StreamArtistOnboardingTypes.AssignmentFact(
+            address(this),
+            revenueClass,
+            SCOPE_COLLECTION,
+            collectionId,
+            _primaryAssignmentHash(
+                revenueClass,
+                SCOPE_COLLECTION,
+                collectionId,
+                ASSIGNMENT_TYPE_TEMPLATE,
+                bytes32(0),
+                templateId,
+                policyHash,
+                frozen
+            )
+        );
+    }
+
+    /// @dev Reads only immutable template storage; never calls artist consent or materialization.
+    function _requireArtistTemplate(bytes32 templateId) private view returns (uint32 artistShare) {
+        PrimaryTemplate storage template = _templates[templateId];
+        if (!template.exists) revert UnsupportedArtistPrimaryTemplate(templateId);
+        for (uint256 i; i < template.entries.length; ++i) {
+            PrimaryTemplateEntry storage entry = template.entries[i];
+            if (
+                entry.accountSource == ACCOUNT_SOURCE_COLLECTION_ARTIST
+                    && entry.account == address(0) && entry.labelId == ARTIST_LABEL
+            ) {
+                artistShare += entry.sharePpm;
+            } else if (
+                entry.account == address(0) || entry.accountSource != bytes32(0)
+                    || entry.labelId == ARTIST_LABEL
+            ) {
+                revert UnsupportedArtistPrimaryTemplate(templateId);
+            }
+        }
+        if (artistShare < 500_000) revert UnsupportedArtistPrimaryTemplate(templateId);
     }
 
     /// @inheritdoc IStreamArtistPrimaryFacts
@@ -402,11 +471,22 @@ contract StreamRevenueResolver is
             collectionId != 0
                 && IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
                     != bytes32(0)
-                && (!resolved.exists
-                    || resolved.scope != SCOPE_COLLECTION
+        ) {
+            if (
+                !resolved.exists || resolved.scope != SCOPE_COLLECTION
                     || resolved.scopeId != collectionId
-                    || resolved.assignmentType != ASSIGNMENT_TYPE_PROFILE)
-        ) revert UnsupportedArtistPrimaryAssignment(collectionId);
+            ) {
+                revert UnsupportedArtistPrimaryAssignment(collectionId);
+            }
+            if (
+                resolved.assignmentType == ASSIGNMENT_TYPE_TEMPLATE
+                    && revenueClass == keccak256("PRIMARY_SALE")
+            ) {
+                _requireArtistTemplate(resolved.templateId);
+            } else if (resolved.assignmentType != ASSIGNMENT_TYPE_PROFILE) {
+                revert UnsupportedArtistPrimaryAssignment(collectionId);
+            }
+        }
     }
 
     /// @notice Legacy context-free cache for static and SALE_POSTER templates only.

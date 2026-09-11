@@ -85,7 +85,7 @@ values; these are not final cold deployment measurements.
 
 The focused tests use the actual resolver, factory, split wallet and token money
 flows, plus official Safe 1.4.1 with 2-of-3 execution signatures. Safe calls cover
-all 48 public selectors through public reads, owner operations, permissionless
+the materialization and gas-host selectors through public reads, owner operations, permissionless
 cache operations, and the explicitly separate governance route. Native and ERC20
 proceeds reach the Safe payout account. Malformed reads, exact event witnesses,
 cache collisions, payout changes, inherited assignment restrictions, poisoned
@@ -98,11 +98,12 @@ record complete resolver calls for registration, later deployment and reuse.
 Fixture setup and repeated calls warm accounts and storage, so those values are
 not all-cold transaction limits.
 
-Artist-bound assignments still support explicit fixed collection PROFILE terms.
-This increment does not open TEMPLATE assignment, change the artist economics
-consent payload, migrate sale/auction adapters, add collaborator sources, or
-configure the genesis ROLE_TREASURY template and its receiving evidence.
-Those are subsequent coordinated integrations. A fixed profile created by this
+Artist-bound assignments support explicit fixed collection PROFILE terms and
+reads of the narrowly validated initial COLLECTION_ARTIST template configured
+before nomination. The [typed economics facts](artist-template-economics.md)
+explain this read boundary. Bound template mutation, artist consent integration,
+sale/auction adapter migration, collaborator sources and the genesis ROLE_TREASURY
+template with its receiving evidence remain subsequent coordinated integrations. A fixed profile created by this
 cache is immutable; assigning it does not make future sales dynamically follow
 later artist payout changes. Existing auctions keep their creation-time proceeds
 rights under the [auction funding rules](auction-funding.md).

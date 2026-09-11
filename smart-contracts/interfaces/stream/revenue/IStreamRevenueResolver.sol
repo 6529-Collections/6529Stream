@@ -169,7 +169,8 @@ interface IStreamRevenueResolver {
         bytes32 policyHash
     ) external returns (bytes32 assignmentHash);
     /// @notice Sets a zero-policy dynamic template before artist nomination.
-    /// @dev Artist-bound collections currently require an explicit collection fixed profile.
+    /// @dev Template writes remain closed after artist nomination. Supported initial templates
+    ///      may be configured beforehand; resolving them does not prove recorded artist consent.
     function setPrimaryTemplateAssignment(
         bytes32 revenueClass,
         uint8 scope,
@@ -185,7 +186,8 @@ interface IStreamRevenueResolver {
         returns (bytes32 frozenAssignmentHash);
     /// @notice Resolves assignments against the pinned, currently Core-selected artist facade.
     /// @dev Nonzero token IDs must match Core's retained collection identity, including burns.
-    ///      Artist-bound contexts support only explicit collection fixed profiles. This read
+    ///      Artist-bound contexts support explicit collection fixed profiles and the validated
+    ///      initial COLLECTION_ARTIST template profile. This read
     ///      exposes current terms; it does not itself assert that artist consent was recorded.
     function resolvePrimaryAssignment(uint256 collectionId, uint256 tokenId, bytes32 revenueClass)
         external
