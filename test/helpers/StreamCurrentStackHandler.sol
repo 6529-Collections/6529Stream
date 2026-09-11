@@ -121,6 +121,10 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         else _rejectReceiver(seed);
     }
 
+    function _primaryPolicyHash() private view returns (bytes32 hash) {
+        (hash,,) = system.nativeSale.primaryPolicy(1);
+    }
+
     function _sign(uint256 key, bytes32 digest) private returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, digest);
         return abi.encodePacked(r, s, v);
@@ -140,6 +144,7 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
         address payer = actors[seed % 3];
         uint256 price = 10_000 + (seed % 10_000) * 10;
         bytes32 nonce = bytes32(nextConsent++);
+        (bytes32 primaryPolicy,,) = system.nativeSale.primaryPolicy(1);
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory auth =
             IStreamFixedPriceSaleAdapter.SaleAuthorization(
                 1,
@@ -148,6 +153,7 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
                 payer,
                 system.artist,
                 system.profile,
+                primaryPolicy,
                 keccak256(DATA),
                 keccak256(abi.encode("native", nonce)),
                 system.manager.phasePolicyHash(1, NATIVE_PHASE),
@@ -255,6 +261,7 @@ contract StreamCurrentStackHandler is CharacterizationTestBase {
                 AUCTION_PHASE,
                 system.artist,
                 system.profile,
+                _primaryPolicyHash(),
                 keccak256(DATA),
                 keccak256(abi.encode("auction", nonce)),
                 system.manager.phasePolicyHash(1, AUCTION_PHASE),

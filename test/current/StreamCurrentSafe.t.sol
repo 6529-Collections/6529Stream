@@ -10,6 +10,8 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     OfficialSafe private artistSafe;
     OfficialSafe private buyerSafe;
     uint256[] private keys;
+    bool private _templateGenesis;
+    bytes32 private _genesisTemplate;
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -29,23 +31,328 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
         _buyRevealTransferAndClaim();
     }
 
+    function _prepareArtistOnboarding() internal override {
+        if (!_templateGenesis) return;
+        _genesisTemplate = _createArtistTemplate();
+        bytes memory data = abi.encodeCall(
+            primaryResolver.setPrimaryTemplateAssignment,
+            (PRIMARY_REVENUE_CLASS, uint8(1), uint256(1), _genesisTemplate, bytes32(0))
+        );
+        GovernanceActionRequest memory request = _request(address(primaryResolver), data);
+        bytes memory scheduled = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (request))
+        );
+        vm.warp(request.notBefore);
+        executor.executeGovernanceAction(abi.decode(scheduled, (bytes32)), data);
+    }
+
+    function _additionalOperatingPolicies()
+        internal
+        view
+        override
+        returns (GovernanceActionPolicyEntry[] memory rows)
+    {
+        rows = new GovernanceActionPolicyEntry[](1);
+        address target = address(primaryResolver);
+        rows[0] = GovernanceActionPolicyEntry(
+            1,
+            target,
+            primaryResolver.setPrimaryTemplateAssignment.selector,
+            target.codehash,
+            keccak256(abi.encode(DEPLOYMENT_HASH, target)),
+            1,
+            0,
+            0,
+            bytes32(0)
+        );
+    }
+
+    function testSafeArtistTemplateConsentAndPaidMintEscrowFlushAndClaim() public {
+        _templateGenesis = true;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        require(_genesisTemplate != 0, "actual prebinding template");
+        artists.requireMintConsent(1, PHASE, manager.phasePolicyHash(1, PHASE));
+        (, profile, wallet) = sale.primaryPolicy(1);
+        require(
+            !factory.profileExists(profile) && wallet.code.length == 0,
+            "preview does not register or deploy"
+        );
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory authorization =
+            _safeSaleAuthorization();
+        bytes32 digest = sale.authorizationDigest(authorization);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(sale),
+                authorization.price,
+                abi.encodeCall(
+                    sale.buy,
+                    (authorization, TOKEN_DATA, abi.encodePacked(r, s, v), _artistProof(digest))
+                ),
+                0
+            ),
+            "Safe template mint"
+        );
+        uint256 tokenId = core.lastAllocatedTokenId();
+        require(
+            core.ownerOf(tokenId) == address(buyerSafe) && core.collectionMintedEver(1) == 1,
+            "actual Core Safe custody"
+        );
+        require(
+            factory.profileExists(profile) && !factory.splitWalletExists(profile)
+                && revenueEscrow.escrowOwed(PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+                    == authorization.price && sale.totalNativeProceeds() == authorization.price,
+            "exact template escrow funded before mint"
+        );
+        _assertTemplateRights(profile, address(artistSafe));
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(factory),
+                0,
+                abi.encodeCall(factory.deployWallet, (profile)),
+                0
+            ),
+            "Safe deploys registered wallet"
+        );
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(revenueEscrow),
+                0,
+                abi.encodeCall(
+                    revenueEscrow.flushToVerifiedWalletBestEffort,
+                    (PRIMARY_REVENUE_CLASS, profile, wallet, address(0))
+                ),
+                0
+            ),
+            "Safe flushes exact owed destination"
+        );
+        require(
+            wallet.balance == authorization.price && revenueEscrow.totalOwed(address(0)) == 0,
+            "escrow delivered exactly once"
+        );
+        require(
+            executeSafe(
+                artistSafe,
+                keys,
+                wallet,
+                0,
+                abi.encodeCall(
+                    IStreamSplitWallet.release,
+                    (address(0), address(artistSafe), payable(address(artistSafe)))
+                ),
+                0
+            ),
+            "Safe claims actual template share"
+        );
+        require(
+            address(artistSafe).balance == 0.009 ether && wallet.balance == 0.001 ether,
+            "template artist and protocol shares"
+        );
+        (, uint256 requestId) = entropy.requestEntropy(tokenId);
+        provider.fulfill(requestId, keccak256("Safe template mint entropy"));
+        (, bool finalized) = entropy.tokenSeed(tokenId);
+        require(
+            finalized && bytes(core.tokenURI(tokenId)).length != 0,
+            "actual entropy and metadata complete"
+        );
+    }
+
+    function testSafeMaterializesActualArtistTemplateAndPayoutChangesPreserveOldRights() public {
+        bytes32 templateId = _createArtistTemplate();
+        (bytes32 entriesHash, bytes32 metadataHash, uint32 artistShare) =
+            primaryResolver.primaryTemplateEconomicsFacts(templateId);
+        require(
+            entriesHash != 0 && metadataHash == keccak256("Safe artist template")
+                && artistShare == 900_000,
+            "actual immutable template facts"
+        );
+
+        (bytes32 originalProfile, address originalWallet) =
+            _materializeTemplateAsSafe(templateId, false);
+        _assertTemplateRights(originalProfile, address(artistSafe));
+        (bytes32 deployedProfile, address deployedWallet) =
+            _materializeTemplateAsSafe(templateId, true);
+        require(
+            deployedProfile == originalProfile && deployedWallet == originalWallet,
+            "deployment preserves registered rights"
+        );
+
+        (, bytes32 previousRecord) =
+            IStreamArtistPayoutOwner(artistSuite.owners[5]).artistPayoutAccount(fixtureArtistId);
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(fixtureArtistId, address(buyerSafe), previousRecord);
+        T.Authorization memory authorization = _safeArtistAuthorization();
+        authorization.time = 0; // Direct Safe call records the actual inclusion time.
+        require(
+            executeSafe(
+                artistSafe,
+                keys,
+                address(artists),
+                0,
+                abi.encodeCall(artists.recordPayoutDesignation, (payout, authorization)),
+                0
+            ),
+            "Safe changes explicit payout"
+        );
+        (bytes32 currentArtist, address currentPayout, bytes32 record) =
+            artists.collectionArtistBeneficiary(1);
+        require(
+            currentArtist == fixtureArtistId && currentPayout == address(buyerSafe) && record != 0
+                && record != previousRecord,
+            "actual beneficiary read reflects designation"
+        );
+
+        (bytes32 nextProfile, address nextWallet) = _materializeTemplateAsSafe(templateId, false);
+        require(
+            nextProfile != originalProfile && nextWallet != originalWallet,
+            "new recipient has new immutable rights"
+        );
+        _assertTemplateRights(nextProfile, address(buyerSafe));
+        _assertTemplateRights(originalProfile, address(artistSafe));
+        require(factory.splitWalletExists(originalProfile), "old wallet remains deployed");
+    }
+
+    function _createArtistTemplate() private returns (bytes32 templateId) {
+        IStreamRevenueResolver.PrimaryTemplateEntry[] memory entries =
+            new IStreamRevenueResolver.PrimaryTemplateEntry[](2);
+        entries[0] = IStreamRevenueResolver.PrimaryTemplateEntry(
+            address(0), keccak256("COLLECTION_ARTIST"), 900_000, keccak256("artist")
+        );
+        entries[1] = IStreamRevenueResolver.PrimaryTemplateEntry(
+            PROTOCOL, bytes32(0), 100_000, keccak256("protocol")
+        );
+        bytes memory data = abi.encodeCall(
+            primaryResolver.createPrimaryTemplate, (entries, keccak256("Safe artist template"))
+        );
+        GovernanceActionRequest memory request = _request(address(primaryResolver), data);
+        bytes memory result = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (request))
+        );
+        vm.warp(request.notBefore);
+        vm.recordLogs();
+        executor.executeGovernanceAction(abi.decode(result, (bytes32)), data);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 topic = keccak256("PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)");
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(primaryResolver) && logs[i].topics.length == 4
+                    && logs[i].topics[0] == topic
+            ) {
+                require(templateId == 0, "one template created");
+                templateId = logs[i].topics[1];
+            }
+        }
+        require(templateId != 0, "governed template creation observed");
+    }
+
+    function _materializeTemplateAsSafe(bytes32 templateId, bool deployWallet)
+        private
+        returns (bytes32 profileId, address targetWallet)
+    {
+        bytes memory transactionData = abi.encodeCall(
+            primaryResolver.materializeCollectionPrimaryProfile,
+            (templateId, uint256(1), address(0), deployWallet)
+        );
+        bytes32 expectedSafeHash = buyerSafe.getTransactionHash(
+            address(primaryResolver),
+            0,
+            transactionData,
+            0,
+            0,
+            0,
+            0,
+            address(0),
+            address(0),
+            buyerSafe.nonce()
+        );
+        vm.recordLogs();
+        require(
+            executeSafe(buyerSafe, keys, address(primaryResolver), 0, transactionData, 0),
+            "Safe materialization executes"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 topic = keccak256(
+            "CollectionTemplateMaterialized(bytes32,bytes32,uint256,uint16,bytes32,address,bytes32,address,bytes32,bool)"
+        );
+        bool safeSuccess;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(buyerSafe) && logs[i].topics.length == 2
+                    && logs[i].topics[0] == keccak256("ExecutionSuccess(bytes32,uint256)")
+                    && logs[i].topics[1] == expectedSafeHash && logs[i].data.length == 32
+                    && abi.decode(logs[i].data, (uint256)) == 0
+            ) {
+                safeSuccess = true;
+            }
+            if (
+                logs[i].emitter == address(primaryResolver) && logs[i].topics.length == 4
+                    && logs[i].topics[0] == topic
+            ) {
+                require(
+                    profileId == 0 && logs[i].topics[1] == templateId
+                        && uint256(logs[i].topics[3]) == 1,
+                    "one exact collection materialization"
+                );
+                profileId = logs[i].topics[2];
+            }
+        }
+        require(
+            safeSuccess && profileId != 0 && factory.profileExists(profileId),
+            "Safe event and protocol state agree"
+        );
+        targetWallet = factory.walletFor(profileId);
+        require(
+            factory.splitWalletExists(profileId) == deployWallet,
+            "registration and actual deployment distinguished"
+        );
+    }
+
+    function _assertTemplateRights(bytes32 profileId, address payee) private view {
+        require(factory.profileEntryCount(profileId) == 2, "two explicit recipients");
+        uint256 matched;
+        for (uint256 i; i < 2; ++i) {
+            (address account, uint32 shares, bytes32 label) = factory.profileEntry(profileId, i);
+            if (account == payee && shares == 900_000 && label == keccak256("artist")) {
+                matched |= 1;
+            }
+            if (account == PROTOCOL && shares == 100_000 && label == keccak256("protocol")) {
+                matched |= 2;
+            }
+        }
+        require(matched == 3, "canonical profile retains exact artist and protocol shares");
+    }
+
+    function _safeSaleAuthorization()
+        private
+        view
+        returns (IStreamFixedPriceSaleAdapter.SaleAuthorization memory)
+    {
+        return IStreamFixedPriceSaleAdapter.SaleAuthorization({
+            collectionId: 1,
+            phaseId: PHASE,
+            payer: address(buyerSafe),
+            recipient: address(buyerSafe),
+            artist: address(artistSafe),
+            profileId: profile,
+            expectedPrimaryPolicyHash: _nativePrimaryPolicyHash(),
+            tokenDataHash: keccak256(TOKEN_DATA),
+            mintCommitment: keccak256("Safe current artwork"),
+            mintPolicyHash: manager.phasePolicyHash(1, PHASE),
+            price: 0.01 ether,
+            nonce: keccak256("Safe current mint"),
+            deadline: uint64(block.timestamp + 1 days),
+            signerEpoch: sale.signerEpoch()
+        });
+    }
+
     function _buyRevealTransferAndClaim() private {
-        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a =
-            IStreamFixedPriceSaleAdapter.SaleAuthorization({
-                collectionId: 1,
-                phaseId: PHASE,
-                payer: address(buyerSafe),
-                recipient: address(buyerSafe),
-                artist: address(artistSafe),
-                profileId: profile,
-                tokenDataHash: keccak256(TOKEN_DATA),
-                mintCommitment: keccak256("Safe current artwork"),
-                mintPolicyHash: manager.phasePolicyHash(1, PHASE),
-                price: 0.01 ether,
-                nonce: keccak256("Safe current mint"),
-                deadline: uint64(block.timestamp + 1 days),
-                signerEpoch: sale.signerEpoch()
-            });
+        IStreamFixedPriceSaleAdapter.SaleAuthorization memory a = _safeSaleAuthorization();
         bytes32 digest = sale.authorizationDigest(a);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
         require(

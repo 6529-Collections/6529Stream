@@ -7,6 +7,7 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Resume the developing modular artist authority batch | [Current artist activation](current-artist-activation.md) |
 | Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |
 | Onboard another artist and exercise sales and auctions | [Executable product scenarios](product-demo.md) |
 | Finish a collection and verify its portable artwork | [Collection completion and collector package](collector-package.md) |

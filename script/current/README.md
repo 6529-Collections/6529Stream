@@ -1,5 +1,14 @@
 # Current-stack development deployment
 
+The full-v1 integration branch is migrating this workflow to the modular artist
+suite and version-2 native/auction authorizations. Deployment now returns a
+scheduled authority-activation batch; it does not yet complete artist onboarding,
+phase consent or the Manager ownership handoff. See
+[current artist activation](../../docs/integrations/current-artist-activation.md).
+The PowerShell recipes and measurements below describe the retained RC1 workflow
+until their migration and a fresh complete rehearsal pass. Use the frozen RC1
+checkout to reproduce that evidence.
+
 `DeployCurrentStack.s.sol` deploys the current Core, governance, canonical module
 registry, mint manager and ledger, signed native sale, English auction, accepted
 artist registry, entropy coordinator, metadata router, royalty resolver, and

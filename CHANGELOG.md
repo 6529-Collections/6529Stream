@@ -10,6 +10,15 @@ the release policy in `docs/release-policy.md`.
 - Added exact Safe CALL payload conversion and receipt verification for the expected
   Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
   Client ABI/signing documentation now explicitly identifies its retained RC1 scope.
+- Added scoped artist economics/freeze delegation and direct-call timestamp
+  handling for queued EOA and Safe payout/attestation transactions.
+- Added exact native/ERC-20 sale funding with bounded wallet delivery and escrow
+  fallback. Native sale authorization is version 2 and binds the primary policy.
+- Added auction version-2 authorization and retained proceeds commitments;
+  settlement uses the rights approved when the auction was created.
+- Added a resumable modular artist authority-activation plan and current-system
+  Safe ERC-20 payment/recipient-failure tests. Complete operator and client
+  migration remains in progress.
 - Added prospective fixed-profile artist economics approval and exact defensive
   royalty freeze authorization, with typed resolver previews and consent before
   governed mutations. Defensive freezing preserves royalty terms; new minting

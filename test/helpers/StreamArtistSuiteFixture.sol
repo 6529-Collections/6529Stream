@@ -105,8 +105,15 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
             keccak256("fixture metadata module"),
             attribution
         );
-        primaryResolver =
-            new StreamRevenueResolver(IStreamCore(core_), factory_, executor_, attribution);
+        primaryResolver = new StreamRevenueResolver(
+            IStreamCore(core_),
+            factory_,
+            executor_,
+            attribution,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
         royalties = new StreamRoyaltyResolver(IStreamCore(core_), factory_, executor_, attribution);
         s.metadata = address(router);
         s.primaryResolver = address(primaryResolver);

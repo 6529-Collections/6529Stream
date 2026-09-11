@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `a46424a9` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `8b1a048b` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -22,47 +22,70 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
-One integrator owns technical decisions, shared interfaces and current-stack
-integration. Two builders and a separate independent reviewer work concurrently.
+One integrator owns technical decisions and delivery. Two builders and a separate
+reviewer advance independent domains; all rows in [V1_DELIVERY.md](V1_DELIVERY.md)
+remain in scope. [Safe acceptance](SAFE_ACCEPTANCE.md) covers every supported
+contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | `codex/v1-integration` | Full-v1 feature ledger, shared artist/payment/finality decisions, metadata/revenue provider reads and integration |
-| Artist | `codex/v1-artist-authority` | Scoped economics/freeze delegation after integrated prospective economics and exact defensive royalty freeze |
-| Revenue | `codex/v1-revenue` | Native/ERC-20 sale funding and bounded wallet delivery with escrow fallback |
-| Reviewer | Read-only across the above | Independent interface, source, adversarial-test and scope review |
+| Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
+| Artist | `codex/v1-artist-authority` | Collaborator handoff followed by actual template economics consent and remaining artist operations |
+| Revenue | `codex/v1-revenue` | Template-sale handoff followed by shared settlement and explicit permit branches |
+| Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
-ClaimRouter's independently reviewed implementation is integrated as `f6cac4ef`,
-with 21 passing focused tests in both compiler profiles. Broad candidate
-validation remains pending. [Safe acceptance](SAFE_ACCEPTANCE.md) is an explicit
-owner requirement across all lanes; root owns shared official fixtures and
-builders exercise them through their actual features. The artist first slice
-covers operation IDs 1/2/14/15/18/24/52, including repeated economics and
-attestation records where the specification requires them. Root and the reviewer
-resolve the exact shared dependency reads; builders do not create readiness flags
-or silently bypass required consent. The first payment increment is independent
-of universal settlement, allowing both lanes to advance together.
+Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
+expected-binding acceptance are integrated. Collaborator operations 5/6/7
+(`90369bf0`) and current template economics consent (`871046b2`) bring the
+integration source to 15 of the 57 artist operation IDs. Artist work continues
+with authorization revocation, followed by the content-authority operations.
 
-The initial artist/payment topology passed seven native/Safe integration tests
-and ten ERC-20/invariant tests, including 2,048 stateful operations. Its combined
-snapshot reported 27 passes and two fixture failures. After correcting
-policy-consent and pre-genesis deployment setup, all 14 focused adversarial/export
-tests pass, including 256 lineage fuzz cases. Preserve that snapshot's identity
-instead of attributing its results to newer contracts.
+Collection template materialization and typed economics facts are integrated.
+Template fixed-sale funding (`ddf01864`) passed 76 focused tests and four fuzz
+properties per compiler mode. Governed asset permit-capability attestations
+(`3287fcd5`) passed 13 tests plus fuzzing per mode. These increments received
+independent review. Revenue work now implements actual shared settlement and
+permit consumers; registry capability declarations alone do not complete them.
 
-The later economics/freeze increment has separately passed 40 resolver tests per
-compiler mode, 30 artist tests using the actual providers, and three actual
-current-Safe cases. Independent review accepted the source and scoped runtime
-evidence. Deferred profile registration/discovery (150 tests per compiler mode)
-and exact-credit escrow/flush (29 per mode) are also integrated. Sale funding
-adoption and scoped artist delegation now run in parallel with shared deployment,
-domain-fixture and client migration. This is not a full-repository or new
-release-candidate pass. The delivery ledger retains every broader v1 workstream.
+The completed combined snapshot passed 36 cases, including all nine ERC-20 and
+22 native-sale/auction cases. Two failures were an incorrect Safe event-layout
+assertion and an old invariant counterexample loaded from the wrong directory.
+The corrected runner passes all three invariant tests with 32 sequences of 64
+calls and zero reverts against the unchanged snapshot. Original failed evidence
+is preserved. The Safe assertion is corrected in source.
 
-The next draft PR will include a coherent tested implementation increment.
-Builders run focused compilation and tests before handoff; root owns broad
-validation, deterministic artifact refresh, integration and public deployment.
-The first 48-hour sprint is a delivery target, not a full-v1 completion claim.
+The new combined snapshot passed all 39 executed Safe, ERC-20, native-sale,
+auction and invariant cases, including actual Safe template consent/purchase/
+escrow/flush/claim and 2,048 stateful calls with zero reverts. Its 11 royalty cases
+were blocked during setup by a one-day execution window below the required
+seven-day floor. The one-line correction is source-reviewed; a separate copied
+snapshot reruns those 11 cases. All original sources/results remain preserved.
+These planning gas allowances do not establish normative cold-gas acceptance.
+
+The metadata host counterpart for artist content consent and defensive freezes
+passes 30 domain tests, including actual Safe administration and a separate Safe
+freeze relayer. One-use approval records, exact content evolution and versioned
+events are independently reviewed. Actual modular artist authorization and
+executed-finality composition remain pending; no substitute readiness provider
+was added. The source export/client projection still requires migration.
+
+The saved artist-authority activation plan publishes calldata and checks exact
+commitments, submission headroom, resumption and prior execution. Operator
+onboarding, phase completion and final Manager ownership handoff still need a
+complete resumable consumer. The client now prepares exact Safe CALL payloads
+and checks the expected Safe execution result. Its ABI/signing projection still
+targets retained RC1; migration to the new stack remains explicit work.
+
+Independently accepted fixture migration checkpoints include 58 historical
+Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factory/
+auction domain tests. The royalty fixture now uses actual current artist consent
+and canonical governance publication. The latest ABI-only check covers 440 Solidity sources with no errors. This is not a broad
+build or candidate acceptance. Client checks pass 47 tests; three new tests also
+exercise successful and failed calls through actual pinned Safe versions.
+
+The next draft PR will contain a coherent tested implementation increment.
+Builders run focused checks before handoff; root owns broad validation,
+deterministic artifacts, deployment and completion of the entire v1 ledger.
 
 ## Completed supported RC1
 

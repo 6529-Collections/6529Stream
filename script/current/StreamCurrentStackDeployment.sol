@@ -2,7 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "../../smart-contracts/core/StreamCore.sol";
-import "../../smart-contracts/domains/artist/StreamCollectionArtistRegistry.sol";
+import "./StreamArtistSuiteDeployment.sol";
+import "./StreamArtistActivationPlan.sol";
+import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
 import "../../smart-contracts/domains/governance/StreamRoleRegistry.sol";
@@ -24,11 +26,10 @@ import "./DevelopmentEntropyProvider.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 
 /// @notice Reusable development/testnet genesis assembly for the actual current stack.
-abstract contract StreamCurrentStackDeployment {
+abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     bytes32 internal constant PHASE = keccak256("current-stack fixed price");
     bytes32 internal constant AUCTION_PHASE = keccak256("current-stack auction");
     bytes32 internal constant ERC20_PHASE = keccak256("current-stack ERC20 fixed price");
-    bytes32 internal constant PRIMARY_REVENUE_CLASS = keccak256("current primary sale");
     bytes32 internal constant DEPLOYMENT_HASH =
         keccak256("current-stack development deployment v1; unaudited; not release evidence");
     bytes32 internal constant REGISTRY_HASH = keccak256("current-stack development registry v1");
@@ -46,14 +47,14 @@ abstract contract StreamCurrentStackDeployment {
     StreamMintLedger internal ledger;
     StreamFixedPriceSaleAdapter internal sale;
     StreamERC20FixedPriceSaleAdapter internal erc20Sale;
-    StreamRevenueResolver internal primaryRevenue;
     StreamEnglishAuctionHouse internal auction;
     StreamSplitFactory internal factory;
     StreamAssetPolicyRegistry internal assetPolicy;
-    StreamRoyaltyResolver internal royalty;
-    StreamCollectionArtistRegistry internal artistRegistry;
+    StreamRevenueEscrow internal revenueEscrow;
+    bytes32 internal artistActivationId;
+    uint64 internal artistActivationNotBefore;
+    bytes internal encodedArtistActivationPlan;
     StreamEntropyCoordinator internal entropy;
-    StreamMetadataRouter internal router;
     IStreamEntropyProvider internal provider;
     address internal artist;
     address internal wallet;
@@ -87,21 +88,31 @@ abstract contract StreamCurrentStackDeployment {
         ledger = new StreamMintLedger();
         manager = new StreamMintManager(core, ledger, IERC165(address(registry)));
         ledger.setLedgerWriter(address(manager), true);
-        assetPolicy = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(assetPolicy);
-        royalty = new StreamRoyaltyResolver(core, factory, address(executor));
-        artistRegistry = new StreamCollectionArtistRegistry(
+        assetPolicy = new StreamAssetPolicyRegistry(address(executor));
+        factory = new StreamSplitFactory(assetPolicy, address(executor), _walletGasConfigs());
+        _deployArtistSuite(
             address(core),
+            address(manager),
+            address(roles),
+            factory,
             address(executor),
-            DEPLOYMENT_HASH,
-            "urn:6529stream:development:artist",
-            keccak256("development artist module")
+            DEPLOYMENT_HASH
         );
-        sale = new StreamFixedPriceSaleAdapter(manager, factory, platform, artistRegistry);
-        primaryRevenue = new StreamRevenueResolver(factory);
-        erc20Sale =
-            new StreamERC20FixedPriceSaleAdapter(manager, primaryRevenue, platform, artistRegistry);
-        auction = new StreamEnglishAuctionHouse(core, manager, factory, platform, artistRegistry);
+        revenueEscrow = new StreamRevenueEscrow(
+            factory,
+            address(executor),
+            IStreamGasParameterHost.GasParameterConfig("FLUSH_GAS_FLOOR", 12_000_000, 12_000_000, 3)
+        );
+        IStreamArtistAttribution attribution = IStreamArtistAttribution(address(artistRegistry));
+        sale = new StreamFixedPriceSaleAdapter(
+            manager, primaryRevenue, platform, attribution, revenueEscrow
+        );
+        erc20Sale = new StreamERC20FixedPriceSaleAdapter(
+            manager, primaryRevenue, platform, attribution, revenueEscrow
+        );
+        auction = new StreamEnglishAuctionHouse(
+            core, manager, primaryRevenue, platform, attribution, revenueEscrow
+        );
         entropy = new StreamEntropyCoordinator(
             address(core),
             address(executor),
@@ -109,25 +120,6 @@ abstract contract StreamCurrentStackDeployment {
             "urn:6529stream:development:entropy",
             keccak256("development entropy module")
         );
-        // Keep the broadcast initcode identical to the named compiler artifact.
-        // A specialized `new` expression can otherwise defeat Forge's constructor decoder.
-        bytes memory routerInitcode = bytes.concat(
-            type(StreamMetadataRouter).creationCode,
-            abi.encode(
-                address(core),
-                address(executor),
-                DEPLOYMENT_HASH,
-                "urn:6529stream:development:metadata",
-                keccak256("development metadata module"),
-                artistRegistry
-            )
-        );
-        address deployedRouter;
-        assembly ("memory-safe") {
-            deployedRouter := create(0, add(routerInitcode, 32), mload(routerInitcode))
-        }
-        require(deployedRouter != address(0), "metadata deployment failed");
-        router = StreamMetadataRouter(deployedRouter);
         if (localDevelopment) {
             provider = new DevelopmentEntropyProvider(address(entropy), deployer);
         } else {
@@ -140,62 +132,75 @@ abstract contract StreamCurrentStackDeployment {
                 keccak256("development VRF module")
             );
         }
-        _configureMintPhase(PHASE, address(sale));
-        _configureMintPhase(AUCTION_PHASE, address(auction));
-        _configureMintPhase(ERC20_PHASE, address(erc20Sale));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
         entries[1] = IStreamSplitWallet.SplitEntry(protocol, 100_000, keccak256("protocol"));
         (profile, wallet) = factory.createProfile(entries, keccak256("development split"));
-        primaryRevenue.setPrimaryProfileAssignment(
-            PRIMARY_REVENUE_CLASS, 1, 1, profile, keccak256("development ERC20 primary assignment")
-        );
         ledger.transferOwnership(address(executor));
-        manager.transferOwnership(address(executor));
         sale.transferOwnership(address(executor));
         erc20Sale.transferOwnership(address(executor));
-        primaryRevenue.transferOwnership(address(executor));
         auction.transferOwnership(address(executor));
-        assetPolicy.transferOwnership(address(executor));
+        // Manager remains deployer-owned through artist consent and phase activation.
+        // Artist onboarding and phase setup must finish before their separate ownership handoff.
         _initializeProductGenesis();
-        if (artist == deployer) {
-            IStreamCollectionArtistRegistry.Attribution memory item = artistRegistry.attribution(1);
-            artistRegistry.acceptArtist(
-                1,
-                item.nominationHash,
-                artistRegistry.acceptanceNonces(artist),
-                uint64(block.timestamp + 1 days),
-                ""
-            );
-        }
+        _scheduleArtistActivation();
     }
 
-    function _configureMintPhase(bytes32 phase, address phaseExecutor) private {
-        bytes32[] memory counters = new bytes32[](1);
-        counters[0] = keccak256("supply");
-        IStreamMintManager.MintCounterConfig[] memory configs =
-            new IStreamMintManager.MintCounterConfig[](1);
-        configs[0] = IStreamMintManager.MintCounterConfig(
-            true,
-            IStreamMintManager.CounterKeyMode.CONSTANT,
-            IStreamMintLedger.CounterCapMode.STATIC,
-            IStreamMintLedger.CounterDeltaMode.STATIC,
-            10,
-            1,
-            keccak256("counter")
+    function _artistDeploymentSender() internal view override returns (address) {
+        return deployer;
+    }
+
+    function _walletGasConfigs()
+        private
+        pure
+        returns (IStreamGasParameterHost.GasParameterConfig[3] memory rows)
+    {
+        rows[0] = IStreamGasParameterHost.GasParameterConfig(
+            "ERC_1271_GAS_LIMIT", 400_000, 350_000, 2
         );
-        IStreamMintManager.MintGateConfig memory gate;
-        manager.configurePhase(
-            1,
-            phase,
-            IStreamMintManager.MintPhaseConfig(
-                false, 0, 0, 1, keccak256("phase"), keccak256("metadata")
-            ),
-            gate,
-            counters,
-            configs
+        rows[1] =
+            IStreamGasParameterHost.GasParameterConfig("ASSET_POLICY_GAS_LIMIT", 30_000, 15_000, 2);
+        rows[2] = IStreamGasParameterHost.GasParameterConfig(
+            "WALLET_DEPOSIT_GAS_LIMIT", 200_000, 25_000, 2
         );
-        manager.setPhaseExecutor(1, phase, phaseExecutor, true);
+    }
+
+    /// @dev One hour of submission headroom beyond the onchain 48-hour minimum.
+    ///      Live runners pin this value before simulation and retain the scheduled result.
+    function _artistActivationTimestamp() internal view virtual returns (uint64) {
+        return uint64(block.timestamp + 49 hours);
+    }
+
+    function _scheduleArtistActivation() private {
+        StreamArtistActivationPlan.Plan memory plan =
+            StreamArtistActivationPlan.build(roles, manager, deployer);
+        artistActivationNotBefore = _artistActivationTimestamp();
+        require(
+            artistActivationNotBefore >= block.timestamp + 48 hours,
+            "activation submission window elapsed"
+        );
+        encodedArtistActivationPlan = abi.encode(plan);
+        executor.publishGovernanceCallData(plan.callDatas);
+        bytes memory result = governanceRoot.execute(
+            address(executor),
+            0,
+            abi.encodeCall(
+                executor.scheduleGovernanceBatch,
+                (
+                    1,
+                    plan.calls,
+                    plan.scopeHash,
+                    plan.oldValueHash,
+                    plan.newValueHash,
+                    artistActivationNotBefore,
+                    artistActivationNotBefore + 7 days,
+                    keccak256("current artist activation"),
+                    "urn:6529stream:development:artist-activation",
+                    DEPLOYMENT_HASH
+                )
+            )
+        );
+        artistActivationId = abi.decode(result, (bytes32));
     }
 
     function _initializeProductGenesis() private {
@@ -214,12 +219,12 @@ abstract contract StreamCurrentStackDeployment {
                 (pointerRecords[j], pointerRecords[j - 1]);
             }
         }
-        GenesisBatch[] memory batches = new GenesisBatch[](4);
+        GenesisBatch[] memory batches = new GenesisBatch[](5);
         batches[0].actionClass = 1;
         (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
             StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 6);
-        batches[0].callDatas = new bytes[](records.length + 6);
+        batches[0].calls = new GovernanceCall[](records.length + 2);
+        batches[0].callDatas = new bytes[](records.length + 2);
         for (uint256 i; i < records.length; ++i) {
             batches[0].calls[i] = registrations[i];
             batches[0].callDatas[i] = registrationData[i];
@@ -232,30 +237,6 @@ abstract contract StreamCurrentStackDeployment {
         );
         batches[0].callDatas[records.length + 1] = data;
         batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
-        data = abi.encodeCall(
-            router.setCollectionMetadata,
-            (1, "Stream Genesis", "Current stack development deployment", "", "")
-        );
-        batches[0].callDatas[records.length + 2] = data;
-        batches[0].calls[records.length + 2] = _configurationCall(address(router), data);
-        data = abi.encodeCall(royalty.configureCollectionRoyalty, (1, profile, uint16(690)));
-        batches[0].callDatas[records.length + 3] = data;
-        batches[0].calls[records.length + 3] = _configurationCall(address(royalty), data);
-        data = abi.encodeCall(
-            router.setCollectionScript,
-            (
-                1,
-                "const c=document.createElement('canvas');c.width=c.height=800;document.body.style.margin='0';document.body.append(c);const x=c.getContext('2d');x.fillStyle='#101217';x.fillRect(0,0,800,800);for(let i=0;i<32;i++){x.fillStyle='#'+tokenHash.slice(2+i,8+i);x.fillRect(30+i*23,80+(i%4)*140,18,420)}x.fillStyle='white';x.font='32px monospace';x.fillText('STREAM #'+tokenId,40,740);"
-            )
-        );
-        batches[0].callDatas[records.length + 4] = data;
-        batches[0].calls[records.length + 4] = _configurationCall(address(router), data);
-        data = abi.encodeCall(
-            artistRegistry.nominateArtist, (1, artist, keccak256("development artist attribution"))
-        );
-        batches[0].callDatas[records.length + 5] = data;
-        batches[0].calls[records.length + 5] = _configurationCall(address(artistRegistry), data);
-
         bytes32[] memory installTypes = new bytes32[](records.length - 1);
         StreamModuleRegistration[] memory installs =
             new StreamModuleRegistration[](records.length - 1);
@@ -266,12 +247,54 @@ abstract contract StreamCurrentStackDeployment {
         batches[1].actionClass = 3;
         (batches[1].calls, batches[1].callDatas) =
             StreamCurrentStackPlan.pointerCalls(core, registry, installTypes, installs);
-        batches[2].actionClass = 2;
-        batches[2].calls = new GovernanceCall[](1);
-        batches[2].callDatas = new bytes[](1);
-        (batches[2].calls[0], batches[2].callDatas[0]) =
+        batches[2].actionClass = 1;
+        batches[2].calls = new GovernanceCall[](7);
+        batches[2].callDatas = new bytes[](7);
+        data = abi.encodeCall(
+            router.setCollectionMetadata,
+            (1, "Stream Genesis", "Current stack development deployment", "", "")
+        );
+        batches[2].callDatas[0] = data;
+        batches[2].calls[0] = _configurationCall(address(router), data);
+        data = abi.encodeCall(royalty.configureCollectionRoyalty, (1, profile, uint16(690)));
+        batches[2].callDatas[1] = data;
+        batches[2].calls[1] = _configurationCall(address(royalty), data);
+        data = abi.encodeCall(
+            router.setCollectionScript,
+            (
+                1,
+                "const c=document.createElement('canvas');c.width=c.height=800;document.body.style.margin='0';document.body.append(c);const x=c.getContext('2d');x.fillStyle='#101217';x.fillRect(0,0,800,800);for(let i=0;i<32;i++){x.fillStyle='#'+tokenHash.slice(2+i,8+i);x.fillRect(30+i*23,80+(i%4)*140,18,420)}x.fillStyle='white';x.font='32px monospace';x.fillText('STREAM #'+tokenId,40,740);"
+            )
+        );
+        batches[2].callDatas[2] = data;
+        batches[2].calls[2] = _configurationCall(address(router), data);
+        data = abi.encodeCall(
+            primaryRevenue.setPrimaryProfileAssignment,
+            (PRIMARY_REVENUE_CLASS, uint8(1), uint256(1), profile, bytes32(0))
+        );
+        batches[2].callDatas[3] = data;
+        batches[2].calls[3] = _configurationCall(address(primaryRevenue), data);
+        (batches[2].calls[4], batches[2].callDatas[4]) = _escrowProducerCall(address(sale));
+        (batches[2].calls[5], batches[2].callDatas[5]) = _escrowProducerCall(address(erc20Sale));
+        (batches[2].calls[6], batches[2].callDatas[6]) = _escrowProducerCall(address(auction));
+        batches[3].actionClass = 2;
+        batches[3].calls = new GovernanceCall[](1);
+        batches[3].callDatas = new bytes[](1);
+        (batches[3].calls[0], batches[3].callDatas[0]) =
             StreamCurrentStackPlan.freezeManifestCall(core, registry, records[1]);
         _sealProductPlan(batches, pointerTypes, pointerRecords, records);
+    }
+
+    function _escrowProducerCall(address producer)
+        private
+        view
+        returns (GovernanceCall memory call_, bytes memory data)
+    {
+        (bytes32 scope, bytes32 oldState, bytes32 nextState) =
+            revenueEscrow.creditProducerTransitionHashes(producer, true);
+        data = abi.encodeCall(revenueEscrow.setCreditProducer, (producer, true));
+        call_ =
+            StreamCurrentStackPlan.call(address(revenueEscrow), data, scope, oldState, nextState);
     }
 
     function _moduleRecords() private view returns (StreamModuleRegistration[] memory records) {
@@ -321,7 +344,7 @@ abstract contract StreamCurrentStackDeployment {
         records[7] = _record(
             address(artistRegistry),
             keccak256("ARTIST_REGISTRY"),
-            type(IStreamCollectionArtistRegistry).interfaceId,
+            type(IStreamArtistMintConsent).interfaceId,
             keccak256("development artist module")
         );
         records[8] = _record(
@@ -417,18 +440,18 @@ abstract contract StreamCurrentStackDeployment {
             (binding.expectedTriggers[1], binding.expectedTriggers[0]);
         }
         binding.actionPolicyCandidateProfileHash = DEPLOYMENT_HASH;
-        batches[3].actionClass = 3;
-        batches[3].calls = new GovernanceCall[](2);
-        batches[3].callDatas = new bytes[](2);
-        batches[3].calls[0].target = address(executor);
-        batches[3].calls[0].selector = executor.sealSystemManifestBootstrap.selector;
-        batches[3].calls[1].target = address(manifest);
-        batches[3].calls[1].selector = manifest.publishStreamSystemManifest.selector;
+        batches[4].actionClass = 3;
+        batches[4].calls = new GovernanceCall[](2);
+        batches[4].callDatas = new bytes[](2);
+        batches[4].calls[0].target = address(executor);
+        batches[4].calls[0].selector = executor.sealSystemManifestBootstrap.selector;
+        batches[4].calls[1].target = address(manifest);
+        batches[4].calls[1].selector = manifest.publishStreamSystemManifest.selector;
         binding.actionPolicies = _actionPolicies(batches);
         binding.expectedActionPolicyCatalogHash = StreamGovernanceActionPolicy.expectedCatalogHash(
             address(executor), binding.actionPolicyCandidateProfileHash, binding.actionPolicies
         );
-        (batches[3].calls[0], batches[3].callDatas[0]) =
+        (batches[4].calls[0], batches[4].callDatas[0]) =
             StreamGenesisManifestPlan.sealCall(executor, deployer, binding, payload);
         StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate({
             manifestHash: payloadHash,
@@ -451,7 +474,7 @@ abstract contract StreamCurrentStackDeployment {
         modules.streamAdminsOrGovernance = address(executor);
         modules.moduleRegistry = address(registry);
         modules.stateExportPublisher = address(executor);
-        (batches[3].calls[1], batches[3].callDatas[1]) =
+        (batches[4].calls[1], batches[4].callDatas[1]) =
             StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
         executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
         // Bind the committed catalog in its own transaction so product activation
@@ -526,7 +549,7 @@ abstract contract StreamCurrentStackDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 59 : 60);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 67 : 68);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -607,7 +630,21 @@ abstract contract StreamCurrentStackDeployment {
         rows[i++] = _operatingPolicy(
             2, address(primaryRevenue), primaryRevenue.freezePrimaryAssignment.selector
         );
-        // Artist nomination and metadata/entropy configuration are also collected from genesis.
+        rows[i++] = _operatingPolicy(address(manager), manager.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(artistRegistry), artistRegistry.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(revenueEscrow), revenueEscrow.setCreditProducer.selector);
+        rows[i++] = _operatingPolicy(address(factory), factory.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(revenueEscrow), revenueEscrow.raiseGasParameter.selector);
+        rows[i++] =
+            _operatingPolicy(address(primaryRevenue), primaryRevenue.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(
+            address(primaryRevenue), primaryRevenue.createPrimaryTemplate.selector
+        );
+        rows[i++] = _operatingPolicy(address(assetPolicy), assetPolicy.setAssetPermitPolicy.selector);
+        // Metadata/entropy configuration is also collected from genesis.
         assert(i == rows.length);
     }
 

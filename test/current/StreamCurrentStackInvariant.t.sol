@@ -61,9 +61,15 @@ contract StreamCurrentStackInvariantTest is StreamCurrentStackFixture {
             manager,
             primaryResolver,
             vm.addr(PLATFORM_KEY),
-            IStreamArtistAttribution(address(artists))
+            IStreamArtistAttribution(address(artists)),
+            revenueEscrow
         );
         _assertDeployableProductionInstance(address(erc20Sale));
+    }
+
+    function _additionalEscrowProducers() internal view override returns (address[] memory rows) {
+        rows = new address[](1);
+        rows[0] = address(erc20Sale);
     }
 
     function _configureAdditionalProducts() internal override {

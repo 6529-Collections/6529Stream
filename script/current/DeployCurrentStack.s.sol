@@ -42,6 +42,15 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         bool developmentEntropy;
         address erc20Sale;
         address primaryRevenueResolver;
+        address revenueEscrow;
+        address artistCoordinator;
+        address artistArchive;
+        address artistValidator;
+        address artistReads;
+        address[7] artistOwners;
+        bytes32 activationActionId;
+        uint64 activationNotBefore;
+        bytes activationPlan;
     }
 
     function run() external returns (DeploymentAddresses memory deployed) {
@@ -76,8 +85,23 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
             profile,
             localDevelopment,
             address(erc20Sale),
-            address(primaryRevenue)
+            address(primaryRevenue),
+            address(revenueEscrow),
+            address(artistCoordinator),
+            artistSuite.archive,
+            artistSuite.validator,
+            address(artistCoordinator.reads()),
+            artistSuite.owners,
+            artistActivationId,
+            artistActivationNotBefore,
+            encodedArtistActivationPlan
         );
+    }
+
+    function _artistActivationTimestamp() internal view override returns (uint64) {
+        uint256 value = vm.envOr("STREAM_ARTIST_ACTIVATION_NOT_BEFORE", block.timestamp + 49 hours);
+        require(value <= type(uint64).max - 7 days, "activation time out of range");
+        return uint64(value);
     }
 
     function _loadVRFConfig() private {
