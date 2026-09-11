@@ -108,7 +108,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
-| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; current-Core composition, canonical mint-authorization correction, native and broader orchestration pending |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; current-Core composition running, native and broader orchestration pending |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
@@ -336,11 +336,14 @@ the uninstalled foundation settlement API (`f803f482`). The universal recorder,
 sole ERC-20 payer adapter and signed fixed-profile consumer (`18dbe54c`) pass 29
 domain tests plus 256 fuzz inputs with independent review. Actual Core/Manager/
 artist composition is being built; native official settlement is the next payment
-slice. A separate correction will bind the ERC-20 Manager authorization ID to the
-full signed message digest required by MPA-TICKET. Existing replay tests do not
-establish that normative digest derivation.
+slice. The separate correction `5ecae362` binds the ERC-20 Manager authorization
+ID to the full signed message digest required by MPA-TICKET; two focused cases
+and exact unchanged interface/storage checks received independent review. The
+next ten-case current run combines three universal payment cases with two content
+and five existing Safe cases. It includes the identity revision and independently
+checks actual Manager authorization consumption and rollback.
 
-The latest whole-repository ABI-only check covers 470 Solidity sources with zero
+The latest whole-repository ABI-only check covers 471 Solidity sources with zero
 errors, including work-in-progress universal integration tests. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
 

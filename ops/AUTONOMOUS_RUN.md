@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `3f6a5dd4` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `5ecae362` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -31,7 +31,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
 | Artist | `codex/v1-artist-authority` | Guardian configuration and two-sided principal rotation (operations 28–32) |
-| Revenue | `codex/v1-revenue` | Native shared settlement and template consumer; canonical ERC-20 mint authorization correction |
+| Revenue | `codex/v1-revenue` | Native shared settlement and template consumer |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
@@ -58,6 +58,10 @@ fixed-profile consumer are integrated as `18dbe54c`. Their 29 tests plus 256 fuz
 inputs pass with independent source/artifact review. Current-Core composition is
 being built separately. Native official settlement and other orchestration
 profiles remain open; the payment builder is implementing the native branch.
+The canonical full-digest Manager authorization correction is integrated as
+`5ecae362`, with two focused tests and independent source/artifact review. A
+ten-case actual-current run now combines three new universal payment workflows
+with the existing content and Safe cases, using the accepted identity revision.
 
 The completed combined snapshot passed 36 cases, including all nine ERC-20 and
 22 native-sale/auction cases. Two failures were an incorrect Safe event-layout
@@ -100,7 +104,7 @@ Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factor
 auction domain tests. The royalty fixture now uses actual current artist consent
 and canonical governance publication. Five preserved resolver tests (`f803f482`)
 replace the old fixture's still-supported resolver assertions; the obsolete
-settlement API is retired. The latest ABI-only check covers 470 Solidity sources,
+settlement API is retired. The latest ABI-only check covers 471 Solidity sources,
 including work-in-progress universal current-stack tests, with zero
 errors. This is not a broad build or candidate
 acceptance. Client checks pass 47 tests; three new tests also

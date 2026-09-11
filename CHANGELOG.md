@@ -14,6 +14,9 @@ the release policy in `docs/release-policy.md`.
   signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
   exact settlement events, replay protection and Safe domain tests. Current-Core
   composition and broader sale orchestration remain in progress.
+- Bound universal sale mint authorization IDs to the complete signed digest,
+  preserving the separate commercial and execution nonce protections. Added
+  actual-current Safe payment, exact replay and late-recipient rollback scenarios.
 - Preserved resolver and public SALE_POSTER materialization regressions in their
   own fixture while retiring the uninstalled settlement API's owner allowlist
   and direct payer-pull tests. New graph tests cover current transfer/replay rules.
