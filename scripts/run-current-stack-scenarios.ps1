@@ -323,6 +323,19 @@ function Scenario-Event([object]$Receipt,[string]$Module,[string]$Name) {
     }
     return $values
 }
+function ConvertTo-ScenarioAuthorizationTuple([string]$Module,[string]$Method,[object]$Message) {
+    # JSON dictionaries have no positional ABI meaning. Resumed authorizations
+    # use the selected contract's struct component order on every PS7 version.
+    $parameters=@((Scenario-Method $Module $Method).inputs)
+    if ($parameters.Count -ne 1 -or $parameters[0].type -ne 'tuple') {throw "Expected one authorization tuple in $Module.$Method."}
+    $fields=@($parameters[0].components)
+    if ($Message -isnot [Collections.IDictionary] -or $Message.Count -ne $fields.Count) {throw 'Authorization field count differs from the selected ABI.'}
+    $values=@(foreach ($field in $fields) {
+        if (-not $Message.Contains($field.name)) {throw "Authorization field missing: $($field.name)"}
+        [string]$Message[$field.name]
+    })
+    return '('+($values -join ',')+')'
+}
 function New-ScenarioAuthorization([string]$Label,[string]$Kind,[string]$Module,[object]$Message) {
     if (-not $script:state.Contains('authorizations')) {$script:state.authorizations=[ordered]@{}}
     if (-not $script:state.authorizations.Contains($Label)) {
@@ -338,8 +351,8 @@ function New-ScenarioAuthorization([string]$Label,[string]$Kind,[string]$Module,
     if ($LASTEXITCODE -ne 0) {throw "Build the current client package before signing: $($prepared -join ' ')"}
     $typed=($prepared -join "`n")|ConvertFrom-Json -AsHashtable
     [IO.File]::WriteAllText((Join-Path $OutputDirectory "$Label.typed-data.json"),($typed|ConvertTo-Json -Depth 30)+"`n",[Text.UTF8Encoding]::new($false))
-    $tuple='('+(($request.message.Values) -join ',')+')'
     $method=if($Kind -eq 'paymentIntent'){'paymentIntentDigest'}else{'authorizationDigest'}
+    $tuple=ConvertTo-ScenarioAuthorizationTuple $Module $method $request.message
     $onchain=(Read-Scenario $Module $method @($tuple))[0]
     if ($onchain -ne $typed.digest) {throw "Client digest differs from the deployed contract for $Label."}
     $rpcPrepared=& node (Join-Path $repoRoot 'packages/stream-client/examples/prepare.mjs') --rpc $path 2>&1

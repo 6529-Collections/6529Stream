@@ -24,6 +24,43 @@ Require ((Scenario-Hex ([bigint]16777216)) -eq '0x1000000') 'Gas cap quantity en
 $parameter=@{type='tuple[]';components=@(@{type='uint256'},@{type='tuple[]';components=@(@{type='address'},@{type='bytes32'})})}
 Require ((Scenario-CanonicalType $parameter) -eq '(uint256,(address,bytes32)[])[]') 'Nested ABI tuple arrays.'
 
+# Restored JSON can be unordered on PS7.0-7.2. Check actual retained contract
+# ABIs against explicit protocol field lists, independently of dictionary order.
+& {
+    $repoRoot=Split-Path -Parent $PSScriptRoot
+    $contracts=@{nativeSale='StreamFixedPriceSaleAdapter';erc20Sale='StreamERC20FixedPriceSaleAdapter';auction='StreamEnglishAuctionHouse'}
+    $artifactCache=@{}
+    foreach ($contract in $contracts.Values) {
+        $artifactCache[$contract]=Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $repoRoot "release-artifacts/current/artifacts/$contract.json") | ConvertFrom-Json -AsHashtable
+    }
+    $cases=@(
+        @{module='nativeSale';method='authorizationDigest';fields=@('collectionId','phaseId','payer','recipient','artist','profileId','tokenDataHash','mintCommitment','mintPolicyHash','price','nonce','deadline','signerEpoch')},
+        @{module='erc20Sale';method='authorizationDigest';fields=@('saleId','saleConfigHash','payer','recipient','artist','tokenDataHash','mintCommitment','nonce','deadline','signerEpoch')},
+        @{module='erc20Sale';method='paymentIntentDigest';fields=@('payer','asset','maxAmount','saleRef','expectedPrimaryPolicyHash','nonce','deadline')},
+        @{module='auction';method='authorizationDigest';fields=@('collectionId','phaseId','artist','profileId','tokenDataHash','mintCommitment','mintPolicyHash','reservePrice','startTime','endTime','extensionWindow','minBidIncrementBps','nonce','deadline','signerEpoch')}
+    )
+    foreach ($case in $cases) {
+        $components=@((Scenario-Method $case.module $case.method).inputs[0].components)
+        Require (($components.name -join ',') -ceq ($case.fields -join ',')) 'Explicit field order matches the retained actual contract ABI.'
+        $values=@{};$i=0
+        foreach ($field in $case.fields) {$i++;$values[$field]=$i.ToString()}
+        $expected='('+(($case.fields | ForEach-Object {$values[$_]}) -join ',')+')'
+        foreach ($mode in @('reversedJson','plainHashtable')) {
+            $message=if ($mode -eq 'plainHashtable') {@{}} else {[ordered]@{}}
+            for ($j=$case.fields.Count-1;$j -ge 0;$j--) {$field=$case.fields[$j];$message[$field]=$values[$field]}
+            if ($mode -eq 'reversedJson') {
+                $message=$message | ConvertTo-Json -Compress | ConvertFrom-Json -AsHashtable
+                Require (('('+(($message.Values) -join ',')+')') -cne $expected) 'Shuffled JSON exposes the former Values-based defect.'
+            } else {Require ($message -is [hashtable]) 'Fixture includes the ordinary pre-7.3 dictionary type.'}
+            Require ((ConvertTo-ScenarioAuthorizationTuple $case.module $case.method $message) -ceq $expected) 'Authorization tuple follows ABI order after restoration.'
+        }
+        $bad=$values.Clone();$bad.Remove($case.fields[0]);$bad.unexpected='1'
+        Require-Failure {ConvertTo-ScenarioAuthorizationTuple $case.module $case.method $bad} 'Authorization field missing'
+        $bad=$values.Clone();$bad.unexpected='1'
+        Require-Failure {ConvertTo-ScenarioAuthorizationTuple $case.module $case.method $bad} 'Authorization field count differs'
+    }
+}
+
 # A --skip test deployment has no mock artifact. Preparation must supply both
 # creation bytecode and the shared ABI cache used by mint/approve/balance reads.
 $fixtureParent=[IO.Path]::GetFullPath([IO.Path]::GetTempPath())
