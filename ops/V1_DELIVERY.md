@@ -104,7 +104,8 @@ commits, tests and retained results in the evidence column when advancing it.
 | ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Queued |
 | ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Queued |
 | ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
-| PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Building |
+| PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Integrated: `f6cac4ef`, 21 focused tests in both compiler profiles; candidate validation pending |
+| SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Queued |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Queued |
 | PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Queued |

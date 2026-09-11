@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added stateless aggregation of native and ERC-20 split-wallet claims, including
+  atomic and continue-on-failure modes and tests across 20 actual wallets.
+- Added offline fixtures from integrity-pinned official Safe 1.3.0, 1.4.1 and
+  1.5.0 packages, real threshold-signature and execution helpers, and focused
+  wallet interoperability tests. Full workflow acceptance remains in progress.
+
 - Added independently checked Sepolia deployment and native-sale demonstration
   evidence, public addresses and client configuration, including real Chainlink
   fulfillment, final metadata, withdrawals and artist transfer.

@@ -29,10 +29,14 @@ integration. Two builders and a separate independent reviewer work concurrently.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Full-v1 feature ledger, shared artist/payment/finality decisions, metadata/revenue provider reads and integration |
 | Artist | `codex/v1-artist-authority` | Real identity, two-sided binding and eligible mint consent with mandatory floor records; manager hooks and independent pause |
-| Revenue | `codex/v1-revenue` | Stateless claim aggregation over at least 20 real wallets; failure isolation and event-based discovery |
+| Revenue | `codex/v1-revenue` | Signed releases/revocation and deprecated-asset exits; actual governed wallet verification budgets |
 | Reviewer | Read-only across the above | Independent interface, source, adversarial-test and scope review |
 
-No feature in this new phase is yet marked integrated. The artist first slice
+ClaimRouter's independently reviewed implementation is integrated as `f6cac4ef`,
+with 21 passing focused tests in both compiler profiles. Broad candidate
+validation remains pending. [Safe acceptance](SAFE_ACCEPTANCE.md) is an explicit
+owner requirement across all lanes; root owns shared official fixtures and
+builders exercise them through their actual features. The artist first slice
 covers operation IDs 1/2/14/15/18/24/52, including repeated economics and
 attestation records where the specification requires them. Root and the reviewer
 resolve the exact shared dependency reads; builders do not create readiness flags
