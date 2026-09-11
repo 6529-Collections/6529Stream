@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "../parameters/IStreamGasParameterHost.sol";
+
 import "./IStreamSplitWallet.sol";
 import "./IStreamAssetPolicyRegistry.sol";
 
 /// @notice Interface for creating deterministic split profiles and wallets.
-interface IStreamSplitFactory {
+interface IStreamSplitFactory is IStreamGasParameterHost {
+    function gasParameterFloor(bytes32 parameterId) external view returns (uint256);
     /// @notice Reverts when two canonical entries use the same account and label.
     error DuplicateSplitEntry(address account, bytes32 labelId);
     /// @notice Reverts when a split profile has zero entries or exceeds the entry limit.

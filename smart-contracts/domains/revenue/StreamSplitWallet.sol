@@ -6,13 +6,15 @@ import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 
 import "../../interfaces/stream/revenue/IStreamSplitWallet.sol";
 import "../../vendor/openzeppelin/Math.sol";
-import "../../vendor/openzeppelin/ReentrancyGuard.sol";
+import "./StreamReleaseAuthorization.sol";
 
 /// @notice Pull-payment split wallet for one immutable split profile.
-contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
+contract StreamSplitWallet is StreamReleaseAuthorization {
     uint8 private constant _ASSET_STATUS_ACTIVE = 1;
-    uint256 private constant _ASSET_POLICY_GAS_LIMIT = 30_000;
-    uint256 private constant _ASSET_POLICY_PARENT_GAS_MIN = 31_000;
+    uint8 private constant _ASSET_STATUS_DEPRECATED = 3;
+    bytes32 private constant _ASSET_POLICY_GAS_ID =
+        keccak256("6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT");
+    bytes32 private constant _ERC1271_GAS_ID = keccak256("6529STREAM_GGP_ERC_1271_GAS_LIMIT");
 
     /// @notice Parts-per-million denominator for split shares.
     uint32 public constant override SHARE_DENOMINATOR_PPM = 1_000_000;
@@ -198,19 +200,56 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         returns (uint256 amount)
     {
         _requireSupportedAsset(asset);
-        if (recipient == address(0)) {
-            revert ZeroRecipient();
-        }
+        if (recipient == address(0)) revert ZeroRecipient();
         if (recipient != account && msg.sender != account) {
             revert UnauthorizedReleaseRecipient(msg.sender, account, recipient);
         }
+        uint256 observed;
+        (observed, amount) = _prepareRelease(asset, account, recipient);
+        _executeRelease(asset, account, recipient, observed, amount);
+    }
 
-        uint256 observed = observedReceived(asset);
-        amount = releasable(asset, account);
+    /// @notice Relays exact full-amount wallet-domain consent, including contract-wallet signatures.
+    function releaseWithAuthorization(
+        ReleaseAuthorization calldata authorization,
+        bytes calldata signature
+    ) external override nonReentrant returns (uint256 amount) {
+        uint256 observed;
+        (observed, amount) =
+            _prepareRelease(authorization.asset, authorization.account, authorization.recipient);
+        _consumeReleaseAuthorization(authorization, signature, amount);
+        _executeRelease(
+            authorization.asset,
+            authorization.account,
+            payable(authorization.recipient),
+            observed,
+            amount
+        );
+    }
+
+    function _prepareRelease(address asset, address account, address recipient)
+        private
+        returns (uint256 observed, uint256 amount)
+    {
+        if (recipient == address(0)) revert ZeroRecipient();
+        observed = observedReceived(asset);
+        _recordObservation(asset, observed);
+        uint256 entitlement =
+            Math.mulDiv(observed, aggregateSharePpm[account], SHARE_DENOMINATOR_PPM);
+        uint256 released = accountReleased[asset][account];
+        amount = entitlement > released ? entitlement - released : 0;
         if (amount == 0) {
             revert NoReleasableFunds(asset, account);
         }
+    }
 
+    function _executeRelease(
+        address asset,
+        address account,
+        address payable recipient,
+        uint256 observed,
+        uint256 amount
+    ) private {
         accountReleased[asset][account] += amount;
         totalReleased[asset] += amount;
 
@@ -229,7 +268,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
             emit NativeReleased(
                 profileId, account, recipient, amount, totalReleased[asset], observed
             );
-            return amount;
+            return;
         }
 
         _transferERC20(asset, recipient, amount);
@@ -271,7 +310,8 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
             revert UnsupportedAsset(asset);
         }
         address registry = _assetPolicyRegistryOrRevert(asset);
-        (bool success, uint256 statusWord) = _readAssetStatusWord(registry, asset);
+        (bool success, uint256 statusWord) =
+            _readAssetPolicyWord(registry, asset, IStreamAssetPolicyRegistry.assetStatus.selector);
         if (!success) {
             revert AssetPolicyReadFailed(registry, asset);
         }
@@ -281,9 +321,18 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         // Safe because statusWord is bounded to uint8 above.
         // forge-lint: disable-next-line(unsafe-typecast)
         uint8 status = uint8(statusWord);
-        if (status != _ASSET_STATUS_ACTIVE) {
-            revert AssetNotActive(asset, status);
+        if (status == _ASSET_STATUS_ACTIVE) return;
+        if (status == _ASSET_STATUS_DEPRECATED) {
+            if (assetObservationInitialized[asset]) return;
+            (success, statusWord) = _readAssetPolicyWord(
+                registry, asset, IStreamAssetPolicyRegistry.assetReleaseGraceUntil.selector
+            );
+            if (!success || statusWord > type(uint64).max) {
+                revert AssetPolicyReadFailed(registry, asset);
+            }
+            if (block.timestamp < statusWord) return;
         }
+        revert AssetNotActive(asset, status);
     }
 
     function _currentBalance(address asset) private view returns (uint256) {
@@ -307,16 +356,14 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         }
     }
 
-    function _readAssetStatusWord(address registry, address asset)
+    function _readAssetPolicyWord(address registry, address asset, bytes4 operation)
         private
         view
         returns (bool success, uint256 statusWord)
     {
-        if (gasleft() < _ASSET_POLICY_PARENT_GAS_MIN) {
-            return (false, 0);
-        }
-        uint256 selector = uint32(bytes4(keccak256("assetStatus(address)")));
-        uint256 gasLimit = _ASSET_POLICY_GAS_LIMIT;
+        uint256 selector = uint32(operation);
+        uint256 gasLimit = _walletGasParameter(_ASSET_POLICY_GAS_ID);
+        _requireWalletCallGas(gasLimit);
         assembly ("memory-safe") {
             let ptr := mload(0x40)
             mstore(ptr, shl(224, selector))
@@ -328,6 +375,25 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
                 statusWord := mload(ptr)
             }
         }
+    }
+
+    function _releaseSignatureGasLimit() internal view override returns (uint256) {
+        return _walletGasParameter(_ERC1271_GAS_ID);
+    }
+
+    function _walletGasParameter(bytes32 parameterId) private view returns (uint256 value) {
+        address target = factory;
+        uint256 selector = uint32(IStreamGasParameterHost.gasParameter.selector);
+        bool success;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, shl(224, selector))
+            mstore(add(ptr, 4), parameterId)
+            success := staticcall(gas(), target, ptr, 36, ptr, 32)
+            success := and(success, eq(returndatasize(), 32))
+            value := mload(ptr)
+        }
+        if (!success || value == 0) revert WalletGasParameterReadFailed(parameterId);
     }
 
     function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {

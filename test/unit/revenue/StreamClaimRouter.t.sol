@@ -5,6 +5,7 @@ import "../../../smart-contracts/domains/revenue/StreamClaimRouter.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../../smart-contracts/domains/revenue/StreamAssetPolicyRegistry.sol";
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "../../helpers/RevenueV1TestBase.sol";
 
 contract ClaimToken {
     mapping(address => uint256) public balanceOf;
@@ -95,7 +96,7 @@ contract ClaimReentrantRecipient {
     }
 }
 
-contract StreamClaimRouterTest is CharacterizationTestBase {
+contract StreamClaimRouterTest is RevenueV1TestBase {
     event log_named_uint(string key, uint256 value);
     address private constant ACCOUNT = address(0xA11CE);
     address private constant CALLER = address(0xCA11);
@@ -125,10 +126,12 @@ contract StreamClaimRouterTest is CharacterizationTestBase {
 
     function setUp() public {
         router = new StreamClaimRouter();
-        policy = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(policy);
+        policy = new StreamAssetPolicyRegistry(address(_revenueAuthority()));
+        factory = new StreamSplitFactory(policy, address(revenueAuthority), _walletGasConfigs());
         token = new ClaimToken();
-        policy.setAssetStatus(address(token), policy.ASSET_STATUS_ACTIVE(), keccak256("standard"));
+        _setAssetPolicy(
+            policy, address(token), policy.ASSET_STATUS_ACTIVE(), keccak256("standard"), 0
+        );
     }
 
     function testExactTwoSelectorsAndEmptyBatches() public {
@@ -238,7 +241,9 @@ contract StreamClaimRouterTest is CharacterizationTestBase {
         address later = _wallet(2, ACCOUNT);
         token.mint(first, 500);
         vm.deal(later, 2 ether);
-        policy.setAssetStatus(address(token), policy.ASSET_STATUS_DEPRECATED(), keccak256("paused"));
+        _setAssetPolicy(
+            policy, address(token), policy.ASSET_STATUS_INACTIVE(), keccak256("paused"), 0
+        );
         IStreamClaimRouter.ClaimCall[] memory claims = _two(first, later, ACCOUNT);
         claims[0].asset = address(token);
         vm.recordLogs();
@@ -262,7 +267,7 @@ contract StreamClaimRouterTest is CharacterizationTestBase {
                     abi.encodeWithSelector(
                         IStreamSplitWallet.AssetNotActive.selector,
                         address(token),
-                        policy.ASSET_STATUS_DEPRECATED()
+                        policy.ASSET_STATUS_INACTIVE()
                     )
                 ),
             "exact reason"
@@ -611,7 +616,7 @@ contract StreamClaimRouterTest is CharacterizationTestBase {
             require(entitled, "event-discovered entitlement");
             (uint16 schema, uint16 version, address wallet) =
                 abi.decode(logs[i].data, (uint16, uint16, address));
-            require(schema == 1 && version == 2, "factory event version");
+            require(schema == 1 && version == 3, "factory event version");
             claims[cursor++] = IStreamClaimRouter.ClaimCall(wallet, address(0), ACCOUNT);
         }
     }

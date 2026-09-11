@@ -11,14 +11,23 @@ interface IStreamAssetPolicyRegistry {
     error InvalidAssetStatus(uint8 status);
     /// @notice Reverts when a policy update would leave status and evidence unchanged.
     error AssetPolicyUnchanged(address asset, uint8 status, bytes32 policyHash);
+    error InvalidAssetPolicyAuthority(address authority);
+    error AssetPolicyNotAuthority(address caller);
+    error InvalidAssetPolicyAction();
+    error InvalidAssetReleaseGrace(uint64 previousGrace, uint64 suppliedGrace);
+    error AssetPolicyActionAlreadyApplied(address asset, bytes32 actionId);
 
     /// @notice Emitted when the deployment-wide asset policy for an ERC-20 changes.
     event AssetPolicyUpdated(
         address indexed asset,
         uint8 indexed previousStatus,
         uint8 indexed status,
+        uint16 schemaVersion,
         bytes32 previousPolicyHash,
         bytes32 policyHash,
+        uint64 effectiveAt,
+        uint64 releaseGraceUntil,
+        bytes32 actionId,
         address admin
     );
 
@@ -28,7 +37,7 @@ interface IStreamAssetPolicyRegistry {
     function ASSET_STATUS_ACTIVE() external pure returns (uint8);
     /// @notice Status for reviewed assets that are not currently accepted by split wallets.
     function ASSET_STATUS_INACTIVE() external pure returns (uint8);
-    /// @notice Status for previously approved assets that are disabled for sync and release.
+    /// @notice Retired for new acceptance, with observed/grace-bound sync and release exits.
     function ASSET_STATUS_DEPRECATED() external pure returns (uint8);
     /// @notice Status for explicitly unsupported assets.
     function ASSET_STATUS_UNSUPPORTED() external pure returns (uint8);
@@ -40,13 +49,26 @@ interface IStreamAssetPolicyRegistry {
     function assetPolicy(address asset)
         external
         view
-        returns (uint8 status, bytes32 policyHash, uint64 effectiveAt);
+        returns (uint8 status, bytes32 policyHash, uint64 effectiveAt, uint64 releaseGraceUntil);
+    function assetReleaseGraceUntil(address asset) external view returns (uint64);
+    function governanceAuthority() external view returns (address);
+    function assetPolicyTransitionHashes(
+        address asset,
+        uint8 status,
+        bytes32 policyHash,
+        uint64 releaseGraceUntil
+    ) external view returns (bytes32 scopeHash, bytes32 oldStateHash, bytes32 newStateHash);
     /// @notice Returns the timestamp for the current asset policy status.
     function assetPolicyEffectiveAt(address asset) external view returns (uint64);
     /// @notice Returns true when an asset is currently active for split-wallet sync and release.
     function isAssetActive(address asset) external view returns (bool);
     /// @notice Sets an asset policy status and evidence hash.
-    function setAssetStatus(address asset, uint8 status, bytes32 policyHash) external;
+    function setAssetStatus(
+        address asset,
+        uint8 status,
+        bytes32 policyHash,
+        uint64 releaseGraceUntil
+    ) external;
     /// @notice Marker for deployment validation.
     function isStreamAssetPolicyRegistry() external pure returns (bool);
 }

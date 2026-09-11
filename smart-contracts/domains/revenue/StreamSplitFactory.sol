@@ -2,10 +2,11 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "./StreamSplitWallet.sol";
+import "./StreamSplitWalletDeployment.sol";
+import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Creates immutable split profiles and their deterministic native split wallets.
-contract StreamSplitFactory is IStreamSplitFactory {
+contract StreamSplitFactory is IStreamSplitFactory, StreamGasParameterHost {
     uint8 private constant _ASSET_STATUS_ACTIVE = 1;
 
     /// @notice Domain separator label for v1 split profile identifiers.
@@ -13,7 +14,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     /// @notice Split profile schema version used in profile identifiers and events.
     uint16 public constant override SCHEMA_VERSION = 1;
     /// @notice Split wallet implementation version used in profile identifiers and events.
-    uint16 public constant override WALLET_VERSION = 2;
+    uint16 public constant override WALLET_VERSION = 3;
     /// @notice Maximum canonical split entries accepted by one profile.
     uint16 public constant override MAX_ENTRIES = 64;
     /// @notice Maximum unique recipient accounts accepted by one profile.
@@ -35,7 +36,25 @@ contract StreamSplitFactory is IStreamSplitFactory {
 
     mapping(bytes32 => Profile) private _profiles;
 
-    constructor(IStreamAssetPolicyRegistry assetPolicyRegistry_) {
+    constructor(
+        IStreamAssetPolicyRegistry assetPolicyRegistry_,
+        address authority,
+        GasParameterConfig[2] memory walletGasConfigs
+    ) StreamGasParameterHost(authority) {
+        if (authority == address(0)) {
+            revert GasParameterInvalidAuthority(authority);
+        }
+        for (uint256 i; i < 2; ++i) {
+            bytes32 expected =
+                i == 0 ? keccak256("ERC_1271_GAS_LIMIT") : keccak256("ASSET_POLICY_GAS_LIMIT");
+            if (
+                keccak256(bytes(walletGasConfigs[i].name)) != expected
+                    || walletGasConfigs[i].failureClass != FAILURE_CLASS_FAIL_CLOSED_PRECHECK
+            ) {
+                revert GasParameterInvalidConfig(expected);
+            }
+            _registerGasParameter(walletGasConfigs[i]);
+        }
         if (address(assetPolicyRegistry_).code.length == 0) {
             revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
         }
@@ -58,14 +77,20 @@ contract StreamSplitFactory is IStreamSplitFactory {
         emit AssetPolicyRegistryPinned(address(assetPolicyRegistry_));
     }
 
+    /// @notice Immutable constructor floor for a registered wallet-line gas budget.
+    function gasParameterFloor(bytes32 parameterId) external view override returns (uint256) {
+        gasParameter(parameterId);
+        return _gasParameters[parameterId].floor;
+    }
+
     /// @notice Returns the creation-code hash used for deterministic wallet addresses.
     function splitWalletInitCodeHash() public pure override returns (bytes32) {
-        return keccak256(type(StreamSplitWallet).creationCode);
+        return StreamSplitWalletDeployment.initCodeHash();
     }
 
     /// @notice Returns the runtime-code hash accepted for deployed split wallets.
     function splitWalletRuntimeCodeHash() public pure override returns (bytes32) {
-        return keccak256(type(StreamSplitWallet).runtimeCode);
+        return StreamSplitWalletDeployment.runtimeCodeHash();
     }
 
     /// @notice Creates or reuses a canonical split profile and deploys its deterministic wallet.
@@ -231,8 +256,8 @@ contract StreamSplitFactory is IStreamSplitFactory {
             return wallet;
         }
 
-        StreamSplitWallet splitWallet = new StreamSplitWallet{ salt: profileId }();
-        wallet = address(splitWallet);
+        wallet = StreamSplitWalletDeployment.deploy(profileId);
+        IStreamSplitWallet splitWallet = IStreamSplitWallet(wallet);
         splitWallet.initialize(
             profileId,
             profile.entriesHash,

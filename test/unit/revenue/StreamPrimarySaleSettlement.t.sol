@@ -11,9 +11,9 @@ import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol
 import "../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../helpers/Assertions.sol";
-import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "../../helpers/RevenueV1TestBase.sol";
 
-contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
+contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
@@ -77,8 +77,10 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
     StreamPrimarySaleSettlement private settlement;
 
     function setUp() public {
-        assetPolicyRegistry = new StreamAssetPolicyRegistry();
-        factory = new StreamSplitFactory(assetPolicyRegistry);
+        assetPolicyRegistry = new StreamAssetPolicyRegistry(address(_revenueAuthority()));
+        factory = new StreamSplitFactory(
+            assetPolicyRegistry, address(revenueAuthority), _walletGasConfigs()
+        );
         resolver = new StreamRevenueResolver(factory);
         settlement = new StreamPrimarySaleSettlement(resolver);
         settlement.setSettlementCaller(SETTLEMENT_CALLER, true);
@@ -940,10 +942,12 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
         settlement.settleERC20PrimarySale(sale, address(inactiveToken));
 
         PrimarySettlementERC20Mock deprecatedToken = new PrimarySettlementERC20Mock();
-        assetPolicyRegistry.setAssetStatus(
+        _setAssetPolicy(
+            assetPolicyRegistry,
             address(deprecatedToken),
             assetPolicyRegistry.ASSET_STATUS_DEPRECATED(),
-            ERC20_POLICY_EVIDENCE
+            ERC20_POLICY_EVIDENCE,
+            uint64(block.timestamp + 180 days)
         );
         deprecatedToken.mint(PAYER, 2 ether);
         vm.prank(PAYER);
@@ -1227,8 +1231,12 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
     }
 
     function _activateAsset(address token) private {
-        assetPolicyRegistry.setAssetStatus(
-            token, assetPolicyRegistry.ASSET_STATUS_ACTIVE(), ERC20_POLICY_EVIDENCE
+        _setAssetPolicy(
+            assetPolicyRegistry,
+            token,
+            assetPolicyRegistry.ASSET_STATUS_ACTIVE(),
+            ERC20_POLICY_EVIDENCE,
+            0
         );
     }
 
