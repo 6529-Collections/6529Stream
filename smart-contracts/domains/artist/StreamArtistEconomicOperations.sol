@@ -77,8 +77,9 @@ library StreamArtistEconomicOperations {
                 || p.assignmentHash != expected.assignmentHash
         ) revert T.InvalidRecord();
         T.Payout memory payout = _payout(x, b.artistId);
-        reads.requireStaticArtistPayout(p.collectionId, p.resolver, payout.account);
-        return _economics(x, actor, b, p, payout, delegation, a, before_, "");
+        bytes memory currentEvidence =
+            reads.requireCurrentArtistEconomics(p.collectionId, p.resolver, payout.account);
+        return _economics(x, actor, b, p, payout, delegation, a, before_, currentEvidence);
     }
 
     function economicsProspective(
@@ -96,9 +97,10 @@ library StreamArtistEconomicOperations {
         T.Payout memory payout = _payout(x, b.artistId);
         T.AssignmentFact memory actual =
             reads.requireProspectiveEconomics(p, candidate, payout.account);
-        return _economics(
-            x, actor, b, p, payout, delegation, a, before_, abi.encode(candidate, actual)
-        );
+        return
+            _economics(
+                x, actor, b, p, payout, delegation, a, before_, abi.encode(candidate, actual)
+            );
     }
 
     function _economics(

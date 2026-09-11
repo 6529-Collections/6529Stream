@@ -13,6 +13,7 @@ import "../../interfaces/stream/artist/IStreamArtistConsentOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyPreview.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
@@ -162,8 +163,13 @@ contract StreamArtistOnboardingReads {
                 _suite.primaryResolver
             ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);
         if (
-            !p.exists || p.scope != 1 || p.scopeId != collectionId || p.assignmentType != 1
-                || p.profileId == bytes32(0)
+            !p.exists || p.scope != 1 || p.scopeId != collectionId
+                || !((p.assignmentType == 1 && p.profileId != bytes32(0))
+                    || (p.assignmentType == 2
+                        && p.profileId == bytes32(0)
+                        && p.templateId != bytes32(0)
+                        && p.policyHash == bytes32(0)
+                        && _suite.primaryRevenueClass == keccak256("PRIMARY_SALE")))
         ) {
             revert T.UnsupportedProfile();
         }
@@ -334,11 +340,73 @@ contract StreamArtistOnboardingReads {
         }
     }
 
+    /// @notice Validates current economics and returns supplemental immutable template evidence, if applicable.
+    /// @dev This is a read over an already-installed assignment, never a prospective template authorization.
+    function requireCurrentArtistEconomics(uint256 collectionId, address resolver, address payout)
+        external
+        view
+        returns (bytes memory)
+    {
+        if (resolver != _suite.primaryResolver) {
+            requireStaticArtistPayout(collectionId, resolver, payout);
+            return "";
+        }
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory current = IStreamRevenueResolver(
+                resolver
+            ).resolvePrimaryAssignment(collectionId, 0, _suite.primaryRevenueClass);
+        if (current.assignmentType != 2) {
+            requireStaticArtistPayout(collectionId, resolver, payout);
+            return "";
+        }
+        if (
+            !current.exists || current.scope != 1 || current.scopeId != collectionId
+                || current.profileId != bytes32(0) || current.templateId == bytes32(0)
+                || current.policyHash != bytes32(0)
+                || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")
+        ) revert T.UnsupportedProfile();
+        T.Binding memory binding_ = acceptedBinding(collectionId);
+        (address operative, bytes32 designation) =
+            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(binding_.artistId);
+        if (payout == address(0) || payout != operative || designation == bytes32(0)) {
+            revert T.MissingMintPrerequisite(keccak256("payout"));
+        }
+        IStreamArtistPrimaryTemplateFacts provider = IStreamArtistPrimaryTemplateFacts(resolver);
+        (bytes32 entriesHash, bytes32 metadataURIHash, uint32 artistShare) =
+            provider.primaryTemplateEconomicsFacts(current.templateId);
+        T.AssignmentFact memory preview = provider.previewArtistPrimaryTemplateAssignment(
+            collectionId, current.templateId, current.policyHash, current.frozen
+        );
+        if (
+            entriesHash == bytes32(0) || artistShare < 500_000 || preview.resolver != resolver
+                || preview.revenueClass != _suite.primaryRevenueClass || preview.scope != 1
+                || preview.scopeId != collectionId
+                || preview.assignmentHash != current.assignmentHash
+        ) revert T.InvalidRecord();
+        uint32 count =
+            IStreamArtistCollaboratorBindingOwner(_suite.owners[0])
+        .bindingTerms(collectionId, binding_.generation)
+        .count;
+        for (uint256 i; i < count; ++i) {
+            C.Row memory row = collaboratorAt(collectionId, binding_.generation, i);
+            if (!row.accepted) revert T.InvalidAttribution(collectionId);
+            // This first template profile represents only the primary artist dynamically.
+            // A paid collaborator must never disappear behind an unrelated static entry.
+            if (row.shareLabelId != bytes32(0)) revert T.UnsupportedProfile();
+        }
+        return abi.encode(
+            keccak256("6529STREAM_CURRENT_PRIMARY_TEMPLATE_ECONOMICS_EVIDENCE_V1"),
+            current.templateId,
+            entriesHash,
+            metadataURIHash,
+            artistShare
+        );
+    }
+
     /// @notice Verifies that actual static profile artist entries pay the operative designation.
     /// @dev The initial profile supports fixed collection assignments only. Dynamic templates
     ///      require their separate accepted materialization path and are rejected here.
     function requireStaticArtistPayout(uint256 collectionId, address resolver, address payout)
-        external
+        public
         view
     {
         bytes32 profileId;

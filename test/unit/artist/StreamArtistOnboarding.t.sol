@@ -268,6 +268,272 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     uint256 private nextNonce;
     bool private directArtistCalls;
     bytes32 private collaboratorId;
+    uint8 private templateFixtureKind;
+    bytes32 private templateFixtureId;
+
+    function _freshTemplateFixture(uint8 kind) private {
+        // A separate deployment with a prebinding template; no existing assignment or history is reset.
+        templateFixtureKind = kind;
+        setUp();
+    }
+
+    function _installInitialPrimary(address governance, bytes32 profile) private {
+        if (templateFixtureKind == 0) {
+            vm.prank(governance);
+            primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, profile, bytes32(0));
+            return;
+        }
+        IStreamRevenueResolver.PrimaryTemplateEntry[] memory entries =
+            new IStreamRevenueResolver.PrimaryTemplateEntry[](2);
+        entries[0] = IStreamRevenueResolver.PrimaryTemplateEntry(
+            templateFixtureKind == 3 ? address(artist) : address(0),
+            templateFixtureKind == 3
+                ? bytes32(0)
+                : keccak256(
+                    templateFixtureKind == 2 ? bytes("SALE_POSTER") : bytes("COLLECTION_ARTIST")
+                ),
+            templateFixtureKind == 4 ? 400_000 : 900_000,
+            keccak256("artist")
+        );
+        entries[1] = IStreamRevenueResolver.PrimaryTemplateEntry(
+            address(0xFEE),
+            bytes32(0),
+            templateFixtureKind == 4 ? 600_000 : 100_000,
+            keccak256("protocol")
+        );
+        vm.prank(governance);
+        templateFixtureId =
+            primary.createPrimaryTemplate(entries, keccak256("unit immutable primary template"));
+        vm.prank(governance);
+        primary.setPrimaryTemplateAssignment(PRIMARY, 1, 1, templateFixtureId, bytes32(0));
+    }
+
+    function testCurrentTemplateSafeConsentMaterializesLatestPayoutAndOldWalletStillPaysOldAccount()
+        public
+    {
+        _freshTemplateFixture(1);
+        _all();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        bytes32 record = IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p);
+        (bytes32 oldProfile, address oldWallet,) =
+            primary.materializeCollectionPrimaryProfile(templateFixtureId, 1, address(this), true);
+        require(
+            IStreamSplitWallet(oldWallet).aggregateSharePpm(address(artist)) == 900_000,
+            "initial dynamic artist account"
+        );
+        (, bytes32 previous) = ingress.artistPayoutAccount(artistId);
+        T.PayoutDesignation memory update = T.PayoutDesignation(artistId, address(0xCAFE), previous);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(update, a));
+        ingress.recordPayoutDesignation(update, a);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == record,
+            "same immutable template consent"
+        );
+        (bytes32 newProfile, address newWallet,) =
+            primary.materializeCollectionPrimaryProfile(templateFixtureId, 1, address(this), true);
+        require(
+            newProfile != oldProfile && newWallet != oldWallet
+                && IStreamSplitWallet(newWallet).aggregateSharePpm(address(0xCAFE)) == 900_000,
+            "future materialization uses new operative designation"
+        );
+        vm.deal(address(this), 1 ether);
+        (bool paid,) = oldWallet.call{ value: 1 ether }("");
+        require(paid, "fund old wallet");
+        uint256 before_ = address(artist).balance;
+        IStreamSplitWallet(oldWallet).release(address(0), address(artist), payable(address(artist)));
+        require(
+            address(artist).balance == before_ + 0.9 ether
+                && IStreamSplitWallet(oldWallet).aggregateSharePpm(address(0xCAFE)) == 0,
+            "old wallet rights immutable"
+        );
+    }
+
+    function testCurrentTemplateSupplementaryTermsAndCanonicalRecordAreBothReconstructable()
+        public
+    {
+        _freshTemplateFixture(1);
+        _accept();
+        _payout();
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        (bytes32 entriesHash, bytes32 metadataHash, uint32 share) = IStreamArtistPrimaryTemplateFacts(
+                address(primary)
+            ).primaryTemplateEconomicsFacts(templateFixtureId);
+        bytes memory evidence =
+            coordinator.reads().requireCurrentArtistEconomics(1, address(primary), address(artist));
+        require(
+            keccak256(evidence)
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_CURRENT_PRIMARY_TEMPLATE_ECONOMICS_EVIDENCE_V1"),
+                        templateFixtureId,
+                        entriesHash,
+                        metadataHash,
+                        share
+                    )
+                ),
+            "actual immutable template facts"
+        );
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        (, bytes32 designation) = ingress.artistPayoutAccount(artistId);
+        bytes32 expected = StreamArtistEconomicsHashes.economicsRecord(
+            StreamArtistHashes.Environment(
+                block.chainid, address(ingress), suite.core, suite.mintManager
+            ),
+            p,
+            designation,
+            artistId,
+            address(artist),
+            a.nonce,
+            uint64(block.timestamp)
+        );
+        this.executeTargetSafe(
+            address(coordinator.reads()),
+            abi.encodeCall(
+                StreamArtistOnboardingReads.requireCurrentArtistEconomics,
+                (1, address(primary), address(artist))
+            )
+        );
+        a.signature = "";
+        this.executeTargetSafe(
+            address(ingress), abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a))
+        );
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == expected,
+            "direct Safe unchanged canonical op15 record"
+        );
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordEconomicsConsent(p, a);
+        require(_roots() == before_, "same replay lane");
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        avm.expectRevert(T.UnsupportedProfile.selector);
+        reads.requireStaticArtistPayout(1, address(primary), address(artist));
+        avm.expectPartialRevert(T.MissingMintPrerequisite.selector);
+        reads.requireCurrentArtistEconomics(1, address(primary), address(0xBAD));
+    }
+
+    function testCurrentTemplateAllowsExplicitUnpaidCollaborator() public {
+        _freshTemplateFixture(1);
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(false);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        _policy();
+        _payout();
+        _economics();
+        _ratify();
+        _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
+    function testCurrentTemplateDelegatedSafeConsentKeepsPrincipalReplayAndLivenessSeparate()
+        public
+    {
+        _freshTemplateFixture(1);
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, 2000, 1));
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        vm.warp(1100);
+        bytes32 record = _delegateEconomics(p, grant, 0);
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            ingress.recordDelegation(record) == grant && ingress.delegationRecord(grant).uses == 1,
+            "actual template consent carries consumed grant witness"
+        );
+        require(
+            before_.nonceHint == after_.nonceHint
+                && before_.lastAuthorityActionAt == after_.lastAuthorityActionAt,
+            "delegate template consent does not become a principal action"
+        );
+    }
+
+    function testCurrentTemplateRejectsPaidCollaboratorWithoutConsumingConsentNonce() public {
+        _freshTemplateFixture(1);
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        _payout();
+        _collaboratorPayout(address(delegateSafe));
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.UnsupportedProfile.selector);
+        ingress.recordEconomicsConsent(p, a);
+        require(
+            _roots() == before_
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "paid collaborator never silently omitted"
+        );
+    }
+
+    function testCurrentTemplateRejectsUnsupportedSalePosterStaticArtistAndBelowFloor() public {
+        for (uint8 kind = 2; kind <= 4; ++kind) {
+            _freshTemplateFixture(kind);
+            _accept();
+            _payout();
+            StreamArtistOnboardingReads reads = coordinator.reads();
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamArtistPrimaryTemplateFacts.UnsupportedArtistPrimaryTemplate.selector,
+                    templateFixtureId
+                )
+            );
+            reads.requireCurrentArtistEconomics(1, address(primary), address(artist));
+        }
+    }
+
+    function testCurrentTemplateCannotBecomeFixedProspectiveCandidateOrAuthorizeReplacement()
+        public
+    {
+        _freshTemplateFixture(1);
+        _all();
+        (T.AssignmentFact memory fact,) = coordinator.reads().currentAssignments(1);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        T.FixedEconomicsCandidate memory candidate =
+            T.FixedEconomicsCandidate(templateFixtureId, bytes32(0), 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 before_ = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.UnverifiedSplitProfile.selector, templateFixtureId
+            )
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(_roots() == before_, "template ID not a fixed profile alias");
+        address governor = primary.owner();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
+            )
+        );
+        vm.prank(governor);
+        primary.setPrimaryTemplateAssignment(PRIMARY, 1, 1, templateFixtureId, bytes32(0));
+    }
 
     function _collaboratorIdentity(bool direct) private {
         _delegateSetup();
@@ -2132,6 +2398,8 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     }
 
     function setUp() public {
+        nextNonce = 0;
+        directArtistCalls = false;
         vm.warp(1000);
         keys = new uint256[](2);
         keys[0] = 0xA11CE;
@@ -2271,8 +2539,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         core.set(keccak256("METADATA_ROUTER"), address(metadata), false);
         core.set(keccak256("ROYALTY_RESOLVER"), address(royalty), false);
         (profile,) = factory.createProfile(entries, keccak256("artist unit split"));
-        vm.prank(governance);
-        primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, profile, bytes32(0));
+        _installInitialPrimary(governance, profile);
         vm.prank(governance);
         royalty.configureCollectionRoyalty(1, royaltyProfile, 500);
         (artistId,) = ingress.proposeArtistBinding(

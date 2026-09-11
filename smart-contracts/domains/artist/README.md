@@ -130,6 +130,23 @@ Current and prospective consent share operation 15 records and replay keys.
 Existing fixed consent remains valid after a payout revision; newly consented
 profiles must match the revised designation.
 
+Current operation 15 also admits an initial primary template installed before
+artist binding. Its immutable terms must use dynamic `COLLECTION_ARTIST` entries
+for the artist label, static nonartist entries, a zero policy, and at least
+500,000 artist ppm. The actual pinned resolver supplies the template facts and
+canonical assignment hash. The artist signs that current assignment hash; the
+archive also retains the actual immutable template terms. All paid collaborator
+labels are rejected by this first template profile so they cannot be omitted;
+explicitly unpaid rows are supported.
+
+A lawful payout revision changes future template materializations without
+requiring new consent to unchanged terms. Existing materialized wallets retain
+their immutable recipients. Mint still requires an accepted current identity,
+an explicit operative designation, and the exact current economics record.
+`FixedEconomicsCandidate.profileHash` keeps its fixed-profile meaning; it is not
+a template ID, and current template consent grants no prospective replacement
+permission. The previous `requireStaticArtistPayout` read remains static-only.
+
 Operation 20 authorizes freezing one exact current royalty assignment. It does
 not require policy, payout, economics or content mint floors. The authorization
 belongs to the current artist and binding generation; the actual resolver must
