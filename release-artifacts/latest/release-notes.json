@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:795f9fd7fa6fcdabd6c58fdd0789f987fee70d0c19cd5a10f5e610df6739332c",
-      "size_bytes": 169773
+      "sha256": "sha256:b7a185f518c946f9a6140ddb3c5fc9356216b590d856fca81b59dae6c8f928a0",
+      "size_bytes": 170056
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:fb5954e071787eadd3c550bbd01d083bfca901e8365d6073bdd80e158d302458",
+      "sha256": "sha256:bf90b030edab70697656ad0a4c357c2a52094395f4b505b3c82a8f43a9f4bdac",
       "size_bytes": 34457
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -58,7 +58,10 @@
       "Added focused Core, mint and governance caller interfaces, shared request types, and interface compatibility regressions. Added a portable developer command for the supported stack and explicit unit, legacy, gas and full suites.",
       "Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.",
       "Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.",
-      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. An earlier prototype completed a Sepolia paid mint. The corrected, extended source requires a new deployment; its real randomness callback and final demonstration are pending subscription funding. The prototype is historical development evidence, not the current candidate or a production release.",
+      "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The current Sepolia instance completes the real randomness callback and native demonstration; earlier prototype records retain their historical source and deployment identity.",
+      "Order resumed scenario authorizations by contract ABI fields across supported PowerShell versions, and check current auction terms before wallet prompts.",
+      "Report local snapshot and collector-package errors clearly, and keep campaign lock conflicts from creating empty output directories.",
+      "Build the client before Windows operator tests and avoid retaining checkout credentials in the client CI job.",
       "Reuse compiler caches within the pinned toolchain and profile while retaining unconditional builds, tests and source validation. Mixed current build-info after a fallback restore triggers one fresh build before export validation.",
       "Publish writable compilation workspaces only after copying and validation succeed, and reject unreachable governance-policy validation in the source gate.",
       "Organized Solidity interfaces by domain, isolated legacy implementations and regression tests, and grouped maintenance tools into Python packages. Rewrote contributor and integration guides around the current APIs; older examples and detailed maintenance instructions now have separate reference sections.",
