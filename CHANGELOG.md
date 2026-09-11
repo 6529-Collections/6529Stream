@@ -10,7 +10,8 @@ the release policy in `docs/release-policy.md`.
 - Added native fixed-price PROFILE and COLLECTION_ARTIST sales through the shared
   official settlement recorder, with exact payment, deferred wallet escrow and
   replay protection. Domain tests and fuzzing pass with real Safe wallets;
-  actual current-Core composition is being validated separately.
+  all six current-Core native/ERC-20 composition tests also pass, including
+  template escrow, Safe withdrawals and complete failed-mint rollback.
 - Added a stateless phase-setup planner and JSON encoder for exact EOA/Safe calls,
   confirmed-state resumption, current artist nonce checks and final Manager
   ownership handoff. Seven actual-current tests cover real Safe setup, failed

@@ -338,8 +338,11 @@ domain tests plus 256 fuzz inputs with independent review. Actual Core/Manager/
 artist composition now passes. Native official settlement and its fixed-profile/
 COLLECTION_ARTIST consumer are integrated as `f9162df3`. The independently
 reviewed domain snapshot passes 55 cases and three properties with 256 fuzz inputs
-each. Actual Core/Manager/artist native composition is running alongside the
-existing three ERC-20 cases against the changed recorder. The separate correction
+each. Actual Core/Manager/artist native composition passes all three cases alongside
+the existing three ERC-20 cases against the changed recorder. Independent review
+binds all 245 compiler artifacts and confirms 95 production runtimes fit. The
+original five-pass/one-fail setup snapshot remains retained; governed template
+creation fixes the test without a production authorization change. The separate correction
 `5ecae362` binds the ERC-20 Manager authorization
 ID to the full signed message digest required by MPA-TICKET; two focused cases
 and exact unchanged interface/storage checks received independent review. The

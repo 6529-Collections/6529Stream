@@ -61,8 +61,12 @@ passes in the ten-case snapshot below. Native shared settlement is integrated as
 with independent source/artifact review. Both product compiler profiles fit the
 runtime caps and preserve the preceding recorder interface/storage and ERC-20
 payer implementation. The native domain suite uses actual resolver, factory,
-wallet, escrow and Safe contracts; actual Core/Manager/artist composition is
-running separately with three native cases and three ERC-20 regressions.
+wallet, escrow and Safe contracts. The separate actual Core/Manager/artist
+composition now passes all three native cases and three ERC-20 regressions.
+Independent review verifies the captured sources and all 245 compiler artifacts,
+with all 95 nonempty production runtimes within the deployment cap. The original
+five-pass/one-fail snapshot is retained; its template setup was corrected to
+create the template through its actual governance owner before assignment.
 The canonical full-digest Manager authorization correction is integrated as
 `5ecae362`, with two focused tests and independent source/artifact review. A
 ten-case actual-current run passes all three new universal payment workflows,

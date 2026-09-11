@@ -111,6 +111,16 @@ canonical wallet normally reverts. Malformed read/result tests likewise label
 their injected boundary failures. These tests are not full current-Core,
 governance-delay or fully cold gas evidence.
 
+The separate `test/current/StreamCurrentNativeSettlement.t.sol` suite uses actual
+Core, Manager, artist owners, governance, resolver and two-owner Safe wallets.
+Its three cases pass together with the three current ERC-20 regressions:
+native PROFILE purchase/reveal/claims/replay, governed COLLECTION_ARTIST template
+creation and deferred-wallet escrow/deploy/flush/claims, and a late recipient
+rejection that rolls back all money and mint state before an identical retry.
+Only the external entropy service is mocked in this composition. Independent
+review binds the exact six-case snapshot and compiler outputs; it does not
+establish the complete feature set or a new release candidate.
+
 Prepared minting, deferred custody settlement, refund windows, native auctions,
 Dutch/private/public sale modes and collaborator templates remain separate
 implementation slices. A Safe receiving the immediately minted NFT proves
