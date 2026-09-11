@@ -58,6 +58,8 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Compare client commitment and receipt hashes by their hexadecimal bytes so
+  equivalent letter casing does not reject a valid purchase or auction.
 - Order resumed scenario authorizations by contract ABI fields across supported
   PowerShell versions, and check current auction terms before wallet prompts.
 - Report local snapshot and collector-package errors clearly, and keep campaign

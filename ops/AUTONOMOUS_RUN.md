@@ -29,7 +29,7 @@ seven review threads were resolved. Its merged tree matches the reviewed
 [PR #742](https://github.com/6529-Collections/6529Stream/pull/742) is the active
 developer-kit increment on `codex/developer-launch-kit`. Current-stack tests,
 campaigns, client validation and the completed public Sepolia flow are recorded
-below. Current release coverage contains 703 files.
+below. Current release coverage contains 704 files.
 
 Final integration remains pending. The Windows CI job now builds the client
 before operator tests, and the verifier-test fixture binds the reviewed Slither
@@ -125,7 +125,7 @@ change production Solidity behavior. Completed pieces include the TypeScript
 client, a selected-state snapshot exporter, a second-artist product demonstration
 and resumable Sepolia stages.
 
-- The client passes 33 tests plus its build, type checks and retained-ABI checks.
+- The client passes 38 tests plus its build, type checks and retained-ABI checks.
   Its snapshot records selected public facts at one block, with explicit coverage,
   canonical hashes and fresh RPC readback. It is not a complete archival export.
 - The product demonstration executes 31 local transactions across native/ERC-20
