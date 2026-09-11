@@ -12,6 +12,7 @@ import "../../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
 import "../../helpers/Assertions.sol";
 import "../../helpers/RevenueV1TestBase.sol";
+import "../../helpers/RevenueResolverTestMocks.sol";
 
 contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
     using Assertions for address;
@@ -37,7 +38,8 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
     bytes32 private constant TEMPLATE_METADATA = keccak256("ipfs://primary-template");
     bytes32 private constant MATERIALIZED_PROFILE_METADATA_DOMAIN =
         keccak256("6529STREAM_MATERIALIZED_PRIMARY_PROFILE_METADATA_V1");
-    bytes32 private constant POLICY_EVIDENCE = keccak256("policy-evidence");
+    // Canonical assignment policy: no advertised loosening.
+    bytes32 private constant POLICY_EVIDENCE = bytes32(0);
     bytes32 private constant ERC20_POLICY_EVIDENCE = keccak256("standard-erc20-policy");
     bytes32 private constant MISSING_PROFILE = keccak256("missing-profile");
     bytes32 private constant SETTLEMENT_POSTER_1 = keccak256("poster-sale-1");
@@ -81,7 +83,13 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
         factory = new StreamSplitFactory(
             assetPolicyRegistry, address(revenueAuthority), _walletGasConfigs()
         );
-        resolver = new StreamRevenueResolver(factory);
+        RevenueResolverCoreMock core = new RevenueResolverCoreMock();
+        RevenueResolverArtistMock artists = new RevenueResolverArtistMock(address(core));
+        core.selectArtist(address(artists), address(artists).codehash);
+        core.setToken(9001, 42, false);
+        core.setToken(77, 9, false);
+        resolver =
+            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
         settlement = new StreamPrimarySaleSettlement(resolver);
         settlement.setSettlementCaller(SETTLEMENT_CALLER, true);
     }
@@ -430,8 +438,15 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
         vm.prank(PAYER);
         token.approve(address(settlement), 6 ether);
 
-        IStreamPrimarySaleSettlement.PrimarySale memory sale =
-            _sale(SETTLEMENT_ERC20_TEMPLATE, REVENUE_SPECIAL, 12, 0, 1, 5 ether, POLICY_EVIDENCE);
+        IStreamPrimarySaleSettlement.PrimarySale memory sale = _sale(
+            SETTLEMENT_ERC20_TEMPLATE,
+            REVENUE_SPECIAL,
+            12,
+            0,
+            1,
+            5 ether,
+            keccak256("prior sale commitment")
+        );
         sale.policyMode = settlement.POLICY_MODE_ALLOW_CURRENT();
 
         vm.recordLogs();
@@ -470,8 +485,15 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
         vm.prank(PAYER);
         token.approve(address(settlement), 4 ether);
 
-        IStreamPrimarySaleSettlement.PrimarySale memory sale =
-            _sale(SETTLEMENT_ZERO_POSTER, REVENUE_SPECIAL, 13, 0, 1, 3 ether, POLICY_EVIDENCE);
+        IStreamPrimarySaleSettlement.PrimarySale memory sale = _sale(
+            SETTLEMENT_ZERO_POSTER,
+            REVENUE_SPECIAL,
+            13,
+            0,
+            1,
+            3 ether,
+            keccak256("prior sale commitment")
+        );
         sale.policyMode = settlement.POLICY_MODE_ALLOW_CURRENT();
         sale.poster = address(0);
         bytes32 key = settlement.settlementKey(sale);
@@ -697,11 +719,7 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
         (bytes32 currentProfile, address currentWallet,) =
             _createProfile(PROTOCOL, 1_000_000, LABEL_PROTOCOL);
         bytes32 currentAssignmentHash = resolver.setPrimaryProfileAssignment(
-            REVENUE_SPECIAL,
-            resolver.SCOPE_DEFAULT(),
-            0,
-            currentProfile,
-            keccak256("operator-repoint")
+            REVENUE_SPECIAL, resolver.SCOPE_DEFAULT(), 0, currentProfile, bytes32(0)
         );
         bytes32 currentPolicyHash = _expectedPolicyHash(
             REVENUE_SPECIAL, 1, 0, bytes32(0), currentProfile, currentWallet, currentAssignmentHash

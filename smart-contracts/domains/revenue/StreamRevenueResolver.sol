@@ -4,9 +4,14 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 import "../../interfaces/stream/revenue/IStreamAssetPolicyRegistry.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
+import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 
-/// @notice Outside-Core resolver for primary revenue assignments and templates.
+/// @notice Core-bound primary assignments with immutable artist-facade admission.
+/// @dev The supported artist profile is a collection-scoped fixed profile configured before
+///      artist nomination. Prospective economics consent and advertised loosening are not
+///      implemented: all assignment mutation, including freeze, closes after nomination.
 contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     bytes32 private constant _PRIMARY_TEMPLATE_DOMAIN = keccak256("6529STREAM_PRIMARY_TEMPLATE_V1");
     bytes32 private constant _PRIMARY_ASSIGNMENT_DOMAIN =
@@ -39,6 +44,10 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     IStreamSplitFactory public immutable splitFactoryContract;
     IStreamAssetPolicyRegistry private immutable _assetPolicyRegistry;
     bytes32 private immutable _splitWalletRuntimeCodeHash;
+    address public immutable override core;
+    address public immutable override artistRegistry;
+    bytes32 public immutable override coreCodeHash;
+    bytes32 public immutable override artistRegistryCodeHash;
 
     /// @notice Reverts when the configured split factory cannot support resolver invariants.
     error InvalidSplitFactory(address splitFactory);
@@ -73,7 +82,27 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     mapping(bytes32 => PrimaryTemplate) private _templates;
     mapping(bytes32 => PrimaryAssignment) private _primaryAssignments;
 
-    constructor(IStreamSplitFactory splitFactory_) {
+    /// @dev The explicit facade pin permits deployment before genesis installs Core pointers.
+    ///      Assignment configuration still requires this facade to be selected by Core.
+    constructor(
+        IStreamCore core_,
+        IStreamSplitFactory splitFactory_,
+        address governanceExecutor_,
+        IStreamArtistAttribution artistRegistry_
+    ) {
+        if (address(core_).code.length == 0 || governanceExecutor_.code.length == 0) {
+            revert InvalidPrimaryResolverConfiguration();
+        }
+        address artist = address(artistRegistry_);
+        if (
+            artist.code.length == 0 || IStreamArtistAttribution(artist).core() != address(core_)
+                || !IERC165(artist).supportsInterface(type(IStreamArtistAttribution).interfaceId)
+                || IERC165(artist).supportsInterface(0xffffffff)
+        ) revert InvalidPrimaryArtistRegistry(artist);
+        core = address(core_);
+        coreCodeHash = address(core_).codehash;
+        artistRegistry = artist;
+        artistRegistryCodeHash = artist.codehash;
         if (address(splitFactory_).code.length == 0) {
             revert InvalidSplitFactory(address(splitFactory_));
         }
@@ -105,6 +134,7 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         splitFactoryContract = splitFactory_;
         _assetPolicyRegistry = registry;
         _splitWalletRuntimeCodeHash = runtimeCodeHash;
+        _transferOwnership(governanceExecutor_);
     }
 
     /// @notice Returns true for deployment validation.
@@ -218,6 +248,7 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
+        _requireMutableArtistScope(scope, scopeId);
         bytes32 key = _assignmentKey(revenueClass, scope, scopeId);
         PrimaryAssignment storage assignment = _primaryAssignments[key];
         if (!assignment.exists) {
@@ -240,6 +271,7 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
+        _requireMutableArtistScope(scope, scopeId);
         bytes32 key = _assignmentKey(revenueClass, scope, scopeId);
         PrimaryAssignment storage assignment = _primaryAssignments[key];
         if (!assignment.exists) {
@@ -264,19 +296,24 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         returns (ResolvedPrimaryAssignment memory resolved)
     {
         _requireRevenueClass(revenueClass);
+        _requireSelectedArtistRegistry();
+        collectionId = _resolveCollectionIdentity(collectionId, tokenId);
         if (tokenId != 0) {
             resolved = _resolvedAt(revenueClass, SCOPE_TOKEN, tokenId);
-            if (resolved.exists) {
-                return resolved;
-            }
         }
-        if (collectionId != 0) {
+        if (!resolved.exists && collectionId != 0) {
             resolved = _resolvedAt(revenueClass, SCOPE_COLLECTION, collectionId);
-            if (resolved.exists) {
-                return resolved;
-            }
         }
-        return _resolvedAt(revenueClass, SCOPE_DEFAULT, 0);
+        if (!resolved.exists) resolved = _resolvedAt(revenueClass, SCOPE_DEFAULT, 0);
+        if (
+            collectionId != 0
+                && IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+                    != bytes32(0)
+                && (!resolved.exists
+                    || resolved.scope != SCOPE_COLLECTION
+                    || resolved.scopeId != collectionId
+                    || resolved.assignmentType != ASSIGNMENT_TYPE_PROFILE)
+        ) revert UnsupportedArtistPrimaryAssignment(collectionId);
     }
 
     /// @notice Materializes a dynamic template into a deterministic split profile.
@@ -369,6 +406,7 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         bytes32 policyHash,
         bool frozen
     ) external view override returns (bytes32) {
+        if (policyHash != bytes32(0)) revert InvalidPrimaryPolicyHash();
         return _primaryAssignmentHash(
             revenueClass, scope, scopeId, assignmentType, profileId, templateId, policyHash, frozen
         );
@@ -789,11 +827,59 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
         uint8 scope,
         uint256 scopeId,
         bytes32 policyHash
-    ) private pure {
+    ) private view {
         _requireRevenueClass(revenueClass);
         _requireScope(scope, scopeId);
-        if (policyHash == bytes32(0)) {
+        if (policyHash != bytes32(0)) {
             revert InvalidPrimaryPolicyHash();
+        }
+        _requireMutableArtistScope(scope, scopeId);
+    }
+
+    function _requireSelectedArtistRegistry() private view {
+        if (core.codehash != coreCodeHash) revert InvalidPrimaryResolverConfiguration();
+        (address selected, bytes32 selectedCodeHash,,,,,,,,) =
+            IStreamCore(core).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
+        if (
+            selected != artistRegistry || selected.codehash != artistRegistryCodeHash
+                || selectedCodeHash != artistRegistryCodeHash
+                || IStreamArtistAttribution(selected).core() != core
+        ) revert InvalidPrimaryArtistRegistry(selected);
+    }
+
+    function _requireMutableArtistScope(uint8 scope, uint256 scopeId) private view {
+        _requireSelectedArtistRegistry();
+        if (scope == SCOPE_DEFAULT) return;
+        uint256 collectionId = scope == SCOPE_COLLECTION
+            ? _resolveCollectionIdentity(scopeId, 0)
+            : _resolveCollectionIdentity(0, scopeId);
+        if (
+            IStreamArtistAttribution(artistRegistry).attribution(collectionId).nominationHash
+                != bytes32(0)
+        ) {
+            revert PrimaryArtistConsentRequired(collectionId);
+        }
+    }
+
+    function _resolveCollectionIdentity(uint256 suppliedCollectionId, uint256 tokenId)
+        private
+        view
+        returns (uint256 collectionId)
+    {
+        collectionId = suppliedCollectionId;
+        if (tokenId != 0) {
+            (bool exists, uint256 mappedCollection,,) =
+                IStreamCore(core).tokenCollectionIdentity(tokenId);
+            if (
+                !exists || mappedCollection == 0
+                    || (collectionId != 0 && collectionId != mappedCollection)
+            ) {
+                revert InvalidPrimaryTokenIdentity(tokenId, suppliedCollectionId);
+            }
+            collectionId = mappedCollection;
+        }
+        if (collectionId != 0 && !IStreamCore(core).collectionExists(collectionId)) {
+            revert InvalidPrimaryCollection(collectionId);
         }
     }
 

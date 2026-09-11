@@ -32,8 +32,14 @@ interface IStreamRevenueResolver {
     error InvalidAssignmentScope(uint8 scope, uint256 scopeId);
     /// @notice Reverts when an assignment type is unsupported.
     error InvalidAssignmentType(uint8 assignmentType);
-    /// @notice Reverts when assignment evidence hash is zero.
+    /// @notice This implementation supports only the canonical zero no-loosening policy.
     error InvalidPrimaryPolicyHash();
+    error InvalidPrimaryResolverConfiguration();
+    error InvalidPrimaryArtistRegistry(address selected);
+    error InvalidPrimaryCollection(uint256 collectionId);
+    error InvalidPrimaryTokenIdentity(uint256 tokenId, uint256 suppliedCollectionId);
+    error PrimaryArtistConsentRequired(uint256 collectionId);
+    error UnsupportedArtistPrimaryAssignment(uint256 collectionId);
     /// @notice Reverts when a split profile is unknown or lacks a verified wallet.
     error UnverifiedSplitProfile(bytes32 profileId);
     /// @notice Reverts when a template entry is invalid.
@@ -121,13 +127,20 @@ interface IStreamRevenueResolver {
     function ACCOUNT_SOURCE_SALE_POSTER() external pure returns (bytes32);
     /// @notice The split factory used to verify and materialize profiles.
     function splitFactory() external view returns (address);
+    /// @notice Permanent Core whose collection and token identity govern this resolver.
+    function core() external view returns (address);
+    /// @notice Explicit immutable facade pin, required to be Core-selected for assignment writes/resolution.
+    function artistRegistry() external view returns (address);
+    function coreCodeHash() external view returns (bytes32);
+    function artistRegistryCodeHash() external view returns (bytes32);
     /// @notice Returns true for deployment validation.
     function isStreamRevenueResolver() external pure returns (bool);
     /// @notice Creates or reuses a primary split template.
     function createPrimaryTemplate(PrimaryTemplateEntry[] calldata entries, bytes32 metadataURIHash)
         external
         returns (bytes32 templateId);
-    /// @notice Sets a fixed-profile primary assignment.
+    /// @notice Sets a fixed-profile primary assignment with zero no-loosening policy.
+    /// @dev The current profile closes collection/token mutation at initial artist nomination.
     function setPrimaryProfileAssignment(
         bytes32 revenueClass,
         uint8 scope,
@@ -135,7 +148,8 @@ interface IStreamRevenueResolver {
         bytes32 profileId,
         bytes32 policyHash
     ) external returns (bytes32 assignmentHash);
-    /// @notice Sets a dynamic-template primary assignment.
+    /// @notice Sets a zero-policy dynamic template before artist nomination.
+    /// @dev Artist-bound collections currently require an explicit collection fixed profile.
     function setPrimaryTemplateAssignment(
         bytes32 revenueClass,
         uint8 scope,
@@ -145,11 +159,14 @@ interface IStreamRevenueResolver {
     ) external returns (bytes32 assignmentHash);
     /// @notice Clears a mutable primary assignment.
     function clearPrimaryAssignment(bytes32 revenueClass, uint8 scope, uint256 scopeId) external;
-    /// @notice Freezes an existing primary assignment.
+    /// @notice Freezes an existing primary assignment before artist nomination.
     function freezePrimaryAssignment(bytes32 revenueClass, uint8 scope, uint256 scopeId)
         external
         returns (bytes32 frozenAssignmentHash);
-    /// @notice Resolves token, collection, then default primary assignment for a sale context.
+    /// @notice Resolves assignments against the pinned, currently Core-selected artist facade.
+    /// @dev Nonzero token IDs must match Core's retained collection identity, including burns.
+    ///      Artist-bound contexts support only explicit collection fixed profiles. This read
+    ///      exposes current terms; it does not itself assert that artist consent was recorded.
     function resolvePrimaryAssignment(uint256 collectionId, uint256 tokenId, bytes32 revenueClass)
         external
         view
@@ -170,7 +187,7 @@ interface IStreamRevenueResolver {
         external
         view
         returns (address account, bytes32 accountSource, uint32 sharePpm, bytes32 labelId);
-    /// @notice Computes the current assignment hash for explicit inputs.
+    /// @notice Computes a zero-policy assignment hash for explicit inputs, not a live selection.
     function primaryAssignmentHash(
         bytes32 revenueClass,
         uint8 scope,
