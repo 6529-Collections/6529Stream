@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `a46424a9` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -28,8 +28,8 @@ integration. Two builders and a separate independent reviewer work concurrently.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Full-v1 feature ledger, shared artist/payment/finality decisions, metadata/revenue provider reads and integration |
-| Artist | `codex/v1-artist-authority` | Prospective fixed-profile economics consent and exact defensive royalty freeze; extend the real onboarding and consent implementation |
-| Revenue | `codex/v1-revenue` | Exact-credit escrow and permissionless flush after reviewed deferred wallet registration/discovery |
+| Artist | `codex/v1-artist-authority` | Scoped economics/freeze delegation after integrated prospective economics and exact defensive royalty freeze |
+| Revenue | `codex/v1-revenue` | Native/ERC-20 sale funding and bounded wallet delivery with escrow fallback |
 | Reviewer | Read-only across the above | Independent interface, source, adversarial-test and scope review |
 
 ClaimRouter's independently reviewed implementation is integrated as `f6cac4ef`,
@@ -43,12 +43,21 @@ resolve the exact shared dependency reads; builders do not create readiness flag
 or silently bypass required consent. The first payment increment is independent
 of universal settlement, allowing both lanes to advance together.
 
-The new artist/payment topology has passed seven native/Safe integration tests
-and ten ERC-20/invariant tests, including 2,048 stateful operations. The combined
-current suite is running with strengthened callback and deployability assertions.
-Shared deployment and older unit-fixture constructor migration remains work in
-progress; this is not a full-repository or release-candidate pass. The delivery
-ledger records exact scope and the next artist/revenue increments.
+The initial artist/payment topology passed seven native/Safe integration tests
+and ten ERC-20/invariant tests, including 2,048 stateful operations. Its combined
+snapshot reported 27 passes and two fixture failures. After correcting
+policy-consent and pre-genesis deployment setup, all 14 focused adversarial/export
+tests pass, including 256 lineage fuzz cases. Preserve that snapshot's identity
+instead of attributing its results to newer contracts.
+
+The later economics/freeze increment has separately passed 40 resolver tests per
+compiler mode, 30 artist tests using the actual providers, and three actual
+current-Safe cases. Independent review accepted the source and scoped runtime
+evidence. Deferred profile registration/discovery (150 tests per compiler mode)
+and exact-credit escrow/flush (29 per mode) are also integrated. Sale funding
+adoption and scoped artist delegation now run in parallel with shared deployment,
+domain-fixture and client migration. This is not a full-repository or new
+release-candidate pass. The delivery ledger retains every broader v1 workstream.
 
 The next draft PR will include a coherent tested implementation increment.
 Builders run focused compilation and tests before handoff; root owns broad

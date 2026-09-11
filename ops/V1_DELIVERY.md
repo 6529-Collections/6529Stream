@@ -100,15 +100,15 @@ commits, tests and retained results in the evidence column when advancing it.
 | --- | --- | --- | --- |
 | FOUND-01 | Actual metadata content-state and primary/royalty assignment reads plus required mutation/consent hooks supply the artist floor records | Integrator; parallel with ART-01, no dependency on advanced ART-03 or META-01 | Building |
 | ART-01 | Identity, binding, acceptance, exact mint consent and independent pause; actual economics, first-release and attestation prerequisites make an eligible mint possible | Artist; internal typed/storage decision | Building |
-| ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist + integrator; ART-01 | Building: prospective fixed-profile economics and exact defensive royalty freeze first; collaborator/delegation work follows |
+| ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist + integrator; ART-01 | Building: prospective fixed-profile economics and exact defensive royalty freeze integrated through actual providers and Safe; scoped economics/freeze delegation next |
 | ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Queued |
 | ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Queued |
 | ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
 | PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Integrated: `f6cac4ef`, 21 focused tests in both compiler profiles; candidate validation pending |
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
-| PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery prerequisite reviewed; first exact-credit and permissionless-flush implementation in progress |
-| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Queued |
+| PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; sale adoption active, recovery still pending |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: native/ERC-20 fixed-sale funding adoption first; universal settlement and permit branches remain pending |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
@@ -217,15 +217,47 @@ relayed/direct payment, recipient and token callbacks, atomic rollback and
 stateful conservation. Its quick invariant campaign completed 32 sequences
 of 64 operations (2,048 calls, zero handler reverts). This run used isolated
 dynamic test linking; its inputs and artifacts are retained separately from
-the normal native/Safe compile. A combined current suite is now checking the
-strengthened exact callback-rejection assertions and complete fixture instance
-size checks, alongside existing fuzz, adversarial, catalog and export tests.
+the normal native/Safe compile. The combined `b0b7bf66` snapshot completed with
+27 passes and two fixture failures: missing prospective artist policy consent
+before a changed executor list, and an export probe created after its address
+was required by the genesis catalog. Both fixtures are corrected; their focused
+follow-up passes all 14 adversarial/export cases, including 256 lineage fuzz
+cases, against the retained original snapshot. These results are not evidence
+for later production changes.
 
-Artist work continues with prospective economics consent and exact defensive
-royalty freeze. Revenue work continues with escrow after reviewed deferred
-wallet registration, append-only discovery and deposit-gas configuration.
-The integrator owns resolver counterparts, current-stack integration and shared
-constructor/deployment/client migration. Older deployment and unit-fixture
-callsites still need migration; no full-repository build or new release-candidate
-pass is claimed. All other ledger rows remain in scope with their stated
-dependencies. The published RC1 and its deployment evidence remain unchanged.
+Prospective fixed-profile economics and exact defensive royalty-freeze authority
+are integrated as `4f77bba8` / `acd90b8a`, with actual resolver counterparts in
+`648b71a4`. The resolver suite passes 40 tests in each compiler mode, and the
+artist suite uses the actual primary and royalty providers and separate split
+factories (`7b19e7bc`, 30 tests). Independent review accepted both. This adds
+operation 20 to the seven earlier operation IDs; the remaining 49 operations
+remain explicit work. Scoped economics/freeze delegation is the next artist
+increment, with collaborator and other delegation capabilities still pending.
+
+The new actual-current Safe snapshot (`a46424a9`) passes all three cases,
+including prospective economics approval, real governed primary replacement,
+exact defensive royalty freeze and a subsequent eligible mint/custody/release
+flow. Independent review matched all 62 production artifacts to retained compiler
+outputs and confirmed their runtime sizes fit. This is a separately retained
+dynamic snapshot, not a full-repository or complete Safe-selector acceptance.
+
+Deferred profile registration and append-only wallet discovery are integrated
+as `e39a8dce` (150 focused tests per compiler mode). Single-factory escrow is
+integrated as `9f15cab8` (29 tests per mode, including fuzzing): exact native and
+token credit, governed producer admission, retained destination identity and
+permissionless flush. Independent review accepted these increments. Escrow
+recovery and successor routing remain pending. Revenue work now connects actual
+fixed sales to bounded wallet funding with escrow fallback. The native signed
+sale payload becomes an explicit version 2 with an exact primary-policy hash;
+both native and ERC-20 lanes require the supported `PRIMARY_SALE` profile.
+This does not complete universal settlement or the remaining permit branches.
+
+The integrator owns current-stack acceptance and shared constructor, deployment
+and client migration. Older deployment and unit-fixture callsites still need
+migration; no full-repository build or new release-candidate pass is claimed.
+The migrated entropy/metadata domain suite passes 19 tests, including 256 fuzz
+cases, maximum-content rendering and exact ratified-content mutation rejection.
+Its artist read boundary deliberately rejects all mint-consent operations;
+these domain and gas results do not substitute for actual artist integration.
+All other ledger rows remain in scope with their stated dependencies. The
+published RC1 and its deployment evidence remain unchanged.
