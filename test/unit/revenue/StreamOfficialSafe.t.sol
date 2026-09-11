@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../helpers/OfficialSafeFixture.sol";
-import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
+import "../../helpers/RevenueV1TestBase.sol";
 import "../../../smart-contracts/domains/mint/StreamSaleSignatures.sol";
 import "../../../smart-contracts/domains/revenue/StreamClaimRouter.sol";
 import "../../../smart-contracts/domains/revenue/StreamSplitFactory.sol";
@@ -28,7 +28,7 @@ contract SafeExecutionReceiver {
     }
 }
 
-contract StreamOfficialSafeTest is CharacterizationTestBase, OfficialSafeFixture {
+contract StreamOfficialSafeTest is RevenueV1TestBase, OfficialSafeFixture {
     event log_named_uint(string key, uint256 value);
     bytes4 private constant MAGIC = 0x1626ba7e;
     uint256[] private _owners;
@@ -155,8 +155,10 @@ contract StreamOfficialSafeTest is CharacterizationTestBase, OfficialSafeFixture
     }
 
     function _claimIntoSafe(OfficialSafe account) private {
-        StreamAssetPolicyRegistry policy = new StreamAssetPolicyRegistry();
-        StreamSplitFactory factory = new StreamSplitFactory(policy);
+        StreamAssetPolicyRegistry policy =
+            new StreamAssetPolicyRegistry(address(_revenueAuthority()));
+        StreamSplitFactory factory =
+            new StreamSplitFactory(policy, address(_revenueAuthority()), _walletGasConfigs());
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
         entries[0] = IStreamSplitWallet.SplitEntry(address(account), 1_000_000, keccak256("ARTIST"));
         (, address wallet) = factory.createProfile(entries, keccak256("Safe payout"));

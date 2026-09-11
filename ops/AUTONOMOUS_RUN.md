@@ -28,8 +28,8 @@ integration. Two builders and a separate independent reviewer work concurrently.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Full-v1 feature ledger, shared artist/payment/finality decisions, metadata/revenue provider reads and integration |
-| Artist | `codex/v1-artist-authority` | Real identity, two-sided binding and eligible mint consent with mandatory floor records; manager hooks and independent pause |
-| Revenue | `codex/v1-revenue` | Signed releases/revocation and deprecated-asset exits; actual governed wallet verification budgets |
+| Artist | `codex/v1-artist-authority` | Prospective fixed-profile economics consent and exact defensive royalty freeze; extend the real onboarding and consent implementation |
+| Revenue | `codex/v1-revenue` | Exact-credit escrow and permissionless flush after reviewed deferred wallet registration/discovery |
 | Reviewer | Read-only across the above | Independent interface, source, adversarial-test and scope review |
 
 ClaimRouter's independently reviewed implementation is integrated as `f6cac4ef`,
@@ -42,6 +42,13 @@ attestation records where the specification requires them. Root and the reviewer
 resolve the exact shared dependency reads; builders do not create readiness flags
 or silently bypass required consent. The first payment increment is independent
 of universal settlement, allowing both lanes to advance together.
+
+The new artist/payment topology has passed seven native/Safe integration tests
+and ten ERC-20/invariant tests, including 2,048 stateful operations. The combined
+current suite is running with strengthened callback and deployability assertions.
+Shared deployment and older unit-fixture constructor migration remains work in
+progress; this is not a full-repository or release-candidate pass. The delivery
+ledger records exact scope and the next artist/revenue increments.
 
 The next draft PR will include a coherent tested implementation increment.
 Builders run focused compilation and tests before handoff; root owns broad

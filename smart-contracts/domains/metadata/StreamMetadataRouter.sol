@@ -2,16 +2,24 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/core/IStreamCore.sol";
+import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRouter.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyView.sol";
 import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
 import "../modules/StreamModuleBase.sol";
 import "./StreamMetadataRenderer.sol";
 
 /// @notice Serves current-Core identities and their original coordinator's canonical entropy.
-contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
+contract StreamMetadataRouter is
+    StreamModuleBase,
+    IStreamMetadataRouter,
+    IStreamArtistContentFacts
+{
     using Strings for uint256;
 
     struct CollectionMetadata {
@@ -41,7 +49,7 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
     }
     IStreamCore public immutable core;
     address public immutable authority;
-    IStreamCollectionArtistRegistry public immutable artistRegistry;
+    IStreamArtistAttribution public immutable artistRegistry;
     mapping(uint256 => CollectionMetadata) private _collections;
     mapping(uint256 => PreparedMetadata) private _prepared;
     string private _contractMetadataURI;
@@ -53,6 +61,9 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
     error CollectionFrozen(uint256 collectionId);
     error InvalidToken(uint256 tokenId);
     error MetadataJSONLimitExceeded(uint256 escapedBytes, uint256 maximumBytes);
+    error ArtistContentAuthorizationRequired(uint256 collectionId);
+    error UnconfiguredOnchainContent(uint256 collectionId);
+    error ArtistRegistryBindingChanged(address selected);
     event CollectionMetadataConfigured(uint256 indexed collectionId, bytes32 metadataHash);
     event CollectionScriptConfigured(uint256 indexed collectionId, bytes32 scriptHash);
     event ContractMetadataConfigured(bytes32 uriHash);
@@ -63,7 +74,7 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         bytes32 deploymentManifestHash,
         string memory manifestURI,
         bytes32 manifestHash,
-        IStreamCollectionArtistRegistry artistRegistry_
+        IStreamArtistAttribution artistRegistry_
     )
         StreamModuleBase(
             keccak256("6529stream.metadata-router.schema.v1"),
@@ -81,9 +92,11 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         authority = authority_;
         if (
             address(artistRegistry_).code.length == 0 || artistRegistry_.core() != core_
-                || !artistRegistry_.supportsInterface(
-                    type(IStreamCollectionArtistRegistry).interfaceId
-                ) || artistRegistry_.supportsInterface(0xffffffff)
+                || !IERC165(address(artistRegistry_))
+                    .supportsInterface(type(IStreamArtistAttribution).interfaceId)
+                || !IERC165(address(artistRegistry_))
+                    .supportsInterface(type(IStreamArtistContentRatification).interfaceId)
+                || IERC165(address(artistRegistry_)).supportsInterface(0xffffffff)
         ) revert InvalidManifest();
         artistRegistry = artistRegistry_;
     }
@@ -106,7 +119,8 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         override(StreamModuleBase, IERC165)
         returns (bool)
     {
-        return id == type(IStreamMetadataRouter).interfaceId || super.supportsInterface(id);
+        return id == type(IStreamMetadataRouter).interfaceId
+            || id == type(IStreamArtistContentFacts).interfaceId || super.supportsInterface(id);
     }
 
     function setCollectionMetadata(
@@ -123,8 +137,14 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         StreamMetadataRenderer.requireValidUtf8ContentUri(
             "animationBaseURI", animationBaseURI, 2048, true
         );
-        _prepareCollectionMetadata(collectionId, name, description, image, animationBaseURI);
         CollectionMetadata storage metadata = _collections[collectionId];
+        if (
+            keccak256(bytes(metadata.image)) != keccak256(bytes(image))
+                || keccak256(bytes(metadata.animationBaseURI)) != keccak256(bytes(animationBaseURI))
+        ) {
+            _requireUnratifiedContent(collectionId);
+        }
+        _prepareCollectionMetadata(collectionId, name, description, image, animationBaseURI);
         metadata.name = name;
         metadata.description = description;
         metadata.image = image;
@@ -140,6 +160,11 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
     function setCollectionScript(uint256 collectionId, string calldata script) external {
         _requireMutable(collectionId);
         StreamMetadataRenderer.requireValidUtf8Bytes("animationScript", script, 8192);
+        if (
+            keccak256(bytes(_collections[collectionId].animationScript)) != keccak256(bytes(script))
+        ) {
+            _requireUnratifiedContent(collectionId);
+        }
         _collections[collectionId].animationScript = script;
         _prepared[collectionId].animationScript = _prepareScript(script);
         emit CollectionScriptConfigured(collectionId, keccak256(bytes(script)));
@@ -160,6 +185,62 @@ contract StreamMetadataRouter is StreamModuleBase, IStreamMetadataRouter {
         returns (CollectionMetadata memory)
     {
         return _collections[collectionId];
+    }
+
+    /// @notice Exact current-router ONCHAIN content profile for first-release ratification.
+    /// @dev Includes the actual linked renderer and content fields, not descriptive records.
+    ///      Future content-freeze authorization must use this same versioned state commitment.
+    function currentArtistContentState(uint256 collectionId)
+        external
+        view
+        override
+        returns (address metadataContract, bytes32 contentStateHash)
+    {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireSelectedArtistRegistry();
+        CollectionMetadata storage metadata = _collections[collectionId];
+        if (!metadata.configured || bytes(metadata.animationScript).length == 0) {
+            revert UnconfiguredOnchainContent(collectionId);
+        }
+        bytes32 hostContext = keccak256(
+            abi.encode(
+                block.chainid,
+                address(core),
+                collectionId,
+                address(this),
+                address(this).codehash,
+                address(StreamMetadataRenderer),
+                address(StreamMetadataRenderer).codehash
+            )
+        );
+        contentStateHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROUTER_ONCHAIN_CONTENT_V1"),
+                hostContext,
+                keccak256(bytes(metadata.image)),
+                keccak256(bytes(metadata.animationBaseURI)),
+                keccak256(bytes(metadata.animationScript))
+            )
+        );
+        return (address(this), contentStateHash);
+    }
+
+    function _requireUnratifiedContent(uint256 collectionId) private view {
+        _requireSelectedArtistRegistry();
+        (bool ratified,,) = IStreamArtistContentRatification(address(artistRegistry))
+            .firstReleaseRatification(collectionId);
+        if (ratified) revert ArtistContentAuthorizationRequired(collectionId);
+    }
+
+    function _requireSelectedArtistRegistry() private view {
+        (address selected, bytes32 codeHash,,,,,,,,) =
+            IStreamCorePointers(address(core)).getSatellitePointer(keccak256("ARTIST_REGISTRY"));
+        if (
+            selected != address(artistRegistry) || selected.code.length == 0
+                || codeHash != selected.codehash
+        ) {
+            revert ArtistRegistryBindingChanged(selected);
+        }
     }
 
     function tokenURI(address core_, uint256 tokenId)

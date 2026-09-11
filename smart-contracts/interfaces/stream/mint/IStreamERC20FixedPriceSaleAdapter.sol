@@ -5,7 +5,7 @@ import "../revenue/IStreamPaymentIntentVerifier.sol";
 import "./IStreamMintManager.sol";
 import "../revenue/IStreamRevenueResolver.sol";
 import "../revenue/IStreamSplitFactory.sol";
-import "../artist/IStreamCollectionArtistRegistry.sol";
+import "../artist/IStreamArtistAttribution.sol";
 import "../../../vendor/openzeppelin/IERC165.sol";
 
 /// @notice Current-stack fixed-price ERC-20 purchases with creator, platform and payer consent.
@@ -95,7 +95,7 @@ interface IStreamERC20FixedPriceSaleAdapter is IERC165 {
     /// @notice Shared token admission registry pinned by the split factory.
     function assetPolicyRegistry() external view returns (IStreamAssetPolicyRegistry);
     /// @notice Collection attribution authority bound to the manager's Core.
-    function artistRegistry() external view returns (IStreamCollectionArtistRegistry);
+    function artistRegistry() external view returns (IStreamArtistAttribution);
     /// @notice Current platform signer for commercial sale authorizations.
     function platformSigner() external view returns (address);
     /// @notice Monotonic signer epoch included in every commercial authorization.

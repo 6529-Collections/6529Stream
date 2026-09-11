@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../helpers/StreamCurrentStackFixture.sol";
+import "../helpers/StreamCurrentAssetPolicy.sol";
 import "../../smart-contracts/domains/mint/StreamERC20FixedPriceSaleAdapter.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../mocks/MockStreamPaymentToken.sol";
@@ -44,8 +45,7 @@ contract CurrentERC20Receiver is IERC721Receiver {
 contract StreamCurrentStackERC20Test is StreamCurrentStackFixture {
     uint256 private constant PAYER_KEY = 0xE2C20;
     bytes32 private constant ERC20_PHASE = keccak256("current ERC20 phase");
-    bytes32 private constant REVENUE = keccak256("current primary sale");
-    StreamRevenueResolver private primaryResolver;
+    bytes32 private constant REVENUE = PRIMARY_REVENUE_CLASS;
     StreamERC20FixedPriceSaleAdapter private erc20Sale;
     MockStreamPaymentToken private paymentToken;
     address private payer;
@@ -59,18 +59,28 @@ contract StreamCurrentStackERC20Test is StreamCurrentStackFixture {
         require(ok && executor.genesisInitialized() && bound && sealed_, "real sealed genesis");
     }
 
-    function _configureAdditionalProducts() internal override {
+    function _deployAdditionalProducts() internal override {
         payer = vm.addr(PAYER_KEY);
-        primaryResolver = new StreamRevenueResolver(factory);
-        primaryResolver.setPrimaryProfileAssignment(
-            REVENUE, 1, 1, profile, keccak256("ERC20 profile assignment")
-        );
         paymentToken = new MockStreamPaymentToken();
         paymentToken.mint(payer, 10_000);
-        assetPolicy.setAssetStatus(address(paymentToken), 1, keccak256("standard test ERC20"));
         erc20Sale = new StreamERC20FixedPriceSaleAdapter(
-            manager, primaryResolver, vm.addr(PLATFORM_KEY), artists
+            manager,
+            primaryResolver,
+            vm.addr(PLATFORM_KEY),
+            IStreamArtistAttribution(address(artists))
         );
+        _assertDeployableProductionInstance(address(erc20Sale));
+    }
+
+    function _configureAdditionalProducts() internal override {
+        GovernanceActionRequest memory activation = StreamCurrentAssetPolicy.activationRequest(
+            assetPolicy, address(paymentToken), keccak256("standard test ERC20"), DEPLOYMENT_HASH
+        );
+        bytes memory result = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (activation))
+        );
+        vm.warp(activation.notBefore);
+        executor.executeGovernanceAction(abi.decode(result, (bytes32)), activation.callData);
         _configureMintPhase(ERC20_PHASE, address(erc20Sale));
         (bytes32 policy,,) = erc20Sale.primaryPolicy(1, REVENUE);
         erc20SaleId = erc20Sale.registerSale(
@@ -88,7 +98,6 @@ contract StreamCurrentStackERC20Test is StreamCurrentStackFixture {
         );
         vm.prank(payer);
         paymentToken.approve(address(erc20Sale), 10_000);
-        primaryResolver.transferOwnership(address(executor));
         erc20Sale.transferOwnership(address(executor));
     }
 
@@ -180,8 +189,13 @@ contract StreamCurrentStackERC20Test is StreamCurrentStackFixture {
         CurrentERC20Receiver receiver = new CurrentERC20Receiver();
         receiver.configure(erc20Sale, paymentToken, wallet, "", true);
         bytes memory data = _buyData(_authorization(1, address(receiver)), true);
-        (bool ok,) = address(erc20Sale).call(data);
-        require(!ok, "rejecting receiver accepted");
+        (bool ok, bytes memory reason) = address(erc20Sale).call(data);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(abi.encodeWithSignature("Error(string)", "recipient rejects")),
+            "wrong recipient rejection"
+        );
         _assertUntouched();
     }
 

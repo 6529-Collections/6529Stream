@@ -100,16 +100,16 @@ commits, tests and retained results in the evidence column when advancing it.
 | --- | --- | --- | --- |
 | FOUND-01 | Actual metadata content-state and primary/royalty assignment reads plus required mutation/consent hooks supply the artist floor records | Integrator; parallel with ART-01, no dependency on advanced ART-03 or META-01 | Building |
 | ART-01 | Identity, binding, acceptance, exact mint consent and independent pause; actual economics, first-release and attestation prerequisites make an eligible mint possible | Artist; internal typed/storage decision | Building |
-| ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist; ART-01 | Queued |
+| ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist + integrator; ART-01 | Building: prospective fixed-profile economics and exact defensive royalty freeze first; collaborator/delegation work follows |
 | ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Queued |
 | ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Queued |
 | ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
 | PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Integrated: `f6cac4ef`, 21 focused tests in both compiler profiles; candidate validation pending |
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
-| PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Queued |
-| PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Queued |
+| PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
+| PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery prerequisite reviewed; first exact-credit and permissionless-flush implementation in progress |
 | PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Queued |
-| PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Queued |
+| PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Queued |
@@ -184,3 +184,48 @@ RC1, its deployment checkout, source tags, original-work recovery and retired
 branch bundles remain preserved. New contracts or changed semantics require a
 new candidate identifier and matching deployment evidence. Never move RC1's tag
 or relabel its Sepolia instance as the new v1 implementation.
+
+## Integration checkpoint: 11 September, evening
+
+Artist onboarding (`53fcf977`) and bounded nonce/fixed-size authority reads
+(`717827de`) are on the integration branch. These implement operations
+1, 2, 14, 15, 18, 24 and 52 for the explicit primary-only collection profile;
+they do not complete the other artist operation families. Phase configuration
+extraction (`32b94199`) preserves the Manager ABI and all 13 recursive storage
+entries while bringing its runtime to 24,142 bytes. Independent review accepted
+the extraction after 17 focused tests and exact compiler/storage comparison.
+
+The payment release/asset-exit increment (`6d2074fb`) and primary resolver
+binding (`8eb37037`) are integrated source. Primary and royalty constructors pin
+the actual Core and artist facade before committed genesis; live operations
+require the selected Core pointer and admitted runtime hash. Sale adapters
+consume the narrow attribution interface. Provider tests pass 12 cases per
+compiler mode, including 256 royalty fuzz cases; the shared sale attribution
+guard passes seven per mode. Official Safe foundation tests pass four per mode.
+
+The combined actual-current native and Safe slice now passes seven tests:
+real artist owners and mandatory records, governance, paid mint, reveal and
+metadata, auction custody/bids/refunds/settlement, NFT transfer/burn and split
+withdrawals. Safe 1.4.1 executes as artist, buyer, NFT holder, beneficiary and
+governor, including a delayed Safe-to-Executor parameter raise. Only the
+external entropy service is mocked. Independent review verified exact sources,
+retained compiler provenance and production runtime sizes for this snapshot.
+The complete Safe selector acceptance matrix remains open.
+
+The actual-current ERC-20 and invariant slice passes ten tests, including
+relayed/direct payment, recipient and token callbacks, atomic rollback and
+stateful conservation. Its quick invariant campaign completed 32 sequences
+of 64 operations (2,048 calls, zero handler reverts). This run used isolated
+dynamic test linking; its inputs and artifacts are retained separately from
+the normal native/Safe compile. A combined current suite is now checking the
+strengthened exact callback-rejection assertions and complete fixture instance
+size checks, alongside existing fuzz, adversarial, catalog and export tests.
+
+Artist work continues with prospective economics consent and exact defensive
+royalty freeze. Revenue work continues with escrow after reviewed deferred
+wallet registration, append-only discovery and deposit-gas configuration.
+The integrator owns resolver counterparts, current-stack integration and shared
+constructor/deployment/client migration. Older deployment and unit-fixture
+callsites still need migration; no full-repository build or new release-candidate
+pass is claimed. All other ledger rows remain in scope with their stated
+dependencies. The published RC1 and its deployment evidence remain unchanged.

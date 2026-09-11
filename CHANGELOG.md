@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Connected modular artist onboarding and exact consent records to actual current
+  native/ERC-20 minting, auctions, metadata and primary/royalty facts. Added real
+  Safe artist, buyer, custody, payout and delayed-governance integration scenarios.
+  Wider artist lifecycle and deployment/client migration remain in progress.
+- Added split-wallet release authorization, revocation and deprecated-asset exits,
+  and immutable Core/artist binding for primary revenue resolution.
 - Added stateless aggregation of native and ERC-20 split-wallet claims, including
   atomic and continue-on-failure modes and tests across 20 actual wallets.
 - Added offline fixtures from integrity-pinned official Safe 1.3.0, 1.4.1 and
@@ -64,6 +70,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Admit the narrow artist mint-consent capability at Core and narrow attribution
+  reads at sale adapters. Pin provider identity across committed genesis, and
+  extract mint phase configuration without changing the Manager ABI or storage.
 - Compare client commitment and receipt hashes by their hexadecimal bytes so
   equivalent letter casing does not reject a valid purchase or auction.
 - Order resumed scenario authorizations by contract ABI fields across supported

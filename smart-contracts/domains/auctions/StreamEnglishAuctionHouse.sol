@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "../mint/StreamSaleArtist.sol";
+
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 
 import "../../interfaces/stream/auctions/IStreamEnglishAuctionHouse.sol";
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/IERC721Receiver.sol";
 import "../../vendor/openzeppelin/Math.sol";
@@ -33,7 +35,8 @@ contract StreamEnglishAuctionHouse is
     IStreamCore public immutable core;
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
-    IStreamCollectionArtistRegistry public immutable artistRegistry;
+    IStreamArtistAttribution public immutable artistRegistry;
+    bytes32 public immutable artistRegistryCodeHash;
     address public platformSigner;
     uint64 public signerEpoch = 1;
     bool public paused;
@@ -51,17 +54,15 @@ contract StreamEnglishAuctionHouse is
         IStreamMintManager mintManager_,
         IStreamSplitFactory splitFactory_,
         address platformSigner_,
-        IStreamCollectionArtistRegistry artistRegistry_
+        IStreamArtistAttribution artistRegistry_
     ) {
         if (
             address(core_).code.length == 0 || address(mintManager_).code.length == 0
                 || address(splitFactory_).code.length == 0 || platformSigner_ == address(0)
         ) revert InvalidAuctionConfiguration();
         if (
-            address(artistRegistry_).code.length == 0 || artistRegistry_.core() != address(core_)
-                || !artistRegistry_.supportsInterface(
-                    type(IStreamCollectionArtistRegistry).interfaceId
-                ) || artistRegistry_.supportsInterface(0xffffffff)
+            !StreamSaleArtist.supportsAttribution(artistRegistry_)
+                || artistRegistry_.core() != address(core_)
         ) revert InvalidAuctionConfiguration();
         if (address(IStreamMintReads(address(mintManager_)).core()) != address(core_)) {
             revert InvalidAuctionConfiguration();
@@ -71,6 +72,7 @@ contract StreamEnglishAuctionHouse is
         splitFactory = splitFactory_;
         platformSigner = platformSigner_;
         artistRegistry = artistRegistry_;
+        artistRegistryCodeHash = address(artistRegistry_).codehash;
     }
 
     function supportsInterface(bytes4 id) public view override(ERC165, IERC165) returns (bool) {
@@ -138,7 +140,9 @@ contract StreamEnglishAuctionHouse is
     ) external override nonReentrant returns (uint256 tokenId) {
         if (paused) revert AuctionsPaused();
         _validateAuthorization(authorization, tokenData);
-        artistRegistry.requireArtist(authorization.collectionId, authorization.artist);
+        StreamSaleArtist.requireArtist(
+            artistRegistry, artistRegistryCodeHash, authorization.collectionId, authorization.artist
+        );
         bytes32 digest = authorizationDigest(authorization);
         _requireSignature(platformSigner, digest, platformSignature);
         _requireSignature(authorization.artist, digest, artistSignature);

@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamSaleArtist.sol";
+
 import "../../interfaces/stream/mint/IStreamERC20FixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamRevenueResolver.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../interfaces/standards/IERC20.sol";
 import "../revenue/StreamPaymentIntentVerifier.sol";
@@ -32,7 +34,8 @@ contract StreamERC20FixedPriceSaleAdapter is
     IStreamRevenueResolver public immutable override revenueResolver;
     IStreamSplitFactory public immutable override splitFactory;
     IStreamAssetPolicyRegistry public immutable override assetPolicyRegistry;
-    IStreamCollectionArtistRegistry public immutable override artistRegistry;
+    IStreamArtistAttribution public immutable override artistRegistry;
+    bytes32 public immutable artistRegistryCodeHash;
     address public override platformSigner;
     uint64 public override signerEpoch = 1;
     uint256 public override nextSaleNonce = 1;
@@ -46,15 +49,15 @@ contract StreamERC20FixedPriceSaleAdapter is
         IStreamMintManager manager_,
         IStreamRevenueResolver resolver_,
         address platformSigner_,
-        IStreamCollectionArtistRegistry artists_
+        IStreamArtistAttribution artists_
     ) {
         if (
             address(manager_).code.length == 0 || address(resolver_).code.length == 0
                 || platformSigner_ == address(0) || !resolver_.isStreamRevenueResolver()
-                || address(artists_).code.length == 0
-                || !artists_.supportsInterface(type(IStreamCollectionArtistRegistry).interfaceId)
-                || artists_.supportsInterface(0xffffffff)
+                || !StreamSaleArtist.supportsAttribution(artists_)
                 || address(IStreamMintReads(address(manager_)).core()) != artists_.core()
+                || resolver_.core() != artists_.core()
+                || resolver_.artistRegistry() != address(artists_)
         ) {
             revert InvalidSaleConfiguration();
         }
@@ -70,6 +73,7 @@ contract StreamERC20FixedPriceSaleAdapter is
         splitFactory = factory_;
         assetPolicyRegistry = assets_;
         artistRegistry = artists_;
+        artistRegistryCodeHash = address(artists_).codehash;
         platformSigner = platformSigner_;
     }
 
@@ -301,7 +305,9 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert SaleAuthorizationUsed(authorization.artist, authorization.nonce);
         }
         e.config = record.config;
-        artistRegistry.requireArtist(e.config.collectionId, authorization.artist);
+        StreamSaleArtist.requireArtist(
+            artistRegistry, artistRegistryCodeHash, e.config.collectionId, authorization.artist
+        );
         e.digest = authorizationDigest(authorization);
         if (!_validSignature(platformSigner, e.digest, platformSignature)) {
             revert InvalidSaleSignature(platformSigner);

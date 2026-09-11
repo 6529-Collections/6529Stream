@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./StreamSaleArtist.sol";
+
 import "../../interfaces/stream/mint/IStreamFixedPriceSaleAdapter.sol";
 import "../../interfaces/stream/mint/IStreamMintManager.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
-import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
+import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../vendor/openzeppelin/ERC165.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
@@ -31,7 +33,8 @@ contract StreamFixedPriceSaleAdapter is
 
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
-    IStreamCollectionArtistRegistry public immutable artistRegistry;
+    IStreamArtistAttribution public immutable artistRegistry;
+    bytes32 public immutable artistRegistryCodeHash;
     address public platformSigner;
     uint64 public signerEpoch = 1;
     bool public paused;
@@ -43,18 +46,15 @@ contract StreamFixedPriceSaleAdapter is
         IStreamMintManager mintManager_,
         IStreamSplitFactory splitFactory_,
         address platformSigner_,
-        IStreamCollectionArtistRegistry artistRegistry_
+        IStreamArtistAttribution artistRegistry_
     ) {
         if (
             address(mintManager_).code.length == 0 || address(splitFactory_).code.length == 0
                 || platformSigner_ == address(0)
         ) revert InvalidSaleConfiguration();
-        if (
-            address(artistRegistry_).code.length == 0
-                || !artistRegistry_.supportsInterface(
-                    type(IStreamCollectionArtistRegistry).interfaceId
-                ) || artistRegistry_.supportsInterface(0xffffffff)
-        ) revert InvalidSaleConfiguration();
+        if (!StreamSaleArtist.supportsAttribution(artistRegistry_)) {
+            revert InvalidSaleConfiguration();
+        }
         (bool bound, bytes memory coreData) =
             address(mintManager_).staticcall(abi.encodeWithSignature("core()"));
         if (
@@ -67,6 +67,7 @@ contract StreamFixedPriceSaleAdapter is
         splitFactory = splitFactory_;
         platformSigner = platformSigner_;
         artistRegistry = artistRegistry_;
+        artistRegistryCodeHash = address(artistRegistry_).codehash;
     }
 
     function supportsInterface(bytes4 interfaceId)
@@ -151,7 +152,9 @@ contract StreamFixedPriceSaleAdapter is
     ) external payable override nonReentrant returns (uint256 tokenId, bytes32 operationRoot) {
         if (paused) revert SalesPaused();
         _validateSale(sale, tokenData);
-        artistRegistry.requireArtist(sale.collectionId, sale.artist);
+        StreamSaleArtist.requireArtist(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
         bytes32 digest = authorizationDigest(sale);
         _requireSignature(platformSigner, digest, platformSignature);
         _requireSignature(sale.artist, digest, artistSignature);
