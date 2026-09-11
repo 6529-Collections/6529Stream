@@ -11,9 +11,27 @@ import "../../vendor/openzeppelin/ERC165.sol";
 import "./StreamMintCoreExecutor.sol";
 import "./StreamMintGateValidator.sol";
 import "./StreamMintOperationIdentity.sol";
+import "./StreamMintArtistConsent.sol";
+import "../parameters/StreamGasParameterHost.sol";
 
 /// @notice Outside-Core phase policy and prepared mint execution manager.
-contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC165 {
+contract StreamMintManager is
+    IStreamMintManager,
+    Ownable,
+    ReentrancyGuard,
+    ERC165,
+    StreamGasParameterHost
+{
+    bytes32 public constant GGP_ARTIST_AUTHORITY_GAS_LIMIT =
+        keccak256("6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT");
+    event MintPhaseConsentRecorded(
+        uint16 schemaVersion,
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        bytes32 indexed policyHash,
+        uint8 consentMode,
+        bytes32 consentEvidenceHash
+    );
     /// @notice Domain separator for active phase policy hashes.
     bytes32 public constant POLICY_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_POLICY_V1");
     /// @notice Domain separator for phase configuration hashes.
@@ -102,7 +120,11 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
 
-    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_) {
+    constructor(IStreamCore core_, IStreamMintLedger mintLedger_, IERC165 moduleRegistry_)
+        StreamGasParameterHost(StreamMintArtistConsent.governance(
+                address(core_), address(moduleRegistry_)
+            ))
+    {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
@@ -132,6 +154,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         core = core_;
         mintLedger = mintLedger_;
         moduleRegistry = moduleRegistry_;
+        _registerGasParameter(GasParameterConfig("ARTIST_AUTHORITY_GAS_LIMIT", 150_000, 150_000, 2));
     }
 
     /// @notice Returns true for deployment validation.
@@ -183,6 +206,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
         _phases[collectionId][phaseId] = PhaseState({ exists: true, config: config });
 
         policyHash = _computePolicyHash(collectionId, phaseId);
+        _recordArtistConsent(collectionId, phaseId, policyHash);
         phasePolicyHash[collectionId][phaseId] = policyHash;
         mintLedger.registerPhasePolicy(
             address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
@@ -241,7 +265,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
             return;
         }
         phaseState.config.paused = paused;
-        bytes32 policyHash = _refreshLedgerPolicy(collectionId, phaseId);
+        bytes32 policyHash = phasePolicyHash[collectionId][phaseId];
         emit MintPhasePausedEvent(collectionId, phaseId, paused, policyHash, msg.sender);
     }
 
@@ -517,6 +541,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
             revert MintPolicyHashMismatch(registeredPolicyHash, transcript.currentPolicyHash);
         }
         transcript.boundPolicyHash = _requireBoundPolicyHash(batch, transcript.currentPolicyHash);
+        StreamMintArtistConsent.mint(
+            address(core),
+            batch.collectionId,
+            batch.phaseId,
+            transcript.currentPolicyHash,
+            _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+        );
         transcript.authorization = StreamMintGateValidator.validateAuthorization(
             batch,
             gateData,
@@ -650,9 +681,59 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard, ERC1
             ledgerPolicies[i] = _ledgerPolicy(_counterConfigs[collectionId][phaseId][counterId]);
         }
         policyHash = _computePolicyHash(collectionId, phaseId);
+        _recordArtistConsent(collectionId, phaseId, policyHash);
         phasePolicyHash[collectionId][phaseId] = policyHash;
         mintLedger.registerPhasePolicy(
             address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies, 0
+        );
+    }
+
+    function _recordArtistConsent(uint256 collectionId, bytes32 phaseId, bytes32 policyHash)
+        private
+    {
+        (uint8 mode, bytes32 evidence) = StreamMintArtistConsent.registration(
+            address(core),
+            collectionId,
+            phaseId,
+            policyHash,
+            _gasParameterValue(GGP_ARTIST_AUTHORITY_GAS_LIMIT)
+        );
+        emit MintPhaseConsentRecorded(
+            SCHEMA_VERSION, collectionId, phaseId, policyHash, mode, evidence
+        );
+    }
+
+    /// @notice Computes the exact prospective policy so the artist can consent before registration.
+    /// @dev Uses this Manager's chain/dependencies. Pause is excluded; executor order is canonicalized.
+    ///      Configuration admission and runtime authorization are independently checked when applied.
+    function previewPhasePolicyHash(
+        uint256 collectionId,
+        bytes32 phaseId,
+        MintPhaseConfig calldata config,
+        MintGateConfig calldata gateConfig,
+        bytes32[] calldata counterIds,
+        MintCounterConfig[] calldata counterConfigs,
+        address[] calldata executors
+    ) external view returns (bytes32) {
+        if (
+            counterIds.length != counterConfigs.length || counterIds.length > MAX_PHASE_COUNTERS
+                || executors.length > MAX_PHASE_EXECUTORS
+        ) revert MintArrayLengthMismatch();
+        return StreamMintOperationIdentity.computePolicyHash(
+            config,
+            gateConfig,
+            counterIds,
+            counterConfigs,
+            executors,
+            StreamMintOperationIdentity.PolicyContext(
+                block.chainid,
+                address(this),
+                address(mintLedger),
+                address(moduleRegistry),
+                SCHEMA_VERSION,
+                collectionId,
+                phaseId
+            )
         );
     }
 
