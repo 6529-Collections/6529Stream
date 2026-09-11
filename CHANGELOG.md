@@ -9,11 +9,12 @@ the release policy in `docs/release-policy.md`.
 
 - Added operative artist identity document revisions with immutable registration
   and binding history, exact document-hash personhood matching, and preserved
-  existing consent records. Current-stack composition remains in progress.
+  existing consent records. Current-stack Safe and payment composition passes.
 - Added the shared official revenue recorder, sole ERC-20 payer adapter and a
   signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
-  exact settlement events, replay protection and Safe domain tests. Current-Core
-  composition and broader sale orchestration remain in progress.
+  exact settlement events, replay protection and Safe domain tests. Actual-Core
+  Safe payment, minting, claims and rollback composition passes; broader sale
+  orchestration remains in progress.
 - Bound universal sale mint authorization IDs to the complete signed digest,
   preserving the separate commercial and execution nonce protections. Added
   actual-current Safe payment, exact replay and late-recipient rollback scenarios.

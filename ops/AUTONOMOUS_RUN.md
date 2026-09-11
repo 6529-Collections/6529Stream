@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `5ecae362` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `4e9a41b1` (independently tested integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -47,7 +47,7 @@ minting and template settlement. Independent review binds the captured inputs
 and all 209 relevant artifacts. Identity revision operation 25 (`3f6a5dd4`)
 brings the source count to 19. Its 109 tests, preserved interface/storage
 prefixes and 30 production artifacts received independent review; its current
-composition remains part of the next integration run.
+composition now passes with the payment, content and Safe workflows below.
 
 Collection template materialization and typed economics facts are integrated.
 Template fixed-sale funding (`ddf01864`) passed 76 focused tests and four fuzz
@@ -55,13 +55,17 @@ properties per compiler mode. Governed asset permit-capability attestations
 (`3287fcd5`) passed 13 tests plus fuzzing per mode. These increments received
 independent review. Shared settlement, the ERC-20 payer adapter and signed
 fixed-profile consumer are integrated as `18dbe54c`. Their 29 tests plus 256 fuzz
-inputs pass with independent source/artifact review. Current-Core composition is
-being built separately. Native official settlement and other orchestration
+inputs pass with independent source/artifact review. Current-Core composition now
+passes in the ten-case snapshot below. Native official settlement and other orchestration
 profiles remain open; the payment builder is implementing the native branch.
 The canonical full-digest Manager authorization correction is integrated as
 `5ecae362`, with two focused tests and independent source/artifact review. A
-ten-case actual-current run now combines three new universal payment workflows
-with the existing content and Safe cases, using the accepted identity revision.
+ten-case actual-current run passes all three new universal payment workflows,
+two content and five existing Safe cases, using the accepted identity revision.
+Independent review matched all 218 Solidity sources and three Safe fixtures to
+`4e9a41b1`, bound 237 artifacts to retained compiler outputs, and confirmed all
+90 nonempty production runtimes fit. These actual mint, replay and rollback
+results do not establish full-repository or new-candidate acceptance.
 
 The completed combined snapshot passed 36 cases, including all nine ERC-20 and
 22 native-sale/auction cases. Two failures were an incorrect Safe event-layout
