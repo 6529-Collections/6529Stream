@@ -4,10 +4,11 @@
 
 | Item | Outcome | Gate | Status |
 | --- | --- | --- | --- |
-| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Active PR #742 / issue #738, branch `codex/developer-launch-kit`; PR #741 merged; current product flows and native Sepolia demonstration pass; developer toolkit, final review and candidate freeze in progress |
+| `SHIP-001` | Working current-stack RC and Sepolia demonstration | Tested transactions and concrete deployment | Completed in PR #742; issue #738 closed; testnet/current-rc-1 published from `569bf87f` with matching Sepolia evidence |
+| `SHIP-002` | Complete full v1 features and integrated candidate | [Feature ledger](V1_DELIVERY.md) and actual current-stack behavior | Active issue #743, branch `codex/v1-integration`; artist and payment builders implementing first vertical increments; independent review active |
 
 Status: historical full-v1 backlog. Current delivery priorities and lane
-ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md). The September delivery
+ownership are in [AUTONOMOUS_RUN.md](AUTONOMOUS_RUN.md) and [V1_DELIVERY.md](V1_DELIVERY.md). The September delivery
 reset prioritizes working current-stack transactions before release paperwork;
 the entries below remain useful scope and acceptance-criteria references.
 

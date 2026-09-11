@@ -1,0 +1,185 @@
+# Full v1 implementation delivery
+
+Started 11 September 2026 under the owner's autonomous delivery authority.
+This is the active implementation plan. The normative specification set in
+[spec policy](../docs/spec-policy.md) still defines v1; this plan organizes its
+completion and does not narrow its requirements.
+
+## Starting point and outcome
+
+Supported testnet RC1 is complete and published from
+`569bf87f1fa808787d324f6e1582924b5ccf1d40`. Its source tag and deployment evidence
+remain immutable. The next outcome is the full specified feature set running
+through actual current contracts, with independent review, tests, developer
+interfaces and a newly identified candidate. External audit and production
+ceremony acceptance remain separately visible requirements.
+
+The prior 45-60% assessment was a qualitative feature estimate, not a measured
+requirements pass rate or estimate of remaining time. This ledger replaces
+percentage-based progress reporting with concrete capabilities and evidence.
+
+## Team and ownership
+
+Four agents work concurrently: one integrator, two builders and one independent
+reviewer. The integrator remains responsible for decisions and delivery.
+
+| Role | First assignment | Continuing responsibility |
+| --- | --- | --- |
+| Integrator | Shared artist/payment/finality decisions; feature ledger and integration | Core/governance, dependency order, merged tests, API coherence, CI, deployment, release and cleanup |
+| Artist builder | Identity, two-sided acceptance and genuinely eligible mint consent | Artist lifecycle, sanctions and the artist side of finality/recovery |
+| Revenue builder | Stateless claims across 20 real split wallets | Wallet completion, settlement/escrow, then missing sale mechanisms |
+| Independent reviewer | Challenge both first slices before integration | Adversarial source and test review; challenge scope omissions and false completion claims |
+
+The two builders have separate branches and worktrees. The reviewer needs no
+worktree of its own. The integrator owns one integration worktree; original
+main and the frozen Sepolia checkout are retained. Retire a builder worktree
+after its handoff is merged and preserved instead of accumulating old branches.
+
+Builders may not edit the same production files concurrently. Interface owners
+publish a concrete typed contract before dependent builders use it. A handoff
+contains one coherent commit, exact validation, unresolved limitations and the
+next useful slice. Root owns global manifests, release artifacts and integration
+fixtures. No builder independently pushes, merges or broadcasts transactions.
+
+## Delivery rules
+
+1. Work in executable vertical increments. Each increment ends with an actual
+   usable behavior through the current stack, including its failure paths.
+   A directory, interface, mock-only test or always-failing admission path is
+   not feature completion.
+2. Resolve ordinary design choices internally. Old Proposed packets identify
+   decisions to finish, not requests to return to the CEO. Preserve accepted
+   semantics, record exact changes and obtain independent technical review.
+   Do not blanket-flip implementation-authorized flags or erase unresolved
+   requirements. Any genuine semantic amendment gets a concise decision record
+   and corresponding spec/test reconciliation before dependent code is accepted.
+3. One writer owns each semantic state, replay key and event. Keep cross-domain
+   calls typed and atomic. No generic execution router or second source of
+   payment, artist, governance or finality authority.
+4. Integrate each coherent passing increment promptly. Independent work does
+   not wait for another feature's PR, full cold build or release bundle.
+5. Compile the smallest relevant import closure first. Reuse only caches whose
+   complete source and toolchain inputs match. Run focused behavior and current
+   integration checks during development; broad validation, artifact generation
+   and testnet rehearsals follow meaningful integration checkpoints.
+6. Preserve an independent reviewer. Rotate that role only after a handoff;
+   a builder never supplies the sole acceptance of its own feature.
+7. Every new money/authority path receives negative and adversarial tests,
+   appropriate fuzzing and stateful accounting checks. Tests must show successful
+   operations and independent expected results, not just attempted calls.
+8. Keep status fresh in this ledger and the active issue. Report what now works,
+   the current critical path and any actual forecast change. Historical issue
+   text about the completed RC is not a new blocker.
+
+## First integration checkpoints
+
+The first 48 hours are an aggressive implementation sprint, not a promise that
+every remaining specification requirement can be completed in that time.
+Re-estimate the critical path from the first actual integrated deliveries.
+
+| Checkpoint | Required result |
+| --- | --- |
+| First working increments | One transaction claims from at least 20 real wallets; real artist facts can satisfy one complete policy-consent path, including all mandatory floor records |
+| Expanded commerce and authority | Complete wallet exits and typed settlement/escrow; artist changes invalidate or preserve consent exactly as specified |
+| New products and recovery | Missing sales consume shared payment/mint/artist boundaries; fallback entropy and finality use real dependencies |
+| Full feature candidate | Every ledger row and mandatory genesis role has executable evidence; all 57 artist operations are explicitly accounted for; broad tests, fuzz campaigns, independent review and a fresh matching testnet rehearsal pass |
+
+An integration checkpoint is a concrete capability, not a time spent, document
+count or arbitrary test-count target. Aim for a new demonstrable increment each
+working half-day; investigate and split any lane that produces only paperwork.
+
+## Feature completion ledger
+
+States: `Building` means source work is assigned; `Queued` means a named owner
+will take it after the listed dependency. Neither means complete. Promote a row
+to `Integrated` only with code and actual current-stack tests, and to `Verified`
+only with independent review and the specified demonstration. Keep links to
+commits, tests and retained results in the evidence column when advancing it.
+
+| ID | Capability and completion test | Owner / dependencies | Initial state |
+| --- | --- | --- | --- |
+| FOUND-01 | Actual metadata content-state and primary/royalty assignment reads plus required mutation/consent hooks supply the artist floor records | Integrator; parallel with ART-01, no dependency on advanced ART-03 or META-01 | Building |
+| ART-01 | Identity, binding, acceptance, exact mint consent and independent pause; actual economics, first-release and attestation prerequisites make an eligible mint possible | Artist; internal typed/storage decision | Building |
+| ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist; ART-01 | Queued |
+| ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Queued |
+| ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Queued |
+| ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
+| PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Building |
+| PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Queued |
+| PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Queued |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Queued |
+| PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Queued |
+| SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
+| SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
+| SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Queued |
+| SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Queued |
+| MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / freed builder; shared artist/payment interfaces | Queued |
+| ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Queued |
+| ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Queued |
+| META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Queued |
+| META-02 | Rendering-input manifests, offchain first-sale binding, archive receipt/fixity semantics and required museum schemas round-trip | Integrator / freed builder; META-01 | Queued |
+| FIN-01 | Collection/token/release/season/view finality binds actual Core, metadata, discovery, entropy and artist sanction | Artist + integrator; ART-03, META-01/02, ENT-02 | Queued |
+| FIN-02 | Governance-owned recovery, owner notice/objection, recovered-route lineage and bounded refresh/cutover work end to end | Artist + integrator; FIN-01, owner records, ADR 0020 reconciliation | Queued |
+| ARCH-01 | Complete state/event reconstruction and export preservation can rebuild required records, lineage and artwork without relying on the app | Integrator / freed builder; current publisher, META/ART/FIN | Queued |
+| GOV-01 | Complete governed parameter hosts, call-budget behavior and distinct fallback instances fit the real candidate | Integrator; integrated modules | Queued |
+| APP-01 | SDK, human-readable artist signing, event-based claims and operator recovery expose every supported new workflow | Integrator / freed builder; each accepted interface increment | Queued |
+| VERIFY-01 | Full mandatory feature traceability, integrated hostile tests, fuzz/stateful campaigns, normative all-cold collector gas ceilings and interaction measurements, and real candidate demonstrations | Reviewer + integrator; all implementation rows | Queued |
+| RELEASE-01 | Complete genesis inventory, exact compiler/deployment binding, new frozen source and matching testnet evidence | Integrator; VERIFY-01 | Queued |
+
+The [normative v1 scope](../docs/launch-v1-target-architecture.md),
+[genesis profile and gate inventory](../docs/launch-conformance-matrix.md),
+[sales specification](../docs/stream-sales-and-auctions.md),
+[artist operation matrix](../release-artifacts/issue-670-adapter-freeze/artist-operation-matrix-v1.json)
+and [artist domain matrix](../docs/architecture/artist-semantic-owner-matrix-v2.json)
+own the detailed requirements. This grouped ledger is an execution index, not
+a replacement for those requirements or a count-based percentage score.
+
+## Critical path and parallelism
+
+Artist authority and settlement are the shared prerequisites for many remaining
+features, so they begin immediately. Claim aggregation is an independent first
+payment increment while the universal settlement decision is resolved. Artist
+floor records are included in the first vertical flow; an acceptance-only
+registry with permanently unavailable mint eligibility is not its end state.
+FOUND-01 is a parallel prerequisite owned by the integrator. Its small real
+provider/read and mutation hooks do not wait for the complete museum metadata
+system. ART-03 and META-01 agree typed interfaces first, then build their own
+state owners in parallel; neither waits for the other's entire implementation.
+
+Once the first interfaces and integrated contracts are stable, move available
+builder capacity to entropy and metadata. Full finality follows real artist
+sanction and metadata inputs. Recovery follows finality. Rich sales use the
+shared payment and mint boundaries instead of inventing new accounting.
+
+The integrator may split or reorder rows to keep both builders productive, but
+must retain every v1 requirement and record changed dependencies. Avoid adding
+more concurrent worktrees or overlapping writers to conceal a blocked lane.
+
+## Feature acceptance and external release obligations
+
+For every mandatory feature, retain: its normative anchors; actual owning
+contract and interface; successful and rejected current-stack operations;
+state/event/replay assertions; applicable fuzz/invariant evidence; independent
+review disposition; developer usage; and deployment/configuration requirements.
+Measure the normative all-cold and interaction gas envelopes as features become
+integrated. A real ceiling breach needs implementation slimming or an explicitly
+reviewed semantic amendment, not a silently increased test allowance.
+Do not infer completion from a source filename, isolated mocked test, deployed
+address count or a generated checker reporting that a placeholder is honest.
+
+External audit, institutional/marketplace validation, production signer custody,
+funding/endowment operations and production ceremonies remain separate visible
+acceptance obligations. A feature-complete testnet candidate does not close
+them. Lean remains deferred until the traditional implementation stabilizes.
+
+## Resume and preservation
+
+The integrator records active commits, processes, cache owners, review results
+and next actions in the local continuation checkpoint as well as this ledger's
+capability state. Resuming work begins by reading current assignments and
+reusing active workers; do not spawn duplicate compilers or broadcasts.
+
+RC1, its deployment checkout, source tags, original-work recovery and retired
+branch bundles remain preserved. New contracts or changed semantics require a
+new candidate identifier and matching deployment evidence. Never move RC1's tag
+or relabel its Sepolia instance as the new v1 implementation.
