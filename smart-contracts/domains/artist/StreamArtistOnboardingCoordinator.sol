@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
+import "./StreamArtistBindingOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistBindingLifecycleCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegationCoordinator.sol";
 
 import "./StreamArtistOnboardingReads.sol";
@@ -25,7 +27,8 @@ import {
 contract StreamArtistOnboardingCoordinator is
     IStreamArtistOnboardingCoordinator,
     IStreamArtistEconomicsCoordinator,
-    IStreamArtistDelegationCoordinator
+    IStreamArtistDelegationCoordinator,
+    IStreamArtistBindingLifecycleCoordinator
 {
     /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
     error MissingMintPrerequisite(bytes32 prerequisite);
@@ -103,6 +106,8 @@ contract StreamArtistOnboardingCoordinator is
                 _runtimeHashes,
                 uint16(1),
                 uint16(2),
+                uint16(3),
+                uint16(4),
                 uint16(14),
                 uint16(15),
                 uint16(18),
@@ -191,28 +196,36 @@ contract StreamArtistOnboardingCoordinator is
         uint256 collectionId,
         T.Authorization calldata a
     ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(2);
-        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
-        _collection(collectionId);
-        if (b.accepted || b.bindingHash == bytes32(0)) revert T.InvalidAttribution(collectionId);
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistHashes.acceptanceDigest(_environment(), collectionId, b, a),
-            a.signature
+        return StreamArtistBindingOperations.accept(
+            _economicContext(), actor, collectionId, a, 0, bytes32(0), false
         );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeAcceptance(_context(2, actor, before_[2]), collectionId, b, a, proof);
-        bytes32 actual = IStreamArtistAcceptanceOwner(_suite.owners[3])
-            .recordAcceptance(
-                _context(2, actor, before_[3]), collectionId, b, proof.signer, a.nonce
-            );
-        if (actual != record) revert T.InvalidRecord();
-        IStreamArtistBindingOwner(_suite.owners[0])
-            .accept(_context(2, actor, before_[0]), collectionId, b.bindingHash, record);
-        IStreamArtistAttributionOwner(_suite.owners[4])
-            .accept(_context(2, actor, before_[4]), collectionId, b, record);
-        _archive(2, actor, record, before_, abi.encode(collectionId, b, a, proof));
+    }
+
+    function coordinateAcceptArtistBindingExpected(
+        address actor,
+        uint256 collectionId,
+        uint64 generation,
+        bytes32 bindingHash,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistBindingOperations.accept(
+            _economicContext(), actor, collectionId, a, generation, bindingHash, true
+        );
+    }
+
+    function coordinateRefuseArtistBinding(
+        address actor,
+        L.Termination calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistBindingOperations.refuse(_economicContext(), actor, p, a);
+    }
+
+    function coordinateWithdrawArtistBinding(address actor, L.Termination calldata p)
+        external
+        operation
+    {
+        StreamArtistBindingOperations.withdraw(_economicContext(), actor, p);
     }
 
     function coordinateRecordPolicyConsent(
@@ -289,9 +302,8 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         if (grant == bytes32(0)) revert D.InvalidDelegation(grant);
-        return StreamArtistEconomicOperations.economicsCurrent(
-            _economicContext(), actor, p, grant, a
-        );
+        return
+            StreamArtistEconomicOperations.economicsCurrent(_economicContext(), actor, p, grant, a);
     }
 
     function coordinateRecordDelegatedProspectiveEconomicsConsent(

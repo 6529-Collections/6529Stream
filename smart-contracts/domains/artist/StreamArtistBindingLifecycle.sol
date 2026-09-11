@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
+import "./StreamArtistBindingOperations.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -10,6 +11,7 @@ import {
 contract StreamArtistBindingLifecycle is StreamArtistOwner {
     mapping(uint256 => T.Binding) private _bindings;
     mapping(uint256 => mapping(uint64 => T.Binding)) private _history;
+    mapping(uint256 => mapping(uint64 => L.Terminal)) private _terminals;
     event ArtistBindingProposed(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -58,6 +60,14 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         return _history[collectionId][generation];
     }
 
+    function bindingTermination(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (L.Terminal memory)
+    {
+        return _terminals[collectionId][generation];
+    }
+
     function propose(
         T.ActionContext calldata c,
         uint256 collectionId,
@@ -69,7 +79,12 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             collectionId == 0 || artistId == bytes32(0) || p.artistAddress == address(0)
                 || p.identityRecordHash == bytes32(0)
         ) revert T.InvalidRecord();
-        if (_bindings[collectionId].generation != 0) revert T.InvalidAttribution(collectionId);
+        T.Binding storage previous = _bindings[collectionId];
+        if (
+            previous.generation != 0
+                && (previous.accepted || _terminals[collectionId][previous.generation].kind == 0)
+        ) revert T.InvalidAttribution(collectionId);
+        uint64 generation = previous.generation + 1;
         if (
             p.consentMode != 1 || p.saleConsentScope != 0 || p.registryImmutabilityElection > 1
                 || p.collabPolicyMode != 0 || p.collabThreshold != 0 || p.collaborators.length != 0
@@ -83,7 +98,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             p.artistAddress,
             p.identityRecordHash,
             bytes32(0),
-            1,
+            generation,
             p.consentMode,
             p.saleConsentScope,
             p.registryImmutabilityElection,
@@ -135,6 +150,7 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         T.Binding storage item = _bindings[collectionId];
         if (
             item.generation == 0 || item.accepted || item.bindingHash != bindingHash
+                || _terminals[collectionId][item.generation].kind != 0
                 || acceptanceRecord == bytes32(0)
         ) {
             revert T.InvalidAttribution(collectionId);
@@ -147,6 +163,69 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
             keccak256(abi.encode(collectionId, item)),
             bytes32(0),
             bytes32(0)
+        );
+    }
+
+    function refuse(
+        T.ActionContext calldata c,
+        L.Termination calldata p,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32 record) {
+        _check(c, 3);
+        T.Binding memory b = _pending(p);
+        if (signer != b.artistAddress) revert T.InvalidSignature();
+        record = StreamArtistBindingOperations.refusalRecord(
+            _environment(), p, b.artistId, signer, nonce, _now()
+        );
+        bytes32 key = _consume(
+            keccak256("binding_lifecycle.replay.refusal_uniqueness"),
+            keccak256(abi.encode(p.collectionId, p.generation)),
+            record
+        );
+        _terminals[p.collectionId][p.generation] = L.Terminal(1, p.reasonHash, record);
+        _commit(
+            c,
+            keccak256(abi.encode(b, p, signer, nonce)),
+            keccak256(
+                abi.encode(p.collectionId, p.generation, _terminals[p.collectionId][p.generation])
+            ),
+            keccak256(abi.encode(key, record)),
+            record
+        );
+    }
+
+    function withdraw(T.ActionContext calldata c, L.Termination calldata p) external {
+        _check(c, 4);
+        T.Binding memory b = _pending(p);
+        if (c.actor != b.proposer) revert T.Unauthorized(c.actor);
+        bytes32 key = _consume(
+            keccak256("binding_lifecycle.replay.proposal_terminal_transition_key"),
+            keccak256(abi.encode(p.collectionId, p.generation)),
+            b.bindingHash
+        );
+        _terminals[p.collectionId][p.generation] = L.Terminal(2, p.reasonHash, bytes32(0));
+        _commit(
+            c,
+            keccak256(abi.encode(b, p)),
+            keccak256(
+                abi.encode(p.collectionId, p.generation, _terminals[p.collectionId][p.generation])
+            ),
+            keccak256(abi.encode(key, b.bindingHash)),
+            bytes32(0)
+        );
+    }
+
+    function _pending(L.Termination calldata p) private view returns (T.Binding memory b) {
+        b = _bindings[p.collectionId];
+        if (
+            b.generation == 0 || b.accepted || p.generation != b.generation
+                || p.bindingHash != b.bindingHash
+                || _terminals[p.collectionId][p.generation].kind != 0
+        ) revert T.InvalidAttribution(p.collectionId);
+        if (p.reasonHash == bytes32(0)) revert T.InvalidRecord();
+        if (bytes(p.reasonURI).length > 2048) revert T.BoundExceeded(
+            bytes(p.reasonURI).length, 2048
         );
     }
 }

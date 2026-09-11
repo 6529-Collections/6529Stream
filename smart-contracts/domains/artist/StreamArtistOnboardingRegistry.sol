@@ -3,6 +3,8 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistDelegation.sol";
+import "../../interfaces/stream/artist/IStreamArtistBindingLifecycle.sol";
+import "../../interfaces/stream/artist/IStreamArtistBeneficiaryFacts.sol";
 
 import "./StreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
@@ -24,6 +26,8 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistContentRatification,
     IStreamArtistEconomicsAuthority,
     IStreamArtistDelegation,
+    IStreamArtistBindingLifecycle,
+    IStreamArtistBeneficiaryFacts,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -77,7 +81,9 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistOnboarding).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
             || id == type(IStreamArtistEconomicsAuthority).interfaceId
-            || id == type(IStreamArtistDelegation).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistDelegation).interfaceId
+            || id == type(IStreamArtistBindingLifecycle).interfaceId
+            || id == type(IStreamArtistBeneficiaryFacts).interfaceId || super.supportsInterface(id);
     }
 
     function grantArtistDelegation(D.Grant calldata p, T.Authorization calldata a)
@@ -205,6 +211,50 @@ contract StreamArtistOnboardingRegistry is
             .coordinateAcceptArtistBinding(msg.sender, collectionId, a);
     }
 
+    function acceptArtistBindingExpected(
+        uint256 collectionId,
+        uint64 generation,
+        bytes32 bindingHash,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
+            .coordinateAcceptArtistBindingExpected(
+                msg.sender, collectionId, generation, bindingHash, a
+            );
+    }
+
+    function refuseArtistBinding(L.Termination calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
+            .coordinateRefuseArtistBinding(msg.sender, p, a);
+    }
+
+    function withdrawArtistBinding(L.Termination calldata p) external {
+        IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
+            .coordinateWithdrawArtistBinding(msg.sender, p);
+    }
+
+    function bindingRefusalDigest(L.Termination calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistBindingOperations.refusalDigest(_environment(), p, a);
+    }
+
+    function bindingTermination(uint256 collectionId, uint64 generation)
+        external
+        view
+        returns (L.Terminal memory)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistBindingTerminationOwner(s.owners[0])
+            .bindingTermination(collectionId, generation);
+    }
+
     function recordPolicyConsent(T.PolicyConsent calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
@@ -320,6 +370,14 @@ contract StreamArtistOnboardingRegistry is
         T.RatificationRecord memory r =
             IStreamArtistConsentOwner(s.owners[6]).firstReleaseRatification(collectionId);
         return (r.recordHash != bytes32(0), r.contentStateHash, r.recordHash);
+    }
+
+    function collectionArtistBeneficiary(uint256 collectionId)
+        external
+        view
+        returns (bytes32, address, bytes32)
+    {
+        return _reads().collectionArtistBeneficiary(collectionId);
     }
 
     function artistPayoutAccount(bytes32 artistId) external view returns (address, bytes32) {

@@ -47,6 +47,21 @@ contract StreamArtistOnboardingReads {
         }
     }
 
+    function collectionArtistBeneficiary(uint256 collectionId)
+        external
+        view
+        returns (bytes32 artistId, address payoutAccount, bytes32 designationRecordHash)
+    {
+        _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
+        T.Binding memory b = acceptedBinding(collectionId);
+        artistId = b.artistId;
+        (payoutAccount, designationRecordHash) =
+            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
+        if (payoutAccount == address(0) || designationRecordHash == bytes32(0)) {
+            revert T.InvalidRecord();
+        }
+    }
+
     function consentMode(uint256 collectionId) external view returns (uint8) {
         T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
         return b.accepted ? b.consentMode : 0;

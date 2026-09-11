@@ -132,17 +132,33 @@ contract ArtistUnitGovernance {
 
 contract ArtistUnitRoles {
     address public immutable admin;
+    mapping(address => bool) private extraAdmins;
+    uint64 private revision = 1;
+    bytes32 private changes;
 
     constructor(address admin_) {
         admin = admin_;
     }
 
     function hasRole(bytes32 role, address account) external view returns (bool) {
-        return role == keccak256("ROLE_ARTIST_REGISTRY_ADMIN") && account == admin;
+        return role == keccak256("ROLE_ARTIST_REGISTRY_ADMIN")
+            && (account == admin || extraAdmins[account]);
+    }
+
+    function setAdmin(address account, bool enabled) external {
+        require(msg.sender == admin, "unit admin");
+        extraAdmins[account] = enabled;
+        changes = keccak256(abi.encode(changes, account, enabled));
+        ++revision;
     }
 
     function roleMutationState(bytes32 role) external view returns (bytes32, uint64) {
-        return (keccak256(abi.encode(role, admin)), 1);
+        return (
+            changes == bytes32(0)
+                ? keccak256(abi.encode(role, admin))
+                : keccak256(abi.encode(role, admin, changes)),
+            revision
+        );
     }
 }
 
@@ -184,6 +200,390 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     StreamMintLedger private ledger;
     uint256 private nextNonce;
     bool private directArtistCalls;
+
+    function _termination(uint256 collectionId) private view returns (L.Termination memory p) {
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);
+        p = L.Termination(
+            collectionId,
+            b.generation,
+            b.bindingHash,
+            keccak256("incorrect proposed terms"),
+            "urn:binding:reason"
+        );
+    }
+
+    function _repropose(uint256 collectionId) private {
+        ingress.proposeArtistBinding(
+            collectionId, _proposal(artistId), bytes("unit identity document"), "Artist Safe"
+        );
+    }
+
+    function testBindingRefusalSafeSignatureCanonicalRecordAndEvents() public {
+        L.Termination memory p = _termination(1);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.bindingRefusalDigest(p, a));
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_BINDING_REFUSAL_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                suite.core,
+                uint256(1),
+                p.generation,
+                p.bindingHash,
+                artistId,
+                address(artist),
+                uint8(1),
+                p.reasonHash,
+                a.nonce,
+                uint64(1000)
+            )
+        );
+        vm.recordLogs();
+        require(ingress.refuseArtistBinding(p, a) == expected, "canonical refusal record");
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool contextFound;
+        bool stateFound;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != suite.owners[4]) continue;
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistBindingTerminationContext(uint16,uint256,uint64,bytes32,bytes32,bytes32,address,uint256,uint64)"
+                    )
+            ) {
+                require(
+                    logs[i].topics[1] == bytes32(uint256(1))
+                        && logs[i].topics[2] == bytes32(uint256(1))
+                        && logs[i].topics[3] == expected,
+                    "refusal context topics"
+                );
+                (
+                    uint16 schema,
+                    bytes32 bh,
+                    bytes32 id,
+                    address signer,
+                    uint256 nonce,
+                    uint64 observed
+                ) = abi.decode(logs[i].data, (uint16, bytes32, bytes32, address, uint256, uint64));
+                require(
+                    schema == 1 && bh == p.bindingHash && id == artistId
+                        && signer == address(artist) && nonce == a.nonce && observed == 1000
+                        && observed != a.time,
+                    "exact refusal context"
+                );
+                contextFound = true;
+            }
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistAttributionStateChanged(uint16,uint256,uint8,uint64,uint8,address,uint8,bytes32,bytes32,string)"
+                    )
+            ) {
+                (
+                    uint16 schema,
+                    uint64 generation,
+                    uint8 old,
+                    address actor,
+                    uint8 auth,
+                    bytes32 record,
+                    bytes32 reason,
+                    string memory uri
+                ) = abi.decode(
+                    logs[i].data, (uint16, uint64, uint8, address, uint8, bytes32, bytes32, string)
+                );
+                require(
+                    schema == 1 && generation == 1 && old == 1 && actor == address(this)
+                        && auth == 1 && record == expected && reason == p.reasonHash
+                        && keccak256(bytes(uri)) == keccak256(bytes(p.reasonURI)),
+                    "state event record"
+                );
+                stateFound = true;
+            }
+        }
+        require(contextFound && stateFound, "both events");
+        require(ingress.bindingTermination(1, 1).recordHash == expected, "historical refusal");
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.refuseArtistBinding(p, a);
+        require(before_ == _roots(), "refusal replay rollback");
+        T.Snapshot memory identityBefore =
+            IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
+        _repropose(1);
+        require(
+            keccak256(abi.encode(identityBefore))
+                == keccak256(
+                    abi.encode(IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2())
+                ),
+            "reproposal reuses identity read-only"
+        );
+        require(
+            IStreamArtistBindingOwner(suite.owners[0]).binding(1).generation == 2
+                && ingress.bindingTermination(1, 1).recordHash == expected,
+            "generation history"
+        );
+    }
+
+    function testBindingSafeDirectRefusalRejectsOwnerEoaAndExpiredProof() public {
+        L.Termination memory p = _termination(1);
+        T.Authorization memory a = T.Authorization(0, 999, "");
+        a.signature = _signature(ingress.bindingRefusalDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, uint64(999)));
+        ingress.refuseArtistBinding(p, a);
+        a = T.Authorization(0, 2000, "");
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        vm.prank(vm.addr(keys[0]));
+        ingress.refuseArtistBinding(p, a);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistBindingLifecycle.refuseArtistBinding, (p, a)),
+                0
+            ),
+            "real Safe direct refusal"
+        );
+        require(ingress.bindingTermination(1, 1).kind == 1, "refused");
+    }
+
+    function testBindingTwoWithdrawalsHaveDistinctEvidenceAndNoIdentityOrRecordMutation() public {
+        T.Snapshot memory identityBefore =
+            IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
+        bytes32 first;
+        for (uint256 i; i < 2; ++i) {
+            L.Termination memory p = _termination(1);
+            T.Snapshot memory before_ = IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2();
+            ingress.withdrawArtistBinding(p);
+            T.Snapshot memory after_ = IStreamArtistOwner(suite.owners[0]).ownerStateSnapshotV2();
+            require(
+                after_.revision == before_.revision + 1
+                    && after_.recordChainTip == before_.recordChainTip,
+                "withdraw no new normative record"
+            );
+            require(
+                ingress.bindingTermination(1, p.generation).kind == 2
+                    && ingress.bindingTermination(1, p.generation).recordHash == bytes32(0),
+                "withdraw terminal history"
+            );
+            require(
+                _operationPayload(4, address(this), p.bindingHash).length != 0,
+                "distinct archive evidence exists"
+            );
+            if (i == 0) first = p.bindingHash;
+            else require(first != p.bindingHash, "per-generation reference");
+            _repropose(1);
+        }
+        require(
+            keccak256(abi.encode(identityBefore))
+                == keccak256(
+                    abi.encode(IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2())
+                ),
+            "withdraw/reuse preserve identity"
+        );
+        require(
+            IStreamArtistBindingOwner(suite.owners[0]).binding(1).generation == 3,
+            "third generation"
+        );
+    }
+
+    function testBindingSafeStoredProposerWithdrawalSurvivesRoleRemoval() public {
+        ArtistUnitRoles roles = ArtistUnitRoles(suite.roleRegistry);
+        roles.setAdmin(address(artist), true);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistOnboarding.proposeArtistBinding,
+                    (2, _proposal(artistId), bytes("unit identity document"), "Artist Safe")
+                ),
+                0
+            ),
+            "Safe proposer"
+        );
+        roles.setAdmin(address(artist), false);
+        L.Termination memory p = _termination(2);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        ingress.withdrawArtistBinding(p);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistBindingLifecycle.withdrawArtistBinding, (p)),
+                0
+            ),
+            "stored Safe proposer retains withdrawal"
+        );
+        require(ingress.bindingTermination(2, 1).kind == 2, "withdrawn");
+    }
+
+    function testBindingQueuedSafeAcceptanceCannotDriftToReplacementGeneration() public {
+        L.Termination memory old = _termination(1);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        bytes memory queued = abi.encodeCall(IStreamArtistOnboarding.acceptArtistBinding, (1, a));
+        bytes memory pinned = abi.encodeCall(
+            IStreamArtistBindingLifecycle.acceptArtistBindingExpected,
+            (1, old.generation, old.bindingHash, a)
+        );
+        ingress.withdrawArtistBinding(old);
+        _repropose(1);
+        bytes32 before_ = _roots();
+        uint256 safeNonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), queued);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), pinned);
+        require(
+            _roots() == before_ && artist.nonce() == safeNonce,
+            "queued failure preserves all roots/Safe nonce"
+        );
+        require(
+            !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, 0),
+            "artist nonce unused"
+        );
+        L.Termination memory current = _termination(1);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistBindingLifecycle.acceptArtistBindingExpected,
+                    (1, current.generation, current.bindingHash, a)
+                ),
+                0
+            ),
+            "exact new terms accepted"
+        );
+        require(ingress.acceptedArtist(1) == address(artist), "accepted replacement");
+    }
+
+    function testBindingStaleSignedAcceptanceAndRefusalRejectAfterReplacement() public {
+        L.Termination memory old = _termination(1);
+        T.Authorization memory accept_ = T.Authorization(0, 2000, "");
+        accept_.signature = _signature(ingress.acceptanceDigest(1, accept_));
+        T.Authorization memory refuse_ = T.Authorization(1, 2000, "");
+        refuse_.signature = _signature(ingress.bindingRefusalDigest(old, refuse_));
+        ingress.withdrawArtistBinding(old);
+        _repropose(1);
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        ingress.acceptArtistBinding(1, accept_);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.refuseArtistBinding(old, refuse_);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.withdrawArtistBinding(old);
+        require(before_ == _roots(), "stale actions rollback");
+        accept_.signature = _signature(ingress.acceptanceDigest(1, accept_));
+        ingress.acceptArtistBinding(1, accept_);
+        require(
+            ingress.acceptedArtist(1) == address(artist),
+            "legacy signed API still supports generation2"
+        );
+        L.Termination memory current = _termination(1);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.withdrawArtistBinding(current);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.refuseArtistBinding(current, refuse_);
+    }
+
+    function testBindingTerminationLateArchiveFailureRollsBackAllState() public {
+        L.Termination memory p = _termination(1);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        a.signature = _signature(ingress.bindingRefusalDigest(p, a));
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.refuseArtistBinding(p, a);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.withdrawArtistBinding(p);
+        require(
+            _roots() == before_ && ingress.bindingTermination(1, 1).kind == 0
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, 0),
+            "atomic archive failures"
+        );
+        avm.clearMockedCalls();
+        ingress.refuseArtistBinding(p, a);
+    }
+
+    function testRevokedNominationNeverUnlocksActualProviders() public {
+        L.Termination memory p = _termination(1);
+        ingress.withdrawArtistBinding(p);
+        require(
+            ingress.attribution(1).nominationHash == p.bindingHash
+                && ingress.acceptedArtist(1) == address(0),
+            "persistent nomination without attribution"
+        );
+        bytes32 profile = royalty.collectionRoyalty(1).profileId;
+        address governor = ingress.governanceAuthority();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        vm.prank(governor);
+        royalty.configureCollectionRoyalty(1, profile, 600);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRevenueResolver.PrimaryArtistConsentRequired.selector, uint256(1)
+            )
+        );
+        vm.prank(governor);
+        primary.clearPrimaryAssignment(PRIMARY, 1, 1);
+        _repropose(1);
+        require(ingress.attribution(1).nominationHash != bytes32(0), "new nomination stays guarded");
+    }
+
+    function testCollectionArtistBeneficiaryUsesAcceptedIdentityAndOperativePayout() public {
+        require(
+            ingress.supportsInterface(type(IStreamArtistBeneficiaryFacts).interfaceId),
+            "beneficiary capability"
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidAttribution.selector, uint256(1)));
+        ingress.collectionArtistBeneficiary(1);
+        _accept();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.collectionArtistBeneficiary(1);
+        _payout();
+        (bytes32 id, address account, bytes32 record) = ingress.collectionArtistBeneficiary(1);
+        require(
+            id == artistId && account == address(artist) && record != bytes32(0),
+            "explicit accepted payout"
+        );
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistBeneficiaryFacts.collectionArtistBeneficiary, (1)),
+                0
+            ),
+            "actual Safe read"
+        );
+        T.PayoutDesignation memory p = T.PayoutDesignation(artistId, address(0x987), record);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(p, a));
+        ingress.recordPayoutDesignation(p, a);
+        bytes32 nextRecord;
+        (, account, nextRecord) = ingress.collectionArtistBeneficiary(1);
+        require(
+            account == address(0x987) && nextRecord != record,
+            "operative designation follows actual record"
+        );
+        core.set(keccak256("ARTIST_REGISTRY"), address(primary), false);
+        require(
+            _closed(abi.encodeCall(IStreamArtistBeneficiaryFacts.collectionArtistBeneficiary, (1))),
+            "removed facade cannot provide current beneficiary"
+        );
+    }
 
     function _directTimeExercise(bool useSafe) private {
         address account = useSafe ? address(artist) : vm.addr(0xE0A123);
@@ -839,9 +1239,8 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         avm.expectRevert(T.InvalidSignature.selector);
         ingress.authorizeDelegatedRoyaltyFreeze(freeze, grant, a);
         require(_roots() == before_, "missing threshold/owner never delegate");
-        D.Revocation memory revoke = D.Revocation(
-            artistId, address(delegateSafe), grant, bytes32(0)
-        );
+        D.Revocation memory revoke =
+            D.Revocation(artistId, address(delegateSafe), grant, bytes32(0));
         a = T.Authorization(nextNonce, 2000, "");
         a.signature = _delegateSignature(ingress.delegationRevocationDigest(revoke, a));
         avm.expectRevert(T.InvalidSignature.selector);
@@ -872,9 +1271,8 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         );
         bytes32 record = ingress.authorizeDelegatedRoyaltyFreeze(freeze, grant, a);
         require(ingress.recordDelegation(record) == grant, "approved empty delegate proof");
-        D.Revocation memory revoke = D.Revocation(
-            artistId, address(delegateSafe), grant, bytes32(0)
-        );
+        D.Revocation memory revoke =
+            D.Revocation(artistId, address(delegateSafe), grant, bytes32(0));
         a = _authorization(false);
         _approveMessage(ingress.delegationRevocationDigest(revoke, a));
         ingress.revokeArtistDelegation(revoke, a);

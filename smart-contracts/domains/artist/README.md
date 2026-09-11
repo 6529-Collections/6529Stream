@@ -6,7 +6,7 @@ records, owner configuration, and archive evidence. `StreamArtistRegistryV2`
 remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, no collaborators
-or capability overrides, and operator-set sale parameters. Operations 1, 2, 14,
+or capability overrides, and operator-set sale parameters. Operations 1, 2, 3, 4, 14,
 15, 18, 20, 24, 26, 27, and 52 have typed entrypoints. The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
@@ -22,6 +22,8 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Existing content ratification | `IStreamArtistContentRatification` |
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
+| Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
+| Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
 | Immutable owner identity, snapshot, and replay cell | `IStreamArtistOwner` |
 | Each domain's typed reads and coordinator-only writes | The seven `IStreamArtist*Owner` interfaces |
 
@@ -46,6 +48,28 @@ append is atomic with every owner write and nonce consumption. The archive is
 evidence storage, not a current-state authority. Identity reuse across a second
 collection validates the existing identity without re-registering it or changing
 its liveness; Binding and Attribution own the new collection records.
+
+The named artist can refuse a pending proposal with a direct call or a verified
+refusal signature. Only its stored proposer can withdraw it, even if that
+proposer later loses the admin role. Both calls pin the exact generation and
+binding hash. They terminate a `CLAIMED` generation with a reason and preserve
+its history. A new proposal increments the generation; an authoritative accepted
+generation cannot be reopened through these calls. Withdrawal creates no artist
+record and changes no Identity state. Its archive entry cites the existing
+binding hash, so repeated withdrawal and reproposal remain distinct.
+
+Use `acceptArtistBindingExpected` for queued direct acceptance. It checks the
+expected generation and binding hash before consuming authorization. The older
+`acceptArtistBinding` retains signed acceptance for every generation, but empty
+direct proofs only for generation 1; queued old calldata cannot silently accept
+a replacement proposal. Refusal and withdrawal never clear the nomination hash
+used by the actual economics providers to enforce artist consent.
+
+`collectionArtistBeneficiary` composes the actual accepted identity and explicit
+operative payout record. It rejects absent attribution/designation and a facade
+that Core no longer selects. It does not substitute a signing address or require
+a revenue resolver callback. Fixed split profiles retain their prior accounts;
+this read supplies current facts for consumers that explicitly support them.
 
 All floors are required both at phase registration and before mint effects:
 
@@ -110,7 +134,8 @@ operations can be enabled.
 `StreamArtistIdentityState` and `StreamArtistDelegationState` are linked storage
 helpers operating on the Identity owner's original and appended slots.
 Identity retains its typed Coordinator/snapshot guards and the single semantic
-commit. `StreamArtistEconomicOperations` is a linked stateless recipe helper;
+commit. `StreamArtistEconomicOperations` and `StreamArtistBindingOperations` are
+linked stateless recipe helpers;
 the Coordinator keeps facade authentication, immutable target checks and its
 reentrancy lock. These helpers are deployment dependencies, not additional
 semantic owners or public protocol ingress points.
@@ -133,7 +158,8 @@ ERC1271 proof bytes. For a Safe, threshold owners sign the handler's SafeMessage
 wrapping of the Stream digest, or approve that message through the real Safe
 SignMessageLib. An approved empty proof is a valid relayed contract proof. A
 direct artist call with empty proof consumes the current unused allocator nonce;
-long-lived records must supply the current block timestamp. A Safe owner's EOA
+payout and attestation can use the observed-time convention described above.
+A Safe owner's EOA
 has no implicit authority belonging to the Safe.
 
 The focused onboarding tests use real owners, archive, split factories, primary

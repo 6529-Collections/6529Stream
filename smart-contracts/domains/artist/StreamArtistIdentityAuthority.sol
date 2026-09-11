@@ -7,6 +7,7 @@ import "./StreamArtistOwner.sol";
 import "./StreamArtistNonceAvailability.sol";
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
+import "./StreamArtistBindingOperations.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -157,8 +158,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         _check(c, 26);
         if (a.time != 0) revert T.InvalidRecord();
         bytes32 delta;
-        (record, delta) =
-            StreamArtistDelegationState.grant(
+        (record, delta) = StreamArtistDelegationState.grant(
             _delegations, _environment(), p, proof.signer, a.nonce
         );
         bytes32 digest = StreamArtistDelegationState.grantDigest(_environment(), p, a.nonce);
@@ -171,9 +171,8 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             record,
             _identity.identities[p.artistId].authorityAddress
         );
-        bytes32 key = _consume(
-            keccak256("identity_authority.replay.delegation_key"), record, record
-        );
+        bytes32 key =
+            _consume(keccak256("identity_authority.replay.delegation_key"), record, record);
         _commit(
             c,
             keccak256(abi.encode(p, a, proof)),
@@ -209,9 +208,8 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         (record, delta) = StreamArtistDelegationState.revoke(
             _delegations, _environment(), p, proof.signer, a.nonce, _now()
         );
-        bytes32 digest = StreamArtistDelegationState.revokeDigest(
-            _environment(), p, a.nonce, a.time
-        );
+        bytes32 digest =
+            StreamArtistDelegationState.revokeDigest(_environment(), p, a.nonce, a.time);
         bytes32 replay = _authorizeState(c, p.artistId, a, proof, digest, record, grantor);
         bytes32 key = _consume(
             keccak256("identity_authority.replay.one_way_delegation_revocation"),
@@ -356,6 +354,32 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
             a,
             proof,
             StreamArtistHashes.acceptanceDigest(_environment(), collectionId, b, a),
+            record
+        );
+    }
+
+    function consumeRefusal(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        L.Termination calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32 record) {
+        _check(c, 3);
+        _deadline(a.time);
+        if (
+            b.accepted || b.generation != p.generation || b.bindingHash != p.bindingHash
+                || proof.signer != b.artistAddress
+        ) revert T.InvalidRecord();
+        record = StreamArtistBindingOperations.refusalRecord(
+            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        );
+        _authorize(
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistBindingOperations.refusalDigest(_environment(), p, a),
             record
         );
     }
