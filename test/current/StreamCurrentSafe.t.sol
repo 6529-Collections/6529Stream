@@ -46,27 +46,6 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
         executor.executeGovernanceAction(abi.decode(scheduled, (bytes32)), data);
     }
 
-    function _additionalOperatingPolicies()
-        internal
-        view
-        override
-        returns (GovernanceActionPolicyEntry[] memory rows)
-    {
-        rows = new GovernanceActionPolicyEntry[](1);
-        address target = address(primaryResolver);
-        rows[0] = GovernanceActionPolicyEntry(
-            1,
-            target,
-            primaryResolver.setPrimaryTemplateAssignment.selector,
-            target.codehash,
-            keccak256(abi.encode(DEPLOYMENT_HASH, target)),
-            1,
-            0,
-            0,
-            bytes32(0)
-        );
-    }
-
     function testSafeArtistTemplateConsentAndPaidMintEscrowFlushAndClaim() public {
         _templateGenesis = true;
         _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
