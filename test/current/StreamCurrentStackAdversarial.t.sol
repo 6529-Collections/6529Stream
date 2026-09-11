@@ -246,10 +246,12 @@ contract StreamCurrentStackAdversarialTest is StreamCurrentStackFixture {
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory saleTerms = _saleAuthorization(400);
         IStreamEnglishAuctionHouse.AuctionAuthorization memory auctionTerms =
             _auctionAuthorization(401);
+        _consentAdditionalExecutor(PHASE, address(sale));
         _executeDelayed(
             address(manager),
             abi.encodeCall(manager.setPhaseExecutor, (1, PHASE, SECOND_OWNER, true))
         );
+        _consentAdditionalExecutor(AUCTION_PHASE, address(auction));
         _executeDelayed(
             address(manager),
             abi.encodeCall(manager.setPhaseExecutor, (1, AUCTION_PHASE, SECOND_OWNER, true))
@@ -296,6 +298,27 @@ contract StreamCurrentStackAdversarialTest is StreamCurrentStackFixture {
         require(
             core.totalSupply() == 2 && wallet.balance == 0.01 ether,
             "fresh platform and artist consent restores both paths"
+        );
+    }
+
+    /// @dev The governance change must first have actual artist approval. The stale sale
+    ///      signatures below remain unchanged so this still tests mint-policy drift rejection.
+    function _consentAdditionalExecutor(bytes32 phaseId, address existingExecutor) private {
+        (, IStreamMintManager.MintPhaseConfig memory config) = manager.phase(1, phaseId);
+        bytes32[] memory ids = manager.phaseCounterIds(1, phaseId);
+        IStreamMintManager.MintCounterConfig[] memory configs =
+            new IStreamMintManager.MintCounterConfig[](ids.length);
+        for (uint256 i; i < ids.length; ++i) {
+            configs[i] = manager.counterConfig(1, phaseId, ids[i]);
+        }
+        address[] memory executors = new address[](2);
+        executors[0] = existingExecutor;
+        executors[1] = SECOND_OWNER;
+        _recordFixturePolicy(
+            phaseId,
+            manager.previewPhasePolicyHash(
+                1, phaseId, config, manager.phaseGate(1, phaseId), ids, configs, executors
+            )
         );
     }
 
