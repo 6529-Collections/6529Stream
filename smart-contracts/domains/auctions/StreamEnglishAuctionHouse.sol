@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../mint/StreamSaleArtist.sol";
+import "../mint/StreamSaleFunding.sol";
 
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 
@@ -23,18 +24,22 @@ contract StreamEnglishAuctionHouse is
     IERC721Receiver,
     ERC165,
     Ownable,
-    ReentrancyGuard
+    ReentrancyGuard,
+    StreamSaleFunding
 {
     bytes32 public constant AUCTION_AUTHORIZATION_TYPEHASH = keccak256(
-        "AuctionAuthorization(uint256 collectionId,bytes32 phaseId,address artist,bytes32 profileId,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 reservePrice,uint64 startTime,uint64 endTime,uint32 extensionWindow,uint16 minBidIncrementBps,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
+        "AuctionAuthorization(uint256 collectionId,bytes32 phaseId,address artist,bytes32 profileId,bytes32 expectedPrimaryPolicyHash,bytes32 tokenDataHash,bytes32 mintCommitment,bytes32 mintPolicyHash,uint256 reservePrice,uint64 startTime,uint64 endTime,uint32 extensionWindow,uint16 minBidIncrementBps,bytes32 nonce,uint64 deadline,uint64 signerEpoch)"
     );
     bytes32 private constant DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
     );
     bytes32 private constant NONCE_DOMAIN = keccak256("6529STREAM_ENGLISH_AUCTION_NONCE_V1");
+    bytes32 public constant REVENUE_CLASS = keccak256("PRIMARY_SALE");
+    bytes32 public constant PRIMARY_POLICY_DOMAIN = keccak256("6529STREAM_PRIMARY_POLICY_V1");
     IStreamCore public immutable core;
     IStreamMintManager public immutable mintManager;
     IStreamSplitFactory public immutable splitFactory;
+    IStreamRevenueResolver public immutable override revenueResolver;
     IStreamArtistAttribution public immutable artistRegistry;
     bytes32 public immutable artistRegistryCodeHash;
     address public platformSigner;
@@ -52,13 +57,17 @@ contract StreamEnglishAuctionHouse is
     constructor(
         IStreamCore core_,
         IStreamMintManager mintManager_,
-        IStreamSplitFactory splitFactory_,
+        IStreamRevenueResolver resolver_,
         address platformSigner_,
-        IStreamArtistAttribution artistRegistry_
-    ) {
+        IStreamArtistAttribution artistRegistry_,
+        IStreamRevenueEscrow escrow_
+    ) StreamSaleFunding(IStreamSplitFactory(resolver_.splitFactory()), escrow_) {
+        IStreamSplitFactory splitFactory_ = IStreamSplitFactory(resolver_.splitFactory());
         if (
             address(core_).code.length == 0 || address(mintManager_).code.length == 0
                 || address(splitFactory_).code.length == 0 || platformSigner_ == address(0)
+                || !resolver_.isStreamRevenueResolver() || resolver_.core() != address(core_)
+                || resolver_.artistRegistry() != address(artistRegistry_)
         ) revert InvalidAuctionConfiguration();
         if (
             !StreamSaleArtist.supportsAttribution(artistRegistry_)
@@ -70,6 +79,7 @@ contract StreamEnglishAuctionHouse is
         core = core_;
         mintManager = mintManager_;
         splitFactory = splitFactory_;
+        revenueResolver = resolver_;
         platformSigner = platformSigner_;
         artistRegistry = artistRegistry_;
         artistRegistryCodeHash = address(artistRegistry_).codehash;
@@ -106,7 +116,7 @@ contract StreamEnglishAuctionHouse is
             abi.encode(
                 DOMAIN_TYPEHASH,
                 keccak256("6529StreamEnglishAuction"),
-                keccak256("1"),
+                keccak256("2"),
                 block.chainid,
                 address(this)
             )
@@ -132,6 +142,51 @@ contract StreamEnglishAuctionHouse is
         return keccak256(abi.encode(NONCE_DOMAIN, block.chainid, address(this), artist, nonce));
     }
 
+    function primaryPolicy(uint256 collectionId)
+        public
+        view
+        override
+        returns (bytes32 policyHash, bytes32 profileId, address wallet)
+    {
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
+            revenueResolver.resolvePrimaryAssignment(collectionId, 0, REVENUE_CLASS);
+        if (
+            !a.exists || a.assignmentType != 1 || a.scope != 1 || a.scopeId != collectionId
+                || a.templateId != bytes32(0) || a.profileId == bytes32(0)
+                || a.assignmentHash == bytes32(0)
+        ) revert AuctionPrimaryAssignmentUnsupported();
+        profileId = a.profileId;
+        wallet = splitFactory.walletFor(profileId);
+        _requireFundingWallet(profileId, wallet);
+        policyHash = keccak256(
+            abi.encode(
+                PRIMARY_POLICY_DOMAIN,
+                block.chainid,
+                address(revenueResolver),
+                REVENUE_CLASS,
+                collectionId,
+                uint256(0),
+                bytes32(0),
+                profileId,
+                wallet,
+                a.assignmentHash
+            )
+        );
+    }
+
+    function _requirePrimaryPolicy(AuctionAuthorization calldata a)
+        private
+        view
+        returns (address wallet)
+    {
+        (bytes32 policy, bytes32 profile, address target) = primaryPolicy(a.collectionId);
+        if (profile != a.profileId) revert InvalidAuctionSplitProfile(a.profileId);
+        if (policy != a.expectedPrimaryPolicyHash) {
+            revert AuctionPrimaryPolicyMismatch(a.expectedPrimaryPolicyHash, policy);
+        }
+        return target;
+    }
+
     function createAuction(
         AuctionAuthorization calldata authorization,
         bytes calldata tokenData,
@@ -146,15 +201,11 @@ contract StreamEnglishAuctionHouse is
         bytes32 digest = authorizationDigest(authorization);
         _requireSignature(platformSigner, digest, platformSignature);
         _requireSignature(authorization.artist, digest, artistSignature);
-        if (!splitFactory.splitWalletExists(authorization.profileId)) {
-            revert InvalidAuctionSplitProfile(authorization.profileId);
-        }
-        address wallet = splitFactory.walletFor(authorization.profileId);
+        address wallet = _requirePrimaryPolicy(authorization);
         bytes32 id = authorizationId(authorization.artist, authorization.nonce);
-        authorizationUsed[authorization.artist][authorization.nonce] = true;
         bytes32 operationRoot;
         (tokenId, operationRoot) = _mintAuctionToken(authorization, tokenData, digest, id);
-        _storeAuction(tokenId, authorization, wallet);
+        _storeAuction(tokenId, authorization, wallet, id, operationRoot);
         _emitAuctionCreated(tokenId, authorization, id, operationRoot, digest, wallet);
     }
 
@@ -192,14 +243,20 @@ contract StreamEnglishAuctionHouse is
         bytes32 id
     ) private returns (uint256 tokenId, bytes32 operationRoot) {
         IStreamMintManager.MintBatch memory batch = _mintBatch(authorization, tokenData, digest, id);
+        (bytes32 expectedRoot, bytes32[] memory expectedIds) =
+            IStreamMintReads(address(mintManager)).previewSingleStepMintOperation(batch, "");
+        if (expectedRoot == bytes32(0) || expectedIds.length != 1 || expectedIds[0] == bytes32(0)) {
+            revert AuctionMintResultInvalid();
+        }
+        authorizationUsed[authorization.artist][authorization.nonce] = true;
         _acceptingMint = true;
         uint256[] memory tokenIds;
         bytes32[] memory operationIds;
         (tokenIds, operationRoot, operationIds) = mintManager.executeSingleStepMint(batch, "");
         _acceptingMint = false;
         if (
-            tokenIds.length != 1 || tokenIds[0] == 0 || operationRoot == bytes32(0)
-                || operationIds.length != 1 || operationIds[0] == bytes32(0)
+            tokenIds.length != 1 || tokenIds[0] == 0 || operationRoot != expectedRoot
+                || operationIds.length != 1 || operationIds[0] != expectedIds[0]
         ) revert AuctionMintResultInvalid();
         tokenId = tokenIds[0];
         if (core.ownerOf(tokenId) != address(this) || _auctions[tokenId].artist != address(0)) {
@@ -285,16 +342,29 @@ contract StreamEnglishAuctionHouse is
         item.settled = true;
         item.pendingNoBidNftClaimant = address(0);
         uint256 amount = item.highestBid;
+        bool escrowed;
         if (amount != 0) {
             totalBidEscrow -= amount;
             totalNativeProceeds += amount;
             nativeProceeds[item.profileId] += amount;
-            _sendNative(payable(item.wallet), amount);
+            escrowed = _fundNative(REVENUE_CLASS, item.profileId, item.wallet, amount);
         }
         core.safeTransferFrom(address(this), item.deliveryRecipient, tokenId);
         emit AuctionSettled(
             tokenId, item.highestBidder, item.deliveryRecipient, item.wallet, amount
         );
+        if (amount != 0) {
+            emit SaleRevenueFunded(
+                1,
+                item.authorizationId,
+                item.operationRoot,
+                item.profileId,
+                item.wallet,
+                address(0),
+                amount,
+                escrowed
+            );
+        }
     }
 
     /// @notice A signed artist controls delivery when an unsold NFT needs a contract receiver.
@@ -362,13 +432,13 @@ contract StreamEnglishAuctionHouse is
     {
         if (
             item.collectionId == 0 || item.phaseId == bytes32(0) || item.artist == address(0)
-                || item.profileId == bytes32(0) || item.tokenDataHash != keccak256(tokenData)
-                || item.mintCommitment == bytes32(0) || item.mintPolicyHash == bytes32(0)
-                || item.nonce == bytes32(0) || item.signerEpoch != signerEpoch
-                || block.timestamp > item.deadline || item.endTime <= item.startTime
-                || item.endTime <= block.timestamp || item.endTime > block.timestamp + 365 days
-                || item.extensionWindow > 1 days || item.minBidIncrementBps == 0
-                || item.minBidIncrementBps > 10_000
+                || item.profileId == bytes32(0) || item.expectedPrimaryPolicyHash == bytes32(0)
+                || item.tokenDataHash != keccak256(tokenData) || item.mintCommitment == bytes32(0)
+                || item.mintPolicyHash == bytes32(0) || item.nonce == bytes32(0)
+                || item.signerEpoch != signerEpoch || block.timestamp > item.deadline
+                || item.endTime <= item.startTime || item.endTime <= block.timestamp
+                || item.endTime > block.timestamp + 365 days || item.extensionWindow > 1 days
+                || item.minBidIncrementBps == 0 || item.minBidIncrementBps > 10_000
         ) revert InvalidAuctionAuthorization();
         if (authorizationUsed[item.artist][item.nonce]) {
             revert AuctionAuthorizationUsed(item.artist, item.nonce);
@@ -396,9 +466,13 @@ contract StreamEnglishAuctionHouse is
         batch.contextHash = digest;
     }
 
-    function _storeAuction(uint256 tokenId, AuctionAuthorization calldata item, address wallet)
-        private
-    {
+    function _storeAuction(
+        uint256 tokenId,
+        AuctionAuthorization calldata item,
+        address wallet,
+        bytes32 id,
+        bytes32 operationRoot
+    ) private {
         Auction storage created = _auctions[tokenId];
         created.artist = item.artist;
         created.wallet = wallet;
@@ -409,6 +483,9 @@ contract StreamEnglishAuctionHouse is
         created.extensionWindow = item.extensionWindow;
         created.minBidIncrementBps = item.minBidIncrementBps;
         created.deliveryRecipient = item.artist;
+        created.authorizationId = id;
+        created.operationRoot = operationRoot;
+        created.primaryPolicyHash = item.expectedPrimaryPolicyHash;
     }
 
     function _requireAuction(uint256 tokenId) private view returns (Auction storage item) {
