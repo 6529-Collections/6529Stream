@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added metadata-host content commitments, one-use approval consumption, actual
+  evolution witnesses and defensive artist locks, with real Safe administration
+  and relayer tests. Modular artist and executed-finality integration remain open.
 - Added exact Safe CALL payload conversion and receipt verification for the expected
   Safe transaction hash, with actual upstream 1.3.0/1.4.1/1.5.0 success/failure tests.
   Client ABI/signing documentation now explicitly identifies its retained RC1 scope.

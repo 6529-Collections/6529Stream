@@ -13,6 +13,7 @@ import "../../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 import "../../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../mocks/StreamMetadataArtistBoundary.sol";
+import "../../helpers/OfficialSafeFixture.sol";
 import "../../../smart-contracts/core/StreamCore.sol";
 import "../../../smart-contracts/core/StreamCoreExternalReads.sol";
 import "../../../smart-contracts/interfaces/stream/mint/IStreamMintManager.sol";
@@ -44,7 +45,7 @@ contract NativeMetadataEncodingHarness is StreamMetadataRouter {
 
 /// @notice Real Core, entropy and rendering with explicit governance and artist read boundaries.
 /// @dev Direct Core minting isolates entropy/metadata; current-stack tests prove artist eligibility.
-contract StreamEntropyMetadataTest is CharacterizationTestBase {
+contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixture {
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
     event log_named_uint(string key, uint256 value);
     bytes32 private constant MANAGER =
@@ -156,6 +157,337 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase {
             1, 'Artist "Collection"', "Description", "ipfs://image", "https://example.test/art/"
         );
         vm.deal(address(this), 1 ether);
+    }
+
+    function testArtistContentFamiliesSeparateArtworkFromDisplayAndMatchPreviews() public {
+        router.setCollectionScript(1, "document.body.textContent=tokenHash;");
+        (, bytes32 fullBefore) = router.currentArtistContentState(1);
+        (bool scriptSupported, bytes32 scriptBefore) =
+            router.artistContentFamilyState(1, keccak256("SCRIPT"));
+        (bool mediaSupported, bytes32 mediaBefore) =
+            router.artistContentFamilyState(1, keccak256("MEDIA_MANIFEST"));
+        require(scriptSupported && mediaSupported, "actual artwork families");
+        require(scriptBefore != mediaBefore, "family separation");
+        router.setCollectionMetadata(
+            1, "New display title", "New description", "ipfs://image", "https://example.test/art/"
+        );
+        (, bytes32 afterDisplay) = router.currentArtistContentState(1);
+        require(afterDisplay == fullBefore, "display text does not change artwork");
+        bytes32 nextScript = router.previewArtistScriptState(1, "document.body.textContent='new';");
+        router.setCollectionScript(1, "document.body.textContent='new';");
+        (, bytes32 scriptAfter) = router.artistContentFamilyState(1, keccak256("SCRIPT"));
+        (, bytes32 mediaAfterScript) =
+            router.artistContentFamilyState(1, keccak256("MEDIA_MANIFEST"));
+        require(scriptAfter == nextScript && scriptAfter != scriptBefore, "script preview");
+        require(mediaAfterScript == mediaBefore, "script does not modify media family");
+        bytes32 nextMedia = router.previewArtistMediaState(1, "ipfs://new", "https://new.test/art/");
+        router.setCollectionMetadata(
+            1, "Title", "Description", "ipfs://new", "https://new.test/art/"
+        );
+        (, bytes32 mediaAfter) = router.artistContentFamilyState(1, keccak256("MEDIA_MANIFEST"));
+        (, bytes32 scriptAfterMedia) = router.artistContentFamilyState(1, keccak256("SCRIPT"));
+        require(mediaAfter == nextMedia && mediaAfter != mediaBefore, "media pair preview");
+        require(scriptAfterMedia == scriptAfter, "media does not modify script family");
+    }
+
+    function testDefensiveContentFactsDoNotGrantMintReadinessOrUnknownFamilies() public {
+        bytes32 defensive = router.artistContentFreezeState(1);
+        require(defensive != bytes32(0), "empty script can be defensively frozen");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataRouter.UnconfiguredOnchainContent.selector, 1)
+        );
+        router.currentArtistContentState(1);
+        (bool supported, bytes32 hash) = router.artistContentFamilyState(1, keccak256("UNKNOWN"));
+        require(!supported && hash == bytes32(0), "unknown family");
+        (bool knownLock, bool locked) = router.artistContentLockState(1, keccak256("METADATA_ALL"));
+        require(!knownLock && !locked, "artist cannot freeze unrelated metadata");
+        (knownLock, locked) = router.artistContentLockState(1, keccak256("DEPENDENCIES"));
+        require(knownLock && locked, "linked renderer dependency is immutable");
+        (knownLock, locked) = router.artistContentLockState(1, keccak256("BASE_URI"));
+        require(knownLock && !locked, "explicit base URI classification");
+        (bytes32 ratification, bytes32 content) = router.artistContentEvolution(1);
+        require(
+            ratification == bytes32(0) && content == bytes32(0), "no invented evolution witness"
+        );
+        vm.expectRevert(abi.encodeWithSelector(StreamMetadataRouter.InvalidCollection.selector, 2));
+        router.artistContentFreezeState(2);
+    }
+
+    function testContentConsentAppliesExactStateOnceAndExtendsRatification() public {
+        router.setCollectionScript(1, "A");
+        (, bytes32 initial) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(initial);
+        bytes32 first = keccak256("consent to B");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "B"), first
+        );
+        router.setCollectionScript(1, "B");
+        (, bytes32 afterB) = router.currentArtistContentState(1);
+        (,, bytes32 ratification) = artistRegistry.firstReleaseRatification(1);
+        (bytes32 witnessRatification, bytes32 witnessState) = router.artistContentEvolution(1);
+        require(witnessRatification == ratification && witnessState == afterB, "actual evolution");
+        require(router.consumedArtistContentConsent(first), "exact record consumed");
+        bytes32 second = keccak256("consent to A");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "A"), second
+        );
+        router.setCollectionScript(1, "A");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentConsentConsumed.selector, first
+            )
+        );
+        router.setCollectionScript(1, "B");
+        (, bytes32 afterFailure) = router.currentArtistContentState(1);
+        require(afterFailure == initial, "repeat consent cannot change content");
+        bytes32 third = keccak256("fresh consent to B");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "B"), third
+        );
+        router.setCollectionScript(1, "B");
+        require(
+            router.consumedArtistContentConsent(third), "fresh authorization permits same result"
+        );
+    }
+
+    function testContentNoOpsDoNotConsumeAndStaleBaselineCannotBecomeValid() public {
+        router.setCollectionScript(1, "A");
+        (, bytes32 initial) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(initial);
+        bytes32 unused = keccak256("no-op approval");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "A"), unused
+        );
+        router.setCollectionScript(1, "A");
+        require(!router.consumedArtistContentConsent(unused), "no-op does not consume");
+        bytes32 change = keccak256("otherwise valid approval");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "B"), change
+        );
+        artistRegistry.setRatification(keccak256("different operative baseline"));
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataRouter.ArtistContentEvolutionBroken.selector, 1)
+        );
+        router.setCollectionScript(1, "B");
+        require(
+            !router.consumedArtistContentConsent(change),
+            "invalid predecessor keeps approval unused"
+        );
+    }
+
+    function testConsentedEmptyScriptDoesNotInventMintReadyContent() public {
+        router.setCollectionScript(1, "A");
+        (, bytes32 initial) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(initial);
+        bytes32 approval = keccak256("consent empty script");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, ""), approval
+        );
+        router.setCollectionScript(1, "");
+        require(router.consumedArtistContentConsent(approval), "approved write applied");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataRouter.UnconfiguredOnchainContent.selector, 1)
+        );
+        router.currentArtistContentState(1);
+    }
+
+    function testFirstMintClosesUnratifiedOperatorContentWindow() public {
+        _mint();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentAuthorizationRequired.selector, 1
+            )
+        );
+        router.setCollectionScript(1, "not approved");
+    }
+
+    function testArtistDefensiveFreezeIsPermissionlessBeforeContentIsReady() public {
+        bytes32 freeze =
+            _fixtureContentFreeze(keccak256("SCRIPT"), router.artistContentFreezeState(1));
+        vm.prank(address(0xBEEF123));
+        router.applyArtistContentFreeze(1, freeze);
+        (bool supported, bool locked) = router.artistContentLockState(1, keccak256("SCRIPT"));
+        require(supported && locked, "actual lock");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentLocked.selector, 1, keccak256("SCRIPT")
+            )
+        );
+        router.setCollectionScript(1, "late artwork");
+        router.setCollectionMetadata(
+            1, "Editorial title", "Editorial text", "ipfs://image", "https://example.test/art/"
+        );
+        vm.prank(address(0xCAFE));
+        router.applyArtistContentFreeze(1, freeze);
+    }
+
+    function testBaseURIFreezeCannotBeBypassedByCombinedMetadataWrite() public {
+        bytes32 freeze =
+            _fixtureContentFreeze(keccak256("BASE_URI"), router.artistContentFreezeState(1));
+        router.applyArtistContentFreeze(1, freeze);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.ArtistContentLocked.selector, 1, keccak256("BASE_URI")
+            )
+        );
+        router.setCollectionMetadata(
+            1, "Title", "Description", "ipfs://different", "https://different.test/"
+        );
+        router.setCollectionMetadata(
+            1, "Title", "Description", "ipfs://different", "https://example.test/art/"
+        );
+        require(
+            keccak256(bytes(router.collectionMetadata(1).image)) == keccak256("ipfs://different"),
+            "base lock is scoped"
+        );
+    }
+
+    function testStaleOrUnknownFreezeAppliesNoLock() public {
+        bytes32 stale =
+            _fixtureContentFreeze(keccak256("SCRIPT"), router.artistContentFreezeState(1));
+        router.setCollectionScript(1, "new content");
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamMetadataRouter.InvalidArtistContentFreeze.selector, stale)
+        );
+        router.applyArtistContentFreeze(1, stale);
+        (, bool locked) = router.artistContentLockState(1, keccak256("SCRIPT"));
+        require(!locked, "stale freeze did not lock");
+        bytes32 unknown =
+            _fixtureContentFreeze(keccak256("METADATA_ALL"), router.artistContentFreezeState(1));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamMetadataRouter.InvalidArtistContentFreeze.selector, unknown
+            )
+        );
+        router.applyArtistContentFreeze(1, unknown);
+    }
+
+    function testContentApplicationAndFreezeEventsCarryExactEvidence() public {
+        router.setCollectionScript(1, "A");
+        (, bytes32 initial) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(initial);
+        bytes32 approval = keccak256("event approval");
+        bytes32 family = keccak256("SCRIPT");
+        artistRegistry.setContentConsent(
+            1, family, router.previewArtistScriptState(1, "B"), approval
+        );
+        vm.recordLogs();
+        router.setCollectionScript(1, "B");
+        (, bytes32 resulting) = router.currentArtistContentState(1);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 matches;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter != address(router)
+                    || logs[i].topics[0]
+                        != keccak256(
+                            "ArtistContentConsentApplied(uint256,bytes32,bytes32,bytes32,uint16)"
+                        )
+            ) continue;
+            ++matches;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == family && logs[i].topics[3] == approval,
+                "consent event identity"
+            );
+            require(
+                keccak256(logs[i].data) == keccak256(abi.encode(resulting, uint16(1))),
+                "consent event result and schema"
+            );
+        }
+        require(matches == 1, "one consent event");
+        bytes32 freeze = _fixtureContentFreeze(family, resulting);
+        vm.recordLogs();
+        vm.prank(RECIPIENT);
+        router.applyArtistContentFreeze(1, freeze);
+        logs = vm.getRecordedLogs();
+        require(logs.length == 1 && logs[0].emitter == address(router), "one host freeze event");
+        require(
+            logs[0].topics.length == 3
+                && logs[0].topics[0]
+                    == keccak256(
+                        "CollectionMetadataLocked(uint256,bytes32,address,uint8,bytes32,uint16)"
+                    ) && logs[0].topics[1] == bytes32(uint256(1)) && logs[0].topics[2] == family,
+            "freeze event identity"
+        );
+        require(
+            keccak256(logs[0].data)
+                == keccak256(abi.encode(RECIPIENT, uint8(1), freeze, uint16(1))),
+            "freeze actor authority evidence and schema"
+        );
+    }
+
+    function testSafeAdminContentCallsAndSeparateSafeDefensiveFreeze() public {
+        uint256[] memory keys = new uint256[](2);
+        keys[0] = 0xA1101;
+        keys[1] = 0xA1102;
+        SafeComponents memory components = deploySafeComponents("1.4.1");
+        OfficialSafe admin = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 1);
+        OfficialSafe relayer = createOfficialSafe(components, safeOwnerAddresses(keys), 2, 2);
+        router = new StreamMetadataRouter(
+            address(core), address(admin), MANIFEST, "ipfs://local-test", MANIFEST, artistRegistry
+        );
+        _install(ROUTER, address(router), type(IStreamMetadataRouter).interfaceId);
+        _safeContentCall(
+            admin,
+            keys,
+            abi.encodeCall(
+                router.setCollectionMetadata, (1, "Safe artist", "Description", "ipfs://safe", "")
+            )
+        );
+        _safeContentCall(admin, keys, abi.encodeCall(router.setCollectionScript, (1, "A")));
+        (, bytes32 initial) = router.currentArtistContentState(1);
+        artistRegistry.setRatification(initial);
+        bytes32 consent = keccak256("Safe content consent");
+        artistRegistry.setContentConsent(
+            1, keccak256("SCRIPT"), router.previewArtistScriptState(1, "B"), consent
+        );
+        _safeContentCall(admin, keys, abi.encodeCall(router.setCollectionScript, (1, "B")));
+        require(router.consumedArtistContentConsent(consent), "Safe consumes exact consent");
+        require(
+            keccak256(bytes(router.collectionMetadata(1).animationScript)) == keccak256("B"),
+            "Safe changed actual script"
+        );
+        _safeContentCall(
+            relayer, keys, abi.encodeCall(router.artistContentFamilyState, (1, keccak256("SCRIPT")))
+        );
+        _safeContentCall(
+            relayer, keys, abi.encodeCall(router.artistContentLockState, (1, keccak256("SCRIPT")))
+        );
+        _safeContentCall(relayer, keys, abi.encodeCall(router.artistContentFreezeState, (1)));
+        _safeContentCall(relayer, keys, abi.encodeCall(router.artistContentEvolution, (1)));
+        _safeContentCall(relayer, keys, abi.encodeCall(router.previewArtistScriptState, (1, "C")));
+        _safeContentCall(
+            relayer, keys, abi.encodeCall(router.previewArtistMediaState, (1, "ipfs://next", ""))
+        );
+        bytes32 freeze =
+            _fixtureContentFreeze(keccak256("SCRIPT"), router.artistContentFreezeState(1));
+        _safeContentCall(
+            relayer, keys, abi.encodeCall(router.applyArtistContentFreeze, (1, freeze))
+        );
+        (, bool locked) = router.artistContentLockState(1, keccak256("SCRIPT"));
+        require(locked, "separate Safe applies actual defensive lock");
+    }
+
+    function _safeContentCall(OfficialSafe account, uint256[] memory keys, bytes memory data)
+        private
+    {
+        require(executeSafe(account, keys, address(router), 0, data, 0), "Safe content CALL");
+    }
+
+    function _fixtureContentFreeze(bytes32 lockClass, bytes32 expected)
+        private
+        returns (bytes32 hash)
+    {
+        hash = keccak256(abi.encode("metadata boundary freeze", lockClass, expected));
+        bytes32[] memory locks = new bytes32[](1);
+        locks[0] = lockClass;
+        artistRegistry.setContentFreeze(
+            1,
+            StreamArtistContentTypes.FreezeRecord(
+                hash, keccak256("artist"), 1, address(router), locks, expected, 1
+            )
+        );
     }
 
     function testRealCoreMintRequestFulfillAndMetadata() public {

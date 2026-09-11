@@ -9,6 +9,13 @@ import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentRatification.sol";
+import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
+import {
+    IStreamArtistContentAuthority
+} from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
+import {
+    StreamArtistContentTypes
+} from "../../interfaces/stream/artist/StreamArtistContentTypes.sol";
 import "../../vendor/openzeppelin/Strings.sol";
 import "../../vendor/openzeppelin/Base64.sol";
 import "../modules/StreamModuleBase.sol";
@@ -18,7 +25,8 @@ import "./StreamMetadataRenderer.sol";
 contract StreamMetadataRouter is
     StreamModuleBase,
     IStreamMetadataRouter,
-    IStreamArtistContentFacts
+    IStreamArtistContentFacts,
+    IStreamArtistContentMutationFacts
 {
     using Strings for uint256;
 
@@ -47,12 +55,26 @@ contract StreamMetadataRouter is
         string animationBaseURI;
         string animationScript;
     }
+
+    struct ContentApplication {
+        bytes32 consent;
+        bytes32 ratification;
+    }
     IStreamCore public immutable core;
     address public immutable authority;
     IStreamArtistAttribution public immutable artistRegistry;
     mapping(uint256 => CollectionMetadata) private _collections;
     mapping(uint256 => PreparedMetadata) private _prepared;
     string private _contractMetadataURI;
+    mapping(uint256 => mapping(bytes32 => bool)) private _artistContentLocks;
+    mapping(uint256 => bytes32) private _evolutionRatification;
+    mapping(uint256 => bytes32) private _evolutionContent;
+    mapping(bytes32 => bool) public consumedArtistContentConsent;
+
+    bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
+    bytes32 public constant CONTENT_MEDIA = keccak256("MEDIA_MANIFEST");
+    bytes32 public constant LOCK_BASE_URI = keccak256("BASE_URI");
+    bytes32 public constant LOCK_DEPENDENCIES = keccak256("DEPENDENCIES");
 
     error Unauthorized(address caller);
     error InvalidCore(address supplied);
@@ -64,9 +86,28 @@ contract StreamMetadataRouter is
     error ArtistContentAuthorizationRequired(uint256 collectionId);
     error UnconfiguredOnchainContent(uint256 collectionId);
     error ArtistRegistryBindingChanged(address selected);
+    error ArtistContentLocked(uint256 collectionId, bytes32 lockClass);
+    error InvalidArtistContentFreeze(bytes32 recordHash);
+    error ArtistContentConsentConsumed(bytes32 recordHash);
+    error ArtistContentEvolutionBroken(uint256 collectionId);
     event CollectionMetadataConfigured(uint256 indexed collectionId, bytes32 metadataHash);
     event CollectionScriptConfigured(uint256 indexed collectionId, bytes32 scriptHash);
     event ContractMetadataConfigured(bytes32 uriHash);
+    event ArtistContentConsentApplied(
+        uint256 indexed collectionId,
+        bytes32 indexed familyId,
+        bytes32 indexed consentRecordHash,
+        bytes32 resultingContentStateHash,
+        uint16 schemaVersion
+    );
+    event CollectionMetadataLocked(
+        uint256 indexed collectionId,
+        bytes32 indexed lockId,
+        address actor,
+        uint8 authorityClass,
+        bytes32 freezeAuthorizationHash,
+        uint16 schemaVersion
+    );
 
     constructor(
         address core_,
@@ -120,7 +161,9 @@ contract StreamMetadataRouter is
         returns (bool)
     {
         return id == type(IStreamMetadataRouter).interfaceId
-            || id == type(IStreamArtistContentFacts).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistContentFacts).interfaceId
+            || id == type(IStreamArtistContentMutationFacts).interfaceId
+            || super.supportsInterface(id);
     }
 
     function setCollectionMetadata(
@@ -137,14 +180,10 @@ contract StreamMetadataRouter is
         StreamMetadataRenderer.requireValidUtf8ContentUri(
             "animationBaseURI", animationBaseURI, 2048, true
         );
-        CollectionMetadata storage metadata = _collections[collectionId];
-        if (
-            keccak256(bytes(metadata.image)) != keccak256(bytes(image))
-                || keccak256(bytes(metadata.animationBaseURI)) != keccak256(bytes(animationBaseURI))
-        ) {
-            _requireUnratifiedContent(collectionId);
-        }
+        ContentApplication memory application =
+            _authorizeMediaWrite(collectionId, image, animationBaseURI);
         _prepareCollectionMetadata(collectionId, name, description, image, animationBaseURI);
+        CollectionMetadata storage metadata = _collections[collectionId];
         metadata.name = name;
         metadata.description = description;
         metadata.image = image;
@@ -153,6 +192,9 @@ contract StreamMetadataRouter is
         emit CollectionMetadataConfigured(
             collectionId, keccak256(abi.encode(name, description, image, animationBaseURI))
         );
+        _recordContentApplication(
+            collectionId, CONTENT_MEDIA, application.consent, application.ratification
+        );
     }
 
     /// @notice Optional onchain generative script. It receives tokenId, tokenHash and tokenDataBase64.
@@ -160,14 +202,20 @@ contract StreamMetadataRouter is
     function setCollectionScript(uint256 collectionId, string calldata script) external {
         _requireMutable(collectionId);
         StreamMetadataRenderer.requireValidUtf8Bytes("animationScript", script, 8192);
+        bytes32 consent;
+        bytes32 ratification;
         if (
             keccak256(bytes(_collections[collectionId].animationScript)) != keccak256(bytes(script))
         ) {
-            _requireUnratifiedContent(collectionId);
+            _requireContentUnlocked(collectionId, CONTENT_SCRIPT);
+            (consent, ratification) = _authorizeContentWrite(
+                collectionId, CONTENT_SCRIPT, _scriptState(collectionId, script)
+            );
         }
         _collections[collectionId].animationScript = script;
         _prepared[collectionId].animationScript = _prepareScript(script);
         emit CollectionScriptConfigured(collectionId, keccak256(bytes(script)));
+        _recordContentApplication(collectionId, CONTENT_SCRIPT, consent, ratification);
     }
 
     function setContractMetadataURI(string calldata uri) external {
@@ -202,7 +250,87 @@ contract StreamMetadataRouter is
         if (!metadata.configured || bytes(metadata.animationScript).length == 0) {
             revert UnconfiguredOnchainContent(collectionId);
         }
-        bytes32 hostContext = keccak256(
+        return (address(this), _contentState(collectionId));
+    }
+
+    function artistContentFamilyState(uint256 collectionId, bytes32 familyId)
+        external
+        view
+        override
+        returns (bool supported, bytes32 currentStateHash)
+    {
+        _requireContentCollection(collectionId);
+        CollectionMetadata storage metadata = _collections[collectionId];
+        if (familyId == CONTENT_SCRIPT) {
+            return (true, _scriptState(collectionId, metadata.animationScript));
+        }
+        if (familyId == CONTENT_MEDIA) {
+            return (true, _mediaState(collectionId, metadata.image, metadata.animationBaseURI));
+        }
+        return (false, bytes32(0));
+    }
+
+    function artistContentLockState(uint256 collectionId, bytes32 lockClass)
+        external
+        view
+        override
+        returns (bool supported, bool locked)
+    {
+        _requireContentCollection(collectionId);
+        // This router has no dependency assignment mutation: its renderer is linked into code.
+        if (lockClass == LOCK_DEPENDENCIES) return (true, true);
+        supported =
+            lockClass == CONTENT_SCRIPT || lockClass == CONTENT_MEDIA || lockClass == LOCK_BASE_URI;
+        return (supported, supported && _artistContentLocks[collectionId][lockClass]);
+    }
+
+    function artistContentFreezeState(uint256 collectionId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        _requireContentCollection(collectionId);
+        return _contentState(collectionId);
+    }
+
+    function artistContentEvolution(uint256 collectionId)
+        external
+        view
+        override
+        returns (bytes32, bytes32)
+    {
+        _requireContentCollection(collectionId);
+        return (_evolutionRatification[collectionId], _evolutionContent[collectionId]);
+    }
+
+    /// @notice Exact resulting SCRIPT family commitment for artist consent tooling.
+    function previewArtistScriptState(uint256 collectionId, string calldata script)
+        external
+        view
+        returns (bytes32)
+    {
+        _requireContentCollection(collectionId);
+        return _scriptState(collectionId, script);
+    }
+
+    /// @notice MEDIA_MANIFEST binds both render-affecting fields changed by setCollectionMetadata.
+    function previewArtistMediaState(
+        uint256 collectionId,
+        string calldata image,
+        string calldata animationBaseURI
+    ) external view returns (bytes32) {
+        _requireContentCollection(collectionId);
+        return _mediaState(collectionId, image, animationBaseURI);
+    }
+
+    function _requireContentCollection(uint256 collectionId) private view {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        _requireSelectedArtistRegistry();
+    }
+
+    function _contentHostContext(uint256 collectionId) private view returns (bytes32) {
+        return keccak256(
             abi.encode(
                 block.chainid,
                 address(core),
@@ -213,23 +341,165 @@ contract StreamMetadataRouter is
                 address(StreamMetadataRenderer).codehash
             )
         );
-        contentStateHash = keccak256(
+    }
+
+    function _contentState(uint256 collectionId) private view returns (bytes32) {
+        CollectionMetadata storage metadata = _collections[collectionId];
+        return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ROUTER_ONCHAIN_CONTENT_V1"),
-                hostContext,
+                _contentHostContext(collectionId),
                 keccak256(bytes(metadata.image)),
                 keccak256(bytes(metadata.animationBaseURI)),
                 keccak256(bytes(metadata.animationScript))
             )
         );
-        return (address(this), contentStateHash);
     }
 
-    function _requireUnratifiedContent(uint256 collectionId) private view {
+    function _scriptState(uint256 collectionId, string memory script)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROUTER_CONTENT_FAMILY_V1"),
+                _contentHostContext(collectionId),
+                CONTENT_SCRIPT,
+                keccak256(bytes(script))
+            )
+        );
+    }
+
+    function _mediaState(uint256 collectionId, string memory image, string memory baseURI)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROUTER_CONTENT_FAMILY_V1"),
+                _contentHostContext(collectionId),
+                CONTENT_MEDIA,
+                keccak256(bytes(image)),
+                keccak256(bytes(baseURI))
+            )
+        );
+    }
+
+    /// @notice Anyone may apply the artist's exact, current defensive freeze without editing content.
+    function applyArtistContentFreeze(uint256 collectionId, bytes32 freezeRecordHash) external {
+        _requireContentCollection(collectionId);
+        IStreamArtistContentAuthority authority_ =
+            IStreamArtistContentAuthority(address(artistRegistry));
+        StreamArtistContentTypes.FreezeRecord memory record =
+            authority_.contentFreezeAuthorization(freezeRecordHash);
+        if (
+            freezeRecordHash == bytes32(0) || record.recordHash != freezeRecordHash
+                || record.artistId == bytes32(0) || record.metadataContract != address(this)
+                || record.authorityClass == 0 || record.lockClasses.length == 0
+                || record.lockClasses.length > 16
+                || record.expectedStateHash != _contentState(collectionId)
+        ) revert InvalidArtistContentFreeze(freezeRecordHash);
+        bytes32 previous;
+        for (uint256 i; i < record.lockClasses.length; ++i) {
+            bytes32 lockClass = record.lockClasses[i];
+            if (
+                lockClass <= previous
+                    || (lockClass != CONTENT_SCRIPT
+                        && lockClass != CONTENT_MEDIA
+                        && lockClass != LOCK_BASE_URI
+                        && lockClass != LOCK_DEPENDENCIES)
+            ) revert InvalidArtistContentFreeze(freezeRecordHash);
+            (bool authorized, bytes32 operative) =
+                authority_.isContentFreezeAuthorized(collectionId, lockClass);
+            if (!authorized || operative != freezeRecordHash) {
+                revert InvalidArtistContentFreeze(freezeRecordHash);
+            }
+            previous = lockClass;
+        }
+        for (uint256 i; i < record.lockClasses.length; ++i) {
+            bytes32 lockClass = record.lockClasses[i];
+            if (_artistContentLocks[collectionId][lockClass]) continue;
+            _artistContentLocks[collectionId][lockClass] = true;
+            emit CollectionMetadataLocked(
+                collectionId, lockClass, msg.sender, record.authorityClass, freezeRecordHash, 1
+            );
+        }
+    }
+
+    function _requireContentUnlocked(uint256 collectionId, bytes32 lockClass) private view {
+        if (_artistContentLocks[collectionId][lockClass]) {
+            revert ArtistContentLocked(collectionId, lockClass);
+        }
+    }
+
+    function _authorizeMediaWrite(uint256 collectionId, string memory image, string memory baseURI)
+        private
+        returns (ContentApplication memory application)
+    {
+        CollectionMetadata storage metadata = _collections[collectionId];
+        bool uriChanged = keccak256(bytes(metadata.animationBaseURI)) != keccak256(bytes(baseURI));
+        if (keccak256(bytes(metadata.image)) != keccak256(bytes(image)) || uriChanged) {
+            _requireContentUnlocked(collectionId, CONTENT_MEDIA);
+            if (uriChanged) _requireContentUnlocked(collectionId, LOCK_BASE_URI);
+            (application.consent, application.ratification) = _authorizeContentWrite(
+                collectionId, CONTENT_MEDIA, _mediaState(collectionId, image, baseURI)
+            );
+        }
+    }
+
+    function _authorizeContentWrite(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
+        private
+        returns (bytes32 consent, bytes32 ratification)
+    {
         _requireSelectedArtistRegistry();
-        (bool ratified,,) = IStreamArtistContentRatification(address(artistRegistry))
-            .firstReleaseRatification(collectionId);
-        if (ratified) revert ArtistContentAuthorizationRequired(collectionId);
+        (bool ratified, bytes32 ratifiedState, bytes32 record) = IStreamArtistContentRatification(
+                address(artistRegistry)
+            ).firstReleaseRatification(collectionId);
+        if (!ratified) {
+            if (
+                core.collectionMintedEver(collectionId) == 0
+                    || artistRegistry.attribution(collectionId).nominatedArtist == address(0)
+            ) return (0, 0);
+        } else {
+            bytes32 current = _contentState(collectionId);
+            if (
+                record == bytes32(0)
+                    || (current != ratifiedState
+                        && (_evolutionRatification[collectionId] != record
+                            || _evolutionContent[collectionId] != current))
+            ) {
+                revert ArtistContentEvolutionBroken(collectionId);
+            }
+            ratification = record;
+        }
+        try IStreamArtistContentAuthority(address(artistRegistry))
+            .contentConsentEvidence(collectionId, familyId, newStateHash) returns (
+            bytes32 evidence
+        ) {
+            consent = evidence;
+        } catch {
+            revert ArtistContentAuthorizationRequired(collectionId);
+        }
+        if (consent == bytes32(0)) revert ArtistContentAuthorizationRequired(collectionId);
+        if (consumedArtistContentConsent[consent]) revert ArtistContentConsentConsumed(consent);
+        consumedArtistContentConsent[consent] = true;
+    }
+
+    function _recordContentApplication(
+        uint256 collectionId,
+        bytes32 familyId,
+        bytes32 consent,
+        bytes32 ratification
+    ) private {
+        if (consent == bytes32(0)) return;
+        bytes32 current = _contentState(collectionId);
+        if (ratification != bytes32(0)) {
+            _evolutionRatification[collectionId] = ratification;
+            _evolutionContent[collectionId] = current;
+        }
+        emit ArtistContentConsentApplied(collectionId, familyId, consent, current, 1);
     }
 
     function _requireSelectedArtistRegistry() private view {

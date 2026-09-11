@@ -4,8 +4,11 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistAttribution.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistContentRatification.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistMintConsent.sol";
+import {
+    StreamArtistContentTypes
+} from "../../smart-contracts/interfaces/stream/artist/StreamArtistContentTypes.sol";
 
-/// @dev Metadata-domain boundary: supplies attribution and ratification facts only.
+/// @dev Metadata-domain boundary: supplies explicit attribution, ratification and content authorization.
 ///      Every mint-consent operation rejects; this fixture cannot prove artist eligibility.
 contract StreamMetadataArtistBoundary is
     IStreamArtistAttribution,
@@ -18,6 +21,9 @@ contract StreamMetadataArtistBoundary is
     address private immutable fixtureOwner;
     IStreamCollectionArtistRegistry.Attribution private record;
     bytes32 private ratifiedContent;
+    mapping(bytes32 => bytes32) private contentConsents;
+    mapping(bytes32 => StreamArtistContentTypes.FreezeRecord) private freezes;
+    mapping(uint256 => mapping(bytes32 => bytes32)) private operativeFreezes;
 
     error MintConsentOutsideMetadataFixture();
 
@@ -71,6 +77,55 @@ contract StreamMetadataArtistBoundary is
                 keccak256(abi.encode("metadata fixture ratification", ratifiedContent))
             );
         }
+    }
+
+    /// @dev Explicit metadata-domain authorization boundary; no artist signature validation is claimed.
+    function setContentConsent(
+        uint256 collectionId,
+        bytes32 family,
+        bytes32 state,
+        bytes32 recordHash
+    ) external {
+        require(msg.sender == fixtureOwner, "fixture owner");
+        contentConsents[keccak256(abi.encode(collectionId, family, state))] = recordHash;
+    }
+
+    function contentConsentEvidence(uint256 collectionId, bytes32 family, bytes32 state)
+        external
+        view
+        returns (bytes32)
+    {
+        bytes32 evidence = contentConsents[keccak256(abi.encode(collectionId, family, state))];
+        require(evidence != bytes32(0), "missing fixture consent");
+        return evidence;
+    }
+
+    function setContentFreeze(
+        uint256 collectionId,
+        StreamArtistContentTypes.FreezeRecord calldata value
+    ) external {
+        require(msg.sender == fixtureOwner, "fixture owner");
+        freezes[value.recordHash] = value;
+        for (uint256 i; i < value.lockClasses.length; ++i) {
+            operativeFreezes[collectionId][value.lockClasses[i]] = value.recordHash;
+        }
+    }
+
+    function contentFreezeAuthorization(bytes32 recordHash)
+        external
+        view
+        returns (StreamArtistContentTypes.FreezeRecord memory)
+    {
+        return freezes[recordHash];
+    }
+
+    function isContentFreezeAuthorized(uint256 collectionId, bytes32 lockClass)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        bytes32 value = operativeFreezes[collectionId][lockClass];
+        return (value != bytes32(0), value);
     }
 
     function consentMode(uint256) external pure returns (uint8) {
