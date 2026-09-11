@@ -26,3 +26,6 @@ deployments/current/sepolia-2026-09-10/SHA256SUMS text eol=lf
 
 # Keep generated client projections identical on Windows and Linux.
 packages/stream-client/** text eol=lf
+
+# Preserve the official Safe package license bytes in Windows checkouts.
+test/fixtures/safe/LICENSE-* text eol=lf
