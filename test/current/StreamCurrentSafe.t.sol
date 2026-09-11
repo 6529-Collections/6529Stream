@@ -26,6 +26,10 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
     }
 
     function testSafeArtistBuyerCustodyApprovalTransferAndRevenueRelease() public {
+        _buyRevealTransferAndClaim();
+    }
+
+    function _buyRevealTransferAndClaim() private {
         IStreamFixedPriceSaleAdapter.SaleAuthorization memory a =
             IStreamFixedPriceSaleAdapter.SaleAuthorization({
                 collectionId: 1,
@@ -123,6 +127,127 @@ contract StreamCurrentSafeTest is StreamCurrentStackFixture, OfficialSafeFixture
             address(artistSafe).balance == 0.009 ether && wallet.balance == 0.001 ether,
             "Safe revenue balance"
         );
+    }
+
+    function testSafeArtistEconomicsGovernedReplacementAndDefensiveFreezeKeepMintEligible() public {
+        IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
+        entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
+        entries[1] = IStreamSplitWallet.SplitEntry(PROTOCOL, 100_000, keccak256("protocol"));
+        (bytes32 nextProfile, address nextWallet) =
+            factory.createProfile(entries, keccak256("Safe replacement economics"));
+        T.AssignmentFact memory primaryCandidate =
+            primaryResolver.previewArtistPrimaryAssignment(1, nextProfile, bytes32(0), false);
+        bytes32 oldPrimaryHash =
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash;
+        bytes memory data = abi.encodeCall(
+            primaryResolver.setPrimaryProfileAssignment,
+            (PRIMARY_REVENUE_CLASS, uint8(1), uint256(1), nextProfile, bytes32(0))
+        );
+        GovernanceActionRequest memory request = _request(address(primaryResolver), data);
+        bytes memory scheduled = governanceRoot.execute(
+            address(executor), 0, abi.encodeCall(executor.scheduleGovernanceAction, (request))
+        );
+        bytes32 actionId = abi.decode(scheduled, (bytes32));
+        vm.warp(request.notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        executor.executeGovernanceAction(actionId, data);
+        require(
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash
+                == oldPrimaryHash,
+            "governance changed economics without artist consent"
+        );
+        _safeProspectiveConsent(
+            primaryCandidate, T.FixedEconomicsCandidate(nextProfile, bytes32(0), 0, false)
+        );
+        executor.executeGovernanceAction(actionId, data);
+        require(
+            primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS).assignmentHash
+                == primaryCandidate.assignmentHash,
+            "governed replacement differs from artist approval"
+        );
+
+        IStreamRoyaltyResolver.RoyaltyConfig memory priorRoyalty = royalties.collectionRoyalty(1);
+        T.AssignmentFact memory frozenCandidate = royalties.previewArtistRoyaltyAssignment(
+            1, priorRoyalty.profileId, priorRoyalty.royaltyBps, true
+        );
+        _safeProspectiveConsent(
+            frozenCandidate,
+            T.FixedEconomicsCandidate(
+                priorRoyalty.profileId, bytes32(0), priorRoyalty.royaltyBps, true
+            )
+        );
+        bytes32 liveRoyaltyHash = royalties.currentArtistRoyaltyAssignment(1).assignmentHash;
+        T.RoyaltyFreeze memory freeze =
+            T.RoyaltyFreeze(address(royalties), 1, keccak256("ROYALTY_ERC2981"), liveRoyaltyHash);
+        require(
+            executeSafe(
+                artistSafe,
+                keys,
+                address(artists),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEconomicsAuthority.authorizeArtistRoyaltyFreeze,
+                    (freeze, _safeArtistAuthorization())
+                ),
+                0
+            ),
+            "Safe artist freeze authorization"
+        );
+        require(
+            executeSafe(
+                buyerSafe,
+                keys,
+                address(royalties),
+                0,
+                abi.encodeCall(royalties.applyArtistRoyaltyFreeze, (1, liveRoyaltyHash)),
+                0
+            ),
+            "permissionless Safe royalty freeze application"
+        );
+        IStreamRoyaltyResolver.RoyaltyConfig memory frozen = royalties.collectionRoyalty(1);
+        require(
+            frozen.frozen && frozen.profileId == priorRoyalty.profileId
+                && frozen.wallet == priorRoyalty.wallet
+                && frozen.royaltyBps == priorRoyalty.royaltyBps
+                && royalties.currentArtistRoyaltyAssignment(1).assignmentHash
+                    == frozenCandidate.assignmentHash,
+            "royalty freeze changed terms or commitment"
+        );
+        artists.requireMintConsent(1, PHASE, manager.phasePolicyHash(1, PHASE));
+        profile = nextProfile;
+        wallet = nextWallet;
+        _buyRevealTransferAndClaim();
+    }
+
+    function _safeProspectiveConsent(
+        T.AssignmentFact memory fact,
+        T.FixedEconomicsCandidate memory candidate
+    ) private {
+        T.EconomicsConsent memory consent = T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+        require(
+            executeSafe(
+                artistSafe,
+                keys,
+                address(artists),
+                0,
+                abi.encodeCall(
+                    IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent,
+                    (consent, candidate, _safeArtistAuthorization())
+                ),
+                0
+            ),
+            "Safe prospective economics consent"
+        );
+    }
+
+    function _safeArtistAuthorization() private view returns (T.Authorization memory) {
+        uint256 nonce =
+            IStreamArtistIdentityOwner(artistSuite.owners[2]).identity(fixtureArtistId).nonceHint;
+        return T.Authorization(nonce, uint64(block.timestamp + 1 days), "");
     }
 
     function testSafeGovernorSchedulesAndExecutesActualFactoryGasRaise() public {
