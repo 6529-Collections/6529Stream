@@ -12,6 +12,8 @@ import "./StreamArtistIdentityState.sol";
 import "./StreamArtistBindingOperations.sol";
 import "./StreamArtistCollaboratorIdentityState.sol";
 import "./StreamArtistAuthorizationState.sol";
+import "./StreamArtistIdentityRevisionState.sol";
+import "./StreamArtistIdentityConsentState.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -32,6 +34,78 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
     StreamArtistIdentityState.State private _identity;
     StreamArtistDelegationState.State private _delegations;
     StreamArtistCollaboratorIdentityState.State private _collaboratorAccounts;
+    StreamArtistIdentityRevisionState.State private _identityRevisions;
+
+    event ArtistIdentityRevisionRecorded(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        address indexed signer,
+        bytes32 previousRecordHash,
+        bytes32 revisedRecordHash,
+        string identityRecordURI,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 revisionRecordHash
+    );
+
+    function recordIdentityRevision(
+        T.ActionContext calldata c,
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        _check(c, 25);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityRevisionState.revise(
+            _identityRevisions,
+            _identity,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            a,
+            proof,
+            document,
+            displayName
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function operativeIdentityRecord(bytes32 artistId) public view returns (bytes32) {
+        return StreamArtistIdentityRevisionState.operative(_identityRevisions, _identity, artistId);
+    }
+
+    function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
+        return _identity.documents[operativeIdentityRecord(artistId)];
+    }
+
+    function identityRevisionRecord(bytes32 record)
+        external
+        view
+        returns (StreamArtistIdentityRevisionTypes.Record memory)
+    {
+        return _identityRevisions.records[record];
+    }
+
+    function operativeIdentityMetadata(bytes32 artistId)
+        external
+        view
+        returns (bytes32, string memory, string memory)
+    {
+        return StreamArtistIdentityRevisionState.metadata(_identityRevisions, _identity, artistId);
+    }
+
+    function artistDisplayName(bytes32 artistId)
+        external
+        view
+        returns (string memory name, bytes32 hash)
+    {
+        (hash,, name) =
+            StreamArtistIdentityRevisionState.metadata(_identityRevisions, _identity, artistId);
+    }
 
     event ArtistAuthorizationRevoked(
         uint16 schemaVersion,
@@ -140,7 +214,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         return _identity.identities[artistId];
     }
 
-    /// @notice Fixed-size authority facts; avoids copying URI/display strings on capped mint reads.
+    /// @notice Fixed-size authority facts with the immutable registration hash, not the operative document.
     function authorityState(bytes32 artistId)
         external
         view
@@ -384,18 +458,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 2);
-        _deadline(a.time);
-        record = StreamArtistHashes.acceptanceRecord(
-            _environment(), collectionId, b, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.acceptance(
+            _identity, _replay, _ownerContext(), c, collectionId, b, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistHashes.acceptanceDigest(_environment(), collectionId, b, a),
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeRefusal(
@@ -432,13 +499,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 14);
-        _deadline(a.time);
-        record = StreamArtistHashes.policyRecord(
-            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.policy(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(
-            c, b.artistId, a, proof, StreamArtistHashes.policyDigest(_environment(), p, a), record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeEconomics(
@@ -450,19 +515,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 15);
-        _deadline(a.time);
-        if (designation == bytes32(0)) revert T.InvalidRecord();
-        record = StreamArtistEconomicsHashes.economicsRecord(
-            _environment(), p, designation, b.artistId, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.economics(
+            _identity, _replay, _ownerContext(), c, b, p, designation, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumePayout(
@@ -517,18 +574,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 20);
-        _deadline(a.time);
-        record = StreamArtistEconomicsHashes.royaltyFreezeRecord(
-            _environment(), p, b.artistId, proof.signer, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.royaltyFreeze(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeContentConsent(
@@ -539,19 +589,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 17);
-        _deadline(a.time);
-        StreamArtistContentHashes.validateConsent(p);
-        record = StreamArtistContentHashes.consentRecord(
-            _environment(), p, b.artistId, proof.signer, 1, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.contentConsent(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistContentHashes.consentDigest(_environment(), p, a),
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function consumeContentFreeze(
@@ -562,19 +604,11 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner {
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
         _check(c, 21);
-        _deadline(a.time);
-        StreamArtistContentHashes.validateFreeze(p);
-        record = StreamArtistContentHashes.freezeRecord(
-            _environment(), p, b.artistId, proof.signer, 1, a.nonce, _now()
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.contentFreeze(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _authorize(
-            c,
-            b.artistId,
-            a,
-            proof,
-            StreamArtistContentHashes.freezeDigest(_environment(), p, a),
-            record
-        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function _authorize(

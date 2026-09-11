@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
 import "./StreamArtistOwner.sol";
 import {
@@ -258,6 +259,37 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         bytes calldata statement
     ) external returns (bytes32 record) {
         _check(c, 24);
+        // The old callback has no operative Identity fact. Only deployment uses it.
+        if (p.subjectKind != 9) revert T.UnsupportedProfile();
+        return _recordAttestation(c, b, p, bytes32(0), signer, nonce, signedAt, statement);
+    }
+
+    function recordIdentityAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        bytes32 operativeIdentityHash,
+        address signer,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes calldata statement
+    ) external returns (bytes32) {
+        _check(c, 24);
+        if (p.subjectKind != 10 || operativeIdentityHash == bytes32(0)) revert T.InvalidRecord();
+        return
+            _recordAttestation(c, b, p, operativeIdentityHash, signer, nonce, signedAt, statement);
+    }
+
+    function _recordAttestation(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Attestation calldata p,
+        bytes32 operativeIdentityHash,
+        address signer,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes calldata statement
+    ) private returns (bytes32 record) {
         Attribution storage attr = _attributions[p.collectionId];
         if (attr.state != 2 || attr.generation != b.generation || signer != b.artistAddress) {
             revert T.InvalidAttribution(p.collectionId);
@@ -279,7 +311,7 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             ) revert T.InvalidRecord();
         } else if (p.subjectKind == 10) {
             if (
-                p.subjectId != b.artistId || p.subjectStateHash != b.identityRecordHash
+                p.subjectId != b.artistId || p.subjectStateHash != operativeIdentityHash
                     || (p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
                         && p.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
             ) revert T.InvalidRecord();
@@ -298,7 +330,13 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         if (_statements[p.statementHash].length == 0) _statements[p.statementHash] = statement;
         _commit(
             c,
-            keccak256(abi.encode(b, p, signer, nonce, signedAt, keccak256(statement))),
+            p.subjectKind == 10
+                ? keccak256(
+                    abi.encode(
+                        b, p, signer, nonce, signedAt, keccak256(statement), operativeIdentityHash
+                    )
+                )
+                : keccak256(abi.encode(b, p, signer, nonce, signedAt, keccak256(statement))),
             keccak256(abi.encode(p.collectionId, p.subjectKind, p.subjectId, item)),
             bytes32(0),
             record

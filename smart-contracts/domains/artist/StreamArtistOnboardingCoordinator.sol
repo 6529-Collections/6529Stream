@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityOperations.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
@@ -37,6 +38,8 @@ contract StreamArtistOnboardingCoordinator is
 {
     /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
     error MissingMintPrerequisite(bytes32 prerequisite);
+    /// @notice Retained for errors propagated by the linked identity recipes.
+    error InvalidIdentity(bytes32 artistId);
     T.SuiteConfiguration private _suite;
     address[16] private _targets;
     bytes32[16] private _runtimeHashes;
@@ -123,6 +126,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(20),
                 uint16(21),
                 uint16(24),
+                uint16(25),
                 uint16(26),
                 uint16(27),
                 uint16(52),
@@ -167,17 +171,9 @@ contract StreamArtistOnboardingCoordinator is
         artistId = p.artistId;
         bool reused = artistId != bytes32(0);
         if (reused) {
-            T.Identity memory current = identity.identity(artistId);
-            if (
-                current.status != 1 || current.authorityClass != 1
-                    || current.authorityAddress != p.artistAddress
-                    || current.identityRecordHash != p.identityRecordHash
-                    || identity.activeIdentity(p.artistAddress) != artistId
-                    || keccak256(document) != p.identityRecordHash
-                    || keccak256(bytes(displayName)) != keccak256(bytes(current.displayName))
-                    || keccak256(bytes(p.identityRecordURI))
-                        != keccak256(bytes(current.identityRecordURI))
-            ) revert T.InvalidIdentity(artistId);
+            StreamArtistIdentityOperations.validateProposalIdentity(
+                _suite.owners[2], p, document, displayName
+            );
         } else {
             artistId = identity.registerIdentity(
                 _context(1, actor, before_[2]),
@@ -417,37 +413,18 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a,
         bytes calldata statement
     ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(24);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        T.Authorization memory effective = _directObservedTime(actor, b.artistAddress, a);
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistHashes.attestationDigest(_environment(), p, effective),
-            effective.signature
-        );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeAttestation(_context(24, actor, before_[2]), b, p, effective, proof);
-        bytes32 actual = IStreamArtistAttributionOwner(_suite.owners[4])
-            .recordAttestation(
-                _context(24, actor, before_[4]),
-                b,
-                p,
-                proof.signer,
-                effective.nonce,
-                effective.time,
-                statement
-            );
-        if (actual != record) revert T.InvalidRecord();
-        _archive(
-            24,
-            actor,
-            record,
-            before_,
-            a.time == effective.time
-                ? abi.encode(b, p, a, statement, proof)
-                : abi.encode(b, p, a, statement, proof, effective)
+        return StreamArtistIdentityOperations.attest(_economicContext(), actor, p, a, statement);
+    }
+
+    function coordinateRecordIdentityRevision(
+        address actor,
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external operation returns (bytes32) {
+        return StreamArtistIdentityOperations.revise(
+            _economicContext(), actor, p, a, document, displayName
         );
     }
 

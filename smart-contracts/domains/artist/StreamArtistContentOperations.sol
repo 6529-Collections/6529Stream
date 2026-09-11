@@ -148,12 +148,11 @@ library StreamArtistContentOperations {
         b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);
         (uint8 state, uint64 generation) =
             IStreamArtistAttributionOwner(suite.owners[4]).attributionState(collectionId);
-        (address authority, uint8 class_, uint8 status, bytes32 identityHash) =
+        (address authority, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);
         if (
             !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
                 || b.consentMode != 1 || status != 1 || class_ != 1 || authority != b.artistAddress
-                || identityHash != b.identityRecordHash
         ) revert T.InvalidAttribution(collectionId);
         C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])
             .bindingTerms(collectionId, generation);

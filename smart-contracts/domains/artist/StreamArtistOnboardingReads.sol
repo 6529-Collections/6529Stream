@@ -6,6 +6,7 @@ import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 import "../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
@@ -40,12 +41,11 @@ contract StreamArtistOnboardingReads {
         b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
         (uint8 state, uint64 generation) =
             IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);
-        (address authority, uint8 authorityClass, uint8 identityStatus, bytes32 identityHash) =
+        (address authority, uint8 authorityClass, uint8 identityStatus,) =
             IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         if (
             !b.accepted || state != 2 || generation != b.generation || identityStatus != 1
                 || authorityClass != 1 || authority != b.artistAddress
-                || identityHash != b.identityRecordHash
         ) {
             revert T.InvalidAttribution(collectionId);
         }
@@ -113,20 +113,21 @@ contract StreamArtistOnboardingReads {
     }
 
     /// @notice Acceptance hash/time describe the primary's recorded acceptance, even before set completion.
-    /// @dev The artist field remains zero until all required rows complete; timestamps are not readiness flags.
+    /// @dev identityHash is the binding's ratified document version, never the current identity tip.
+    ///      The artist field remains zero until all required rows complete; timestamps are not readiness flags.
     function attribution(uint256 collectionId)
         external
         view
         returns (IStreamCollectionArtistRegistry.Attribution memory result)
     {
         T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
-        (address authority,,, bytes32 identityHash) =
+        (address authority,,,) =
             IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         IStreamArtistAcceptanceOwner acceptance = IStreamArtistAcceptanceOwner(_suite.owners[3]);
         result = IStreamCollectionArtistRegistry.Attribution(
             b.artistAddress,
             b.accepted ? authority : address(0),
-            identityHash,
+            b.identityRecordHash,
             b.bindingHash,
             acceptance.acceptanceRecord(b.bindingHash),
             b.generation,
@@ -329,7 +330,9 @@ contract StreamArtistOnboardingReads {
             attribution_.attestation(collectionId, 10, b.artistId);
         if (
             personhood.recordHash == bytes32(0) || personhood.generation != b.generation
-                || personhood.subjectStateHash != b.identityRecordHash
+                || personhood.subjectStateHash
+                    != IStreamArtistIdentityRevisionReads(_suite.owners[2])
+                        .operativeIdentityRecord(b.artistId)
                 || (personhood.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
                     && personhood.schemaId != keccak256("6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1"))
         ) {

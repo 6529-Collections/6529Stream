@@ -35,6 +35,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistCollaboratorLifecycle,
     IStreamArtistAuthorizationRevocation,
     IStreamArtistContentAuthority,
+    IStreamArtistIdentityRevision,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -93,7 +94,57 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistBeneficiaryFacts).interfaceId
             || id == type(IStreamArtistCollaboratorLifecycle).interfaceId
             || id == type(IStreamArtistAuthorizationRevocation).interfaceId
-            || id == type(IStreamArtistContentAuthority).interfaceId || super.supportsInterface(id);
+            || id == type(IStreamArtistContentAuthority).interfaceId
+            || id == type(IStreamArtistIdentityRevision).interfaceId
+            || id == type(IStreamArtistIdentityRevisionReads).interfaceId
+            || super.supportsInterface(id);
+    }
+
+    function recordIdentityRevision(
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a,
+        bytes calldata document,
+        string calldata displayName
+    ) external returns (bytes32) {
+        return IStreamArtistIdentityRevisionCoordinator(operationCoordinator)
+            .coordinateRecordIdentityRevision(msg.sender, p, a, document, displayName);
+    }
+
+    function identityRevisionDigest(
+        StreamArtistIdentityRevisionTypes.Revision calldata p,
+        T.Authorization calldata a
+    ) external view returns (bytes32) {
+        return StreamArtistIdentityRevisionState.digest(_environment(), p, a);
+    }
+
+    function _identityOwner() private view returns (IStreamArtistIdentityRevisionOwner) {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistIdentityRevisionOwner(s.owners[2]);
+    }
+
+    function operativeIdentityRecord(bytes32 artistId) external view returns (bytes32) {
+        return _identityOwner().operativeIdentityRecord(artistId);
+    }
+
+    function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
+        return _identityOwner().identityRecordBytes(artistId);
+    }
+
+    function identityDocumentBytes(bytes32 hash) external view returns (bytes memory) {
+        return _identityOwner().identityDocumentBytes(hash);
+    }
+
+    function artistDisplayName(bytes32 artistId) external view returns (string memory, bytes32) {
+        return _identityOwner().artistDisplayName(artistId);
+    }
+
+    function identityRevisionRecord(bytes32 record)
+        external
+        view
+        returns (StreamArtistIdentityRevisionTypes.Record memory)
+    {
+        return _identityOwner().identityRevisionRecord(record);
     }
 
     function revokeArtistAuthorization(

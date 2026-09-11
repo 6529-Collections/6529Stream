@@ -7,7 +7,7 @@ remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
 collaborator rows, no capability overrides, and operator-set sale parameters.
-Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 26, 27, 52, and 54 have typed entrypoints.
+Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 25, 26, 27, 52, and 54 have typed entrypoints.
 The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
@@ -24,6 +24,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Exact content consent and defensive one-way content freeze | `IStreamArtistContentAuthority` |
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
 | Preventive identity-scoped nonce or digest cancellation | `IStreamArtistAuthorizationRevocation` |
+| Append-only identity revision and operative or historical document reads | `IStreamArtistIdentityRevision` |
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
 | Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
 | Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
@@ -33,7 +34,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 
 `StreamArtistOnboardingTypes` owns the shared payloads. The `Authorization.time`
 field is a deadline for acceptance, policy, economics, content consent, freezes, and ratification; it is
-the signed timestamp for payout and attestations. Direct payout/attestation calls
+the signed timestamp for payout, attestations and identity revisions. These direct calls
 can set it to zero to record the eventual inclusion timestamp, so a queued Safe
 transaction need not predict its execution time. This convention applies only
 when the original caller is the artist and the signature is empty; signed relays,
@@ -52,6 +53,30 @@ append is atomic with every owner write and nonce consumption. The archive is
 evidence storage, not a current-state authority. Identity reuse across a second
 collection validates the existing identity without re-registering it or changing
 its liveness; Binding and Attribution own the new collection records.
+
+Identity's existing `identity` tuple and `authorityState` hash retain the immutable
+registration document. `operativeIdentityRecord`, `identityRecordBytes` and
+`artistDisplayName` read the latest revision; `identityDocumentBytes` and
+`identityRevisionRecord` preserve history. The document bytes are authoritative
+over the bounded display-name and URI mirrors. Revision changes neither the
+artist ID nor the typed payout designation. The contract does not parse JSON;
+schema, mirror equality and dual-family archival admission remain external
+acceptance gates and are not claimed by the isolated unit tests.
+
+A proposal must name the operative identity document at proposal time. Later
+revisions do not rewrite that proposal or prevent its artist from accepting the
+exact historical version. Existing accepted bindings and policy, economics,
+content and deployment records remain intact. Personhood evidence specifically
+compares its subject hash to the operative document: A-to-B makes A evidence
+stale; a new attestation for B restores that floor. A-to-B-to-A can also restore
+an unchanged A attestation, since the specified comparison is by document hash,
+not revision ordinal. The current personhood recipe passes an actual
+Coordinator-snapshotted Identity fact to Attribution without owner-to-owner calls.
+Revision signatures bind document hashes, so an unused signature may apply if its
+exact previous document becomes operative again. Permanent revision records also
+retain the prior revision-record reference to distinguish repeated document content.
+Successor authority, provisional/adjudicated revisions and archival admission
+remain separate implementation seams.
 
 Collaborator identities are staged by an admin and allocated only after the
 named account accepts with a direct call or verified signature. Identity stores

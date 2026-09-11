@@ -397,6 +397,618 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         primary.setPrimaryTemplateAssignment(PRIMARY, 1, 1, templateFixtureId, bytes32(0));
     }
 
+    function _revisionProposal(bytes memory document)
+        private
+        view
+        returns (StreamArtistIdentityRevisionTypes.Revision memory)
+    {
+        return StreamArtistIdentityRevisionTypes.Revision(
+            artistId,
+            ingress.operativeIdentityRecord(artistId),
+            keccak256(document),
+            "urn:identity:revision"
+        );
+    }
+
+    function _reviseDocument(bytes memory document) private returns (bytes32 record) {
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        return ingress.recordIdentityRevision(p, a, document, "Revised Artist");
+    }
+
+    function _otherOwnerRoots() private view returns (bytes32) {
+        T.Snapshot[7] memory snapshots;
+        for (uint256 i; i < 7; ++i) {
+            if (i != 2) snapshots[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+        }
+        return keccak256(abi.encode(snapshots));
+    }
+
+    function testIdentityRevisionSafeRecordDigestEventAndImmutableRegistration() public {
+        T.Identity memory original = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        bytes memory document = bytes("updated canonical identity");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        bytes32 digest = StreamArtistHashes.typed(
+            StreamArtistHashes.Environment(
+                block.chainid, address(ingress), address(core), address(manager)
+            ),
+            keccak256(
+                abi.encode(
+                    bytes32(0xbfb7a5d3bc248c8eefbe4f8dfc2ea7d75d18c5cb3f2ab0d56000fd87f4b58603),
+                    artistId,
+                    p.previousRecordHash,
+                    p.revisedRecordHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(
+            digest == ingress.identityRevisionDigest(p, a),
+            "permanent revision typehash and field order"
+        );
+        a.signature = _signature(digest);
+        vm.warp(1015);
+        bytes32 other = _otherOwnerRoots();
+        vm.recordLogs();
+        bytes32 record = ingress.recordIdentityRevision(p, a, document, "Revised Artist");
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_REVISION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                p.previousRecordHash,
+                p.revisedRecordHash,
+                address(artist),
+                uint8(1),
+                a.nonce,
+                a.time
+            )
+        );
+        require(record == expected, "signedAt remains signed time");
+        bool found;
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[2]
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistIdentityRevisionRecorded(uint16,bytes32,address,bytes32,bytes32,string,uint8,uint256,uint64,bytes32)"
+                        )
+            ) {
+                require(
+                    logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(uint160(address(artist)))),
+                    "revision indexed identity"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.previousRecordHash,
+                                p.revisedRecordHash,
+                                p.identityRecordURI,
+                                uint8(1),
+                                a.nonce,
+                                a.time,
+                                record
+                            )
+                        ),
+                    "exact revision event"
+                );
+                found = true;
+            }
+        }
+        require(found && _otherOwnerRoots() == other, "sole Identity writer");
+        T.Identity memory current = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            current.identityRecordHash == original.identityRecordHash
+                && keccak256(bytes(current.identityRecordURI))
+                    == keccak256(bytes(original.identityRecordURI))
+                && keccak256(bytes(current.displayName)) == keccak256(bytes(original.displayName)),
+            "immutable registration tuple"
+        );
+        require(
+            ingress.operativeIdentityRecord(artistId) == p.revisedRecordHash
+                && keccak256(ingress.identityRecordBytes(artistId)) == p.revisedRecordHash
+                && keccak256(ingress.identityDocumentBytes(original.identityRecordHash))
+                    == original.identityRecordHash,
+            "operative and historical document bytes"
+        );
+        (string memory name, bytes32 hash) = ingress.artistDisplayName(artistId);
+        require(
+            hash == p.revisedRecordHash && keccak256(bytes(name)) == keccak256("Revised Artist"),
+            "operative mirror paired with hash"
+        );
+        StreamArtistIdentityRevisionTypes.Record memory saved =
+            ingress.identityRevisionRecord(record);
+        require(
+            saved.previousRevisionRecord == bytes32(0) && saved.recordHash == record
+                && saved.authorityClass == 1 && saved.signedAt == a.time,
+            "historical canonical revision"
+        );
+        (
+            ,
+            T.Authorization memory submitted,
+            bytes memory bytes_,,
+            T.SignerApproval memory proof,
+            T.Authorization memory effective
+        ) = abi.decode(
+            _operationPayload(25, address(this), record),
+            (
+                StreamArtistIdentityRevisionTypes.Revision,
+                T.Authorization,
+                bytes,
+                string,
+                T.SignerApproval,
+                T.Authorization
+            )
+        );
+        require(
+            !proof.direct && proof.digest == digest && submitted.time == effective.time
+                && keccak256(submitted.signature) == keccak256(a.signature)
+                && keccak256(bytes_) == hash,
+            "exact signed Archive"
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevision.identityRevisionDigest, (p, a))
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevisionReads.operativeIdentityRecord, (artistId))
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevisionReads.identityRecordBytes, (artistId))
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevisionReads.identityDocumentBytes, (hash))
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevisionReads.artistDisplayName, (artistId))
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityRevisionReads.identityRevisionRecord, (record))
+        );
+    }
+
+    function testIdentityRevisionDelayedDirectSafeRecordsObservedTimeAndOriginalSentinel() public {
+        bytes memory document = bytes("queued Safe revision");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = T.Authorization(0, 0, "");
+        bytes memory data = abi.encodeCall(
+            IStreamArtistIdentityRevision.recordIdentityRevision, (p, a, document, "Queued Safe")
+        );
+        vm.warp(1050);
+        this.executeTargetSafe(address(ingress), data);
+        bytes32 record = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_IDENTITY_REVISION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                p.previousRecordHash,
+                p.revisedRecordHash,
+                address(artist),
+                uint8(1),
+                uint256(0),
+                uint64(1050)
+            )
+        );
+        require(ingress.identityRevisionRecord(record).signedAt == 1050, "observed inclusion time");
+        (
+            ,
+            T.Authorization memory submitted,,,
+            T.SignerApproval memory proof,
+            T.Authorization memory effective
+        ) = abi.decode(
+            _operationPayload(25, address(artist), record),
+            (
+                StreamArtistIdentityRevisionTypes.Revision,
+                T.Authorization,
+                bytes,
+                string,
+                T.SignerApproval,
+                T.Authorization
+            )
+        );
+        require(
+            submitted.time == 0 && effective.time == 1050 && proof.direct
+                && proof.digest == ingress.identityRevisionDigest(p, effective),
+            "original and effective direct bytes"
+        );
+    }
+
+    function testIdentityRevisionDelayedEOAAndCrossIdentityNonceIsolation() public {
+        address eoa = vm.addr(9081);
+        T.BindingProposal memory proposal = _proposal(bytes32(0));
+        proposal.artistAddress = eoa;
+        (bytes32 second,) = ingress.proposeArtistBinding(
+            2, proposal, bytes("unit identity document"), "Artist Safe"
+        );
+        bytes memory document = bytes("EOA revised identity");
+        StreamArtistIdentityRevisionTypes.Revision memory p =
+            StreamArtistIdentityRevisionTypes.Revision(
+                second, proposal.identityRecordHash, keccak256(document), "urn:eoa"
+            );
+        T.Authorization memory a = T.Authorization(0, 0, "");
+        bytes memory data = abi.encodeCall(
+            IStreamArtistIdentityRevision.recordIdentityRevision, (p, a, document, "EOA")
+        );
+        vm.warp(1060);
+        vm.prank(eoa);
+        (bool ok,) = address(ingress).call(data);
+        require(
+            ok && ingress.operativeIdentityRecord(second) == keccak256(document),
+            "delayed EOA direct"
+        );
+        require(
+            !ingress.artistAuthorizationState(artistId, bytes32(0), 0).nonceConsumed,
+            "other identity nonce unchanged"
+        );
+        _reviseDocument(bytes("independent Safe revision"));
+        require(
+            ingress.artistAuthorizationState(artistId, bytes32(0), 0).nonceConsumed,
+            "same nonce other identity works"
+        );
+    }
+
+    function testIdentityRevisionStalesOnlyPersonhoodThenMatchingAttestationRestoresMint() public {
+        _all();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        bytes32 other = _otherOwnerRoots();
+        bytes32 newHash = keccak256("identity B");
+        _reviseDocument(bytes("identity B"));
+        require(
+            _otherOwnerRoots() == other
+                && coordinator.reads().acceptedBinding(1).bindingHash == b.bindingHash,
+            "all prior binding and consent state stays"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                T.MissingMintPrerequisite.selector, keccak256("personhood-attestation")
+            )
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        bytes32 roots = _roots();
+        uint256 n = nextNonce;
+        avm.expectRevert(T.InvalidRecord.selector);
+        this.recordUnitPersonhood(b.identityRecordHash);
+        require(_roots() == roots, "obsolete personhood record rolls back");
+        nextNonce = n;
+        _attest(10, artistId, newHash, keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1"));
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            coordinator.reads().acceptedBinding(1).identityRecordHash == b.identityRecordHash,
+            "historical binding not rewritten"
+        );
+        _contentConsent(keccak256("content after identity revision"));
+    }
+
+    function recordUnitPersonhood(bytes32 state) external {
+        require(msg.sender == address(this), "test self only");
+        _attest(10, artistId, state, keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1"));
+    }
+
+    function testIdentityRevisionReturnToSameDocumentRestoresHashMatchingEvidence() public {
+        _all();
+        T.AttestationRecord memory proof =
+            IStreamArtistAttributionOwner(suite.owners[4]).attestation(1, 10, artistId);
+        bytes32 other = _otherOwnerRoots();
+        bytes32 first = _reviseDocument(bytes("identity B"));
+        require(_closed(_mintCall()), "A evidence stale at B");
+        bytes32 second = _reviseDocument(bytes("unit identity document"));
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            ingress.identityRevisionRecord(second).previousRevisionRecord == first
+                && ingress.identityRevisionRecord(first).revisedRecordHash
+                    == keccak256("identity B"),
+            "linear permanent history through repeated content"
+        );
+        require(
+            _otherOwnerRoots() == other
+                && IStreamArtistAttributionOwner(suite.owners[4])
+                    .attestation(1, 10, artistId)
+                    .recordHash == proof.recordHash,
+            "same A subject matches without unsolicited revision ordinal"
+        );
+    }
+
+    function testIdentityRevisionPendingAcceptanceRetainsProposalVersionAndFutureProposalUsesTip()
+        public
+    {
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(bytes("identity B"));
+        _reviseDocument(bytes("identity B"));
+        _accept();
+        require(
+            coordinator.reads().acceptedBinding(1).identityRecordHash
+                == keccak256("unit identity document"),
+            "proposal A accepted after revision B"
+        );
+        T.BindingProposal memory old = _proposal(artistId);
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, artistId));
+        ingress.proposeArtistBinding(2, old, bytes("unit identity document"), "Artist Safe");
+        old.identityRecordHash = p.revisedRecordHash;
+        old.identityRecordURI = p.identityRecordURI;
+        bytes32 before_ =
+            keccak256(abi.encode(IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()));
+        ingress.proposeArtistBinding(2, old, bytes("identity B"), "Revised Artist");
+        require(
+            keccak256(abi.encode(IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()))
+                == before_,
+            "reuse remains read-only"
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.acceptanceDigest(2, a));
+        ingress.acceptArtistBinding(2, a);
+        require(
+            coordinator.reads().acceptedBinding(2).identityRecordHash == p.revisedRecordHash,
+            "future accepted binding B"
+        );
+        require(
+            ingress.attribution(2).identityHash == p.revisedRecordHash
+                && ingress.attribution(1).identityHash == p.previousRecordHash,
+            "compatibility attribution pairs each binding with its ratified document"
+        );
+        _policy();
+        _payout();
+        _economics();
+        _ratify();
+        _attestations();
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            IStreamArtistAttributionOwner(suite.owners[4])
+            .attestation(1, 10, artistId)
+            .subjectStateHash == p.revisedRecordHash,
+            "pending historical A acceptance uses operative B personhood"
+        );
+    }
+
+    function testIdentityRevisionApprovedEmptySafeAndProtocolOnlyCallbacks() public {
+        bytes memory document = bytes("approved empty revision");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        bytes32 digest = ingress.identityRevisionDigest(p, a);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordIdentityRevision(p, a, document, "Approved");
+        _approveMessage(digest);
+        bytes32 record = ingress.recordIdentityRevision(p, a, document, "Approved");
+        require(
+            ingress.identityRevisionRecord(record).signer == address(artist),
+            "real Safe empty-proof relay"
+        );
+        T.ActionContext memory c = T.ActionContext(
+            25, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof = T.SignerApproval(address(artist), digest, true);
+        bytes memory call_ = abi.encodeCall(
+            IStreamArtistIdentityRevisionOwner.recordIdentityRevision,
+            (c, p, a, proof, document, "Approved")
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], call_);
+        call_ = abi.encodeCall(
+            IStreamArtistIdentityRevisionCoordinator.coordinateRecordIdentityRevision,
+            (address(artist), p, a, document, "Approved")
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(coordinator), call_);
+        p = _revisionProposal(bytes("no EOA owner privilege"));
+        a = _authorization(true);
+        vm.prank(vm.addr(keys[0]));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordIdentityRevision(p, a, bytes("no EOA owner privilege"), "Owner");
+    }
+
+    function testIdentityRevisionLateArchiveFailureRestoresHeadBytesReplayAndRecord() public {
+        bytes memory document = bytes("atomic identity revision");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        bytes32 before_ = _roots();
+        bytes memory failure = abi.encodeWithSignature("Error(string)", "revision archive failed");
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            failure
+        );
+        vm.expectRevert(failure);
+        ingress.recordIdentityRevision(p, a, document, "Atomic");
+        require(
+            _roots() == before_ && ingress.operativeIdentityRecord(artistId) == p.previousRecordHash
+                && ingress.identityDocumentBytes(p.revisedRecordHash).length == 0
+                && !ingress.artistAuthorizationState(artistId, bytes32(0), a.nonce).nonceConsumed,
+            "complete rollback"
+        );
+        avm.clearMockedCalls();
+        ingress.recordIdentityRevision(p, a, document, "Atomic");
+    }
+
+    function testIdentityRevisionRejectsForkNoopWrongBytesAndTimestamps() public {
+        bytes memory document = bytes("branch B");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        ingress.recordIdentityRevision(p, a, document, "B");
+        bytes32 before_ = _roots();
+        a = _authorization(true);
+        p.revisedRecordHash = keccak256("branch C");
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordIdentityRevision(p, a, bytes("branch C"), "C");
+        p = _revisionProposal(document);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordIdentityRevision(p, a, document, "Noop");
+        p = _revisionProposal(bytes("branch C"));
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordIdentityRevision(p, a, document, "Wrong bytes");
+        a.time = uint64(block.timestamp + 1);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordIdentityRevision(p, a, bytes("branch C"), "Future");
+        a.time = 0;
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        avm.expectRevert(T.InvalidRecord.selector);
+        ingress.recordIdentityRevision(p, a, bytes("branch C"), "Relay zero");
+        require(_roots() == before_, "all invalid branches preserve roots");
+    }
+
+    function testIdentityRevisionExactByteBounds() public {
+        bytes memory document = new bytes(8192);
+        document[8191] = 0x41;
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        p.identityRecordURI = string(new bytes(2048));
+        string memory name = string(new bytes(256));
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        ingress.recordIdentityRevision(p, a, document, name);
+        require(ingress.identityRecordBytes(artistId).length == 8192, "maximum bytes stored");
+        document = new bytes(8193);
+        p = _revisionProposal(document);
+        a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.BoundExceeded.selector, uint256(8193), uint256(8192))
+        );
+        ingress.recordIdentityRevision(p, a, document, "Name");
+        document = bytes("bounds");
+        p = _revisionProposal(document);
+        p.identityRecordURI = string(new bytes(2049));
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.BoundExceeded.selector, uint256(2049), uint256(2048))
+        );
+        ingress.recordIdentityRevision(p, a, document, "Name");
+        p.identityRecordURI = "urn:ok";
+        vm.expectRevert(
+            abi.encodeWithSelector(T.BoundExceeded.selector, uint256(257), uint256(256))
+        );
+        ingress.recordIdentityRevision(p, a, document, string(new bytes(257)));
+    }
+
+    function _identityRevisionReplayKey(bytes32 surface, bytes32 scope)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[2],
+                keccak256("domain:identity_authority"),
+                surface,
+                scope
+            )
+        );
+    }
+
+    function testIdentityRevisionRevokedDigestAndUsedNoncePinExactIdentityDenial() public {
+        bytes memory document = bytes("prevented revision");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = T.Authorization(51, 1000, "");
+        bytes32 digest = ingress.identityRevisionDigest(p, a);
+        a.signature = _signature(digest);
+        StreamArtistAuthorizationTypes.Revocation memory revoke =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory cancel = _authorization(false);
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(revoke, cancel));
+        ingress.revokeArtistAuthorization(revoke, cancel);
+        bytes32 before_ = _roots();
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.digest_revocation"),
+            keccak256(abi.encode(artistId, digest))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, key));
+        ingress.recordIdentityRevision(p, a, document, "Denied");
+        a.nonce = 0;
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.nonce_allocator"),
+            keccak256(abi.encode(artistId, uint256(0)))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, key));
+        ingress.recordIdentityRevision(p, a, document, "Used nonce");
+        require(
+            _roots() == before_
+                && ingress.operativeIdentityRecord(artistId) == p.previousRecordHash,
+            "preventive denial rollback"
+        );
+    }
+
+    function testIdentityRevisionWrongDomainMissingSafeOwnerAndDirectTimeGuard() public {
+        bytes memory document = bytes("invalid signature revision");
+        StreamArtistIdentityRevisionTypes.Revision memory p = _revisionProposal(document);
+        T.Authorization memory a = _authorization(true);
+        a.signature =
+            _signature(keccak256(abi.encode("wrong domain", ingress.identityRevisionDigest(p, a))));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordIdentityRevision(p, a, document, "Wrong domain");
+        uint256[] memory oneKey = new uint256[](1);
+        oneKey[0] = keys[0];
+        a.signature = safeThresholdSignature(
+            oneKey, safeMessageDigest(artist, abi.encode(ingress.identityRevisionDigest(p, a)))
+        );
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordIdentityRevision(p, a, document, "Missing owner");
+        a.signature = "";
+        bytes memory queued = abi.encodeCall(
+            IStreamArtistIdentityRevision.recordIdentityRevision,
+            (p, a, document, "Nonzero stale time")
+        );
+        vm.warp(1010);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), queued);
+        require(
+            !ingress.artistAuthorizationState(artistId, bytes32(0), 0).nonceConsumed,
+            "bad proofs and direct stale time preserve allocator"
+        );
+    }
+
+    function testIdentityAttestationLegacyCallbackRejectsPersonhoodAndNewCallbackRejectsSafe()
+        public
+    {
+        _accept();
+        T.Binding memory b = coordinator.reads().acceptedBinding(1);
+        bytes memory statement = bytes("old callback cannot reintroduce stale facts");
+        T.Attestation memory p = T.Attestation(
+            1,
+            10,
+            artistId,
+            b.identityRecordHash,
+            keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1"),
+            keccak256(statement),
+            "urn:waiver"
+        );
+        T.ActionContext memory c = T.ActionContext(
+            24, address(artist), IStreamArtistOwner(suite.owners[4]).ownerStateSnapshotV2()
+        );
+        vm.prank(address(coordinator));
+        avm.expectRevert(T.UnsupportedProfile.selector);
+        IStreamArtistAttributionOwner(suite.owners[4])
+            .recordAttestation(c, b, p, address(artist), 1, 1000, statement);
+        bytes memory callback = abi.encodeCall(
+            IStreamArtistIdentityAttestationOwner.recordIdentityAttestation,
+            (c, b, p, b.identityRecordHash, address(artist), uint256(1), uint64(1000), statement)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[4], callback);
+    }
+
     function _contentProposal(bytes32 candidate) private view returns (Content.Consent memory) {
         return Content.Consent(
             1, address(metadata), keccak256("SCRIPT"), metadata.familyState(1, candidate)
@@ -507,8 +1119,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         T.ActionContext memory c = T.ActionContext(
             17, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
         );
-        bytes memory callback =
-            abi.encodeCall(
+        bytes memory callback = abi.encodeCall(
             IStreamArtistContentIdentityOwner.consumeContentConsent, (c, b, p, a, proof)
         );
         vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
@@ -1096,6 +1707,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 uint16(20),
                 uint16(21),
                 uint16(24),
+                uint16(25),
                 uint16(26),
                 uint16(27),
                 uint16(52),
@@ -2920,6 +3532,9 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
             "attestation observed inclusion time"
         );
         payload = _operationPayload(24, account, actual.recordHash);
+        bytes32 operative;
+        (payload, operative) = abi.decode(payload, (bytes, bytes32));
+        require(operative == ingress.operativeIdentityRecord(artistId), "snapshotted identity fact");
         (,, submitted,, proof, effective) = abi.decode(
             payload,
             (T.Binding, T.Attestation, T.Authorization, bytes, T.SignerApproval, T.Authorization)
@@ -3860,7 +4475,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         _attest(
             10,
             artistId,
-            binding_.identityRecordHash,
+            ingress.operativeIdentityRecord(artistId),
             keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
         );
     }
