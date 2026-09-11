@@ -29,8 +29,17 @@ contract StreamRevenueResolverArtistBindingTest is RevenueV1TestBase, OfficialSa
         artists = new RevenueResolverArtistMock(address(core));
         core.selectArtist(address(artists), address(artists).codehash);
         core.setToken(77, 1, false);
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         profile = _profile(ARTIST, keccak256("artist"));
         replacement = _profile(address(0xB0B), keccak256("other"));
         template = resolver.createPrimaryTemplate(_templateEntries(), bytes32(uint256(1)));
@@ -264,27 +273,55 @@ contract StreamRevenueResolverArtistBindingTest is RevenueV1TestBase, OfficialSa
                 IStreamRevenueResolver.InvalidPrimaryResolverConfiguration.selector
             )
         );
-        new StreamRevenueResolver(IStreamCore(address(0)), factory, address(this), artists);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamRevenueResolver.InvalidPrimaryResolverConfiguration.selector
+        new StreamRevenueResolver(
+            IStreamCore(address(0)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
             )
         );
-        new StreamRevenueResolver(IStreamCore(address(core)), factory, address(0xE0A), artists);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGasParameterHost.GasParameterInvalidAuthority.selector, address(0xE0A))
+        );
+        new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(0xE0A),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
         RevenueResolverArtistMock wrong = new RevenueResolverArtistMock(address(1));
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamRevenueResolver.InvalidPrimaryArtistRegistry.selector, address(wrong)
             )
         );
-        new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), wrong);
+        new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            wrong,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamRevenueResolver.InvalidPrimaryArtistRegistry.selector, address(0)
             )
         );
         new StreamRevenueResolver(
-            IStreamCore(address(core)), factory, address(this), IStreamArtistAttribution(address(0))
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            IStreamArtistAttribution(address(0)),
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
         );
     }
 
@@ -292,8 +329,16 @@ contract StreamRevenueResolverArtistBindingTest is RevenueV1TestBase, OfficialSa
         core.selectArtist(address(0), bytes32(0));
         artists.setReadFailure(true);
         StreamRevenueResolver staged = new StreamRevenueResolver(
-            IStreamCore(address(core)), factory, address(this), artists
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
         );
+        vm.prank(address(revenueAuthority));
+        staged.transferOwnership(address(this));
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamRevenueResolver.InvalidPrimaryArtistRegistry.selector, address(0)

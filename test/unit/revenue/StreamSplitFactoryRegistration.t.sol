@@ -244,8 +244,17 @@ contract StreamSplitFactoryRegistrationTest is RevenueV1TestBase, OfficialSafeFi
         RevenueResolverCoreMock core = new RevenueResolverCoreMock();
         RevenueResolverArtistMock artist = new RevenueResolverArtistMock(address(core));
         core.selectArtist(address(artist), address(artist).codehash);
-        StreamRevenueResolver resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artist);
+        StreamRevenueResolver resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artist,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         (bytes32 id,) = factory.registerProfile(_single(), bytes32(uint256(6)));
         bytes32 revenueClass = keccak256("PRIMARY_SALE");
         vm.expectRevert(

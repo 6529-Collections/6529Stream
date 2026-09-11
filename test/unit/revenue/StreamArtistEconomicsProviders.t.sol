@@ -122,8 +122,17 @@ contract StreamArtistEconomicsProvidersTest is RevenueV1TestBase {
             address(_revenueAuthority()),
             _walletGasConfigs()
         );
-        primary =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        primary = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        primary.transferOwnership(address(this));
         royalty =
             new StreamRoyaltyResolver(IStreamCore(address(core)), factory, address(this), artists);
         first = _profile(address(0xA11CE));

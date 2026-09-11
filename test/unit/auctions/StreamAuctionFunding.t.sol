@@ -61,8 +61,17 @@ contract StreamAuctionFundingTest is RevenueV1TestBase, OfficialSafeFixture {
         core.setManager(address(manager));
         artists = new SaleFundingArtistMock(address(core));
         core.selectArtist(address(artists), address(artists).codehash);
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 1_000_000, keccak256("artist"));
         (profile, wallet) = factory.createProfile(entries, keccak256("auction profile"));
@@ -450,8 +459,17 @@ contract StreamAuctionFundingTest is RevenueV1TestBase, OfficialSafeFixture {
         platform = address(safe);
         artists = new SaleFundingArtistMock(address(core));
         core.selectArtist(address(artists), address(artists).codehash);
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](1);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 1_000_000, keccak256("Safe artist"));
         (profile, wallet) = factory.createProfile(entries, keccak256("Safe auction"));

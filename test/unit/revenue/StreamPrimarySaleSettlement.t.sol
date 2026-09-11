@@ -88,8 +88,17 @@ contract StreamPrimarySaleSettlementTest is RevenueV1TestBase {
         core.selectArtist(address(artists), address(artists).codehash);
         core.setToken(9001, 42, false);
         core.setToken(77, 9, false);
-        resolver =
-            new StreamRevenueResolver(IStreamCore(address(core)), factory, address(this), artists);
+        resolver = new StreamRevenueResolver(
+            IStreamCore(address(core)),
+            factory,
+            address(revenueAuthority),
+            artists,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARTIST_BENEFICIARY_READ_GAS", 200_000, 50_000, 2
+            )
+        );
+        vm.prank(address(revenueAuthority));
+        resolver.transferOwnership(address(this));
         settlement = new StreamPrimarySaleSettlement(resolver);
         settlement.setSettlementCaller(SETTLEMENT_CALLER, true);
     }
