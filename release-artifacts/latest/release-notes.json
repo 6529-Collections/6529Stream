@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b7a185f518c946f9a6140ddb3c5fc9356216b590d856fca81b59dae6c8f928a0",
-      "size_bytes": 170056
+      "sha256": "sha256:591281c21f7bff4b73d0a40e08901118bd2518f790574503640da52dd31ebfe3",
+      "size_bytes": 170205
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -59,6 +59,7 @@
       "Integrated the current Core with signed native fixed-price sales, English auctions, canonical mint accounting, immutable split wallets and royalty resolution. Sales and auctions require the accepted collection artist and platform to sign the exact transaction terms.",
       "Added collection artist nomination and relayed acceptance, a current entropy coordinator with a VRF v2.5 adapter, and metadata rendering from the token's original coordinator. Wider artist lifecycle and payment modes remain future work.",
       "Added committed one-time genesis initialization, real system discovery and current-stack tests covering paid mint, auction custody/refunds, withdrawals, metadata, transfer/burn, receiver rollback and delayed governance rotation. Normal governance delays remain after genesis. The current Sepolia instance completes the real randomness callback and native demonstration; earlier prototype records retain their historical source and deployment identity.",
+      "Compare client commitment and receipt hashes by their hexadecimal bytes so equivalent letter casing does not reject a valid purchase or auction.",
       "Order resumed scenario authorizations by contract ABI fields across supported PowerShell versions, and check current auction terms before wallet prompts.",
       "Report local snapshot and collector-package errors clearly, and keep campaign lock conflicts from creating empty output directories.",
       "Build the client before Windows operator tests and avoid retaining checkout credentials in the client CI job.",
