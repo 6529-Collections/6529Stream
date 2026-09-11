@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | `TBD` |
 | Next issue | `TBD` |
-| Source checkpoint | `bcb43e06` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | `3f6a5dd4` (active integration); RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -30,8 +30,8 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Current-stack composition, remaining unit fixtures, operator onboarding, client/signing migration, CI and release |
-| Artist | `codex/v1-artist-authority` | Content consent and defensive freeze handoff, then remaining identity and authority operations |
-| Revenue | `codex/v1-revenue` | Actual shared settlement and permit consumers, then missing sale mechanisms |
+| Artist | `codex/v1-artist-authority` | Guardian configuration and two-sided principal rotation (operations 28–32) |
+| Revenue | `codex/v1-revenue` | Native shared settlement and template consumer; canonical ERC-20 mint authorization correction |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
@@ -41,14 +41,23 @@ integration source to 15 of the 57 artist operation IDs. Revocation operation 54
 is integrated as `6a0f5a4f`; content-authority operations 17 and 21 are integrated
 as `bcb43e06`, bringing the source count to 18. Their 96-case domain suite and
 exact production artifacts received independent review. The metadata counterpart
-is committed separately as `f73882e0`; actual composition tests are running.
+is committed separately as `f73882e0`. Actual composition (`af37d8ed`) passes
+seven tests: two content workflows and five Safe workflows, including real
+minting and template settlement. Independent review binds the captured inputs
+and all 209 relevant artifacts. Identity revision operation 25 (`3f6a5dd4`)
+brings the source count to 19. Its 109 tests, preserved interface/storage
+prefixes and 30 production artifacts received independent review; its current
+composition remains part of the next integration run.
 
 Collection template materialization and typed economics facts are integrated.
 Template fixed-sale funding (`ddf01864`) passed 76 focused tests and four fuzz
 properties per compiler mode. Governed asset permit-capability attestations
 (`3287fcd5`) passed 13 tests plus fuzzing per mode. These increments received
-independent review. Revenue work now implements actual shared settlement and
-permit consumers; registry capability declarations alone do not complete them.
+independent review. Shared settlement, the ERC-20 payer adapter and signed
+fixed-profile consumer are integrated as `18dbe54c`. Their 29 tests plus 256 fuzz
+inputs pass with independent source/artifact review. Current-Core composition is
+being built separately. Native official settlement and other orchestration
+profiles remain open; the payment builder is implementing the native branch.
 
 The completed combined snapshot passed 36 cases, including all nine ERC-20 and
 22 native-sale/auction cases. Two failures were an incorrect Safe event-layout
@@ -71,23 +80,29 @@ These planning gas allowances do not establish normative cold-gas acceptance.
 The metadata host counterpart for artist content consent and defensive freezes
 passes 30 domain tests, including actual Safe administration and a separate Safe
 freeze relayer. One-use approval records, exact content evolution and versioned
-events are independently reviewed. Actual modular artist authorization and
-executed-finality composition remain pending; no substitute readiness provider
-was added. The source export/client projection still requires migration.
+events are independently reviewed. Actual modular artist composition now passes
+the separate seven-case current run. Executed-finality composition and the
+source export/client projection still require implementation and migration.
 
 The saved artist-authority activation plan publishes calldata and checks exact
 commitments, submission headroom, resumption and prior execution. Operator
 onboarding, phase completion and final Manager ownership handoff still need a
-complete resumable consumer. The client now prepares exact Safe CALL payloads
+complete resumable consumer. A proposed immediate genesis activation failed
+three actual tests because the bootstrap actor cannot propose final-root role
+mutations. That prototype is withdrawn; the same snapshot's five existing Safe
+cases pass. The accepted delayed activation and production guards are retained.
+The client prepares exact Safe CALL payloads
 and checks the expected Safe execution result. Its ABI/signing projection still
 targets retained RC1; migration to the new stack remains explicit work.
 
 Independently accepted fixture migration checkpoints include 58 historical
 Manager/manifest, six flat-attribution, 16 ERC-20 adapter and 75 resolver/factory/
 auction domain tests. The royalty fixture now uses actual current artist consent
-and canonical governance publication. The latest ABI-only check covers 443
-Solidity sources with no errors before the content-owner integration; the latest
-check includes 446 sources without errors. This is not a broad build or candidate
+and canonical governance publication. Five preserved resolver tests (`f803f482`)
+replace the old fixture's still-supported resolver assertions; the obsolete
+settlement API is retired. The latest ABI-only check covers 470 Solidity sources,
+including work-in-progress universal current-stack tests, with zero
+errors. This is not a broad build or candidate
 acceptance. Client checks pass 47 tests; three new tests also
 exercise successful and failed calls through actual pinned Safe versions.
 

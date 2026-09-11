@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added operative artist identity document revisions with immutable registration
+  and binding history, exact document-hash personhood matching, and preserved
+  existing consent records. Current-stack composition remains in progress.
 - Added the shared official revenue recorder, sole ERC-20 payer adapter and a
   signed fixed-profile sale consumer, including governed EIP-2612/Permit2 paths,
   exact settlement events, replay protection and Safe domain tests. Current-Core

@@ -108,7 +108,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
 | PAY-02 | Signed release/revocation and specified deprecated-asset exits preserve owed funds and nonce rules | Revenue; existing wallet/asset policy | Building: source integrated as `6d2074fb`; 121 focused tests per compiler profile; combined current-stack acceptance pending |
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
-| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: native/ERC-20 fixed-sale funding adoption first; universal settlement and permit branches remain pending |
+| PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; current-Core composition, canonical mint-authorization correction, native and broader orchestration pending |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Queued |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
@@ -286,8 +286,10 @@ properties per mode). Governed permit-capability attestations are integrated as
 increments. Revocation operation 54 is integrated as `6a0f5a4f`, bringing the
 source to 16 operation IDs. Content consent/freeze operations 17 and 21 are
 integrated as `bcb43e06`, bringing the source to 18; 96 domain tests and exact
-production artifacts received independent review. Revenue work continues with
-shared settlement and actual permit consumers.
+production artifacts received independent review. Identity revision operation 25
+is integrated as `3f6a5dd4`, bringing the source count to 19; its 109 tests and
+30 production artifacts are independently accepted. Guardian configuration and
+two-sided principal rotation are the next artist increment.
 
 Root's completed combined snapshot passed 36 cases: all nine ERC-20 and all 22
 native-sale/auction unit cases passed. One new Safe test asserted the wrong event
@@ -315,7 +317,8 @@ Its independently reviewed 30-case domain suite covers replay/staleness, exact
 events, BASE_URI combined-setter closure, actual Safe administration and a
 separate Safe freeze relayer. It uses an explicit artist authorization boundary;
 actual artist operations 17/21 are now source-integrated, with two actual-current
-content/mint workflows and the five existing Safe cases running together. The
+content/mint workflows and the five existing Safe cases now passing together,
+independently reviewed against the exact `af37d8ed` inputs and artifacts. The
 executed-finality provider remains pending. The two narrow content-authority
 interfaces are integrated as `8b1a048b`.
 
@@ -328,8 +331,17 @@ Migration checkpoints independently accepted during this integration:
 - 75 resolver/factory/auction domain cases with governed constructor authority.
 
 The royalty suite now uses actual current artist consent and canonical governance
-publication. The latest whole-repository ABI-only check covers 446 Solidity
-sources with zero errors. Broad compilation and candidate
+publication. Five preserved resolver tests pass independently after retirement of
+the uninstalled foundation settlement API (`f803f482`). The universal recorder,
+sole ERC-20 payer adapter and signed fixed-profile consumer (`18dbe54c`) pass 29
+domain tests plus 256 fuzz inputs with independent review. Actual Core/Manager/
+artist composition is being built; native official settlement is the next payment
+slice. A separate correction will bind the ERC-20 Manager authorization ID to the
+full signed message digest required by MPA-TICKET. Existing replay tests do not
+establish that normative digest derivation.
+
+The latest whole-repository ABI-only check covers 470 Solidity sources with zero
+errors, including work-in-progress universal integration tests. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
@@ -339,7 +351,11 @@ failure receipts with threshold signatures. Its generated contract ABIs and sign
 payloads still target retained RC1; the documentation makes that boundary explicit.
 This helper work does not complete the full Safe selector acceptance matrix.
 
-The exact saved artist-activation plan is implemented; the operator onboarding,
+The exact saved artist-activation plan is implemented. A proposed immediate
+genesis version failed three execution tests at the required final-root proposer
+check; it is withdrawn without changing production authorization. That snapshot's
+five existing Safe cases still pass. Delayed activation remains the supported
+operator path. The operator onboarding,
 phase-consent and final Manager handoff consumer remains to be built. Complete
 ABI/client migration, metadata, entropy, finality, recovery, new sale mechanisms
 and every other ledger row remain in scope. No new candidate is claimed.
