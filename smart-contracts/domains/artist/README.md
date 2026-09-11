@@ -7,8 +7,8 @@ remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, no collaborators
 or capability overrides, and operator-set sale parameters. Operations 1, 2, 14,
-15, 18, 20, 24, and 52 have typed entrypoints. The full 57-operation API is not
-advertised, and this implementation does not provide recovery, delegation,
+15, 18, 20, 24, 26, 27, and 52 have typed entrypoints. The full 57-operation API is not
+advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
 finality operations.
 
@@ -21,12 +21,20 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Accepted attribution for metadata and other readers | `IStreamArtistAttribution` |
 | Existing content ratification | `IStreamArtistContentRatification` |
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
+| Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
 | Immutable owner identity, snapshot, and replay cell | `IStreamArtistOwner` |
 | Each domain's typed reads and coordinator-only writes | The seven `IStreamArtist*Owner` interfaces |
 
 `StreamArtistOnboardingTypes` owns the shared payloads. The `Authorization.time`
 field is a deadline for acceptance, policy, economics, royalty freeze, and ratification; it is
-the signed timestamp for payout and attestations. These ABI tuples preserve the
+the signed timestamp for payout and attestations. Direct payout/attestation calls
+can set it to zero to record the eventual inclusion timestamp, so a queued Safe
+transaction need not predict its execution time. This convention applies only
+when the original caller is the artist and the signature is empty; signed relays,
+including approved-empty Safe relays, retain their signed timestamp. Archive
+evidence preserves both the submitted zero and the effective authorization.
+Delegation grants require time zero because their payload signs its validity
+window and nonce. These ABI tuples preserve the
 specified EIP712 field order inside each digest. The EIP712 name is
 `6529StreamArtistRegistry`, version `1`.
 
@@ -69,6 +77,43 @@ hash, so minting still requires separate consent to the resulting frozen state.
 Neither this record nor prospective consent substitutes for governance on
 ordinary assignment changes. `StreamArtistEconomicsHashes` is a linked pure
 hashing library; authorization and replay storage remain in their domain owners.
+
+The artist can grant a delegate `CAP_ECONOMICS_CONSENT` (4),
+`CAP_ROYALTY_FREEZE` (32), or both. Every other capability is currently rejected,
+including the permanently nondelegable payout and identity powers. A grant can
+cover one collection or all collections belonging to that artist identity.
+Only one unexpired, unrevoked and unexhausted grant per artist/delegate pair is
+admitted; a future grant reserves that pair too. `notBefore` is inclusive and
+`expiresAt` exclusive. `maxUses = 0` is unlimited only within that finite window;
+the read returns `uint64.max` for its remaining-use sentinel. `constraintsHash`
+records narrative constraints, not additional executable restrictions.
+
+The grant's `active` read describes its time window, revocation and use limit.
+Every actual action also checks the accepted artist binding, collection scope
+and capability. Only the original stored grantor can revoke. Revocation blocks
+future actions and preserves already recorded consent/freeze authorizations.
+Each successful delegated record stores `AUTH_DELEGATE` and an exact grant
+witness, readable with `recordDelegation`; its event supplies the same witness.
+Delegation never changes the artist's payout or substitutes for governance on
+ordinary resolver mutations.
+
+Delegate nonces have a separate persistent artist/delegate lane. Replacement
+grants cannot reset used nonces or the bounded allocator. The permanent action
+digest does not include a grant ID, so an unused, still-valid action signature
+can be submitted under a later matching grant. Every successful use advances
+the counter atomically with the Identity replay cell, Consent record and Archive
+append. A later failure rolls them all back. Delegated actions do not advance
+the artist's liveness timestamp or consume the artist's nonce lane. Automatic
+revocation on succession/dormancy remains a required seam before those future
+operations can be enabled.
+
+`StreamArtistIdentityState` and `StreamArtistDelegationState` are linked storage
+helpers operating on the Identity owner's original and appended slots.
+Identity retains its typed Coordinator/snapshot guards and the single semantic
+commit. `StreamArtistEconomicOperations` is a linked stateless recipe helper;
+the Coordinator keeps facade authentication, immutable target checks and its
+reentrancy lock. These helpers are deployment dependencies, not additional
+semantic owners or public protocol ingress points.
 
 Policy consent can be recorded before Manager registration. Use
 `IStreamMintReads.previewPhasePolicyHash` with the intended executor set. Manager

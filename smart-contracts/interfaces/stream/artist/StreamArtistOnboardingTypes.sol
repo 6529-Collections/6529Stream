@@ -79,7 +79,8 @@ library StreamArtistOnboardingTypes {
     }
 
     /// @dev time is deadline for acceptance/policy/economics/ratification, signedAt
-    ///      for payout/attestation. Each typed endpoint fixes its meaning.
+    ///      for payout/attestation. Direct payout/attestation may use zero to request
+    ///      the observed inclusion timestamp; relayed signed payloads cannot use that sentinel.
     struct Authorization {
         uint256 nonce;
         uint64 time;

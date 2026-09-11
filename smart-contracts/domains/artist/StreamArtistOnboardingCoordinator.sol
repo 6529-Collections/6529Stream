@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistEconomicOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistDelegationCoordinator.sol";
 
 import "./StreamArtistOnboardingReads.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorOwner.sol";
@@ -22,8 +24,11 @@ import {
 /// @dev No generic route, semantic record or nonce lives here. Only the operation lock mutates.
 contract StreamArtistOnboardingCoordinator is
     IStreamArtistOnboardingCoordinator,
-    IStreamArtistEconomicsCoordinator
+    IStreamArtistEconomicsCoordinator,
+    IStreamArtistDelegationCoordinator
 {
+    /// @notice A required artist fact is absent; retained for errors propagated by linked recipes.
+    error MissingMintPrerequisite(bytes32 prerequisite);
     T.SuiteConfiguration private _suite;
     address[16] private _targets;
     bytes32[16] private _runtimeHashes;
@@ -103,6 +108,8 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(18),
                 uint16(20),
                 uint16(24),
+                uint16(26),
+                uint16(27),
                 uint16(52)
             )
         );
@@ -234,21 +241,10 @@ contract StreamArtistOnboardingCoordinator is
         address actor,
         T.EconomicsConsent calldata p,
         T.Authorization calldata a
-    ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(15);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        (T.AssignmentFact memory primary, T.AssignmentFact memory royalty) =
-            reads.currentAssignments(p.collectionId);
-        T.AssignmentFact memory expected = p.resolver == primary.resolver ? primary : royalty;
-        if (
-            p.resolver != expected.resolver || p.revenueClass != expected.revenueClass
-                || p.scope != expected.scope || p.scopeId != expected.scopeId
-                || p.assignmentHash != expected.assignmentHash
-        ) revert T.InvalidRecord();
-        T.Payout memory payout = _payout(b.artistId);
-        reads.requireStaticArtistPayout(p.collectionId, p.resolver, payout.account);
-        return _recordEconomics(actor, b, p, payout, a, before_, "");
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.economicsCurrent(
+            _economicContext(), actor, p, bytes32(0), a
+        );
     }
 
     function coordinateRecordProspectiveEconomicsConsent(
@@ -257,70 +253,72 @@ contract StreamArtistOnboardingCoordinator is
         T.FixedEconomicsCandidate calldata candidate,
         T.Authorization calldata a
     ) external operation returns (bytes32) {
-        T.Snapshot[7] memory before_ = _snapshots(15);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        T.Payout memory payout = _payout(b.artistId);
-        T.AssignmentFact memory actual =
-            reads.requireProspectiveEconomics(p, candidate, payout.account);
-        return _recordEconomics(actor, b, p, payout, a, before_, abi.encode(candidate, actual));
-    }
-
-    function _payout(bytes32 artistId) private view returns (T.Payout memory payout) {
-        (payout.account, payout.recordHash) =
-            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
-        if (payout.account == address(0) || payout.recordHash == bytes32(0)) {
-            revert T.MissingMintPrerequisite(keccak256("payout"));
-        }
-    }
-
-    function _recordEconomics(
-        address actor,
-        T.Binding memory b,
-        T.EconomicsConsent calldata p,
-        T.Payout memory payout,
-        T.Authorization calldata a,
-        T.Snapshot[7] memory before_,
-        bytes memory candidateEvidence
-    ) private returns (bytes32 record) {
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
-            a.signature
+        return StreamArtistEconomicOperations.economicsProspective(
+            _economicContext(), actor, p, candidate, bytes32(0), a
         );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeEconomics(_context(15, actor, before_[2]), b, p, payout.recordHash, a, proof);
-        bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
-            .recordEconomics(_context(15, actor, before_[6]), b, p, payout, proof.signer, a.nonce);
-        if (actual != record) revert T.InvalidRecord();
-        bytes memory payload = candidateEvidence.length == 0
-            ? abi.encode(b, p, payout, a, proof)
-            : abi.encode(b, p, payout, a, proof, candidateEvidence);
-        _archive(15, actor, record, before_, payload);
     }
 
     function coordinateAuthorizeArtistRoyaltyFreeze(
         address actor,
         T.RoyaltyFreeze calldata p,
         T.Authorization calldata a
-    ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(20);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        reads.requireRoyaltyFreezeProposal(p);
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
-            a.signature
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.freeze(_economicContext(), actor, p, bytes32(0), a);
+    }
+
+    function coordinateGrantArtistDelegation(
+        address actor,
+        D.Grant calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.grant(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRevokeArtistDelegation(
+        address actor,
+        D.Revocation calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistEconomicOperations.revoke(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRecordDelegatedEconomicsConsent(
+        address actor,
+        T.EconomicsConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        if (grant == bytes32(0)) revert D.InvalidDelegation(grant);
+        return StreamArtistEconomicOperations.economicsCurrent(
+            _economicContext(), actor, p, grant, a
         );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeRoyaltyFreeze(_context(20, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
-            .authorizeRoyaltyFreeze(_context(20, actor, before_[6]), b, p, proof.signer, a.nonce);
-        if (actual != record) revert T.InvalidRecord();
-        _archive(20, actor, record, before_, abi.encode(b, p, a, proof));
+    }
+
+    function coordinateRecordDelegatedProspectiveEconomicsConsent(
+        address actor,
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        if (grant == bytes32(0)) revert D.InvalidDelegation(grant);
+        return StreamArtistEconomicOperations.economicsProspective(
+            _economicContext(), actor, p, candidate, grant, a
+        );
+    }
+
+    function coordinateAuthorizeDelegatedRoyaltyFreeze(
+        address actor,
+        T.RoyaltyFreeze calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        if (grant == bytes32(0)) revert D.InvalidDelegation(grant);
+        return StreamArtistEconomicOperations.freeze(_economicContext(), actor, p, grant, a);
+    }
+
+    function _economicContext() private view returns (D.CoordinatorContext memory) {
+        return D.CoordinatorContext(_suite, address(reads), configurationHash);
     }
 
     function coordinateRecordPayoutDesignation(
@@ -330,18 +328,27 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32 record) {
         T.Snapshot[7] memory before_ = _snapshots(18);
         T.Identity memory artist = IStreamArtistIdentityOwner(_suite.owners[2]).identity(p.artistId);
+        T.Authorization memory effective = _directObservedTime(actor, artist.authorityAddress, a);
         T.SignerApproval memory proof = _verify(
             actor,
             artist.authorityAddress,
-            StreamArtistHashes.payoutDigest(_environment(), p, a),
-            a.signature
+            StreamArtistHashes.payoutDigest(_environment(), p, effective),
+            effective.signature
         );
         record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumePayout(_context(18, actor, before_[2]), p, a, proof);
+            .consumePayout(_context(18, actor, before_[2]), p, effective, proof);
         bytes32 actual = IStreamArtistPayoutOwner(_suite.owners[5])
-            .recordDesignation(_context(18, actor, before_[5]), p, proof.signer, a.nonce, a.time);
+            .recordDesignation(
+                _context(18, actor, before_[5]), p, proof.signer, effective.nonce, effective.time
+            );
         if (actual != record) revert T.InvalidRecord();
-        _archive(18, actor, record, before_, abi.encode(p, a, proof));
+        _archive(
+            18,
+            actor,
+            record,
+            before_,
+            a.time == effective.time ? abi.encode(p, a, proof) : abi.encode(p, a, proof, effective)
+        );
     }
 
     function coordinateRecordArtistAttestation(
@@ -353,20 +360,35 @@ contract StreamArtistOnboardingCoordinator is
         T.Snapshot[7] memory before_ = _snapshots(24);
         T.Binding memory b = reads.acceptedBinding(p.collectionId);
         _collection(p.collectionId);
+        T.Authorization memory effective = _directObservedTime(actor, b.artistAddress, a);
         T.SignerApproval memory proof = _verify(
             actor,
             b.artistAddress,
-            StreamArtistHashes.attestationDigest(_environment(), p, a),
-            a.signature
+            StreamArtistHashes.attestationDigest(_environment(), p, effective),
+            effective.signature
         );
         record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeAttestation(_context(24, actor, before_[2]), b, p, a, proof);
+            .consumeAttestation(_context(24, actor, before_[2]), b, p, effective, proof);
         bytes32 actual = IStreamArtistAttributionOwner(_suite.owners[4])
             .recordAttestation(
-                _context(24, actor, before_[4]), b, p, proof.signer, a.nonce, a.time, statement
+                _context(24, actor, before_[4]),
+                b,
+                p,
+                proof.signer,
+                effective.nonce,
+                effective.time,
+                statement
             );
         if (actual != record) revert T.InvalidRecord();
-        _archive(24, actor, record, before_, abi.encode(b, p, a, statement, proof));
+        _archive(
+            24,
+            actor,
+            record,
+            before_,
+            a.time == effective.time
+                ? abi.encode(b, p, a, statement, proof)
+                : abi.encode(b, p, a, statement, proof, effective)
+        );
     }
 
     function coordinateRecordContentRatification(
@@ -395,7 +417,22 @@ contract StreamArtistOnboardingCoordinator is
         _archive(52, actor, record, before_, abi.encode(b, p, a, proof));
     }
 
-    function _verify(address actor, address signer, bytes32 digest, bytes calldata signature)
+    function _directObservedTime(address actor, address signer, T.Authorization calldata submitted)
+        private
+        view
+        returns (T.Authorization memory effective)
+    {
+        effective = submitted;
+        if (
+            actor == signer && actor != address(0) && submitted.signature.length == 0
+                && submitted.time == 0
+        ) {
+            if (block.timestamp > type(uint64).max) revert T.InvalidRecord();
+            effective.time = uint64(block.timestamp);
+        }
+    }
+
+    function _verify(address actor, address signer, bytes32 digest, bytes memory signature)
         private
         view
         returns (T.SignerApproval memory proof)

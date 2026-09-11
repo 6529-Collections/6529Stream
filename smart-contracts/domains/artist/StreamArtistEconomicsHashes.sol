@@ -10,6 +10,63 @@ import {
 /// @dev The explicit environment is the pinned registry identity, never this linked library.
 ///      No authorization, nonce, owner storage or caller-dependent behavior lives here.
 library StreamArtistEconomicsHashes {
+    function economicsRecordForAuthority(
+        StreamArtistHashes.Environment memory e,
+        T.EconomicsConsent memory p,
+        bytes32 designation,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                p.resolver,
+                p.revenueClass,
+                p.scope,
+                p.scopeId,
+                p.assignmentHash,
+                designation,
+                artistId,
+                signer,
+                authorityClass,
+                nonce,
+                signedAt
+            )
+        );
+    }
+
+    function royaltyFreezeRecordForAuthority(
+        StreamArtistHashes.Environment memory e,
+        T.RoyaltyFreeze memory p,
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint256 nonce,
+        uint64 signedAt
+    ) public pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1"),
+                e.chainId,
+                e.registry,
+                p.resolver,
+                p.collectionId,
+                p.revenueClass,
+                p.expectedAssignmentHash,
+                artistId,
+                signer,
+                authorityClass,
+                nonce,
+                signedAt
+            )
+        );
+    }
+
     function economicsDigest(
         StreamArtistHashes.Environment memory e,
         T.EconomicsConsent memory p,

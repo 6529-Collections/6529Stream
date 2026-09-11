@@ -185,6 +185,761 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     uint256 private nextNonce;
     bool private directArtistCalls;
 
+    function _directTimeExercise(bool useSafe) private {
+        address account = useSafe ? address(artist) : vm.addr(0xE0A123);
+        uint256 collectionId = useSafe ? 1 : 2;
+        if (useSafe) {
+            _accept();
+        } else {
+            T.BindingProposal memory proposal = _proposal(bytes32(0));
+            proposal.artistAddress = account;
+            (artistId,) = ingress.proposeArtistBinding(
+                2, proposal, bytes("unit identity document"), "Artist Safe"
+            );
+            vm.prank(account);
+            ingress.acceptArtistBinding(2, T.Authorization(0, 2000, ""));
+        }
+        T.PayoutDesignation memory payout = T.PayoutDesignation(artistId, account, bytes32(0));
+        T.Authorization memory prepared = T.Authorization(1, 0, "");
+        bytes memory data =
+            abi.encodeCall(IStreamArtistOnboarding.recordPayoutDesignation, (payout, prepared));
+        vm.warp(1010);
+        if (useSafe) {
+            require(executeSafe(artist, keys, address(ingress), 0, data, 0), "queued Safe payout");
+        } else {
+            vm.prank(account);
+            (bool ok,) = address(ingress).call(data);
+            require(ok, "queued EOA payout");
+        }
+        (, bytes32 record) = ingress.artistPayoutAccount(artistId);
+        require(
+            record
+                == StreamArtistHashes.payoutRecord(
+                    StreamArtistHashes.Environment(
+                        block.chainid, address(ingress), suite.core, suite.mintManager
+                    ),
+                    payout,
+                    account,
+                    1,
+                    1010
+                ),
+            "payout uses inclusion timestamp"
+        );
+        bytes memory payload = _operationPayload(18, account, record);
+        (
+            ,
+            T.Authorization memory submitted,
+            T.SignerApproval memory proof,
+            T.Authorization memory effective
+        ) = abi.decode(
+            payload, (T.PayoutDesignation, T.Authorization, T.SignerApproval, T.Authorization)
+        );
+        require(
+            submitted.time == 0 && effective.time == 1010 && proof.direct
+                && proof.digest == ingress.payoutDesignationDigest(payout, effective),
+            "archive preserves submitted sentinel and canonical authorization"
+        );
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(collectionId);
+        bytes memory statement = bytes("explicit personhood waiver");
+        T.Attestation memory attestation = T.Attestation(
+            collectionId,
+            10,
+            artistId,
+            b.identityRecordHash,
+            keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1"),
+            keccak256(statement),
+            "urn:queued:waiver"
+        );
+        prepared.nonce = 2;
+        data = abi.encodeCall(
+            IStreamArtistOnboarding.recordArtistAttestation, (attestation, prepared, statement)
+        );
+        vm.warp(1020);
+        if (useSafe) {
+            require(
+                executeSafe(artist, keys, address(ingress), 0, data, 0), "queued Safe attestation"
+            );
+        } else {
+            vm.prank(account);
+            (bool ok,) = address(ingress).call(data);
+            require(ok, "queued EOA attestation");
+        }
+        T.AttestationRecord memory actual =
+            IStreamArtistAttributionOwner(suite.owners[4]).attestation(collectionId, 10, artistId);
+        require(
+            actual.signedAt == 1020 && actual.signer == account,
+            "attestation observed inclusion time"
+        );
+        payload = _operationPayload(24, account, actual.recordHash);
+        (,, submitted,, proof, effective) = abi.decode(
+            payload,
+            (T.Binding, T.Attestation, T.Authorization, bytes, T.SignerApproval, T.Authorization)
+        );
+        require(
+            submitted.time == 0 && effective.time == 1020 && proof.direct
+                && proof.digest == ingress.attestationDigest(attestation, effective),
+            "attestation exact archive normalization"
+        );
+    }
+
+    function _operationPayload(uint16 op, address actor, bytes32 record)
+        private
+        view
+        returns (bytes memory payload)
+    {
+        bytes32 id = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                op,
+                actor,
+                record
+            )
+        );
+        (,,,,,,, payload) = abi.decode(
+            archive.artistEvidenceBytesV2(id, 1),
+            (uint16, bytes32, uint16, address, bytes32, T.Snapshot[7], T.Snapshot[7], bytes)
+        );
+    }
+
+    function testQueuedDirectSafePayoutAndAttestationObserveInclusionTime() public {
+        _directTimeExercise(true);
+    }
+
+    function testQueuedDirectEoaPayoutAndAttestationObserveInclusionTime() public {
+        _directTimeExercise(false);
+    }
+
+    function testObservedTimeSentinelNeverAppliesToRelayedApprovedEmptySafeProof() public {
+        _accept();
+        T.PayoutDesignation memory p = T.PayoutDesignation(artistId, address(artist), bytes32(0));
+        T.Authorization memory a = T.Authorization(nextNonce, 0, "");
+        _approveMessage(ingress.payoutDesignationDigest(p, a));
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidTimestamp.selector, uint64(0)));
+        ingress.recordPayoutDesignation(p, a);
+        require(_roots() == before_, "relayed zero signedAt is not direct sentinel");
+        a.time = uint64(block.timestamp + 100);
+        a.signature = _signature(ingress.payoutDesignationDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidTimestamp.selector, a.time));
+        ingress.recordPayoutDesignation(p, a);
+        a.time = 900;
+        a.signature = _signature(ingress.payoutDesignationDigest(p, a));
+        bytes32 digest = ingress.payoutDesignationDigest(p, a);
+        bytes32 record = ingress.recordPayoutDesignation(p, a);
+        (, T.Authorization memory submitted, T.SignerApproval memory proof) = abi.decode(
+            _operationPayload(18, address(this), record),
+            (T.PayoutDesignation, T.Authorization, T.SignerApproval)
+        );
+        require(
+            submitted.time == 900 && proof.digest == digest && !proof.direct,
+            "signed relay time/digest unchanged"
+        );
+    }
+    OfficialSafe private delegateSafe;
+    uint256[] private delegateKeys;
+
+    function _delegateSetup() private {
+        delegateKeys = new uint256[](2);
+        delegateKeys[0] = 0xDE1;
+        delegateKeys[1] = 0xDE2;
+        delegateSafe = createOfficialSafe(safeComponents, safeOwnerAddresses(delegateKeys), 2, 29);
+    }
+
+    function _delegation(uint256 scope, uint32 caps, uint64 start, uint64 expiry, uint64 uses)
+        private
+        view
+        returns (D.Grant memory)
+    {
+        return D.Grant(
+            artistId,
+            address(delegateSafe),
+            scope,
+            caps,
+            start,
+            expiry,
+            uses,
+            keccak256("narrative evidence only")
+        );
+    }
+
+    function _grant(D.Grant memory p) private returns (bytes32 record) {
+        T.Authorization memory a = _authorization(false);
+        a.time = 0;
+        a.signature = _signature(ingress.delegationGrantDigest(p, a));
+        if (directArtistCalls) {
+            _artistCall(abi.encodeCall(IStreamArtistDelegation.grantArtistDelegation, (p, a)));
+            record = _grantRecord(p, a.nonce);
+        } else {
+            record = ingress.grantArtistDelegation(p, a);
+        }
+        require(record == _grantRecord(p, a.nonce), "canonical grant record");
+    }
+
+    function _grantRecord(D.Grant memory p, uint256 nonce) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_DELEGATION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                p.artistId,
+                p.delegate,
+                p.collectionId,
+                p.capabilities,
+                p.notBefore,
+                p.expiresAt,
+                p.maxUses,
+                p.constraintsHash,
+                nonce
+            )
+        );
+    }
+
+    function _revoke(bytes32 record) private returns (bytes32 revoked) {
+        D.Revocation memory p =
+            D.Revocation(artistId, address(delegateSafe), record, keccak256("artist revocation"));
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.delegationRevocationDigest(p, a));
+        if (directArtistCalls) {
+            _artistCall(abi.encodeCall(IStreamArtistDelegation.revokeArtistDelegation, (p, a)));
+        } else {
+            revoked = ingress.revokeArtistDelegation(p, a);
+        }
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_DELEGATION_REVOCATION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                address(delegateSafe),
+                record,
+                address(artist),
+                uint8(1),
+                p.reasonHash,
+                a.nonce,
+                uint64(block.timestamp)
+            )
+        );
+        if (directArtistCalls) revoked = ingress.delegationRecord(record).revocationRecordHash;
+        require(revoked == expected, "canonical revocation record");
+    }
+
+    function _delegateSignature(bytes32 digest) private returns (bytes memory) {
+        return
+            safeThresholdSignature(
+                delegateKeys, safeMessageDigest(delegateSafe, abi.encode(digest))
+            );
+    }
+
+    function _currentEconomics(address resolver)
+        private
+        view
+        returns (T.EconomicsConsent memory p)
+    {
+        (T.AssignmentFact memory first, T.AssignmentFact memory second) =
+            coordinator.reads().currentAssignments(1);
+        T.AssignmentFact memory fact = resolver == first.resolver ? first : second;
+        return T.EconomicsConsent(
+            1, fact.resolver, fact.revenueClass, fact.scope, fact.scopeId, fact.assignmentHash
+        );
+    }
+
+    function _delegateEconomics(T.EconomicsConsent memory p, bytes32 grant, uint256 nonce)
+        private
+        returns (bytes32)
+    {
+        T.Authorization memory a = T.Authorization(nonce, uint64(block.timestamp + 1 days), "");
+        a.signature = _delegateSignature(ingress.economicsConsentDigest(p, a));
+        return ingress.recordDelegatedEconomicsConsent(p, grant, a);
+    }
+
+    function executeDelegate(address target, bytes calldata data) external returns (bool) {
+        require(msg.sender == address(this), "test only");
+        return executeSafe(delegateSafe, delegateKeys, target, 0, data, 0);
+    }
+
+    /// @dev Encloses digest/provider reads so expectRevert observes the actual failed operation.
+    function relayDelegateEconomics(address resolver, bytes32 grant, uint256 nonce)
+        external
+        returns (bytes32)
+    {
+        require(msg.sender == address(this), "test only");
+        return _delegateEconomics(_currentEconomics(resolver), grant, nonce);
+    }
+
+    function testDelegationSafeGrantCurrentEconomicsHasCanonicalClassAndIndependentReplay() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 36, 1000, 2000, 3));
+        T.Identity memory prior = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        vm.warp(1001);
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        bytes32 record = _delegateEconomics(p, grant, 0);
+        (, bytes32 designation) = ingress.artistPayoutAccount(artistId);
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1"),
+                        block.chainid,
+                        address(ingress),
+                        p.resolver,
+                        p.revenueClass,
+                        p.scope,
+                        p.scopeId,
+                        p.assignmentHash,
+                        designation,
+                        artistId,
+                        address(delegateSafe),
+                        uint8(2),
+                        uint256(0),
+                        uint64(block.timestamp)
+                    )
+                ),
+            "delegated canonical record"
+        );
+        require(
+            ingress.recordDelegation(record) == grant && ingress.delegationRecord(grant).uses == 1,
+            "permanent grant witness/use"
+        );
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            after_.nonceHint == prior.nonceHint
+                && after_.lastAuthorityActionAt == prior.lastAuthorityActionAt,
+            "delegate cannot consume principal nonce/liveness"
+        );
+        (bool used, uint256 hint) = ingress.delegatedNonceState(artistId, address(delegateSafe), 0);
+        require(used && hint == 1, "independent delegate replay lane");
+        (bool active,,,,,, uint64 remaining) = ingress.delegationState(grant);
+        require(active && remaining == 2, "finite remaining");
+    }
+
+    function testDelegationSafeProspectiveConsentAppliesActualProvider() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(0, 4, 1000, 2000, 0));
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _candidate(address(primary), address(artist), 0, false);
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        a.signature = _delegateSignature(ingress.economicsConsentDigest(p, a));
+        bytes32 record = ingress.recordDelegatedProspectiveEconomicsConsent(p, candidate, grant, a);
+        vm.prank(primary.owner());
+        primary.transferOwnership(address(artist));
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(primary),
+                0,
+                abi.encodeCall(
+                    IStreamRevenueResolver.setPrimaryProfileAssignment,
+                    (PRIMARY, uint8(1), uint256(1), candidate.profileHash, bytes32(0))
+                ),
+                0
+            ),
+            "Safe applies delegated-consented primary"
+        );
+        require(
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY).assignmentHash == p.assignmentHash
+                && ingress.recordDelegation(record) == grant,
+            "actual assignment matches consent"
+        );
+        (bool active,,,,,, uint64 remaining) = ingress.delegationState(grant);
+        require(active && remaining == type(uint64).max, "unlimited within finite window");
+    }
+
+    function testDelegationSafeDirectFreezeNoMintFloorsAndActualApply() public {
+        _accept();
+        _delegateSetup();
+        directArtistCalls = true;
+        bytes32 grant = _grant(_delegation(1, 32, 1000, 2000, 1));
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        vm.recordLogs();
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistDelegation.authorizeDelegatedRoyaltyFreeze, (p, grant, a)
+                ),
+                0
+            ),
+            "direct Safe delegate freeze"
+        );
+        bytes32 record = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                p.resolver,
+                p.collectionId,
+                p.revenueClass,
+                p.expectedAssignmentHash,
+                artistId,
+                address(delegateSafe),
+                uint8(2),
+                uint256(0),
+                uint64(block.timestamp)
+            )
+        );
+        require(
+            ingress.recordDelegation(record) == grant
+                && ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "delegated freeze is operative"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool witness;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[6]
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistRecordDelegation(uint16,bytes32,bytes32,bytes32,address,bytes32,uint8)"
+                        )
+            ) {
+                (uint16 schema, address resolver, bytes32 class_, uint8 authority) =
+                    abi.decode(logs[i].data, (uint16, address, bytes32, uint8));
+                require(
+                    schema == 1 && logs[i].topics[1] == record && logs[i].topics[2] == grant
+                        && logs[i].topics[3] == artistId && resolver == address(royalty)
+                        && class_ == keccak256("ROYALTY_ERC2981") && authority == 2,
+                    "reconstructible grant witness"
+                );
+                witness = true;
+            }
+        }
+        require(witness, "witness event");
+        _revoke(grant);
+        require(
+            ingress.isRoyaltyFreezeAuthorized(1, p.expectedAssignmentHash),
+            "revocation does not erase successful authority"
+        );
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(royalty),
+                0,
+                abi.encodeCall(
+                    IStreamRoyaltyFreeze.applyArtistRoyaltyFreeze,
+                    (uint256(1), p.expectedAssignmentHash)
+                ),
+                0
+            ),
+            "actual defensive freeze application"
+        );
+        require(
+            royalty.collectionRoyalty(1).frozen && _closed(_mintCall()),
+            "frozen without inventing mint floors"
+        );
+    }
+
+    function testDelegationWindowCapabilityScopeAndExhaustionRejectionsAreAtomic() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 future = _grant(_delegation(1, 4, 1100, 1200, 1));
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationUnavailable.selector, future));
+        this.relayDelegateEconomics(address(primary), future, 0);
+        require(_roots() == before_, "notBefore rollback");
+        vm.warp(1100);
+        _delegateEconomics(p, future, 0);
+        before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationUnavailable.selector, future));
+        this.relayDelegateEconomics(address(royalty), future, 1);
+        require(_roots() == before_, "finite use rollback");
+        bytes32 wrongScope = _grant(_delegation(2, 4, 1100, 1200, 0));
+        before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationScope.selector, wrongScope));
+        this.relayDelegateEconomics(address(royalty), wrongScope, 1);
+        require(_roots() == before_, "scope rollback");
+        _revoke(wrongScope);
+        bytes32 wrongCap = _grant(_delegation(0, 32, 1100, 1200, 0));
+        before_ = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(D.DelegationCapability.selector, wrongCap, uint32(4))
+        );
+        this.relayDelegateEconomics(address(royalty), wrongCap, 1);
+        require(_roots() == before_, "capability rollback");
+        vm.warp(1200);
+        (bool active,,,,,,) = ingress.delegationState(wrongCap);
+        require(!active, "exclusive expiry");
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationUnavailable.selector, wrongCap));
+        this.relayDelegateEconomics(address(royalty), wrongCap, 1);
+    }
+
+    function testDelegationReplacementCannotResetNoncesAndUnusedProofRemainsValid() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 first = _grant(_delegation(1, 4, 1000, 1100, 0));
+        _delegateEconomics(_currentEconomics(address(primary)), first, 1);
+        T.EconomicsConsent memory p = _currentEconomics(address(royalty));
+        T.Authorization memory unused = T.Authorization(0, 2000, "");
+        unused.signature = _delegateSignature(ingress.economicsConsentDigest(p, unused));
+        _revoke(first);
+        bytes32 second = _grant(_delegation(0, 4, 1000, 2000, 0));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        this.relayDelegateEconomics(address(royalty), second, 1);
+        require(
+            _roots() == before_ && ingress.delegationRecord(second).uses == 0,
+            "replacement preserves replay and use atomicity"
+        );
+        ingress.recordDelegatedEconomicsConsent(p, second, unused);
+        (bool used, uint256 hint) = ingress.delegatedNonceState(artistId, address(delegateSafe), 0);
+        require(
+            used && hint == 2 && ingress.delegationRecord(first).uses == 1
+                && ingress.delegationRecord(second).uses == 1,
+            "unused digest accepts new authority; reverse nonces bounded"
+        );
+    }
+
+    function testDelegationRevocationImmediatelyBlocksUnusedActionAndKeepsExactRecord() public {
+        _accept();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 32, 1000, 2000, 0));
+        T.RoyaltyFreeze memory p = _freezePayload();
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        a.signature = _delegateSignature(ingress.royaltyFreezeDigest(p, a));
+        vm.recordLogs();
+        bytes32 revocation = _revoke(grant);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool found;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[2]
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistDelegationRevoked(uint16,bytes32,address,bytes32,bytes32,address,uint8,uint256,uint64)"
+                        )
+            ) {
+                (
+                    uint16 schema,
+                    bytes32 reason,
+                    address signer,
+                    uint8 class_,
+                    uint256 nonce,
+                    uint64 time
+                ) = abi.decode(logs[i].data, (uint16, bytes32, address, uint8, uint256, uint64));
+                require(
+                    schema == 1 && reason == keccak256("artist revocation")
+                        && signer == address(artist) && class_ == 1 && nonce == nextNonce - 1
+                        && time == block.timestamp && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(uint160(address(delegateSafe))))
+                        && logs[i].topics[3] == grant,
+                    "exact reconstructible revoke event"
+                );
+                found = true;
+            }
+        }
+        require(
+            found && ingress.delegationRecord(grant).revocationRecordHash == revocation,
+            "historical revocation"
+        );
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSelector(D.DelegationUnavailable.selector, grant));
+        ingress.authorizeDelegatedRoyaltyFreeze(p, grant, a);
+        require(_roots() == before_, "revocation blocks later use");
+    }
+
+    function testDelegationRejectsForbiddenUnknownCapsAndConflictingFutureGrant() public {
+        _delegateSetup();
+        uint32[6] memory invalid =
+            [uint32(0), uint32(256), uint32(512), uint32(2048), uint32(2), uint32(1 << 31)];
+        for (uint256 i; i < invalid.length; ++i) {
+            D.Grant memory p = _delegation(0, invalid[i], 1000, 2000, 0);
+            T.Authorization memory a = T.Authorization(nextNonce, 0, "");
+            a.signature = _signature(ingress.delegationGrantDigest(p, a));
+            bytes32 before_ = _roots();
+            avm.expectRevert(T.UnsupportedProfile.selector);
+            ingress.grantArtistDelegation(p, a);
+            require(_roots() == before_, "invalid cap no mutation");
+        }
+        bytes32 first = _grant(_delegation(1, 36, 1100, 2000, 0));
+        D.Grant memory conflict = _delegation(2, 4, 1000, 1200, 0);
+        T.Authorization memory a = T.Authorization(nextNonce, 0, "");
+        a.signature = _signature(ingress.delegationGrantDigest(conflict, a));
+        vm.expectRevert(abi.encodeWithSelector(D.ConflictingDelegation.selector, first));
+        ingress.grantArtistDelegation(conflict, a);
+        vm.warp(2000);
+        bytes32 replacement = _grant(_delegation(0, 4, 2000, 2200, 0));
+        require(replacement != first, "expired key reusable; old history retained");
+    }
+
+    function testDelegationLateConsentAndArchiveFailuresRollBackUseNonceAndWitness() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 36, 1000, 2000, 0));
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        _economicsRecord(coordinator.reads().currentRoyaltyAssignment(1));
+        bytes32 before_ = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        this.relayDelegateEconomics(address(royalty), grant, 0);
+        require(
+            _roots() == before_ && ingress.delegationRecord(grant).uses == 0,
+            "late record replay atomic"
+        );
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.expectRevert(T.InvalidRecord.selector);
+        this.relayDelegateEconomics(address(primary), grant, 0);
+        (bool used,) = ingress.delegatedNonceState(artistId, address(delegateSafe), 0);
+        require(
+            !used && _roots() == before_ && ingress.delegationRecord(grant).uses == 0,
+            "archive reverts all owners/use/index"
+        );
+        avm.clearMockedCalls();
+        _delegateEconomics(p, grant, 0);
+    }
+
+    function testDelegationSafeThresholdWrongDomainAndOwnersCannotInheritRoles() public {
+        _accept();
+        _delegateSetup();
+        D.Grant memory p = _delegation(1, 32, 1000, 2000, 0);
+        T.Authorization memory a = T.Authorization(nextNonce, 0, "");
+        bytes32 digest = ingress.delegationGrantDigest(p, a);
+        a.signature = safeThresholdSignature(
+            keys, safeMessageDigest(artist, abi.encode(keccak256(abi.encode(digest))))
+        );
+        bytes32 before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.grantArtistDelegation(p, a);
+        a.signature = "";
+        vm.prank(vm.addr(keys[0]));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.grantArtistDelegation(p, a);
+        require(_roots() == before_, "wrong domain/unapproved owner no mutation");
+        bytes32 grant = _grant(p);
+        T.RoyaltyFreeze memory freeze = _freezePayload();
+        a = T.Authorization(0, 2000, "");
+        uint256[] memory one = new uint256[](1);
+        one[0] = delegateKeys[0];
+        a.signature = safeThresholdSignature(
+            one, safeMessageDigest(delegateSafe, abi.encode(ingress.royaltyFreezeDigest(freeze, a)))
+        );
+        before_ = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.authorizeDelegatedRoyaltyFreeze(freeze, grant, a);
+        a.signature = "";
+        vm.prank(vm.addr(delegateKeys[0]));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.authorizeDelegatedRoyaltyFreeze(freeze, grant, a);
+        require(_roots() == before_, "missing threshold/owner never delegate");
+        D.Revocation memory revoke = D.Revocation(
+            artistId, address(delegateSafe), grant, bytes32(0)
+        );
+        a = T.Authorization(nextNonce, 2000, "");
+        a.signature = _delegateSignature(ingress.delegationRevocationDigest(revoke, a));
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.revokeArtistDelegation(revoke, a);
+    }
+
+    function testDelegationApprovedEmptySafeGrantUseAndRevokeAndProtocolRejection() public {
+        _accept();
+        _delegateSetup();
+        D.Grant memory p = _delegation(1, 32, 1000, 2000, 0);
+        T.Authorization memory a = _authorization(false);
+        a.time = 0;
+        _approveMessage(ingress.delegationGrantDigest(p, a));
+        bytes32 grant = ingress.grantArtistDelegation(p, a);
+        T.RoyaltyFreeze memory freeze = _freezePayload();
+        a = T.Authorization(0, 2000, "");
+        bytes32 digest = ingress.royaltyFreezeDigest(freeze, a);
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "delegate Safe approval"
+        );
+        bytes32 record = ingress.authorizeDelegatedRoyaltyFreeze(freeze, grant, a);
+        require(ingress.recordDelegation(record) == grant, "approved empty delegate proof");
+        D.Revocation memory revoke = D.Revocation(
+            artistId, address(delegateSafe), grant, bytes32(0)
+        );
+        a = _authorization(false);
+        _approveMessage(ingress.delegationRevocationDigest(revoke, a));
+        ingress.revokeArtistDelegation(revoke, a);
+        bytes32 before_ = _roots();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeDelegate(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistDelegationCoordinator.coordinateGrantArtistDelegation,
+                (address(delegateSafe), p, a)
+            )
+        );
+        T.ActionContext memory c = T.ActionContext(
+            26, address(delegateSafe), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeDelegate(
+            suite.owners[2],
+            abi.encodeCall(
+                IStreamArtistDelegationOwner.grantDelegation,
+                (c, p, a, T.SignerApproval(address(artist), bytes32(0), false))
+            )
+        );
+        require(_roots() == before_, "direct Safe cannot impersonate protocol callbacks");
+        require(
+            executeSafe(
+                delegateSafe,
+                delegateKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistDelegation.delegationState, (grant)),
+                0
+            ),
+            "actual Safe delegation view"
+        );
+    }
+
+    function testDelegationWildcardUsesSameIdentityOnSecondAcceptedCollection() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(0, 4, 1000, 2000, 0));
+        IStreamRevenueResolver.ResolvedPrimaryAssignment memory assignment =
+            primary.resolvePrimaryAssignment(1, 0, PRIMARY);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 1, 2, assignment.profileId, bytes32(0));
+        IStreamRoyaltyResolver.RoyaltyConfig memory royaltyConfig = royalty.collectionRoyalty(1);
+        vm.prank(royalty.owner());
+        royalty.configureCollectionRoyalty(2, royaltyConfig.profileId, royaltyConfig.royaltyBps);
+        ingress.proposeArtistBinding(
+            2, _proposal(artistId), bytes("unit identity document"), "Artist Safe"
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.acceptanceDigest(2, a));
+        ingress.acceptArtistBinding(2, a);
+        assignment = primary.resolvePrimaryAssignment(2, 0, PRIMARY);
+        T.EconomicsConsent memory p =
+            T.EconomicsConsent(2, address(primary), PRIMARY, 1, 2, assignment.assignmentHash);
+        bytes32 record = _delegateEconomics(p, grant, 0);
+        require(
+            ingress.recordDelegation(record) == grant && ingress.delegationRecord(grant).uses == 1,
+            "wildcard follows accepted same artist identity"
+        );
+    }
+
     function setUp() public {
         vm.warp(1000);
         keys = new uint256[](2);

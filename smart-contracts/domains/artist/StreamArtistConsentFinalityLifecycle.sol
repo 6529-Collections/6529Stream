@@ -16,6 +16,17 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     mapping(uint256 => T.RatificationRecord) private _ratifications;
     mapping(bytes32 => T.RatificationRecord) private _ratificationRecords;
     mapping(bytes32 => T.RoyaltyFreezeRecord) private _royaltyFreezes;
+    mapping(bytes32 => bytes32) public recordDelegation;
+    /// @notice Permanent grant witness and missing contextual preimage fields for a delegated canonical record.
+    event ArtistRecordDelegation(
+        uint16 schemaVersion,
+        bytes32 indexed recordHash,
+        bytes32 indexed delegationRecordHash,
+        bytes32 indexed artistId,
+        address resolver,
+        bytes32 revenueClass,
+        uint8 authorityClass
+    );
     event ArtistRoyaltyFreezeAuthorized(
         uint16 schemaVersion,
         uint256 indexed collectionId,
@@ -139,6 +150,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 15);
         _requireAccepted(b, signer);
+        return _recordEconomics(c, b, p, designation, signer, nonce, bytes32(0));
+    }
+
+    function recordDelegatedEconomics(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.EconomicsConsent calldata p,
+        T.Payout calldata designation,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external returns (bytes32) {
+        _check(c, 15);
+        _requireDelegated(b, signer, grant);
+        return _recordEconomics(c, b, p, designation, signer, nonce, grant);
+    }
+
+    function _recordEconomics(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.EconomicsConsent calldata p,
+        T.Payout calldata designation,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) private returns (bytes32 record) {
         if (
             designation.account == address(0) || designation.recordHash == bytes32(0)
                 || p.resolver == address(0) || p.assignmentHash == bytes32(0)
@@ -146,16 +183,29 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         ) {
             revert T.InvalidRecord();
         }
-        record = StreamArtistEconomicsHashes.economicsRecord(
-            _environment(), p, designation.recordHash, b.artistId, signer, nonce, _now()
+        uint8 authorityClass = grant == bytes32(0) ? 1 : 2;
+        record = StreamArtistEconomicsHashes.economicsRecordForAuthority(
+            _environment(),
+            p,
+            designation.recordHash,
+            b.artistId,
+            signer,
+            authorityClass,
+            nonce,
+            _now()
         );
         bytes32 scope = keccak256(abi.encode(p));
         bytes32 key = _consume(keccak256("consent_finality.replay.consent_key"), scope, record);
         _economics[scope] = record;
+        if (grant != bytes32(0)) recordDelegation[record] = grant;
         _commit(
             c,
-            keccak256(abi.encode(b, p, designation, signer, nonce)),
-            keccak256(abi.encode(scope, record)),
+            grant == bytes32(0)
+                ? keccak256(abi.encode(b, p, designation, signer, nonce))
+                : keccak256(abi.encode(b, p, designation, signer, nonce, grant)),
+            grant == bytes32(0)
+                ? keccak256(abi.encode(scope, record))
+                : keccak256(abi.encode(scope, record, grant)),
             keccak256(abi.encode(key, record)),
             record
         );
@@ -168,11 +218,14 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
             p.scope,
             p.scopeId,
             designation.recordHash,
-            1,
+            authorityClass,
             nonce,
             _now(),
             record
         );
+        if (grant != bytes32(0)) {
+            emit ArtistRecordDelegation(1, record, grant, b.artistId, p.resolver, p.revenueClass, 2);
+        }
     }
 
     function recordRatification(
@@ -233,6 +286,30 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
     ) external returns (bytes32 record) {
         _check(c, 20);
         _requireAccepted(b, signer);
+        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, bytes32(0));
+    }
+
+    function authorizeDelegatedRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) external returns (bytes32) {
+        _check(c, 20);
+        _requireDelegated(b, signer, grant);
+        return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, grant);
+    }
+
+    function _authorizeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce,
+        bytes32 grant
+    ) private returns (bytes32 record) {
         if (
             p.resolver == address(0) || p.collectionId == 0
                 || p.revenueClass != keccak256("ROYALTY_ERC2981")
@@ -240,24 +317,47 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         ) {
             revert T.InvalidRecord();
         }
-        record = StreamArtistEconomicsHashes.royaltyFreezeRecord(
-            _environment(), p, b.artistId, signer, nonce, _now()
+        uint8 authorityClass = grant == bytes32(0) ? 1 : 2;
+        record = StreamArtistEconomicsHashes.royaltyFreezeRecordForAuthority(
+            _environment(), p, b.artistId, signer, authorityClass, nonce, _now()
         );
         bytes32 scope = keccak256(abi.encode(p, b.artistId, b.generation));
         bytes32 key = _consume(keccak256("consent_finality.replay.freeze_key"), scope, record);
         T.RoyaltyFreezeRecord memory authorization =
             T.RoyaltyFreezeRecord(record, b.artistId, b.generation);
         _royaltyFreezes[scope] = authorization;
+        if (grant != bytes32(0)) recordDelegation[record] = grant;
         _commit(
             c,
-            keccak256(abi.encode(b, p, signer, nonce)),
-            keccak256(abi.encode(scope, authorization)),
+            grant == bytes32(0)
+                ? keccak256(abi.encode(b, p, signer, nonce))
+                : keccak256(abi.encode(b, p, signer, nonce, grant)),
+            grant == bytes32(0)
+                ? keccak256(abi.encode(scope, authorization))
+                : keccak256(abi.encode(scope, authorization, grant)),
             keccak256(abi.encode(key, record)),
             record
         );
         emit ArtistRoyaltyFreezeAuthorized(
-            1, p.collectionId, p.expectedAssignmentHash, signer, 1, nonce, _now(), record
+            1,
+            p.collectionId,
+            p.expectedAssignmentHash,
+            signer,
+            authorityClass,
+            nonce,
+            _now(),
+            record
         );
+        if (grant != bytes32(0)) {
+            emit ArtistRecordDelegation(1, record, grant, b.artistId, p.resolver, p.revenueClass, 2);
+        }
+    }
+
+    function _requireDelegated(T.Binding calldata b, address signer, bytes32 grant) private pure {
+        if (
+            !b.accepted || b.consentMode != 1 || b.artistId == bytes32(0) || signer == address(0)
+                || grant == bytes32(0)
+        ) revert T.InvalidRecord();
     }
 
     function _requireAccepted(T.Binding calldata b, address signer) private pure {

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import "../../interfaces/stream/artist/IStreamArtistDelegation.sol";
 
 import "./StreamArtistOnboardingCoordinator.sol";
 import "../../interfaces/stream/artist/IStreamArtistOnboarding.sol";
@@ -22,6 +23,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistAttribution,
     IStreamArtistContentRatification,
     IStreamArtistEconomicsAuthority,
+    IStreamArtistDelegation,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -75,7 +77,114 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistOnboarding).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
             || id == type(IStreamArtistEconomicsAuthority).interfaceId
-            || super.supportsInterface(id);
+            || id == type(IStreamArtistDelegation).interfaceId || super.supportsInterface(id);
+    }
+
+    function grantArtistDelegation(D.Grant calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistDelegationCoordinator(operationCoordinator)
+            .coordinateGrantArtistDelegation(msg.sender, p, a);
+    }
+
+    function revokeArtistDelegation(D.Revocation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        return IStreamArtistDelegationCoordinator(operationCoordinator)
+            .coordinateRevokeArtistDelegation(msg.sender, p, a);
+    }
+
+    function recordDelegatedEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistDelegationCoordinator(operationCoordinator)
+            .coordinateRecordDelegatedEconomicsConsent(msg.sender, p, grant, a);
+    }
+
+    function recordDelegatedProspectiveEconomicsConsent(
+        T.EconomicsConsent calldata p,
+        T.FixedEconomicsCandidate calldata candidate,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistDelegationCoordinator(operationCoordinator)
+            .coordinateRecordDelegatedProspectiveEconomicsConsent(
+                msg.sender, p, candidate, grant, a
+            );
+    }
+
+    function authorizeDelegatedRoyaltyFreeze(
+        T.RoyaltyFreeze calldata p,
+        bytes32 grant,
+        T.Authorization calldata a
+    ) external returns (bytes32) {
+        return IStreamArtistDelegationCoordinator(operationCoordinator)
+            .coordinateAuthorizeDelegatedRoyaltyFreeze(msg.sender, p, grant, a);
+    }
+
+    function delegationGrantDigest(D.Grant calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistDelegationState.grantDigest(_environment(), p, a.nonce);
+    }
+
+    function delegationRevocationDigest(D.Revocation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistDelegationState.revokeDigest(_environment(), p, a.nonce, a.time);
+    }
+
+    function delegationRecord(bytes32 grant) public view returns (D.Record memory) {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistDelegationOwner(s.owners[2]).delegationRecord(grant);
+    }
+
+    function delegationState(bytes32 grant)
+        external
+        view
+        returns (bool, address, uint256, uint32, uint64, uint64, uint64)
+    {
+        D.Record memory item = delegationRecord(grant);
+        uint64 remaining = item.grantor == address(0)
+            ? 0
+            : item.grant.maxUses == 0
+                ? type(uint64).max
+                : uint64(uint256(item.grant.maxUses) - item.uses);
+        return (
+            StreamArtistDelegationState.active(item),
+            item.grant.delegate,
+            item.grant.collectionId,
+            item.grant.capabilities,
+            item.grant.notBefore,
+            item.grant.expiresAt,
+            remaining
+        );
+    }
+
+    function delegatedNonceState(bytes32 artistId, address delegate, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return
+            IStreamArtistDelegationOwner(s.owners[2]).delegatedNonceState(artistId, delegate, nonce);
+    }
+
+    function recordDelegation(bytes32 record) external view returns (bytes32) {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistDelegatedConsentOwner(s.owners[6]).recordDelegation(record);
     }
 
     function proposeArtistBinding(
