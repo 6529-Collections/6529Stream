@@ -17,18 +17,18 @@ contract RootEntropyBoundary {
 /// @notice Actual rendering, token inventory, checkpoint, archival aggregator, retained bytes and publication.
 /// @dev Core membership, governance execution, archival receipts, artist approvals and Finality/provider bindings
 ///      remain explicit boundaries. This is not execution of a real Finality record.
-contract StreamContentRootCompositionTest is ContentRootPublicationFixture {
+abstract contract ContentRootCompositionFixture is ContentRootPublicationFixture {
     LeafManifestVm private constant mvm =
         LeafManifestVm(address(uint160(uint256(keccak256("hevm cheat code")))));
-    StreamCollectionTokenInventory private inventory;
-    StreamOnchainContentCheckpoint private checkpoint;
-    StreamFinalityArtifactCoverage private artifacts;
-    LeafManifestArchiveBoundary private archive;
-    StreamContentLeafManifest private verifier;
-    bytes32 private checkpointHash;
-    bytes32 private verified;
+    StreamCollectionTokenInventory internal inventory;
+    StreamOnchainContentCheckpoint internal checkpoint;
+    StreamFinalityArtifactCoverage internal artifacts;
+    LeafManifestArchiveBoundary internal archive;
+    StreamContentLeafManifest internal verifier;
+    bytes32 internal checkpointHash;
+    bytes32 internal verified;
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
         _documents(schemas.RAW_BYTES());
         core.setToken(1, address(this), 2);
@@ -78,8 +78,7 @@ contract StreamContentRootCompositionTest is ContentRootPublicationFixture {
             address(0),
             _gas("CONTENT_LEAF_MANIFEST_READ_GAS", 2_000_000, 2)
         );
-        provider =
-            address(
+        provider = address(
             new RootProviderBoundary(address(metadata), address(schemas), address(verifier))
         );
         finality = new RootFinalityBoundary(
@@ -131,9 +130,8 @@ contract StreamContentRootCompositionTest is ContentRootPublicationFixture {
             leaves
         );
         (bytes32 artifact, bytes32 coverage) = _archiveBytes(raw);
-        bytes32 plan = verifier.beginManifest(
-            checkpointHash, artifact, coverage, keccak256("artist")
-        );
+        bytes32 plan =
+            verifier.beginManifest(checkpointHash, artifact, coverage, keccak256("artist"));
         verified = verifier.verifyNextLeaves(plan, 1);
     }
 
@@ -157,7 +155,9 @@ contract StreamContentRootCompositionTest is ContentRootPublicationFixture {
         );
         coverage = artifacts.coverNextChunk(plan, 0, a.chunkHashes[0]);
     }
+}
 
+contract StreamContentRootCompositionTest is ContentRootCompositionFixture {
     function testActualVerifiedBytesPublishWithoutInvalidatingTheirCheckpoint() public {
         IStreamContentRootPublication.Publication memory p = _publication();
         p.verifiedManifestRecordHash = verified;

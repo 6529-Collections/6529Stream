@@ -7,6 +7,7 @@ deployment evidence.
 
 | Task | Guide |
 | --- | --- |
+| Validate a published root against current preserved content | [Finality content evidence](finality-content-evidence.md) |
 | Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |
 | Fund reveal requests and settle collection escrow | [Reveal-fee funding](reveal-fee-funding.md) |
 | Record artist approval of exact sale terms | [Sale-parameter consent](sale-parameter-consent.md) |

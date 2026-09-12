@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added current-content evidence reads that join the exact artist-approved root
+  record, fixed deployment route, complete token checkpoint and preserved leaf
+  bytes. Full typed record interpretation and finality composition remain open.
 - Added artist-approved collection-root publication backed by verified preserved
   manifests, exact governed interpretation bytes and publisher grants, with
   append-only history, atomic consent/evolution and Safe calls. The complete

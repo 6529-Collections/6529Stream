@@ -78,6 +78,10 @@ It does not change the serving-source commitment used to verify its own
 checkpoint. This avoids a root publication invalidating the evidence that
 justified it.
 
+The developing provider's [content-evidence consumer](finality-content-evidence.md)
+joins this current head to actual complete checkpoint and preserved leaf bytes.
+Historical root getters alone do not establish current finality eligibility.
+
 ## Gas and tested boundaries
 
 The Finality component-read cap must provide headroom for the manifest
