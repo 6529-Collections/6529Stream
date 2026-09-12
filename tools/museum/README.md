@@ -11,7 +11,7 @@ On Windows PowerShell, no activation or execution-policy change is needed:
 ```powershell
 python -m venv .venv-tools/museum
 .\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
-.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory -v
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection -v
 ```
 
 On Linux or macOS:
@@ -19,7 +19,7 @@ On Linux or macOS:
 ```sh
 python3 -m venv .venv-tools/museum
 .venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
-.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory -v
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection -v
 ```
 
 Use that environment's Python for the following commands. Dependency installation
@@ -28,6 +28,7 @@ needs package-index access; verification itself uses only retained local bytes.
 ```text
 python -m tools.museum.schemas --check
 python -m tools.museum.fixtures --check
+python -m tools.museum.review --check
 python -m tools.museum export-fixture --schema schemas/museum/fixtures/source.schema.json --source schemas/museum/fixtures/photograph.json --output <empty-output-directory>
 python -m tools.museum verify-fixture <output-directory>
 python -m tools.museum.linked_art schemas/museum/linked-art/examples/digital.json --policy-hash 0xb0fa483a5e25eda775095980c7b677c252568774b3d6b8944c6294cff3a1f54e
@@ -72,6 +73,14 @@ coverage row. See [the inventory boundary and command](../../docs/museum-schema-
 Both engines fail closed on unsupported constructs and have no remote schema
 loader. Remaining profiles are an implementation backlog, not permission to omit
 a source family or reduce its coverage denominator.
+
+The additive [canonical review and selection layer](../../docs/museum-review-literal.md)
+uses the actual assertion/backlink schema with a versioned review-literal body.
+It binds exact selectors and revisions, derives self-review from fixture issuer
+facts, and applies an explicit source/reviewer policy. Unselected reviews cannot
+admit or veto a claim. Selected conflicting claims retain their provenance and
+are withheld from unqualified projection. Actual chain/family authentication and
+the complete resource package remain separate; `recorded_state` is rejected.
 
 New Stream JSON values are a JCS-compatible restricted profile: protocol integers
 and exact decimals use typed strings; floats are rejected. This restriction is
