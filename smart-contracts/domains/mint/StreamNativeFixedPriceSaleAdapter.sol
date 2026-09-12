@@ -11,6 +11,7 @@ import "../revenue/StreamNativeSettlementAdmission.sol";
 import "../revenue/StreamNativeSettlementSupport.sol";
 import "../../interfaces/stream/revenue/IStreamNativePrimarySaleSettlement.sol";
 import "../../interfaces/stream/mint/IStreamNativeFixedPriceSaleAdapter.sol";
+import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
 import "../../interfaces/stream/revenue/IStreamPrimarySaleSettlement.sol";
 import "../../vendor/openzeppelin/Ownable.sol";
@@ -22,6 +23,7 @@ import "../../vendor/openzeppelin/ERC165.sol";
 contract StreamNativeFixedPriceSaleAdapter is
     IStreamNativeFixedPriceSaleAdapter,
     IStreamNativePricePrograms,
+    IStreamArtistSaleFacts,
     StreamSettlementContext,
     Ownable,
     ReentrancyGuard,
@@ -82,7 +84,33 @@ contract StreamNativeFixedPriceSaleAdapter is
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamNativeFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamNativePricePrograms).interfaceId
+            || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamNativeSaleBinding).interfaceId || super.supportsInterface(id);
+    }
+
+    /// @notice Canonical declaration checked against the actual registered module record.
+    function streamModuleType() external pure returns (bytes32) {
+        return keccak256("NATIVE_PRIMARY_SALE_ADAPTER");
+    }
+
+    function streamModuleInterfaceId() external pure returns (bytes4) {
+        return type(IStreamNativeSaleBinding).interfaceId;
+    }
+
+    /// @inheritdoc IStreamArtistSaleFacts
+    function saleConsentFacts(bytes32 id)
+        external
+        view
+        override
+        returns (uint256 collectionId, bytes32 saleConfigHash)
+    {
+        SaleRecord storage fixedRecord = _sales[id];
+        if (fixedRecord.saleNonce != 0) {
+            return (fixedRecord.config.collectionId, fixedRecord.configHash);
+        }
+        PriceProgramRecord storage program = _pricePrograms[id];
+        if (program.saleNonce != 0) return (program.config.collectionId, program.configHash);
+        revert SaleConsentFactsUnavailable(id);
     }
 
     function registerPriceProgram(PriceProgramConfig calldata config)
