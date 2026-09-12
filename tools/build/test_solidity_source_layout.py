@@ -11,6 +11,7 @@ import unittest
 from pathlib import Path
 
 from tools.build import check_solidity_source_layout as checker
+from tools.build import refresh_solidity_source_inventory as inventory
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -50,6 +51,56 @@ class SoliditySourceLayoutTests(unittest.TestCase):
 
     def test_committed_repository_passes(self) -> None:
         self.assertEqual(self.errors(REPO_ROOT), [])
+
+    def test_refresh_only_updates_paths_and_is_idempotent(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            active_path = root / checker.CURRENT_MANIFEST_PATH
+            before = json.loads(active_path.read_bytes())
+            historical_paths = (checker.MANIFEST_PATH, checker.HISTORICAL_RECEIPT_PATH)
+            historical = {path: (root / path).read_bytes() for path in historical_paths}
+            source = root / "smart-contracts/interfaces/stream/mint/IInventoryExample.sol"
+            source.write_bytes(b"pragma solidity ^0.8.19;\ninterface IInventoryExample {}\n")
+            self.assertTrue(inventory.refresh(root))
+            after = json.loads(active_path.read_bytes())
+            self.assertEqual(set(after["source_paths"]) - set(before["source_paths"]), {source.relative_to(root).as_posix()})
+            self.assertEqual({k: v for k, v in before.items() if k != "source_paths"},
+                             {k: v for k, v in after.items() if k != "source_paths"})
+            self.assertEqual(historical, {path: (root / path).read_bytes() for path in historical_paths})
+            self.assertFalse(inventory.refresh(root))
+
+    def test_refresh_check_reports_drift_without_writing(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            active_path = root / checker.CURRENT_MANIFEST_PATH
+            before = active_path.read_bytes()
+            source = root / "smart-contracts/interfaces/stream/mint/IInventoryExample.sol"
+            source.write_bytes(b"pragma solidity ^0.8.19;\ninterface IInventoryExample {}\n")
+            self.assertTrue(inventory.refresh(root, check=True))
+            self.assertEqual(before, active_path.read_bytes())
+
+    def test_refresh_rejects_invalid_layout_without_writing(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            active_path = root / checker.CURRENT_MANIFEST_PATH
+            before = active_path.read_bytes()
+            source = root / "smart-contracts/domains/mint/IMisplaced.sol"
+            source.write_bytes(b"pragma solidity ^0.8.19;\ninterface IMisplaced {}\n")
+            with self.assertRaisesRegex(checker.SourceLayoutError, "shared protocol interface belongs"):
+                inventory.refresh(root)
+            self.assertEqual(before, active_path.read_bytes())
+
+    def test_refresh_cannot_drop_a_historical_destination(self) -> None:
+        with self.fixture() as temp:
+            root = Path(temp)
+            active_path = root / checker.CURRENT_MANIFEST_PATH
+            before = active_path.read_bytes()
+            current = checker.load_current_manifest(root)
+            move = checker.load_manifest(root)["moves"][0]
+            (root / checker.current_target(move["new_path"], current)).unlink()
+            with self.assertRaises(checker.SourceLayoutError):
+                inventory.refresh(root)
+            self.assertEqual(before, active_path.read_bytes())
 
     def test_historical_git_object_archive_has_one_exact_stale_path_exception(
         self,

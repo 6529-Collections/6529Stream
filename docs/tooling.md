@@ -131,6 +131,14 @@ remains pre-audit and not production-ready.
 
 ## Maintainer references
 
+After adding or removing Solidity files, run
+`python -m tools.build.refresh_solidity_source_inventory`, then
+`python -m tools.build.check_solidity_source_layout`. The refresh changes only
+the active path inventory after validating the layout and imports. It preserves
+the original migration manifest, historical receipts and frozen evidence.
+Use `--check` to detect a stale inventory without writing files. Moves involving
+historical destinations still require an explicit reviewed relocation entry.
+
 | Task | Detailed reference |
 | --- | --- |
 | Install pins or refresh the Python lock | [Toolchain](reference/tooling/toolchain.md) |
