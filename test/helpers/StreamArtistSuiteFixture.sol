@@ -14,7 +14,7 @@ import "../../smart-contracts/domains/artist/StreamArtistPayoutLifecycle.sol";
 import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycle.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
-import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import { StreamMetadataRouter } from "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
 import "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
 import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
 import "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes.sol";
