@@ -12,7 +12,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active PR branch | `codex/v1-integration` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/742` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
-| Active PR | `TBD` |
+| Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
 | Source checkpoint | `66d70e04` (reveal fees and activation), `f8564761` / `99b53aab` / `dac3ef4a` / `592635fc` (coupled artist sale consent and capability admission), `677b9ae9` (identity-compromise filing), `b56c37f2` (governed reveal timing), `ec476e5c` (actual REQUIRED purchase tests); captured acceptance scopes are described below; RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
@@ -189,8 +189,9 @@ errors. This is not a broad build or candidate
 acceptance. Client checks pass 47 tests; three new tests also
 exercise successful and failed calls through actual pinned Safe versions.
 
-The next draft PR will contain a coherent tested implementation increment.
-Builders run focused checks before handoff; root owns broad validation,
+Draft [PR #744](https://github.com/6529-Collections/6529Stream/pull/744) exposes
+the current integrated implementation and its exact acceptance boundaries.
+CodeRabbit review is requested. Builders run focused checks before handoff; root owns broad validation,
 deterministic artifacts, deployment and completion of the entire v1 ledger.
 
 ## Completed supported RC1
