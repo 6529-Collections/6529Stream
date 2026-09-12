@@ -11,7 +11,7 @@ On Windows PowerShell, no activation or execution-policy change is needed:
 ```powershell
 python -m venv .venv-tools/museum
 .\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
-.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis -v
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis tools.museum.test_iiif_numbers tools.museum.test_iiif_uri tools.museum.test_iiif -v
 ```
 
 On Linux or macOS:
@@ -19,7 +19,7 @@ On Linux or macOS:
 ```sh
 python3 -m venv .venv-tools/museum
 .venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
-.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis -v
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis tools.museum.test_iiif_numbers tools.museum.test_iiif_uri tools.museum.test_iiif -v
 ```
 
 Use that environment's Python for the following commands. Dependency installation
@@ -138,7 +138,7 @@ admission and complete Museum/dossier conformance remain separate work.
 
 ```text
 python -m tools.museum.projection --check
-python -m unittest tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis -v
+python -m unittest tools.museum.test_projection tools.museum.test_package tools.museum.test_linked_art_v2 tools.museum.test_projection_v2 tools.museum.test_premis tools.museum.test_iiif_numbers tools.museum.test_iiif_uri tools.museum.test_iiif -v
 ```
 
 The separate [abstract/nonvisual v2 projection](../../docs/museum-abstract-nonvisual-projection.md)
@@ -154,3 +154,12 @@ pinned lxml validator. It retains the exact standalone LoC PREMIS 3 schema,
 requires explicit selected file facts and does not claim a fixity check or
 complete preservation export. Check its profile with
 `python -m tools.museum.premis --check`.
+
+The [IIIF Presentation 3 correspondence](../../docs/museum-iiif-correspondence.md)
+adds one explicit four-media Manifest from the same selected Linked Art/PREMIS
+source. Check its profile and complete offline context closure with
+`python -m tools.museum.iiif_model --check`. It uses the existing pinned Python
+dependencies. Exact target decimals use a separate encoder; Stream source
+canonicalization stays unchanged. The visible named Sound supplement and
+content-addressed media require a compatible resolver; no viewer, media
+availability or chain-authentication claim follows from offline validation.

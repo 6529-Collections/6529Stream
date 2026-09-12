@@ -1,0 +1,75 @@
+_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>thumbnail-nav</td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>together</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>unordered</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>* <code class="language-plaintext highlighter-rouge">hidden</code> is allowed on Annotation Collections, Annotation Pages, Annotations, Specific Resources and Choices, as these are the classes that result in rendering content to the user.</p>
+      <h3 id="b-example-manifest-response">
+        
+        
+          B. Example Manifest Response <a href="#b-example-manifest-response" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/manifest"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Manifest"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Book 1"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Author"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"none"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Anne Author"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Published"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Paris, circa 1400"</span><span class="w"> </span><span class="p">],</span><span class="w">
+        </span><span class="nl">"fr"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Paris, environ 1400"</span><span class="w"> </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Notes"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="s2">"Text of note 1"</span><span class="p">,</span><span class="w">
+          </span><span class="s2">"Text of note 2"</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Source"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"none"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"&lt;span&gt;From: &lt;a href=</span><span class="se">\"</span><span class="s2">https://example.org/db/1.html</span><span class="se">\"</span><span class="s2">&gt;Some Collection&lt;/a&gt;&lt;/span&gt;"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"summary"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Book 1, written be Anne Author, published in Paris around 1400."</span><span class="w"> </span><

@@ -1,0 +1,78 @@
+path
+swarm,                          namespace,      0xe4,           draft,      Swarm path
+ipns,                           namespace,      0xe5,           draft,      IPNS path
+zeronet,                        namespace,      0xe6,           draft,      ZeroNet site address
+secp256k1-pub,                  key,            0xe7,           draft,      Secp256k1 public key (compressed)
+dnslink,                        namespace,      0xe8,           permanent,  DNSLink path
+bls12_381-g1-pub,               key,            0xea,           draft,      BLS12-381 public key in the G1 field
+bls12_381-g2-pub,               key,            0xeb,           draft,      BLS12-381 public key in the G2 field
+x25519-pub,                     key,            0xec,           draft,      Curve25519 public key
+ed25519-pub,                    key,            0xed,           draft,      Ed25519 public key
+bls12_381-g1g2-pub,             key,            0xee,           draft,      BLS12-381 concatenated public keys in both the G1 and G2 fields
+sr25519-pub,                    key,            0xef,           draft,      Sr25519 public key
+dash-block,                     ipld,           0xf0,           draft,      Dash Block
+dash-tx,                        ipld,           0xf1,           draft,      Dash Tx
+swarm-manifest,                 ipld,           0xfa,           draft,      Swarm Manifest
+swarm-feed,                     ipld,           0xfb,           draft,      Swarm Feed
+beeson,                         ipld,           0xfc,           draft,      Swarm BeeSon
+udp,                            multiaddr,      0x0111,         draft,
+p2p-webrtc-star,                multiaddr,      0x0113,         deprecated, Use webrtc or webrtc-direct instead
+p2p-webrtc-direct,              multiaddr,      0x0114,         deprecated, Use webrtc or webrtc-direct instead
+p2p-stardust,                   multiaddr,      0x0115,         deprecated,
+webrtc-direct,                  multiaddr,      0x0118,         draft,      ICE-lite webrtc transport with SDP munging during connection establishment and without use of a STUN server
+webrtc,                         multiaddr,      0x0119,         draft,      webrtc transport where connection establishment is according to w3c spec
+p2p-circuit,                    multiaddr,      0x0122,         permanent,
+dag-json,                       ipld,           0x0129,         permanent,  MerkleDAG json
+udt,                            multiaddr,      0x012d,         draft,
+utp,                            multiaddr,      0x012e,         draft,
+crc32,                          hash,           0x0132,         draft,      CRC-32 non-cryptographic hash algorithm (IEEE 802.3)
+crc64-ecma,                     hash,           0x0164,         draft,      CRC-64 non-cryptographic hash algorithm (ECMA-182 - Annex B)
+crc64-nvme,                     hash,           0x0165,         draft,      CRC-64 checksum based on the NVME polynomial as specified in the NVM Express® NVM Command Set Specification
+unix,                           multiaddr,      0x0190,         permanent,
+thread,                         multiaddr,      0x0196,         draft,      Textile Thread
+p2p,                            multiaddr,      0x01a5,         permanent,  libp2p
+https,                          multiaddr,      0x01bb,         draft,
+onion,                          multiaddr,      0x01bc,         draft,
+onion3,                         multiaddr,      0x01bd,         draft,
+garlic64,                       multiaddr,      0x01be,         draft,      I2P base64 (raw public key)
+garlic32,                       multiaddr,      0x01bf,         draft,      I2P base32 (hashed public key or encoded public key/checksum+optional secret)
+tls,                            multiaddr,      0x01c0,         draft,
+sni,                            multiaddr,      0x01c1,         draft,      Server Name Indication RFC 6066 § 3
+noise,                          multiaddr,      0x01c6,         draft,
+shs,                            multiaddr,      0x01c8,         draft,      Secure Scuttlebutt - Secret Handshake Stream
+quic,                           multiaddr,      0x01cc,         permanent,
+quic-v1,                        multiaddr,      0x01cd,         permanent,
+webtransport,                   multiaddr,      0x01d1,         draft,
+certhash,                       multiaddr,      0x01d2,         draft,      TLS certificate's fingerprint as a multihash
+ws,                             multiaddr,      0x01dd,         permanent,
+wss,                            multiaddr,      0x01de,         permanent,
+p2p-websocket-star,             multiaddr,      0x01df,         permanent,
+http,                           multiaddr,      0x01e0,         draft,
+http-path,                      multiaddr,      0x01e1,         draft,      Percent-encoded path to an HTTP resource
+swhid-1-snp,                    ipld,           0x01f0,         draft,      SoftWare Heritage persistent IDentifier version 1 snapshot
+json,                           ipld,           0x0200,         permanent,  JSON (UTF-8-encoded)
+messagepack,                    serialization,  0x0201,         draft,      MessagePack
+car,                            serialization,  0x0202,         draft,      Content Addressable aRchive (CAR)
+x509-certificate,               serialization,  0x0210,         draft,      DER-encoded X.509 (PKIX) certificate per RFC 5280; single certificate only (no chain); raw DER bytes (not PEM)
+ipns-record,                    serialization,  0x0300,         permanent,  Signed IPNS Record
+libp2p-peer-record,             libp2p,         0x0301,         permanent,  libp2p peer record type
+libp2p-relay-rsvp,              libp2p,         0x0302,         permanent,  libp2p relay reservation voucher
+memorytransport,                libp2p,         0x0309,         permanent,  in memory transport for self-dialing and testing; arbitrary
+car-index-sorted,               serialization,  0x0400,         draft,      CARv2 IndexSorted index format
+car-multihash-index-sorted,     serialization,  0x0401,         draft,      CARv2 MultihashIndexSorted index format
+transport-bitswap,              transport,      0x0900,         draft,      Bitswap datatransfer
+transport-graphsync-filecoinv1, transport,      0x0910,         draft,      Filecoin graphsync datatransfer
+transport-ipfs-gateway-http,    transport,      0x0920,         draft,      HTTP IPFS Gateway trustless datatransfer
+transport-filecoin-piece-http,  transport,      0x0930,         draft,      HTTP piece retrieval from Filecoin storage provider; https://github.com/filecoin-project/FIPs/blob/master/FRCs/frc-0066.md
+multidid,                       multiformat,    0x0d1d,         draft,      Compact encoding for Decentralized Identifers
+fr32-sha256-trunc254-padbintree,multihash,      0x1011,         draft,      A balanced binary tree hash used in Filecoin Piece Commitments as described in FRC-0069
+sha2-256-trunc254-padded,       multihash,      0x1012,         permanent,  SHA2-256 with the two most significant bits from the last byte zeroed (as via a mask with 0b00111111) - used for proving trees as in Filecoin
+sha2-224,                       multihash,      0x1013,         permanent,  aka SHA-224; as specified by FIPS 180-4.
+sha2-512-224,                   multihash,      0x1014,         permanent,  aka SHA-512/224; as specified by FIPS 180-4.
+sha2-512-256,                   multihash,      0x1015,         permanent,  aka SHA-512/256; as specified by FIPS 180-4.
+murmur3-x64-128,                hash,           0x1022,         draft,
+grid-cbor,                      ipld,           0x1027,         draft,      Grid message envelope: RFC-8949 deterministic CBOR; 'grid'-tagged; codec preserves arbitrary tags/keys while allowing traversal of tag-42 CID links; spec: https://github.com/promisegrid/promisegrid/blob/main/docs/grid-cbor-multicodec-spec.md
+ripemd-128,                     multihash,      0x1052,         draft,
+ripemd-160,                     multihash,      0x1053,         draft,
+ripemd-256,                     multihash,      0x1054,         draft,
+ripemd-320,                     multihash,    

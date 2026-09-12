@@ -1,0 +1,61 @@
+  "AuthLogoutService1": {
+	      "@id": "http://iiif.io/api/auth/1#LogoutService",
+	      "@context": [
+	        "http://iiif.io/api/auth/1/context.json",
+	        {
+	          "id": null,
+	          "type": null
+	        }
+	      ]
+	    }
+      }
+    },
+
+    "seeAlso": {
+      "@type": "@id",
+      "@id": "rdfs:seeAlso",
+      "@container": "@set"
+    },
+
+    "selector":{
+      "@type":"@id",
+      "@id":"oa:selector",
+      "@container" : "@set",
+      "@context":[
+        "https://iiif.io/api/registry/selectors/context.json",
+        "http://www.w3.org/ns/anno.jsonld"
+      ]
+   },
+
+    "start": {
+      "@type": "@id",
+      "@id": "iiif_prezi:start"
+    },
+    "supplementary": {
+      "@type": "@id",
+      "@id": "iiif_prezi:supplementary"
+    },
+
+    "items": {
+      "@type": "@id",
+      "@id": "as:items",
+      "@container": "@list"
+    },
+    "structures": {
+      "@type": "@id",
+      "@id": "iiif_prezi:structures",
+      "@container": "@list"
+    },
+    "annotations": {
+      "@type": "@id",
+      "@id": "iiif_prezi:annotations",
+      "@container": "@list"
+    },
+
+    "painting": "iiif_prezi:painting",
+    "supplementing": "iiif_prezi:supplementing",
+    "contentState": "iiif_prezi:contentState",
+    "contextualizing": "iiif_prezi:contextualizing"
+  }
+}
+

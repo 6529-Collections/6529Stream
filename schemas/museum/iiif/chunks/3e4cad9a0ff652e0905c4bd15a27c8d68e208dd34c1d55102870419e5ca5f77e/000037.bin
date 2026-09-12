@@ -1,0 +1,141 @@
+ptional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Range</td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>AnnotationCollection</td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Content Resources</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<table class="api-table" id="table-reqs-1a">
+  <thead>
+    <tr>
+      <th> </th>
+      <th>provider</th>
+      <th>thumbnail</th>
+      <th>placeholderCanvas</th>
+      <th>accompanyingCanvas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Collection</td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>Manifest</td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/recommended.png" alt="recommended" title="Recommended" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>Canvas</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" />*</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" />*</td>
+    </tr>
+    <tr>
+      <td>Annotation</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>AnnotationPage</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Range</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+    </tr>
+    <tr>
+      <td>AnnotationCollection</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+    <tr>
+      <td>Content Resources</td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>*A Canvas that is the value of a <code class="language-plaintext highlighter-rouge">placeholderCanvas</code> or <code class="language-plaintext highlighter-rouge">accompanyingCanvas</code> property may not have either of those properties itself.<br /></p>
+
+<p><strong>Technical Properties</strong></p>
+
+<table class="api-table" id="table-reqs-2">
+  <thead>
+    <tr>
+      <th> </th>
+      <th>id</th>
+      <th>type</th>
+      <th>format</th>
+      <th>profile</th>
+      <th>height</th>
+      <th>width</th>
+      <th>duration</th>
+      <th>viewingDirection</th>
+      <th>behavior</th>
+      <th>timeMode</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Collection</td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/required.png" alt="required" title="Required" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/not_allowed.png" alt="not allowed" title="Not allowed" /></td>
+      <td><img src="/api/assets/images/icons/optional.png" alt="optional" title="Optional" /></td>
+      <td><img src="/ap

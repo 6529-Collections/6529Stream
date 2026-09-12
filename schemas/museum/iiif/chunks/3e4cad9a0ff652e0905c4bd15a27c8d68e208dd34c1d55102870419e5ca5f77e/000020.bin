@@ -1,0 +1,93 @@
+ highlighter-rouge">structures</code> property.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and the <code class="language-plaintext highlighter-rouge">type</code> <em class="rfc">must</em> be <code class="language-plaintext highlighter-rouge">Range</code>.</p>
+
+<ul>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">structures</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">structures</code> on a Manifest. The first hierarchy <em class="rfc">should</em> be presented to the user by default, and further hierarchies <em class="rfc">should</em> be able to be selected as alternative structures by the user.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">structures</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">structures</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"structures"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/range/1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Range"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">...</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="annotations">
+        
+        
+          annotations <a href="#annotations" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>An ordered list of Annotation Pages that contain commentary or other Annotations about this resource, separate from the Annotations that are used to paint content on to a Canvas. The <code class="language-plaintext highlighter-rouge">motivation</code> of the Annotations <em class="rfc">must not</em> be <code class="language-plaintext highlighter-rouge">painting</code>, and the target of the Annotations <em class="rfc">must</em> include this resource or part of it.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have at least the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">annotations</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">annotations</code> on a Manifest,.</li>
+  <li>A Canvas <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">annotations</code> on a Canvas.</li>
+  <li>A Range <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">annotations</code> on a Range.</li>
+  <li>A content resource <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property with at least one item.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">annotations</code> on a content resource.</li>
+  <li>Other types of resource <em class="rfc">must not</em> have the <code class="language-plaintext highlighter-rouge">annotations</code> property.<br />
+Clients <em class="rfc">should</em> ignore <code class="language-plaintext highlighter-rouge">annotations</code> on other types of resource.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"annotations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/annotationPage/1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">...</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="35-values">
+        
+        
+          3.5. Values <a href="#35-values" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+      <h5 id="values-for-motivation">
+        
+        
+          Values for motivation <a href="#values-for-motivation" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>This specification defines two values for the Web Annotation property of <code class="language-plaintext highlighter-rouge">motivation</code>, or <code class="language-plaintext highlighter-rouge">purpose</code> when used on a Specific Resource or Textual Body.</p>
+
+<p>While any resource <em class="rfc">may</em> be the <code class="language-plaintext highlighter-rouge">target</code> of an Annotation, this specification defines only motivations for Annotations that target Canvases. These motivations allow clients to determine how the Annotation should be rendered, by distinguishing between Annotations that provide the content of the Canvas, from ones with externally defined motivations which are typically comments about the Canvas.</p>
+
+<p>Additional motivations may be added to the Annotation to further clarify the intent, drawn from <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">extensions</a> or other sources. Clients <em class="rfc">must</em> ig

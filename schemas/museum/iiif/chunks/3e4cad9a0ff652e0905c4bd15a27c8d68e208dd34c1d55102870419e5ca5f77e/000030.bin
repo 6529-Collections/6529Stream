@@ -1,0 +1,56 @@
+>may</em> be described by appending a <code class="language-plaintext highlighter-rouge">t=</code> fragment to the end of the Canvas’s URI. Spatial and temporal fragments <em class="rfc">may</em> be combined, using an <code class="language-plaintext highlighter-rouge">&amp;</code> character between them, and the temporal dimension <em class="rfc">should</em> come first. It is an error to select a region using a dimension that is not defined by the Canvas, such as a temporal region of a Canvas that only has height and width dimensions.</p>
+
+<p>Canvases <em class="rfc">may</em> be treated as content resources for the purposes of annotating on to other Canvases. For example, a Canvas (Canvas A) with a video resource and Annotations representing subtitles or captions may be annotated on to another Canvas (Canvas B). This pattern maintains the correct spatial and temporal alignment of Canvas A’s content relative to Canvas B’s dimensions.</p>
+
+<p>Renderers <em class="rfc">must</em> scale content into the space represented by the Canvas, and <em class="rfc">should</em> follow any <code class="language-plaintext highlighter-rouge">timeMode</code> value provided for time-based media. If the Canvas represents a view of a physical object, the spatial dimensions of the Canvas <em class="rfc">should</em> be the same scale as that physical object, and content <em class="rfc">should</em> represent only the object.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="c1">// Metadata about this canvas</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/p1"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"none"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"p. 1"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"height"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"width"</span><span class="p">:</span><span class="w"> </span><span class="mi">750</span><span class="p">,</span><span class="w">
+
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/content/p1/1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="c1">// Painting Annotations on the Canvas are included here</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+
+  </span><span class="nl">"annotations"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/comments/p1/1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="c1">// Non-Painting Annotations on the Canvas are included here</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="54-range">
+        
+        
+          5.4. Range <a href="#54-range" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Ranges are used to represent structure within an object beyond the default order of the Canvases in the <code class="language-plaintext highlighter-rouge">items</code> property of the Manifest, such as newspaper sections or articles, chapters within a book, or movements within a piece of music. Ranges can include Canvases, parts of Canvases, or other Ranges, creating a tree structure like a table of contents.</p>
+
+<p>The intent of adding a Range to the Manifest is to allow the client to display a linear or hierarchical navigation interface to enable the user to quickly move through the object’s content. Clients <em class="rfc">should</em> present only Ranges that have the <code class="language-plaintext highlighter-rouge">label</code> property and do not have a <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">no-nav</code> to the user. Clients <em class="rfc">should not</em> render Canvas labels as part of the navigation, and a Range that wraps the Canvas <em class="rfc">must</em> be created if this is the desired presentation.</p>
+
+<p>If there is no Range that has the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">sequence</code>, and the Manifest does not have the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">unordered</code>, then the client <em class="rfc">should</em> treat the order of the Canvases in the Manifest’s <code class="language-plaintext highlighter-rouge">items</code> array as the default order. If there is one Range that has the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">sequence</code>, then the client <em class="rfc">must</em> instead use this Range for the ordering. If there is more than one Range that has the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">sequence</code>, for example a second Range to represent an alternative ordering of the pages of a manuscript, the first Range <em class="rfc">should</em> be used as the default and the others <em class="rfc">should</em> be able to be selected. Ranges that have the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">sequence</code> <em class="rfc">must</em> be directly within the <code class="language-plaintext highlighter-rouge">structures</code> property of the Manifest, and <em class="rfc">must not</em> be <a href="/api/presentation/3.0/#12-terminology">embedded</a> or <a href="/api/presentation/3.0/#12-terminology">referenced</a> within other Ranges. These Ranges may have limited hierarchical nesting, but clients are not expected to traverse very deep structures in determining the default order. If this Range includes parts of Canvases, then these parts are the content to render by default and would generate separate entries in a navi

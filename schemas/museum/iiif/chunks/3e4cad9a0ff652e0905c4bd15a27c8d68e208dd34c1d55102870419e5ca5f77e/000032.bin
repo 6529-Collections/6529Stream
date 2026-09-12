@@ -1,0 +1,74 @@
+"p">,</span><span class="w">
+              </span><span class="nl">"selector"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"FragmentSelector"</span><span class="p">,</span><span class="w">
+                </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"xywh=0,0,750,300"</span><span class="w">
+              </span><span class="p">}</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+          </span><span class="p">]</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/canvas/backCover"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Canvas"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="55-annotation-page">
+        
+        
+          5.5. Annotation Page <a href="#55-annotation-page" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Association of Images and other content with their respective Canvases is done via Annotations. Traditionally Annotations are used for associating commentary with the resource the Annotation’s text or body is about, the <a href="http://w3.org/TR/annotation-model/" title="Web Annotation Model">Web Annotation</a> model allows any resource to be associated with any other resource, or parts thereof, and it is reused for both commentary and painting resources on the Canvas. Other resources beyond images might include the full text of the object, musical notations, musical performances, diagram transcriptions, commentary Annotations, tags, video, data and more.</p>
+
+<p>These Annotations are collected together in Annotation Page resources, which are included in the <code class="language-plaintext highlighter-rouge">items</code> property from the Canvas. Each Annotation Page can be <a href="/api/presentation/3.0/#12-terminology">embedded</a> in its entirety, if the Annotations should be processed as soon as possible when the user navigates to that Canvas, or a reference to an external page. This reference <em class="rfc">must</em> include <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code>, <em class="rfc">must not</em> include <code class="language-plaintext highlighter-rouge">items</code> and <em class="rfc">may</em> include other properties, such as <code class="language-plaintext highlighter-rouge">behavior</code>. All of the Annotations in the Annotation Page <em class="rfc">should</em> have the Canvas as their <code class="language-plaintext highlighter-rouge">target</code>.  Clients <em class="rfc">should</em> process the Annotation Pages and their items in the order given in the Canvas.  Publishers may choose to expedite the processing of <a href="/api/presentation/3.0/#12-terminology">embedded</a> Annotation Pages by ordering them before external pages, which will need to be dereferenced by the client.</p>
+
+<p>An Annotation Page <em class="rfc">must</em> have an <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URI given in <code class="language-plaintext highlighter-rouge">id</code>, and <em class="rfc">may</em> have any of the other properties defined in this specification or the Web Annotation specification. The Annotations are listed in the <code class="language-plaintext highlighter-rouge">items</code> property of the Annotation Page.</p>
+
+<p class="warning"><strong>Incompatibility Warning</strong><br />
+The definition of <code class="language-plaintext highlighter-rouge">label</code> in the Web Annotation specification does not produce <abbr title="JavaScript Object Notation">JSON</abbr> conformant with the structure defined in this specification for languages. Given the absolute requirement for internationalized labels and the strong desire for consistently handling properties, the <code class="language-plaintext highlighter-rouge">label</code> property on Annotation model classes does not conform to the string requirement of the Web Annotation Data Model.  This <a href="https://github.com/w3c/web-annotation/issues/437">issue has been filed with the W3C</a> and will hopefully be addressed in a future version of the standard.</p>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"@context"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/presentation/3/context.json"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/p1"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AnnotationPage"</span><span class="p">,</span><span class="w">
+
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/p1/a1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Annotation"</span><span class="w">
+      </span><span class="c1">// ...</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/book1/annopage/p1/a2"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Annotation"</span><span class="w">
+      </span><span class="c1">// ...</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h3 id="56-annotation">
+        
+        
+          5.6. Annotation <a href="#56-annotation" class="anchorClass"></a>
+        
+        
+      </h3>
+    
+
+<p>Annotations follow the <a href="http://w3.org/TR/annotation-model/" title="Web Annotation Model">Web Annotation</a> data model. The description provided here is a summary plus any <abbr title="International Image Interoperability Framework">IIIF</abbr> specific requirements. The W3C standard is the official documentation.</p>
+
+<p>Annotations <em class="rfc">must</em> have their own <abbr title="Hypertext Transfer Protocol">HTTP</abbr>(S) URIs, conveyed in the <code class="language-plaintext highlighter-rouge">id</code> property. The <abbr title="JSON for Linking Data">JSON-LD</abbr> description of the Annotation <em class="rfc">should</em> be returned if the URI is dereferenced, according to the <a href="http://w3.org/TR/annotation-protocol/" title="Web Annotation Protocol">Web Annotation Protocol</a>.</p>
+
+<p>When Annotations are used to associate content resources with a Canvas, the content resource is linked in the

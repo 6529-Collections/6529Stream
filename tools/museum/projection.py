@@ -202,7 +202,7 @@ def project_fixture(state, selection_bytes: bytes, plan_bytes: bytes, *, selecti
             references.append(assertion["object"]["entity"])
         references.extend(loads(e)["reviewer"] for e in claim.review_evidence)
     selected_entities, _ = entity_index(tuple(declarations), selected_rows, tuple(references), frozenset(external))
-    policy = loads(selection_bytes)
+    policy = loads(selection_bytes, maximum=524288)
     specializations = profile.content_specializations(selection, entities, policy)
     resolved_classes = {identifier: classes.get(value["kind"]) for identifier, (value, _) in entities.items()}
     resolved_classes.update({identifier: value["resourceClass"] for identifier, value in specializations.items()})

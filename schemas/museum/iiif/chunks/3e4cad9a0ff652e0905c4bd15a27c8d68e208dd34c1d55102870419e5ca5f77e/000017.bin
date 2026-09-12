@@ -1,0 +1,80 @@
+ class="rfc">should</em> then check the <code class="language-plaintext highlighter-rouge">services</code> property on the top-most resource for an expanded definition.  If the service is not present in the <code class="language-plaintext highlighter-rouge">services</code> list, and the client requires more information in order to use the service, then it <em class="rfc">should</em> dereference the <code class="language-plaintext highlighter-rouge">id</code> (or <code class="language-plaintext highlighter-rouge">@id</code>) of the service in order to retrieve a service description.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each object <em class="rfc">must</em> a service resource, as described above.</p>
+
+<ul>
+  <li>A Collection <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">services</code> property, if it is the topmost Collection in a response document.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">services</code> on a Collection.</li>
+  <li>A Manifest <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">services</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">services</code> on a Manifest.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"services"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"@id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/auth/login"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"@type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AuthCookieService1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/auth/1/login"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Login to Example Institution"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"service"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"@id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/iiif/auth/token"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"@type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AuthTokenService1"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"http://iiif.io/api/auth/1/token"</span><span class="w">          
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="seealso">
+        
+        
+          seeAlso <a href="#seealso" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A machine-readable resource such as an <abbr title="eXtensible Markup Language">XML</abbr> or <abbr title="Resource Description Framework">RDF</abbr> description that is related to the current resource that has the <code class="language-plaintext highlighter-rouge">seeAlso</code> property. Properties of the resource should be given to help the client select between multiple descriptions (if provided), and to make appropriate use of the document. If the relationship between the resource and the document needs to be more specific, then the document should include that relationship rather than the <abbr title="International Image Interoperability Framework">IIIF</abbr> resource. Other <abbr title="International Image Interoperability Framework">IIIF</abbr> resources are also valid targets for <code class="language-plaintext highlighter-rouge">seeAlso</code>, for example to link to a Manifest that describes a related object. The URI of the document <em class="rfc">must</em> identify a single representation of the data in a particular format. For example, if the same data exists in <abbr title="JavaScript Object Notation">JSON</abbr> and <abbr title="eXtensible Markup Language">XML</abbr>, then separate resources should be added for each representation, with distinct <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">format</code> properties.</p>
+
+<p>The value <em class="rfc">must</em> be an array of <abbr title="JavaScript Object Notation">JSON</abbr> objects. Each item <em class="rfc">must</em> have the <code class="language-plaintext highlighter-rouge">id</code> and <code class="language-plaintext highlighter-rouge">type</code> properties, and <em class="rfc">should</em> have the <code class="language-plaintext highlighter-rouge">label</code>, <code class="language-plaintext highlighter-rouge">format</code> and <code class="language-plaintext highlighter-rouge">profile</code> properties.</p>
+
+<ul>
+  <li>Any resource type <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">seeAlso</code> property with at least one item.<br />
+Clients <em class="rfc">may</em> process <code class="language-plaintext highlighter-rouge">seeAlso</code> on any resource type.</li>
+</ul>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"seeAlso"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/library/catalog/book1.xml"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Dataset"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"label"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"en"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"Bibliographic Description in XML"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"format"</span><span class="p">:</span><span class="w"> </span><span class="s2">"text/xml"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"profile"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://example.org/profiles/bibliographic"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h4 id="332-internal-links">
+        
+        
+          3.3.2. Internal Links <a href="#332-internal-links" class="anchorClass"></a>
+        
+        
+      </h4>
+    
+      <h5 id="pa

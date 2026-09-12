@@ -1,0 +1,82 @@
+vases are like this, then page turning is not possible, so simply use <code class="language-plaintext highlighter-rouge">individuals</code> instead. Disjoint with <code class="language-plaintext highlighter-rouge">paged</code> and <code class="language-plaintext highlighter-rouge">non-paged</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">non-paged</code></td>
+      <td>Valid only on Canvases, where the Canvas has at least <code class="language-plaintext highlighter-rouge">height</code> and <code class="language-plaintext highlighter-rouge">width</code> dimensions. Canvases that have this behavior <em class="rfc">must not</em> be presented in a page turning interface, and <em class="rfc">must</em> be skipped over when determining the page order. This behavior <em class="rfc">must</em> be ignored if the current Manifest does not have the <code class="language-plaintext highlighter-rouge">behavior</code> value <code class="language-plaintext highlighter-rouge">paged</code>. Disjoint with <code class="language-plaintext highlighter-rouge">paged</code> and <code class="language-plaintext highlighter-rouge">facing-pages</code>.</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>Collection Behaviors</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">multi-part</code></td>
+      <td>Valid only on Collections. Collections that have this behavior consist of multiple Manifests or Collections which together form part of a logical whole or a contiguous set, such as multi-volume books or a set of journal issues. Clients might render these Collections as a table of contents rather than with thumbnails, or provide viewing interfaces that can easily advance from one member to the next. Disjoint with <code class="language-plaintext highlighter-rouge">together</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">together</code></td>
+      <td>Valid only on Collections. A client <em class="rfc">should</em> present all of the child Manifests to the user at once in a separate viewing area with its own controls. Clients <em class="rfc">should</em> catch attempts to create too many viewing areas. This behavior <em class="rfc">should not</em> be interpreted as applying to the members of any child resources. Disjoint with <code class="language-plaintext highlighter-rouge">multi-part</code>.</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>Range Behaviors</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">sequence</code></td>
+      <td>Valid only on Ranges, where the Range is <a href="/api/presentation/3.0/#12-terminology">referenced</a> in the <code class="language-plaintext highlighter-rouge">structures</code> property of a Manifest. Ranges that have this behavior represent different orderings of the Canvases listed in the <code class="language-plaintext highlighter-rouge">items</code> property of the Manifest, and user interfaces that interact with this order <em class="rfc">should</em> use the order within the selected Range, rather than the default order of <code class="language-plaintext highlighter-rouge">items</code>. Disjoint with <code class="language-plaintext highlighter-rouge">thumbnail-nav</code> and <code class="language-plaintext highlighter-rouge">no-nav</code>.</td>
+    </tr>
+    <tr>
+      <td><code style="white-space:nowrap;" class="language-plaintext highlighter-rouge">thumbnail-nav</code></td>
+      <td>Valid only on Ranges. Ranges that have this behavior <em class="rfc">may</em> be used by the client to present an alternative navigation or overview based on thumbnails, such as regular keyframes along a timeline for a video, or sections of a long scroll. Clients <em class="rfc">should not</em> use them to generate a conventional table of contents. Child Ranges of a Range with this behavior <em class="rfc">must</em> have a suitable <code class="language-plaintext highlighter-rouge">thumbnail</code> property. Disjoint with <code class="language-plaintext highlighter-rouge">sequence</code> and <code class="language-plaintext highlighter-rouge">no-nav</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">no-nav</code></td>
+      <td>Valid only on Ranges. Ranges that have this behavior <em class="rfc">must not</em> be displayed to the user in a navigation hierarchy. This allows for Ranges to be present that capture unnamed regions with no interesting content, such as the set of blank pages at the beginning of a book, or dead air between parts of a performance, that are still part of the Manifest but do not need to be navigated to directly. Disjoint with <code class="language-plaintext highlighter-rouge">sequence</code> and <code class="language-plaintext highlighter-rouge">thumbnail-nav</code>.</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td><strong>Miscellaneous Behaviors</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hidden</code></td>
+      <td>Valid on Annotation Collections, Annotation Pages, Annotations, Specific Resources and Choices. If this behavior is provided, then the client <em class="rfc">should not</em> render the resource by default, but allow the user to turn it on and off. This behavior does not inherit, as it is not valid on Collections, Manifests, Ranges or Canvases.</td>
+    </tr>
+  </tbody>
+</table>
+
+<script src="/api/assets/js/copyCodeBlock.js"></script>
+
+<div class="code-header">
+    <button class="copy-button button is-small is-primary" aria-label="Copy code to clipboard"></button>
+</div>
+
+<div class="language-json-doc highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"behavior"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"auto-advance"</span><span class="p">,</span><span class="w"> </span><span class="s2">"individuals"</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+      <h5 id="timemode">
+        
+        
+          timeMode <a href="#timemode" class="anchorClass"></a>
+        
+        
+      </h5>
+    
+
+<p>A mode associated with an Annotation that is to be applied to the rendering of any time-based media, or otherwise could be considered to have a duration, used as a body resource of that Annotation. Note that the association of <code class="language-plaintext highlighter-rouge">timeMode</code> with the Annotation means that different resources in the body cannot have different values. This specification defines the values specified in the table below. Others may be defined externally as an <a href="/api/presentation/3.0/#46-linked-data-context-and-extensions" title="Linked Data Context and Extensions">extension</a>.</p>
+
+<p>The value <em class="rfc">must</em> be a string.</p>
+
+<ul>
+  <li>An Annotation <em class="rfc">may</em> have the <code class="language-plaintext highlighter-rouge">timeMode</code> property.<br />
+Clients <em class="rfc">should</em> process <code class="language-plaintext highlighter-rouge">timeMode</code> on an Annotation.</li>
+</ul>
+
+<table class="api-table" id="table-timemode">
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">trim</code></td>
+      <td>(default, if not supplied) If the content resource has a longer duration than the duration of portion of the Canvas it is associated with, then at the end of the Canvas’s duration, the playback of the content resource <em class="rfc">must</em> also end. If the content resource has a shorter duration than the duration of the portion of the Canvas it is associated with, then, for video resources, the last frame <em class="rfc">should</em> persist on-screen until the end of the Canvas portion’s duration. For example, a video of 120 seconds annotated to a Canvas with a duration of 100 seconds wo

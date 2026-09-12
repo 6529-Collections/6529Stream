@@ -1,0 +1,81 @@
+        multihash,      0xb3c0,         draft,
+skein1024-776,                  multihash,      0xb3c1,         draft,
+skein1024-784,                  multihash,      0xb3c2,         draft,
+skein1024-792,                  multihash,      0xb3c3,         draft,
+skein1024-800,                  multihash,      0xb3c4,         draft,
+skein1024-808,                  multihash,      0xb3c5,         draft,
+skein1024-816,                  multihash,      0xb3c6,         draft,
+skein1024-824,                  multihash,      0xb3c7,         draft,
+skein1024-832,                  multihash,      0xb3c8,         draft,
+skein1024-840,                  multihash,      0xb3c9,         draft,
+skein1024-848,                  multihash,      0xb3ca,         draft,
+skein1024-856,                  multihash,      0xb3cb,         draft,
+skein1024-864,                  multihash,      0xb3cc,         draft,
+skein1024-872,                  multihash,      0xb3cd,         draft,
+skein1024-880,                  multihash,      0xb3ce,         draft,
+skein1024-888,                  multihash,      0xb3cf,         draft,
+skein1024-896,                  multihash,      0xb3d0,         draft,
+skein1024-904,                  multihash,      0xb3d1,         draft,
+skein1024-912,                  multihash,      0xb3d2,         draft,
+skein1024-920,                  multihash,      0xb3d3,         draft,
+skein1024-928,                  multihash,      0xb3d4,         draft,
+skein1024-936,                  multihash,      0xb3d5,         draft,
+skein1024-944,                  multihash,      0xb3d6,         draft,
+skein1024-952,                  multihash,      0xb3d7,         draft,
+skein1024-960,                  multihash,      0xb3d8,         draft,
+skein1024-968,                  multihash,      0xb3d9,         draft,
+skein1024-976,                  multihash,      0xb3da,         draft,
+skein1024-984,                  multihash,      0xb3db,         draft,
+skein1024-992,                  multihash,      0xb3dc,         draft,
+skein1024-1000,                 multihash,      0xb3dd,         draft,
+skein1024-1008,                 multihash,      0xb3de,         draft,
+skein1024-1016,                 multihash,      0xb3df,         draft,
+skein1024-1024,                 multihash,      0xb3e0,         draft,
+xxh-32,                         hash,           0xb3e1,         draft,      Extremely fast non-cryptographic hash algorithm
+xxh-64,                         hash,           0xb3e2,         draft,      Extremely fast non-cryptographic hash algorithm
+xxh3-64,                        hash,           0xb3e3,         draft,      Extremely fast non-cryptographic hash algorithm
+xxh3-128,                       hash,           0xb3e4,         draft,      Extremely fast non-cryptographic hash algorithm
+poseidon-bls12_381-a2-fc1,      multihash,      0xb401,         permanent,  Poseidon using BLS12-381 and arity of 2 with Filecoin parameters
+poseidon-bls12_381-a2-fc1-sc,   multihash,      0xb402,         draft,      Poseidon using BLS12-381 and arity of 2 with Filecoin parameters - high-security variant
+rdfc-1,                         ipld,           0xb403,         draft,      The result of canonicalizing an input according to RDFC-1.0 and then expressing its hash value as a multihash value.
+ssz,                            serialization,  0xb501,         draft,      SimpleSerialize (SSZ) serialization
+ssz-sha2-256-bmt,               multihash,      0xb502,         draft,      SSZ Merkle tree root using SHA2-256 as the hashing function and SSZ serialization for the block binary
+sha2-256-chunked,               multihash,      0xb510,         draft,      Hash of concatenated SHA2-256 digests of 8*2^n MiB source chunks; n = ceil(log2(source_size/(10^4 * 8MiB)))
+json-jcs,                       ipld,           0xb601,         draft,      The result of canonicalizing an input according to JCS - JSON Canonicalisation Scheme (RFC 8785)
+bittorrent-pieces-root,         multihash,      0xb702,         draft,      BitTorrent v2 pieces root hash.
+iscc,                           softhash,       0xcc01,         draft,      ISCC (International Standard Content Code) - similarity preserving hash
+zeroxcert-imprint-256,          zeroxcert,      0xce11,         draft,      0xcert Asset Imprint (root hash)
+nonstandard-sig,                varsig,         0xd000,         deprecated, Namespace for all not yet standard signature algorithms
+bcrypt-pbkdf,                   multihash,      0xd00d,         draft,      Bcrypt-PBKDF key derivation function
+es256k,                         varsig,         0xd0e7,         draft,      ES256K Signature Algorithm (secp256k1)
+bls12_381-g1-sig,               varsig,         0xd0ea,         draft,      G1 signature for BLS12-381
+bls12_381-g2-sig,               varsig,         0xd0eb,         draft,      G2 signature for BLS12-381
+eddsa,                          varsig,         0xd0ed,         draft,      Edwards-Curve Digital Signature Algorithm
+eip-191,                        varsig,         0xd191,         draft,      EIP-191 Ethereum Signed Data Standard
+jwk_jcs-pub,                    key,            0xeb51,         draft,      JSON object containing only the required members of a JWK (RFC 7518 and RFC 7517) representing the public key. Serialisation based on JCS (RFC 8785)
+ed2k,                           multihash,      0xed20,         draft,      eDonkey2000 hash.
+fil-commitment-unsealed,        filecoin,       0xf101,         permanent,  Filecoin piece or sector data commitment merkle node/root (CommP & CommD)
+fil-commitment-sealed,          filecoin,       0xf102,         permanent,  Filecoin sector data commitment merkle node/root - sealed and replicated (CommR)
+shelter-contract-manifest,      shelter,        0x511e00,       draft,      Shelter protocol contract manifest
+shelter-contract-text,          shelter,        0x511e01,       draft,      Shelter protocol contract text
+shelter-contract-data,          shelter,        0x511e02,       draft,      Shelter protocol contract data (contract chain)
+shelter-file-manifest,          shelter,        0x511e03,       draft,      Shelter protocol file manifest
+shelter-file-chunk,             shelter,        0x511e04,       draft,      Shelter protocol file chunk
+plaintextv2,                    multiaddr,      0x706c61,       draft,
+holochain-adr-v0,               holochain,      0x807124,       draft,      Holochain v0 address    + 8 R-S (63 x Base-32)
+holochain-adr-v1,               holochain,      0x817124,       draft,      Holochain v1 address    + 8 R-S (63 x Base-32)
+holochain-key-v0,               holochain,      0x947124,       draft,      Holochain v0 public key + 8 R-S (63 x Base-32)
+holochain-key-v1,               holochain,      0x957124,       draft,      Holochain v1 public key + 8 R-S (63 x Base-32)
+holochain-sig-v0,               holochain,      0xa27124,       draft,      Holochain v0 signature  + 8 R-S (63 x Base-32)
+holochain-sig-v1,               holochain,      0xa37124,       draft,      Holochain v1 signature  + 8 R-S (63 x Base-32)
+skynet-ns,                      namespace,      0xb19910,       draft,      Skynet Namespace
+arweave-ns,                     namespace,      0xb29910,       draft,      Arweave Namespace
+subspace-ns,                    namespace,      0xb39910,       draft,      Subspace Network Namespace
+kumandra-ns,                    namespace,      0xb49910,       draft,      Kumandra Network Namespace
+massa,                          namespace,      0xb59910,       draft,      Massa blockchain ecosystem
+massa-mainnet,                  namespace,      0xb59911,       draft,      Massa mainnet network
+massa-buildnet,                 namespace,      0xb59912,       draft,      Massa buildnet network
+massa-deweb,                    namespace,      0xb59913,       draft,      Massa DeWeb decentralized web
+massa-gossip,                   namespace,      0xb59914,       draft,      Massa Gossip decentralized messaging
+massa-mns,                      namespace,      0xb59915,       draft,      Massa Name Service target
+massa-sc,                       namespace,      0xb59916,       d

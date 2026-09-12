@@ -170,7 +170,7 @@ def project_premis_fixture(state, selection_bytes, plan_bytes, premis_plan_bytes
     if (not isinstance(targets, list) or not 1 <= len(targets) <= 512
             or any(not isinstance(v, str) for v in targets) or len(set(targets)) != len(targets)):
         raise MuseumError("PREMIS object selection invalid")
-    policy = loads(selection_bytes)
+    policy = loads(selection_bytes, maximum=524288)
     if not set(FIELDS.values()).issubset(policy["singleValuedRelations"]):
         raise MuseumError("PREMIS facts require single-valued conflict policy")
     selection = select_canonical_fixture(state, selection_bytes, policy_hash=selection_hash, profile_hash=profile_hash)
