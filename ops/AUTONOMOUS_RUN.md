@@ -25,6 +25,8 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 The latest museum increments provide review selection, attributed resource
 projection and reproducible offline packages (`f5a23d72`, `ff1a899d`,
 `66aebd4a`). All 104 combined tests pass again locally with pinned dependencies.
+The 104-test source and all four generators also pass Windows and Linux CI
+at `dac4d4ed`.
 Full authenticated-chain exports and institutional acceptance remain open.
 Complete archival artifact coverage is integrated as `880bac6d`, with 26
 reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort

@@ -76,7 +76,8 @@ These increments add [review literals](../docs/museum-review-literal.md),
 [resource projection](../docs/museum-resource-projection.md) and
 [offline package reproduction](../docs/museum-offline-resource-package.md).
 The earlier 65-test source at `49b3e072` passed CI on Windows and Linux. The new
-104-test source and four generators need their own platform CI evidence.
+104-test source and all four generators also pass both platforms at `dac4d4ed`
+([run 34697427952](https://github.com/6529-Collections/6529Stream/actions/runs/34697427952)).
 Complete mappings, including a faithful abstract-work representation, BagIt/
 OCFL packaging, real-chain authority and institutional ingests remain in scope.
 

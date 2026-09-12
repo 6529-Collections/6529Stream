@@ -26,8 +26,9 @@ museum tests pass again in the root's pinned environment. Each increment has
 independent review and an exact source-to-integration bridge. These tools use
 explicit public fixtures; authenticated chain adapters, complete cross-format
 mapping and institutional acceptance remain open. The prior 65-test source
-at `49b3e072` passed museum CI on both Windows and Linux; the new 104-test
-source needs its own platform CI result.
+at `49b3e072` passed museum CI on both Windows and Linux. The new 104-test
+source at `dac4d4ed` also passes both platforms, including all four generators
+([run 34697427952](https://github.com/6529-Collections/6529Stream/actions/runs/34697427952)).
 
 The developing [current metadata record host](../docs/integrations/metadata-records.md),
 integrated as `72c4b099`,
@@ -132,7 +133,7 @@ record and exporter work alongside contract engineering; all twelve museum
 gates remain required for full-v1 acceptance. Adoption is not implementation
 or institutional-conformance evidence.
 
-The latest remote CI on `266fc055` remains red. It identified a default-mode
+Earlier remote CI on `266fc055` was red. It identified a default-mode
 artist hash-helper stack limit and a separate full current-profile Yul compiler
 failure; Slither provenance and release bundles also need their planned refresh.
 The hash-helper repair is integrated as `e43dbed5`, with exact preimage vectors
