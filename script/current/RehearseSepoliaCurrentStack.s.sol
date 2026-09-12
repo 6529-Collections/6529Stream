@@ -37,6 +37,7 @@ contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
         address selectedArtist = vm.envAddress("STREAM_ARTIST");
         address platform = vm.envAddress("STREAM_PLATFORM_SIGNER");
         localDevelopment = false;
+        _loadOperatorConfiguration();
         address upstream = 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B;
         require(upstream.code.length != 0, "actual coordinator code required");
         // This is explicit fork funding, never a claim about the account's live balance.
@@ -59,7 +60,11 @@ contract RehearseSepoliaCurrentStack is StreamCurrentStackDeployment {
         require(balance == 0.005 ether && subscriptionOwner == deployer, "subscription readback");
         require(consumers.length == 1 && consumers[0] == address(provider), "consumer readback");
         require(StreamEntropyProviderVRF(address(provider)).subscriptionId() == subId, "adapter subId");
-        require(executor.genesisInitialized(), "genesis incomplete");
+        require(executor.genesisInitialized(), "foundation incomplete");
+        require(
+            StreamCurrentStackPlan.readPointer(core, keccak256("ARTIST_REGISTRY")).target == address(0),
+            "rehearsal deploys products without claiming activation"
+        );
         return (address(core), address(provider), subId);
     }
 }

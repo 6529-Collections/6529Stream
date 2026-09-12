@@ -14,6 +14,8 @@ import "../../smart-contracts/domains/artist/StreamArtistConsentFinalityLifecycl
 import "../../smart-contracts/domains/revenue/StreamRevenueResolver.sol";
 import "../../smart-contracts/domains/revenue/StreamRoyaltyResolver.sol";
 import "../../smart-contracts/domains/metadata/StreamMetadataRouter.sol";
+import "../../smart-contracts/domains/preservation/StreamArweaveCheckpointVerifier.sol";
+import "../../smart-contracts/domains/preservation/StreamArchivalCoverage.sol";
 
 interface ArtistDeploymentVm {
     function getNonce(address account) external view returns (uint64);
@@ -31,6 +33,12 @@ abstract contract StreamArtistSuiteDeployment {
     StreamMetadataRouter internal router;
     StreamRoyaltyResolver internal royalty;
     T.SuiteConfiguration internal artistSuite;
+    StreamArweaveCheckpointVerifier internal archivalCheckpoint;
+    StreamArchivalCoverage internal archivalCoverage;
+    StreamArchivalTypes.Observer[] internal archivalObservers;
+    uint8 internal archivalQuorum;
+    uint256 internal archivalSignatureGas;
+    uint256 internal archivalReadGas;
 
     function _artistDeploymentSender() internal view virtual returns (address);
 
@@ -48,6 +56,22 @@ abstract contract StreamArtistSuiteDeployment {
         s.roleRegistry = roles_;
         s.validator = address(new StreamArtistRegistryValidatorBase());
         s.primaryRevenueClass = PRIMARY_REVENUE_CLASS;
+        // The Executor foundation must already bind its actual RoleRegistry.
+        // Observer accounts and organization commitments come from explicit operator
+        // configuration; test private keys are never deployment defaults.
+        IStreamGasParameterHost.GasParameterConfig memory signatureGas =
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARCHIVAL_ERC1271_VERIFY_GAS", archivalSignatureGas, 90_000, 2
+            );
+        archivalCheckpoint = new StreamArweaveCheckpointVerifier(
+            executor_, archivalObservers, archivalQuorum, signatureGas
+        );
+        archivalCoverage = new StreamArchivalCoverage(
+            core_, executor_, roles_, address(archivalCheckpoint), signatureGas,
+            IStreamGasParameterHost.GasParameterConfig(
+                "ARCHIVAL_DEPENDENCY_READ_GAS", archivalReadGas, 50_000, 2
+            )
+        );
         ArtistDeploymentVm prediction =
             ArtistDeploymentVm(address(uint160(uint256(keccak256("hevm cheat code")))));
         uint256 nonce = prediction.getNonce(_artistDeploymentSender());
@@ -59,6 +83,7 @@ abstract contract StreamArtistSuiteDeployment {
             manager_,
             nextCoordinator,
             executor_,
+            address(archivalCoverage),
             deploymentHash,
             "urn:6529stream:development:artist",
             keccak256("development artist module")

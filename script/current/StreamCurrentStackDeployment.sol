@@ -5,6 +5,7 @@ import "../../smart-contracts/core/StreamCore.sol";
 import "./StreamArtistSuiteDeployment.sol";
 import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "./StreamArtistActivationPlan.sol";
+import "./StreamGovernanceGenesisPlan.sol";
 import "./StreamRevealActivationPlan.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
@@ -27,13 +28,19 @@ import "./StreamGenesisManifestPlan.sol";
 import "./DevelopmentEntropyProvider.sol";
 import "../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 
+interface CurrentOperatorConfigurationVm {
+    function envBytes(string calldata key) external view returns (bytes memory);
+    function envOr(string calldata key, address defaultValue) external view returns (address);
+    function envOr(string calldata key, uint256 defaultValue) external view returns (uint256);
+}
+
 /// @notice Reusable development/testnet genesis assembly for the actual current stack.
 abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     bytes32 internal constant PHASE = keccak256("current-stack fixed price");
     bytes32 internal constant AUCTION_PHASE = keccak256("current-stack auction");
     bytes32 internal constant ERC20_PHASE = keccak256("current-stack ERC20 fixed price");
     bytes32 internal constant DEPLOYMENT_HASH =
-        keccak256("current-stack development deployment v1; unaudited; not release evidence");
+        keccak256("current-stack staged engineering deployment v2; unaudited; not release evidence");
     bytes32 internal constant REGISTRY_HASH = keccak256("current-stack development registry v1");
     address internal deployer;
     address internal protocol;
@@ -53,9 +60,10 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     StreamSplitFactory internal factory;
     StreamAssetPolicyRegistry internal assetPolicy;
     StreamRevenueEscrow internal revenueEscrow;
-    bytes32 internal artistActivationId;
-    uint64 internal artistActivationNotBefore;
-    bytes internal encodedArtistActivationPlan;
+    address internal configuredGovernanceRoot;
+    address[] internal configuredGuardians;
+    bytes internal encodedFoundationPlan;
+    GovernanceActionPolicyEntry[] internal foundationPolicies;
     StreamEntropyCoordinator internal entropy;
     IStreamEntropyProvider internal provider;
     address internal artist;
@@ -63,15 +71,56 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     bytes32 internal profile;
     address[] internal guardians;
 
+    /// @dev Public configuration only; no observer private key is read or generated.
+    function _loadOperatorConfiguration() internal {
+        CurrentOperatorConfigurationVm configVm = CurrentOperatorConfigurationVm(
+            address(uint160(uint256(keccak256("hevm cheat code"))))
+        );
+        configuredGovernanceRoot = configVm.envOr("STREAM_GOVERNANCE_ROOT", address(0));
+        if (configuredGovernanceRoot != address(0)) {
+            configuredGuardians = abi.decode(configVm.envBytes("STREAM_GOVERNANCE_GUARDIANS"), (address[]));
+        } else {
+            require(localDevelopment, "explicit governance root required");
+        }
+        StreamArchivalTypes.Observer[] memory observers = abi.decode(
+            configVm.envBytes("STREAM_ARCHIVAL_OBSERVERS"), (StreamArchivalTypes.Observer[])
+        );
+        uint256 quorum = configVm.envOr("STREAM_ARCHIVAL_QUORUM", uint256(2));
+        require(quorum >= 2 && quorum <= observers.length && observers.length <= 8, "invalid observer quorum");
+        address prior;
+        for (uint256 i; i < observers.length; ++i) {
+            require(observers[i].account > prior && observers[i].organizationId != bytes32(0), "invalid observer set");
+            for (uint256 j; j < i; ++j) {
+                require(observers[i].organizationId != observers[j].organizationId, "duplicate observer organization");
+            }
+            archivalObservers.push(observers[i]);
+            prior = observers[i].account;
+        }
+        archivalQuorum = uint8(quorum);
+        archivalSignatureGas = configVm.envOr("STREAM_ARCHIVAL_SIGNATURE_GAS", uint256(400_000));
+        archivalReadGas = configVm.envOr("STREAM_ARCHIVAL_READ_GAS", uint256(150_000));
+        require(archivalSignatureGas >= 90_000 && archivalReadGas >= 50_000, "archival gas below floor");
+    }
+
     function _deployCurrentStack(address artist_, address platform) internal {
         artist = artist_;
         executor = new StreamGovernanceExecutor(deployer);
-        governanceRoot = new StreamGovernanceActor(deployer);
-        guardians = new address[](2);
-        guardians[0] = address(new StreamGovernanceActor(deployer));
-        guardians[1] = address(new StreamGovernanceActor(deployer));
-        if (guardians[0] > guardians[1]) {
-            (guardians[0], guardians[1]) = (guardians[1], guardians[0]);
+        if (configuredGovernanceRoot == address(0)) {
+            require(localDevelopment, "explicit governance root required");
+            governanceRoot = new StreamGovernanceActor(deployer);
+            guardians = new address[](2);
+            guardians[0] = address(new StreamGovernanceActor(deployer));
+            guardians[1] = address(new StreamGovernanceActor(deployer));
+        } else {
+            // The address may be a Safe. No development-actor method is called on it.
+            governanceRoot = StreamGovernanceActor(payable(configuredGovernanceRoot));
+            guardians = configuredGuardians;
+            require(guardians.length >= 2, "redundant guardians required");
+        }
+        for (uint256 i = 1; i < guardians.length; ++i) {
+            for (uint256 j = i; j > 0 && guardians[j - 1] > guardians[j]; --j) {
+                (guardians[j - 1], guardians[j]) = (guardians[j], guardians[j - 1]);
+            }
         }
         roles = new StreamRoleRegistry(address(executor));
         registry = new StreamModuleRegistry(
@@ -87,9 +136,9 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
             _deploymentGasParameters()
         );
         manifest = new StreamSystemManifest(address(core), address(executor));
+        _initializeGovernanceFoundation();
         ledger = new StreamMintLedger();
         manager = new StreamMintManager(core, ledger, IERC165(address(registry)));
-        ledger.setLedgerWriter(address(manager), true);
         assetPolicy = new StreamAssetPolicyRegistry(address(executor));
         factory = new StreamSplitFactory(assetPolicy, address(executor), _walletGasConfigs());
         _deployArtistSuite(
@@ -146,8 +195,13 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         auction.transferOwnership(address(executor));
         // Manager remains deployer-owned through artist consent and phase activation.
         // Artist onboarding and phase setup must finish before their separate ownership handoff.
-        _initializeProductGenesis();
-        _scheduleArtistActivation();
+        // Stop at deployed, unselected products. Ordinary catalog, registration,
+        // pointer and configuration stages are separately saved and delayed.
+        require(executor.genesisInitialized(), "foundation incomplete");
+        require(
+            StreamCurrentStackPlan.readPointer(core, keccak256("ARTIST_REGISTRY")).target == address(0),
+            "products must remain unactivated"
+        );
     }
 
     function _artistDeploymentSender() internal view override returns (address) {
@@ -169,130 +223,92 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         );
     }
 
-    /// @dev One hour of submission headroom beyond the onchain 48-hour minimum.
-    ///      Live runners pin this value before simulation and retain the scheduled result.
-    function _artistActivationTimestamp() internal view virtual returns (uint64) {
-        return uint64(block.timestamp + 49 hours);
-    }
-
-    function _scheduleArtistActivation() private {
-        StreamArtistActivationPlan.Plan memory plan = StreamRevealActivationPlan.buildWithArtist(
-            roles,
-            manager,
-            deployer,
-            StreamRevealActivationPlan.Principals(
-                address(governanceRoot), address(governanceRoot), address(governanceRoot)
-            )
+    function _initializeGovernanceFoundation() private {
+        StreamGovernanceGenesisPlan.Configuration memory c;
+        c.executor = executor;
+        c.roles = roles;
+        c.core = core;
+        c.registry = registry;
+        c.manifest = manifest;
+        c.bootstrapAuthority = deployer;
+        c.governanceRoot = address(governanceRoot);
+        c.guardians = guardians;
+        c.deploymentHash = DEPLOYMENT_HASH;
+        c.manifestModuleHash = keccak256("development system manifest");
+        c.moduleURI = "urn:6529stream:engineering:foundation-module";
+        (address payload, bytes32 hash) = StreamGenesisManifestPlan.writePayload(
+            bytes("{\"purpose\":\"staged engineering foundation only\",\"version\":2}")
         );
-        artistActivationNotBefore = _artistActivationTimestamp();
-        require(
-            artistActivationNotBefore >= block.timestamp + 48 hours,
-            "activation submission window elapsed"
+        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate(
+            hash, "urn:6529stream:engineering:foundation:v2",
+            keccak256("development events"), keccak256("development compatibility"),
+            keccak256("development numeric ids"), keccak256("development schema"),
+            keccak256("development canonicalization"), keccak256("development spec"),
+            keccak256("development client")
         );
-        encodedArtistActivationPlan = abi.encode(plan);
-        executor.publishGovernanceCallData(plan.callDatas);
-        bytes memory result = governanceRoot.execute(
-            address(executor),
-            0,
-            abi.encodeCall(
-                executor.scheduleGovernanceBatch,
-                (
-                    1,
-                    plan.calls,
-                    plan.scopeHash,
-                    plan.oldValueHash,
-                    plan.newValueHash,
-                    artistActivationNotBefore,
-                    artistActivationNotBefore + 7 days,
-                    keccak256("current artist activation"),
-                    "urn:6529stream:development:artist-activation",
-                    DEPLOYMENT_HASH
-                )
-            )
-        );
-        artistActivationId = abi.decode(result, (bytes32));
-    }
-
-    function _initializeProductGenesis() private {
-        StreamModuleRegistration[] memory records = _moduleRecords();
-        bytes32[] memory pointerTypes = new bytes32[](records.length);
-        StreamModuleRegistration[] memory pointerRecords =
-            new StreamModuleRegistration[](records.length);
-        for (uint256 i; i < records.length; ++i) {
-            pointerRecords[i] = records[i];
-            pointerTypes[i] = _pointerType(records[i].moduleType);
+        (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches) =
+            StreamGovernanceGenesisPlan.build(c, payload, update);
+        encodedFoundationPlan = abi.encode(binding, batches);
+        for (uint256 i; i < binding.actionPolicies.length; ++i) {
+            foundationPolicies.push(binding.actionPolicies[i]);
         }
-        for (uint256 i = 1; i < pointerTypes.length; ++i) {
-            for (uint256 j = i; j > 0 && pointerTypes[j - 1] > pointerTypes[j]; --j) {
-                (pointerTypes[j - 1], pointerTypes[j]) = (pointerTypes[j], pointerTypes[j - 1]);
-                (pointerRecords[j - 1], pointerRecords[j]) =
-                (pointerRecords[j], pointerRecords[j - 1]);
+        executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
+        executor.prepareGenesis(binding, batches);
+        executor.initializeGenesis(binding, batches);
+    }
+
+    /// @notice Exact deployed product records; foundation registrations are excluded.
+    function _productRegistrations() internal view returns (StreamModuleRegistration[] memory rows) {
+        StreamModuleRegistration[] memory allRows = _moduleRecords();
+        rows = new StreamModuleRegistration[](allRows.length - 2);
+        for (uint256 i; i < rows.length; ++i) rows[i] = allRows[i + 2];
+    }
+
+    /// @notice Full initial admission intent, not one prematurely scheduled catalog batch.
+    /// @dev The operator partitions at64 entries and observes each executed catalog revision
+    ///      before preparing the next extension plus fresh manifest publication.
+    function _productPolicyAdditions() internal view returns (GovernanceActionPolicyEntry[] memory rows) {
+        GenesisBatch[] memory prototypes = new GenesisBatch[](1);
+        prototypes[0] = _initialConfigurationBatch();
+        GovernanceActionPolicyEntry[] memory allRows = _actionPolicies(prototypes);
+        uint256 count;
+        for (uint256 i; i < allRows.length; ++i) {
+            bool exists;
+            for (uint256 j; j < foundationPolicies.length; ++j) {
+                if (_policyKey(allRows[i]) != _policyKey(foundationPolicies[j])) continue;
+                require(keccak256(abi.encode(allRows[i])) == keccak256(abi.encode(foundationPolicies[j])),
+                    "foundation policy cannot be rewritten");
+                exists = true;
+                break;
             }
+            if (!exists) allRows[count++] = allRows[i];
         }
-        GenesisBatch[] memory batches = new GenesisBatch[](5);
-        batches[0].actionClass = 1;
-        (GovernanceCall[] memory registrations, bytes[] memory registrationData) =
-            StreamCurrentStackPlan.registrationCalls(registry, records);
-        batches[0].calls = new GovernanceCall[](records.length + 2);
-        batches[0].callDatas = new bytes[](records.length + 2);
-        for (uint256 i; i < records.length; ++i) {
-            batches[0].calls[i] = registrations[i];
-            batches[0].callDatas[i] = registrationData[i];
-        }
-        (batches[0].calls[records.length], batches[0].callDatas[records.length]) =
-            StreamCurrentStackPlan.createCollectionCall(core, 1, 10);
-        bytes memory data = abi.encodeCall(
-            entropy.configureCollection,
-            (1, address(provider), keccak256("collection salt"), true, uint64(100))
-        );
-        batches[0].callDatas[records.length + 1] = data;
-        batches[0].calls[records.length + 1] = _configurationCall(address(entropy), data);
-        bytes32[] memory installTypes = new bytes32[](records.length - 1);
-        StreamModuleRegistration[] memory installs =
-            new StreamModuleRegistration[](records.length - 1);
-        for (uint256 i = 1; i < records.length; ++i) {
-            installs[i - 1] = records[i];
-            installTypes[i - 1] = _pointerType(records[i].moduleType);
-        }
-        batches[1].actionClass = 3;
-        (batches[1].calls, batches[1].callDatas) =
-            StreamCurrentStackPlan.pointerCalls(core, registry, installTypes, installs);
-        batches[2].actionClass = 1;
-        batches[2].calls = new GovernanceCall[](7);
-        batches[2].callDatas = new bytes[](7);
-        data = abi.encodeCall(
-            router.setCollectionMetadata,
-            (1, "Stream Genesis", "Current stack development deployment", "", "")
-        );
-        batches[2].callDatas[0] = data;
-        batches[2].calls[0] = _configurationCall(address(router), data);
-        data = abi.encodeCall(royalty.configureCollectionRoyalty, (1, profile, uint16(690)));
-        batches[2].callDatas[1] = data;
-        batches[2].calls[1] = _configurationCall(address(royalty), data);
-        data = abi.encodeCall(
-            router.setCollectionScript,
-            (
-                1,
-                "const c=document.createElement('canvas');c.width=c.height=800;document.body.style.margin='0';document.body.append(c);const x=c.getContext('2d');x.fillStyle='#101217';x.fillRect(0,0,800,800);for(let i=0;i<32;i++){x.fillStyle='#'+tokenHash.slice(2+i,8+i);x.fillRect(30+i*23,80+(i%4)*140,18,420)}x.fillStyle='white';x.font='32px monospace';x.fillText('STREAM #'+tokenId,40,740);"
-            )
-        );
-        batches[2].callDatas[2] = data;
-        batches[2].calls[2] = _configurationCall(address(router), data);
-        data = abi.encodeCall(
-            primaryRevenue.setPrimaryProfileAssignment,
-            (PRIMARY_REVENUE_CLASS, uint8(1), uint256(1), profile, bytes32(0))
-        );
-        batches[2].callDatas[3] = data;
-        batches[2].calls[3] = _configurationCall(address(primaryRevenue), data);
-        (batches[2].calls[4], batches[2].callDatas[4]) = _escrowProducerCall(address(sale));
-        (batches[2].calls[5], batches[2].callDatas[5]) = _escrowProducerCall(address(erc20Sale));
-        (batches[2].calls[6], batches[2].callDatas[6]) = _escrowProducerCall(address(auction));
-        batches[3].actionClass = 2;
-        batches[3].calls = new GovernanceCall[](1);
-        batches[3].callDatas = new bytes[](1);
-        (batches[3].calls[0], batches[3].callDatas[0]) =
-            StreamCurrentStackPlan.freezeManifestCall(core, registry, records[1]);
-        _sealProductPlan(batches, pointerTypes, pointerRecords, records);
+        rows = new GovernanceActionPolicyEntry[](count);
+        for (uint256 i; i < count; ++i) rows[i] = allRows[i];
+    }
+
+    /// @dev Rebuild against observed selected products before scheduling. These prototypes
+    ///      collect selectors at deployment; their transition state is not a saved future plan.
+    function _initialConfigurationBatch() internal view returns (GenesisBatch memory batch) {
+        batch.actionClass = 1;
+        batch.calls = new GovernanceCall[](9);
+        batch.callDatas = new bytes[](9);
+        batch.callDatas[0] = abi.encodeCall(ledger.setLedgerWriter, (address(manager), true));
+        batch.callDatas[1] = abi.encodeCall(entropy.configureCollection,
+            (1, address(provider), keccak256("collection salt"), true, uint64(100)));
+        batch.callDatas[2] = abi.encodeCall(router.setCollectionMetadata,
+            (1, "Stream Genesis", "Staged current-stack engineering deployment", "", ""));
+        batch.callDatas[3] = abi.encodeCall(router.setCollectionScript,
+            (1, "document.body.textContent=tokenHash;"));
+        batch.callDatas[4] = abi.encodeCall(royalty.configureCollectionRoyalty, (1, profile, uint16(690)));
+        batch.callDatas[5] = abi.encodeCall(primaryRevenue.setPrimaryProfileAssignment,
+            (PRIMARY_REVENUE_CLASS, uint8(1), uint256(1), profile, bytes32(0)));
+        address[6] memory targets = [address(ledger), address(entropy), address(router),
+            address(router), address(royalty), address(primaryRevenue)];
+        for (uint256 i; i < targets.length; ++i) batch.calls[i] = _configurationCall(targets[i], batch.callDatas[i]);
+        (batch.calls[6], batch.callDatas[6]) = _escrowProducerCall(address(sale));
+        (batch.calls[7], batch.callDatas[7]) = _escrowProducerCall(address(erc20Sale));
+        (batch.calls[8], batch.callDatas[8]) = _escrowProducerCall(address(auction));
     }
 
     function _escrowProducerCall(address producer)
@@ -404,95 +420,6 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         );
     }
 
-    function _sealProductPlan(
-        GenesisBatch[] memory batches,
-        bytes32[] memory pointerTypes,
-        StreamModuleRegistration[] memory pointerRecords,
-        StreamModuleRegistration[] memory records
-    ) private {
-        // Final binding and publication are assembled below from the exact deployed objects.
-        SystemManifestBootstrapBinding memory binding;
-        binding.roleRegistry = address(roles);
-        binding.governanceRoot = address(governanceRoot);
-        binding.governanceRootCodeHash = address(governanceRoot).codehash;
-        binding.initialTerminalFreezeVetoGuardians = guardians;
-        binding.core = address(core);
-        binding.systemManifestSatellite = address(manifest);
-        binding.pointerTypes = pointerTypes;
-        binding.registries = new address[](1);
-        binding.registries[0] = address(registry);
-        (binding.expectedInventoryStateRoot, binding.expectedInventoryLeafCount) =
-            StreamCurrentStackPlan.finalInventory(
-                address(executor), core, registry, pointerTypes, pointerRecords, records
-            );
-        _completeGenesisPlan(binding, batches);
-    }
-
-    function _completeGenesisPlan(
-        SystemManifestBootstrapBinding memory binding,
-        GenesisBatch[] memory batches
-    ) internal {
-        (address payload, bytes32 payloadHash) = StreamGenesisManifestPlan.writePayload(
-            bytes(
-                "{\"purpose\":\"current-stack development deployment; not release evidence\",\"version\":1}"
-            )
-        );
-        binding.expectedManifestHash = payloadHash;
-        binding.expectedTriggers = new SystemManifestBootstrapTriggerExpectation[](2);
-        binding.expectedTriggers[0] = SystemManifestBootstrapTriggerExpectation(
-            address(core), core.updateSatellitePointer.selector, address(core).codehash, 8
-        );
-        binding.expectedTriggers[1] = SystemManifestBootstrapTriggerExpectation(
-            address(registry), registry.setModuleStatus.selector, address(registry).codehash, 3
-        );
-        if (address(core) > address(registry)) {
-            (binding.expectedTriggers[0], binding.expectedTriggers[1]) =
-            (binding.expectedTriggers[1], binding.expectedTriggers[0]);
-        }
-        binding.actionPolicyCandidateProfileHash = DEPLOYMENT_HASH;
-        batches[4].actionClass = 3;
-        batches[4].calls = new GovernanceCall[](2);
-        batches[4].callDatas = new bytes[](2);
-        batches[4].calls[0].target = address(executor);
-        batches[4].calls[0].selector = executor.sealSystemManifestBootstrap.selector;
-        batches[4].calls[1].target = address(manifest);
-        batches[4].calls[1].selector = manifest.publishStreamSystemManifest.selector;
-        binding.actionPolicies = _actionPolicies(batches);
-        binding.expectedActionPolicyCatalogHash = StreamGovernanceActionPolicy.expectedCatalogHash(
-            address(executor), binding.actionPolicyCandidateProfileHash, binding.actionPolicies
-        );
-        (batches[4].calls[0], batches[4].callDatas[0]) =
-            StreamGenesisManifestPlan.sealCall(executor, deployer, binding, payload);
-        StreamSystemManifestUpdate memory update = StreamSystemManifestUpdate({
-            manifestHash: payloadHash,
-            manifestURI: "urn:6529stream:current-stack:development",
-            eventCatalogHash: keccak256("development events"),
-            compatibilityMatrixHash: keccak256("development compatibility"),
-            numericIdCatalogHash: keccak256("development numeric ids"),
-            schemaCatalogHash: keccak256("development schema"),
-            canonicalizationCatalogHash: keccak256("development canonicalization"),
-            specBundleHash: keccak256("development spec"),
-            reconstructionClientHash: keccak256("development client")
-        });
-        StreamSystemManifest.ModuleAddresses memory modules;
-        modules.revenueResolver = address(royalty);
-        modules.artistRegistry = address(artistRegistry);
-        modules.metadataRouter = address(router);
-        modules.entropyCoordinator = address(entropy);
-        modules.mintManager = address(manager);
-        modules.mintLedger = address(ledger);
-        modules.streamAdminsOrGovernance = address(executor);
-        modules.moduleRegistry = address(registry);
-        modules.stateExportPublisher = address(executor);
-        (batches[4].calls[1], batches[4].callDatas[1]) =
-            StreamGenesisManifestPlan.firstPublicationCall(manifest, payload, update, modules);
-        executor.commitGenesisPlan(executor.hashGenesisPlan(binding, batches));
-        // Bind the committed catalog in its own transaction so product activation
-        // and the final seal remain atomic within the chain's transaction gas cap.
-        executor.prepareGenesis(binding, batches);
-        executor.initializeGenesis(binding, batches);
-    }
-
     function _actionPolicies(GenesisBatch[] memory batches)
         private
         view
@@ -559,7 +486,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 73 : 74);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 77 : 78);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -623,7 +550,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         rows[i++] =
             _operatingPolicy(2, address(manifest), manifest.publishStreamSystemManifest.selector);
         // Append-only catalog evolution; existing entries remain pinned.
-        rows[i++] = _operatingPolicy(3, address(executor), bytes4(0x9ad52a32));
+        rows[i++] = _operatingPolicy(3, address(executor), executor.extendGovernanceActionPolicy.selector);
         if (!localDevelopment) {
             rows[i++] = _operatingPolicy(
                 1, address(provider), StreamEntropyProviderVRF.updateSubscription.selector
@@ -663,7 +590,11 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         rows[i++] = _operatingPolicy(2, address(artistRegistry), IStreamArtistIdentityContest.contestArtistIdentity.selector);
         rows[i++] = _operatingPolicy(1, address(artistRegistry), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
         rows[i++] = _operatingPolicy(2, address(artistRegistry), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
-        // Metadata/entropy configuration is also collected from genesis.
+        rows[i++] = _operatingPolicy(address(archivalCheckpoint), archivalCheckpoint.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(address(archivalCoverage), archivalCoverage.raiseGasParameter.selector);
+        rows[i++] = _operatingPolicy(address(archivalCoverage), archivalCoverage.admitFamily.selector);
+        rows[i++] = _operatingPolicy(address(archivalCoverage), archivalCoverage.setFamilyStatus.selector);
+        // Metadata/entropy configuration selectors come from the configuration prototypes.
         assert(i == rows.length);
     }
 

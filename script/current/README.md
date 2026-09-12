@@ -1,32 +1,59 @@
 # Current-stack development deployment
 
-The full-v1 integration branch is migrating this workflow to the modular artist
-suite and version-2 native/auction authorizations. Deployment now returns a
-scheduled authority-activation batch; it does not yet complete artist onboarding.
-After onboarding, the [phase setup planner](../../docs/integrations/current-mint-setup.md)
-prepares exact EOA/Safe consent, configuration and final Manager handoff calls.
-Seven actual-current integration tests pass. See
-[current artist activation](../../docs/integrations/current-artist-activation.md).
-The PowerShell recipes and measurements below describe the retained RC1 workflow
-until their migration and a fresh complete rehearsal pass. Use the frozen RC1
-checkout to reproduce that evidence.
+The full-v1 branch is migrating the operator workflow to staged governance and
+the modular artist suite. `DeployCurrentStack.s.sol` now returns a version-2
+deployment tuple. It initializes and seals the five-leaf governance foundation,
+then constructs the archival checkpoint, coverage provider and artist suite
+against that canonical foundation. Its output expressly reports
+`productsActivated = false` and contains registrations and catalog additions
+for later stages. It does not schedule an artist activation or complete onboarding.
 
-`DeployCurrentStack.s.sol` deploys the current Core, governance, canonical module
-registry, mint manager and ledger, signed native sale, English auction, accepted
-artist registry, entropy coordinator, metadata router, royalty resolver, and
-immutable split wallet. It commits one genesis plan, prepares its catalog in a
-separate transaction, then atomically activates and seals the stack. It freezes the
-SystemManifest pointer, and publishes an explicitly labeled development manifest.
-These module metadata hashes describe development configurations. They are not
-release checksums, audit evidence, or a frozen release candidate.
+The declared product inventory includes minting, native fixed sales, English
+auctions, entropy, metadata and revenue dependencies. It does not yet include
+every newer full-v1 sale or recording module. The complete operator rehearsal
+and expanded inventory remain tracked in [delivery](../../ops/V1_DELIVERY.md).
 
-The deployment uses `FOUNDRY_PROFILE=current`, Solidity 0.8.19, optimizer 200 runs, and **global via-IR**, the
-same instance profile as the current-stack integration test. The script's deployer
-is the bootstrap authority and controller of each separate governance actor.
-Manager, ledger, sale, auction, asset policy, and royalty control belongs to the
-governance executor after setup. The governance catalog includes operational
-controls, root and role rotation, and module-status updates with their action
-classes. Governance actors are simple development/testnet controllers.
+Supply the governance root and its guardian array explicitly for Sepolia.
+`STREAM_GOVERNANCE_ROOT` is an address; `STREAM_GOVERNANCE_GUARDIANS` is an
+ABI-encoded `address[]`. The foundation accepts a Safe as root. Local chain
+31337 alone may omit the root to create development governance actors.
+`STREAM_ARCHIVAL_OBSERVERS` is an ABI-encoded `(address,bytes32)[]` containing
+sorted observer accounts and distinct nonzero organization commitments.
+`STREAM_ARCHIVAL_QUORUM` defaults to two; explicit gas settings are available
+as `STREAM_ARCHIVAL_SIGNATURE_GAS` and `STREAM_ARCHIVAL_READ_GAS`. Supplying
+identities constructs the verifier; it does not establish live archival evidence.
+
+`StreamGovernanceStagePlan.sol` prepares exact zero-value publication and
+scheduling calls. Submit scheduling from the returned caller, including through
+`Safe.execTransaction`. Retain the original encoded plan and its independent
+hash before signing, and derive the action ID from the confirmed receipt.
+`PrepareCurrentGovernanceStage.s.sol` and `ExecuteSavedGovernanceStage.s.sol`
+expose preparation and resumption; the durable journal and full operator runner
+are still being connected. Seven actual-foundation/Safe tests cover the library.
+
+Catalog extensions invalidate actions scheduled against the previous catalog.
+Execute those actions first, or retain their stale attempts and prepare new
+ones after the extension. Each catalog chunk requires observed execution,
+updated manifest publication and its own ordinary governance delay. Never reuse
+an old schedule by changing its saved plan or recomputing its journal hash.
+
+After activation and onboarding, the
+[phase setup planner](../../docs/integrations/current-mint-setup.md) prepares
+exact EOA/Safe consent, configuration and final Manager handoff calls. The
+[artist activation guide](../../docs/integrations/current-artist-activation.md)
+describes that separate authority stage.
+
+The development compiler profile is Solidity 0.8.19, optimizer 200 runs and
+global via-IR. Development module hashes identify engineering configurations;
+release binding and full-v1 acceptance remain separate work.
+
+## Retained RC1 operator recipes
+
+All PowerShell recipes and measurements below describe the frozen RC1 workflow.
+Run them from its retained checkout. The current version-1 PowerShell decoders
+must not consume the new version-2 deployment tuple. Their migration and a fresh
+complete demonstration are pending; these recipes do not prove current-v1
+operator completion.
 
 ## Local Anvil
 

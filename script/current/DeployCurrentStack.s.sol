@@ -14,14 +14,15 @@ interface CurrentDeploymentVm {
     function stopBroadcast() external;
 }
 
-/// @notice Deploys an unaudited current-stack development instance to Anvil or Sepolia.
+/// @notice Deploys a sealed foundation and unactivated products on Anvil or Sepolia.
 /// @dev No key is read by this script. Supply a Foundry signer or an unlocked local account.
 ///      Broadcast receipts under broadcast/ identify every deployment and configuration call.
 contract DeployCurrentStack is StreamCurrentStackDeployment {
     CurrentDeploymentVm private constant vm =
         CurrentDeploymentVm(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    struct DeploymentAddresses {
+    struct DeploymentV2 {
+        uint16 schemaVersion;
         address core;
         address executor;
         address governanceRoot;
@@ -48,23 +49,33 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         address artistValidator;
         address artistReads;
         address[7] artistOwners;
-        bytes32 activationActionId;
-        uint64 activationNotBefore;
-        bytes activationPlan; // Combined artist/reveal five-call plan; use ActivateCurrentRevealAuthority.
+        address roleRegistry;
+        address assetPolicy;
+        address archivalCheckpoint;
+        address archivalCoverage;
+        bytes32 archivalConfigurationHash;
+        bytes32 deploymentProfileHash;
+        bool foundationInitialized;
+        bool productsActivated;
+        bytes foundationPlan;
+        StreamModuleRegistration[] productRegistrations;
+        GovernanceActionPolicyEntry[] catalogAdditions;
     }
 
-    function run() external returns (DeploymentAddresses memory deployed) {
+    function run() external returns (DeploymentV2 memory deployed) {
         require(block.chainid == 31337 || block.chainid == 11155111, "Anvil or Sepolia only");
         deployer = vm.envAddress("STREAM_DEPLOYER");
         require(deployer != address(0), "deployer required");
         protocol = vm.envOr("STREAM_PROTOCOL_TREASURY", deployer);
         localDevelopment = block.chainid == 31337;
+        _loadOperatorConfiguration();
         if (!localDevelopment) _loadVRFConfig();
         address selectedArtist = vm.envOr("STREAM_ARTIST", deployer);
         address platform = vm.envOr("STREAM_PLATFORM_SIGNER", deployer);
         vm.startBroadcast(deployer);
         _deployCurrentStack(selectedArtist, platform);
         vm.stopBroadcast();
+        deployed.schemaVersion = 2;
         deployed.core = address(core);
         deployed.executor = address(executor);
         deployed.governanceRoot = address(governanceRoot);
@@ -91,15 +102,17 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         deployed.artistValidator = artistSuite.validator;
         deployed.artistReads = address(artistCoordinator.reads());
         deployed.artistOwners = artistSuite.owners;
-        deployed.activationActionId = artistActivationId;
-        deployed.activationNotBefore = artistActivationNotBefore;
-        deployed.activationPlan = encodedArtistActivationPlan;
-    }
-
-    function _artistActivationTimestamp() internal view override returns (uint64) {
-        uint256 value = vm.envOr("STREAM_ARTIST_ACTIVATION_NOT_BEFORE", block.timestamp + 49 hours);
-        require(value <= type(uint64).max - 7 days, "activation time out of range");
-        return uint64(value);
+        deployed.roleRegistry = address(roles);
+        deployed.assetPolicy = address(assetPolicy);
+        deployed.archivalCheckpoint = address(archivalCheckpoint);
+        deployed.archivalCoverage = address(archivalCoverage);
+        deployed.archivalConfigurationHash = archivalCheckpoint.configurationHash();
+        deployed.deploymentProfileHash = DEPLOYMENT_HASH;
+        deployed.foundationInitialized = executor.genesisInitialized();
+        deployed.productsActivated = false;
+        deployed.foundationPlan = encodedFoundationPlan;
+        deployed.productRegistrations = _productRegistrations();
+        deployed.catalogAdditions = _productPolicyAdditions();
     }
 
     function _loadVRFConfig() private {
