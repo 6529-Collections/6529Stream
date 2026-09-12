@@ -5,6 +5,7 @@ import "./StreamArtistOnboardingOperations.sol";
 import "./StreamArtistRotationOperations.sol";
 import "./StreamArtistSaleOperations.sol";
 import "./StreamArtistIdentityContestOperations.sol";
+import "./StreamArtistSuccessionOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistSaleAuthority.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -146,6 +147,8 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(31),
                 uint16(32),
                 uint16(33),
+                uint16(36),
+                uint16(37),
                 uint16(51),
                 uint16(52),
                 uint16(54)
@@ -452,6 +455,23 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistIdentityOperations.revise(
             _economicContext(), actor, p, a, document, displayName
         );
+    }
+
+    function coordinateRecordSuccessorDesignation(
+        address actor,
+        Succ.Designation calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistSuccessionOperations.designate(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRecordEstateDirective(
+        address actor,
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        Succ.PublicDocument calldata document
+    ) external operation returns (bytes32) {
+        return StreamArtistSuccessionOperations.directive(_economicContext(), actor, p, a, document);
     }
 
     function coordinateRecordContentConsent(

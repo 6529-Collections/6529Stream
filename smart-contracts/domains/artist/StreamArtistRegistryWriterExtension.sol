@@ -72,6 +72,24 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateRecordIdentityRevision(msg.sender, p, a, document, displayName);
     }
 
+    function recordSuccessorDesignation(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistSuccessionCoordinator(operationCoordinator)
+            .coordinateRecordSuccessorDesignation(msg.sender, p, a);
+    }
+
+    function recordEstateDirective(
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        Succ.PublicDocument calldata document
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistSuccessionCoordinator(operationCoordinator)
+            .coordinateRecordEstateDirective(msg.sender, p, a, document);
+    }
+
     function setArtistGuardians(R.GuardianSet calldata p, T.Authorization calldata a)
         external
         onlyHost

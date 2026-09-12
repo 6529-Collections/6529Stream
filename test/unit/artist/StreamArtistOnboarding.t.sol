@@ -2351,6 +2351,8 @@ contract StreamArtistOnboardingTest is
                 uint16(31),
                 uint16(32),
                 uint16(33),
+                uint16(36),
+                uint16(37),
                 uint16(51),
                 uint16(52),
                 uint16(54)
@@ -6687,6 +6689,985 @@ contract StreamArtistOnboardingTest is
         require(
             ingress.supportsInterface(type(IStreamArtistIdentityContest).interfaceId),
             "narrow capability advertised"
+        );
+    }
+
+    function _successorTerms(address account, uint8 kind)
+        private
+        view
+        returns (Succ.Designation memory)
+    {
+        return Succ.Designation(
+            artistId, account, kind, 4095, keccak256("estate conditions"), bytes32(0)
+        );
+    }
+
+    function _successionRecord(Succ.Designation memory p) private returns (bytes32 record) {
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        return ingress.recordSuccessorDesignation(p, a);
+    }
+
+    function _directiveTerms(uint32 forbidden)
+        private
+        view
+        returns (Succ.Directive memory, Succ.PublicDocument memory)
+    {
+        Succ.PublicDocument memory document =
+            Succ.PublicDocument(keccak256("legal instrument"), keccak256("payout intent"));
+        return (
+            Succ.Directive(
+                artistId,
+                uint32(4095) & ~forbidden,
+                forbidden,
+                keccak256(
+                    ingress.previewEstateDirectivePayload(
+                        uint32(4095) & ~forbidden, forbidden, document
+                    )
+                )
+            ),
+            document
+        );
+    }
+
+    function _directiveRecord(uint32 forbidden) private returns (bytes32 record) {
+        (Succ.Directive memory p, Succ.PublicDocument memory document) = _directiveTerms(forbidden);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.estateDirectiveDigest(p, a));
+        return ingress.recordEstateDirective(p, a, document);
+    }
+
+    function _successionTyped(bytes32 message) private view returns (bytes32) {
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529StreamArtistRegistry"),
+                keccak256("1"),
+                block.chainid,
+                address(ingress)
+            )
+        );
+        return keccak256(abi.encodePacked(hex"1901", domain, message));
+    }
+
+    function testSuccessionNonceZeroExactDigestRecordReplayAndEvent() public {
+        _delegateSetup();
+        Succ.Designation memory p = _successorTerms(address(delegateSafe), 2);
+        p.grantedCapabilities = 0;
+        T.Authorization memory a = _authorization(true);
+        bytes32 digest = _successionTyped(
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "StreamArtistSuccessorDesignation(bytes32 artistId,address successor,uint8 successorKind,uint32 grantedCapabilities,bytes32 conditionsHash,bytes32 directiveHash,uint256 nonce,uint64 signedAt)"
+                    ),
+                    p.artistId,
+                    p.successor,
+                    p.successorKind,
+                    p.grantedCapabilities,
+                    p.conditionsHash,
+                    p.directiveHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(
+            digest == ingress.successorDesignationDigest(p, a) && a.nonce == 0,
+            "independent nonce0 digest"
+        );
+        a.signature = _signature(digest);
+        bytes32 others = _otherOwnerRoots();
+        vm.recordLogs();
+        bytes32 record = ingress.recordSuccessorDesignation(p, a);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_SUCCESSION_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                p.successor,
+                p.successorKind,
+                p.grantedCapabilities,
+                p.conditionsHash,
+                p.directiveHash,
+                uint256(0),
+                uint64(1000)
+            )
+        );
+        require(
+            record == expected && ingress.operativeSuccessorRecord(artistId) == record,
+            "nonce0 is a real head"
+        );
+        (address account, uint8 kind, uint32 caps,,, uint256 nonce) =
+            ingress.successorDesignation(artistId);
+        require(
+            account == address(delegateSafe) && kind == 2 && caps == 0 && nonce == 0,
+            "canonical six-word read"
+        );
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.succession_chain"), keccak256(abi.encode(record))
+        );
+        T.ReplayCell memory cell = IStreamArtistOwner(suite.owners[2]).replayCell(key);
+        require(
+            cell.status == 2 && cell.commitment == record && _otherOwnerRoots() == others,
+            "single owner and exact chain replay"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistSuccessorDesignated(uint16,bytes32,address,uint8,uint32,bytes32,bytes32,uint256,uint64,bytes32)"
+                    )
+            ) {
+                ++count;
+                require(
+                    logs[i].emitter == suite.owners[2] && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(uint160(p.successor))),
+                    "Identity emitter/indexes"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.successorKind,
+                                p.grantedCapabilities,
+                                p.conditionsHash,
+                                p.directiveHash,
+                                a.nonce,
+                                a.time,
+                                record
+                            )
+                        ),
+                    "exact designation event"
+                );
+            }
+        }
+        require(count == 1, "one designation event");
+    }
+
+    function testEstateDirectiveCanonicalPayloadDigestRecordAndEvent() public {
+        Succ.PublicDocument memory document;
+        bytes memory expectedBytes = bytes(
+            '{"forbiddenCapabilities":4,"grantedCapabilities":0,"legalInstrumentHash":"0x0000000000000000000000000000000000000000000000000000000000000000","payoutRoutingIntentHash":"0x0000000000000000000000000000000000000000000000000000000000000000","schema":"6529STREAM_ESTATE_DIRECTIVE_V1"}'
+        );
+        require(
+            keccak256(ingress.previewEstateDirectivePayload(0, 4, document))
+                == keccak256(expectedBytes),
+            "literal JCS bytes"
+        );
+        Succ.Directive memory p = Succ.Directive(artistId, 0, 4, keccak256(expectedBytes));
+        T.Authorization memory a = _authorization(true);
+        bytes32 digest = _successionTyped(
+            keccak256(
+                abi.encode(
+                    keccak256(
+                        "StreamArtistEstateDirective(bytes32 artistId,uint32 grantedCapabilities,uint32 forbiddenCapabilities,bytes32 directivePayloadHash,uint256 nonce,uint64 signedAt)"
+                    ),
+                    p.artistId,
+                    p.grantedCapabilities,
+                    p.forbiddenCapabilities,
+                    p.directivePayloadHash,
+                    a.nonce,
+                    a.time
+                )
+            )
+        );
+        require(digest == ingress.estateDirectiveDigest(p, a), "independent directive digest");
+        a.signature = _signature(digest);
+        vm.recordLogs();
+        bytes32 record = ingress.recordEstateDirective(p, a, document);
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_ESTATE_DIRECTIVE_RECORD_V1"),
+                        block.chainid,
+                        address(ingress),
+                        artistId,
+                        uint32(0),
+                        uint32(4),
+                        p.directivePayloadHash,
+                        uint256(0),
+                        uint64(1000)
+                    )
+                ),
+            "exact directive record"
+        );
+        require(
+            ingress.operativeEstateDirective(artistId) == record
+                && keccak256(ingress.estateDirectivePayload(record)) == keccak256(expectedBytes),
+            "nonce0 stored bytes/head"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistEstateDirectiveRecorded(uint16,bytes32,uint32,uint32,bytes32,uint256,uint64,bytes32)"
+                    )
+            ) {
+                ++count;
+                require(
+                    logs[i].emitter == suite.owners[2] && logs[i].topics[1] == artistId
+                        && keccak256(logs[i].data)
+                            == keccak256(
+                                abi.encode(
+                                    uint16(1),
+                                    uint32(0),
+                                    uint32(4),
+                                    p.directivePayloadHash,
+                                    a.nonce,
+                                    a.time,
+                                    record
+                                )
+                            ),
+                    "exact directive event"
+                );
+            }
+        }
+        require(count == 1, "one directive event");
+    }
+
+    function testSuccessionBothActualSafeDirectWritersObserveDelayedTimeAndArchive() public {
+        Succ.Designation memory p = _successorTerms(address(0xAABB), 1);
+        T.Authorization memory submitted = T.Authorization(0, 0, "");
+        bytes memory data = abi.encodeCall(
+            IStreamArtistSuccessionRecords.recordSuccessorDesignation, (p, submitted)
+        );
+        vm.warp(1042);
+        this.executeArtistSafe(data);
+        bytes32 record = ingress.operativeSuccessorRecord(artistId);
+        (
+            Succ.Designation memory terms,
+            T.Authorization memory original,
+            T.Authorization memory effective,
+            T.SignerApproval memory proof,
+            Succ.DesignationRecord memory archived
+        ) = abi.decode(
+            _operationPayload(36, address(artist), record),
+            (
+                Succ.Designation,
+                T.Authorization,
+                T.Authorization,
+                T.SignerApproval,
+                Succ.DesignationRecord
+            )
+        );
+        require(
+            original.time == 0 && effective.time == 1042 && proof.direct
+                && archived.signedAt == 1042 && terms.successor == p.successor,
+            "designation observed/original"
+        );
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(4);
+        submitted.nonce = 1;
+        data = abi.encodeCall(
+            IStreamArtistSuccessionRecords.recordEstateDirective, (d, submitted, doc)
+        );
+        vm.warp(1080);
+        this.executeArtistSafe(data);
+        record = ingress.operativeEstateDirective(artistId);
+        require(ingress.estateDirectiveRecord(record).signedAt == 1080, "directive observed time");
+        (, original, effective, proof,,,) = abi.decode(
+            _operationPayload(37, address(artist), record),
+            (
+                Succ.Directive,
+                T.Authorization,
+                T.Authorization,
+                T.SignerApproval,
+                Succ.PublicDocument,
+                Succ.DirectiveRecord,
+                bytes
+            )
+        );
+        require(
+            original.time == 0 && effective.time == 1080 && proof.direct,
+            "directive original/effective archive"
+        );
+    }
+
+    function testSuccessionApprovedEmptySafeBothFamiliesAndUnapprovedEmptyRejection() public {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = _authorization(true);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        _approveMessage(ingress.successorDesignationDigest(p, a));
+        bytes32 first = ingress.recordSuccessorDesignation(p, a);
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        a = _authorization(true);
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordEstateDirective(d, a, doc);
+        _approveMessage(ingress.estateDirectiveDigest(d, a));
+        bytes32 second = ingress.recordEstateDirective(d, a, doc);
+        require(first != 0 && second != 0, "real Safe approved-empty records");
+    }
+
+    function testSuccessionWrongDomainMissingOwnerAndProtocolOnlyCallbacks() public {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(keccak256("wrong domain"));
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        uint256[] memory one = new uint256[](1);
+        one[0] = keys[0];
+        a.signature = safeThresholdSignature(
+            one, safeMessageDigest(artist, abi.encode(ingress.successorDesignationDigest(p, a)))
+        );
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        a.signature = "";
+        a.time = 0;
+        avm.expectRevert(T.InvalidSignature.selector);
+        vm.prank(safeVm.addr(keys[0]));
+        ingress.recordSuccessorDesignation(p, a);
+        T.ActionContext memory c = T.ActionContext(
+            36, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        bytes memory callback = abi.encodeCall(
+            IStreamArtistSuccessionOwner.recordSuccessorDesignation,
+            (c, p, a, T.SignerApproval(address(artist), 0, true))
+        );
+        address identityWriter =
+            StreamArtistIdentityAuthority(suite.owners[2]).identityWriterExtension();
+        address registryWriter = ingress.registryWriterExtension();
+        address registryReader = ingress.registryReadExtension();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(identityWriter, callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            registryWriter,
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordSuccessorDesignation, (p, a))
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            registryReader,
+            abi.encodeCall(IStreamArtistSuccessionReads.operativeSuccessorRecord, (artistId))
+        );
+        require(_roots() == roots, "all invalid authority paths atomic");
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordSuccessorDesignation, (p, a))
+        );
+    }
+
+    function testSuccessionActualSafeCoversEveryNewRead() public {
+        bytes32 s = _successionRecord(_successorTerms(address(0xAB), 1));
+        bytes32 d = _directiveRecord(0);
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.successorDesignation, (artistId))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.operativeSuccessorRecord, (artistId))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.operativeEstateDirective, (artistId))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.successorDesignationRecord, (s))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.estateDirectiveRecord, (d))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.estateDirectivePayload, (d))
+        );
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = T.Authorization(7, 1000, "");
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionRecords.successorDesignationDigest, (p, a))
+        );
+        (Succ.Directive memory directive, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionRecords.estateDirectiveDigest, (directive, a))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistSuccessionRecords.previewEstateDirectivePayload,
+                (uint32(4095), uint32(0), doc)
+            )
+        );
+        require(
+            ingress.supportsInterface(type(IStreamArtistSuccessionReads).interfaceId)
+                && ingress.supportsInterface(type(IStreamArtistSuccessionRecords).interfaceId),
+            "narrow capabilities"
+        );
+    }
+
+    function testSuccessionRejectsUnknownKindsBitsAndClassifies7702Exclusively() public {
+        Succ.Designation memory p = _successorTerms(address(0), 1);
+        T.Authorization memory a = T.Authorization(0, 1000, "");
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidSuccessor.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        p.successor = address(artist);
+        p.successorKind = 1;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidSuccessor.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        p.successorKind = 3;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidSuccessor.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        p.successorKind = 2;
+        p.grantedCapabilities = 4096;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidSuccessor.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        address delegated = address(0xD7702);
+        vm.etch(delegated, abi.encodePacked(hex"ef0100", address(artist)));
+        p = _successorTerms(delegated, 2);
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidSuccessor.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        p.successorKind = 1;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        ingress.recordSuccessorDesignation(p, a);
+    }
+
+    function testEstateDirectiveRejectsPayloadDivergenceUnknownBitsAndForeignPairing() public {
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(4);
+        T.Authorization memory a = T.Authorization(0, 1000, "");
+        d.directivePayloadHash = keccak256("wrong payload");
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.recordEstateDirective(d, a, doc);
+        d.forbiddenCapabilities = 4096;
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.recordEstateDirective(d, a, doc);
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        p.directiveHash = keccak256("missing directive");
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        (d, doc) = _directiveTerms(4);
+        d.artistId = bytes32(uint256(123));
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, d.artistId));
+        ingress.recordEstateDirective(d, a, doc);
+        p.directiveHash = 0;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        ingress.recordSuccessorDesignation(p, a);
+    }
+
+    function testSuccessionHigherNonceWinsBothFamiliesAndLowerHistoryRetained() public {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = T.Authorization(90, 1000, "");
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        bytes32 high = ingress.recordSuccessorDesignation(p, a);
+        p.successor = address(0xBB);
+        a.nonce = 0;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        bytes32 low = ingress.recordSuccessorDesignation(p, a);
+        require(
+            ingress.operativeSuccessorRecord(artistId) == high
+                && ingress.successorDesignationRecord(low).terms.successor == p.successor,
+            "lower designation retained not operative"
+        );
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(4);
+        a.nonce = 91;
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        high = ingress.recordEstateDirective(d, a, doc);
+        (d, doc) = _directiveTerms(0);
+        a.nonce = 1;
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        low = ingress.recordEstateDirective(d, a, doc);
+        require(
+            ingress.operativeEstateDirective(artistId) == high
+                && ingress.estateDirectiveRecord(low).recordHash == low,
+            "lower directive retained not operative"
+        );
+    }
+
+    function testSuccessionLateArchiveRollbackAllowsExactSafeRetry() public {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = T.Authorization(0, 0, "");
+        bytes memory data =
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordSuccessorDesignation, (p, a));
+        bytes32 roots = _roots();
+        uint256 nonce = artist.nonce();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        require(
+            _roots() == roots && artist.nonce() == nonce
+                && ingress.operativeSuccessorRecord(artistId) == 0,
+            "all designation effects rollback"
+        );
+        avm.clearMockedCalls();
+        this.executeArtistSafe(data);
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(4);
+        a.nonce = 1;
+        data = abi.encodeCall(IStreamArtistSuccessionRecords.recordEstateDirective, (d, a, doc));
+        roots = _roots();
+        nonce = artist.nonce();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        require(
+            _roots() == roots && artist.nonce() == nonce
+                && ingress.operativeEstateDirective(artistId) == 0,
+            "all directive effects rollback"
+        );
+        avm.clearMockedCalls();
+        this.executeArtistSafe(data);
+    }
+
+    function testSuccessionOperativeSafeDesigneeVetoesWithoutAuthorship() public {
+        _delegateSetup();
+        _successionRecord(_successorTerms(address(delegateSafe), 2));
+        _newRotationSafe(16001);
+        bytes32 rotation = _stageRotation(0);
+        bytes memory data = abi.encodeCall(
+            IStreamArtistRotation.vetoArtistRotation,
+            (artistId, rotation, keccak256("successor veto"))
+        );
+        uint256 nonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+        vm.expectRevert(
+            abi.encodeWithSelector(T.Unauthorized.selector, safeVm.addr(delegateKeys[0]))
+        );
+        vm.prank(safeVm.addr(delegateKeys[0]));
+        ingress.vetoArtistRotation(artistId, rotation, keccak256("successor veto"));
+        this.executeDelegate(address(ingress), data);
+        require(
+            ingress.rotationRecord(rotation).transition.phase == 3
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint
+                    == nonce,
+            "successor veto only defensive state"
+        );
+    }
+
+    function testSuccessionOperativeSafeDesigneeContestsAndBindsActualRecord() public {
+        _delegateSetup();
+        bytes32 successor = _successionRecord(_successorTerms(address(delegateSafe), 2));
+        this.executeDelegate(address(ingress), _contestData(0));
+        bytes32 record = ingress.latestIdentityContest(artistId);
+        (,,, bytes32 archivedSuccessor) = abi.decode(
+            _operationPayload(33, address(delegateSafe), record),
+            (Contest.Request, Contest.GovernanceWitness, Contest.Record, bytes32)
+        );
+        require(
+            archivedSuccessor == successor
+                && ingress.identityContestRecord(record).contester == address(delegateSafe),
+            "actual permanent standing witness"
+        );
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.estateDirectiveDigest(d, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, artistId));
+        ingress.recordEstateDirective(d, a, doc);
+    }
+
+    function testSuccessionReplacementRemovesOldDesigneeStandingAndStalesGovernanceContext()
+        public
+    {
+        _delegateSetup();
+        _successionRecord(_successorTerms(address(delegateSafe), 2));
+        (bytes32 scope, bytes32 beforeOld,) = ingress.identityContestGovernanceContext(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        _successionRecord(_successorTerms(address(artist), 2));
+        (bytes32 newScope, bytes32 afterOld,) = ingress.identityContestGovernanceContext(
+            artistId, 0, keccak256("compromise evidence"), keccak256("compromise reason")
+        );
+        require(
+            scope == newScope && beforeOld != afterOld, "operative successor bound in old-state"
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeDelegate(address(ingress), _contestData(0));
+        this.executeArtistSafe(_contestData(0));
+    }
+
+    function _successionMaturityCase(uint8 boundary) private {
+        bytes32 baseS = _successionRecord(_successorTerms(address(0xAA), 1));
+        bytes32 baseD = _directiveRecord(0);
+        OfficialSafe prior = artist;
+        uint256[] memory priorKeys = keys;
+        _newRotationSafe(16020 + boundary);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        bytes32 candidateS = _successionRecord(_successorTerms(address(0xBB), 1));
+        bytes32 candidateD = _directiveRecord(4);
+        uint64 end = ingress.rotationRecord(rotation).transition.postWindowEndsAt;
+        require(
+            ingress.operativeSuccessorRecord(artistId) == baseS
+                && ingress.operativeEstateDirective(artistId) == baseD,
+            "candidates not ready"
+        );
+        vm.warp(uint256(end) + boundary - 1);
+        require(
+            executeSafe(prior, priorKeys, address(ingress), 0, _contestData(rotation), 0),
+            "actual prior Safe contest"
+        );
+        vm.warp(uint256(end) + 2);
+        require(
+            ingress.operativeSuccessorRecord(artistId) == (boundary == 0 ? baseS : candidateS)
+                && ingress.operativeEstateDirective(artistId)
+                    == (boundary == 0 ? baseD : candidateD),
+            "exact half-open maturity"
+        );
+        require(
+            ingress.successorDesignationRecord(candidateS).recordHash == candidateS
+                && ingress.estateDirectiveRecord(candidateD).recordHash == candidateD,
+            "all immutable history retained"
+        );
+    }
+
+    function testSuccessionContestBeforeExpiryInvalidatesBothCandidates() public {
+        _successionMaturityCase(0);
+    }
+
+    function testSuccessionContestAtExpiryDoesNotRewindBothMatureHeads() public {
+        _successionMaturityCase(1);
+    }
+
+    function testSuccessionContestAfterExpiryDoesNotRewindBothMatureHeads() public {
+        _successionMaturityCase(2);
+    }
+
+    function testSuccessionProvisionalHeadsMatureWithoutMaintenanceAndCannotEvictHigherNonce()
+        public
+    {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = T.Authorization(90, 1000, "");
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        bytes32 high = ingress.recordSuccessorDesignation(p, a);
+        _delegateSetup();
+        _newRotationSafe(16030);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        bytes32 low = _successionRecord(_successorTerms(address(delegateSafe), 2));
+        bytes32 d = _directiveRecord(4);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeDelegate(address(ingress), _contestData(rotation));
+        vm.warp(ingress.rotationRecord(rotation).transition.postWindowEndsAt);
+        require(
+            ingress.operativeSuccessorRecord(artistId) == high
+                && ingress.successorDesignationRecord(low).recordHash == low
+                && ingress.operativeEstateDirective(artistId) == d,
+            "highest eligible nonce and time-only directive maturity"
+        );
+    }
+
+    function testEstateDirectiveImmediatelyBlocksDelegatedGrantAndBothUsesThenLatestRestores()
+        public
+    {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 oldDirective = _directiveRecord(0);
+        bytes32 grant = _grant(_delegation(1, 36, 1000, 2000, 0));
+        bytes32 blocked = _directiveRecord(36);
+        Succ.Designation memory successor = _successorTerms(address(delegateSafe), 2);
+        successor.directiveHash = oldDirective;
+        _successionRecord(successor);
+        bytes32 roots = _roots();
+        T.EconomicsConsent memory p = _currentEconomics(address(primary));
+        T.Authorization memory a = T.Authorization(0, 2000, "");
+        a.signature = _delegateSignature(ingress.economicsConsentDigest(p, a));
+        vm.expectRevert(
+            abi.encodeWithSelector(Succ.ForbiddenCapability.selector, artistId, uint32(4), blocked)
+        );
+        ingress.recordDelegatedEconomicsConsent(p, grant, a);
+        (, T.AssignmentFact memory royaltyFact) = coordinator.reads().currentAssignments(1);
+        T.RoyaltyFreeze memory f = T.RoyaltyFreeze(
+            royaltyFact.resolver, 1, royaltyFact.revenueClass, royaltyFact.assignmentHash
+        );
+        a.signature = _delegateSignature(ingress.royaltyFreezeDigest(f, a));
+        vm.expectRevert(
+            abi.encodeWithSelector(Succ.ForbiddenCapability.selector, artistId, uint32(32), blocked)
+        );
+        ingress.authorizeDelegatedRoyaltyFreeze(f, grant, a);
+        D.Grant memory another = _delegation(0, 4, 1000, 2000, 0);
+        another.delegate = address(0xDD);
+        T.Authorization memory principal = _authorization(false);
+        principal.time = 0;
+        principal.signature = _signature(ingress.delegationGrantDigest(another, principal));
+        vm.expectRevert(
+            abi.encodeWithSelector(Succ.ForbiddenCapability.selector, artistId, uint32(4), blocked)
+        );
+        ingress.grantArtistDelegation(another, principal);
+        require(
+            _roots() == roots && ingress.delegationRecord(grant).uses == 0,
+            "forbidden checks before consumption"
+        );
+        bytes32 permit = _directiveRecord(0);
+        require(permit != blocked, "newer directive");
+        _delegateEconomics(p, grant, 0);
+        a.nonce = 1;
+        a.signature = _delegateSignature(ingress.royaltyFreezeDigest(f, a));
+        ingress.authorizeDelegatedRoyaltyFreeze(f, grant, a);
+        ingress.grantArtistDelegation(another, principal);
+        require(
+            ingress.delegationRecord(grant).uses == 2,
+            "no historical forbidden union and old pairing cannot bypass newer prohibition"
+        );
+    }
+
+    function testEstateDirectiveProvisionalRestrictionAppliesOnlyAfterUncontestedMaturity() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, uint64(1000 + 365 days), 0));
+        _newRotationSafe(16040);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        bytes32 directive = _directiveRecord(4);
+        _delegateEconomics(_currentEconomics(address(primary)), grant, 0);
+        vm.warp(ingress.rotationRecord(rotation).transition.postWindowEndsAt);
+        T.EconomicsConsent memory p = _currentEconomics(address(royalty));
+        T.Authorization memory a = T.Authorization(1, uint64(block.timestamp + 1 days), "");
+        a.signature = _delegateSignature(ingress.economicsConsentDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Succ.ForbiddenCapability.selector, artistId, uint32(4), directive
+            )
+        );
+        ingress.recordDelegatedEconomicsConsent(p, grant, a);
+        require(
+            _roots() == roots && ingress.delegationRecord(grant).uses == 1,
+            "mature mask gates future use without touching old record"
+        );
+        _directiveRecord(0);
+        ingress.recordDelegatedEconomicsConsent(p, grant, a);
+        require(
+            ingress.delegationRecord(grant).uses == 2,
+            "same unused action succeeds under lawful new directive"
+        );
+    }
+
+    function testSuccessionRevokedPayloadAndFutureSignedAtRejectWithoutConsumingRecord() public {
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        T.Authorization memory a = T.Authorization(50, 1000, "");
+        bytes32 digest = ingress.successorDesignationDigest(p, a);
+        a.signature = _signature(digest);
+        StreamArtistAuthorizationTypes.Revocation memory target =
+            StreamArtistAuthorizationTypes.Revocation(artistId, digest, 0);
+        T.Authorization memory cancel = _authorization(false);
+        cancel.signature = _signature(ingress.authorizationRevocationDigest(target, cancel));
+        ingress.revokeArtistAuthorization(target, cancel);
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.digest_revocation"),
+            keccak256(abi.encode(artistId, digest))
+        );
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, key));
+        ingress.recordSuccessorDesignation(p, a);
+        a.nonce = 51;
+        a.time = 1001;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidTimestamp.selector, uint64(1001)));
+        ingress.recordSuccessorDesignation(p, a);
+        require(
+            _roots() == roots && ingress.operativeSuccessorRecord(artistId) == 0,
+            "revocation and future time atomic"
+        );
+        a.time = 1000;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        ingress.recordSuccessorDesignation(p, a);
+    }
+
+    function testEstateDirectiveFutureTimeAndStaleDirectTimestampRejectThenSentinelWorks() public {
+        (Succ.Directive memory p, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        T.Authorization memory a = T.Authorization(0, 1001, "");
+        a.signature = _signature(ingress.estateDirectiveDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidTimestamp.selector, uint64(1001)));
+        ingress.recordEstateDirective(p, a, doc);
+        a.signature = "";
+        a.time = 1000;
+        bytes memory queued =
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordEstateDirective, (p, a, doc));
+        vm.warp(1050);
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(queued);
+        require(_roots() == roots, "stale queued explicit time rejected");
+        a.time = 0;
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordEstateDirective, (p, a, doc))
+        );
+        require(
+            ingress.estateDirectiveRecord(ingress.operativeEstateDirective(artistId)).signedAt
+                == 1050,
+            "sentinel inclusion time"
+        );
+    }
+
+    function testSuccessionNewOperativeGuardianCanVetoPendingRotation() public {
+        _selfGuardian();
+        _newRotationSafe(16050);
+        bytes32 rotation = _stageRotation(0);
+        _delegateSetup();
+        address[] memory guardians = new address[](1);
+        guardians[0] = address(delegateSafe);
+        _guardianRecord(guardians, 1, 0, nextNonce++);
+        this.executeDelegate(
+            address(ingress),
+            abi.encodeCall(
+                IStreamArtistRotation.vetoArtistRotation,
+                (artistId, rotation, keccak256("new operative guardian"))
+            )
+        );
+        require(
+            ingress.rotationRecord(rotation).transition.phase == 3,
+            "new operative guardian retains veto standing"
+        );
+    }
+
+    function testEstateDirectiveActualForeignRecordCannotBePairedAndEOADirectTimeIsObserved()
+        public
+    {
+        address other = vm.addr(0xA247);
+        T.BindingProposal memory proposal = _proposal(0);
+        proposal.artistAddress = other;
+        proposal.identityRecordHash = keccak256("other estate identity");
+        (bytes32 otherId,) = ingress.proposeArtistBinding(
+            2, proposal, bytes("other estate identity"), "Other estate artist"
+        );
+        (Succ.Directive memory d, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        d.artistId = otherId;
+        T.Authorization memory a = T.Authorization(0, 0, "");
+        vm.warp(1060);
+        vm.prank(other);
+        bytes32 foreign = ingress.recordEstateDirective(d, a, doc);
+        require(
+            ingress.estateDirectiveRecord(foreign).signedAt == 1060, "actual EOA inclusion time"
+        );
+        Succ.Designation memory p = _successorTerms(address(0xAA), 1);
+        p.directiveHash = foreign;
+        a = _authorization(true);
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.recordSuccessorDesignation(p, a);
+        p.directiveHash = 0;
+        a.signature = _signature(ingress.successorDesignationDigest(p, a));
+        ingress.recordSuccessorDesignation(p, a);
+    }
+
+    function testSuccessionActualSafeRejectsDirectiveCallbacksAndLinkedConstructorDirectCall()
+        public
+    {
+        (Succ.Directive memory p, Succ.PublicDocument memory doc) = _directiveTerms(0);
+        T.Authorization memory a = T.Authorization(0, 0, "");
+        T.ActionContext memory c = T.ActionContext(
+            37, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        T.SignerApproval memory proof = T.SignerApproval(address(artist), 0, true);
+        bytes memory callback = abi.encodeCall(
+            IStreamArtistSuccessionOwner.recordEstateDirective, (c, p, a, proof, doc)
+        );
+        address writer = StreamArtistIdentityAuthority(suite.owners[2]).identityWriterExtension();
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(writer, callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistSuccessionCoordinator.coordinateRecordEstateDirective,
+                (address(artist), p, a, doc)
+            )
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistSuccessionCoordinator.coordinateRecordSuccessorDesignation,
+                (address(artist), _successorTerms(address(0xAA), 1), a)
+            )
+        );
+        bytes memory deploymentCall =
+            abi.encodeWithSignature("deployReader(address)", address(coordinator));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(StreamArtistRegistryExtensionDeployment), deploymentCall);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce,
+            "actual Safe callback failures have no effects"
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionRecords.recordEstateDirective, (p, a, doc))
+        );
+    }
+
+    function testEstateDirectiveRejectsOverlappingMasksThenSameNonceDisjointPositive() public {
+        Succ.PublicDocument memory document;
+        bytes memory overlapping = bytes(
+            '{"forbiddenCapabilities":4,"grantedCapabilities":4,"legalInstrumentHash":"0x0000000000000000000000000000000000000000000000000000000000000000","payoutRoutingIntentHash":"0x0000000000000000000000000000000000000000000000000000000000000000","schema":"6529STREAM_ESTATE_DIRECTIVE_V1"}'
+        );
+        Succ.Directive memory p = Succ.Directive(artistId, 4, 4, keccak256(overlapping));
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.estateDirectiveDigest(p, a));
+        bytes32 roots = _roots();
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.previewEstateDirectivePayload(4, 4, document);
+        avm.expectRevert(Succ.InvalidDirective.selector);
+        ingress.recordEstateDirective(p, a, document);
+        require(
+            _roots() == roots && ingress.operativeEstateDirective(artistId) == 0,
+            "overlap rejects before nonce/record"
+        );
+        p.grantedCapabilities = 0;
+        p.directivePayloadHash = keccak256(ingress.previewEstateDirectivePayload(0, 4, document));
+        a.signature = _signature(ingress.estateDirectiveDigest(p, a));
+        bytes32 record = ingress.recordEstateDirective(p, a, document);
+        require(
+            ingress.operativeEstateDirective(artistId) == record
+                && ingress.estateDirectiveRecord(record).nonce == 0,
+            "same-context disjoint nonce0 positive"
+        );
+    }
+
+    event SuccessionReaderDeploymentProof(
+        address indexed helper,
+        bytes helperRuntime,
+        address indexed registry,
+        address indexed reader
+    );
+
+    function testSuccessionLinkedReaderDeploymentRetainsCreatorAndMeasuredHelperRuntime() public {
+        address helper = address(StreamArtistRegistryExtensionDeployment);
+        address reader = ingress.registryReadExtension();
+        require(
+            helper.code.length != 0 && helper.code.length <= 24576,
+            "actual compiler-linked constructor helper fits"
+        );
+        require(
+            reader == avm.computeCreateAddress(address(ingress), 2)
+                && ingress.registryWriterExtension()
+                    == avm.computeCreateAddress(address(ingress), 1),
+            "same creator and child nonces"
+        );
+        require(
+            address(ingress).code.length <= 24576 && suite.owners[2].code.length <= 24576,
+            "actual host runtime limits"
+        );
+        emit SuccessionReaderDeploymentProof(helper, helper.code, address(ingress), reader);
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistSuccessionReads.operativeSuccessorRecord, (artistId))
         );
     }
 

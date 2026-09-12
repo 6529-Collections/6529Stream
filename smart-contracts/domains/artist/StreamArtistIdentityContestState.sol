@@ -64,6 +64,33 @@ library StreamArtistIdentityContestState {
         );
     }
 
+    function contextWithSuccessor(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.OwnerContext memory o,
+        Contest.Request memory p,
+        address successor,
+        bytes32 successorRecord
+    ) public view returns (bytes32 scope, bytes32 oldHash, bytes32 newHash) {
+        (scope, oldHash, newHash) = context(s, identity, rotations, o, p);
+        if (successorRecord != bytes32(0)) {
+            oldHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_CONTEST_SUCCESSOR_STATE_V1"),
+                    oldHash,
+                    successor,
+                    successorRecord
+                )
+            );
+            newHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_INTENT_V1"), scope, oldHash, p
+                )
+            );
+        }
+    }
+
     function file(
         State storage s,
         StreamArtistIdentityState.State storage identity,
@@ -75,7 +102,36 @@ library StreamArtistIdentityContestState {
         Contest.GovernanceWitness memory governance,
         address governanceAuthority
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
-        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = context(s, identity, rotations, o, p);
+        return fileWithSuccessor(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            governance,
+            governanceAuthority,
+            address(0),
+            bytes32(0)
+        );
+    }
+
+    function fileWithSuccessor(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Contest.Request memory p,
+        Contest.GovernanceWitness memory governance,
+        address governanceAuthority,
+        address successor,
+        bytes32 successorRecord
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
+            contextWithSuccessor(s, identity, rotations, o, p, successor, successorRecord);
         bytes32 pending = rotations.pending[p.artistId];
         bytes32 executed = rotations.latestExecution[p.artistId];
         bytes32 guardians = StreamArtistRotationState.operativeGuardian(rotations, p.artistId);
@@ -96,7 +152,8 @@ library StreamArtistIdentityContestState {
             (bool revoked,) =
                 StreamArtistRotationState.standingRevoked(rotations, p.artistId, c.actor);
             if (
-                !_member(rotations, guardians, c.actor) && !_member(rotations, captured, c.actor)
+                c.actor != successor && !_member(rotations, guardians, c.actor)
+                    && !_member(rotations, captured, c.actor)
                     && (rotations.retirement[p.artistId][c.actor] == bytes32(0) || revoked)
             ) {
                 revert T.Unauthorized(c.actor);

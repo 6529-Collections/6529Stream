@@ -49,6 +49,81 @@ contract StreamArtistRegistryReadExtension {
         return IStreamArtistRotationOwner(_contentSuite().owners[2]);
     }
 
+    function _successionOwner() private view returns (IStreamArtistSuccessionOwner) {
+        return IStreamArtistSuccessionOwner(_contentSuite().owners[2]);
+    }
+
+    function successorDesignation(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (address, uint8, uint32, bytes32, bytes32, uint256)
+    {
+        return _successionOwner().successorDesignation(artistId);
+    }
+
+    function operativeSuccessorRecord(bytes32 artistId) external view onlyHost returns (bytes32) {
+        return _successionOwner().operativeSuccessorRecord(artistId);
+    }
+
+    function operativeEstateDirective(bytes32 artistId) external view onlyHost returns (bytes32) {
+        return _successionOwner().operativeEstateDirective(artistId);
+    }
+
+    function successorDesignationRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (Succ.DesignationRecord memory)
+    {
+        return _successionOwner().successorDesignationRecord(record);
+    }
+
+    function estateDirectiveRecord(bytes32 record)
+        external
+        view
+        onlyHost
+        returns (Succ.DirectiveRecord memory)
+    {
+        return _successionOwner().estateDirectiveRecord(record);
+    }
+
+    function estateDirectivePayload(bytes32 record) external view onlyHost returns (bytes memory) {
+        return _successionOwner().estateDirectivePayload(record);
+    }
+
+    function successorDesignationDigest(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        T.SuiteConfiguration memory s = _contentSuite();
+        return StreamArtistSuccessionHashes.designationDigest(
+            StreamArtistHashes.Environment(block.chainid, _host, s.core, s.mintManager), p, a
+        );
+    }
+
+    function estateDirectiveDigest(Succ.Directive calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        T.SuiteConfiguration memory s = _contentSuite();
+        return StreamArtistSuccessionHashes.directiveDigest(
+            StreamArtistHashes.Environment(block.chainid, _host, s.core, s.mintManager), p, a
+        );
+    }
+
+    function previewEstateDirectivePayload(
+        uint32 granted,
+        uint32 forbidden,
+        Succ.PublicDocument calldata document
+    ) external view onlyHost returns (bytes memory) {
+        return StreamArtistSuccessionHashes.publicPayload(granted, forbidden, document);
+    }
+
     function identityContestRecord(bytes32 record)
         external
         view

@@ -34,10 +34,98 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
     error InvalidSignature();
     error InvalidIdentity(bytes32 artistId);
     error InvalidTimestamp(uint64 timestamp);
+    error InvalidRecord();
     error Replay(bytes32 replayKey);
     using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
     address public immutable artistWindowAuthority;
     address public immutable identityWriterExtension;
+
+    event ArtistSuccessorDesignated(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        address indexed successor,
+        uint8 successorKind,
+        uint32 grantedCapabilities,
+        bytes32 conditionsHash,
+        bytes32 directiveHash,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 designationRecordHash
+    );
+    event ArtistEstateDirectiveRecorded(
+        uint16 schemaVersion,
+        bytes32 indexed artistId,
+        uint32 grantedCapabilities,
+        uint32 forbiddenCapabilities,
+        bytes32 directivePayloadHash,
+        uint256 nonce,
+        uint64 signedAt,
+        bytes32 directiveRecordHash
+    );
+
+    function recordSuccessorDesignation(
+        T.ActionContext calldata c,
+        Succ.Designation calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardIdentityWriter();
+    }
+
+    function recordEstateDirective(
+        T.ActionContext calldata c,
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        Succ.PublicDocument calldata document
+    ) external returns (bytes32) {
+        _forwardIdentityWriter();
+    }
+
+    function operativeSuccessorRecord(bytes32 artistId) public view returns (bytes32) {
+        return StreamArtistSuccessionState.operativeDesignation(_succession, _rotations, artistId);
+    }
+
+    function operativeEstateDirective(bytes32 artistId) external view returns (bytes32) {
+        return StreamArtistSuccessionState.operativeDirective(_succession, _rotations, artistId);
+    }
+
+    function successorDesignation(bytes32 artistId)
+        external
+        view
+        returns (address, uint8, uint32, bytes32, bytes32, uint256)
+    {
+        Succ.DesignationRecord storage r =
+            _succession.designations[operativeSuccessorRecord(artistId)];
+        return (
+            r.terms.successor,
+            r.terms.successorKind,
+            r.terms.grantedCapabilities,
+            r.terms.conditionsHash,
+            r.terms.directiveHash,
+            r.nonce
+        );
+    }
+
+    function successorDesignationRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DesignationRecord memory)
+    {
+        return _succession.designations[record];
+    }
+
+    function estateDirectiveRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DirectiveRecord memory)
+    {
+        return _succession.directives[record];
+    }
+
+    function estateDirectivePayload(bytes32 record) external view returns (bytes memory) {
+        return _succession.payloads[record];
+    }
 
     event ArtistIdentityContested(
         uint16 schemaVersion,
@@ -56,17 +144,20 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         Contest.GovernanceWitness calldata governance
     ) external returns (bytes32) {
         _check(c, 33);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityContestState.file(
-            _identityContests,
-            _identity,
-            _rotations,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            governance,
-            artistWindowAuthority
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityContestState.fileWithSuccessor(
+                _identityContests,
+                _identity,
+                _rotations,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                governance,
+                artistWindowAuthority,
+                _succession.designations[operativeSuccessorRecord(p.artistId)].terms.successor,
+                operativeSuccessorRecord(p.artistId)
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -84,8 +175,14 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         view
         returns (bytes32, bytes32, bytes32)
     {
-        return StreamArtistIdentityContestState.context(
-            _identityContests, _identity, _rotations, _ownerContext(), p
+        return StreamArtistIdentityContestState.contextWithSuccessor(
+            _identityContests,
+            _identity,
+            _rotations,
+            _ownerContext(),
+            p,
+            _succession.designations[operativeSuccessorRecord(p.artistId)].terms.successor,
+            operativeSuccessorRecord(p.artistId)
         );
     }
 
@@ -298,8 +395,16 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         bytes32 reasonHash
     ) external {
         _check(c, 31);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.veto(
-            _rotations, _identity, _replay, _ownerContext(), c, artistId, expected, reasonHash
+        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.vetoWithSuccessor(
+            _rotations,
+            _identity,
+            _replay,
+            _ownerContext(),
+            c,
+            artistId,
+            expected,
+            reasonHash,
+            _succession.designations[operativeSuccessorRecord(artistId)].terms.successor
         );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -563,13 +668,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
-        _check(c, 26);
-        if (a.time != 0) revert T.InvalidRecord();
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.grantDelegation(
-            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
-        );
-        _commit(c, m.action, m.state, m.replay, m.record);
-        return m.record;
+        _forwardIdentityWriter();
     }
 
     function revokeDelegation(

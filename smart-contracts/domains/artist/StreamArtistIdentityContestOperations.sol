@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/artist/IStreamArtistIdentityContest.sol";
+import "../../interfaces/stream/artist/IStreamArtistSuccessionRecords.sol";
 import "../../interfaces/stream/artist/IStreamArtistOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistArchiveV2.sol";
 import {
@@ -27,7 +28,12 @@ library StreamArtistIdentityContestOperations {
         record = owner.contestIdentity(T.ActionContext(33, actor, before_[2]), p, governance);
         T.Snapshot[7] memory after_;
         after_[2] = IStreamArtistOwner(address(owner)).ownerStateSnapshotV2();
-        bytes memory payload = abi.encode(p, governance, owner.identityContestRecord(record));
+        bytes memory payload = abi.encode(
+            p,
+            governance,
+            owner.identityContestRecord(record),
+            IStreamArtistSuccessionOwner(address(owner)).operativeSuccessorRecord(p.artistId)
+        );
         bytes32 id = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),

@@ -56,6 +56,53 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         _;
     }
 
+    function grantDelegation(
+        T.ActionContext calldata c,
+        D.Grant calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 26);
+        StreamArtistSuccessionState.requireAllowed(
+            _succession, _rotations, p.artistId, p.capabilities
+        );
+        if (a.time != 0) revert T.InvalidRecord();
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.grantDelegation(
+            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function recordSuccessorDesignation(
+        T.ActionContext calldata c,
+        Succ.Designation calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32) {
+        _check(c, 36);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistSuccessionState.designate(
+            _succession, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
+    function recordEstateDirective(
+        T.ActionContext calldata c,
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        Succ.PublicDocument calldata document
+    ) external onlyHost returns (bytes32) {
+        _check(c, 37);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistSuccessionState.directive(
+            _succession, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof, document
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
     function ownerStateSnapshotV2() public view override onlyHost returns (T.Snapshot memory) {
         return super.ownerStateSnapshotV2();
     }
@@ -222,22 +269,22 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         bytes32 digest,
         bytes32 record
     ) private {
-        StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityState.authorizeDelegate(
-                _identity,
-                _replay,
-                _delegations,
-                _ownerContext(),
-                c,
-                b,
-                collectionId,
-                capability,
-                grant,
-                a,
-                proof,
-                digest,
-                record
-            );
+        StreamArtistSuccessionState.requireAllowed(_succession, _rotations, b.artistId, capability);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.authorizeDelegate(
+            _identity,
+            _replay,
+            _delegations,
+            _ownerContext(),
+            c,
+            b,
+            collectionId,
+            capability,
+            grant,
+            a,
+            proof,
+            digest,
+            record
+        );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 

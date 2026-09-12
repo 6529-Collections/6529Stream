@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistRegistryWriterExtension.sol";
 import "./StreamArtistRegistryReadExtension.sol";
+import "./StreamArtistRegistryExtensionDeployment.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionState.sol";
 import {
     IStreamArtistContentAuthority
@@ -44,6 +45,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistSaleAuthority,
     IStreamArtistAttributionState,
     IStreamArtistIdentityContest,
+    IStreamArtistSuccessionRecords,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -80,8 +82,7 @@ contract StreamArtistOnboardingRegistry is
         operationCoordinator = coordinator_;
         registryWriterExtension =
             address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
-        registryReadExtension =
-            address(new StreamArtistRegistryReadExtension(address(this), coordinator_));
+        registryReadExtension = StreamArtistRegistryExtensionDeployment.deployReader(coordinator_);
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
     }
@@ -117,6 +118,8 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistSaleAuthority).interfaceId
             || id == type(IStreamArtistAttributionState).interfaceId
             || id == type(IStreamArtistIdentityContest).interfaceId
+            || id == type(IStreamArtistSuccessionRecords).interfaceId
+            || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
     }
 
@@ -125,6 +128,81 @@ contract StreamArtistOnboardingRegistry is
         returns (bytes32)
     {
         _forwardRegistryWriter();
+    }
+
+    function recordSuccessorDesignation(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function recordEstateDirective(
+        Succ.Directive calldata p,
+        T.Authorization calldata a,
+        Succ.PublicDocument calldata document
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function successorDesignation(bytes32 artistId)
+        external
+        view
+        returns (address, uint8, uint32, bytes32, bytes32, uint256)
+    {
+        _forwardRegistryRead();
+    }
+
+    function operativeSuccessorRecord(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function operativeEstateDirective(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function successorDesignationRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DesignationRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectiveRecord(bytes32 record)
+        external
+        view
+        returns (Succ.DirectiveRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectivePayload(bytes32 record) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function successorDesignationDigest(Succ.Designation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function estateDirectiveDigest(Succ.Directive calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardRegistryRead();
+    }
+
+    function previewEstateDirectivePayload(
+        uint32 granted,
+        uint32 forbidden,
+        Succ.PublicDocument calldata document
+    ) external view returns (bytes memory) {
+        _forwardRegistryRead();
     }
 
     function contestArtistIdentity(

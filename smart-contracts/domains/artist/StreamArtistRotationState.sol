@@ -479,10 +479,27 @@ library StreamArtistRotationState {
         bytes32 expected,
         bytes32 reasonHash
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return vetoWithSuccessor(
+            s, identity, replay, o, c, artistId, expected, reasonHash, address(0)
+        );
+    }
+
+    function vetoWithSuccessor(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expected,
+        bytes32 reasonHash,
+        address successor
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
         R.RotationRecord storage r = _pending(s, artistId, expected);
         (bool revoked,) = standingRevoked(s, artistId, c.actor);
         if (
-            c.actor != identity.identities[artistId].authorityAddress
+            c.actor != identity.identities[artistId].authorityAddress && c.actor != successor
+                && !_member(s, operativeGuardian(s, artistId), c.actor)
                 && !_member(s, r.guardianSetRecordHash, c.actor)
                 && (s.retirement[artistId][c.actor] == bytes32(0) || revoked)
         ) revert T.Unauthorized(c.actor);
