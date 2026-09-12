@@ -7,11 +7,25 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added governed reveal timing with a permissionless Safe keeper request after
+  the effective SLO, live request-timeout raises and strict deadline boundaries.
+  Fifty-four domain tests, thirty actual-Core metadata regressions and both
+  compiler profiles pass independent review. Seven actual Executor/Safe scenarios
+  also pass against their captured source. The new constructor takes explicit timing configuration
+  and uses a new storage layout for new deployments.
+- Added exact artist sale-parameter consent across native and universal sales,
+  with explicit capability admission and REQUIRED rejection in legacy consumers.
+  Focused consent and Safe tests pass; three new current purchase scenarios are
+  being rerun after correcting their artist nonce setup.
+- Added artist identity-compromise filings by eligible guardians, prior
+  authorities and a staged arbiter, with immutable contest records and
+  provisional-cohort consequences. The 159-case domain suite passes independent
+  review; actual governance composition and dismissal/recovery remain underway.
 - Added declared collection reveal-fee policies, separate escrow and requester
   credits, canonical operational roles and typed provider quotes. Forty-four
   focused cases and thirty actual-Core metadata regressions pass independent
   review. Resumable role activation has six registry regression tests; automatic
-  request timing, SLO fallback and complete recovery remain in progress.
+  AT_MINT requests and complete recovery remain in progress.
 - Added the ARRNG provider adapter with pinned source authority, exact fees,
   stored-output retry, a governed coordinator-call gas cap and contract treasury
   withdrawals. Seventeen focused tests plus fuzzing pass with independent review;

@@ -41,7 +41,7 @@ contract ProviderWithMalformedCollectionFee is MockStreamEntropyProvider {
 }
 
 /// @notice Escrow behavior with real Safe callers and explicit Core/role/provider domain doubles.
-contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixture {
+contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixture, EntropyTimeAuthorityFixture {
     bytes32 private constant MANIFEST = keccak256("reveal fee fixture");
     bytes32 private constant REVEAL_OWNER = keccak256("ROLE_ENTROPY_REVEAL_OWNER");
     bytes32 private constant ADMIN = keccak256("ROLE_ENTROPY_ADMIN");
@@ -62,14 +62,15 @@ contract StreamRevealFeeEscrowTest is CharacterizationTestBase, OfficialSafeFixt
         core.setModuleRegistry(address(new MockEntropyModuleRegistry(address(this))));
         roleRegistry = new MockEntropyRoleRegistry(address(this));
         roleRegistry.setHolder(TREASURY, address(safe));
-        entropy = new StreamEntropyCoordinator(
+        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
             address(core),
             address(this),
             address(roleRegistry),
+            EntropyTimeTestConfigs.parameters(),
             MANIFEST,
             "urn:stream:fixture:reveal",
             MANIFEST
-        );
+        ));
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
         provider.setFee(100);

@@ -8,12 +8,14 @@ import "../../interfaces/stream/entropy/IStreamEntropyProvider.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyProviderFeeQuote.sol";
 import "../../interfaces/stream/entropy/IStreamRevealFeeEscrow.sol";
 import "../../interfaces/stream/entropy/IStreamRevealPolicyAdmin.sol";
+import "../../interfaces/stream/entropy/IStreamEntropyTiming.sol";
 import "../../interfaces/stream/governance/IStreamRoleRegistry.sol";
 import "../../interfaces/stream/governance/IStreamGovernanceRoleSources.sol";
 import "../../interfaces/stream/mint/IStreamMintGovernanceRegistry.sol";
 import "../../interfaces/stream/modules/IStreamModuleRegistry.sol";
 import "../../vendor/openzeppelin/ReentrancyGuard.sol";
 import "../modules/StreamModuleBase.sol";
+import "../parameters/StreamTimeParameterHost.sol";
 
 /// @notice Core-bound asynchronous entropy with immutable request inputs and no ordinary reroll.
 /// @dev A collection's initial policy locks on its first token or scope registration. Fresh
@@ -21,10 +23,18 @@ import "../modules/StreamModuleBase.sol";
 contract StreamEntropyCoordinator is
     StreamModuleBase,
     ReentrancyGuard,
+    StreamTimeParameterHost,
     IStreamEntropyCoordinator,
     IStreamEntropyView,
-    IStreamRevealPolicyAdmin
+    IStreamRevealPolicyAdmin,
+    IStreamEntropyTiming
 {
+    bytes32 public constant GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS =
+        keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
+    bytes32 public constant GTP_ENTROPY_REVEAL_SLO_BLOCKS =
+        keccak256("6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS");
+    bytes32 public constant GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS =
+        keccak256("6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS");
     bytes32 public constant REQUEST_DOMAIN = keccak256("6529STREAM_ENTROPY_REQUEST_V1");
     bytes32 public constant SEED_DOMAIN = keccak256("6529STREAM_ENTROPY_SEED_V1");
     bytes32 public constant SCOPE_DOMAIN = keccak256("6529STREAM_ENTROPY_SCOPE_SUBJECT_V1");
@@ -162,37 +172,51 @@ contract StreamEntropyCoordinator is
     );
     event MetadataNotificationFailed(uint256 indexed tokenId, bytes32 indexed requestKey);
 
-    constructor(
-        address core_,
-        address authority_,
-        address roleRegistry_,
-        bytes32 deploymentManifestHash,
-        string memory manifestURI,
-        bytes32 manifestHash
-    )
+    /// @notice Complete constructor configuration for a new coordinator instance.
+    struct DeploymentConfig {
+        address core;
+        address authority;
+        address roleRegistry;
+        TimeParameterConfig[3] timeParameters;
+        bytes32 deploymentManifestHash;
+        string manifestURI;
+        bytes32 manifestHash;
+    }
+
+    constructor(DeploymentConfig memory config)
         StreamModuleBase(
             keccak256("6529stream.entropy-coordinator.schema.v1"),
             address(0),
-            deploymentManifestHash,
-            manifestURI,
-            manifestHash
+            config.deploymentManifestHash,
+            config.manifestURI,
+            config.manifestHash
         )
+        StreamTimeParameterHost(config.authority)
     {
-        if (core_.code.length == 0 || !IERC165(core_).supportsInterface(0x80ac58cd)) revert InvalidDependency(core_);
-        if (authority_ == address(0) || deploymentManifestHash == 0 || manifestHash == 0) {
-            revert InvalidDependency(authority_);
+        if (config.core.code.length == 0 || !IERC165(config.core).supportsInterface(0x80ac58cd)) revert InvalidDependency(config.core);
+        if (config.authority == address(0) || config.deploymentManifestHash == 0 || config.manifestHash == 0) {
+            revert InvalidDependency(config.authority);
         }
         if (
-            roleRegistry_.code.length == 0
-                || !IStreamRoleRegistry(roleRegistry_)
+            config.roleRegistry.code.length == 0
+                || !IStreamRoleRegistry(config.roleRegistry)
                     .supportsInterface(type(IStreamRoleRegistry).interfaceId)
-                || IStreamRoleRegistry(roleRegistry_).supportsInterface(0xffffffff)
-                || IStreamRoleRegistryOwnership(roleRegistry_).owner() != authority_
-        ) revert InvalidDependency(roleRegistry_);
-        core = IStreamCore(core_);
-        authority = authority_;
-        roleRegistry = IStreamRoleRegistry(roleRegistry_);
-        roleRegistryCodeHash = roleRegistry_.codehash;
+                || IStreamRoleRegistry(config.roleRegistry).supportsInterface(0xffffffff)
+                || IStreamRoleRegistryOwnership(config.roleRegistry).owner() != config.authority
+        ) revert InvalidDependency(config.roleRegistry);
+        core = IStreamCore(config.core);
+        authority = config.authority;
+        roleRegistry = IStreamRoleRegistry(config.roleRegistry);
+        roleRegistryCodeHash = config.roleRegistry.codehash;
+        bytes32[3] memory expected = [
+            GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS,
+            GTP_ENTROPY_REVEAL_SLO_BLOCKS,
+            GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS
+        ];
+        for (uint256 i; i < expected.length; ++i) {
+            bytes32 id = _registerTimeParameter(config.timeParameters[i]);
+            if (id != expected[i]) revert TimeParameterInvalidConfig(id);
+        }
     }
 
     modifier onlyAuthority() {
@@ -221,6 +245,8 @@ contract StreamEntropyCoordinator is
         return id == type(IStreamEntropyCoordinator).interfaceId
             || id == type(IStreamRevealFeeEscrow).interfaceId
             || id == type(IStreamRevealPolicyAdmin).interfaceId
+            || id == type(IStreamTimeParameterHost).interfaceId
+            || id == type(IStreamEntropyTiming).interfaceId
             || id == type(IStreamEntropyView).interfaceId || super.supportsInterface(id);
     }
 
@@ -435,6 +461,26 @@ contract StreamEntropyCoordinator is
         emit EntropyRegistered(collectionId, tokenId, mintCommitment);
     }
 
+    /// @inheritdoc IStreamEntropyTiming
+    function effectiveRequestTimeoutBlocks(uint256 collectionId)
+        public view override returns (uint256)
+    {
+        CollectionConfig storage config = collectionEntropyConfig[collectionId];
+        if (config.provider == address(0)) revert InvalidCollection(collectionId);
+        uint256 live = _timeParameterValue(GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS);
+        return live > config.timeoutBlocks ? live : config.timeoutBlocks;
+    }
+
+    /// @inheritdoc IStreamEntropyTiming
+    function effectiveRevealSLOBlocks(uint256 collectionId)
+        public view override returns (uint256)
+    {
+        IStreamRevealFeeEscrow.CollectionRevealPolicy storage policy = _revealPolicies[collectionId];
+        if (!policy.declared) revert RevealPolicyUndeclared(collectionId);
+        uint256 live = _timeParameterValue(GTP_ENTROPY_REVEAL_SLO_BLOCKS);
+        return live > policy.requestSLOBlocks ? live : policy.requestSLOBlocks;
+    }
+
     function requestEntropy(uint256 tokenId)
         external
         payable
@@ -447,7 +493,13 @@ contract StreamEntropyCoordinator is
             core.tokenLifecycle(tokenId) != uint8(StreamTokenLifecycle.MINTED)
                 || core.coordinatorAtMint(tokenId) != address(this)
         ) revert InvalidToken(tokenId);
+        // A matured public remedy does not depend on availability of optional role reads.
+        // Subtraction avoids overflow when a governed window approaches uint256's limit.
+        bool lapsed = subject.status == StreamEntropyStatus.REGISTERED
+            && block.number > registeredAtBlock[tokenId]
+            && block.number - registeredAtBlock[tokenId] > effectiveRevealSLOBlocks(subject.collectionId);
         if (
+            !lapsed &&
             msg.sender != authority && !requesters[msg.sender]
                 && !collectionEntropyConfig[subject.collectionId].publicRequests
                 && !_hasRole(_ENTROPY_ADMIN, msg.sender)
@@ -515,6 +567,7 @@ contract StreamEntropyCoordinator is
     {
         Subject storage subject = _subjects[subjectKey];
         if (subject.status != StreamEntropyStatus.REGISTERED) revert InvalidStatus(subject.status);
+        if (block.number > type(uint64).max) revert EntropyBlockNumberOverflow();
         CollectionConfig storage config = collectionEntropyConfig[subject.collectionId];
         address provider = config.provider;
         if (
@@ -690,9 +743,9 @@ contract StreamEntropyCoordinator is
         Subject storage subject = _subjects[request.subjectKey];
         if (subject.status != StreamEntropyStatus.REQUESTED) revert InvalidStatus(subject.status);
         if (
-            block.number
-                <= uint256(request.requestedAtBlock)
-                    + collectionEntropyConfig[subject.collectionId].timeoutBlocks
+            block.number <= request.requestedAtBlock
+                || block.number - request.requestedAtBlock
+                    <= effectiveRequestTimeoutBlocks(subject.collectionId)
         ) revert RequestNotExpired();
         (, bytes32 boundKey,, bool received,) =
             IStreamEntropyProvider(request.provider).providerResultStatus(request.providerRequestId);

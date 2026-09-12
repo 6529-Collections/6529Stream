@@ -290,6 +290,64 @@ contract StreamCurrentARRNGTest is StreamCurrentStackFixture, OfficialSafeFixtur
         executor.executeGovernanceAction(abi.decode(result, (bytes32)), data);
     }
 
+    function testSafeGovernorRaisesLiveSLOThenUnprivilegedSafeRevealsActualMint() public {
+        bytes memory restrictRequests = abi.encodeCall(
+            entropy.configureCollection, (1, address(arrng), SALT, false, uint64(100))
+        );
+        _safeGovern(address(entropy), restrictRequests, keccak256("restricted reveal fixture"),
+            keccak256("public requests"), keccak256("restricted requests"));
+        uint256 token = _buy();
+        uint256 registered = entropy.registeredAtBlock(token);
+        require(executeSafe(buyerSafe, keys, address(entropy), 100,
+            abi.encodeCall(entropy.fundRevealFeeEscrow, (1)), 0), "actual Safe reveal funding");
+        bytes32 parameter = entropy.GTP_ENTROPY_REVEAL_SLO_BLOCKS();
+        (uint256 value, uint256 floor, uint64 wall, uint64 revision) = entropy.timeParameterInfo(parameter);
+        require(value == 100 && floor == 100 && wall == 1200 && revision == 1, "explicit genesis timing");
+        bytes32 scope = keccak256(abi.encode(
+            bytes32(0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24),
+            block.chainid, address(entropy), parameter));
+        bytes32 domain = 0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384;
+        bytes32 oldState = keccak256(abi.encode(domain, scope, value, floor, wall, revision));
+        bytes32 newState = keccak256(abi.encode(domain, scope, uint256(200), floor, wall, revision + 1));
+        bytes memory raise = abi.encodeCall(entropy.raiseTimeParameter, (parameter, uint256(200)));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.attemptDirectEntropyTimeAsSafe(raise);
+        _safeGovern(address(entropy), raise, scope, oldState, newState);
+        require(entropy.effectiveRevealSLOBlocks(1) == 200
+            && entropy.collectionRevealPolicy(1).requestSLOBlocks == 100
+            && entropy.registeredAtBlock(token) == registered, "real governed raise retains frozen promise");
+        OfficialSafe keeper = createOfficialSafe(
+            deploySafeComponents("1.4.1"), safeOwnerAddresses(keys), 2, 163
+        );
+        require(!roles.hasRole(keccak256("ROLE_ENTROPY_ADMIN"), address(keeper))
+            && !roles.hasRole(keccak256("ROLE_ENTROPY_REVEAL_OWNER"), address(keeper)),
+            "keeper has no operational authority");
+        vm.roll(registered + 200);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.requestThroughPublicSafe(keeper, token);
+        uint256 oracleBefore = address(artistSafe).balance;
+        vm.roll(registered + 201);
+        this.requestThroughPublicSafe(keeper, token);
+        require(entropy.revealFeeEscrow(1) == 0 && address(artistSafe).balance == oracleBefore + 100
+            && entropy.entropyFeeCredit(address(keeper)) == 0 && address(keeper).balance == 0,
+            "unprivileged Safe pays no value while actual provider receives exact escrow fee");
+        _deliverAsSafe(1, 9876, 0);
+        _assertSeed(token, 1, 9876);
+        require(core.ownerOf(token) == address(buyerSafe) && entropy.nonterminalTokenCount(1) == 0,
+            "actual mint/reveal lineage and custody remain unchanged");
+    }
+
+    function attemptDirectEntropyTimeAsSafe(bytes calldata data) external {
+        require(msg.sender == address(this), "fixture only");
+        require(executeSafe(buyerSafe, keys, address(entropy), 0, data, 0), "direct Safe time call");
+    }
+
+    function requestThroughPublicSafe(OfficialSafe keeper, uint256 token) external {
+        require(msg.sender == address(this), "fixture only");
+        require(executeSafe(keeper, keys, address(entropy), 0,
+            abi.encodeCall(entropy.requestEntropy, (token)), 0), "public Safe request");
+    }
+
     function testSafeARRNGMintRevealAndGovernedTreasuryWithdrawal() public {
         uint256 token = _buy();
         uint256 oracleBefore = address(artistSafe).balance;

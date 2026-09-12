@@ -1,8 +1,9 @@
 # Fund and settle reveal fees
 
 This guide covers the developing full-v1 coordinator. Its collection escrow and
-typed fee policy pass focused tests; automatic request timing and the complete
-recovery lifecycle remain in progress. Use the frozen RC1 checkout and its
+typed fee policy and governed reveal deadline pass focused tests. Automatic
+AT_MINT attempts and the complete recovery lifecycle remain in progress.
+Use the frozen RC1 checkout and its
 artifacts for RC1 contracts.
 
 ## Read the declared policy
@@ -40,7 +41,40 @@ attaching 55 wei pays 40 wei and receives 15 wei of pull credit. With 150 wei
 already in escrow, attaching 25 wei leaves 50 wei in escrow and credits all
 25 wei to the caller. Units here are illustrative.
 
-## Administration and receipts
+## Request after the reveal deadline
+
+Read `IStreamEntropyTiming.effectiveRevealSLOBlocks(collectionId)` from the
+token's original coordinator. It returns the larger of the collection's frozen
+`requestSLOBlocks` and the live `ENTROPY_REVEAL_SLO_BLOCKS` governed parameter.
+For a token still `REGISTERED`, anyone may request when the current block is
+strictly greater than `registeredAtBlock(tokenId) + effectiveWindow`. Equality
+is too early. The collection need not have opted into ordinary public requests.
+
+This fallback uses the same collection escrow, caller shortfall and excess-credit
+rules above. It remains usable when optional role resolution is unavailable.
+An existing request or terminal result cannot use the fallback to draw again.
+Earlier requests still use the configured public/requester/operational roles.
+
+`effectiveRequestTimeoutBlocks(collectionId)` similarly applies the larger of
+the frozen provider timeout and the live governed request timeout to both token
+and scope requests. Timing changes act on existing registrations and requests;
+they do not reset their start blocks or change their entropy identities.
+
+## Govern timing and administer fees
+
+The coordinator implements `IStreamTimeParameterHost`. A correctly authorized
+Safe proposes and executes `raiseTimeParameter` through the canonical delayed
+Executor. Calling that method directly from the Safe is insufficient, including
+when the Safe is the governance root. Each exact class-1 action may increase a
+parameter by at most twice its current value; collection promises remain floors.
+Block counts do not adjust themselves to a change in the chain's wall-clock cadence.
+
+The constructor takes one `StreamEntropyCoordinator.DeploymentConfig`, including
+three ordered, explicit time configurations: request timeout, reveal SLO and
+recovery-step delay. `StreamCurrentStackPlan.entropyTimeParameters()` supplies
+development values of 100 blocks with a 100-block floor and 1,200-second intent.
+A release must record its own validated cadence and holder latency. Hosting the
+recovery-delay parameter does not implement recovery itself.
 
 `IStreamRevealPolicyAdmin` exposes these direct operational calls:
 

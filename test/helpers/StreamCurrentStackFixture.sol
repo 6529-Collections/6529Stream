@@ -105,14 +105,15 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         auction = new StreamEnglishAuctionHouse(
             core, manager, primaryResolver, platform, attribution, revenueEscrow
         );
-        entropy = new StreamEntropyCoordinator(
+        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
             address(core),
             address(executor),
             address(roles),
+            StreamCurrentStackPlan.entropyTimeParameters(),
             DEPLOYMENT_HASH,
             "urn:6529stream:fixture:entropy",
             keccak256("fixture entropy module")
-        );
+        ));
         provider = new MockStreamEntropyProvider(address(entropy));
         IStreamSplitWallet.SplitEntry[] memory entries = new IStreamSplitWallet.SplitEntry[](2);
         entries[0] = IStreamSplitWallet.SplitEntry(artist, 900_000, keccak256("artist"));
@@ -788,7 +789,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](61 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](62 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -872,6 +873,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         rows[i++] = _operatingPolicy(
             address(primaryResolver), primaryResolver.setPrimaryTemplateAssignment.selector
         );
+        rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
         // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];

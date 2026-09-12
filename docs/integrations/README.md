@@ -9,6 +9,7 @@ deployment evidence.
 | --- | --- |
 | Resume the developing artist and reveal authority batch | [Current activation](current-artist-activation.md) |
 | Fund reveal requests and settle collection escrow | [Reveal-fee funding](reveal-fee-funding.md) |
+| Record artist approval of exact sale terms | [Sale-parameter consent](sale-parameter-consent.md) |
 | Integrate the new native/ERC-20 funding boundary | [Sale funding](sale-funding.md) |
 | Integrate auction V2 and retained proceeds rights | [Auction funding](auction-funding.md) |
 | Build typed calls, signing payloads and portable snapshots | [TypeScript client](typescript-client.md) |

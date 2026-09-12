@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../mocks/MockStreamEntropyProvider.sol";
 import "../../mocks/MockEntropyRoleRegistry.sol";
+import "../../helpers/EntropyTimeTestMocks.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
 
 /// @notice Minimal Core surface for testing coordinator subject identity without a full stack.
@@ -110,7 +111,7 @@ contract EntropySubjectCoreFixture {
     }
 }
 
-contract StreamEntropySubjectIdentityTest is CharacterizationTestBase {
+contract StreamEntropySubjectIdentityTest is CharacterizationTestBase, EntropyTimeAuthorityFixture {
     bytes32 private constant MANIFEST = keccak256("subject-identity-test");
     bytes32 private constant MINT_COMMITMENT = keccak256("signed mint commitment");
     address private constant REQUESTER = address(0x1234);
@@ -126,14 +127,15 @@ contract StreamEntropySubjectIdentityTest is CharacterizationTestBase {
         core = new EntropySubjectCoreFixture();
         roleRegistry = new MockEntropyRoleRegistry(address(this));
         core.setModuleRegistry(address(new MockEntropyModuleRegistry(address(this))));
-        entropy = new StreamEntropyCoordinator(
+        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
             address(core),
             address(this),
             address(roleRegistry),
+            EntropyTimeTestConfigs.parameters(),
             MANIFEST,
             "urn:test:subject-identity",
             MANIFEST
-        );
+        ));
         core.setCoordinator(entropy);
         provider = new MockStreamEntropyProvider(address(entropy));
         entropy.configureCollection(1, address(provider), keccak256("collection salt"), true, 10);

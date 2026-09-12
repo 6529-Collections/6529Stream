@@ -92,8 +92,45 @@ generated from the completed integration, not reused from RC1.
 
 ## Remaining lifecycle work
 
-This increment stores the request mode and SLO promise. Automatic AT_MINT
-attempts, the governed SLO and permissionless fallback, the complete recovery
-lifecycle and legacy entropy administration's EC-ROLES migration remain separate
-implementation work. Existing collection/provider configuration and terminal
-administration retain their Executor authority path in this increment.
+Automatic AT_MINT attempts, the complete recovery lifecycle and legacy entropy
+administration's EC-ROLES migration remain separate implementation work.
+Existing collection/provider configuration and terminal administration retain
+their Executor authority path in this increment.
+
+## Governed timing addition
+
+The next implementation uses the existing `StreamTimeParameterHost` for the
+three canonical EC-TIME parameters. A new coordinator's single `DeploymentConfig`
+contains explicit, ordered request-timeout, reveal-SLO and recovery-step-delay
+configurations. Unknown, missing, duplicate or reordered identifiers cannot
+silently replace a required parameter. The shared host preserves canonical
+Executor validation, class-1 exact commitments, immutable floors and at-most-2x
+raises. The tuple constructor avoids Solidity 0.8.19's non-IR decoder stack
+limit encountered with seven separate arguments; no values are defaulted in
+the coordinator. Development tooling separately supplies its documented inputs.
+
+Every timing decision takes the maximum of the frozen collection declaration
+and the live host value. A still-REGISTERED token becomes permissionlessly
+requestable strictly after its recorded registration block plus the effective
+SLO. That matured remedy is evaluated before optional role reads, so a role
+service outage cannot veto it. Token and scope stale transitions use the live
+effective timeout from their original request block. Elapsed-block subtraction
+avoids overflow for a maximum-sized governed value; request creation also
+rejects a block number that cannot fit its stored uint64 before provider calls
+or effects. Timing values remain outside request and seed identity preimages.
+
+This is an explicitly new, undeployed storage layout. The time host inserts its
+mapping and inventory at slots 2 and 3; preceding slots 0 and 1 retain their
+shape, and the coordinator's prior fields shift by two slots. It is not an
+in-place upgrade or a prefix-preserving layout change. Old instances continue
+to own their original tokens and requests. All preceding callable signatures
+remain available; constructor artifacts and new interface/parameter inventories
+must be regenerated for the new candidate.
+
+The final timing domain suite covers 54 cases, including ten timing cases and
+256 fuzz inputs for each randomized property. Thirty actual-Core metadata
+regressions and seven actual Safe/Executor scenarios also pass independent
+source/artifact review. The seven-case capture includes the final unique-holder
+activation planner and predates the operation-33 artist increment. Hosting the
+recovery delay provides the canonical parameter state only; complete recovery
+must later consume it with the specified incident and step semantics.

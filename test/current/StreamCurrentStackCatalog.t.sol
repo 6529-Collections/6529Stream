@@ -71,14 +71,15 @@ contract StreamCurrentStackCatalogTest is StreamCurrentStackFixture {
     }
 
     function _replacement() private returns (StreamEntropyCoordinator) {
-        return new StreamEntropyCoordinator(
+        return new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
             address(core),
             address(executor),
             address(roles),
+            StreamCurrentStackPlan.entropyTimeParameters(),
             DEPLOYMENT_HASH,
             "urn:6529stream:fixture:replacement-entropy",
             keccak256("replacement entropy module")
-        );
+        ));
     }
 
     function _configuration(StreamEntropyCoordinator target)

@@ -9,6 +9,7 @@ import {
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../mocks/MockStreamEntropyProvider.sol";
 import "../../mocks/MockEntropyRoleRegistry.sol";
+import "../../helpers/EntropyTimeTestMocks.sol";
 import "../../mocks/MockVRFCoordinatorV2Plus.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyProviderVRF.sol";
 import "../../../smart-contracts/domains/entropy/StreamEntropyCoordinator.sol";
@@ -46,7 +47,7 @@ contract NativeMetadataEncodingHarness is StreamMetadataRouter {
 
 /// @notice Real Core, entropy and rendering with explicit governance and artist read boundaries.
 /// @dev Direct Core minting isolates entropy/metadata; current-stack tests prove artist eligibility.
-contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixture {
+contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixture, EntropyTimeAuthorityFixture {
     event NativeVRFCallbackGasMeasured(uint256 gasUsed);
     event log_named_uint(string key, uint256 value);
     bytes32 private constant MANAGER =
@@ -108,14 +109,15 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         registry.setRecord(
             address(registry), REGISTRY, type(IStreamModuleRegistry).interfaceId, MANIFEST, MANIFEST
         );
-        entropy = new StreamEntropyCoordinator(
+        entropy = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
             address(core),
             address(this),
             address(roleRegistry),
+            EntropyTimeTestConfigs.parameters(),
             MANIFEST,
             "ipfs://local-test",
             MANIFEST
-        );
+        ));
         artistRegistry = new StreamMetadataArtistBoundary(address(core), address(this), RECIPIENT);
         router = new NativeMetadataEncodingHarness(
             address(core), address(this), MANIFEST, artistRegistry
@@ -632,9 +634,10 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
     function testRouterUsesCoordinatorAtMintAfterPointerReplacementAndBurnKeepsSeed() public {
         uint256 id = _mint();
         (, uint256 requestId) = entropy.requestEntropy(id);
-        StreamEntropyCoordinator next = new StreamEntropyCoordinator(
-            address(core), address(this), address(roleRegistry), MANIFEST, "ipfs://next", MANIFEST
-        );
+        StreamEntropyCoordinator next = new StreamEntropyCoordinator(StreamEntropyCoordinator.DeploymentConfig(
+            address(core), address(this), address(roleRegistry), EntropyTimeTestConfigs.parameters(),
+            MANIFEST, "ipfs://next", MANIFEST
+        ));
         _install(ENTROPY, address(next), type(IStreamEntropyCoordinator).interfaceId);
         provider.fulfill(requestId, bytes32(uint256(12)));
         _assertState(id, "final");

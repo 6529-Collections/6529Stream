@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/domains/modules/StreamModuleRegistry.sol";
+import "../../smart-contracts/interfaces/stream/parameters/IStreamTimeParameterHost.sol";
 
 /// @notice Offchain deployment planner shared by current-stack scripts and tests.
 /// @dev Predicts exact transition commitments without mutating contracts or using cheatcodes.
@@ -13,6 +14,21 @@ library StreamCurrentStackPlan {
         keccak256("6529STREAM_MODULE_REGISTRATION_SCOPE_V1");
     bytes32 private constant REGISTRATION_STATE =
         keccak256("6529STREAM_MODULE_REGISTRATION_STATE_V1");
+
+    /// @notice Explicit development-chain timing; release manifests must pin their own cadence.
+    function entropyTimeParameters()
+        internal pure returns (IStreamTimeParameterHost.TimeParameterConfig[3] memory rows)
+    {
+        rows[0] = IStreamTimeParameterHost.TimeParameterConfig(
+            "ENTROPY_REQUEST_TIMEOUT_BLOCKS", 100, 100, 1200
+        );
+        rows[1] = IStreamTimeParameterHost.TimeParameterConfig(
+            "ENTROPY_REVEAL_SLO_BLOCKS", 100, 100, 1200
+        );
+        rows[2] = IStreamTimeParameterHost.TimeParameterConfig(
+            "ENTROPY_RECOVERY_STEP_DELAY_BLOCKS", 100, 100, 1200
+        );
+    }
 
     function gasParameters()
         internal
