@@ -56,6 +56,16 @@ contract StreamArtistIdentityAuthority is
     address public immutable identityWriterExtension;
     address public immutable identityEstateExtension;
 
+    function consumeSanction(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        S.Terms calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external returns (bytes32) {
+        _forwardEstateWriter();
+    }
+
     function requestEstate(
         T.ActionContext calldata c,
         Estate.Request calldata p,

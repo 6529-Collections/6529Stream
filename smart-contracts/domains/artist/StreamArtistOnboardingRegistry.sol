@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistRegistryWriterExtension.sol";
 import "./StreamArtistRegistryReadExtension.sol";
+import "./StreamArtistRegistryFinalityReadExtension.sol";
 import "./StreamArtistRegistryExtensionDeployment.sol";
 import "./StreamArtistEstateCoverage.sol";
 import "../../interfaces/stream/artist/IStreamArtistCommercialAuthority.sol";
@@ -55,6 +57,10 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistEstateBinding,
     IStreamArtistCommercialAuthority,
     IStreamArtistRecordPublication,
+    IStreamArtistFinalityBinding,
+    IStreamArtistSanction,
+    IStreamArtworkFinalityComponent,
+    IStreamArtworkScopedFinalityComponent,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -63,9 +69,83 @@ contract StreamArtistOnboardingRegistry is
     address public immutable operationCoordinator;
     address public immutable registryWriterExtension;
     address public immutable registryReadExtension;
+    address public immutable registryFinalityReadExtension;
     address public immutable override archivalCoverage;
     bytes32 public immutable override archivalCoverageCodeHash;
     bytes32 public immutable override archivalCoverageConfigurationHash;
+
+    function recordArtistSanction(Q.Request calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function prepareArtistSanction(Q.Request calldata p) external view returns (Q.Prepared memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionDigest(S.Terms calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        _forwardFinalityRead();
+    }
+
+    function sanctionRecord(bytes32 recordHash) external view returns (S.Record memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionArchiveBytes(bytes32 recordHash) external view returns (bytes memory) {
+        _forwardFinalityRead();
+    }
+
+    function sanctionArchiveFacts(bytes32 recordHash)
+        external
+        view
+        returns (IStreamArtistSanctionArchiveFacts.Facts memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function collectionSanctionComponentType(uint256 collectionId) external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
+
+    function verifySanctionForSubject(
+        uint8 scopeType,
+        uint256 collectionId,
+        uint256 tokenId,
+        bytes32 scopeId,
+        bytes32 subject
+    ) external view returns (bool, bytes32, address, uint8) {
+        _forwardFinalityRead();
+    }
+
+    function finalityState(uint256 collectionId)
+        external
+        view
+        returns (StreamFinalityComponentState memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function finalityStateForScope(StreamFinalityScope calldata scope)
+        external
+        view
+        returns (StreamFinalityComponentState memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function finalityRegistry() external view returns (address) {
+        _forwardFinalityRead();
+    }
+
+    function finalityRegistryCodeHash() external view returns (bytes32) {
+        _forwardFinalityRead();
+    }
 
     constructor(
         address core_,
@@ -100,6 +180,8 @@ contract StreamArtistOnboardingRegistry is
         registryWriterExtension =
             address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
         registryReadExtension = StreamArtistRegistryExtensionDeployment.deployReader(coordinator_);
+        registryFinalityReadExtension =
+            address(new StreamArtistRegistryFinalityReadExtension(address(this), coordinator_));
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
         _registerGasParameter(
@@ -108,6 +190,7 @@ contract StreamArtistOnboardingRegistry is
         _registerGasParameter(
             GasParameterConfig("ARTIST_ARCHIVAL_COVERAGE_READ_GAS", 400_000, 250_000, 2)
         );
+        _registerGasParameter(GasParameterConfig("ARTIST_FINALITY_READ_GAS", 2_000_000, 500_000, 2));
     }
 
     function streamModuleType() public pure override returns (bytes32) {
@@ -146,6 +229,12 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistEstateBinding).interfaceId
             || id == type(IStreamArtistCommercialAuthority).interfaceId
             || id == type(IStreamArtistRecordPublication).interfaceId
+            || id == type(IStreamArtistFinalityBinding).interfaceId
+            || id == type(IStreamArtistSanction).interfaceId
+            || id == type(IStreamFinalitySanctionReads).interfaceId
+            || id == type(IStreamArtistSanctionArchiveFacts).interfaceId
+            || id == type(IStreamArtworkFinalityComponent).interfaceId
+            || id == type(IStreamArtworkScopedFinalityComponent).interfaceId
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
@@ -391,7 +480,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistSaleHashes.digest(_environment(), p, a);
+        _forwardFinalityRead();
     }
 
     function saleConsentScope(uint256 collectionId) external view returns (uint8) {
@@ -957,7 +1046,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time);
+        _forwardRegistryRead();
     }
 
     function recordArtistAttestation(
@@ -987,7 +1076,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistContentHashes.consentDigest(_environment(), p, a);
+        _forwardFinalityRead();
     }
 
     function contentFreezeDigest(Content.Freeze calldata p, T.Authorization calldata a)
@@ -995,7 +1084,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistContentHashes.freezeDigest(_environment(), p, a);
+        _forwardFinalityRead();
     }
 
     function requireContentConsent(uint256 collectionId, bytes32 familyId, bytes32 newStateHash)
@@ -1135,7 +1224,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time);
+        _forwardRegistryRead();
     }
 
     function payoutDesignationDigest(T.PayoutDesignation calldata p, T.Authorization calldata a)
@@ -1189,6 +1278,18 @@ contract StreamArtistOnboardingRegistry is
 
     function _forwardRegistryRead() private view {
         address target = registryReadExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := staticcall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function _forwardFinalityRead() private view {
+        address target = registryFinalityReadExtension;
         assembly ("memory-safe") {
             let pointer := mload(0x40)
             calldatacopy(pointer, 0, calldatasize())

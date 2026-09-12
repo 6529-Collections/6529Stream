@@ -65,6 +65,22 @@ contract StreamArtistIdentityEstateExtension is
         _;
     }
 
+    function consumeSanction(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        S.Terms calldata p,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 12);
+        StreamArtistIdentityState.Mutation memory m;
+        (m, record) = StreamArtistIdentityConsentState.sanction(
+            _identity, _replay, _ownerContext(), c, b, p, a, proof
+        );
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+    }
+
     function setGuardians(
         T.ActionContext calldata c,
         R.GuardianSet calldata p,

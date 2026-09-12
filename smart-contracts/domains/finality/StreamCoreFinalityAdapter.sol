@@ -5,30 +5,52 @@ import "../../vendor/openzeppelin/IERC165.sol";
 import "../../interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
 import "../../interfaces/stream/finality/IStreamCoreFinalitySource.sol";
 import "../../interfaces/stream/finality/IStreamFinalityMetadataReads.sol";
+import "../../interfaces/stream/finality/IStreamFinalityEvidenceProvider.sol";
+import "../../interfaces/stream/finality/IStreamCoreFinalityEvidenceBinding.sol";
 import "../../interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
 
 /// @notice Immutable read-only composition boundary for artwork-finality Core facts.
 /// @dev Keeps aggregate finality reads out of StreamCore while binding the exact Core and
 ///      collection-metadata deployments whose granular state is composed here.
-contract StreamCoreFinalityAdapter is IStreamCoreFinalityAdapter {
+contract StreamCoreFinalityAdapter is
+    IStreamCoreFinalityAdapter,
+    IStreamCoreFinalityEvidenceBinding
+{
     error InvalidCore(address core);
     error InvalidCollectionMetadata(address collectionMetadata);
+    error InvalidEvidenceProvider(address provider);
     error LiveSupplyExceedsMintedSupply(
         uint256 collectionId, uint256 mintedSupply, uint256 liveSupply
     );
 
     address public immutable override core;
     address public immutable override collectionMetadata;
+    address public immutable override evidenceProvider;
+    bytes32 private immutable _coreCodeHash;
+    bytes32 private immutable _metadataCodeHash;
+    bytes32 private immutable _providerCodeHash;
 
-    constructor(address core_, address collectionMetadata_) {
+    constructor(address core_, address collectionMetadata_, address evidenceProvider_) {
         if (core_ == address(0) || core_.code.length == 0) {
             revert InvalidCore(core_);
         }
         if (collectionMetadata_ == address(0) || collectionMetadata_.code.length == 0) {
             revert InvalidCollectionMetadata(collectionMetadata_);
         }
+        if (
+            evidenceProvider_.code.length == 0
+                || _boundAddress(evidenceProvider_, IStreamFinalityScopeEvidence.core.selector)
+                    != core_
+                || _boundAddress(
+                        evidenceProvider_, IStreamFinalityEvidenceProvider.metadataHost.selector
+                    ) != collectionMetadata_
+        ) revert InvalidEvidenceProvider(evidenceProvider_);
         core = core_;
         collectionMetadata = collectionMetadata_;
+        evidenceProvider = evidenceProvider_;
+        _coreCodeHash = core_.codehash;
+        _metadataCodeHash = collectionMetadata_.codehash;
+        _providerCodeHash = evidenceProvider_.codehash;
     }
 
     /// @inheritdoc IStreamCoreFinalityAdapter
@@ -38,6 +60,7 @@ contract StreamCoreFinalityAdapter is IStreamCoreFinalityAdapter {
         override
         returns (StreamCoreCollectionFinalityFacts memory facts)
     {
+        _requireEvidencePins();
         IStreamCoreFinalitySource source = IStreamCoreFinalitySource(core);
         uint256 mintedSupply = source.collectionMintedEver(collectionId);
         uint256 liveSupply = source.totalSupplyOfCollection(collectionId);
@@ -65,6 +88,7 @@ contract StreamCoreFinalityAdapter is IStreamCoreFinalityAdapter {
         override
         returns (StreamScopedCoreFinalityFacts memory facts)
     {
+        _requireEvidencePins();
         facts.scopeType = scope.scopeType;
         facts.collectionId = scope.collectionId;
         facts.tokenId = scope.tokenId;
@@ -107,7 +131,7 @@ contract StreamCoreFinalityAdapter is IStreamCoreFinalityAdapter {
             return facts;
         }
 
-        (bool published, bytes32 manifestHash) = IStreamFinalityMetadataReads(collectionMetadata)
+        (bool published, bytes32 manifestHash) = IStreamFinalityMetadataReads(evidenceProvider)
             .scopeManifest(scope.collectionId, scope.scopeId);
         if (published && manifestHash != bytes32(0)) {
             facts.scopeExists = true;
@@ -118,7 +142,38 @@ contract StreamCoreFinalityAdapter is IStreamCoreFinalityAdapter {
     /// @inheritdoc IERC165
     function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(IStreamCoreFinalityAdapter).interfaceId
+            || interfaceId == type(IStreamCoreFinalityEvidenceBinding).interfaceId
             || interfaceId == type(IERC165).interfaceId;
+    }
+
+    function _requireEvidencePins() private view {
+        if (core.codehash != _coreCodeHash) revert InvalidCore(core);
+        if (collectionMetadata.codehash != _metadataCodeHash) {
+            revert InvalidCollectionMetadata(collectionMetadata);
+        }
+        if (
+            evidenceProvider.codehash != _providerCodeHash
+                || _boundAddress(evidenceProvider, IStreamFinalityScopeEvidence.core.selector)
+                    != core
+                || _boundAddress(
+                        evidenceProvider, IStreamFinalityEvidenceProvider.metadataHost.selector
+                    ) != collectionMetadata
+        ) revert InvalidEvidenceProvider(evidenceProvider);
+    }
+
+    function _boundAddress(address target, bytes4 selector) private view returns (address value) {
+        bytes memory data = abi.encodeWithSelector(selector);
+        bool ok;
+        uint256 length;
+        uint256 raw;
+        assembly ("memory-safe") {
+            let scratch := mload(0x40)
+            ok := staticcall(gas(), target, add(data, 32), mload(data), scratch, 32)
+            length := returndatasize()
+            raw := mload(scratch)
+        }
+        if (!ok || length != 32 || raw > type(uint160).max) revert InvalidEvidenceProvider(target);
+        return address(uint160(raw));
     }
 
     function _canonicalScopedQuery(StreamCoreFinalityScopeQuery calldata scope)

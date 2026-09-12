@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistSanctionReads.sol";
 import {
     IStreamArtistContentAuthority
 } from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
@@ -485,6 +486,34 @@ contract StreamArtistRegistryReadExtension {
             collectionId,
             IStreamArtistBindingOwner(s.owners[0]).binding(collectionId),
             a
+        );
+    }
+
+    function royaltyFreezeDigest(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time);
+    }
+
+    function economicsConsentDigest(T.EconomicsConsent calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time);
+    }
+
+    function _environment() private view returns (StreamArtistHashes.Environment memory) {
+        T.SuiteConfiguration memory s = _contentSuite();
+        return StreamArtistHashes.Environment(
+            StreamArtistOnboardingCoordinator(operationCoordinator).deploymentChainId(),
+            _host,
+            s.core,
+            s.mintManager
         );
     }
 }

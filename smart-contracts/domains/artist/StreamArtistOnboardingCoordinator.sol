@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityDismissalOperations.sol";
+import "./StreamArtistFinalityAdmission.sol";
+import "./StreamArtistSanctionOperations.sol";
+import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistOnboardingOperations.sol";
 import "./StreamArtistRotationOperations.sol";
@@ -60,8 +63,12 @@ contract StreamArtistOnboardingCoordinator is
     uint256 public immutable deploymentChainId;
     bytes32 public immutable configurationHash;
     StreamArtistOnboardingReads public immutable reads;
+    address public immutable finalityRegistry;
+    bytes32 public immutable finalityRegistryCodeHash;
+    address public immutable finalityEvidenceProvider;
+    bytes32 public immutable finalityEvidenceProviderCodeHash;
 
-    constructor(T.SuiteConfiguration memory suite) {
+    constructor(T.SuiteConfiguration memory suite, address finalityRegistry_) {
         deploymentChainId = block.chainid;
         if (suite.registry == address(0) || suite.primaryRevenueClass == bytes32(0)) {
             revert T.InvalidBinding();
@@ -118,6 +125,12 @@ contract StreamArtistOnboardingCoordinator is
             IStreamArtistCollaboratorOwner(suite.owners[1]).collaboratorSetHash()
                 != StreamArtistHashes.emptyCollaborators()
         ) revert T.InvalidBinding();
+        (address provider, bytes32 providerCodeHash) =
+            StreamArtistFinalityAdmission.admit(suite, finalityRegistry_);
+        finalityEvidenceProvider = provider;
+        finalityEvidenceProviderCodeHash = providerCodeHash;
+        finalityRegistry = finalityRegistry_;
+        finalityRegistryCodeHash = finalityRegistry_.codehash;
         configurationHash = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_ONBOARDING_CONFIGURATION_V1"),
@@ -125,6 +138,10 @@ contract StreamArtistOnboardingCoordinator is
                 address(this),
                 suite,
                 _runtimeHashes,
+                finalityRegistry_,
+                finalityRegistry_.codehash,
+                provider,
+                providerCodeHash,
                 uint16(1),
                 uint16(2),
                 uint16(3),
@@ -132,6 +149,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(5),
                 uint16(6),
                 uint16(7),
+                uint16(12),
                 uint16(14),
                 uint16(15),
                 uint16(16),
@@ -177,6 +195,44 @@ contract StreamArtistOnboardingCoordinator is
 
     function suiteConfiguration() external view returns (T.SuiteConfiguration memory) {
         return _suite;
+    }
+
+    function coordinateRecordArtistSanction(
+        address actor,
+        Q.Request calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistSanctionOperations.record(
+            _economicContext(), _sanctionPins(), actor, p, a
+        );
+    }
+
+    function prepareArtistSanction(Q.Request calldata p) external view returns (Q.Prepared memory) {
+        if (
+            _suite.core.codehash != _runtimeHashes[9]
+                || _suite.registry.codehash != _runtimeHashes[7]
+                || block.chainid != deploymentChainId
+        ) revert T.InvalidBinding();
+        return StreamArtistSanctionCandidate.prepare(
+            StreamArtistHashes.Environment(
+                block.chainid, _suite.registry, _suite.core, _suite.mintManager
+            ),
+            _sanctionPins(),
+            p
+        );
+    }
+
+    function _sanctionPins() private view returns (StreamArtistSanctionCandidate.Pins memory) {
+        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
+            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
+        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        return StreamArtistSanctionCandidate.Pins(
+            finalityRegistry,
+            finalityRegistryCodeHash,
+            finalityEvidenceProvider,
+            finalityEvidenceProviderCodeHash,
+            cap
+        );
     }
 
     function coordinateRecordSaleConsent(

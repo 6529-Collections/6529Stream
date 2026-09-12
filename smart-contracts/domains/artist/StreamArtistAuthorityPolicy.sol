@@ -26,7 +26,9 @@ library StreamArtistAuthorityPolicy {
         ) revert T.InvalidIdentity(artistId);
         if (principal.authorityClass == 1) return;
         uint32 required;
-        if (operation == 14) {
+        if (operation == 12) {
+            required = 8;
+        } else if (operation == 14) {
             required = 2;
         } else if (operation == 15) {
             required = 4;

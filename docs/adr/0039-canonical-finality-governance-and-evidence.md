@@ -54,11 +54,31 @@ executed append-only lineage, with the canonical action ID as execution identity
 
 The staged canonical foundation in
 [ADR 0032](0032-governance-foundation-before-product-activation.md) precedes
-product construction. The artist facade pins a predicted finality address and
-the exact linked, immutable-completed runtime hash. Finality pins that artist
-facade address but does not embed its runtime hash, avoiding a mutual runtime
-hash fixed point. The prediction is deployment evidence, never an operational
-readiness exception.
+product construction. The facade and its fixed reader/writer children embed only
+the predicted Coordinator address. Deploy those artist contracts first; the actual
+MetadataV1 host can then pin the completed facade runtime, followed by the typed
+provider, ArtifactCoverage and Finality. The Coordinator is constructed last at
+its predicted address, with the actual Finality address and completed runtime hash
+included in its fixed configuration. The facade exposes these pins through that
+one constructor-fixed Coordinator. SuiteConfiguration's existing tuple stays intact.
+
+This order avoids an indirect runtime-hash cycle: MetadataV1 embeds the facade
+codehash and Finality embeds metadata/provider hashes. Neither Finality-derived
+configurationHash nor Coordinator runtime hash may be embedded back into facade
+or child runtime. The Coordinator constructor validates Finality's Core, metadata,
+sanction and artifact bindings. Finality's constructor does not call back through
+the absent Coordinator. Predeployment facade reads fail closed; no absent code or
+malformed result supplies default pins or readiness. Operative preparation later
+requires the complete reciprocal joins and current selected pointers.
+
+The definitive Finality constructor also pins ArtifactCoverage and canonical
+module deployment/manifest configuration. ArtifactCoverage may already pin the
+predicted nonzero Finality address; every operative coverage read requires the
+real deployed and selected counterpart. The registry advertises the canonical
+IStreamModule identity and the Core-required permanent primary finality interface,
+with additive preparation, canonical context and archive interfaces advertised
+only when their implementation is supported. Original six finality storage roots
+remain physical prefixes; new module and witness state is appended.
 
 Every finality-sensitive artist or registry operation requires the counterpart
 to have the expected nonempty code, exact interfaces and reciprocal Core,
@@ -120,6 +140,23 @@ bytes, signer, authority class and subject. Coverage of a generic ceremony
 document or a detached reference cannot stand in for that join. This preserves
 the permanent sanction and finality preimages without a circular content hash.
 
+Artist-bound finalization explicitly selects a typed archive proof containing
+sanctionRecordHash, artifactHash and completionHash. A new typed finalization
+and preparation entry carries that tuple; the canonical action's new-state
+commitment binds its exact evidence key as well as the finality record. The
+execution witness retains the selected proof. Execution rechecks retained
+sanction, signature and ceremony bytes against the artifact and its current
+coverage. Permanent sanction subjects and finality record preimages do not
+change. Old artist-bound finalize entries fail closed without the required
+proof; platform declarations remain a separate profile.
+
+No permissionless latest-proof pointer selects evidence for a scheduled action.
+Permissionless archival ingestion establishes content-addressed evidence only;
+it does not authorize or replace the action's selection. An unrelated submitter
+cannot redirect an otherwise valid prepared action to another family pair.
+A failed current-coverage check leaves both execution and its selected witness
+uncommitted, permitting the same action to retry after healthy revalidation.
+
 The estate provider's exact public estate schema, 8192-byte bound and receipt
 preimages remain intact. Finality artifact support uses separately versioned
 schemas and actual bytes. It reuses the canonical immutable chunk/document
@@ -157,6 +194,76 @@ data hashes, manifests and sanction subjects must commit that original evidence,
 not the mutable validation-record head. Routine healthy fixity refresh therefore
 does not restart a scheduled terminal action. Current admission checks the fresh
 cache and external pins separately; historical records remain readable.
+
+## Typed sanction recording and archival interpretation
+
+The first executable recording profile uses operation 12 with a real, nonempty
+signature by the current principal: AUTH_ARTIST or a current AUTH_SUCCESSOR
+with CAP_SANCTION. It supports an accepted binding without a collaborator
+threshold. Delegate, steward and collaborator-threshold sanction paths remain
+separate full-v1 obligations. A direct principal transaction does not replace
+the required retained signature with an empty DIRECT proof.
+
+Preparation derives the subject and review facts from the fixed validated
+provider. The first ONCHAIN review profile has one actual content root, no media
+hash entries and exactly one reference-render artifact content hash. The typed
+serializer retains ordered identities, validates UTF-8 and emits the exact
+bounded RFC8785 ceremony. The ceremony's custom JSON Schema profile annotations
+are normative producer/consumer rules; an ordinary JSON Schema validator does
+not automatically enforce them. Permanent EIP712 terms and the fourteen-word
+sanction-record hash are unchanged. Deadline and observed signedAt remain
+separate facts.
+
+The full archive object has its own versioned binary schema and canonicalization:
+a 24-word ABI head followed by canonical ceremony and signature byte tails.
+The complete object, at most 13,120 bytes in this profile, is archived. Its whole
+hash includes the retained signature and every offset, length and padding word.
+It contains no self-dependent archive hash. The registered definition documents
+are in [the finality schema directory](../schemas/finality/). Archive-proof
+finalization checks all four exact interpretation definitions, their registered
+kinds and names, and their actual retained bytes against fixed content hashes.
+Retirement does not invalidate those existing interpretation references; there
+is no incidental ACTIVE-only revocation of a historical sanction schema.
+
+Consent remains the sole record owner. Its constructor-fixed writer executes
+only explicit callbacks in the Consent host context and preserves the common
+physical storage layout. The facade retains its original writer and reader
+children at nonces 1 and 2 and adds the fixed sanction/finality reader at nonce 3.
+Relocated digest reads retain the Coordinator's deployment chain, the facade as
+verifying contract, and the exact bound Core and MintManager. Deployment evidence
+must include child runtimes and argument-inclusive parent initcode, not runtime
+size alone.
+
+## Recorded sanction continuity and confirmation
+
+A new sanction requires the actual current authority and its applicable sanction
+capability. AA-GUARD4 rejects new sanctions and authorizations while the Identity
+is contested. That rule does not retroactively invalidate an existing sanction
+or independently prohibit its consumption by finality. AA-SANCTION1–3 instead
+requires the exact current subject and a collection attribution that is neither
+disputed nor revoked. The platform-works contest stop is a separate scope rule.
+
+A recorded sanction remains usable across an authority-address rotation or
+estate succession that preserves artistId, binding generation and binding hash.
+The recorded signer and authority class remain immutable. Corrective rebinding,
+collection dispute/revocation or subject drift rejects consumption. An Identity
+contest alone does not rewrite historical sanction evidence or add a new
+saved-sanction invalidation predicate. This differs from an unused publication
+authorization, which must still identify the current signer when it is consumed.
+
+Operation 13 is permissionless confirmation of an already executed COLLECTION
+finality. Its ActionContext and Archive actor remain the actual transaction
+caller. The Archive payload separately joins the saved sanction signer/class,
+association, sanction record and executed finality evidence. Attribution uses
+the saved authenticated class for the transition; the caller is not represented
+as the historic signer. Confirmation consumes no Identity signature nonce,
+records no living-authority action and fabricates no new primary sanction.
+Scoped finality does not elevate collection attribution.
+
+Required controls distinguish new sanction rejection during Identity contest
+from preserved historical sanction/current consumption, and separately prove
+that a real collection dispute stops consumption. Rotation/estate continuity
+must preserve both the recorded sanction and its permanent subject preimage.
 
 ## Acceptance and remaining work
 

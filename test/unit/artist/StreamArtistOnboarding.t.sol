@@ -7,6 +7,7 @@ import "./ArtistEstateArchivalFixture.sol";
 import "./ArtistSaleRegistryFixture.sol";
 import "./ArtistPublicationHostFixture.sol";
 import "./ArtistCanonicalPublicationFixture.sol";
+import "./ArtistSanctionFinalityFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
@@ -39,6 +40,45 @@ interface ArtistTestVm {
 
 /// @dev Unit boundary double. These tests do not establish real Core/metadata/royalty integration.
 contract ArtistUnitCore {
+    function collectionHasMaxSupply(uint256 id) external pure returns (bool) {
+        return id == 1;
+    }
+
+    function collectionStatus(uint256 id) external pure returns (uint8) {
+        return id == 1 ? 2 : 0;
+    }
+
+    function collectionSupplyMode(uint256) external pure returns (uint8) {
+        return 0;
+    }
+
+    function collectionMaxSupply(uint256 id) external pure returns (uint256) {
+        return id == 1 ? 1 : 0;
+    }
+
+    function collectionMintedEver(uint256 id) external pure returns (uint256) {
+        return id == 1 ? 1 : 0;
+    }
+
+    function collectionNextSerial(uint256 id) external pure returns (uint256) {
+        return id == 1 ? 2 : 0;
+    }
+
+    function totalSupplyOfCollection(uint256 id) external pure returns (uint256) {
+        return id == 1 ? 1 : 0;
+    }
+
+    function tokenLifecycle(uint256) external pure returns (uint8) {
+        return 0;
+    }
+
+    function collectionBurnsBlocked(uint256 id) external pure returns (bool) {
+        return id == 1;
+    }
+
+    function collectionFreezeStatus(uint256 id) external pure returns (bool) {
+        return id == 1;
+    }
     mapping(bytes32 => address) public targets;
     mapping(bytes32 => bool) public frozen;
     mapping(uint256 => uint256) private tokenCollections;
@@ -231,6 +271,12 @@ contract ArtistUnitGovernance {
 }
 
 contract ArtistUnitRoles {
+    address public owner;
+
+    function configureOwner(address value) external {
+        require(msg.sender == admin, "unit admin");
+        owner = value;
+    }
     address public immutable admin;
     mapping(address => bool) private extraAdmins;
     uint64 private revision = 1;
@@ -272,6 +318,11 @@ contract ArtistUnitRoles {
 }
 
 contract ArtistUnitMetadata {
+    address public core;
+
+    function configureCore(address value) external {
+        core = value;
+    }
     bytes32 public content = keccak256("initial unit content");
     IStreamArtistContentAuthority public artistContent;
     IStreamArtistContentRatification public artistRatification;
@@ -3102,6 +3153,15 @@ contract StreamArtistOnboardingTest is
         runtimeHashes[13] = suite.primaryResolver.codehash;
         runtimeHashes[14] = suite.royaltyResolver.codehash;
         runtimeHashes[15] = suite.validator.codehash;
+        address actualFinality = address(sanctionFixture.registry());
+        address actualProvider = address(sanctionFixture.provider());
+        require(
+            coordinator.finalityRegistry() == actualFinality
+                && coordinator.finalityRegistryCodeHash() == actualFinality.codehash
+                && coordinator.finalityEvidenceProvider() == actualProvider
+                && coordinator.finalityEvidenceProviderCodeHash() == actualProvider.codehash,
+            "actual constructor finality and provider pins"
+        );
         bytes32 expected = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_ONBOARDING_CONFIGURATION_V1"),
@@ -3109,6 +3169,10 @@ contract StreamArtistOnboardingTest is
                 address(coordinator),
                 suite,
                 runtimeHashes,
+                actualFinality,
+                actualFinality.codehash,
+                actualProvider,
+                actualProvider.codehash,
                 uint16(1),
                 uint16(2),
                 uint16(3),
@@ -3116,6 +3180,7 @@ contract StreamArtistOnboardingTest is
                 uint16(5),
                 uint16(6),
                 uint16(7),
+                uint16(12),
                 uint16(14),
                 uint16(15),
                 uint16(16),
@@ -11898,6 +11963,477 @@ contract StreamArtistOnboardingTest is
         ingress.requireMintConsent(1, PHASE, POLICY);
     }
 
+    function testSanctionFirstActualOwnerAndFinalityPreparationSafeSignature() public {
+        require(
+            address(sanctionFixture.registry()).code.length <= 24576
+                && address(ingress).code.length <= 24576
+                && address(coordinator).code.length <= 24576,
+            "actual registry/facade/coordinator EIP170"
+        );
+        _accept();
+        Q.Request memory q = sanctionFixture.request();
+        Q.Prepared memory prepared = ingress.prepareArtistSanction(q);
+        q.terms.sanctionSubjectHash = StreamArtistSanctionHashes.subject(prepared.subject);
+        q.terms.statementHash = keccak256(prepared.ceremony);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.sanctionDigest(q.terms, a));
+        T.Snapshot memory beforeConsent = IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2();
+        bytes32 record = ingress.recordArtistSanction(q, a);
+        S.Record memory r = ingress.sanctionRecord(record);
+        require(
+            r.recordHash == record && r.artistId == artistId && r.signer == address(artist)
+                && r.authorityClass == 1 && r.nonce == a.nonce && r.deadline == a.time
+                && r.terms.sanctionSubjectHash == q.terms.sanctionSubjectHash
+                && r.terms.statementHash == q.terms.statementHash,
+            "actual stored sanction"
+        );
+        require(
+            r.digest == ingress.sanctionDigest(q.terms, a)
+                && IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2().revision
+                    == beforeConsent.revision + 1,
+            "exact digest and one operation"
+        );
+        bytes memory object = ingress.sanctionArchiveBytes(record);
+        IStreamArtistSanctionArchiveFacts.Facts memory facts = ingress.sanctionArchiveFacts(record);
+        require(
+            facts.contentHash == keccak256(object) && facts.byteLength == object.length
+                && facts.sanctionRecordHash == record && facts.artistId == artistId,
+            "retained entire signature/ceremony object"
+        );
+        require(
+            keccak256(object)
+                == keccak256(
+                    StreamArtistSanctionHashes.archiveBytes(
+                        StreamArtistHashes.Environment(
+                            block.chainid, address(ingress), address(core), address(manager)
+                        ),
+                        address(sanctionFixture.registry()),
+                        r,
+                        prepared.ceremony,
+                        a.signature
+                    )
+                ),
+            "stored bytes composition parity; literal encoding6 oracle separate"
+        );
+        (bool valid, bytes32 saved, address signer, uint8 authorityClass) =
+            ingress.verifySanctionForSubject(0, 1, 0, 0, q.terms.sanctionSubjectHash);
+        require(
+            valid && saved == record && signer == address(artist) && authorityClass == 1,
+            "current association saved sanction"
+        );
+        require(
+            !sanctionFixture.registry().collectionFinalityRecord(1).finalized,
+            "sanction does not finalize"
+        );
+        StreamArtistConsentFinalityLifecycle consent =
+            StreamArtistConsentFinalityLifecycle(suite.owners[6]);
+        require(
+            consent.consentWriterExtension() == avm.computeCreateAddress(address(consent), 1),
+            "actual Consent child nonce1"
+        );
+        require(
+            ingress.registryWriterExtension() == avm.computeCreateAddress(address(ingress), 1)
+                && ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2)
+                && ingress.registryFinalityReadExtension()
+                    == avm.computeCreateAddress(address(ingress), 3),
+            "facade child nonces1/2/3"
+        );
+    }
+
+    function _sanctionPrepared()
+        private
+        view
+        returns (Q.Request memory q, Q.Prepared memory prepared)
+    {
+        q = sanctionFixture.request();
+        prepared = ingress.prepareArtistSanction(q);
+        q.terms.sanctionSubjectHash = StreamArtistSanctionHashes.subject(prepared.subject);
+        q.terms.statementHash = keccak256(prepared.ceremony);
+    }
+
+    function _sanctionAuthorization(Q.Request memory q) private returns (T.Authorization memory a) {
+        a = _authorization(false);
+        // Sanction always retains actual signature bytes, including when submitted by the principal.
+        a.signature = safeThresholdSignature(
+            keys, safeMessageDigest(artist, abi.encode(ingress.sanctionDigest(q.terms, a)))
+        );
+    }
+
+    function _assertSavedSanction(bytes32 expected, bytes32 subject, address signer, uint8 class_)
+        private
+        view
+    {
+        (bool valid, bytes32 record, address actualSigner, uint8 actualClass) =
+            ingress.verifySanctionForSubject(0, 1, 0, 0, subject);
+        require(
+            valid && record == expected && actualSigner == signer && actualClass == class_,
+            "exact saved sanction verification"
+        );
+    }
+
+    function testSanctionSignatureDeadlineAndSubjectFailuresKeepSameNonceUsable() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        T.Authorization memory a = _sanctionAuthorization(q);
+        bytes memory signature = a.signature;
+        bytes32 roots = _roots();
+        a.signature = "";
+        vm.prank(address(artist));
+        vm.expectRevert(abi.encodeWithSelector(S.SanctionSignatureRequired.selector));
+        ingress.recordArtistSanction(q, a);
+        a.signature = hex"01";
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        ingress.recordArtistSanction(q, a);
+        a.signature = signature;
+        uint64 deadline = a.time;
+        a.time = 999;
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, uint64(999)));
+        ingress.recordArtistSanction(q, a);
+        a.time = deadline;
+        bytes32 subject = q.terms.sanctionSubjectHash;
+        q.terms.sanctionSubjectHash = keccak256("not the prepared subject");
+        vm.expectRevert(abi.encodeWithSelector(S.InvalidSanction.selector));
+        ingress.recordArtistSanction(q, a);
+        q.terms.sanctionSubjectHash = subject;
+        bytes32 statement = q.terms.statementHash;
+        q.terms.statementHash = keccak256("not the ceremony bytes");
+        vm.expectRevert(abi.encodeWithSelector(S.InvalidSanction.selector));
+        ingress.recordArtistSanction(q, a);
+        q.terms.statementHash = statement;
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "all failures before nonce effects"
+        );
+        bytes32 record = ingress.recordArtistSanction(q, a);
+        _assertSavedSanction(record, subject, address(artist), 1);
+    }
+
+    function testSanctionExactRecordEventOwnerReplayAndArchiveActor() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        T.Authorization memory a = _sanctionAuthorization(q);
+        T.Snapshot[7] memory before_;
+        for (uint256 i; i < 7; ++i) {
+            before_[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+        }
+        vm.recordLogs();
+        bytes32 record = ingress.recordArtistSanction(q, a);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        S.Record memory r = ingress.sanctionRecord(record);
+        // Independent literal permanent fourteen-word preimage; no production hash helper.
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_SANCTION_RECORD_V1"),
+                        block.chainid,
+                        address(ingress),
+                        artistId,
+                        address(artist),
+                        uint8(1),
+                        uint8(0),
+                        uint256(1),
+                        uint256(0),
+                        bytes32(0),
+                        q.terms.sanctionSubjectHash,
+                        q.terms.statementHash,
+                        a.nonce,
+                        uint64(1000)
+                    )
+                ),
+            "literal sanction record"
+        );
+        bytes32 topic = keccak256(
+            "ArtistSanctionRecorded(uint16,uint256,bytes32,address,uint8,uint256,bytes32,bytes32,uint8,bytes32,uint256,uint64)"
+        );
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].topics.length == 0 || logs[i].topics[0] != topic) continue;
+            require(
+                logs[i].emitter == suite.owners[6] && logs[i].topics.length == 4
+                    && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == q.terms.sanctionSubjectHash
+                    && logs[i].topics[3] == bytes32(uint256(uint160(address(artist)))),
+                "exact owner/event topics"
+            );
+            require(
+                keccak256(logs[i].data)
+                    == keccak256(
+                        abi.encode(
+                            uint16(1),
+                            uint8(0),
+                            uint256(0),
+                            bytes32(0),
+                            record,
+                            uint8(1),
+                            q.terms.statementHash,
+                            a.nonce,
+                            uint64(1000)
+                        )
+                    ),
+                "exact normative event bytes"
+            );
+            ++count;
+        }
+        require(count == 1, "one normative sanction event");
+        for (uint256 i; i < 7; ++i) {
+            T.Snapshot memory after_ = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+            if (i == 2 || i == 6) {
+                require(
+                    after_.revision == before_[i].revision + 1, "one committing revision per owner"
+                );
+            } else {
+                require(
+                    keccak256(abi.encode(after_)) == keccak256(abi.encode(before_[i])),
+                    "unrelated owner exact"
+                );
+            }
+        }
+        IStreamArtistOwner consent = IStreamArtistOwner(suite.owners[6]);
+        bytes32 key = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[6],
+                consent.domainId(),
+                keccak256("consent_finality.replay.sanction_uniqueness"),
+                keccak256(abi.encode(record))
+            )
+        );
+        T.ReplayCell memory cell = consent.replayCell(key);
+        require(
+            cell.commitment == record && cell.kind == 1 && cell.status == 2
+                && cell.touchedRevision == before_[6].revision + 1,
+            "exact permanent consumed record lane"
+        );
+        bytes32 evidenceId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(12),
+                address(this),
+                record
+            )
+        );
+        (
+            uint16 version,
+            bytes32 config,
+            uint16 operation,
+            address actor,
+            bytes32 primaryRecord,
+            T.Snapshot[7] memory prior,
+            T.Snapshot[7] memory post,
+            bytes memory payload
+        ) = abi.decode(
+            archive.artistEvidenceBytesV2(evidenceId, 1),
+            (uint16, bytes32, uint16, address, bytes32, T.Snapshot[7], T.Snapshot[7], bytes)
+        );
+        require(
+            version == 1 && config == coordinator.configurationHash() && operation == 12
+                && actor == address(this) && primaryRecord == record
+                && prior[2].revision == before_[2].revision
+                && post[6].revision == before_[6].revision + 1 && payload.length != 0,
+            "exact permissionless transport actor and owner snapshots archived"
+        );
+        require(
+            r.signer == address(artist) && r.authorityClass == 1,
+            "saved signer distinct from relayer"
+        );
+        bytes32 roots = _roots();
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordArtistSanction(q, a);
+        require(
+            _roots() == roots
+                && keccak256(abi.encode(consent.replayCell(key))) == keccak256(abi.encode(cell)),
+            "replay preserves exact cells and history"
+        );
+    }
+
+    function testSanctionActualLateArchiveBlockOverflowRollsSafeNonceAndAllowsExactRetry() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        T.Authorization memory a = _sanctionAuthorization(q);
+        bytes memory data = abi.encodeCall(IStreamArtistSanction.recordArtistSanction, (q, a));
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "late real Archive rejection rolls owner and actual Safe state back"
+        );
+        (bool valid, bytes32 record,,) =
+            ingress.verifySanctionForSubject(0, 1, 0, 0, q.terms.sanctionSubjectHash);
+        require(!valid && record == 0, "failed write leaves no selected sanction");
+        vm.roll(100);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, data, 0),
+            "exact signed authorization retries after real Archive recovers"
+        );
+        (valid, record,,) =
+            ingress.verifySanctionForSubject(0, 1, 0, 0, q.terms.sanctionSubjectHash);
+        require(
+            valid && record != 0 && artist.nonce() == safeNonce + 1,
+            "one actual successful Safe call"
+        );
+    }
+
+    function testSanctionSavedHistorySurvivesRotationButUnusedOldSignatureCannotWrite() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 record = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        bytes32 savedBytes = keccak256(ingress.sanctionArchiveBytes(record));
+        address retired = address(artist);
+        T.Authorization memory unused = _authorization(false);
+        unused.time = uint64(block.timestamp + 365 days);
+        unused.signature = _signature(ingress.sanctionDigest(q.terms, unused));
+        _newRotationSafe(28101);
+        _executeTimedRotation(_stageRotation(0));
+        _adoptRotatedSafe();
+        _assertSavedSanction(record, q.terms.sanctionSubjectHash, retired, 1);
+        require(
+            keccak256(ingress.sanctionArchiveBytes(record)) == savedBytes,
+            "recorded authorship bytes never rewritten"
+        );
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        ingress.recordArtistSanction(q, unused);
+        require(_roots() == roots, "retired unused proof cannot create a new sanction");
+        bytes32 current = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        require(current != record, "new principal has distinct immutable record");
+        _assertSavedSanction(current, q.terms.sanctionSubjectHash, address(artist), 1);
+        require(
+            keccak256(ingress.sanctionArchiveBytes(record)) == savedBytes,
+            "new selected record retains predecessor"
+        );
+    }
+
+    function testSanctionSavedHistorySurvivesZeroCapabilityEstateButFreshSanctionNeedsEight()
+        public
+    {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        address living = address(artist);
+        bytes32 record = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        bytes32 archiveHash = keccak256(ingress.sanctionArchiveBytes(record));
+        _estateActivateAndAdopt(0);
+        _assertSavedSanction(record, q.terms.sanctionSubjectHash, living, 1);
+        T.Authorization memory a = _sanctionAuthorization(q);
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(8))
+        );
+        ingress.recordArtistSanction(q, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && keccak256(ingress.sanctionArchiveBytes(record)) == archiveHash,
+            "zero-cap succession preserves old evidence without granting fresh sanction"
+        );
+    }
+
+    function testSanctionEstateEightRecordsActualClassThreeSignature() public {
+        _accept();
+        _estateActivateAndAdopt(8);
+        (Q.Request memory q,) = _sanctionPrepared();
+        T.Authorization memory a = _sanctionAuthorization(q);
+        bytes32 record = ingress.recordArtistSanction(q, a);
+        _assertSavedSanction(record, q.terms.sanctionSubjectHash, address(artist), 3);
+        S.Record memory r = ingress.sanctionRecord(record);
+        require(
+            r.authorityClass == 3 && r.digest == ingress.sanctionDigest(q.terms, a)
+                && ingress.sanctionArchiveBytes(record).length > a.signature.length,
+            "actual successor signing bytes and truthful class retained"
+        );
+    }
+
+    function testSanctionIdentityContestPreservesSavedReadButRejectsNewAuthorization() public {
+        _accept();
+        _selfGuardian();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 record = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        T.Authorization memory a = _sanctionAuthorization(q);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual defensive identity contest"
+        );
+        _assertSavedSanction(record, q.terms.sanctionSubjectHash, address(artist), 1);
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, artistId));
+        ingress.recordArtistSanction(q, a);
+        require(_roots() == roots, "new identity-contested authorization stops");
+        // Collection-dispute ingress is separate: this checks the authoritative Attribution read boundary.
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(4), b.generation)
+        );
+        (bool valid, bytes32 current,,) =
+            ingress.verifySanctionForSubject(0, 1, 0, 0, q.terms.sanctionSubjectHash);
+        require(
+            !valid && current == 0 && ingress.sanctionRecord(record).recordHash == record,
+            "collection dispute rejects consumption while retaining history"
+        );
+        avm.clearMockedCalls();
+        _assertSavedSanction(record, q.terms.sanctionSubjectHash, address(artist), 1);
+        (valid,,,) = ingress.verifySanctionForSubject(0, 1, 0, 0, keccak256("different subject"));
+        require(!valid, "saved record never validates a different subject");
+    }
+
+    function testSanctionAllSixteenFixedConsentCallbacksRejectDirectAndActualSafeCall() public {
+        bytes[] memory calls = abi.decode(
+            vm.parseJson(
+                vm.readFile("test/fixtures/artist/consent-writer-callbacks-v1.json"), ".calls"
+            ),
+            (bytes[])
+        );
+        require(calls.length == 16, "complete fixed writer callback inventory");
+        address host = suite.owners[6];
+        address child = StreamArtistConsentFinalityLifecycle(host).consentWriterExtension();
+        bytes32 roots = _roots();
+        uint256 nonce = artist.nonce();
+        for (uint256 i; i < calls.length; ++i) {
+            for (uint256 j; j < i; ++j) {
+                require(bytes4(calls[j]) != bytes4(calls[i]), "distinct selectors");
+            }
+            (bool ok, bytes memory reason) = child.call(calls[i]);
+            require(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(abi.encodeWithSignature("ExtensionWrongHost(address)", child)),
+                "exact child context guard before authority reads"
+            );
+            (ok, reason) = host.call(calls[i]);
+            require(
+                !ok
+                    && keccak256(reason)
+                        == keccak256(
+                            abi.encodeWithSelector(T.Unauthorized.selector, address(this))
+                        ),
+                "host keeps original Coordinator gate"
+            );
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+            this.executeTargetSafe(child, calls[i]);
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+            this.executeTargetSafe(host, calls[i]);
+        }
+        require(
+            _roots() == roots && artist.nonce() == nonce,
+            "all rejected Safe callbacks preserve complete state"
+        );
+    }
+
+    ArtistSanctionFinalityFixture private sanctionFixture;
+
     function setUp() public {
         nextNonce = 0;
         directArtistCalls = false;
@@ -11932,8 +12468,10 @@ contract StreamArtistOnboardingTest is
         suite.core = address(core);
         suite.mintManager = address(manager);
         suite.roleRegistry = address(new ArtistUnitRoles(address(this)));
+        ArtistUnitRoles(suite.roleRegistry).configureOwner(governance);
         suite.validator = address(new StreamArtistRegistryValidatorBase());
         metadata = new ArtistUnitMetadata();
+        metadata.configureCore(address(core));
         suite.metadata = address(metadata);
         factory = new StreamSplitFactory(
             new StreamAssetPolicyRegistry(governance), governance, _walletGasConfigs()
@@ -11945,6 +12483,7 @@ contract StreamArtistOnboardingTest is
             factory.createProfile(entries, keccak256("artist unit split"));
         suite.primaryRevenueClass = PRIMARY;
         _deployEstateArchival(address(core), governance);
+        sanctionFixture = new ArtistSanctionFinalityFixture();
         uint256 nonce = avm.getNonce(address(this));
         address predictedRegistry = avm.computeCreateAddress(address(this), nonce);
         address predictedArchive = avm.computeCreateAddress(address(this), nonce + 1);
@@ -12058,7 +12597,22 @@ contract StreamArtistOnboardingTest is
         bytes32 royaltyProfile = profile;
         suite.primaryResolver = address(primary);
         suite.royaltyResolver = address(royalty);
-        coordinator = new StreamArtistOnboardingCoordinator(suite);
+        ArtistUnitGovernance(governance)
+            .configureContestReads(
+                suite.roleRegistry, address(this), keccak256("finality unit"), "urn:unit"
+            );
+        address finality =
+            sanctionFixture.deploy(address(core), address(metadata), address(ingress), governance);
+        coordinator = new StreamArtistOnboardingCoordinator(suite, finality);
+        ArtistUnitGovernance(governance)
+            .configureContestReads(
+                address(estateFixityRoles),
+                address(this),
+                keccak256("archival fixture"),
+                "urn:unit:archival"
+            );
+        core.set(keccak256("ARTWORK_FINALITY_REGISTRY"), finality, false);
+        core.set(keccak256("COLLECTION_METADATA"), address(metadata), false);
         require(address(coordinator) == predictedCoordinator, "fixed constructor pins");
         core.set(keccak256("ARTIST_REGISTRY"), address(ingress), false);
         core.set(keccak256("METADATA_ROUTER"), address(metadata), false);

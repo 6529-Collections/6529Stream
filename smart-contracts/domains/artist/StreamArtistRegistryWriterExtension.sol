@@ -42,6 +42,15 @@ contract StreamArtistRegistryWriterExtension {
         _;
     }
 
+    function recordArtistSanction(Q.Request calldata p, T.Authorization calldata a)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistSanctionCoordinator(operationCoordinator)
+            .coordinateRecordArtistSanction(msg.sender, p, a);
+    }
+
     function requestEstateActivation(Estate.Request calldata p, T.Authorization calldata a)
         external
         onlyHost

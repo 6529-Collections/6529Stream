@@ -6,9 +6,44 @@ import "./StreamArtistContentHashes.sol";
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistSaleHashes.sol";
 import "./StreamArtistBindingOperations.sol";
+import "./StreamArtistSanctionHashes.sol";
 
 /// @notice Typed authorization mechanics; Identity keeps every operation guard and semantic commit.
 library StreamArtistIdentityConsentState {
+    function sanction(
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        T.Binding memory b,
+        S.Terms memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof
+    ) public returns (StreamArtistIdentityState.Mutation memory m, bytes32 record) {
+        _deadline(a.time);
+        if (proof.direct || a.signature.length == 0) revert S.SanctionSignatureRequired();
+        S.Record memory r;
+        r.artistId = b.artistId;
+        r.signer = proof.signer;
+        r.authorityClass = identity.identities[b.artistId].authorityClass;
+        r.terms = p;
+        r.nonce = a.nonce;
+        r.signedAt = _now();
+        record = StreamArtistSanctionHashes.record(o.environment, r);
+        m = StreamArtistIdentityState.authorize(
+            identity,
+            replay,
+            o,
+            c,
+            b.artistId,
+            a,
+            proof,
+            StreamArtistSanctionHashes.digest(o.environment, p, a),
+            record,
+            identity.identities[b.artistId].authorityAddress
+        );
+    }
+
     function refusal(
         StreamArtistIdentityState.State storage identity,
         mapping(bytes32 => T.ReplayCell) storage replay,
