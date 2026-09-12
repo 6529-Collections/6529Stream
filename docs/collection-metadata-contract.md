@@ -2221,6 +2221,12 @@ the write was accepted: `ARTIST_SIGNER`, `OWNER_SIGNER`, `CURATOR_SIGNER`,
 consumers can permanently distinguish artist-authored, owner-authored,
 independent, and operator-authored provenance (ADR 0010 decision D2).
 
+For the canonical `bytes32 authorizationClass` event field, these eight classes
+use their existing numeric identifiers 1 through 8 in the order listed above,
+zero-extended to 32 bytes. Family masks retain `uint16(1) << class`. This fixes
+the wire representation without reassigning authority or rewriting an earlier
+host's event ABI ([ADR 0040](adr/0040-current-metadata-record-host.md)).
+
 #### Record Payload Carrier [CMC-RECORD-PAYLOAD]
 
 The meaning-bearing record families of [CMC-RECONSTRUCTION] rule 2 need a

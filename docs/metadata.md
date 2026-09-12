@@ -13,6 +13,10 @@ characterization fixtures, not a final marketplace schema promise.
 
 ## Current Output
 
+The new full-byte record host has a separate [integration guide](integrations/metadata-records.md).
+Its attributed history and interpretation documents are distinct from the
+earlier rendering baseline described below.
+
 Off-chain metadata is URI-based:
 
 - Pending randomness: `collectionBaseURI + "pending"`.

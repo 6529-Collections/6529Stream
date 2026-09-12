@@ -4,7 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/finality/IStreamFinalityHostAdapter.sol";
 import "../../interfaces/stream/finality/IStreamFinalityComponentFacts.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
-import "../../interfaces/stream/metadata/IStreamCollectionMetadata.sol";
+import "../../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRouter.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../metadata/StreamMetadataSubjects.sol";
@@ -189,7 +189,7 @@ contract StreamFinalityHostAdapter is IStreamFinalityHostAdapter {
         ) {
             return (
                 StreamFinalityDomains.COMPONENT_COLLECTION_METADATA,
-                type(IStreamCollectionMetadata).interfaceId
+                type(IStreamCollectionMetadataV1).interfaceId
             );
         }
         if (family == StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR) {

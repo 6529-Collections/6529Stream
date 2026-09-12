@@ -40,7 +40,7 @@ contract FinalityHostBoundary {
     function supportsInterface(bytes4 id) external view returns (bool) {
         if (id == 0xffffffff) return invalidMarker;
         return id == 0x01ffc9a7 || id == type(IStreamFinalityComponentFacts).interfaceId
-            || id == type(IStreamCollectionMetadata).interfaceId
+            || id == type(IStreamCollectionMetadataV1).interfaceId
             || id == type(IStreamMetadataRouter).interfaceId
             || id == type(IStreamEntropyCoordinator).interfaceId;
     }

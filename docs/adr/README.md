@@ -106,3 +106,11 @@ and canonical Manager/Ledger authorization identity.
 [ADR 0038: Token royalties and disabled assignment representation](0038-token-royalties-and-disabled-assignment-representation.md)
 defines token precedence, explicit disabled assignment commitments and
 clear-to-inheritance behavior with preserved consent and revision history.
+
+[ADR 0039: Canonical finality governance and evidence](0039-canonical-finality-governance-and-evidence.md)
+defines canonical governance, exact scope evidence and complete archival
+artifact commitments for the developing finality implementation.
+
+[ADR 0040: Current metadata record host](0040-current-metadata-record-host.md)
+defines the new interface boundary, retained byte history and live-root
+authorization for catalog admission and family grants.

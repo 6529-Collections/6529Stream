@@ -52,7 +52,10 @@ It rejects ambiguous scope shapes. Actual token-to-collection membership remains
 the publishing host's responsibility; the token subject intentionally commits
 Core and token identity rather than duplicating the collection mapping.
 
-These are implementation building blocks. They do not yet provide the actual
-metadata record publisher, schema admission, preserved leaf manifests, complete
-render inventory, archival coverage, or a current-contract finality flow. The
+The [current metadata record host](integrations/metadata-records.md) now retains
+actual record bytes and interpretation identities. Its primary interface is
+`IStreamCollectionMetadataV1`; it does not yet implement
+`IStreamFinalityComponentFacts`, so an adapter cannot treat generic bytes as
+finality evidence. Preserved leaf manifests, complete typed render inventory
+and their current-contract finality composition remain in development. The
 [delivery ledger](../ops/V1_DELIVERY.md) tracks that remaining integration.

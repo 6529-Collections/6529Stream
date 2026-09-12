@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../vendor/openzeppelin/IERC165.sol";
 import "../interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
-import "../interfaces/stream/metadata/IStreamCollectionMetadata.sol";
+import "../interfaces/stream/metadata/IStreamCollectionMetadataV1.sol";
 import "../interfaces/stream/artist/IStreamArtistMintConsent.sol";
 import "../interfaces/stream/entropy/IStreamEntropyCoordinator.sol";
 import "../interfaces/stream/metadata/IStreamMetadataRouter.sol";
@@ -163,7 +163,7 @@ library StreamCoreExternalReads {
             return (true, pointerType, type(IStreamArtworkFinalityRegistry).interfaceId);
         }
         if (pointerType == _POINTER_COLLECTION_METADATA) {
-            return (true, pointerType, type(IStreamCollectionMetadata).interfaceId);
+            return (true, pointerType, type(IStreamCollectionMetadataV1).interfaceId);
         }
         if (pointerType == _POINTER_MODULE_REGISTRY) {
             return (true, pointerType, type(IStreamModuleRegistry).interfaceId);

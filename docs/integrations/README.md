@@ -26,6 +26,7 @@ deployment evidence.
 | Create, bid on and settle an auction | [English auctions](auction-flows.md) |
 | Index purchases and state changes | [Events and indexing](events-and-indexing.md) |
 | Display pending and final artwork | [Metadata and rendering](metadata-rendering.md) |
+| Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Withdraw proceeds or bid refunds | [Payments and withdrawals](withdrawals-and-credits.md) |
 | Run the complete flow locally | [Current deployment demo](../../script/current/README.md) |
 
