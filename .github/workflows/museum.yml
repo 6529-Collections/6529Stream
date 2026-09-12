@@ -5,14 +5,20 @@ on:
     paths:
       - ".github/workflows/museum.yml"
       - "tools/museum/**"
+      - "tools/metadata/**"
       - "schemas/museum/**"
+      - "schemas/records/**"
+      - "test/fixtures/metadata/**"
       - "docs/museum-*.md"
   push:
     branches: [main]
     paths:
       - ".github/workflows/museum.yml"
       - "tools/museum/**"
+      - "tools/metadata/**"
       - "schemas/museum/**"
+      - "schemas/records/**"
+      - "test/fixtures/metadata/**"
       - "docs/museum-*.md"
   workflow_dispatch:
 
@@ -52,6 +58,10 @@ jobs:
           python -m pip install --disable-pip-version-check --only-binary=:all: -r tools/museum/requirements-jsonld.txt
       - name: Check dependency compatibility
         run: python -m pip check
+      - name: Test typed record schemas and canonical fixtures
+        run: python -m unittest tools.metadata.test_rights_profile -v
+      - name: Check typed record definition generation
+        run: python -m tools.metadata.rights_profile --check
       - name: Test offline validation and export
         run: python -m unittest discover -s tools/museum -t . -p "test_*.py" -v
       - name: Check schema generation
