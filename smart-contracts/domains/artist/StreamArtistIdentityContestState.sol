@@ -130,8 +130,75 @@ library StreamArtistIdentityContestState {
         address successor,
         bytes32 successorRecord
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
-        (bytes32 scope, bytes32 oldHash, bytes32 newHash) =
-            contextWithSuccessor(s, identity, rotations, o, p, successor, successorRecord);
+        Dismissal.ContestResolutionFacts memory empty;
+        Dismissal.StandingJudgment memory none;
+        return _file(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            governance,
+            governanceAuthority,
+            successor,
+            successorRecord,
+            empty,
+            none
+        );
+    }
+
+    function fileWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Contest.Request memory p,
+        Contest.GovernanceWitness memory governance,
+        address governanceAuthority,
+        address successor,
+        bytes32 successorRecord,
+        Dismissal.ContestResolutionFacts memory resolution,
+        Dismissal.StandingJudgment memory judgment
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _file(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            governance,
+            governanceAuthority,
+            successor,
+            successorRecord,
+            resolution,
+            judgment
+        );
+    }
+
+    function _file(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Contest.Request memory p,
+        Contest.GovernanceWitness memory governance,
+        address governanceAuthority,
+        address successor,
+        bytes32 successorRecord,
+        Dismissal.ContestResolutionFacts memory resolution,
+        Dismissal.StandingJudgment memory judgment
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
+        (bytes32 scope, bytes32 oldHash, bytes32 newHash) = contextWithResolution(
+            s, identity, rotations, o, p, successor, successorRecord, resolution
+        );
         bytes32 pending = rotations.pending[p.artistId];
         bytes32 executed = rotations.latestExecution[p.artistId];
         bytes32 guardians = StreamArtistRotationState.operativeGuardian(rotations, p.artistId);
@@ -151,6 +218,10 @@ library StreamArtistIdentityContestState {
             }
             (bool revoked,) =
                 StreamArtistRotationState.standingRevoked(rotations, p.artistId, c.actor);
+            if (
+                judgment.dismissalRecordHash != bytes32(0)
+                    && judgment.retirementHash == rotations.retirement[p.artistId][c.actor]
+            ) revoked = true;
             if (
                 c.actor != successor && !_member(rotations, guardians, c.actor)
                     && !_member(rotations, captured, c.actor)
@@ -205,8 +276,8 @@ library StreamArtistIdentityContestState {
         s.records[record] = item;
         s.latest[p.artistId] = record;
         // The named historical subject cannot let a current provisional cohort escape the filing.
-        _mark(rotations, p.subjectRecordHash, observed);
-        _mark(rotations, executed, observed);
+        _markWithResolution(rotations, p.subjectRecordHash, observed, resolution.subjectClosure);
+        _markWithResolution(rotations, executed, observed, resolution.executedClosure);
         if (pending != bytes32(0)) {
             _mark(rotations, pending, observed);
             rotations.rotations[pending].transition.phase = 3;
@@ -237,6 +308,85 @@ library StreamArtistIdentityContestState {
             observed,
             record
         );
+
+        if (
+            resolution.currentCauseHash != bytes32(0)
+                || resolution.currentResolutionHash != bytes32(0)
+                || judgment.dismissalRecordHash != bytes32(0)
+        ) {
+            m.state = keccak256(abi.encode(m.state, resolution, judgment));
+        }
+    }
+
+    function contextWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        StreamArtistIdentityState.OwnerContext memory o,
+        Contest.Request memory p,
+        address successor,
+        bytes32 successorRecord,
+        Dismissal.ContestResolutionFacts memory resolution
+    ) public view returns (bytes32 scope, bytes32 oldHash, bytes32 newHash) {
+        (scope, oldHash, newHash) =
+            contextWithSuccessor(s, identity, rotations, o, p, successor, successorRecord);
+        _validateClosed(rotations, p.subjectRecordHash, resolution.subjectClosure);
+        _validateClosed(
+            rotations, rotations.latestExecution[p.artistId], resolution.executedClosure
+        );
+        if (
+            resolution.currentCauseHash != bytes32(0)
+                || resolution.currentResolutionHash != bytes32(0)
+                || resolution.subjectClosure.dismissalRecordHash != bytes32(0)
+                || resolution.executedClosure.dismissalRecordHash != bytes32(0)
+        ) {
+            oldHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_RESOLUTION_STATE_V1"),
+                    oldHash,
+                    resolution
+                )
+            );
+            newHash = keccak256(
+                abi.encode(
+                    keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_INTENT_V1"), scope, oldHash, p
+                )
+            );
+        }
+    }
+
+    function _validateClosed(
+        StreamArtistRotationState.State storage rotations,
+        bytes32 record,
+        Dismissal.Closure memory closure_
+    ) private view {
+        if (closure_.dismissalRecordHash == bytes32(0)) {
+            Dismissal.Closure memory empty;
+            if (keccak256(abi.encode(closure_)) != keccak256(abi.encode(empty))) {
+                revert Dismissal.InvalidClosure(record);
+            }
+            return;
+        }
+        R.TransitionState storage t = rotations.rotations[record].transition;
+        uint64 ends = t.phase == 2 ? t.postWindowEndsAt : t.contestEndsAt;
+        bool abandoned = t.phase == 3
+            || (t.phase == 2 && t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt);
+        if (
+            record == bytes32(0) || closure_.transitionRecordHash != record
+                || t.artistId != closure_.artistId || (t.phase != 2 && t.phase != 3)
+                || closure_.windowEndsAt != ends || closure_.contestedAt != t.contestedAt
+                || closure_.abandoned != abandoned
+        ) revert Dismissal.InvalidClosure(record);
+    }
+
+    function _markWithResolution(
+        StreamArtistRotationState.State storage rotations,
+        bytes32 record,
+        uint64 observed,
+        Dismissal.Closure memory closure_
+    ) private {
+        _validateClosed(rotations, record, closure_);
+        if (closure_.dismissalRecordHash == bytes32(0)) _mark(rotations, record, observed);
     }
 
     function _validate(

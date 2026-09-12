@@ -22,11 +22,17 @@ import {
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
 
 import "./StreamArtistIdentityData.sol";
+import "./StreamArtistIdentityDismissalState.sol";
+import "./StreamArtistTimingState.sol";
 
 /// @notice Constructor-fixed typed Identity writers, executed only in their bound owner.
 /// @dev No fallback or routing table. Direct state reads/writes reject; immutable getters
 ///      expose only truthful construction pins. Every semantic commit remains the owner.
-contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistIdentityData {
+contract StreamArtistIdentityWriterExtension is
+    StreamArtistOwner,
+    StreamArtistIdentityData,
+    IStreamArtistIdentityDismissalEvents
+{
     error ExtensionWrongHost(address actual);
     address private immutable _host;
 
@@ -56,6 +62,30 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         _;
     }
 
+    function dismissIdentityContest(
+        T.ActionContext calldata c,
+        Dismissal.Request calldata p,
+        Contest.GovernanceWitness calldata governance
+    ) external onlyHost returns (bytes32) {
+        _check(c, 58);
+        address executor = IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority();
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityDismissalState.dismiss(
+            _resolutions,
+            _identity,
+            _rotations,
+            _identityRevisions,
+            _succession,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            governance,
+            executor
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
     function grantDelegation(
         T.ActionContext calldata c,
         D.Grant calldata p,
@@ -81,9 +111,19 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         T.SignerApproval calldata proof
     ) external onlyHost returns (bytes32) {
         _check(c, 36);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistSuccessionState.designate(
-            _succession, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistSuccessionState.designateWithResolution(
+                _succession,
+                _identity,
+                _rotations,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                _currentIdentityClosure(p.artistId)
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -96,9 +136,20 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         Succ.PublicDocument calldata document
     ) external onlyHost returns (bytes32) {
         _check(c, 37);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistSuccessionState.directive(
-            _succession, _identity, _rotations, _replay, _ownerContext(), c, p, a, proof, document
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistSuccessionState.directiveWithResolution(
+                _succession,
+                _identity,
+                _rotations,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                document,
+                _currentIdentityClosure(p.artistId)
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -120,19 +171,22 @@ contract StreamArtistIdentityWriterExtension is StreamArtistOwner, StreamArtistI
         string calldata displayName
     ) external onlyHost returns (bytes32) {
         _check(c, 25);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityRevisionState.revise(
-            _identityRevisions,
-            _identity,
-            _rotations,
-            _replay,
-            _ownerContext(),
-            c,
-            p,
-            a,
-            proof,
-            document,
-            displayName
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistIdentityRevisionState.reviseWithResolution(
+                _identityRevisions,
+                _identity,
+                _rotations,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                document,
+                displayName,
+                _currentIdentityClosure(p.artistId),
+                _resolutions.continuations[_resolutions.continuationHead[p.artistId]]
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistRotationHashes.sol";
 import "./StreamArtistRegistryValidatorBase.sol";
@@ -140,7 +141,9 @@ library StreamArtistRotationOperations {
                 artistId,
                 expected,
                 reasonHash,
-                IStreamArtistRotationOwner(x.suite.owners[2]).rotationRecord(expected)
+                IStreamArtistRotationOwner(x.suite.owners[2]).rotationRecord(expected),
+                IStreamArtistIdentityDismissalOwner(x.suite.owners[2])
+                    .currentIdentityContestCause(artistId)
             )
         );
     }

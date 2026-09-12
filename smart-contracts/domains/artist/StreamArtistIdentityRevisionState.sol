@@ -91,6 +91,60 @@ library StreamArtistIdentityRevisionState {
         bytes memory document,
         string memory displayName
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.Closure memory empty;
+        Dismissal.RevisionContinuation memory none;
+        return _revise(
+            s, identity, rotations, replay, o, c, p, a, proof, document, displayName, empty, none
+        );
+    }
+
+    function reviseWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        StreamArtistIdentityRevisionTypes.Revision memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes memory document,
+        string memory displayName,
+        Dismissal.Closure memory closure,
+        Dismissal.RevisionContinuation memory continuation
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _revise(
+            s,
+            identity,
+            rotations,
+            replay,
+            o,
+            c,
+            p,
+            a,
+            proof,
+            document,
+            displayName,
+            closure,
+            continuation
+        );
+    }
+
+    function _revise(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        StreamArtistIdentityRevisionTypes.Revision memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        bytes memory document,
+        string memory displayName,
+        Dismissal.Closure memory closure,
+        Dismissal.RevisionContinuation memory continuation
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         if (
             p.previousRecordHash != operative(s, identity, rotations, p.artistId)
                 || p.revisedRecordHash == bytes32(0) || p.revisedRecordHash == p.previousRecordHash
@@ -129,6 +183,25 @@ library StreamArtistIdentityRevisionState {
                 a.time
             )
         );
+        if (continuation.continuationHash != bytes32(0) && continuation.artistId != p.artistId) {
+            revert T.InvalidRecord();
+        }
+        bool continuing = continuation.continuationHash != bytes32(0)
+            && continuation.stableRevisionRecordHash == previousRevision
+            && continuation.stableDocumentHash == p.previousRecordHash;
+        bytes32 chainSurface = continuing
+            ? keccak256("identity_authority.replay.identity_revision_continuation")
+            : keccak256("identity_authority.replay.identity_revision_chain");
+        bytes32 chainScope = continuing
+            ? keccak256(
+                abi.encode(
+                    p.artistId,
+                    previousRevision,
+                    p.previousRecordHash,
+                    continuation.continuationHash
+                )
+            )
+            : keccak256(abi.encode(p.artistId, previousRevision, p.previousRecordHash));
         bytes32 chainKey = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
@@ -138,8 +211,8 @@ library StreamArtistIdentityRevisionState {
                 o.archive,
                 address(this),
                 o.domain,
-                keccak256("identity_authority.replay.identity_revision_chain"),
-                keccak256(abi.encode(p.artistId, previousRevision, p.previousRecordHash))
+                chainSurface,
+                chainScope
             )
         );
         if (replay[chainKey].status != 0) revert T.Replay(chainKey);
@@ -172,7 +245,7 @@ library StreamArtistIdentityRevisionState {
             );
         s.records[record] = item;
         R.ProvisionalAssociation memory association_ =
-            StreamArtistRotationState.association(rotations, p.artistId);
+            StreamArtistRotationState.associationWithResolution(rotations, p.artistId, closure);
         s.associations[record] = association_;
         if (association_.transitionRecordHash == bytes32(0)) {
             s.latestRecord[p.artistId] = record;
@@ -211,6 +284,12 @@ library StreamArtistIdentityRevisionState {
             record
         );
         emit ArtistIdentityDisplayNameStored(p.artistId, p.revisedRecordHash, displayName);
+
+        if (
+            closure.dismissalRecordHash != bytes32(0) || continuation.continuationHash != bytes32(0)
+        ) {
+            m.state = keccak256(abi.encode(m.state, closure, continuation, continuing));
+        }
     }
 
     function _selected(

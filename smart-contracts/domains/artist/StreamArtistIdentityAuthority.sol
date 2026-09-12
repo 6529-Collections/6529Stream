@@ -8,6 +8,10 @@ import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistOwner.sol";
 import "./StreamArtistIdentityData.sol";
 import "./StreamArtistIdentityWriterExtension.sol";
+import "./StreamArtistIdentityExtensionDeployment.sol";
+import "./StreamArtistIdentityDismissalState.sol";
+import "./StreamArtistIdentityCauseState.sol";
+import "./StreamArtistIdentityResolutionReads.sol";
 import "./StreamArtistNonceAvailability.sol";
 import "./StreamArtistDelegationState.sol";
 import "./StreamArtistIdentityState.sol";
@@ -25,7 +29,11 @@ import {
 
 /// @notice Sole owner of artist identities, authorization replay, liveness and signature bytes.
 /// @dev Current-principal rotation and economics/freeze delegation are supported; recovery remains separate.
-contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentityData {
+contract StreamArtistIdentityAuthority is
+    StreamArtistOwner,
+    StreamArtistIdentityData,
+    IStreamArtistIdentityDismissalEvents
+{
     // Retain the owner ABI for errors propagated by the linked mechanics.
     error NonceAvailabilityAlreadyUsed(uint256 nonce);
     error NonceAvailabilityInconsistent(uint8 level, uint256 prefix);
@@ -138,26 +146,93 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         bytes32 contestRecordHash
     );
 
+    function dismissIdentityContest(
+        T.ActionContext calldata c,
+        Dismissal.Request calldata p,
+        Contest.GovernanceWitness calldata governance
+    ) external returns (bytes32) {
+        _forwardIdentityWriter();
+    }
+
+    function identityContestDismissalContext(Dismissal.Request calldata p)
+        external
+        view
+        returns (Dismissal.Context memory)
+    {
+        _returnResolution(
+            StreamArtistIdentityResolutionReads.context(
+                _resolutions,
+                _identity,
+                _rotations,
+                _identityRevisions,
+                _succession,
+                _environment(),
+                p
+            )
+        );
+    }
+
+    function currentIdentityContestCause(bytes32 artistId)
+        external
+        view
+        returns (Dismissal.Cause memory)
+    {
+        _returnResolution(StreamArtistIdentityResolutionReads.currentCause(_resolutions, artistId));
+    }
+
+    function identityContestCause(bytes32 hash) external view returns (Dismissal.Cause memory) {
+        _returnResolution(StreamArtistIdentityResolutionReads.cause(_resolutions, hash));
+    }
+
+    function identityContestDismissalRecord(bytes32 hash)
+        external
+        view
+        returns (Dismissal.Record memory)
+    {
+        _returnResolution(StreamArtistIdentityResolutionReads.record(_resolutions, hash));
+    }
+
+    function latestIdentityContestDismissal(bytes32 artistId) external view returns (bytes32) {
+        _returnResolution(StreamArtistIdentityResolutionReads.latest(_resolutions, artistId));
+    }
+
+    function identityTransitionClosure(bytes32 artistId, bytes32 transition)
+        external
+        view
+        returns (Dismissal.Closure memory item)
+    {
+        _returnResolution(
+            StreamArtistIdentityResolutionReads.closure(_resolutions, artistId, transition)
+        );
+    }
+
+    function identityRevisionContinuation(bytes32 hash)
+        external
+        view
+        returns (Dismissal.RevisionContinuation memory)
+    {
+        _returnResolution(StreamArtistIdentityResolutionReads.continuation(_resolutions, hash));
+    }
+
     function contestIdentity(
         T.ActionContext calldata c,
         Contest.Request calldata p,
         Contest.GovernanceWitness calldata governance
     ) external returns (bytes32) {
         _check(c, 33);
-        StreamArtistIdentityState.Mutation memory m =
-            StreamArtistIdentityContestState.fileWithSuccessor(
-                _identityContests,
-                _identity,
-                _rotations,
-                _replay,
-                _ownerContext(),
-                c,
-                p,
-                governance,
-                artistWindowAuthority,
-                _succession.designations[operativeSuccessorRecord(p.artistId)].terms.successor,
-                operativeSuccessorRecord(p.artistId)
-            );
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityCauseState.file(
+            _resolutions,
+            _identity,
+            _rotations,
+            _identityContests,
+            _succession,
+            _replay,
+            _ownerContext(),
+            c,
+            p,
+            governance,
+            artistWindowAuthority
+        );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -175,14 +250,8 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         view
         returns (bytes32, bytes32, bytes32)
     {
-        return StreamArtistIdentityContestState.contextWithSuccessor(
-            _identityContests,
-            _identity,
-            _rotations,
-            _ownerContext(),
-            p,
-            _succession.designations[operativeSuccessorRecord(p.artistId)].terms.successor,
-            operativeSuccessorRecord(p.artistId)
+        return StreamArtistIdentityCauseState.context(
+            _resolutions, _identity, _rotations, _identityContests, _succession, _ownerContext(), p
         );
     }
 
@@ -332,10 +401,8 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         )
     {
         artistWindowAuthority = StreamArtistTimingState.canonicalAuthority(core_, manager_);
-        identityWriterExtension = address(
-            new StreamArtistIdentityWriterExtension(
-                address(this), registry_, coordinator_, archive_, core_, manager_
-            )
+        identityWriterExtension = StreamArtistIdentityExtensionDeployment.deployWriter(
+            registry_, coordinator_, archive_, core_, manager_
         );
     }
 
@@ -346,9 +413,18 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         T.SignerApproval calldata proof
     ) external returns (bytes32) {
         _check(c, 28);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.setGuardians(
-            _rotations, _identity, _replay, _ownerContext(), c, p, a, proof
-        );
+        StreamArtistIdentityState.Mutation memory m =
+            StreamArtistRotationState.setGuardiansWithResolution(
+                _rotations,
+                _identity,
+                _replay,
+                _ownerContext(),
+                c,
+                p,
+                a,
+                proof,
+                _currentIdentityClosure(p.artistId)
+            );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -362,7 +438,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         T.SignerApproval calldata newProof
     ) external returns (bytes32) {
         _check(c, 29);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.stage(
+        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.stageWithResolution(
             _rotations,
             _identity,
             _replay,
@@ -372,7 +448,8 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
             oldAuthorization,
             newAuthorization,
             oldProof,
-            newProof
+            newProof,
+            _currentIdentityClosure(p.artistId)
         );
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
@@ -395,16 +472,17 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         bytes32 reasonHash
     ) external {
         _check(c, 31);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.vetoWithSuccessor(
-            _rotations,
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityCauseState.veto(
+            _resolutions,
             _identity,
+            _rotations,
+            _succession,
             _replay,
             _ownerContext(),
             c,
             artistId,
             expected,
-            reasonHash,
-            _succession.designations[operativeSuccessorRecord(artistId)].terms.successor
+            reasonHash
         );
         _commit(c, m.action, m.state, m.replay, m.record);
     }
@@ -426,6 +504,10 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         T.SignerApproval calldata proof
     ) external returns (bytes32) {
         _check(c, 51);
+        (bool revoked,) = StreamArtistIdentityDismissalState.standingRevoked(
+            _resolutions, _rotations, p.artistId, p.revokedAddress
+        );
+        if (revoked) revert R.InvalidPriorStanding(p.revokedAddress);
         StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.revokeStanding(
             _rotations, _identity, _replay, _ownerContext(), c, p, a, proof
         );
@@ -464,15 +546,17 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         view
         returns (bool, bytes32)
     {
-        return StreamArtistRotationState.standingRevoked(_rotations, artistId, account);
+        return StreamArtistIdentityDismissalState.standingRevoked(
+            _resolutions, _rotations, artistId, account
+        );
     }
 
     function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
-        return _rotations.guardians[record];
+        _returnResolution(StreamArtistIdentityResolutionReads.guardian(_rotations, record));
     }
 
     function rotationRecord(bytes32 record) external view returns (R.RotationRecord memory) {
-        return _rotations.rotations[record];
+        _returnResolution(StreamArtistIdentityResolutionReads.rotation(_rotations, record));
     }
 
     function standingRevocationRecord(bytes32 record)
@@ -504,7 +588,9 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
     }
 
     function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
-        return StreamArtistRotationState.activeWindow(_rotations, artistId);
+        return StreamArtistRotationState.activeWindowWithResolution(
+            _rotations, artistId, _currentIdentityClosure(artistId)
+        );
     }
 
     function rotationAcceptanceNonceState(bytes32 artistId, address account, uint256 nonce)
@@ -522,7 +608,9 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
         view
         returns (R.ProvisionalAssociation memory)
     {
-        return StreamArtistRotationState.association(_rotations, artistId);
+        return StreamArtistRotationState.associationWithResolution(
+            _rotations, artistId, _currentIdentityClosure(artistId)
+        );
     }
 
     function provisionalRecordEligible(bytes32 artistId, R.ProvisionalAssociation calldata a)
@@ -579,7 +667,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
     }
 
     function identity(bytes32 artistId) external view returns (T.Identity memory) {
-        return _identity.identities[artistId];
+        _returnResolution(StreamArtistIdentityResolutionReads.identity(_identity, artistId));
     }
 
     /// @notice Fixed-size authority facts with the immutable registration hash, not the operative document.
@@ -613,7 +701,7 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
     }
 
     function delegationRecord(bytes32 grant) external view returns (D.Record memory) {
-        return _delegations.records[grant];
+        _returnResolution(StreamArtistIdentityResolutionReads.delegation(_delegations, grant));
     }
 
     function collaboratorRegistrationNonceState(address account, uint256 nonce)
@@ -837,6 +925,10 @@ contract StreamArtistIdentityAuthority is StreamArtistOwner, StreamArtistIdentit
 
     function _deadline(uint64 deadline) private view {
         if (block.timestamp > deadline) revert T.ExpiredAuthorization(deadline);
+    }
+
+    function _returnResolution(bytes memory encoded) private pure {
+        assembly ("memory-safe") { return(add(encoded, 32), mload(encoded)) }
     }
 
     function _forwardIdentityWriter() private {

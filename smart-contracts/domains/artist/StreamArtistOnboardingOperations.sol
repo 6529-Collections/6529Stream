@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
+import "../../interfaces/stream/artist/IStreamArtistPayoutResolutionOwner.sol";
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistRotationOperations.sol";
 
@@ -133,17 +135,26 @@ library StreamArtistOnboardingOperations {
             transitionOwner.artistTransitionState(currentAssociation.transitionRecordHash);
         R.TransitionState memory candidateTransition =
             transitionOwner.artistTransitionState(candidateAssociation.transitionRecordHash);
+        Dismissal.PayoutResolutionFacts memory resolution;
+        resolution.artistId = p.artistId;
+        IStreamArtistIdentityDismissalOwner resolver =
+            IStreamArtistIdentityDismissalOwner(x.suite.owners[2]);
+        resolution.currentTransitionClosure =
+            resolver.identityTransitionClosure(p.artistId, currentTransition.recordHash);
+        resolution.candidateTransitionClosure =
+            resolver.identityTransitionClosure(p.artistId, candidateTransition.recordHash);
         record = IStreamArtistIdentityOwner(x.suite.owners[2])
             .consumePayout(_context(18, actor, before_[2]), p, effective, proof);
-        bytes32 actual = IStreamArtistPayoutTransitionOwner(x.suite.owners[5])
-            .recordDesignationWithTransition(
+        bytes32 actual = IStreamArtistPayoutResolutionOwner(x.suite.owners[5])
+            .recordDesignationWithResolution(
                 _context(18, actor, before_[5]),
                 p,
                 proof.signer,
                 effective.nonce,
                 effective.time,
                 currentTransition,
-                candidateTransition
+                candidateTransition,
+                resolution
             );
         if (actual != record) revert T.InvalidRecord();
         _archive(
@@ -152,7 +163,7 @@ library StreamArtistOnboardingOperations {
             actor,
             record,
             before_,
-            abi.encode(p, a, proof, effective, currentTransition, candidateTransition)
+            abi.encode(p, a, proof, effective, currentTransition, candidateTransition, resolution)
         );
     }
 

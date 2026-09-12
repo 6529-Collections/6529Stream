@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import {
@@ -48,6 +49,15 @@ contract StreamArtistRegistryWriterExtension {
     {
         return IStreamArtistSaleCoordinator(operationCoordinator)
             .coordinateRecordSaleConsent(msg.sender, p, a);
+    }
+
+    function dismissArtistIdentityContest(Dismissal.Request calldata p)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistIdentityDismissalCoordinator(operationCoordinator)
+            .coordinateDismissArtistIdentityContest(msg.sender, p);
     }
 
     function contestArtistIdentity(

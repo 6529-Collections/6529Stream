@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistOnboardingOperations.sol";
 import "./StreamArtistRotationOperations.sol";
@@ -151,7 +152,8 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(37),
                 uint16(51),
                 uint16(52),
-                uint16(54)
+                uint16(54),
+                uint16(58)
             )
         );
         reads = new StreamArtistOnboardingReads(suite);
@@ -179,6 +181,14 @@ contract StreamArtistOnboardingCoordinator is
         T.Authorization calldata a
     ) external operation returns (bytes32) {
         return StreamArtistSaleOperations.record(_economicContext(), actor, p, a);
+    }
+
+    function coordinateDismissArtistIdentityContest(address actor, Dismissal.Request calldata p)
+        external
+        operation
+        returns (bytes32)
+    {
+        return StreamArtistIdentityDismissalOperations.dismiss(_economicContext(), actor, p);
     }
 
     function coordinateContestArtistIdentity(address actor, Contest.Request calldata p)

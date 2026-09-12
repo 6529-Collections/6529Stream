@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistRegistryWriterExtension.sol";
@@ -46,6 +47,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistAttributionState,
     IStreamArtistIdentityContest,
     IStreamArtistSuccessionRecords,
+    IStreamArtistIdentityDismissal,
     StreamModuleBase,
     StreamGasParameterHost
 {
@@ -118,6 +120,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistSaleAuthority).interfaceId
             || id == type(IStreamArtistAttributionState).interfaceId
             || id == type(IStreamArtistIdentityContest).interfaceId
+            || id == type(IStreamArtistIdentityDismissal).interfaceId
             || id == type(IStreamArtistSuccessionRecords).interfaceId
             || id == type(IStreamArtistSuccessionReads).interfaceId
             || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
@@ -202,6 +205,62 @@ contract StreamArtistOnboardingRegistry is
         uint32 forbidden,
         Succ.PublicDocument calldata document
     ) external view returns (bytes memory) {
+        _forwardRegistryRead();
+    }
+
+    function dismissArtistIdentityContest(Dismissal.Request calldata p) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function identityContestDismissalContext(Dismissal.Request calldata p)
+        external
+        view
+        returns (Dismissal.Context memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function currentIdentityContestCause(bytes32 artistId)
+        external
+        view
+        returns (Dismissal.Cause memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityContestCause(bytes32 causeHash)
+        external
+        view
+        returns (Dismissal.Cause memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityContestDismissalRecord(bytes32 recordHash)
+        external
+        view
+        returns (Dismissal.Record memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function latestIdentityContestDismissal(bytes32 artistId) external view returns (bytes32) {
+        _forwardRegistryRead();
+    }
+
+    function identityTransitionClosure(bytes32 artistId, bytes32 transitionRecordHash)
+        external
+        view
+        returns (Dismissal.Closure memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function identityRevisionContinuation(bytes32 continuationHash)
+        external
+        view
+        returns (Dismissal.RevisionContinuation memory)
+    {
         _forwardRegistryRead();
     }
 

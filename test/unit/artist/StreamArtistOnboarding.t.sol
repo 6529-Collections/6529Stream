@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../regression/legacy/helpers/CharacterizationTestBase.sol";
 import "../../helpers/OfficialSafeFixture.sol";
 import "./ArtistSaleRegistryFixture.sol";
+import "./ArtistIdentityReadEncodingFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
@@ -2355,7 +2356,8 @@ contract StreamArtistOnboardingTest is
                 uint16(37),
                 uint16(51),
                 uint16(52),
-                uint16(54)
+                uint16(54),
+                uint16(58)
             )
         );
         require(coordinator.configurationHash() == expected, "full executable operation commitment");
@@ -7911,6 +7913,1131 @@ contract StreamArtistOnboardingTest is
         T.Authorization memory a = _authorization(false);
         a.signature = _signature(ingress.policyConsentDigest(p, a));
         _artistCall(abi.encodeCall(IStreamArtistOnboarding.recordPolicyConsent, (p, a)));
+    }
+
+    function _assertDismissalCauseEvent(Vm.Log[] memory logs, Dismissal.Cause memory cause)
+        private
+        view
+    {
+        bytes32 topic = keccak256(
+            "ArtistIdentityContestCauseCaptured(uint16,bytes32,bytes32,uint8,bytes32,address,bytes32,bytes32,uint64,address,uint8,uint8,bytes32,bytes32,bytes32,bytes32,bytes32)"
+        );
+        uint256 count;
+        Dismissal.CauseFacts memory f = cause.facts;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[2] && logs[i].topics.length != 0
+                    && logs[i].topics[0] == topic
+            ) {
+                ++count;
+                require(
+                    logs[i].topics.length == 3 && logs[i].topics[1] == f.artistId
+                        && logs[i].topics[2] == cause.causeHash,
+                    "actual cause emitter and indexed tuple"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                f.kind,
+                                f.referenceHash,
+                                f.actor,
+                                f.reasonHash,
+                                f.evidenceHash,
+                                f.enteredAt,
+                                f.incumbent,
+                                f.authorityClass,
+                                f.priorStatus,
+                                f.pendingTransitionHash,
+                                f.executedTransitionHash,
+                                f.previousCauseHash,
+                                f.previousResolutionHash,
+                                f.actorRetirementHash
+                            )
+                        ),
+                    "exact cause event field order and values"
+                );
+            }
+        }
+        require(count == 1, "exactly one cause capture event");
+    }
+
+    function _dismissalRequest() private view returns (Dismissal.Request memory) {
+        return Dismissal.Request(
+            artistId,
+            ingress.currentIdentityContestCause(artistId).causeHash,
+            ingress.latestIdentityContestDismissal(artistId),
+            keccak256("dismissal evidence"),
+            keccak256("dismissal reason"),
+            false,
+            bytes32(0)
+        );
+    }
+
+    function _dismissalExecute(Dismissal.Request memory p, uint8 actionClass, uint8 fault)
+        private
+        returns (bytes32 record)
+    {
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+        authority.configureContestReads(
+            suite.roleRegistry, address(artist), p.reasonHash, "urn:unit:dismissal"
+        );
+        Dismissal.Context memory x = ingress.identityContestDismissalContext(p);
+        if (fault == 1) x.scopeHash = keccak256("wrong scope");
+        if (fault == 2) x.oldValueHash = keccak256("wrong state");
+        if (fault == 3) x.newValueHash = keccak256("wrong intent");
+        if (fault == 4) {
+            authority.configureContestReads(
+                suite.roleRegistry, address(artist), keccak256("wrong reason"), "urn:unit"
+            );
+        }
+        if (fault == 5) {
+            authority.configureContestReads(
+                address(core), address(artist), p.reasonHash, "urn:unit"
+            );
+        }
+        if (fault == 6) ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), false);
+        authority.executeModuleContext(
+            address(ingress),
+            abi.encodeCall(IStreamArtistIdentityDismissal.dismissArtistIdentityContest, (p)),
+            actionClass,
+            x.scopeHash,
+            x.oldValueHash,
+            x.newValueHash
+        );
+        return ingress.latestIdentityContestDismissal(artistId);
+    }
+
+    function executeGovernedDismissal(Dismissal.Request calldata p, uint8 actionClass, uint8 fault)
+        external
+    {
+        require(msg.sender == address(this), "test-only");
+        _dismissalExecute(p, actionClass, fault);
+    }
+
+    function _dismissalPayout(address account) private returns (bytes32 record) {
+        (, bytes32 prior) = ingress.artistPayoutAccount(artistId);
+        T.PayoutDesignation memory p = T.PayoutDesignation(artistId, account, prior);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(p, a));
+        return ingress.recordPayoutDesignation(p, a);
+    }
+
+    function executeDismissalPayout(address account) external {
+        require(msg.sender == address(this), "test-only");
+        _dismissalPayout(account);
+    }
+
+    function _dismissalGuardianCause() private {
+        _selfGuardian();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual Safe files cause"
+        );
+    }
+
+    function testDismissalExactCauseRecordReplayEventAndSoleIdentityCommit() public {
+        vm.recordLogs();
+        _dismissalGuardianCause();
+        Vm.Log[] memory causeLogs = vm.getRecordedLogs();
+        Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
+        _assertDismissalCauseEvent(causeLogs, cause);
+        require(
+            cause.causeHash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_IDENTITY_CONTEST_CAUSE_V1"),
+                        block.chainid,
+                        address(ingress),
+                        suite.owners[2],
+                        cause.facts
+                    )
+                ),
+            "independent cause commitment"
+        );
+        require(
+            cause.facts.kind == 1
+                && cause.facts.referenceHash == ingress.latestIdentityContest(artistId)
+                && cause.facts.actor == address(artist) && cause.facts.incumbent == address(artist)
+                && cause.facts.priorStatus == 1 && cause.facts.authorityClass == 1,
+            "actual filing facts"
+        );
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        bytes32 otherRoots = _otherOwnerRoots();
+        T.Snapshot memory snapshot_ = IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
+        Dismissal.Request memory p = _dismissalRequest();
+        vm.recordLogs();
+        bytes32 record = _dismissalExecute(p, 1, 0);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        Dismissal.Record memory item = ingress.identityContestDismissalRecord(record);
+        (
+            ,
+            Contest.GovernanceWitness memory g,
+            Dismissal.Cause memory archivedCause,
+            Dismissal.Context memory x,
+            Dismissal.Record memory archived
+        ) = abi.decode(
+            _operationPayload(58, manager.governanceAuthority(), record),
+            (
+                Dismissal.Request,
+                Contest.GovernanceWitness,
+                Dismissal.Cause,
+                Dismissal.Context,
+                Dismissal.Record
+            )
+        );
+        require(
+            keccak256(abi.encode(archivedCause)) == keccak256(abi.encode(cause))
+                && keccak256(abi.encode(archived)) == keccak256(abi.encode(item)),
+            "exact archive cause and result"
+        );
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_RECORD_V1"),
+                        block.chainid,
+                        address(ingress),
+                        suite.owners[2],
+                        p,
+                        manager.governanceAuthority(),
+                        g.proposer,
+                        g.actionClass,
+                        g.actionId,
+                        item.incumbent,
+                        item.authorityClass,
+                        item.restoredStatus,
+                        item.dismissedAt,
+                        item.cohortHash,
+                        keccak256(abi.encode(g))
+                    )
+                ),
+            "independent primary record"
+        );
+        require(
+            x.scopeHash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_IDENTITY_DISMISSAL_SCOPE_V1"),
+                        block.chainid,
+                        address(ingress),
+                        suite.owners[2],
+                        artistId
+                    )
+                ),
+            "independent scope"
+        );
+        uint256 events;
+        bytes32 topic = keccak256(
+            "ArtistIdentityContestDismissed(uint16,bytes32,bytes32,bytes32,bytes32,address,address,uint8,bytes32,address,uint8,uint8,bytes32,bytes32,bool,bytes32,uint64,bytes32,bytes32,bytes32)"
+        );
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter == suite.owners[2] && logs[i].topics[0] == topic) {
+                ++events;
+                require(
+                    logs[i].topics.length == 4 && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == cause.causeHash && logs[i].topics[3] == record,
+                    "Identity emitter and indexed fields"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.expectedResolutionHash,
+                                item.executor,
+                                item.proposer,
+                                item.actionClass,
+                                item.actionId,
+                                item.incumbent,
+                                item.authorityClass,
+                                item.restoredStatus,
+                                p.evidenceHash,
+                                p.reasonHash,
+                                p.removePriorStanding,
+                                p.expectedRetirementHash,
+                                item.dismissedAt,
+                                item.cohortHash,
+                                item.governanceWitnessHash,
+                                item.revisionContinuationHead
+                            )
+                        ),
+                    "exact event reconstruction"
+                );
+            }
+        }
+        require(events == 1, "exactly one dismissal event");
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(after_.status == 1, "restored active");
+        after_.status = before_.status;
+        require(
+            keccak256(abi.encode(after_)) == keccak256(abi.encode(before_))
+                && _otherOwnerRoots() == otherRoots,
+            "no nonce, liveness or other owner mutation"
+        );
+        T.Snapshot memory afterSnapshot = IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
+        require(afterSnapshot.revision == snapshot_.revision + 1, "one semantic owner commit");
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.contest_resolution"),
+            keccak256(abi.encode(artistId, cause.causeHash))
+        );
+        T.ReplayCell memory cell = IStreamArtistOwner(suite.owners[2]).replayCell(key);
+        require(
+            cell.commitment == record && cell.status == 2 && cell.kind == 1,
+            "exact consumed cause replay"
+        );
+        vm.expectRevert(abi.encodeWithSelector(Dismissal.InvalidDismissal.selector, artistId));
+        ingress.identityContestDismissalContext(p);
+    }
+
+    function testDismissalGovernanceFaultsAndBothAllowedClassesHaveSameContextControls() public {
+        _dismissalGuardianCause();
+        Dismissal.Request memory p = _dismissalRequest();
+        bytes32 roots = _roots();
+        for (uint8 fault = 1; fault <= 6; ++fault) {
+            uint256 point = vm.snapshotState();
+            if (fault == 6) {
+                vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(artist)));
+            } else {
+                vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+            }
+            this.executeGovernedDismissal(p, 1, fault);
+            require(
+                _roots() == roots && ingress.latestIdentityContestDismissal(artistId) == 0,
+                "fault atomic"
+            );
+            require(_dismissalExecute(p, 1, 0) != 0, "same request restored success");
+            require(vm.revertToState(point), "restore");
+        }
+        for (uint8 class_; class_ < 4; class_ += 3) {
+            vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+            this.executeGovernedDismissal(p, class_, 0);
+        }
+        bytes32 record = _dismissalExecute(p, 2, 0);
+        require(
+            ingress.identityContestDismissalRecord(record).actionClass == 2,
+            "terminal class accepted"
+        );
+    }
+
+    function testDismissalMalformedGovernanceReadCannotConsumeCause() public {
+        _dismissalGuardianCause();
+        Dismissal.Request memory p = _dismissalRequest();
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        authority.configureContestReads(
+            suite.roleRegistry, address(artist), p.reasonHash, "urn:unit"
+        );
+        bytes memory valid = abi.encode(authority.governanceAction(0));
+        bytes32 roots = _roots();
+        for (uint256 mode; mode < 5; ++mode) {
+            uint256 point = vm.snapshotState();
+            bytes memory bad = bytes.concat(valid);
+            if (mode == 0) bad = new bytes(639);
+            if (mode == 1) assembly ("memory-safe") { mstore(add(bad, 32), 64) }
+            if (mode == 2) assembly ("memory-safe") { mstore(add(bad, 640), not(0)) }
+            if (mode == 3) assembly ("memory-safe") { mstore(add(bad, 416), not(0)) }
+            if (mode == 4) bad = bytes.concat(bad, bytes32(0));
+            avm.mockCall(
+                address(authority),
+                abi.encodeWithSelector(IStreamGovernanceReads.governanceAction.selector),
+                bad
+            );
+            vm.expectRevert(abi.encodeWithSelector(Contest.InvalidContestGovernance.selector));
+            this.executeGovernedDismissal(p, 1, 0);
+            require(_roots() == roots, "malformed read atomic");
+            avm.clearMockedCalls();
+            require(_dismissalExecute(p, 1, 0) != 0, "same context positive");
+            require(vm.revertToState(point), "restore");
+        }
+    }
+
+    function testDismissalActualSafeAllEightSelectorsAndProtocolCallbackBoundaries() public {
+        _dismissalGuardianCause();
+        Dismissal.Request memory p = _dismissalRequest();
+        require(
+            ingress.supportsInterface(type(IStreamArtistIdentityDismissal).interfaceId)
+                && type(IStreamArtistIdentityDismissal).interfaceId == bytes4(0x6ddc41b6),
+            "exact narrow capability"
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistIdentityDismissal.currentIdentityContestCause, (artistId))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityContestCause, (p.expectedCauseHash)
+            )
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestDismissalContext, (p))
+        );
+        bytes memory data =
+            abi.encodeCall(IStreamArtistIdentityDismissal.dismissArtistIdentityContest, (p));
+        address identityWriter =
+            StreamArtistIdentityAuthority(suite.owners[2]).identityWriterExtension();
+        address registryWriter = ingress.registryWriterExtension();
+        address registryReader = ingress.registryReadExtension();
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce, "Safe has no direct Executor role"
+        );
+        address ownerEOA = vm.addr(keys[0]);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, ownerEOA));
+        vm.prank(ownerEOA);
+        ingress.dismissArtistIdentityContest(p);
+        T.ActionContext memory c = T.ActionContext(
+            58, address(artist), IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2()
+        );
+        Contest.GovernanceWitness memory g;
+        bytes memory callback =
+            abi.encodeCall(IStreamArtistIdentityDismissalOwner.dismissIdentityContest, (c, p, g));
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[2], callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(identityWriter, callback);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            address(coordinator),
+            abi.encodeCall(
+                IStreamArtistIdentityDismissalCoordinator.coordinateDismissArtistIdentityContest,
+                (address(artist), p)
+            )
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(registryWriter, data);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(
+            registryReader,
+            abi.encodeCall(IStreamArtistIdentityDismissal.currentIdentityContestCause, (artistId))
+        );
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(artist), true);
+        authority.configureContestReads(
+            suite.roleRegistry, address(artist), p.reasonHash, "urn:unit"
+        );
+        Dismissal.Context memory x = ingress.identityContestDismissalContext(p);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(authority),
+                0,
+                abi.encodeCall(
+                    ArtistUnitGovernance.executeModuleContext,
+                    (address(ingress), data, uint8(1), x.scopeHash, x.oldValueHash, x.newValueHash)
+                ),
+                0
+            ),
+            "actual Safe calls qualified governance host"
+        );
+        bytes32 record = ingress.latestIdentityContestDismissal(artistId);
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.latestIdentityContestDismissal, (artistId)
+            )
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestDismissalRecord, (record))
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityTransitionClosure, (artistId, bytes32(0))
+            )
+        );
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityRevisionContinuation, (bytes32(0))
+            )
+        );
+    }
+
+    function _dismissalReadParity(bytes memory data, bytes memory expected) private view {
+        (bool hostOk, bytes memory hostData) = suite.owners[2].staticcall(data);
+        (bool facadeOk, bytes memory facadeData) = address(ingress).staticcall(data);
+        require(
+            hostOk && facadeOk && keccak256(hostData) == keccak256(expected)
+                && keccak256(facadeData) == keccak256(expected),
+            "canonical exact returndata without bytes wrapper"
+        );
+    }
+
+    function testDismissalStoredReadExtractionMatchesInlineEmptyAndMaximumDynamicBytes() public {
+        ArtistIdentityInlineReadOracle inline_ = new ArtistIdentityInlineReadOracle();
+        ArtistIdentityEncodedReadOracle encoded = new ArtistIdentityEncodedReadOracle();
+        bytes4[4] memory selectors = [
+            ArtistIdentityInlineReadOracle.identity.selector,
+            ArtistIdentityInlineReadOracle.guardianSetRecord.selector,
+            ArtistIdentityInlineReadOracle.rotationRecord.selector,
+            ArtistIdentityInlineReadOracle.delegationRecord.selector
+        ];
+        for (uint256 populated; populated < 2; ++populated) {
+            if (populated != 0) {
+                T.Identity memory principal = T.Identity(
+                    address(artist),
+                    1,
+                    1,
+                    1000,
+                    1100,
+                    keccak256("independent document"),
+                    string(new bytes(2048)),
+                    string(new bytes(256)),
+                    type(uint256).max
+                );
+                R.GuardianRecord memory guardian;
+                guardian.recordHash = keccak256("guardian");
+                guardian.terms = R.GuardianSet(artistId, new address[](32), 31, type(uint64).max);
+                for (uint256 j; j < 32; ++j) {
+                    guardian.terms.guardians[j] = address(uint160(j + 1));
+                }
+                guardian.nonce = type(uint256).max;
+                R.RotationRecord memory rotation_;
+                rotation_.recordHash = keccak256("rotation");
+                rotation_.terms = R.Rotation(
+                    artistId,
+                    address(artist),
+                    address(0x1234),
+                    keccak256("reason"),
+                    keccak256("prior")
+                );
+                rotation_.transition =
+                    R.TransitionState(artistId, rotation_.recordHash, 1, 2, 3, 4, 5, 2);
+                inline_.install(artistId, principal, guardian, rotation_);
+                encoded.install(artistId, principal, guardian, rotation_);
+            }
+            for (uint256 i; i < 4; ++i) {
+                bytes memory data = abi.encodeWithSelector(selectors[i], artistId);
+                (bool okA, bytes memory a) = address(inline_).staticcall(data);
+                (bool okB, bytes memory b) = address(encoded).staticcall(data);
+                require(
+                    okA && okB && a.length == b.length && keccak256(a) == keccak256(b),
+                    "old inline and linked full returndata exact"
+                );
+            }
+        }
+    }
+
+    event DismissalIdentityDeploymentProof(
+        address indexed helper,
+        bytes helperRuntime,
+        address indexed identity,
+        address indexed writer
+    );
+
+    function testDismissalIdentityDeploymentHelperRetainsCreatorAndDirectCallGuard() public {
+        address helper = address(StreamArtistIdentityExtensionDeployment);
+        address identity = suite.owners[2];
+        address writer = StreamArtistIdentityAuthority(identity).identityWriterExtension();
+        require(
+            helper.code.length != 0 && helper.code.length <= 24576 && identity.code.length <= 24576
+                && writer.code.length <= 24576,
+            "actual deployed product limits"
+        );
+        require(
+            writer == avm.computeCreateAddress(identity, 1),
+            "Identity remains exact child creator nonce1"
+        );
+        emit DismissalIdentityDeploymentProof(helper, helper.code, identity, writer);
+        bytes memory direct = abi.encodeWithSignature(
+            "deployWriter(address,address,address,address,address)",
+            address(ingress),
+            address(coordinator),
+            address(archive),
+            address(core),
+            address(manager)
+        );
+        uint256 beforeNonce = artist.nonce();
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(helper, direct);
+        require(
+            artist.nonce() == beforeNonce && _roots() == roots,
+            "actual Safe direct library call cannot create another authority"
+        );
+    }
+
+    function testDismissalLinkedReadsEmptyAndPopulatedExactStaticReturndataAndErrors() public {
+        Dismissal.Cause memory emptyCause;
+        Dismissal.Record memory emptyRecord;
+        Dismissal.Closure memory emptyClosure;
+        Dismissal.RevisionContinuation memory emptyContinuation;
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.currentIdentityContestCause, (artistId)),
+            abi.encode(emptyCause)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestCause, (bytes32(0))),
+            abi.encode(emptyCause)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityContestDismissalRecord, (bytes32(0))
+            ),
+            abi.encode(emptyRecord)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.latestIdentityContestDismissal, (artistId)
+            ),
+            abi.encode(bytes32(0))
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityTransitionClosure, (artistId, bytes32(0))
+            ),
+            abi.encode(emptyClosure)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityRevisionContinuation, (bytes32(0))
+            ),
+            abi.encode(emptyContinuation)
+        );
+        DismissalCohortFixture memory f = _dismissalCohort(0);
+        Dismissal.Request memory p = _dismissalRequest();
+        Dismissal.Context memory context_ = ingress.identityContestDismissalContext(p);
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestDismissalContext, (p)),
+            abi.encode(context_)
+        );
+        bytes32 record = _dismissalExecute(p, 1, 0);
+        (
+            ,,
+            Dismissal.Cause memory cause,,
+            Dismissal.Record memory item,
+            Dismissal.RevisionContinuation memory continuation,,
+            Dismissal.Closure memory closure_
+        ) = abi.decode(
+            _operationPayload(58, manager.governanceAuthority(), record),
+            (
+                Dismissal.Request,
+                Contest.GovernanceWitness,
+                Dismissal.Cause,
+                Dismissal.Context,
+                Dismissal.Record,
+                Dismissal.RevisionContinuation,
+                Dismissal.Closure,
+                Dismissal.Closure
+            )
+        );
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.currentIdentityContestCause, (artistId)),
+            abi.encode(cause)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestCause, (cause.causeHash)),
+            abi.encode(cause)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestDismissalRecord, (record)),
+            abi.encode(item)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.latestIdentityContestDismissal, (artistId)
+            ),
+            abi.encode(record)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityTransitionClosure, (artistId, f.rotation)
+            ),
+            abi.encode(closure_)
+        );
+        _dismissalReadParity(
+            abi.encodeCall(
+                IStreamArtistIdentityDismissal.identityRevisionContinuation,
+                (continuation.continuationHash)
+            ),
+            abi.encode(continuation)
+        );
+        bytes memory invalid = abi.encodeCall(
+            IStreamArtistIdentityDismissal.identityTransitionClosure,
+            (keccak256("foreign identity"), f.rotation)
+        );
+        (bool ok, bytes memory reason) = suite.owners[2].staticcall(invalid);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(Dismissal.InvalidClosure.selector, f.rotation)
+                    ),
+            "exact linked error"
+        );
+        (ok, reason) = address(ingress).staticcall(invalid);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(Dismissal.InvalidClosure.selector, f.rotation)
+                    ),
+            "exact facade error"
+        );
+        invalid =
+            abi.encodeCall(IStreamArtistIdentityDismissal.identityContestDismissalContext, (p));
+        (ok, reason) = suite.owners[2].staticcall(invalid);
+        require(
+            !ok
+                && keccak256(reason)
+                    == keccak256(
+                        abi.encodeWithSelector(Dismissal.InvalidDismissal.selector, artistId)
+                    ),
+            "stale context exact error"
+        );
+    }
+
+    function testDismissalRejectsAbsentWrongCauseHeadAndRetirementTerms() public {
+        Dismissal.Request memory p = _dismissalRequest();
+        vm.expectRevert(abi.encodeWithSelector(Dismissal.InvalidDismissal.selector, artistId));
+        ingress.identityContestDismissalContext(p);
+        _dismissalGuardianCause();
+        p = _dismissalRequest();
+        for (uint256 fault; fault < 6; ++fault) {
+            Dismissal.Request memory bad = Dismissal.Request(
+                p.artistId,
+                p.expectedCauseHash,
+                p.expectedResolutionHash,
+                p.evidenceHash,
+                p.reasonHash,
+                p.removePriorStanding,
+                p.expectedRetirementHash
+            );
+            if (fault == 0) bad.expectedCauseHash = keccak256("wrong cause");
+            if (fault == 1) bad.expectedResolutionHash = keccak256("wrong head");
+            if (fault == 2) bad.evidenceHash = 0;
+            if (fault == 3) bad.reasonHash = 0;
+            if (fault == 4) bad.expectedRetirementHash = keccak256("forbidden false target");
+            if (fault == 5) bad.removePriorStanding = true;
+            vm.expectRevert(abi.encodeWithSelector(Dismissal.InvalidDismissal.selector, artistId));
+            ingress.identityContestDismissalContext(bad);
+        }
+        require(_dismissalExecute(p, 1, 0) != 0, "valid exact cause succeeds");
+    }
+
+    struct DismissalCohortFixture {
+        bytes32 rotation;
+        bytes32 stableRevision;
+        bytes32 stableDocument;
+        bytes32 childRevision;
+        bytes32 stableGuardian;
+        bytes32 childGuardian;
+        bytes32 stableSuccessor;
+        bytes32 childSuccessor;
+        bytes32 stableDirective;
+        bytes32 childDirective;
+        bytes32 stablePayout;
+        bytes32 childPayout;
+        uint64 end;
+    }
+
+    function _dismissalCohort(uint8 boundary) private returns (DismissalCohortFixture memory f) {
+        f.stableGuardian = _selfGuardian();
+        f.stableRevision = _reviseDocument(bytes("stable dismissal document"));
+        f.stableDocument = ingress.operativeIdentityRecord(artistId);
+        f.stableSuccessor = _successionRecord(_successorTerms(address(0xAA), 1));
+        f.stableDirective = _directiveRecord(0);
+        f.stablePayout = _dismissalPayout(address(0x1001));
+        OfficialSafe prior = artist;
+        uint256[] memory priorKeys = keys;
+        _newRotationSafe(18000 + boundary);
+        f.rotation = _stageRotation(0);
+        _executeTimedRotation(f.rotation);
+        _adoptRotatedSafe();
+        address[] memory guardians = new address[](1);
+        guardians[0] = address(0xFA11);
+        f.childGuardian = _guardianRecord(guardians, 1, 0, nextNonce);
+        f.childRevision = _reviseDocument(bytes("provisional rejected or mature document"));
+        f.childSuccessor = _successionRecord(_successorTerms(address(0xBB), 1));
+        f.childDirective = _directiveRecord(4);
+        f.childPayout = _dismissalPayout(address(0x1002));
+        f.end = ingress.rotationRecord(f.rotation).transition.postWindowEndsAt;
+        vm.warp(uint256(f.end) + boundary - 1);
+        require(
+            executeSafe(prior, priorKeys, address(ingress), 0, _contestData(f.rotation), 0),
+            "prior Safe contests actual cohort"
+        );
+    }
+
+    function _dismissalAssertSelection(DismissalCohortFixture memory f, bool mature) private view {
+        (,,, bytes32 guardian) = ingress.guardianSet(artistId);
+        (, bytes32 payout) = ingress.artistPayoutAccount(artistId);
+        require(
+            guardian == (mature ? f.childGuardian : f.stableGuardian)
+                && ingress.operativeSuccessorRecord(artistId)
+                    == (mature ? f.childSuccessor : f.stableSuccessor)
+                && ingress.operativeEstateDirective(artistId)
+                    == (mature ? f.childDirective : f.stableDirective)
+                && payout == (mature ? f.childPayout : f.stablePayout)
+                && ingress.operativeIdentityRecord(artistId)
+                    == (mature
+                            ? keccak256("provisional rejected or mature document")
+                            : f.stableDocument),
+            "all five operative selections"
+        );
+    }
+
+    function testDismissalEarlyClosureAbandonsFiveFamiliesAndAllowsFreshProgress() public {
+        DismissalCohortFixture memory f = _dismissalCohort(0);
+        bytes32 transitionBytes = keccak256(abi.encode(ingress.rotationRecord(f.rotation)));
+        bytes32 oldRevisionKey = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.identity_revision_chain"),
+            keccak256(abi.encode(artistId, f.stableRevision, f.stableDocument))
+        );
+        T.ReplayCell memory oldReplay =
+            IStreamArtistOwner(suite.owners[2]).replayCell(oldRevisionKey);
+        bytes32 record = _dismissalExecute(_dismissalRequest(), 1, 0);
+        Dismissal.Closure memory closure_ = ingress.identityTransitionClosure(artistId, f.rotation);
+        require(
+            closure_.abandoned && closure_.dismissalRecordHash == record
+                && closure_.windowEndsAt == f.end && block.timestamp < f.end,
+            "terminal early closure"
+        );
+        require(
+            keccak256(abi.encode(ingress.rotationRecord(f.rotation))) == transitionBytes,
+            "captured transition immutable"
+        );
+        (bytes32 activeWindow,,) = ingress.activeAuthorityWindow(artistId);
+        require(activeWindow == 0, "closed window no longer blocks");
+        _dismissalAssertSelection(f, false);
+        uint256 beforeExpiry = vm.snapshotState();
+        vm.warp(uint256(f.end) + 100);
+        _dismissalAssertSelection(f, false);
+        require(vm.revertToState(beforeExpiry), "restore original pre-expiry time");
+        require(
+            ingress.identityRevisionRecord(f.childRevision).recordHash == f.childRevision
+                && ingress.successorDesignationRecord(f.childSuccessor).recordHash
+                    == f.childSuccessor
+                && ingress.estateDirectiveRecord(f.childDirective).recordHash == f.childDirective,
+            "rejected history remains"
+        );
+        Dismissal.Record memory item = ingress.identityContestDismissalRecord(record);
+        Dismissal.RevisionContinuation memory cont =
+            ingress.identityRevisionContinuation(item.revisionContinuationHead);
+        require(
+            cont.continuationHash
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_IDENTITY_REVISION_CONTINUATION_V1"),
+                        block.chainid,
+                        address(ingress),
+                        suite.owners[2],
+                        artistId,
+                        record,
+                        bytes32(0),
+                        f.stableRevision,
+                        f.stableDocument,
+                        f.childRevision
+                    )
+                ),
+            "independent continuation preimage"
+        );
+        bytes32 newRevision = _reviseDocument(bytes("stable continuation document"));
+        bytes32 continuationKey = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.identity_revision_continuation"),
+            keccak256(
+                abi.encode(artistId, f.stableRevision, f.stableDocument, cont.continuationHash)
+            )
+        );
+        require(
+            IStreamArtistOwner(suite.owners[2]).replayCell(continuationKey).commitment
+                    == newRevision
+                && keccak256(
+                    abi.encode(IStreamArtistOwner(suite.owners[2]).replayCell(oldRevisionKey))
+                ) == keccak256(abi.encode(oldReplay)),
+            "new lane consumed and old replay unchanged"
+        );
+        StreamArtistIdentityRevisionTypes.Revision memory fork =
+            StreamArtistIdentityRevisionTypes.Revision(
+                artistId, f.stableDocument, keccak256("fork document"), "urn:fork"
+            );
+        T.Authorization memory forkA = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        forkA.signature = _signature(ingress.identityRevisionDigest(fork, forkA));
+        bytes32 forkRoots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordIdentityRevision(fork, forkA, bytes("fork document"), "Fork");
+        require(_roots() == forkRoots, "occupied predecessor cannot fork the continuation");
+        bytes32 newPayout = _dismissalPayout(address(0x1003));
+        require(
+            StreamArtistPayoutLifecycle(suite.owners[5]).payoutAbandonment(f.childPayout) == record
+                && newPayout != f.childPayout,
+            "lazy exact payout child detachment"
+        );
+        _selfGuardian();
+        _successionRecord(_successorTerms(address(0xCC), 1));
+        _directiveRecord(0);
+        _newRotationSafe(18009);
+        bytes32 next = _stageRotation(f.rotation);
+        require(next != 0, "new rotation after closure");
+    }
+
+    function testDismissalPayoutLegacyContextRejectsAndLazyDetachRollsBackWithArchive() public {
+        DismissalCohortFixture memory f = _dismissalCohort(0);
+        bytes32 dismissal = _dismissalExecute(_dismissalRequest(), 1, 0);
+        T.PayoutDesignation memory p =
+            T.PayoutDesignation(artistId, address(0x1007), f.stablePayout);
+        T.ActionContext memory c = T.ActionContext(
+            18, address(artist), IStreamArtistOwner(suite.owners[5]).ownerStateSnapshotV2()
+        );
+        R.TransitionState memory transition = ingress.rotationRecord(f.rotation).transition;
+        vm.expectRevert(abi.encodeWithSelector(R.ProvisionalChainOccupied.selector, f.childPayout));
+        vm.prank(address(coordinator));
+        StreamArtistPayoutLifecycle(suite.owners[5])
+            .recordDesignationWithTransition(
+                c, p, address(artist), nextNonce, uint64(block.timestamp), transition, transition
+            );
+        bytes32 roots = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        this.executeDismissalPayout(address(0x1007));
+        require(
+            _roots() == roots
+                && StreamArtistPayoutLifecycle(suite.owners[5]).payoutAbandonment(f.childPayout)
+                    == 0,
+            "late archive restores pending child and detachment proof"
+        );
+        avm.clearMockedCalls();
+        this.executeDismissalPayout(address(0x1007));
+        require(
+            StreamArtistPayoutLifecycle(suite.owners[5]).payoutAbandonment(f.childPayout)
+                == dismissal,
+            "actual typed closure authorizes exact stored child detachment"
+        );
+    }
+
+    function testDismissalRepeatedAbandonmentCreatesNewContinuationWithoutResettingOldLane()
+        public
+    {
+        DismissalCohortFixture memory f = _dismissalCohort(0);
+        bytes32 first = _dismissalExecute(_dismissalRequest(), 1, 0);
+        bytes32 head1 = ingress.identityContestDismissalRecord(first).revisionContinuationHead;
+        OfficialSafe prior = artist;
+        uint256[] memory priorKeys = keys;
+        _newRotationSafe(18040);
+        bytes32 rotation = _stageRotation(f.rotation);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        bytes32 child = _reviseDocument(bytes("second provisional continuation child"));
+        bytes32 key1 = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.identity_revision_continuation"),
+            keccak256(abi.encode(artistId, f.stableRevision, f.stableDocument, head1))
+        );
+        require(
+            IStreamArtistOwner(suite.owners[2]).replayCell(key1).commitment == child,
+            "first continuation consumed"
+        );
+        require(
+            executeSafe(prior, priorKeys, address(ingress), 0, _contestData(rotation), 0),
+            "new actual retired contest"
+        );
+        bytes32 second = _dismissalExecute(_dismissalRequest(), 1, 0);
+        bytes32 head2 = ingress.identityContestDismissalRecord(second).revisionContinuationHead;
+        Dismissal.RevisionContinuation memory cont = ingress.identityRevisionContinuation(head2);
+        require(
+            head2 != head1 && cont.previousContinuationHash == head1
+                && cont.abandonedRevisionRecordHash == child,
+            "versioned continuation retains predecessor history"
+        );
+        bytes32 replacement = _reviseDocument(bytes("second stable continuation"));
+        bytes32 key2 = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.identity_revision_continuation"),
+            keccak256(abi.encode(artistId, f.stableRevision, f.stableDocument, head2))
+        );
+        require(
+            IStreamArtistOwner(suite.owners[2]).replayCell(key1).commitment == child
+                && IStreamArtistOwner(suite.owners[2]).replayCell(key2).commitment == replacement,
+            "neither prior replay lane reset"
+        );
+    }
+
+    function _dismissalMatureCase(uint8 boundary) private {
+        DismissalCohortFixture memory f = _dismissalCohort(boundary);
+        _dismissalAssertSelection(f, true);
+        bytes32 before_ = keccak256(abi.encode(ingress.rotationRecord(f.rotation)));
+        bytes32 record = _dismissalExecute(_dismissalRequest(), 1, 0);
+        Dismissal.Closure memory closure_ = ingress.identityTransitionClosure(artistId, f.rotation);
+        require(
+            !closure_.abandoned && closure_.dismissalRecordHash == record
+                && closure_.contestedAt >= f.end,
+            "mature closure"
+        );
+        require(
+            keccak256(abi.encode(ingress.rotationRecord(f.rotation))) == before_,
+            "mature transition immutable"
+        );
+        _dismissalAssertSelection(f, true);
+        vm.warp(block.timestamp + 30 days);
+        _dismissalAssertSelection(f, true);
+        require(
+            ingress.identityContestDismissalRecord(record).revisionContinuationHead == 0,
+            "no invented abandoned revision"
+        );
+        _reviseDocument(bytes("new child of mature revision"));
+        _dismissalPayout(address(0x1004));
+    }
+
+    function testDismissalAtExactExpiryKeepsAllFiveMatureHeads() public {
+        _dismissalMatureCase(1);
+    }
+
+    function testDismissalAfterExpiryKeepsAllFiveMatureHeads() public {
+        _dismissalMatureCase(2);
+    }
+
+    function testDismissalVetoCauseKeepsNoPrimaryRecordAndLaterContestCannotMutateClosure() public {
+        _selfGuardian();
+        _newRotationSafe(18100);
+        bytes32 first = _stageRotation(0);
+        _executeTimedRotation(first);
+        _adoptRotatedSafe();
+        vm.warp(ingress.rotationRecord(first).transition.postWindowEndsAt);
+        _selfGuardian();
+        _newRotationSafe(18101);
+        bytes32 pending = _stageRotation(first);
+        bytes32 previousContest = ingress.latestIdentityContest(artistId);
+        T.Snapshot memory beforeVeto = IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2();
+        vm.recordLogs();
+        this.executeArtistSafe(
+            abi.encodeCall(
+                IStreamArtistRotation.vetoArtistRotation,
+                (artistId, pending, keccak256("veto reason"))
+            )
+        );
+        Vm.Log[] memory causeLogs = vm.getRecordedLogs();
+        Dismissal.Cause memory cause = ingress.currentIdentityContestCause(artistId);
+        _assertDismissalCauseEvent(causeLogs, cause);
+        require(
+            IStreamArtistOwner(suite.owners[2]).ownerStateSnapshotV2().recordChainTip
+                == beforeVeto.recordChainTip,
+            "operation31 still has no normative primary record"
+        );
+        require(
+            cause.facts.kind == 2 && cause.facts.referenceHash == pending
+                && cause.facts.actor == address(artist)
+                && cause.facts.pendingTransitionHash == pending
+                && cause.facts.executedTransitionHash == first && cause.facts.evidenceHash == 0
+                && ingress.latestIdentityContest(artistId) == previousContest,
+            "actual veto cause, no fabricated33"
+        );
+        _dismissalExecute(_dismissalRequest(), 1, 0);
+        bytes32 firstBytes = keccak256(abi.encode(ingress.rotationRecord(first)));
+        bytes32 closureBytes =
+            keccak256(abi.encode(ingress.identityTransitionClosure(artistId, first)));
+        _newRotationSafe(18102);
+        bytes32 fresh = _stageRotation(pending);
+        this.executeArtistSafe(_contestData(first));
+        require(ingress.rotationRecord(fresh).transition.phase == 3, "new pending is cancelled");
+        require(
+            keccak256(abi.encode(ingress.rotationRecord(first))) == firstBytes
+                && keccak256(abi.encode(ingress.identityTransitionClosure(artistId, first)))
+                    == closureBytes,
+            "closed mature transition and closure immutable"
+        );
+        Dismissal.Cause memory later = ingress.currentIdentityContestCause(artistId);
+        require(
+            later.causeHash != cause.causeHash && later.facts.pendingTransitionHash == fresh,
+            "new exact cause"
+        );
+        _dismissalExecute(_dismissalRequest(), 2, 0);
+        require(
+            keccak256(abi.encode(ingress.identityTransitionClosure(artistId, first)))
+                == closureBytes,
+            "second dismissal cannot overwrite closure"
+        );
+    }
+
+    function testDismissalLateArchiveRollbackRetainsCauseStatusClosuresAndContinuation() public {
+        DismissalCohortFixture memory f = _dismissalCohort(0);
+        Dismissal.Request memory p = _dismissalRequest();
+        bytes32 roots = _roots();
+        bytes32 causeHash = p.expectedCauseHash;
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        this.executeGovernedDismissal(p, 1, 0);
+        require(
+            _roots() == roots && ingress.latestIdentityContestDismissal(artistId) == 0
+                && ingress.currentIdentityContestCause(artistId).causeHash == causeHash
+                && ingress.identityTransitionClosure(artistId, f.rotation).dismissalRecordHash == 0
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "late all-owner resolution rollback"
+        );
+        avm.clearMockedCalls();
+        require(_dismissalExecute(p, 1, 0) != 0, "exact request succeeds after restored archive");
+    }
+
+    function testDismissalRemovedPriorStandingBlocks31And33ButGuardianStandingSurvives() public {
+        OfficialSafe retired = artist;
+        uint256[] memory retiredKeys = keys;
+        _newRotationSafe(18200);
+        bytes32 first = _stageRotation(0);
+        _executeTimedRotation(first);
+        _adoptRotatedSafe();
+        require(
+            executeSafe(retired, retiredKeys, address(ingress), 0, _contestData(first), 0),
+            "actual retired cause actor"
+        );
+        Dismissal.Request memory p = _dismissalRequest();
+        p.removePriorStanding = true;
+        p.expectedRetirementHash = first;
+        bytes32 record = _dismissalExecute(p, 1, 0);
+        (bool revoked, bytes32 judgment) =
+            ingress.priorAddressStandingRevoked(artistId, address(retired));
+        require(revoked && judgment == record, "composed retirement-specific judgment");
+        _newRotationSafe(18201);
+        bytes32 pending = _stageRotation(first);
+        bytes memory veto = abi.encodeCall(
+            IStreamArtistRotation.vetoArtistRotation, (artistId, pending, keccak256("retired veto"))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(retired)));
+        vm.prank(address(retired));
+        ingress.vetoArtistRotation(artistId, pending, keccak256("retired veto"));
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(retired)));
+        vm.prank(address(retired));
+        ingress.contestArtistIdentity(
+            artistId, 0, keccak256("new evidence"), keccak256("new reason")
+        );
+        address[] memory guardians = new address[](1);
+        guardians[0] = address(retired);
+        _guardianRecord(guardians, 1, 0, nextNonce);
+        require(
+            executeSafe(retired, retiredKeys, address(ingress), 0, veto, 0),
+            "independent operative guardian remains actual Safe"
+        );
+    }
+
+    function testDismissalRemovedPriorStandingCannotBeRevokedAgainBy51() public {
+        OfficialSafe retired = artist;
+        uint256[] memory retiredKeys = keys;
+        _newRotationSafe(18210);
+        bytes32 first = _stageRotation(0);
+        _executeTimedRotation(first);
+        _adoptRotatedSafe();
+        require(
+            executeSafe(retired, retiredKeys, address(ingress), 0, _contestData(first), 0),
+            "retired cause"
+        );
+        Dismissal.Request memory p = _dismissalRequest();
+        p.removePriorStanding = true;
+        p.expectedRetirementHash = first;
+        _dismissalExecute(p, 1, 0);
+        R.StandingRevocation memory terms =
+            R.StandingRevocation(artistId, address(retired), keccak256("again"), first);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(terms, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidPriorStanding.selector, address(retired)));
+        ingress.revokePriorAddressStanding(terms, a);
+        require(_roots() == roots, "no duplicate standing record");
     }
 
     function _payout() private {

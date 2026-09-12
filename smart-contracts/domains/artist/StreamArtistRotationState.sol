@@ -3,6 +3,9 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistIdentityState.sol";
 import "./StreamArtistRotationHashes.sol";
+import {
+    StreamArtistIdentityDismissalTypes as Dismissal
+} from "../../interfaces/stream/artist/StreamArtistIdentityDismissalTypes.sol";
 
 /// @notice Linked state mechanics for Identity's guardian and rotation domain.
 /// @dev Identity retains typed caller/snapshot guards and the single semantic commit.
@@ -95,6 +98,44 @@ library StreamArtistRotationState {
         return s.priorStandingTailSeconds == 0 ? 90 days : s.priorStandingTailSeconds;
     }
 
+    function _validClosure(State storage s, bytes32 artistId, Dismissal.Closure memory closure)
+        private
+        view
+    {
+        R.TransitionState storage t = s.rotations[s.latestExecution[artistId]].transition;
+        bool abandoned = t.phase == 3
+            || (t.phase == 2 && t.contestedAt != 0 && t.contestedAt < t.postWindowEndsAt);
+        if (
+            closure.artistId != artistId
+                || closure.transitionRecordHash != s.latestExecution[artistId]
+                || closure.transitionRecordHash == bytes32(0) || t.phase != 2 || t.executedAt == 0
+                || closure.windowEndsAt != t.postWindowEndsAt
+                || closure.contestedAt != t.contestedAt || closure.abandoned != abandoned
+        ) revert Dismissal.InvalidClosure(closure.transitionRecordHash);
+    }
+
+    function associationWithResolution(
+        State storage s,
+        bytes32 artistId,
+        Dismissal.Closure memory closure
+    ) public view returns (R.ProvisionalAssociation memory empty) {
+        if (closure.dismissalRecordHash == bytes32(0)) return association(s, artistId);
+        _validClosure(s, artistId, closure);
+    }
+
+    function activeWindowWithResolution(
+        State storage s,
+        bytes32 artistId,
+        Dismissal.Closure memory closure
+    ) public view returns (bytes32, uint64, bool) {
+        if (closure.dismissalRecordHash == bytes32(0)) {
+            return activeWindow(s, artistId);
+        }
+        _validClosure(s, artistId, closure);
+        if (s.pending[artistId] != bytes32(0)) return activeWindow(s, artistId);
+        return (bytes32(0), 0, false);
+    }
+
     function association(State storage s, bytes32 artistId)
         public
         view
@@ -176,6 +217,35 @@ library StreamArtistRotationState {
         T.Authorization memory a,
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.Closure memory empty;
+        return _setGuardians(s, identity, replay, o, c, p, a, proof, empty);
+    }
+
+    function setGuardiansWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.GuardianSet memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Dismissal.Closure memory closure
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _setGuardians(s, identity, replay, o, c, p, a, proof, closure);
+    }
+
+    function _setGuardians(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.GuardianSet memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Dismissal.Closure memory closure
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         if (
             p.guardians.length > 8 || p.minContestSeconds > 30 days
                 || (p.guardians.length == 0
@@ -208,7 +278,7 @@ library StreamArtistRotationState {
             record,
             identity.identities[p.artistId].authorityAddress
         );
-        R.ProvisionalAssociation memory pending_ = association(s, p.artistId);
+        R.ProvisionalAssociation memory pending_ = associationWithResolution(s, p.artistId, closure);
         R.GuardianRecord memory item =
             R.GuardianRecord(record, p, proof.signer, 1, a.nonce, a.time, prior, pending_);
         s.guardians[record] = item;
@@ -255,6 +325,10 @@ library StreamArtistRotationState {
             a.time,
             record
         );
+
+        if (closure.dismissalRecordHash != bytes32(0)) {
+            m.state = keccak256(abi.encode(m.state, closure));
+        }
     }
 
     function stage(
@@ -269,6 +343,63 @@ library StreamArtistRotationState {
         T.SignerApproval memory oldProof,
         T.SignerApproval memory newProof
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.Closure memory empty;
+        return _stage(
+            s,
+            identity,
+            replay,
+            o,
+            c,
+            p,
+            oldAuthorization,
+            newAuthorization,
+            oldProof,
+            newProof,
+            empty
+        );
+    }
+
+    function stageWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.Rotation memory p,
+        T.Authorization memory oldAuthorization,
+        T.Authorization memory newAuthorization,
+        T.SignerApproval memory oldProof,
+        T.SignerApproval memory newProof,
+        Dismissal.Closure memory closure
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _stage(
+            s,
+            identity,
+            replay,
+            o,
+            c,
+            p,
+            oldAuthorization,
+            newAuthorization,
+            oldProof,
+            newProof,
+            closure
+        );
+    }
+
+    function _stage(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        R.Rotation memory p,
+        T.Authorization memory oldAuthorization,
+        T.Authorization memory newAuthorization,
+        T.SignerApproval memory oldProof,
+        T.SignerApproval memory newProof,
+        Dismissal.Closure memory closure
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         if (block.timestamp > oldAuthorization.time) {
             revert T.ExpiredAuthorization(oldAuthorization.time);
         }
@@ -285,7 +416,7 @@ library StreamArtistRotationState {
         if (identity.activeIdentity[p.newAddress] != bytes32(0)) {
             revert T.AddressAlreadyRegistered(p.newAddress);
         }
-        (bytes32 active, uint64 endsAt,) = activeWindow(s, p.artistId);
+        (bytes32 active, uint64 endsAt,) = activeWindowWithResolution(s, p.artistId, closure);
         if (active != bytes32(0)) revert R.ActiveAuthorityWindow(active, endsAt);
         bytes32 guardians_ = operativeGuardian(s, p.artistId);
         R.GuardianRecord storage guardian = s.guardians[guardians_];
@@ -350,6 +481,10 @@ library StreamArtistRotationState {
             p.reasonHash,
             record
         );
+
+        if (closure.dismissalRecordHash != bytes32(0)) {
+            m.state = keccak256(abi.encode(m.state, closure));
+        }
     }
 
     function acceptanceNonceState(
@@ -495,8 +630,43 @@ library StreamArtistRotationState {
         bytes32 reasonHash,
         address successor
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.StandingJudgment memory none;
+        return _veto(s, identity, replay, o, c, artistId, expected, reasonHash, successor, none);
+    }
+
+    function vetoWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expected,
+        bytes32 reasonHash,
+        address successor,
+        Dismissal.StandingJudgment memory judgment
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _veto(s, identity, replay, o, c, artistId, expected, reasonHash, successor, judgment);
+    }
+
+    function _veto(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        bytes32 artistId,
+        bytes32 expected,
+        bytes32 reasonHash,
+        address successor,
+        Dismissal.StandingJudgment memory judgment
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         R.RotationRecord storage r = _pending(s, artistId, expected);
         (bool revoked,) = standingRevoked(s, artistId, c.actor);
+        if (
+            judgment.dismissalRecordHash != bytes32(0)
+                && judgment.retirementHash == s.retirement[artistId][c.actor]
+        ) revoked = true;
         if (
             c.actor != identity.identities[artistId].authorityAddress && c.actor != successor
                 && !_member(s, operativeGuardian(s, artistId), c.actor)
@@ -516,6 +686,9 @@ library StreamArtistRotationState {
             keccak256(abi.encode(r.transition, identity.identities[artistId])),
             keccak256(abi.encode(key, expected))
         );
+        if (judgment.dismissalRecordHash != bytes32(0)) {
+            m.state = keccak256(abi.encode(m.state, judgment));
+        }
         emit ArtistRotationVetoed(1, artistId, c.actor, expected, reasonHash);
     }
 

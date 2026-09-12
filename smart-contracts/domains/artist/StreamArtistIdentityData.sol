@@ -17,6 +17,7 @@ import "./StreamArtistIdentityConsentState.sol";
 import "./StreamArtistRotationState.sol";
 import "./StreamArtistIdentityContestState.sol";
 import "./StreamArtistSuccessionState.sol";
+import "./StreamArtistIdentityResolutionState.sol";
 import "./StreamArtistTimingState.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import {
@@ -33,4 +34,24 @@ abstract contract StreamArtistIdentityData {
     StreamArtistRotationState.State internal _rotations;
     StreamArtistIdentityContestState.State internal _identityContests;
     StreamArtistSuccessionState.State internal _succession;
+    StreamArtistIdentityResolutionState.State internal _resolutions;
+
+    function _identityContestResolution(bytes32 artistId, bytes32 subject)
+        internal
+        view
+        returns (Dismissal.ContestResolutionFacts memory facts)
+    {
+        facts.subjectClosure = _resolutions.closures[subject];
+        facts.executedClosure = _resolutions.closures[_rotations.latestExecution[artistId]];
+        facts.currentCauseHash = _resolutions.currentCause[artistId];
+        facts.currentResolutionHash = _resolutions.latestResolution[artistId];
+    }
+
+    function _currentIdentityClosure(bytes32 artistId)
+        internal
+        view
+        returns (Dismissal.Closure memory)
+    {
+        return _resolutions.closures[_rotations.latestExecution[artistId]];
+    }
 }

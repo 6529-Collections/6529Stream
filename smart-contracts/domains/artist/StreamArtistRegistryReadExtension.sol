@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import {
@@ -122,6 +123,76 @@ contract StreamArtistRegistryReadExtension {
         Succ.PublicDocument calldata document
     ) external view onlyHost returns (bytes memory) {
         return StreamArtistSuccessionHashes.publicPayload(granted, forbidden, document);
+    }
+
+    function identityContestDismissalContext(Dismissal.Request calldata p)
+        external
+        view
+        onlyHost
+        returns (Dismissal.Context memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .identityContestDismissalContext(p);
+    }
+
+    function currentIdentityContestCause(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (Dismissal.Cause memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .currentIdentityContestCause(artistId);
+    }
+
+    function identityContestCause(bytes32 causeHash)
+        external
+        view
+        onlyHost
+        returns (Dismissal.Cause memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .identityContestCause(causeHash);
+    }
+
+    function identityContestDismissalRecord(bytes32 recordHash)
+        external
+        view
+        onlyHost
+        returns (Dismissal.Record memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .identityContestDismissalRecord(recordHash);
+    }
+
+    function latestIdentityContestDismissal(bytes32 artistId)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .latestIdentityContestDismissal(artistId);
+    }
+
+    function identityTransitionClosure(bytes32 artistId, bytes32 transitionRecordHash)
+        external
+        view
+        onlyHost
+        returns (Dismissal.Closure memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .identityTransitionClosure(artistId, transitionRecordHash);
+    }
+
+    function identityRevisionContinuation(bytes32 continuationHash)
+        external
+        view
+        onlyHost
+        returns (Dismissal.RevisionContinuation memory)
+    {
+        return IStreamArtistIdentityDismissalOwner(_contentSuite().owners[2])
+            .identityRevisionContinuation(continuationHash);
     }
 
     function identityContestRecord(bytes32 record)

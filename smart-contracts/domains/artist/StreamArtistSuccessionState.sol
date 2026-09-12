@@ -110,6 +110,37 @@ library StreamArtistSuccessionState {
         T.Authorization memory a,
         T.SignerApproval memory proof
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.Closure memory empty;
+        return _designate(s, identity, rotations, replay, o, c, p, a, proof, empty);
+    }
+
+    function designateWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Succ.Designation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Dismissal.Closure memory closure
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _designate(s, identity, rotations, replay, o, c, p, a, proof, closure);
+    }
+
+    function _designate(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Succ.Designation memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Dismissal.Closure memory closure
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         bool ownKey = p.successor.code.length == 0
             || StreamArtistSuccessionHashes.isDesignatedAccount(p.successor);
         if (
@@ -140,7 +171,7 @@ library StreamArtistSuccessionState {
         );
         bytes32 base = operativeDesignation(s, rotations, p.artistId);
         R.ProvisionalAssociation memory association_ =
-            StreamArtistRotationState.association(rotations, p.artistId);
+            StreamArtistRotationState.associationWithResolution(rotations, p.artistId, closure);
         Succ.DesignationRecord memory item =
             Succ.DesignationRecord(record, p, proof.signer, 1, a.nonce, a.time, association_);
         s.designations[record] = item;
@@ -184,6 +215,10 @@ library StreamArtistSuccessionState {
             a.time,
             record
         );
+
+        if (closure.dismissalRecordHash != bytes32(0)) {
+            m.state = keccak256(abi.encode(m.state, closure));
+        }
     }
 
     function directive(
@@ -198,6 +233,39 @@ library StreamArtistSuccessionState {
         T.SignerApproval memory proof,
         Succ.PublicDocument memory document
     ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        Dismissal.Closure memory empty;
+        return _directive(s, identity, rotations, replay, o, c, p, a, proof, document, empty);
+    }
+
+    function directiveWithResolution(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Succ.Directive memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Succ.PublicDocument memory document,
+        Dismissal.Closure memory closure
+    ) public returns (StreamArtistIdentityState.Mutation memory m) {
+        return _directive(s, identity, rotations, replay, o, c, p, a, proof, document, closure);
+    }
+
+    function _directive(
+        State storage s,
+        StreamArtistIdentityState.State storage identity,
+        StreamArtistRotationState.State storage rotations,
+        mapping(bytes32 => T.ReplayCell) storage replay,
+        StreamArtistIdentityState.OwnerContext memory o,
+        T.ActionContext memory c,
+        Succ.Directive memory p,
+        T.Authorization memory a,
+        T.SignerApproval memory proof,
+        Succ.PublicDocument memory document,
+        Dismissal.Closure memory closure
+    ) private returns (StreamArtistIdentityState.Mutation memory m) {
         _time(a, proof);
         bytes memory payload = StreamArtistSuccessionHashes.publicPayload(
             p.grantedCapabilities, p.forbiddenCapabilities, document
@@ -220,7 +288,7 @@ library StreamArtistSuccessionState {
         );
         bytes32 base = operativeDirective(s, rotations, p.artistId);
         R.ProvisionalAssociation memory association_ =
-            StreamArtistRotationState.association(rotations, p.artistId);
+            StreamArtistRotationState.associationWithResolution(rotations, p.artistId, closure);
         Succ.DirectiveRecord memory item =
             Succ.DirectiveRecord(record, p, proof.signer, 1, a.nonce, a.time, association_);
         s.directives[record] = item;
@@ -264,6 +332,10 @@ library StreamArtistSuccessionState {
             a.time,
             record
         );
+
+        if (closure.dismissalRecordHash != bytes32(0)) {
+            m.state = keccak256(abi.encode(m.state, closure));
+        }
     }
 
     function _time(T.Authorization memory a, T.SignerApproval memory proof) private view {
