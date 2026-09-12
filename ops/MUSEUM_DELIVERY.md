@@ -25,7 +25,7 @@ No third-party authority match or museum review becomes a mint/finality gate.
 | Work package | Concrete output and completion check | Dependency | Owner | Status |
 | --- | --- | --- | --- | --- |
 | MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder; integrator owns shared record interface | Reviewed first foundation integrated as `c7752f11`: 32 tests and both generators pass; complete mapping/conformance pending |
-| MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Integrator and both builders | Current byte host `72c4b099` passes focused review; actual artist composition and independent lane in development |
+| MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Integrator and both builders | Byte host `72c4b099`, actual artist composition `85f44fbd` and independent host `4673f248` pass focused review; full current-stack and museum-schema composition pending |
 | MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed selection, projection and reproducible public package integrated; 104 combined tests pass; recorded-chain and complete format mappings pending |
 | MUSEUM-04 Cross-format and capture | LIDO/PREMIS/IIIF correspondence tests; draft-preview and confirmed-record adapters preserving artist text, stable IDs and attribution | MUSEUM-01; compose with MUSEUM-03 | Export/capture builder | Pending |
 | MUSEUM-05 Institutional evidence | Both existing named repository-family ingests and both external practitioner roles examine semantic packages and coverage; at least one review covers CRM/Linked Art and authority reconciliation | Reproducible MUSEUM-03/04 outputs | Integrator coordinates external evidence | Pending; no institution or reviewer engagement claimed |
@@ -82,9 +82,12 @@ Complete mappings, including a faithful abstract-work representation, BagIt/
 OCFL packaging, real-chain authority and institutional ingests remain in scope.
 
 The [metadata host](../docs/integrations/metadata-records.md) now has focused
-record-byte, history, authority and Safe tests. Actual artist-authority
-publication and the dedicated independent-attestor host are being built in
-parallel. The exporter will consume verified records through its typed adapter;
+record-byte, history, authority and Safe tests. Four actual artist-publication
+composition cases and the dedicated independent-attestor host's 22-case cohort
+pass independent review and are integrated as `85f44fbd` and `4673f248`.
+Their Core/Executor boundaries differ and remain explicitly documented; they
+do not establish full current-stack or museum-schema acceptance.
+The exporter will consume verified records through its typed adapter;
 it must never relabel a synthetic fixture as an onchain source.
 
 The [schema inventory engine](../docs/museum-schema-inventory.md) is integrated

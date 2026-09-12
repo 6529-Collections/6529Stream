@@ -24,7 +24,12 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 Exact artist publication authorization is integrated as `a7114aeb`, with the
 complete 271-test artist cohort independently reviewed. Actual registry-to-
-metadata-host publication is now the artist builder's immediate composition task.
+metadata-host publication passes four reviewed cases and is integrated as
+`85f44fbd`; Core and Executor remain explicit unit boundaries. The dedicated
+independent-attestor host is integrated as `4673f248`, with 22 reviewed cases,
+256 fuzz inputs and both production profiles fitting. Artist finality/sanction
+and the router's stable presentation/serving facts are the two builder tasks.
+The integrator owns complete token membership and the typed evidence producer.
 
 The latest museum increments provide review selection, attributed resource
 projection and reproducible offline packages (`f5a23d72`, `ff1a899d`,
@@ -38,10 +43,12 @@ passes 23 tests in both compiler modes; separate actual-Executor tests cover
 root authority, ordinary-proposer rejection and multi-call execution. Actual
 artist publication, typed finality and discovery still need composition.
 
-The full current build's Yul issue was isolated to deployment-script catalog
-return construction. Its proposed fix passes the minimal and configuration
-variants; the full patched target timed out, so complete-build acceptance
-remains open. See [V1_DELIVERY.md](V1_DELIVERY.md) for exact evidence boundaries.
+The deployment-script catalog fix passes the minimal and configuration variants,
+but broader CI at `dac4d4ed` still fails with a Yul stack error. The default smoke
+build also identifies a stack-depth error in `StreamArtistAcceptanceLifecycle`.
+The team is isolating those remaining compile surfaces; no complete-build pass
+is claimed. Release checksums and the Slither snapshot also await the later
+stabilized-source regeneration. See [V1_DELIVERY.md](V1_DELIVERY.md).
 
 One integrator owns technical decisions and delivery. Two builders and a separate
 reviewer advance independent domains; all rows in [V1_DELIVERY.md](V1_DELIVERY.md)

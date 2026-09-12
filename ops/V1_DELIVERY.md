@@ -20,13 +20,34 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+The dedicated [independent-attestor host](../docs/integrations/independent-attestations.md)
+is integrated as `4673f248` from `4c277b0e`. Its 22 reviewed cases and 256 fuzz
+inputs cover retained bytes, signatures, history, replay, actual Safe calls and
+canonical governance. Both production profiles fit (17,301 / 16,641 bytes).
+Core membership uses an explicit fixture; renderer/export/current-stack
+composition remains open.
+
+Actual artist-registry-to-metadata-host publication is integrated as `85f44fbd`
+from `7d9f108e`. Four cases pass independent review, covering principal and
+relayer Safe paths, estate intent capability, rotation and atomic append failure.
+The actual artist owners, metadata host, schema/store and module registry are
+composed; Core/Executor are explicit boundaries. Existing production sources
+and prior artist tests remain unchanged. The initial timestamp-restore test
+oracle failure is retained separately from the corrected passing run.
+
+The integrator's [collection token inventory](../docs/integrations/collection-token-inventory.md)
+passes 14 focused tests in both compiler modes and 256 fuzz inputs. It verifies
+actual Core collection serials and completed lifecycles, including burns,
+replacement-Manager abort/reuse and callback rollback. It supplies membership
+for the [typed finality producer](../docs/adr/0041-typed-finality-evidence-provider.md);
+complete roots, serving evidence, discovery and full finality remain active work.
+
 Exact artist record-publication authorization is integrated as `a7114aeb`
 from `36237a1a`. The complete 271-test artist cohort passes in one unpruned
 run, including all 262 prior cases and nine publication/related regressions.
 Independent review checks the prior ABI/storage prefixes and all 121 nonempty
 production runtimes. Its candidate metadata host is an explicit fixture; the
-builder is now composing the actual artist registry with `StreamCollectionMetadataV1`,
-including Safe signer/relayer paths, rotation and atomic append failure.
+separate actual-host composition above supplies the next four checks.
 
 Museum review/selection is integrated as `f5a23d72`, resource projection as
 `ff1a899d`, and offline package reproduction as `66aebd4a`. All 104 combined
