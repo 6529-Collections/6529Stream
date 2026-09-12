@@ -22,6 +22,27 @@ contract SaleFundingArtistMock is IStreamArtistAttribution, IERC165 {
     address public immutable override core;
     address public artist;
     bytes32 public nomination;
+    bool public saleConsentRequired;
+    uint256 public saleConsentFault;
+    mapping(bytes32 => bool) public saleConsents;
+
+    function configureSaleConsent(bool required, uint256 fault) external {
+        saleConsentRequired = required;
+        saleConsentFault = fault;
+    }
+
+    function recordTestSaleConsent(address adapter, uint256 collection, bytes32 id, bytes32 hash, bool allowed) external {
+        saleConsents[keccak256(abi.encode(adapter, collection, id, hash))] = allowed;
+    }
+
+    /// @dev Domain seam only; canonical artist op16 record/authority proof belongs to integration.
+    function requireSaleConsent(uint256 collection, bytes32 id, bytes32 hash) external view {
+        require(nomination != 0, "binding absent");
+        if (saleConsentFault == 1) revert("consent read failed");
+        if (saleConsentFault == 2) { assembly ("memory-safe") { mstore(0, 1) return(0, 32) } }
+        if (saleConsentFault == 3) { assembly ("memory-safe") { let p := mload(0x40) return(p, 65536) } }
+        if (saleConsentRequired) require(saleConsents[keccak256(abi.encode(msg.sender, collection, id, hash))], "required consent absent");
+    }
 
     constructor(address core_) {
         core = core_;

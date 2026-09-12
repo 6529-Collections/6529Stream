@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamSaleConsent.sol";
 import "./StreamNativePriceProgram.sol";
 import "./StreamSaleTemplate.sol";
 import "../revenue/StreamSettlementContext.sol";
@@ -234,6 +235,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         } else {
             _requireSaleContext();
             StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+            _requireConsent(c.sale.settlementId);
             StreamSaleArtist.requireArtist(
                 artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
             );
@@ -253,6 +255,10 @@ contract StreamNativeFixedPriceSaleAdapter is
         )
     {
         _requireSaleContext();
+        if (_pricePrograms[e.authorization.saleId].saleNonce == 0) {
+            revert NativePriceProgramUnavailable(e.authorization.saleId);
+        }
+        _requireConsent(e.authorization.saleId);
         if (authorizationUsed[e.authorization.artist][e.authorization.nonce]) {
             revert NativeAuthorizationUsed(e.authorization.artist, e.authorization.nonce);
         }
@@ -475,6 +481,7 @@ contract StreamNativeFixedPriceSaleAdapter is
     ) private view {
         _requireSaleContext();
         StreamNativeSettlementAdmission.requireAdmission(moduleRegistry, c);
+        _requireConsent(c.sale.settlementId);
         StreamSaleArtist.requireArtist(
             artistRegistry, artistRegistryCodeHash, c.sale.collectionId, artist
         );
@@ -500,6 +507,7 @@ contract StreamNativeFixedPriceSaleAdapter is
         )
     {
         _requireSaleContext();
+        _requireConsent(e.authorization.saleId);
         return StreamNativePriceProgram.prepareFixed(
             _priceProgramContext(),
             _sales[e.authorization.saleId],
@@ -508,6 +516,31 @@ contract StreamNativeFixedPriceSaleAdapter is
             authorizationUsed[e.authorization.artist][e.authorization.nonce],
             executionIdByNonce[e.authorization.saleId][e.authorization.executionNonce]
         );
+    }
+
+    function _requireConsent(bytes32 id) private view {
+        SaleRecord storage fixedRecord = _sales[id];
+        if (fixedRecord.saleNonce != 0) {
+            StreamSaleConsent.requireConsent(
+                core,
+                address(artistRegistry),
+                artistRegistryCodeHash,
+                fixedRecord.config.collectionId,
+                id,
+                fixedRecord.configHash
+            );
+        } else {
+            PriceProgramRecord storage program = _pricePrograms[id];
+            if (program.saleNonce == 0) revert NativeSaleUnavailable(id);
+            StreamSaleConsent.requireConsent(
+                core,
+                address(artistRegistry),
+                artistRegistryCodeHash,
+                program.config.collectionId,
+                id,
+                program.configHash
+            );
+        }
     }
 
     function _rights(uint256 collectionId)

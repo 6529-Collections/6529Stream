@@ -2,6 +2,9 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamSaleConsent.sol";
+import "./StreamUniversalSaleRights.sol";
+import "../../interfaces/stream/artist/IStreamArtistSaleFacts.sol";
 import "./StreamSaleTemplate.sol";
 import "../revenue/StreamSettlementContext.sol";
 import "../revenue/StreamPrimarySettlementHash.sol";
@@ -19,6 +22,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
     IStreamUniversalFixedPriceSaleAdapter,
     IStreamERC20SaleExecution,
     IStreamSaleLifecycleBinding,
+    IStreamArtistSaleFacts,
     StreamSettlementContext,
     Ownable,
     ReentrancyGuard,
@@ -77,7 +81,27 @@ contract StreamUniversalFixedPriceSaleAdapter is
     function supportsInterface(bytes4 id) public view override returns (bool) {
         return id == type(IStreamUniversalFixedPriceSaleAdapter).interfaceId
             || id == type(IStreamERC20SaleExecution).interfaceId
+            || id == type(IStreamArtistSaleFacts).interfaceId
             || id == type(IStreamSaleLifecycleBinding).interfaceId || super.supportsInterface(id);
+    }
+
+    function streamModuleType() external pure returns (bytes32) {
+        return keccak256("FIXED_PRICE_SALE_ADAPTER");
+    }
+
+    function streamModuleInterfaceId() external pure returns (bytes4) {
+        return type(IStreamERC20SaleExecution).interfaceId;
+    }
+
+    function saleConsentFacts(bytes32 id)
+        external
+        view
+        override
+        returns (uint256 collectionId, bytes32 saleConfigHash)
+    {
+        SaleRecord storage record = _sales[id];
+        if (record.saleNonce == 0) revert SaleConsentFactsUnavailable(id);
+        return (record.config.collectionId, record.configHash);
     }
 
     function registerSale(SaleConfig calldata config)
@@ -255,6 +279,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
         );
         result = _settle(c);
         _requireSaleContext();
+        _requireConsent(e.authorization.saleId);
         StreamSettlementAdmission.requireAdmission(moduleRegistry, msg.sender, c);
         StreamSaleArtist.requireArtist(
             artistRegistry, artistRegistryCodeHash, c.sale.collectionId, e.authorization.artist
@@ -266,6 +291,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
             tokens.length != 1 || tokens[0] == 0 || root != c.operationIdentityCommitment
                 || ids.length != 1 || ids[0] != c.operationId
         ) revert UniversalMintResultInvalid();
+        _requireConsent(e.authorization.saleId);
         executionStatus[c.executionBinding.executionId] = 2;
         emit UniversalSaleExecution(
             e.authorization.saleId,
@@ -295,6 +321,7 @@ contract StreamUniversalFixedPriceSaleAdapter is
                 || block.timestamp < record.config.startsAt
                 || block.timestamp > record.config.endsAt
         ) revert UniversalSaleUnavailable(a.saleId);
+        _requireConsent(a.saleId);
         if (
             a.saleConfigHash != record.configHash || a.payer == address(0)
                 || a.executor == address(0) || a.recipient == address(0) || a.artist == address(0)
@@ -366,6 +393,19 @@ contract StreamUniversalFixedPriceSaleAdapter is
         c.executionBinding.executionId = StreamPrimarySettlementHash.executionId(c);
     }
 
+    function _requireConsent(bytes32 id) private view {
+        SaleRecord storage record = _sales[id];
+        if (record.saleNonce == 0) revert UniversalSaleUnavailable(id);
+        StreamSaleConsent.requireConsent(
+            core,
+            address(artistRegistry),
+            artistRegistryCodeHash,
+            record.config.collectionId,
+            id,
+            record.configHash
+        );
+    }
+
     function _batch(
         SaleAuthorization memory a,
         SaleConfig memory config,
@@ -391,22 +431,9 @@ contract StreamUniversalFixedPriceSaleAdapter is
     function _rights(uint256 collectionId)
         private
         view
-        returns (StreamSaleTemplate.Selection memory rights)
+        returns (StreamSaleTemplate.Selection memory)
     {
-        IStreamRevenueResolver.ResolvedPrimaryAssignment memory a =
-            revenueResolver.resolvePrimaryAssignment(collectionId, 0, _CLASS);
-        if (
-            !a.exists || a.assignmentType != 1 || a.scope != 1 || a.scopeId != collectionId
-                || a.templateId != 0 || a.profileId == 0 || a.assignmentHash == 0
-                || a.policyHash != 0 || !splitFactory.splitWalletExists(a.profileId)
-        ) revert InvalidUniversalSale();
-        return StreamSaleTemplate.Selection(
-            a.profileId,
-            splitFactory.walletFor(a.profileId),
-            0,
-            a.assignmentHash,
-            splitFactory.profileEntriesHash(a.profileId)
-        );
+        return StreamUniversalSaleRights.rights(revenueResolver, splitFactory, collectionId);
     }
 
     function _requireSaleContext() private view {
