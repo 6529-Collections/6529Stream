@@ -27,6 +27,13 @@ once, then `npm --prefix packages/stream-client test`. Its independent CI job
 checks retained ABI freshness, TypeScript types, signing payloads and snapshots
 without recompiling Solidity. Solidity development does not require Node.js.
 
+Draft pull requests retain their running CI job when new commits arrive. GitHub
+keeps the newest pending run for that pull request, so repeated integration
+pushes do not keep discarding an unfinished compiler run. Ready pull requests
+still cancel superseded runs. Always associate a result with its tested commit;
+a completed earlier run does not validate the pending revision. This uses
+[GitHub's workflow concurrency behavior](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
+
 ## Pick the relevant tests
 
 The new [artist operation extension](architecture/artist-operation-extension-v1.md)
