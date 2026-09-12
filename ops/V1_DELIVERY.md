@@ -20,6 +20,24 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+The current-content consumer is integrated as `60ec0ba3`, with independent
+source and compiler review. Its 15 new cases plus all 17 retained publication
+cases pass both compiler modes, with two 256-input fuzz properties. It joins
+the actual current Router head, exact published record/state/route, accepted
+artist association, active definitions, complete checkpoint and preserved leaf
+artifact. All prior production bytecode, ABI and storage remain exact. This
+is the content portion of the [typed provider](../docs/integrations/finality-content-evidence.md);
+complete record interpretation, discovery and actual Finality execution remain
+open. Next, fixed typed serializers will reconstruct exact stored JSON payloads
+from untrusted field witnesses, preserving complete semantic schema meanings
+and separately versioned interpretation profiles.
+
+WORK_DESCRIPTION also needs an explicit shared artist/curatorial admission seam:
+the current generic host's single-family policy and artist subject mapping
+cannot yet serve both mandated authority branches for that same record type.
+The serializer will confer no authority. RIGHTS keeps its existing class-7/8
+grant path, so its typed interpretation can proceed independently.
+
 The Router now implements [artist-approved content-root publication](../docs/integrations/content-root-publication.md)
 in `bf5fa1b6`, with independent source, behavior, ABI/storage and compiler review.
 Seventeen focused cases and 256 fuzz inputs pass in both compiler modes. Four
@@ -37,19 +55,33 @@ verified and cooled: Router 11,909,000 gas, Core 12,725,439 and complete
 
 The delegation compiler repair (`54087312`) preserves its signed commitments;
 the separate admission fix (`c7de0ad6`) distinguishes Router from the generic
-metadata record host. Both have independent focused reviews. Operation 13's
-full 303-name artist cohort is running; actual finality execution, typed scope
-provider/discovery and complete constructor/deployment migration remain open.
+metadata record host. Both have independent focused reviews. Operation 13 is
+integrated as `9ab6a717`: independent review accepts the 303-name pass union
+(302 retained plus one corrected stale-mock test, with unchanged production).
+All prior 293 cases pass. The separate Attribution compiler repair is integrated
+as `c7447881`, with six tests and 256 inputs in old IR, new default and new IR
+modes. It preserves signed preimages and the exact Identity host/writer
+artifacts. The unrelated `IdentityConsentState.policyDigest` default-stack
+issue remains. Actual finality execution, typed scope provider/discovery,
+recovery operations 22/23 and complete constructor/deployment migration remain open.
+
+Museum LIDO correspondence is integrated as `03693f36`. All 202 tests pass
+on the exact reviewed source, with eight generators and original pinned XSD
+closure. Root readback reproduces all 37 four-media composite outputs exactly;
+the prior 115/16/17/28 package/projection/PREMIS/IIIF outputs remain unchanged.
+This is a synthetic source correspondence; actual authenticated-chain records,
+complete WORK_DESCRIPTION interpretation and institutional ingest remain open.
+CI now includes the eighth generator and a 40-minute allowance for the measured
+24-minute cohort (`503c60ff`).
 
 Museum IIIF correspondence is integrated as `22318d25`. Independent root
 readback accepts 108 exact files plus preserved/added license line-ending rules,
 all seven generators and all 28 four-media example outputs. The reviewed test
 union has 183 distinct cases (182 original plus 34 after one corrected identity
 predicate); this is not a single latest-source 183-case run. Windows/Linux CI
-passes the preceding 149-test revision at `d0094ca6`, run 34709755563. The new
-CI step checks IIIF and allows 25 minutes for the expanded cohort. LIDO and the
-remaining museum formats, packaging, chain authentication and institutional
-acceptance continue in parallel.
+passes the 183-test IIIF revision at `8ad1e43d`, run 34713924514. The LIDO
+revision's CI has not yet run. Remaining museum formats, packaging, chain
+authentication and institutional acceptance continue in parallel.
 
 Signed artist sanctions and canonical finality admission are integrated as
 `50bd3935`, followed by the separate historical-test migration `cb332bc7`.

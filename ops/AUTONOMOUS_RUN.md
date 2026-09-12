@@ -14,13 +14,40 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Delegation compiler `54087312`, split-host admission `c7de0ad6` and IIIF `22318d25` integrated. Root publication passes final 17-case/fuzz and actual preservation composition; full artist/provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Current content `60ec0ba3`, LIDO `03693f36`, sanction confirmation `9ab6a717` and separate Attribution compiler repair `c7447881` integrated. Full typed provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-12 UTC` |
 
 ## Active work
+
+Operation 13 sanction confirmation is integrated as `9ab6a717`. The independent
+review accepts all 303 test names across the retained 302-pass run and one
+corrected stale-mock test; all prior 293 cases pass. No production source
+changed for that test correction. Confirmation uses the original executed
+Finality record, stored components and archival witness, commits atomically
+through the existing owners/Archive and preserves historical authority rules.
+The separate Attribution stack/preimage repair is integrated as `c7447881`,
+with six focused tests and 256 inputs in old IR, new default and new IR modes.
+The existing `IdentityConsentState.policyDigest` default-stack issue remains.
+The artist builder proceeds to recovery operations 22/23 and actual execution
+composition as the integrator completes typed records/provider/discovery.
+
+The current-content consumer is integrated as `60ec0ba3`: 32 focused/retained
+cases and two 256-input fuzz properties pass both compiler modes, with
+independent artifact/source review. Actual current root records, complete
+checkpoint/inventory and preserved leaf bytes are joined without replaying old
+publisher authorization. Complete typed record interpretation, provider,
+discovery and Finality execution remain next; see the
+[consumer guide](../docs/integrations/finality-content-evidence.md).
+
+LIDO is integrated as `03693f36`, with all 202 tests, eight generators and
+37 exact reproduced composite outputs. Original standards and all previous
+package/projection outputs remain unchanged. The 183-test IIIF revision passes
+Windows/Linux CI at `8ad1e43d` (34713924514); new LIDO CI is pending. Shared CI
+now checks LIDO and allows 40 minutes for the measured 24-minute test cohort.
+The museum builder proceeds to an explicit authenticated-chain read boundary.
 
 The integrator has committed and pushed the independently reviewed content-root
 publication increment as `bf5fa1b6`:
@@ -35,9 +62,9 @@ runtime is 24,248 default / 23,666 IR, preserving the existing ABI/storage prefi
 The IIIF increment is integrated as `22318d25`, with independently verified
 seven generators, 28 example outputs and the 183-name test union. The preceding
 149-case revision passes Windows/Linux CI at `d0094ca6` (34709755563). LIDO is
-being built in parallel. Delegation compiler and split-metadata admission fixes
+integrated above. Delegation compiler and split-metadata admission fixes
 are integrated as `54087312` and `c7de0ad6`; the artist builder's corrected
-303-name confirmation cohort is still compiling. Full deployment construction,
+303-name confirmation pass union is integrated above. Full deployment construction,
 complete finality and candidate freeze remain open. No new testnet broadcast
 is required at this point.
 
@@ -46,7 +73,7 @@ with the separate historical migration `cb332bc7`. Independent review accepts
 the exact 293-name pass union (292 original plus one corrected test oracle),
 all production sizes and prior artist ABI/storage bridges. The separate 101-case
 migration retains 79 historical tests and 22 current read/retirement cases.
-Full archive-proof finalization, operation 13 confirmation, current preview and
+Full archive-proof finalization, current preview and
 root-owned deployment/current constructor migration remain open.
 
 The integrator's complete leaf-list manifest verifier passes 13 cases and two
@@ -78,7 +105,7 @@ The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
 `4c7cc4b6` (run 34708017861). Exact source assertions
 remain distinct from actual file-byte verification. The preceding faithful
 abstract/nonvisual projections (`db3c8153`) pass Windows/Linux CI at `d8f0eef2`.
-IIIF is integrated above; the builder continues LIDO. All prior package versions remain exact.
+IIIF and LIDO are integrated above. All prior package versions remain exact.
 Full authenticated-chain exports and institutional acceptance remain open.
 Complete archival artifact coverage is integrated as `880bac6d`, with 26
 reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
@@ -87,10 +114,8 @@ root authority, ordinary-proposer rejection and multi-call execution. Actual
 artist publication, typed finality and discovery still need composition.
 
 The artist owner/acceptance compiler repair is integrated as `1e3087a2`, with
-exact preimage/event checks and matching owner interfaces/storage. Latest CI at
-`4c7cc4b6` passes client/wrapper jobs; smoke compilation remains running, current
-integration is cancelled and release-artifact/Slither jobs fail. The `d0094ca6`
-CI run is pending; its museum workflow passes. No complete CI pass is claimed. Complete deployment remains unresolved:
+exact preimage/event checks and matching owner interfaces/storage.
+Complete deployment remains unresolved:
 the catalog self-view call helps minimal compiler
 probes but fails current Foundry execution protection, even outside broadcasting.
 The separate helper now passes six plan/catalog tests with 256 fuzz inputs and
@@ -98,7 +123,12 @@ a real Core/Executor/registry/manifest script rehearsal under default protection
 Its creation/read consume no deployer nonce; the three resumed governance writes
 complete. Actual full product-script compilation reached its 600-second bound
 without a result, so full compiler and deployment acceptance remain open.
-No complete-build or working deployment-script repair is claimed. Release
+The latest `8ad1e43d` CI run (34713924529) passes client/wrapper jobs but fails
+smoke/current compilation and release-artifact/Slither gates. Two wildcard
+Router import collisions are repaired as `7772e7b2`; a 269-source syntax/type
+diagnostic now reaches only the two known one-argument Coordinator calls.
+Actual `Coordinator(s, finality)` construction still needs the full dependency
+graph. No complete-build or working deployment-script repair is claimed. Release
 checksums and the Slither snapshot also await the later
 stabilized-source regeneration. See [V1_DELIVERY.md](V1_DELIVERY.md).
 
@@ -110,8 +140,8 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
-| Artist | `codex/v1-artist-authority` | Archival artifact coverage integrated; full artist publication regression, actual finality/sanction/recovery and typed preparation |
-| Revenue | `codex/v1-revenue` | Museum IIIF183 union integrated; LIDO, remaining formats and chain-adapter work |
+| Artist | `codex/v1-artist-authority` | Confirmation303 and separate default4 integrated; actual finality and recovery operations 22/23 |
+| Revenue | `codex/v1-revenue` | Museum LIDO202 integrated; actual local-EVM chain-source adapter, remaining formats and institutional acceptance |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
