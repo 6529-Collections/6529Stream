@@ -364,16 +364,30 @@ accepted 133 focused cases plus two extension prototypes, all 153 compiler input
 and seven actual constructor CREATE traces. Identity and facade runtimes are
 21,128 and 21,463 bytes; the largest Consent runtime is 24,501 bytes. The prior
 size failures are resolved through typed libraries and constructor-fixed
-extensions. Actual current-stack execution of these new paths remains the next
-integration test; this does not complete recovery, estate, dormancy or finality.
+extensions. The next twelve-case current-stack run passes with these production
+sources and exercises the governed artist window through its actual Identity
+owner. This does not complete recovery, estate, dormancy or finality.
 
 The signed native price-program increment (`9eae0d67`, from `0ede006a`) adds open,
 zero-price and pay-what-you-want sales. Its 72 cases and four 256-input fuzz
 properties passed independent review, with complete compiler outputs in both
 production profiles. The original 37 native ABI selectors remain present. These
-new formats still need actual current-stack composition; the earlier six-case
-native/ERC-20 result at `1b41cff4` does not prove these later changes. Sale consent,
+new formats now pass actual-Core Safe free, PWYW and open-edition purchases in
+the twelve-case run. The earlier six-case result at `1b41cff4` remains separately
+scoped. Sale consent,
 explicit attribution facts and refund-window custody now proceed in parallel.
+
+The combined run captures production source at `ed8f0e40` plus its two new test
+files: five native, three universal and four ARRNG cases pass. Independent review
+binds all 247 Solidity inputs, three pinned Safe fixtures and 276 relevant
+artifacts to complete compiler outputs, excluding unrelated cached artifacts.
+It checks every dynamic constructor substitution and all 107 nonempty
+production runtimes. The ARRNG tests exercise actual Core, Manager, artist,
+Executor and threshold Safes, with only the external oracle service doubled.
+They cover mint/reveal/custody, revocation followed by retained-output retry,
+governed source-owner/payment changes and artist timing. Later reveal-fee and
+sale-consent changes require new composition evidence; deployed ARRNG service
+and its incoming callback gas remain separate acceptance work.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
 receipt from actual Safe execution. The full client suite passes 47 tests; three

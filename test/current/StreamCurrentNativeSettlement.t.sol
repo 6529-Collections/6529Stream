@@ -36,6 +36,9 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     OfficialSafe private payerSafe;
     uint256[] private keys;
     bytes32 private saleId;
+    bytes32 private zeroProgram;
+    bytes32 private pwywProgram;
+    bytes32 private openProgram;
     bool private useTemplate;
 
     function setUp() public {
@@ -73,10 +76,12 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         override
         returns (GovernanceActionPolicyEntry[] memory rows)
     {
-        rows = new GovernanceActionPolicyEntry[](3);
+        rows = new GovernanceActionPolicyEntry[](5);
         rows[0] = _nativePolicy(nativeSale.registerSale.selector);
         rows[1] = _nativePolicy(nativeSale.cancelSale.selector);
         rows[2] = _nativePolicy(nativeSale.setPaused.selector);
+        rows[3] = _nativePolicy(nativeSale.registerPriceProgram.selector);
+        rows[4] = _nativePolicy(nativeSale.closePriceProgram.selector);
     }
 
     function _nativePolicy(bytes4 selector)
@@ -166,7 +171,194 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             )
         );
         (, profile, wallet) = sale.primaryPolicy(1);
+        zeroProgram = _registerProgram(12, 0, 0, 3);
+        pwywProgram = _registerProgram(13, 100, 3000, 3);
+        openProgram = _registerProgram(1, PRICE, PRICE, 0);
         nativeSale.transferOwnership(address(executor));
+    }
+
+    function _registerProgram(uint8 kind, uint256 minimum, uint256 maximum, uint64 limit)
+        private
+        returns (bytes32)
+    {
+        return nativeSale.registerPriceProgram(
+            IStreamNativePricePrograms.PriceProgramConfig(
+                1,
+                NATIVE_PHASE,
+                kind,
+                minimum,
+                maximum,
+                limit,
+                0,
+                uint64(block.timestamp + 30 days),
+                1,
+                manager.phasePolicyHash(1, NATIVE_PHASE),
+                kind == 12
+                    ? bytes32(0)
+                    : primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS)
+                    .assignmentHash
+            )
+        );
+    }
+
+    function testSafeZeroPriceProgramMintsWithoutOfficialRevenueAndCannotReplay() public {
+        IStreamNativePricePrograms.PriceProgramExecution memory e =
+            _programExecution(zeroProgram, 41, 0, 0);
+        IStreamNativePricePrograms.PriceProgramResult memory expected =
+            nativeSale.previewPriceProgram(e);
+        bytes memory data = abi.encodeCall(nativeSale.executePriceProgram, (e));
+        uint256 balance = address(payerSafe).balance;
+        uint256 profiles = factory.profileCount();
+        require(
+            executeSafe(payerSafe, keys, address(nativeSale), 0, data, 0), "Safe zero-price mint"
+        );
+        require(
+            core.ownerOf(core.lastAllocatedTokenId()) == address(payerSafe)
+                && core.totalSupply() == 1 && manager.isOperationRootUsed(expected.operationRoot)
+                && manager.isAuthorizationUsed(_programAuthorizationId(e)),
+            "actual zero-price mint authorization"
+        );
+        require(
+            nativeSale.priceProgramRecord(zeroProgram).mintedQuantity == 1
+                && nativeSale.executionStatus(expected.executionId) == 2,
+            "zero execution finalized"
+        );
+        require(
+            address(payerSafe).balance == balance && wallet.balance == 0
+                && recorder.totalOfficialSettled(address(0)) == 0
+                && revenueEscrow.totalOwed(address(0)) == 0 && factory.profileCount() == profiles
+                && !recorder.settlementConsumed(
+                    recorder.settlementKey(address(nativeSale), expected.executionId)
+                ),
+            "zero has no payment/profile/official record"
+        );
+        vm.prank(address(payerSafe));
+        (bool ok, bytes memory failure) = address(nativeSale).call(data);
+        require(
+            !ok
+                && keccak256(failure)
+                    == keccak256(
+                        abi.encodeWithSelector(
+                            IStreamNativeFixedPriceSaleAdapter.NativeAuthorizationUsed.selector,
+                            address(artistSafe),
+                            e.authorization.nonce
+                        )
+                    ),
+            "zero exact replay rejection"
+        );
+        require(
+            core.totalSupply() == 1 && manager.nextOperationNonce() == 1,
+            "zero replay cannot mint again"
+        );
+    }
+
+    function testSafePayWhatYouWantSettlesChosenPriceAndOpenEditionSharesActualMintLedger() public {
+        IStreamNativePricePrograms.PriceProgramExecution memory e =
+            _programExecution(pwywProgram, 42, 2000, 500);
+        IStreamNativePricePrograms.PriceProgramResult memory expected =
+            nativeSale.previewPriceProgram(e);
+        uint256 balance = address(payerSafe).balance;
+        require(
+            executeSafe(
+                payerSafe,
+                keys,
+                address(nativeSale),
+                2000,
+                abi.encodeCall(nativeSale.executePriceProgram, (e)),
+                0
+            ),
+            "Safe chooses price above signed minimum"
+        );
+        StreamPrimarySettlementTypes.PrimarySettlementResult memory paid = recorder.settlementResult(
+            recorder.settlementKey(address(nativeSale), expected.executionId)
+        );
+        require(
+            paid.amount == 2000 && paid.wallet == wallet && wallet.balance == 2000
+                && address(payerSafe).balance == balance - 2000
+                && manager.isAuthorizationUsed(_programAuthorizationId(e)),
+            "full chosen amount is official revenue"
+        );
+        e = _programExecution(openProgram, 43, PRICE, PRICE);
+        require(
+            executeSafe(
+                payerSafe,
+                keys,
+                address(nativeSale),
+                PRICE,
+                abi.encodeCall(nativeSale.executePriceProgram, (e)),
+                0
+            ),
+            "Safe open-edition purchase"
+        );
+        require(
+            core.totalSupply() == 2 && core.collectionMintedEver(1) == 2
+                && manager.nextOperationNonce() == 2
+                && recorder.totalOfficialSettled(address(0)) == 3000 && wallet.balance == 3000,
+            "price kinds share actual mint and money accounting"
+        );
+        require(
+            nativeSale.priceProgramRecord(openProgram).config.maxSaleQuantity == 0
+                && nativeSale.priceProgramRecord(openProgram).mintedQuantity == 1,
+            "open edition has no adapter cap"
+        );
+        require(
+            executeSafe(
+                artistSafe,
+                keys,
+                wallet,
+                0,
+                abi.encodeCall(
+                    IStreamSplitWallet.release,
+                    (address(0), address(artistSafe), payable(address(artistSafe)))
+                ),
+                0
+            ),
+            "Safe claims both sale formats"
+        );
+        require(
+            address(artistSafe).balance == 2700 && wallet.balance == 300,
+            "actual artist shares across programs"
+        );
+    }
+
+    function _programExecution(bytes32 id, uint256 nonce, uint256 chosen, uint256 signedPrice)
+        private
+        returns (IStreamNativePricePrograms.PriceProgramExecution memory e)
+    {
+        e.chosenUnitPrice = chosen;
+        e.tokenData = TOKEN_DATA;
+        e.authorization = IStreamNativePricePrograms.PriceProgramAuthorization(
+            id,
+            nativeSale.priceProgramRecord(id).configHash,
+            address(payerSafe),
+            address(payerSafe),
+            address(payerSafe),
+            address(artistSafe),
+            keccak256(TOKEN_DATA),
+            keccak256(abi.encode("current price program", nonce)),
+            nonce,
+            bytes32(nonce),
+            uint64(block.timestamp + 1 days),
+            id == zeroProgram ? bytes32(0) : _nativePrimaryPolicyHash(),
+            signedPrice
+        );
+        bytes32 digest = nativeSale.priceProgramAuthorizationDigest(e.authorization);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
+        e.platformSignature = abi.encodePacked(r, s, v);
+        e.artistSignature = _artistProof(digest);
+    }
+
+    function _programAuthorizationId(IStreamNativePricePrograms.PriceProgramExecution memory e)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_MINT_TICKET_AUTHORIZATION_V1"),
+                nativeSale.priceProgramAuthorizationDigest(e.authorization)
+            )
+        );
     }
 
     function testSafeNativePurchaseMintsRevealsClaimsAndRejectsReplay() public {
