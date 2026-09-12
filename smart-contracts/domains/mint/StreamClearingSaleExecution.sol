@@ -118,21 +118,43 @@ library StreamClearingSaleExecution {
             x.support, sale.config.collectionId, result.tokenId, p.captured.reveal, revealCap
         );
         _requirePurchaseRetained(state, x, p.floor, p.captured.association);
-        state.purchases[result.purchaseId] = IStreamNativeClearingSale.ClearingPurchaseRecord(
-            p.floor,
-            floorResult.settlementKey,
-            floorResult.candidateCommitment,
-            result.tokenId,
-            a.purchaseNonce,
-            StreamClearingClock.now64(),
-            a.hasPriceOverride,
-            a.priceOverride
-        );
+        _storePurchase(state, p.floor, a, result, floorResult.candidateCommitment);
         if (address(this).balance != original + result.heldOverage + result.excessCredited) {
             revert IStreamNativeClearingSale.ClearingAccountingMismatch();
         }
         state.executionStatus[result.executionId] = 2;
         _emitPurchase(state, a, result, p.captured.consentEvidence);
+    }
+
+    function _storePurchase(
+        StreamClearingSaleState.State storage state,
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory c,
+        IStreamNativeClearingSale.ClearingAuthorization memory a,
+        IStreamNativeClearingSale.ClearingPurchaseResult memory result,
+        bytes32 floorCommitment
+    ) private {
+        IStreamNativeClearingSale.ClearingPurchaseRecord storage stored =
+            state.purchases[result.purchaseId];
+        // saleAdapter stays zero as the explicit sparse/full discriminator. Every
+        // omitted field is reconstructed from immutable local facts, not current
+        // authority, phase or payout state. Variable signed facts remain verbatim.
+        stored.originalFloor.sale.settlementId = c.sale.settlementId;
+        stored.originalFloor.sale.beneficiary = c.sale.beneficiary;
+        stored.originalFloor.sale.expectedPrimaryPolicyHash = c.sale.expectedPrimaryPolicyHash;
+        stored.originalFloor.executionBinding.executionId = c.executionBinding.executionId;
+        stored.originalFloor.executionBinding.executionNonce = c.executionBinding.executionNonce;
+        stored.originalFloor.executionBinding.saleAuthorizationDigest =
+        c.executionBinding.saleAuthorizationDigest;
+        stored.originalFloor.operationIdentityCommitment = c.operationIdentityCommitment;
+        stored.originalFloor.operationId = c.operationId;
+        stored.originalFloor.rights = c.rights;
+        stored.originalFloor.saleExecutionHash = c.saleExecutionHash;
+        stored.floorSettlementKey = result.settlementKey;
+        stored.floorCandidateCommitment = floorCommitment;
+        stored.tokenId = result.tokenId;
+        stored.purchasedAt = StreamClearingClock.now64();
+        stored.hasPriceOverride = a.hasPriceOverride;
+        stored.priceOverride = a.priceOverride;
     }
 
     function _mint(
@@ -201,7 +223,9 @@ library StreamClearingSaleExecution {
         _requireContext(x);
         _requireFinancialAuthority(state, x, id);
         StreamNativeSupplementalTypes.NativeSupplementalCandidate memory c;
-        c.originalFloor = p.originalFloor;
+        c.originalFloor =
+        StreamClearingSaleState.purchaseRecord(state, purchaseId, address(x.support.manager))
+        .originalFloor;
         c.purchaseId = purchaseId;
         c.executor = msg.sender;
         c.purchase = StreamClearingSaleState.purchaseFacts(state, purchaseId);
@@ -210,7 +234,7 @@ library StreamClearingSaleExecution {
                 StreamPrimarySettlementRights.Context(
                     x.support.resolver, x.factory, x.factory.splitWalletRuntimeCodeHash()
                 ),
-                p.originalFloor.sale.collectionId,
+                c.originalFloor.sale.collectionId,
                 p.tokenId
             );
         uint256 beforeBalance = address(this).balance;

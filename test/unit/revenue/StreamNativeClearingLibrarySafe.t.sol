@@ -589,5 +589,29 @@ contract StreamNativeClearingLibrarySafeTest is ClearingSaleTestBase {
             wallet.balance == 100 && clearingManager.nonce() == 1,
             "direct read controls do not mutate consumer"
         );
+        IStreamNativeClearingSale.ClearingPurchaseRecord memory emptyRecord;
+        _read(
+            address(StreamClearingSaleState),
+            abi.encodeWithSelector(
+                StreamClearingSaleState.purchaseRecord.selector,
+                uint256(0),
+                p.purchaseId,
+                address(clearingManager)
+            ),
+            abi.encode(emptyRecord)
+        );
+        IStreamNativeClearingSale.ClearingPurchaseRecord memory actualRecord =
+            clearingSale.purchaseRecord(p.purchaseId);
+        require(
+            actualRecord.tokenId == p.tokenId
+                && actualRecord.floorCandidateCommitment
+                    == recorder.settlementResult(p.settlementKey).candidateCommitment,
+            "actual historical record is bound to official receipt"
+        );
+        _read(
+            address(clearingSale),
+            abi.encodeCall(clearingSale.purchaseRecord, (p.purchaseId)),
+            abi.encode(actualRecord)
+        );
     }
 }

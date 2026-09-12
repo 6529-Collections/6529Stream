@@ -94,6 +94,19 @@ execution, not the already-materialized floor. The sale saves the first accepted
 artist identity, generation and binding; every later purchase must retain that
 association. Fresh commercial signatures still require the actual current signer.
 
+The public `purchaseRecord` retains the complete original tuple. New records
+omit duplicate immutable values in storage: the adapter/executor, collection,
+class, native/pre-revenue constants, sale nonce/lifecycle, Manager and equal
+bound/current mint policy are reconstructed from the immutable sale configuration,
+stable local purchase basis and consumer's immutable Manager. The original
+signed primary-policy hash, concrete profile/wallet/template/assignment/entries,
+full digest, operation/execution identities, beneficiary and uint256 override
+remain stored verbatim. Reconstruction does not consult live providers, current
+policy, deadlines or price-fixing state. A nonzero token ID plus a zero stored
+adapter marks this sparse encoding; prior full records have a nonzero adapter
+and return verbatim. An unknown record remains entirely zero. This is an
+internal encoding change, with the same public ABI and physical storage roots.
+
 ## Fixing, supplements and permanent rebates
 
 Sold-out fixing uses the timestamp of the last accepted purchase, including when
@@ -159,9 +172,13 @@ Global unlock is terminal for unsettled financial legs. It preserves all paid
 floors and completed supplements. The buyer's post-unlock entitlement is
 `paidSum - count*floor - settledSupplement`, less prior entitlement claims, plus
 unclaimed excess. Before fixing, only excess is claimable; after fixing the
-rebate formula is `paidSum - uniformSum`. Two immutable96-depth ceiling trees,
-one per buyer and one per sale, keep exact sums without enumerating buyers.
-Each accepted purchase updates both97-node paths atomically. Counts fit uint64,
+rebate formula is `paidSum - uniformSum`. Two ceiling aggregates, one per buyer
+and one per sale, keep exact sums without enumerating buyers. New trees use
+compressed heap-prefix branches; each accepted purchase updates both atomically.
+Old nonempty fixed-depth trees retain their exact original encoding and append
+behavior. An empty new tree needs a leaf and root pointer; distinct ceilings add
+one leaf and one branch, while duplicate ceilings reuse existing nodes. Queries
+and insertion can still encounter96 branch decisions in a worst-case tree. Counts fit uint64,
 prices fit uint96, and aggregate sums are below2^160; checked count64/sum192
 packing never truncates the original uint256 signed override. Indexing
 `min(rawOverride,startPrice)` preserves every valid clearing price exactly.
@@ -191,12 +208,25 @@ delegated claims, and governed surplus/export tooling to their explicit remainin
 delivery slices. It does not alter the creation-time retained rights of existing
 V2 auctions.
 
-The first composed measurement is **6,802,390 gas** with partially cooled
-consumer/recorder/wallet/Manager and two fresh aggregate paths; a warm repeat is
-**2,064,345 gas**. Both exceed the normative **500,000-gas** single paid
+The accepted functional build measured **6,843,542 gas** for the first purchase
+with partially cooled consumer/recorder/wallet/Manager and two fresh aggregate
+paths, and **2,084,997 gas** for a warm repeat. The earlier pre-INCIDENT-guard
+measurement was 6,802,390 / 2,064,345. Compressed aggregates alone reduced the
+same qualified measurement to **2,567,071 / 1,967,624**; compact local purchase
+records further reduced it to **2,271,876 / 1,672,429** in the focused six-case
+composition. These are measurements of distinct retained source captures, not
+all-cold rehearsal values or a claim that every current-stack path is cheaper.
+
+All remain above the normative **500,000-gas** single paid
 `PRE_REVENUE_SINGLE_STEP` ceiling in
 [MPA-GAS-BUDGET](../mint-policy-and-accounting.md#gas-budget-artifact).
 This is a deployment blocker. Functional acceptance does not waive the ceiling.
-The next optimization replaces full-depth aggregate writes with exact compressed
-branching aggregates and measures retained-record and repeated-call costs before
-further sale variants. The ceiling is not being raised by this implementation.
+A separate cached trace of the original current-stack composition measured a
+first successful 2-of-3 Safe transaction frame of8,805,429, including the
+consumer8,755,856, recorder553,549 and actual Manager798,823. The latter includes
+Core469,659; those nested costs must not be added again. The second Manager frame
+still used602,423. That trace has prior test activity and is not an all-cold
+rehearsal. It demonstrates that clearing-only storage changes cannot by
+themselves satisfy the ceiling while those shared paths remain unchanged.
+Shared mint, authorization and receipt cost work remains open for integration;
+this implementation neither changes the ceiling nor calls those costs accepted.

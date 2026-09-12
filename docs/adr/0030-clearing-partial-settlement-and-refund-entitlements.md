@@ -83,7 +83,7 @@ purchase basis records total paid and an ordered aggregate of authenticated
 ceiling values. Querying prefix counts and sums gives
 `uniformSum = sumBelow + clearing * (count - countBelow)`.
 
-The first representation uses fixed96-depth radix paths. Each node packs a
+The retained first representation uses fixed96-depth radix paths. Each node packs a
 checked uint64 count and uint192 sum into one storage word. All intermediate
 arithmetic remains uint256. A sale-wide maximum quantity bounded by uint64 and
 prices bounded by uint96 imply the largest sum is strictly below2^160. The actual
@@ -95,6 +95,16 @@ scheduled total at fixing; each accepted purchase updates both trees atomically.
 Fixing is bounded independently of buyer count, including its96-step query, rather
 than literally a few reads. The cost of both insertion paths, authentication, mint
 and reveal is measured in actual consumer acceptance.
+
+The optimized representation compresses paths without changing the ordered
+count/sum semantics. A root pointer at `nodes[0]` identifies it; a nonzero old
+aggregate at `nodes[1]` with no pointer identifies the prior fixed-depth encoding.
+Old trees remain readable and append through their original algorithm. A new
+empty tree writes one leaf aggregate and its root pointer. Each new distinct
+ceiling inserts one leaf and one branch, updating only real ancestors; duplicate
+ceilings reuse that path. Canonical heap-prefix keys preserve skipped-bit query
+bounds, and branches have at most96 decisions. A worst-case deep tree remains
+expensive. Compression alone does not establish the collector gas gate.
 
 No-override purchases index startPrice. An authenticated raw override indexes
 `min(rawOverride,startPrice)` while retaining the original signed value unchanged.

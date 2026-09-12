@@ -75,9 +75,9 @@ contract StreamNativeClearingFeesGasTest is ClearingSaleTestBase {
                     }
                     if (mode == 2) require(size == 0, "actual exhausted request frame");
                     if (mode == 3) require(size == 32, "malformed result");
-                    if (mode == 4) require(
-                        size == 65536 && prefix.length == 256, "bounded return bomb"
-                    );
+                    if (mode == 4) {
+                        require(size == 65536 && prefix.length == 256, "bounded return bomb");
+                    }
                 }
             }
             require(
@@ -189,7 +189,7 @@ contract StreamNativeClearingFeesGasTest is ClearingSaleTestBase {
         IStreamNativeClearingSale.ClearingPurchaseResult memory p =
             clearingSale.purchase{ value: 1020 }(d);
         uint256 first = beforeGas - gasleft();
-        emit log_named_uint("COMPOSED_FIRST_BUY_TWO_FRESH_97_NODE_PATHS_PARTIALLY_COOLED", first);
+        emit log_named_uint("COMPOSED_FIRST_BUY_TWO_FRESH_AGGREGATES_PARTIALLY_COOLED", first);
         d = _clearingData(2, payer, payer);
         vm.prank(payer);
         beforeGas = gasleft();
@@ -197,7 +197,7 @@ contract StreamNativeClearingFeesGasTest is ClearingSaleTestBase {
         uint256 repeat = beforeGas - gasleft();
         emit log_named_uint("COMPOSED_REPEAT_BUY_TWO_EXISTING_PATHS_WARM", repeat);
         require(
-            first > 4000000 && repeat < first && wallet.balance == 200
+            first < 6843542 && repeat < first && wallet.balance == 200
                 && clearingManager.nonce() == 2 && p.floorRevenue == 100
                 && clearingSale.totalBuyerLiabilities() == 1800,
             "full composed price/fee/mint and paired aggregates"

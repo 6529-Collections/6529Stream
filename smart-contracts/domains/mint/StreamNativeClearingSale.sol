@@ -206,7 +206,7 @@ contract StreamNativeClearingSale is
         override
         returns (ClearingPurchaseRecord memory)
     {
-        return _state.purchases[id];
+        return StreamClearingSaleState.purchaseRecord(_state, id, address(mintManager));
     }
 
     function financialSale(bytes32 id) external view returns (StreamClearingSaleBook.Sale memory) {

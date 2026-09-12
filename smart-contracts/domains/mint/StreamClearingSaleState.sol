@@ -32,6 +32,65 @@ library StreamClearingSaleState {
         uint256 revealCap;
     }
 
+    /// @dev A stored nonzero saleAdapter identifies the prior full encoding and
+    /// returns verbatim. New records omit only immutable constants/sale fields;
+    /// tokenId distinguishes a real sparse record from an unknown purchase.
+    /// Reconstruction uses local immutable facts, never live providers or clocks.
+    function purchaseRecord(State storage state, bytes32 purchaseId, address manager)
+        public
+        view
+        returns (IStreamNativeClearingSale.ClearingPurchaseRecord memory result)
+    {
+        IStreamNativeClearingSale.ClearingPurchaseRecord storage stored =
+            state.purchases[purchaseId];
+        if (stored.tokenId == 0) return result;
+        if (stored.originalFloor.saleAdapter != address(0)) return stored;
+        bytes32 id = stored.originalFloor.sale.settlementId;
+        IStreamNativeClearingSale.ClearingSaleRecord storage sale = state.sales[id];
+        StreamClearingSaleBook.Purchase storage basis = state.financial.purchases[purchaseId];
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory c;
+        c.saleAdapter = address(this);
+        c.executor = basis.buyer;
+        c.sale = StreamPrimarySettlementTypes.PrimarySale(
+            id,
+            keccak256("PRIMARY_SALE"),
+            0,
+            sale.config.collectionId,
+            0,
+            sale.saleNonce,
+            basis.buyer,
+            address(0),
+            stored.originalFloor.sale.beneficiary,
+            sale.config.schedule.restingPrice,
+            stored.originalFloor.sale.expectedPrimaryPolicyHash
+        );
+        c.lifecycleBinding = sale.lifecycle;
+        c.executionBinding = StreamPrimarySettlementTypes.SaleExecutionBinding(
+            stored.originalFloor.executionBinding.executionId,
+            stored.originalFloor.executionBinding.executionNonce,
+            1,
+            stored.originalFloor.executionBinding.saleAuthorizationDigest
+        );
+        c.orchestrationOrder = 1;
+        c.mintManager = manager;
+        c.operationIdentityCommitment = stored.originalFloor.operationIdentityCommitment;
+        c.operationId = stored.originalFloor.operationId;
+        c.currentPolicyHash = sale.config.mintPolicyHash;
+        c.boundPolicyHash = sale.config.mintPolicyHash;
+        c.rights = stored.originalFloor.rights;
+        c.saleExecutionHash = stored.originalFloor.saleExecutionHash;
+        result = IStreamNativeClearingSale.ClearingPurchaseRecord(
+            c,
+            stored.floorSettlementKey,
+            stored.floorCandidateCommitment,
+            stored.tokenId,
+            basis.nonce,
+            stored.purchasedAt,
+            stored.hasPriceOverride,
+            stored.priceOverride
+        );
+    }
+
     function deadlines(State storage state, bytes32 id)
         public
         view
@@ -81,7 +140,7 @@ library StreamClearingSaleState {
             p.floorSettlementKey,
             p.floorCandidateCommitment,
             p.originalFloor.executionBinding.saleAuthorizationDigest,
-            p.purchaseNonce,
+            p.originalFloor.saleAdapter == address(0) ? basis.nonce : p.purchaseNonce,
             p.tokenId,
             p.originalFloor.operationId,
             basis.paidPrice,
