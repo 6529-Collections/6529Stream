@@ -3,31 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../interfaces/stream/revenue/StreamPrimarySettlementTypes.sol";
 
-/// @dev Exact single SignatureTransfer ABI; no arbitrary selector or target forwarding.
-interface IStreamPinnedPermit2 {
-    struct TokenPermissions {
-        address token;
-        uint256 amount;
-    }
-
-    struct PermitTransferFrom {
-        TokenPermissions permitted;
-        uint256 nonce;
-        uint256 deadline;
-    }
-
-    struct SignatureTransferDetails {
-        address to;
-        uint256 requestedAmount;
-    }
-    function permitTransferFrom(
-        PermitTransferFrom calldata permit,
-        SignatureTransferDetails calldata details,
-        address owner,
-        bytes calldata signature
-    ) external;
-    function nonceBitmap(address owner, uint256 wordPos) external view returns (uint256);
-}
+import "../../interfaces/stream/revenue/IStreamPinnedPermit2.sol";
 
 /// @notice Linked implementation of the exact EIP-2612 and pinned Permit2 operations.
 /// @dev Delegatecall preserves contract20 as spender/destination. The calling adapter checks

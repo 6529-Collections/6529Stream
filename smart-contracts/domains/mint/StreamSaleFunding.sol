@@ -5,13 +5,7 @@ import "../../interfaces/stream/mint/IStreamSaleFunding.sol";
 import "../../interfaces/stream/revenue/IStreamSplitFactory.sol";
 import "../../interfaces/standards/IERC20.sol";
 
-/// @dev Exact existing escrow getter ABI; not a spending or arbitrary execution interface.
-interface IStreamSaleEscrowBinding {
-    function splitFactory() external view returns (address);
-    function assetPolicyRegistry() external view returns (address);
-    function factoryCodeHash() external view returns (bytes32);
-    function walletCodeHash() external view returns (bytes32);
-}
+import "../../interfaces/stream/revenue/IStreamSaleEscrowBinding.sol";
 
 /// @notice Internal concrete-profile funding for current sale adapters.
 /// @dev The embedding adapter owns its guard, authorization, preview and final mint comparison.
