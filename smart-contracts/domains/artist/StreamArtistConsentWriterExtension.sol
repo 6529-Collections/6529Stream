@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistSanctionConfirmation.sol";
 import "./StreamArtistConsentStorage.sol";
+import "./StreamArtistSanctionConfirmationState.sol";
 
 /// @notice Fixed implementation of the Consent owner's explicit mutations.
 /// @dev All semantic callbacks reject direct calls before reading authority or snapshots.
@@ -22,6 +24,24 @@ contract StreamArtistConsentWriterExtension is StreamArtistConsentStorage {
     modifier onlyHost() {
         if (address(this) != _host) revert ExtensionWrongHost(address(this));
         _;
+    }
+
+    function consumeSanctionFinalization(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Confirmation.Transition calldata p
+    ) external onlyHost returns (bytes32 replayKey) {
+        _check(c, 13);
+        StreamArtistConsentState.Mutation memory m;
+        (m, replayKey) = StreamArtistSanctionConfirmationState.consumeEncoded(
+            _sanctions,
+            _replay,
+            StreamArtistConsentState.Context(
+                _environment(), operationCoordinator, archiveV2, domainId, _revision, 0
+            ),
+            msg.data
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
     }
 
     function recordSanction(

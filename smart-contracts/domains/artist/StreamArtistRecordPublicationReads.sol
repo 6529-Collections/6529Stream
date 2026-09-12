@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionPolicy.sol";
 
 import "./StreamArtistRecordPublicationRules.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -36,7 +37,8 @@ library StreamArtistRecordPublicationReads {
         // These values are Attribution states, not Identity status or authority classes.
         if (
             collectionId == 0 || !b.accepted || b.bindingHash == 0 || b.artistId == 0
-                || (state != 2 && state != 3) || generation != b.generation || b.consentMode != 1
+                || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
+                || generation != b.generation || b.consentMode != 1
         ) {
             revert T.InvalidAttribution(collectionId);
         }

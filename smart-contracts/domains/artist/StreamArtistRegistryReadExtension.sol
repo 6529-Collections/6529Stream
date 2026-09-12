@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
@@ -123,8 +124,9 @@ contract StreamArtistRegistryReadExtension {
             StreamArtistSaleOperations.attributionState(s, collectionId);
         T.Binding memory b = IStreamArtistBindingOwner(s.owners[0]).binding(collectionId);
         if (
-            state != 2 || !b.accepted || artistId == bytes32(0) || hash == bytes32(0)
-                || generation != b.generation || hash != b.bindingHash || artistId != b.artistId
+            !StreamArtistAttributionPolicy.acceptedOrSanctioned(state) || !b.accepted
+                || artistId == bytes32(0) || hash == bytes32(0) || generation != b.generation
+                || hash != b.bindingHash || artistId != b.artistId
         ) revert T.InvalidAttribution(collectionId);
         Estate.AuthorityCapabilities memory f =
             IStreamArtistEstateOwner(s.owners[2]).currentAuthorityCapabilities(artistId);

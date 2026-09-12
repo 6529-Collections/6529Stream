@@ -51,6 +51,11 @@ contract StreamArtistRegistryWriterExtension {
             .coordinateRecordArtistSanction(msg.sender, p, a);
     }
 
+    function confirmSanctionFinalized(uint256 collectionId) external onlyHost {
+        IStreamArtistSanctionConfirmationCoordinator(operationCoordinator)
+            .coordinateConfirmSanctionFinalized(msg.sender, collectionId);
+    }
+
     function requestEstateActivation(Estate.Request calldata p, T.Authorization calldata a)
         external
         onlyHost

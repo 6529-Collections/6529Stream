@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionPolicy.sol";
 import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
 import "./StreamArtistRecordPublicationState.sol";
 import "../../interfaces/stream/artist/IStreamArtistRecordPublicationOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistSanctionConfirmation.sol";
 import {
     StreamArtistBindingLifecycleTypes as L
 } from "../../interfaces/stream/artist/StreamArtistBindingLifecycleTypes.sol";
@@ -80,6 +82,45 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             manager_
         )
     { }
+
+    function confirmSanctionFinalized(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Confirmation.Transition calldata p,
+        address savedSigner,
+        uint8 savedAuthorityClass
+    ) external {
+        _check(c, 13);
+        Attribution storage a = _attributions[p.collectionId];
+        if (
+            !b.accepted || b.artistId == 0 || b.bindingHash == 0 || p.collectionId == 0
+                || p.artistId != b.artistId || p.bindingGeneration != b.generation || a.state != 2
+                || p.priorAttributionState != a.state || a.generation != b.generation
+                || p.sanctionRecordHash == 0 || p.finalityRecordHash == 0
+                || savedSigner == address(0)
+                || (savedAuthorityClass != 1 && savedAuthorityClass != 3)
+        ) revert Confirmation.InvalidSanctionConfirmation();
+        a.state = 3;
+        _commit(
+            c,
+            keccak256(abi.encode(b, p, savedSigner, savedAuthorityClass)),
+            keccak256(abi.encode(p.collectionId, a)),
+            bytes32(0),
+            bytes32(0)
+        );
+        emit ArtistAttributionStateChanged(
+            1,
+            p.collectionId,
+            3,
+            b.generation,
+            2,
+            c.actor,
+            savedAuthorityClass,
+            p.sanctionRecordHash,
+            p.finalityRecordHash,
+            ""
+        );
+    }
 
     function attributionState(uint256 collectionId) external view returns (uint8, uint64) {
         Attribution storage a = _attributions[collectionId];
@@ -389,7 +430,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
             revert T.InvalidRecord();
         }
         Attribution storage attr = _attributions[p.collectionId];
-        if ((attr.state != 2 && attr.state != 3) || attr.generation != b.generation) {
+        if (
+            !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
+                || attr.generation != b.generation
+        ) {
             revert T.InvalidAttribution(p.collectionId);
         }
         (bytes32 record, bytes32 action, bytes32 stateDelta) = StreamArtistRecordPublicationState.record(
@@ -417,7 +461,10 @@ contract StreamArtistAttributionLifecycle is StreamArtistOwner {
         uint8 authorityClass
     ) private returns (bytes32 record) {
         Attribution storage attr = _attributions[p.collectionId];
-        if (attr.state != 2 || attr.generation != b.generation) {
+        if (
+            !StreamArtistAttributionPolicy.acceptedOrSanctioned(attr.state)
+                || attr.generation != b.generation
+        ) {
             revert T.InvalidAttribution(p.collectionId);
         }
         if (

@@ -3181,6 +3181,7 @@ contract StreamArtistOnboardingTest is
                 uint16(6),
                 uint16(7),
                 uint16(12),
+                uint16(13),
                 uint16(14),
                 uint16(15),
                 uint16(16),
@@ -11961,6 +11962,725 @@ contract StreamArtistOnboardingTest is
             )
         );
         ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
+    // Operation13 runs the actual facade/Coordinator/owners/Archive. Only immutable executed
+    // Finality return values below are prepared boundary facts: these cases do not execute FIN.
+    struct ConfirmationEnvelope {
+        uint16 schema;
+        bytes32 configuration;
+        uint16 operation;
+        address actor;
+        bytes32 transitionHash;
+        T.Snapshot[7] prior;
+        T.Snapshot[7] post;
+        bytes payload;
+    }
+
+    struct ConfirmationPayload {
+        T.Binding binding_;
+        Confirmation.Transition transition;
+        S.Record sanction;
+        address finality;
+        bytes32 finalityCodeHash;
+        Confirmation.FinalityRecordEvidence record;
+        StreamFinalityComponentExpectation[] components;
+        StreamFinalityExecutionWitness execution;
+        StreamFinalitySanctionArchiveWitness archiveWitness;
+        bytes32 rawReadHash;
+        bytes32 replayKey;
+    }
+
+    function _confirmationStored(bytes32 sanctionHash, uint256 count, uint256 uriLength)
+        private
+        returns (Confirmation.Transition memory p, Confirmation.Observation memory o)
+    {
+        address actualFinality = address(sanctionFixture.registry());
+        require(
+            suite.owners[4].code.length <= 24576 && suite.owners[6].code.length <= 24576
+                && StreamArtistConsentFinalityLifecycle(suite.owners[6]).consentWriterExtension()
+                        .code.length <= 24576,
+            "actual Attribution and Consent host/child EIP170"
+        );
+        o.binding_ = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        o.priorAttributionState = 2;
+        o.sanction = ingress.sanctionRecord(sanctionHash);
+        o.components = new StreamFinalityComponentExpectation[](count);
+        StreamFinalityComponentState memory artistFact = ingress.finalityState(1);
+        o.components[0] = StreamFinalityComponentExpectation(
+            artistFact.componentType,
+            artistFact.component,
+            artistFact.interfaceId,
+            artistFact.codeHash,
+            artistFact.moduleVersion,
+            artistFact.manifestHash,
+            artistFact.dataHash
+        );
+        for (uint256 i = 1; i < count; ++i) {
+            o.components[i] = StreamFinalityComponentExpectation(
+                bytes32(i),
+                address(uint160(i + 100)),
+                bytes4(uint32(i)),
+                keccak256(abi.encode(i)),
+                bytes32(i + 1),
+                bytes32(i + 2),
+                bytes32(i + 3)
+            );
+        }
+        for (uint256 i; i < count; ++i) {
+            for (uint256 j = i + 1; j < count; ++j) {
+                if (o.components[j].componentType < o.components[i].componentType) {
+                    StreamFinalityComponentExpectation memory e = o.components[i];
+                    o.components[i] = o.components[j];
+                    o.components[j] = e;
+                }
+            }
+        }
+        string memory uri = string(new bytes(uriLength));
+        bytes32 finalityHash =
+            keccak256(abi.encode("prepared immutable execution boundary", sanctionHash));
+        o.finalityRecord = StreamCollectionFinalityRecord(
+            true,
+            finalityHash,
+            keccak256("stored manifest"),
+            keccak256(bytes(uri)),
+            uri,
+            keccak256(abi.encode(keccak256("6529STREAM_FINALITY_COMPONENTS_V1"), o.components)),
+            actualFinality,
+            1001
+        );
+        o.executionWitness = StreamFinalityExecutionWitness(
+            keccak256("stored executed action"),
+            address(artist),
+            keccak256("stored reason"),
+            keccak256("stored proposer role mutation"),
+            1
+        );
+        o.archiveWitness.proof = StreamFinalitySanctionArchiveProof(
+            sanctionHash,
+            keccak256("stored whole archive artifact"),
+            keccak256("stored original completion")
+        );
+        o.archiveWitness.evidenceHash = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_FINALITY_SANCTION_ARCHIVE_EVIDENCE_V1"),
+                block.chainid,
+                address(core),
+                actualFinality,
+                IStreamFinalityDeploymentBindings(actualFinality).artifactCoverage(),
+                o.archiveWitness.proof
+            )
+        );
+        avm.mockCall(
+            actualFinality,
+            abi.encodeCall(IStreamArtworkFinalityRegistry.collectionFinalityRecord, (1)),
+            abi.encode(o.finalityRecord)
+        );
+        avm.mockCall(
+            actualFinality,
+            abi.encodeCall(IStreamArtworkFinalityRegistry.finalityComponentCount, (1)),
+            abi.encode(count)
+        );
+        avm.mockCall(
+            actualFinality,
+            abi.encodeCall(IStreamArtworkFinalityRegistry.finalityComponents, (1, 0, count)),
+            abi.encode(o.components)
+        );
+        avm.mockCall(
+            actualFinality,
+            abi.encodeCall(
+                IStreamCanonicalArtworkFinality.finalityExecutionWitness, (finalityHash)
+            ),
+            abi.encode(o.executionWitness)
+        );
+        avm.mockCall(
+            actualFinality,
+            abi.encodeCall(
+                IStreamFinalitySanctionArchive.finalitySanctionArchiveWitness, (finalityHash)
+            ),
+            abi.encode(o.archiveWitness)
+        );
+        o = StreamArtistSanctionConfirmationReads.observe(
+            suite,
+            StreamArtistSanctionConfirmationReads.Pins(
+                actualFinality,
+                actualFinality.codehash,
+                address(core).codehash,
+                address(ingress).codehash,
+                2000000
+            ),
+            1
+        );
+        p = Confirmation.Transition(
+            1, artistId, o.binding_.generation, sanctionHash, finalityHash, 2
+        );
+    }
+
+    function _confirmationScope(Confirmation.Transition memory p) private pure returns (bytes32) {
+        bytes32[7] memory w;
+        w[0] = keccak256("6529STREAM_ARTIST_SANCTION_FINALIZATION_TRANSITION_V1");
+        w[1] = bytes32(p.collectionId);
+        w[2] = p.artistId;
+        w[3] = bytes32(uint256(p.bindingGeneration));
+        w[4] = p.sanctionRecordHash;
+        w[5] = p.finalityRecordHash;
+        w[6] = bytes32(uint256(p.priorAttributionState));
+        return keccak256(abi.encode(w));
+    }
+
+    function _confirmationKey(Confirmation.Transition memory p) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                suite.owners[6],
+                keccak256("domain:consent_finality"),
+                keccak256("consent_finality.replay.sanction_finalization_transition_key"),
+                _confirmationScope(p)
+            )
+        );
+    }
+
+    function _confirmationId(Confirmation.Transition memory p, address actor)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(13),
+                actor,
+                _confirmationScope(p)
+            )
+        );
+    }
+
+    function _confirmationAfter(
+        Confirmation.Transition memory p,
+        Confirmation.Observation memory o,
+        address actor,
+        T.Snapshot[7] memory before_
+    ) private view {
+        address actualFinality = address(sanctionFixture.registry());
+        (uint8 state, uint64 generation) =
+            IStreamArtistAttributionOwner(suite.owners[4]).attributionState(1);
+        require(
+            state == 3 && generation == p.bindingGeneration, "actual sanction-confirmed attribution"
+        );
+        for (uint256 i; i < 7; ++i) {
+            T.Snapshot memory current = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+            if (i == 4 || i == 6) {
+                require(
+                    current.revision == before_[i].revision + 1
+                        && current.recordChainTip == before_[i].recordChainTip,
+                    "one commit, no primary record"
+                );
+            } else {
+                require(
+                    keccak256(abi.encode(current)) == keccak256(abi.encode(before_[i])),
+                    "unrelated owner exact"
+                );
+            }
+        }
+        T.ReplayCell memory cell =
+            IStreamArtistOwner(suite.owners[6]).replayCell(_confirmationKey(p));
+        require(
+            cell.commitment == p.sanctionRecordHash && cell.kind == 1 && cell.status == 2
+                && cell.touchedRevision == before_[6].revision + 1,
+            "literal six-field consumed replay lane"
+        );
+        bytes memory raw = archive.artistEvidenceBytesV2(_confirmationId(p, actor), 1);
+        require(
+            raw.length == 3744 + 224 * o.components.length && raw.length < 24576,
+            "independent exact compact Archive size"
+        );
+        ConfirmationEnvelope memory e =
+            abi.decode(bytes.concat(bytes32(uint256(32)), raw), (ConfirmationEnvelope));
+        require(
+            e.schema == 1 && e.configuration == coordinator.configurationHash() && e.operation == 13
+                && e.actor == actor && e.transitionHash == _confirmationScope(p),
+            "actual permissionless archive context"
+        );
+        ConfirmationPayload memory x =
+            abi.decode(bytes.concat(bytes32(uint256(32)), e.payload), (ConfirmationPayload));
+        require(
+            keccak256(abi.encode(x.binding_)) == keccak256(abi.encode(o.binding_))
+                && keccak256(abi.encode(x.transition)) == keccak256(abi.encode(p))
+                && keccak256(abi.encode(x.sanction)) == keccak256(abi.encode(o.sanction))
+                && x.finality == actualFinality && x.finalityCodeHash == actualFinality.codehash
+                && x.record.fullRecordHash == keccak256(abi.encode(o.finalityRecord))
+                && x.record.manifestURIHash
+                    == keccak256(bytes(o.finalityRecord.finalityManifestURI))
+                && x.record.finalityRecordHash == p.finalityRecordHash
+                && x.rawReadHash == o.rawReadHash && x.rawReadHash == _confirmationTranscript(o)
+                && x.record.manifestContentHash == o.finalityRecord.manifestContentHash
+                && x.record.componentsHash == o.finalityRecord.componentsHash
+                && x.record.manifestPointer == o.finalityRecord.manifestPointer
+                && x.record.finalizedAt == o.finalityRecord.finalizedAt
+                && x.replayKey == _confirmationKey(p),
+            "exact saved association/record/transcript archival"
+        );
+        require(
+            keccak256(abi.encode(x.components)) == keccak256(abi.encode(o.components))
+                && keccak256(abi.encode(x.execution)) == keccak256(abi.encode(o.executionWitness))
+                && keccak256(abi.encode(x.archiveWitness))
+                    == keccak256(abi.encode(o.archiveWitness)),
+            "entire ordered component and both witness facts archived"
+        );
+    }
+
+    function _confirmationTranscript(Confirmation.Observation memory o)
+        private
+        view
+        returns (bytes32 h)
+    {
+        address f = address(sanctionFixture.registry());
+        h = _confirmationTraceStep(
+            h,
+            suite.owners[0],
+            abi.encodeCall(IStreamArtistBindingOwner.binding, (1)),
+            abi.encode(o.binding_)
+        );
+        h = _confirmationTraceStep(
+            h,
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(2), o.binding_.generation)
+        );
+        StreamFinalityComponentExpectation memory e;
+        for (uint256 i; i < o.components.length; ++i) {
+            if (o.components[i].componentType == keccak256("ARTIST_SANCTION")) e = o.components[i];
+        }
+        h = _confirmationTraceStep(
+            h,
+            address(ingress),
+            abi.encodeCall(IStreamArtworkFinalityComponent.finalityState, (1)),
+            abi.encode(
+                StreamFinalityComponentState(
+                        true,
+                        e.componentType,
+                        e.component,
+                        e.interfaceId,
+                        e.codeHash,
+                        e.moduleVersion,
+                        e.manifestHash,
+                        e.dataHash
+                    )
+            )
+        );
+        h = _confirmationTraceStep(
+            h,
+            suite.owners[6],
+            abi.encodeCall(IStreamArtistSanctionOwner.sanctionRecord, (o.sanction.recordHash)),
+            abi.encode(o.sanction)
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeCall(IStreamArtworkFinalityRegistry.collectionFinalityRecord, (1)),
+            abi.encode(o.finalityRecord)
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeCall(IStreamArtworkFinalityRegistry.finalityComponentCount, (1)),
+            abi.encode(o.components.length)
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeCall(
+                IStreamArtworkFinalityRegistry.finalityComponents, (1, 0, o.components.length)
+            ),
+            abi.encode(o.components)
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeWithSelector(IStreamFinalityDeploymentBindings.coreReads.selector),
+            abi.encode(address(core))
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeWithSelector(IStreamFinalityDeploymentBindings.sanctionReads.selector),
+            abi.encode(address(ingress))
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeWithSelector(IStreamFinalityDeploymentBindings.artifactCoverage.selector),
+            abi.encode(IStreamFinalityDeploymentBindings(f).artifactCoverage())
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeCall(
+                IStreamCanonicalArtworkFinality.finalityExecutionWitness,
+                (o.finalityRecord.finalityRecordHash)
+            ),
+            abi.encode(o.executionWitness)
+        );
+        h = _confirmationTraceStep(
+            h,
+            f,
+            abi.encodeCall(
+                IStreamFinalitySanctionArchive.finalitySanctionArchiveWitness,
+                (o.finalityRecord.finalityRecordHash)
+            ),
+            abi.encode(o.archiveWitness)
+        );
+    }
+
+    function _confirmationTraceStep(
+        bytes32 previous,
+        address target,
+        bytes memory callData,
+        bytes memory result
+    ) private pure returns (bytes32) {
+        bytes32[4] memory words;
+        words[0] = previous;
+        words[1] = bytes32(uint256(uint160(target)));
+        words[2] = keccak256(callData);
+        words[3] = keccak256(result);
+        return keccak256(abi.encode(words));
+    }
+
+    function _confirmationSnapshots() private view returns (T.Snapshot[7] memory s) {
+        for (uint256 i; i < 7; ++i) {
+            s[i] = IStreamArtistOwner(suite.owners[i]).ownerStateSnapshotV2();
+        }
+    }
+
+    function testConfirmationActualOwnersExactReplayEventArchiveAndRepeatRejection() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        vm.recordLogs();
+        ingress.confirmSanctionFinalized(1);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _confirmationAfter(p, o, address(this), before_);
+        uint256 found;
+        bytes32 topic = keccak256(
+            "ArtistAttributionStateChanged(uint16,uint256,uint8,uint64,uint8,address,uint8,bytes32,bytes32,string)"
+        );
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].topics.length != 0 && logs[i].topics[0] == topic) {
+                require(
+                    logs[i].emitter == suite.owners[4] && logs[i].topics.length == 3
+                        && logs[i].topics[1] == bytes32(uint256(1))
+                        && logs[i].topics[2] == bytes32(uint256(3)),
+                    "exact op13 event topics"
+                );
+                require(
+                    keccak256(logs[i].data)
+                        == keccak256(
+                            abi.encode(
+                                uint16(1),
+                                p.bindingGeneration,
+                                uint8(2),
+                                address(this),
+                                uint8(1),
+                                hash,
+                                p.finalityRecordHash,
+                                ""
+                            )
+                        ),
+                    "exact event actor/class/reasons"
+                );
+                ++found;
+            }
+        }
+        require(found == 1, "one confirmation event");
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(Confirmation.InvalidSanctionConfirmation.selector));
+        ingress.confirmSanctionFinalized(1);
+        require(_roots() == roots, "already elevated does not append again");
+        require(
+            ingress.acceptedArtist(1) == address(artist),
+            "sanctioned current artist read remains operative"
+        );
+    }
+
+    function testConfirmationMaximumCompactArchiveAndActualSafePermissionlessCall() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 32, 32768);
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistSanctionConfirmation.confirmSanctionFinalized, (1)),
+                0
+            ),
+            "Safe permissionless confirmation"
+        );
+        _confirmationAfter(p, o, address(artist), before_);
+    }
+
+    function testConfirmationLateActualArchiveRollsBothOwnersAndSameSafeCallRetries() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        bytes32 roots = _roots();
+        uint256 nonce = artist.nonce();
+        bytes memory callData =
+            abi.encodeCall(IStreamArtistSanctionConfirmation.confirmSanctionFinalized, (1));
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), callData);
+        require(
+            _roots() == roots && artist.nonce() == nonce
+                && IStreamArtistOwner(suite.owners[6]).replayCell(_confirmationKey(p)).status == 0,
+            "atomic rollback including Safe/replay"
+        );
+        vm.roll(1001);
+        require(executeSafe(artist, keys, address(ingress), 0, callData, 0), "same Safe call retry");
+        _confirmationAfter(p, o, address(artist), before_);
+    }
+
+    function testConfirmationPinnedHistoryAfterPointerReplacementAndActualRotation() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        _newRotationSafe(29001);
+        _executeTimedRotation(_stageRotation(0));
+        _adoptRotatedSafe();
+        core.set(keccak256("ARTWORK_FINALITY_REGISTRY"), address(0xBEEF), false);
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        ingress.confirmSanctionFinalized(1);
+        _confirmationAfter(p, o, address(this), before_);
+        require(
+            ingress.sanctionRecord(hash).signer != address(artist),
+            "permanent retired sanction signer"
+        );
+    }
+
+    function testConfirmationSavedSanctionAfterZeroCapabilityEstateDoesNotGrantPolicy() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        _estateActivateAndAdopt(0);
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        ingress.confirmSanctionFinalized(1);
+        _confirmationAfter(p, o, address(this), before_);
+        T.PolicyConsent memory policy = T.PolicyConsent(1, PHASE, POLICY);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.policyConsentDigest(policy, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(2))
+        );
+        ingress.recordPolicyConsent(policy, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "sanctioned status cannot grant absent capability"
+        );
+    }
+
+    function testConfirmationIdentityContestKeepsHistoricalExecutionConsumable() public {
+        _accept();
+        _selfGuardian();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual identity contest"
+        );
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        ingress.confirmSanctionFinalized(1);
+        _confirmationAfter(p, o, address(this), before_);
+    }
+
+    function testConfirmationConsumedLaneCannotReplayThroughRestoredAcceptedRead() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p,) = _confirmationStored(hash, 1, 9);
+        ingress.confirmSanctionFinalized(1);
+        bytes32 roots = _roots();
+        // Force the read boundary only; the permanent consumed key must still reject before Attribution.
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(2), p.bindingGeneration)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, _confirmationKey(p)));
+        ingress.confirmSanctionFinalized(1);
+        require(_roots() == roots, "permanent replay lane survives fabricated prior-state read");
+    }
+
+    function testConfirmationWrongAssociationDisputeAndAlteredRuntimeRejectBeforeWrites() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        bytes32 roots = _roots();
+        for (uint8 state = 3; state <= 5; ++state) {
+            avm.mockCall(
+                suite.owners[4],
+                abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+                abi.encode(state, p.bindingGeneration)
+            );
+            vm.expectRevert(
+                abi.encodeWithSelector(Confirmation.InvalidSanctionConfirmation.selector)
+            );
+            ingress.confirmSanctionFinalized(1);
+            require(_roots() == roots, "nonaccepted attribution rejects");
+        }
+        avm.mockCall(
+            suite.owners[4],
+            abi.encodeCall(IStreamArtistAttributionOwner.attributionState, (1)),
+            abi.encode(uint8(2), p.bindingGeneration)
+        );
+        for (uint256 i; i < 3; ++i) {
+            T.Binding memory bad = abi.decode(abi.encode(o.binding_), (T.Binding));
+            if (i == 0) bad.artistId = keccak256("corrected artist");
+            else if (i == 1) ++bad.generation;
+            else bad.bindingHash = keccak256("corrected binding");
+            avm.mockCall(
+                suite.owners[0],
+                abi.encodeCall(IStreamArtistBindingOwner.binding, (1)),
+                abi.encode(bad)
+            );
+            (bool ok,) = address(ingress)
+                .call(
+                    abi.encodeCall(IStreamArtistSanctionConfirmation.confirmSanctionFinalized, (1))
+                );
+            require(!ok && _roots() == roots, "corrected association cannot consume old sanction");
+        }
+        avm.mockCall(
+            suite.owners[0],
+            abi.encodeCall(IStreamArtistBindingOwner.binding, (1)),
+            abi.encode(o.binding_)
+        );
+        address finality = address(sanctionFixture.registry());
+        bytes memory saved = finality.code;
+        vm.etch(finality, hex"00");
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidBinding.selector));
+        ingress.confirmSanctionFinalized(1);
+        require(_roots() == roots, "wrong immutable Finality runtime rejects");
+        vm.etch(finality, saved);
+        avm.clearMockedCalls();
+        (Confirmation.Transition memory restoredP, Confirmation.Observation memory restoredO) =
+            _confirmationStored(hash, 1, 9);
+        require(
+            keccak256(abi.encode(restoredP)) == keccak256(abi.encode(p))
+                && keccak256(abi.encode(restoredO)) == keccak256(abi.encode(o))
+                && _roots() == roots,
+            "restored historical evidence and actual owner reads"
+        );
+        T.Snapshot[7] memory before_ = _confirmationSnapshots();
+        ingress.confirmSanctionFinalized(1);
+        _confirmationAfter(p, o, address(this), before_);
+    }
+
+    function testConfirmationSanctionedConsentMintCommercialAndNewAttestationsRemainOperative()
+        public
+    {
+        Sale.Consent memory sale = _saleFixture(1);
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        _confirmationStored(hash, 1, 9);
+        ingress.confirmSanctionFinalized(1);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        ingress.recordSaleConsent(sale, _saleAuthorization(sale));
+        _requireSale(sale);
+        (,,, address current, uint8 class_, uint8 status,) = ingress.collectionArtistAuthority(1);
+        require(
+            current == address(artist) && class_ == 1 && status == 1,
+            "typed commercial read admits sanctioned attribution"
+        );
+        _attestations();
+        require(
+            _contentConsent(keccak256("sanctioned new content")) != 0,
+            "new content retains actual principal capability gate"
+        );
+    }
+
+    function testConfirmationNewOwnerAndFixedWriterCallbacksRejectDirectSafe() public {
+        _accept();
+        (Q.Request memory q,) = _sanctionPrepared();
+        bytes32 hash = ingress.recordArtistSanction(q, _sanctionAuthorization(q));
+        (Confirmation.Transition memory p, Confirmation.Observation memory o) =
+            _confirmationStored(hash, 1, 9);
+        bytes memory consent = abi.encodeCall(
+            IStreamArtistConsentConfirmationOwner.consumeSanctionFinalization,
+            (
+                T.ActionContext(
+                    13, address(artist), IStreamArtistOwner(suite.owners[6]).ownerStateSnapshotV2()
+                ),
+                o.binding_,
+                p
+            )
+        );
+        bytes memory attribution = abi.encodeCall(
+            IStreamArtistAttributionConfirmationOwner.confirmSanctionFinalized,
+            (
+                T.ActionContext(
+                    13, address(artist), IStreamArtistOwner(suite.owners[4]).ownerStateSnapshotV2()
+                ),
+                o.binding_,
+                p,
+                o.sanction.signer,
+                o.sanction.authorityClass
+            )
+        );
+        address writer =
+            StreamArtistConsentFinalityLifecycle(suite.owners[6]).consentWriterExtension();
+        address facadeWriter = ingress.registryWriterExtension();
+        bytes memory facadeCall =
+            abi.encodeCall(IStreamArtistSanctionConfirmation.confirmSanctionFinalized, (1));
+        bytes memory coordinatorCall = abi.encodeCall(
+            IStreamArtistSanctionConfirmationCoordinator.coordinateConfirmSanctionFinalized,
+            (address(artist), 1)
+        );
+        bytes32 roots = _roots();
+        uint256 nonce = artist.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[6], consent);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(writer, consent);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(suite.owners[4], attribution);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(facadeWriter, facadeCall);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(coordinator), coordinatorCall);
+        require(
+            _roots() == roots && artist.nonce() == nonce,
+            "direct rejected callbacks preserve all state"
+        );
+        require(
+            ingress.supportsInterface(type(IStreamArtistSanctionConfirmation).interfaceId),
+            "explicit public confirmation interface"
+        );
     }
 
     function testSanctionFirstActualOwnerAndFinalityPreparationSafeSignature() public {

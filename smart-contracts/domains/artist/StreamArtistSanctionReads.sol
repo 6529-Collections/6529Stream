@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionPolicy.sol";
 
 import "../../interfaces/stream/artist/IStreamArtistSanction.sol";
 import "../../interfaces/stream/artist/IStreamArtistBindingOwner.sol";
@@ -20,7 +21,7 @@ library StreamArtistSanctionReads {
             IStreamArtistAttributionOwner(suite.owners[4]).attributionState(scope.collectionId);
         if (
             !b.accepted || b.artistId == 0 || b.bindingHash == 0 || generation != b.generation
-                || (state != 2 && state != 3)
+                || !StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
         ) return r;
         IStreamArtistSanctionOwner owner = IStreamArtistSanctionOwner(suite.owners[6]);
         bytes32 hash = owner.sanctionForAssociation(

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "./StreamArtistIdentityDismissalOperations.sol";
 import "./StreamArtistFinalityAdmission.sol";
 import "./StreamArtistSanctionOperations.sol";
+import "./StreamArtistSanctionConfirmationOperations.sol";
 import "../../interfaces/stream/artist/IStreamArtistFinalityBinding.sol";
 import "./StreamArtistIdentityOperations.sol";
 import "./StreamArtistOnboardingOperations.sol";
@@ -150,6 +151,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(6),
                 uint16(7),
                 uint16(12),
+                uint16(13),
                 uint16(14),
                 uint16(15),
                 uint16(16),
@@ -204,6 +206,27 @@ contract StreamArtistOnboardingCoordinator is
     ) external operation returns (bytes32) {
         return StreamArtistSanctionOperations.record(
             _economicContext(), _sanctionPins(), actor, p, a
+        );
+    }
+
+    function coordinateConfirmSanctionFinalized(address actor, uint256 collectionId)
+        external
+        operation
+    {
+        (uint256 cap,, uint8 failure, uint64 revision) = IStreamGasParameterHost(_suite.registry)
+            .gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_FINALITY_READ_GAS"));
+        if (cap == 0 || failure != 2 || revision == 0) revert T.InvalidBinding();
+        StreamArtistSanctionConfirmationOperations.confirm(
+            _economicContext(),
+            StreamArtistSanctionConfirmationReads.Pins(
+                finalityRegistry,
+                finalityRegistryCodeHash,
+                _runtimeHashes[9],
+                _runtimeHashes[7],
+                cap
+            ),
+            actor,
+            collectionId
         );
     }
 

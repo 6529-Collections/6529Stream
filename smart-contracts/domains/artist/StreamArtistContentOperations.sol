@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistAttributionPolicy.sol";
 
 import "./StreamArtistContentHashes.sol";
 import "./StreamArtistCurrentAuthorityFacts.sol";
@@ -158,7 +159,9 @@ library StreamArtistContentOperations {
         (address authority, uint8 class_, uint8 status,) =
             IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);
         if (
-            !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
+            !b.accepted
+                || (!StreamArtistAttributionPolicy.acceptedOrSanctioned(state)
+                    && !(defensive && state == 4)) || generation != b.generation
                 || b.consentMode != 1
                 || !StreamArtistAuthorityPolicy.ordinary(class_, status, defensive)
                 || authority == address(0)

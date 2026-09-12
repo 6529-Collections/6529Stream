@@ -59,6 +59,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistRecordPublication,
     IStreamArtistFinalityBinding,
     IStreamArtistSanction,
+    IStreamArtistSanctionConfirmation,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     StreamModuleBase,
@@ -78,6 +79,10 @@ contract StreamArtistOnboardingRegistry is
         external
         returns (bytes32)
     {
+        _forwardRegistryWriter();
+    }
+
+    function confirmSanctionFinalized(uint256 collectionId) external {
         _forwardRegistryWriter();
     }
 
@@ -231,6 +236,7 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistRecordPublication).interfaceId
             || id == type(IStreamArtistFinalityBinding).interfaceId
             || id == type(IStreamArtistSanction).interfaceId
+            || id == type(IStreamArtistSanctionConfirmation).interfaceId
             || id == type(IStreamFinalitySanctionReads).interfaceId
             || id == type(IStreamArtistSanctionArchiveFacts).interfaceId
             || id == type(IStreamArtworkFinalityComponent).interfaceId

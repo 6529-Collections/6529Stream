@@ -14,6 +14,7 @@ import "./StreamArtistConsentStorage.sol";
 import "./StreamArtistConsentWriterExtension.sol";
 import "./StreamArtistSanctionState.sol";
 import "./StreamArtistConsentReadEncoding.sol";
+import "../../interfaces/stream/artist/IStreamArtistSanctionConfirmation.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -33,6 +34,14 @@ contract StreamArtistConsentFinalityLifecycle is
     error StaleOwnerSnapshot(bytes32 domainId);
     error Unauthorized(address caller);
     address public immutable consentWriterExtension;
+
+    function consumeSanctionFinalization(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Confirmation.Transition calldata p
+    ) external returns (bytes32) {
+        _forwardConsentWriter();
+    }
 
     function recordSanction(
         T.ActionContext calldata c,

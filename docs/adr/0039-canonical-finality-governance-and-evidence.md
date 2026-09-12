@@ -260,6 +260,62 @@ as the historic signer. Confirmation consumes no Identity signature nonce,
 records no living-authority action and fabricates no new primary sanction.
 Scoped finality does not elevate collection attribution.
 
+For canonical operation 13, confirmation uses the Coordinator's constructor-bound
+original Finality registry and runtime, its immutable executed COLLECTION record,
+canonical stored component array, and recorded governance and archive witnesses.
+It does not follow a replacement Core finality pointer or revalidate current
+discovery, provider readiness, coverage, observer roles or signer capabilities.
+Repeat those historical reads and deployment identities under the operation lock,
+require exact raw bytes and decoded facts, then recheck the live binding and
+accepted Attribution state before either owner writes.
+
+This pre-genesis decision explicitly supersedes the
+`row_predicates.row_13` requirement `verify.currentRouteMatches equals true` and
+the corresponding `reread_policy.row_13` requirement in the
+[frozen finality dependency supplement](../../release-artifacts/issue-670-adapter-freeze/finality-dependency-supplement-v1.json)
+for canonical operation 13. The frozen packet remains unchanged.
+`verifyFinality` remains a current-route diagnostic, with no fallback role in
+confirmation admission. Other applicable strict ABI, deployment, repeated-read,
+association and event requirements remain. Canonical confirmation must not be
+represented as literal conformance with those two retired packet predicates.
+
+ConsentFinality owns the single-use finalization-transition replay key, followed
+atomically by Attribution's accepted-to-sanctioned state change. Each owner
+checks operation 13 and its exact snapshot and commits once. Neither callback
+creates a new primary record. The newly explicit replay scope is
+`keccak256(abi.encode(keccak256("6529STREAM_ARTIST_SANCTION_FINALIZATION_TRANSITION_V1"), collectionId, artistId, bindingGeneration, sanctionRecordHash, finalityRecordHash, priorAttributionState))`.
+Those six fields retain their frozen order; the prior state is the actually
+observed accepted state 2. The existing owner V2 replay wrapper binds the scope
+to its chain, facade, Coordinator, Archive and Consent owner using surface
+`consent_finality.replay.sanction_finalization_transition_key`. The historical
+mechanics packet left that exact replay scope schema unresolved; this tag and
+scope encoding are new implementation definitions. Already sanctioned state 3
+cannot append a second confirmation. The Attribution event uses the sanction
+record as `recordHash`, executed finality record as `reasonHash`, empty reasonURI,
+actual caller as actor and the saved sanction authority class. Late owner or
+Archive failure reverts both revisions, replay, state change and event.
+
+The observation decoder admits at most 32 ordered components and a conservatively
+bounded 32,768-byte stored URI. The latter is a read ceiling, not a claim that
+such a URI fits the registry's finalization calldata limit. Both complete record
+reads validate its exact ABI offsets, scalar widths, padding and URI hash. The
+operation Archive carries the static record facts, its URI hash and
+`keccak256(abi.encode(fullStoredRecord))`; the original complete URI remains in
+the pinned immutable Finality record. Together with the ordered components,
+saved sanction, execution and archive witnesses, and read transcript, this makes
+the operation evidence exactly `3744 + 224 * componentCount` bytes (10,912 bytes
+at 32 components), within ArchiveV2's 24,575-byte limit. The operation evidence
+does not replace the separate whole-artifact archival requirement for finality.
+
+`StreamArtistAttributionPolicy.acceptedOrSanctioned` applies only to Attribution
+states 2 and 3. It composes the Onboarding accepted-binding and artist reads,
+content/sale binding reads, commercial association read, and attestation,
+publication and saved-sanction reads. Every existing Identity classification,
+current signer, binding generation, capability and consent predicate remains
+separate. Defensive state-4 paths retain their existing explicit exceptions;
+confirmation itself still requires prior Attribution state 2. No Identity state
+or authority class is interpreted using this Attribution predicate.
+
 Required controls distinguish new sanction rejection during Identity contest
 from preserved historical sanction/current consumption, and separately prove
 that a real collection dispute stops consumption. Rotation/estate continuity
