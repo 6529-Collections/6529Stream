@@ -122,7 +122,7 @@ contract StreamCurrentGovernanceStagePlanTest is StreamCurrentGovernanceBootstra
         return StreamGovernanceStagePlan.scheduling(p, StreamGovernanceStagePlan.planHash(p));
     }
 
-    function _initialize() private {
+    function _initialize() internal {
         (SystemManifestBootstrapBinding memory binding, GenesisBatch[] memory batches) = _plan();
         configuration.executor.commitGenesisPlan(configuration.executor.hashGenesisPlan(binding, batches));
         configuration.executor.initializeGenesis(binding, batches);
@@ -139,7 +139,7 @@ contract StreamCurrentGovernanceStagePlanTest is StreamCurrentGovernanceBootstra
     }
 
     function _build(bytes32 stage, GenesisBatch memory batch)
-        private view returns (StreamGovernanceStagePlan.Plan memory)
+        internal view returns (StreamGovernanceStagePlan.Plan memory)
     {
         uint64 ready = uint64(block.timestamp + configuration.executor.minimumDelay(batch.actionClass) + 1 hours);
         return StreamGovernanceStagePlan.build(
@@ -148,7 +148,7 @@ contract StreamCurrentGovernanceStagePlanTest is StreamCurrentGovernanceBootstra
         );
     }
 
-    function _schedule(StreamGovernanceStagePlan.Plan memory p) private returns (bytes32 id) {
+    function _schedule(StreamGovernanceStagePlan.Plan memory p) internal returns (bytes32 id) {
         StreamGovernanceStagePlan.NextCall memory publication = StreamGovernanceStagePlan.publication(p, StreamGovernanceStagePlan.planHash(p));
         require(publication.caller == address(0), "publication is permissionless");
         require(executeSafe(governor, signers, publication.target, publication.value, publication.data, 0), "Safe publication");
