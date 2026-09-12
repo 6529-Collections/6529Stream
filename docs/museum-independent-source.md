@@ -98,8 +98,10 @@ python -m tools.museum.independent_source --anchor schemas/museum/independent-so
 For a read-only online capture, set an environment variable containing the
 explicitly trusted endpoint and use `--rpc-env VARIABLE_NAME` instead of the
 transcript arguments. The endpoint and credentials are excluded from retained
-files and error messages. Only four RPC methods are available: chain ID,
-block-by-hash, block-anchored code, and block-anchored calls. HTTPS is required
+files and error messages. The state capture uses four RPC methods: chain ID,
+block-by-hash, block-anchored code, and block-anchored calls. The additive
+[publication-order profile](museum-independent-publications.md) also permits
+read-only transaction-receipt retrieval through the shared transport. HTTPS is required
 except for loopback endpoints. No public-chain write command is provided.
 
 The explicit implementation bounds are 1,024 declared lanes, 4,096 records,

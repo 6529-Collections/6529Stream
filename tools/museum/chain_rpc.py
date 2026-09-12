@@ -13,7 +13,7 @@ from .canonical import MuseumError, dumps, keccak256, loads
 
 MAX_RESPONSE = 1048576
 MAX_TRANSCRIPT = 67108864
-METHODS = {"eth_chainId", "eth_getBlockByHash", "eth_call", "eth_getCode"}
+METHODS = {"eth_chainId", "eth_getBlockByHash", "eth_call", "eth_getCode", "eth_getTransactionReceipt"}
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):

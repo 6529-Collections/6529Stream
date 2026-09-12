@@ -196,6 +196,7 @@ def main():
     parser.add_argument("--artifacts", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--anvil", default="anvil")
+    parser.add_argument("--publications", action="store_true", help="Also retain exact receipt/header publication evidence")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     with socket.socket() as sock:
@@ -233,6 +234,32 @@ def main():
             (args.output / "source-capture.json").write_bytes(snapshot)
             replay = IndependentSourceAdapter(anchor, ReplayTransport(transcript, keccak256(transcript)), provenance="trusted_rpc")
             require(replay.snapshot() == snapshot, "offline replay byte parity")
+            if args.publications:
+                from .independent_publication import EVENT_DATA, EVENT_TOPIC, PROFILE as PUBLICATION_PROFILE, IndependentPublicationAdapter
+                captured = json.loads(snapshot)
+                selected = {r["recordHash"] for r in captured["records"]}
+                hints = []
+                for tx in fixture.receipts:
+                    for event in tx["receipt"]["logs"]:
+                        if event["address"] == adapter.a["host"] and event["topics"] and event["topics"][0] == EVENT_TOPIC:
+                            h = decode(EVENT_DATA, hex_bytes(event["data"]))[1]
+                            if h in selected:
+                                hints.append({"recordHash": h, "transactionHash": tx["transactionHash"]})
+                hints_raw = dumps({"profile": PUBLICATION_PROFILE, "records": hints})
+                publication = IndependentPublicationAdapter(adapter, hints_raw, RpcTransport(endpoint), provenance="trusted_rpc")
+                try:
+                    publication_bytes = publication.snapshot()
+                except Exception:
+                    (args.output / "failed-publication-transcript.json").write_bytes(publication.reader.transcript())
+                    (args.output / "publication-hints.json").write_bytes(hints_raw)
+                    raise
+                publication_transcript = publication.reader.transcript()
+                (args.output / "publication-hints.json").write_bytes(hints_raw)
+                (args.output / "publication-transcript.json").write_bytes(publication_transcript)
+                (args.output / "publications.json").write_bytes(publication_bytes)
+                publication_replay = IndependentPublicationAdapter(replay, hints_raw,
+                    ReplayTransport(publication_transcript, keccak256(publication_transcript)), provenance="trusted_rpc")
+                require(publication_replay.snapshot() == publication_bytes, "publication replay byte parity")
             print(dumps({"status": "PASS", "environment": "local_evm_fixture", "captureHash": keccak256(snapshot),
                          "transcriptHash": keccak256(transcript), "deploymentEvidenceHash": keccak256(evidence)}).decode())
         finally:

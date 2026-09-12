@@ -49,6 +49,12 @@ provenance. Its local-EVM rehearsal is separate from the fixture projections and
 packages above. Other authority lanes and semantic recorded-state composition
 remain open. A mode field or reviewer name is not evidence.
 
+The additive [publication-order capture](../../docs/museum-independent-publications.md)
+joins those records to exact events, successful receipts and parent-linked block
+headers. It preserves cross-lane publication order without inferring semantic
+issuer identity. The guide includes the offline replay command and the separate
+local rehearsal; no new Python dependency is needed.
+
 The synthetic selection harness uses a separate review test wire
 (`assertionSelector`, `assertionHash`, `disposition`) to exercise authenticated
 input relationships. It is not the canonical family write payload. Every policy
