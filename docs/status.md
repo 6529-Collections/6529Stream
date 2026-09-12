@@ -19,6 +19,15 @@ transfer. The [public instance evidence](../deployments/current/sepolia-2026-09-
 records exact source, deployed runtime, configuration and transaction readbacks.
 It is separate from the historical and production acceptance gates below.
 
+The next full-v1 implementation is tracked in the
+[active delivery ledger](../ops/V1_DELIVERY.md). Succession directives and
+successor records are source-integrated with 185 independently reviewed domain
+tests. A separate eleven-case current-contract run proves four identity-dispute
+governance/Safe workflows and seven retained entropy workflows; it predates the
+succession source. Dismissal has an accepted
+[extension design](architecture/artist-operation-extension-v1.md), while its
+source, wider lifecycle and new candidate acceptance remain in progress.
+
 The historical Gate A regression/evidence baseline records:
 
 - The checked fresh-contributor path in

@@ -7,9 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added succession directives and successor designations with disjoint authority
+  masks, defensive successor standing and typed record/read interfaces. The
+  185-case domain suite, prior interfaces/storage and eight actual constructor
+  traces pass independent review under the artist IR profile.
+- Added actual Safe/Executor identity-dispute coverage for delayed arbitration,
+  a role grant followed by a contest in the same batch, role-loss rollback,
+  mint denial and existing NFT transfer. Four new cases and seven retained
+  entropy cases pass independent review on their pre-succession snapshot.
 - Recorded the explicit identity-contest dismissal design in ADR 0029: a new
   operation 58 closes adjudicated provisional cohorts while preserving historical
-  records and consumed replay state. Implementation remains pending.
+  records and consumed replay state. The additive inventory and hostile checker
+  fixtures are recorded separately; implementation remains pending.
 - Added governed reveal timing with a permissionless Safe keeper request after
   the effective SLO, live request-timeout raises and strict deadline boundaries.
   Fifty-four domain tests, thirty actual-Core metadata regressions and both
@@ -24,7 +33,7 @@ the release policy in `docs/release-policy.md`.
 - Added artist identity-compromise filings by eligible guardians, prior
   authorities and a staged arbiter, with immutable contest records and
   provisional-cohort consequences. The 159-case domain suite passes independent
-  review; actual governance composition and dismissal/recovery remain underway.
+  review; actual governance composition now passes, while dismissal/recovery remain underway.
 - Added declared collection reveal-fee policies, separate escrow and requester
   credits, canonical operational roles and typed provider quotes. Forty-four
   focused cases and thirty actual-Core metadata regressions pass independent

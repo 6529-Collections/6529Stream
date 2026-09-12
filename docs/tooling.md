@@ -29,6 +29,13 @@ without recompiling Solidity. Solidity development does not require Node.js.
 
 ## Pick the relevant tests
 
+The new [artist operation extension](architecture/artist-operation-extension-v1.md)
+has a separate design check: `python -m tools.protocol.check_artist_operation_extension`
+and `python -m tools.protocol.test_artist_operation_extension`. It preserves the
+historical 57-operation packets and derives the additive 58-row inventory.
+Its implementation gate remains closed until matching source and execution
+evidence exist; it is not a substitute for the current test suite.
+
 ```text
 python scripts/dev.py test --match-contract StreamCurrentStackTest
 python scripts/dev.py test --suite unit --match-test testExample

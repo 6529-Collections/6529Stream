@@ -91,3 +91,28 @@ must nevertheless include the child contracts and all linked library bindings.
 
 No live migration, upgrade route or release-readiness claim follows from this
 decision. Existing immutable testnet evidence remains tied to its original line.
+
+## Succession constructor addendum
+
+Operations 36/37 keep this fixed-extension model. The existing `grantDelegation`
+writer joins Identity's fixed writer extension with the same public ABI,
+physical storage, host/Coordinator guards, owner commit and emitted record.
+
+To keep argument-inclusive Registry initcode deployable, its constructor uses
+the compiler-linked `StreamArtistRegistryExtensionDeployment.deployReader(address)`
+library to create the existing reader. The library executes in the Registry
+context: Registry remains the creator, its writer remains child nonce 1 and its
+reader remains child nonce 2. The reader retains the exact host and Coordinator
+arguments. No constructor input, mutable route or runtime authority is added.
+
+The accepted succession snapshot proves eight actual CREATEs, all linked code
+and immutable pins, and all 87 production runtimes. Identity measures 23,918
+runtime bytes and 48,598 bytes of initcode including arguments; Registry measures
+23,627 and 36,847 respectively. These are scoped measurements for `8227e0b6`.
+Deployment inventory and later current-contract composition must include the
+new library and their own matching constructor evidence.
+
+The supported artist profile remains Solidity 0.8.19, via IR, optimizer 200,
+Paris, with bytecode hash and CBOR disabled. Both the prior and new non-IR
+snapshots retain the existing stack-depth failure in `StreamArtistRotationState.stage`;
+the succession result does not establish a new non-IR deployment profile.

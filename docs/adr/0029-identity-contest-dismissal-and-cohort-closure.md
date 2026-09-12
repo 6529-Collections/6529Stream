@@ -1,7 +1,8 @@
 # ADR 0029: Identity-contest dismissal and cohort closure
 
-Status: Accepted design for the undeployed full-v1 implementation. Source,
-effective operation inventory and runtime acceptance remain pending.
+Status: Accepted design for the undeployed full-v1 implementation. The
+[effective extension design](../architecture/artist-operation-extension-v1.md)
+is recorded and checked; source and runtime acceptance remain pending.
 
 Date: 12 September 2026. Delivery issue: [#743](https://github.com/6529-Collections/6529Stream/issues/743).
 
@@ -37,12 +38,28 @@ recorded reason must match the dismissal. Use the bounded governance witness
 rules established for operation 33, including batches. A Safe holding the role
 uses this delayed route; a direct Safe call does not replace it.
 
-Bind the exact current contest, artist, incumbent address and authority class,
-pre-contest status, evidence, reason, expected resolution head and relevant
-transition facts. Reject stale, foreign, superseded or already resolved
-contests. Consume contest-resolution and action replay independently. Append
-one immutable dismissal record and event, retaining the original contest and
-all its evidence.
+Bind the exact current contest cause, artist, incumbent address and authority
+class, pre-contest status, evidence, reason, expected cause/resolution heads
+and relevant transition facts. Reject stale, foreign, superseded or already
+resolved causes. Consume cause-resolution and action replay independently.
+Append one immutable dismissal record and event, retaining the original cause
+and all its evidence.
+
+Both a rotation veto (operation 31) and an identity filing (operation 33) can
+set the identity to CONTESTED. Append Identity-owned typed cause evidence on
+both entry paths: cause kind/reference, actual actor and reason, incumbent
+address/class and prior status captured at entry, relevant pending/executed
+cohort and prior cause head. Operation 33 references its actual contest record;
+operation 31 references the actual vetoed rotation. Preserve operation 31's
+`NONE` normative primary-record semantics and the existing `Contest.Record`
+tuple. Supplemental cause evidence must not fabricate an operation-33 filing
+or change either historical signature/record preimage.
+
+An operation-31 cause is sufficient for dismissal when it is the exact current
+cause; requiring an operation-33 record would strand a veto-contested identity.
+Capture the actor explicitly: a rotation's old address is not necessarily its
+vetoer. An untyped reference, foreign rotation, mismatched kind or reconstructed
+incumbent cannot substitute for this owner-held evidence.
 
 Restore the captured pre-contest status under the same incumbent. The first
 implementation may support the currently implemented ACTIVE artist profile
@@ -117,7 +134,7 @@ financial entitlements, finality, defensive freezes, delegation grants,
 principal nonces or digest revocations. Restored ordinary actions remain
 subject to those retained restrictions.
 
-Optional bad-faith standing removal must name the filing prior address and
+Optional bad-faith standing removal must name the cause's filing/vetoing prior address and
 its exact retirement and append adjudication evidence. It removes that
 prior-address contest/veto standing only. Independent guardian or successor
 standing is unaffected. Preserve the specified appeal obligation; dismissal
@@ -150,6 +167,9 @@ stabilizes. Existing RC1 and historical packets remain unchanged.
 
 - Real delayed Executor/Safe success and exact unauthorized, wrong-role,
   class, context, stale-state, wrong-incumbent and replay rejection.
+- A real operation-31 veto followed by dismissal and fresh rotation, with
+  no fabricated operation-33 record; reject mismatched cause kind/reference,
+  actor, incumbent or cause head. Preserve the operation-31 record semantics.
 - In-window contest and pre-deadline dismissal with document, payout,
   guardian, directive and designation candidates: old candidates never mature;
   fresh writes and rotation succeed from the preserved stable state.

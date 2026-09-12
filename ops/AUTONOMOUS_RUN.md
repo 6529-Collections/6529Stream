@@ -30,7 +30,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
-| Artist | `codex/v1-artist-authority` | Identity-compromise filing integrated after independent review; estate directives and successor designations next, then remaining lifecycle |
+| Artist | `codex/v1-artist-authority` | Succession directives/designations integrated `8227e0b6`; typed dismissal, cohort closure and dependent record/read continuation active, then remaining lifecycle |
 | Revenue | `codex/v1-revenue` | Capability admission integrated; refund-window custody, actual saved-artist association checks, canonical reveal funding and early unlock |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
@@ -71,12 +71,28 @@ remain. Every feature row in the ledger stays in scope.
 
 Identity-compromise operation 33 is integrated as `677b9ae9`: 159 focused tests,
 existing interface/storage compatibility and seven actual deployment traces
-passed independent review. Its actual governance catalog/current composition
-remains a distinct next integration task. Estate operations 36/37 are underway;
+passed independent review. Actual current composition `b002c4d4` adds four
+Safe/Executor cases alongside seven retained entropy cases, all independently
+accepted against 245 captured files and 273 compiler artifacts. It covers exact
+delayed arbitration, per-call batch context, role-loss/reason rollback and mint
+denial without blocking held-NFT transfers. Class 2 proves the indexed guardian
+window and delayed execution, not a guardian veto. Deployment catalog admission
+is separately source-reviewed. This run predates succession.
+
+Succession operations 36/37 are integrated as `8227e0b6` from the independently
+reviewed 17-file handoff: 185 tests, 201 compiler sources, 87 production artifacts,
+25 prior ABI/storage comparisons and eight actual CREATE traces pass. Its new
+fixed reader deployment library preserves Registry child nonces and pins. Only
+the existing IR artist profile is accepted; actual current succession and
+deployment inventory composition remain to be demonstrated.
+
 [ADR 0029](../docs/adr/0029-identity-contest-dismissal-and-cohort-closure.md)
 defines the missing dismissal transition and history-preserving cohort closure.
-Its implementation and effective inventory remain pending; the historical
-57-operation evidence is preserved.
+Both veto and filing causes are explicitly captured. Its
+[effective extension design](../docs/architecture/artist-operation-extension-v1.md)
+preserves all historical packet/schema bytes and adds the exact typed row 58.
+The design check and eleven adversarial tests pass; source/configuration and
+actual Executor/Safe acceptance remain pending. Artist implementation continues.
 
 Fixed-sale and auction funding, scoped delegation, refusal/withdrawal and
 expected-binding acceptance are integrated. Collaborator operations 5/6/7
