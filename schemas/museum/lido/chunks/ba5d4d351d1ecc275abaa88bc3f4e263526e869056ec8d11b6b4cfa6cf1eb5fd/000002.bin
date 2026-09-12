@@ -1,0 +1,132 @@
+gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="linearCSRef" type="gml:LinearCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="LinearCSRefType">
+		<annotation>
+			<documentation>Association to a linear coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:LinearCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="UserDefinedCS" type="gml:UserDefinedCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="UserDefinedCSType">
+		<annotation>
+			<documentation>A two- or three-dimensional coordinate system that consists of any combination of coordinate axes not covered by any other coordinate system type. An example is a multilinear coordinate system which contains one coordinate axis that may have any 1-D shape which has no intersections with itself. This non-straight axis is supplemented by one or two straight axes to complete a 2 or 3 dimensional coordinate system. The non-straight axis is typically incrementally straight or curved. A UserDefinedCS shall have two or three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="userDefinedCSRef" type="gml:UserDefinedCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="UserDefinedCSRefType">
+		<annotation>
+			<documentation>Association to a user-defined coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:UserDefinedCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="SphericalCS" type="gml:SphericalCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="SphericalCSType">
+		<annotation>
+			<documentation>A three-dimensional coordinate system with one distance measured from the origin and two angular coordinates. Not to be confused with an ellipsoidal coordinate system based on an ellipsoid "degenerated" into a sphere. A SphericalCS shall have three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="sphericalCSRef" type="gml:SphericalCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="SphericalCSRefType">
+		<annotation>
+			<documentation>Association to a spherical coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:SphericalCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="PolarCS" type="gml:PolarCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="PolarCSType">
+		<annotation>
+			<documentation>A two-dimensional coordinate system in which position is specified by the distance from the origin and the angle between the line from the origin to a point and a reference direction. A PolarCS shall have two usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="polarCSRef" type="gml:PolarCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="PolarCSRefType">
+		<annotation>
+			<documentation>Association to a polar coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:PolarCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="CylindricalCS" type="gml:CylindricalCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="CylindricalCSType">
+		<annotation>
+			<documentation>A three-dimensional coordinate system consisting of a polar coordinate system extended by a straight coordinate axis perpendicular to the plane spanned by the polar coordinate system. A CylindricalCS shall have three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="cylindricalCSRef" type="gml:CylindricalCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="CylindricalCSRefType">
+		<annotation>
+			<documentation>Association to a cylindrical coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:CylindricalCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ObliqueCartesianCS" type="gml:ObliqueCartesianCSType" substitutionGroup="gml:_CoordinateSystem"/>
+	<!-- =================================================== -->
+	<complexType name="ObliqueCartesianCSType">
+		<annotation>
+			<documentation>A two- or three-dimensional coordinate system with straight axes that are not necessarily orthogonal. An ObliqueCartesianCS shall have two or three usesAxis associations. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCoordinateSystemType"/>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="obliqueCartesianCSRef" type="gml:ObliqueCartesianCSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="ObliqueCartesianCSRefType">
+		<annotation>
+			<documentation>Association to an oblique-Cartesian coordinate system, either referencing or containing the definition of that coordinate system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:ObliqueCartesianCS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+</schema>

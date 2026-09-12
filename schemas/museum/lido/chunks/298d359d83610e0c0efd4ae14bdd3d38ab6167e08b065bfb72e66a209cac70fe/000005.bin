@@ -1,0 +1,135 @@
+>
+		<annotation>
+			<documentation>A Geodesic consists of two distinct
+   positions joined by a geodesic curve. The control points of
+   a Geodesic shall lie on the geodesic between its start
+   point and end points. Between these two points, a geodesic
+   curve defined from ellipsoid or geoid model used by the
+   co-ordinate reference systems may be used to interpolate
+   other positions. Any other point in the controlPoint array
+   must fall on this geodesic.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:GeodesicStringType"/>
+		</complexContent>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="CubicSpline" type="gml:CubicSplineType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="CubicSplineType">
+		<annotation>
+			<documentation>Cubic splines are similar to line strings in that they are a sequence of segments each with its own defining function. A cubic spline uses the control points and a set of derivative parameters to define a piecewise 3rd degree polynomial interpolation. Unlike line-strings, the parameterization by arc length is not necessarily still a polynomial. 
+				The function describing the curve must be C2, that is, have a continuous 1st and 2nd derivative at all points, and pass through the controlPoints in the order given. Between the control points, the curve segment is defined by a cubic polynomial. At each control point, the polynomial changes in such a manner that the 1st and 2nd derivative vectors are the same from either side. The control parameters record must contain vectorAtStart, and vectorAtEnd which are the unit tangent vectors at controlPoint[1] and controlPoint[n] where n = controlPoint.count. 
+				Note: only the direction of the vectors is relevant, not their length.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only. The number of direct positions in the list must be at least three.</documentation>
+						</annotation>
+						<choice minOccurs="2" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecated with GML version 3.1.0. Use "posList" instead.</documentation>
+							</annotation>
+						</element>
+					</choice>
+					<element name="vectorAtStart" type="gml:VectorType">
+						<annotation>
+							<documentation>"vectorAtStart" is the unit tangent vector at the start point of the spline.</documentation>
+						</annotation>
+					</element>
+					<element name="vectorAtEnd" type="gml:VectorType">
+						<annotation>
+							<documentation>"vectorAtEnd" is the unit tangent vector at the end point of the spline.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="cubicSpline">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the curve interpolation mechanism used for this segment. This mechanism
+uses the control points and control parameters to determine the position of this curve segment. For a CubicSpline the interpolation is fixed as "cubicSpline".</documentation>
+					</annotation>
+				</attribute>
+				<attribute name="degree" type="integer" fixed="3">
+					<annotation>
+						<documentation>The degree for a cubic spline is "3".</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="KnotType">
+		<annotation>
+			<documentation>A knot is a breakpoint on a piecewise spline curve.</documentation>
+		</annotation>
+		<sequence>
+			<element name="value" type="double">
+				<annotation>
+					<documentation>The property "value" is the value of the parameter at the knot of the spline. The sequence of knots shall be a non-decreasing sequence. That is, each knot's value in the sequence shall be equal to or greater than the previous knot's value. The use of equal consecutive knots is normally handled using the multiplicity.</documentation>
+				</annotation>
+			</element>
+			<element name="multiplicity" type="nonNegativeInteger">
+				<annotation>
+					<documentation>The property "multiplicity" is the multiplicity of this knot used in the definition of the spline (with the same weight).</documentation>
+				</annotation>
+			</element>
+			<element name="weight" type="double">
+				<annotation>
+					<documentation>The property "weight" is the value of the averaging weight used for this knot of the spline.</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="KnotPropertyType">
+		<annotation>
+			<documentation>Encapsulates a knot to use it in a geometric type.</documentation>
+		</annotation>
+		<sequence>
+			<element name="Knot" type="gml:KnotType"/>
+		</sequence>
+	</complexType>
+	<!-- =========== global element in "_CurveSegment" substitution group ================ -->
+	<element name="BSpline" type="gml:BSplineType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- =========================================================== -->
+	<complexType name="BSplineType">
+		<annotation>
+			<documentation>A B-Spline is a piecewise parametric polynomial or rational curve described in terms of control points and basis functions. Knots are breakpoints on the curve that connect its pieces. They are given as a non-decreasing sequence of real numbers. If the weights in the knots are equal then it is a polynomial spline. The degree is the algebraic degree of the basis functions.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<choice>
+						<annotation>
+							<documentation>GML supports two different ways to specify the control points of a curve segment.
+1. A sequence of "pos" (DirectPositionType) or "pointProperty" (PointPropertyType) elements. "pos" elements are control points that are only part of this curve segment, "pointProperty" elements contain a point that may be referenced from other geometry elements or reference another point defined outside of this curve segment (reuse of existing points).
+2. The "posList" element allows for a compact way to specifiy the coordinates of the control points, if all control points are in the same coordinate reference systems and belong to this curve segment only.</documentation>
+						</annotation>
+						<choice minOccurs="0" maxOccurs="unbounded">
+							<element ref="gml:pos"/>
+							<element ref="gml:pointProperty"/>
+							<element ref="gml:pointRep">
+								<annotation>
+									<documentation>Deprecated with GML version 3.1.0. Use "pointProperty" instead. Included for backwards compatibility with GML 3.0.0.</documentation>
+								</annotation>
+							</element>
+						</choice>
+						<element ref="gml:posList"/>
+						<element ref="gml:coordinates">
+							<annotation>
+								<documentation>Deprecat

@@ -1,0 +1,93 @@
+    overwrite the rights specifications in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordRights">lido:recordRights</a>&gt;.</p>
+            <h4 data-number="4.4.2.3" id="resource"><span
+            class="header-section-number">4.4.2.3</span> Resource</h4>
+            <p>The <a
+            href="http://lido-schema.org/schema/latest/lido.html#resourceWrap"><strong>Resource
+            Wrapper</strong></a> contains information about the digital
+            resource or resources that serve as a surrogate for the
+            object or work. Typically this consists of one or more
+            digital representations such as digital images, video or
+            audio files, or 3D models for online access. Information
+            includes the type of the resource and its digital format, as
+            well as its source and rights. Note that the resource
+            element does not apply to items that are considered
+            objects/works in their own right, but only to surrogates of
+            such. The rights associated with the resource are documented
+            in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsResource">lido:rightsResource</a>&gt;.</p>
+            <blockquote>
+            <p>For further information about metadata see NISO (2017):
+            <a
+            href="https://www.niso.org/publications/understanding-metadata-2017">Understanding
+            Metadata: What is Metadata, and What is it For?: A
+            Primer</a></p>
+            </blockquote>
+            <h2 data-number="4.5" id="element-structure"><span
+            class="header-section-number">4.5</span> Element
+            structure</h2>
+            <p>Some content elements in LIDO follow a fixed structural
+            pattern: A LIDO
+            <abbr title="In LIDO a repeatable structural element">set</abbr>,
+            e.g., &lt;<a href="">lido:subjectActor</a>&gt;, comprises a
+            <abbr title="In LIDO a free-text element for human-readable descriptions">display
+            element</abbr> followed by elements holding indexing
+            information. This structure applies particularly to named
+            entities for which an identifier may be used, such as actor,
+            event, object, and place (see <a
+            href="https://lido-schema.org/schema/latest/lido.html#identifierComplexType"><em>identifierComplexType</em></a>).
+            This pattern is also followed for, e.g., collection
+            information, descriptions of materials and techniques, or
+            measurements. For more information on display and index
+            elements see section <a
+            href="#display-and-index-elements"><em>4.3.3 Display and
+            index elements</em></a>.</p>
+            <h3 data-number="4.5.1"
+            id="overview-of-the-structure-and-the-elements"><span
+            class="header-section-number">4.5.1</span> Overview of the
+            structure and the elements</h3>
+            <p>The following figure shows the element structure, and an
+            example for the description of an actor as subject of the
+            described object or work. The sequence of the sub-elements
+            of &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#actor_actorSetComplexType">lido:actor</a>&gt;
+            is determined by the LIDO specification for <a
+            href="https://lido-schema.org/schema/latest/lido.html#actorComplexType"><em>actorComplexType</em></a>.</p>
+            <figure>
+            <img src="img/figure_element-structure.jpg"
+            alt="Figure 9: Element structure for a named entity" />
+            <figcaption aria-hidden="true">Figure 9: Element structure
+            for a named entity</figcaption>
+            </figure>
+            <p><strong>Example:</strong> The following XML code snippet
+            includes display and index elements to record identifying
+            information about a person and its “<a
+            href="http://terminology.lido-schema.org/lido01027">Cultural
+            affiliation</a>” as a type for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#nationalityActor">lido:nationalityActor</a>&gt;.</p>
+            <div class="sourceCode" id="cb19"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectActor</span>&gt;</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayActor</span><span class="ot"> xml:lang=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        [...]</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayActor</span>&gt;</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Person --&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:actor</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00163&quot;</span>&gt;</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:actorID</span><span class="ot"> lido:type=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>            [...]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:actorID</span>&gt;</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:nameActorSet</span>&gt;</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>            <span class="co">&lt;!-- Preferred name --&gt;</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;{...}&quot;</span>&gt;</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>                [...]</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:nameActorSet</span>&gt;</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Cultural affiliation --&gt;</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:nationalityActor</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido01027&quot;</span>&gt;</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;{...}&quot;</span>&gt;&lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:nationalityActor</span>&gt;</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:actor</span>&gt;</span>
+<span id="cb19-2

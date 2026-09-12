@@ -1,0 +1,139 @@
+ase="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:directedTopoSolid" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value  ===== -->
+	<element name="topoVolumeProperty" type="gml:TopoVolumePropertyType"/>
+	<!-- ============================================================= -->
+	<complexType name="TopoVolumePropertyType">
+		<sequence>
+			<element ref="gml:TopoVolume"/>
+		</sequence>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ========================================================== -->
+	<element name="TopoComplex" type="gml:TopoComplexType" substitutionGroup="gml:_Topology"/>
+	<!-- ========================================================== -->
+	<complexType name="TopoComplexType">
+		<annotation>
+			<documentation>This type represents a TP_Complex capable of holding topological primitives.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractTopologyType">
+				<sequence>
+					<element ref="gml:maximalComplex"/>
+					<element ref="gml:superComplex" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:subComplex" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:topoPrimitiveMember" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:topoPrimitiveMembers" minOccurs="0"/>
+				</sequence>
+				<attribute name="isMaximal" type="boolean" default="false"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ===== Property for topology association - by Value or Reference ===== -->
+	<element name="topoComplexProperty" type="gml:TopoComplexMemberType"/>
+	<!-- ========================================================== -->
+	<element name="subComplex" type="gml:TopoComplexMemberType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:subComplex">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<element name="superComplex" type="gml:TopoComplexMemberType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:superComplex">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<element name="maximalComplex" type="gml:TopoComplexMemberType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:subComplex">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+			<documentation>Need schamatron test here that isMaximal attribute value is true</documentation>
+		</annotation>
+	</element>
+	<!-- ============================================================= -->
+	<complexType name="TopoComplexMemberType">
+		<annotation>
+			<documentation>This Property can be used to embed a TopoComplex in a feature collection.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:TopoComplex" minOccurs="0"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value or Reference ===== -->
+	<element name="topoPrimitiveMember" type="gml:TopoPrimitiveMemberType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:topoPrimitiveMember">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================= -->
+	<complexType name="TopoPrimitiveMemberType">
+		<annotation>
+			<documentation>This type supports embedding topological primitives in a TopoComplex.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:_TopoPrimitive" minOccurs="0"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- ========================================================== -->
+	<!-- ===== Property for topology association - by Value ===== -->
+	<element name="topoPrimitiveMembers" type="gml:TopoPrimitiveArrayAssociationType">
+		<annotation>
+			<appinfo>
+				<sch:pattern name="refAndContent co-occurence prohibited">
+					<sch:rule context="gml:topoPrimitiveMember">
+						<sch:extends rule="hrefOrContent"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ========================================================== -->
+	<complexType name="TopoPrimitiveArrayAssociationType">
+		<annotation>
+			<documentation>This type supports embedding an array of topological primitives in a TopoComplex</documentation>
+		</annotation>
+		<!--		<complexContent>
+			<restriction base="gml:ArrayAssociationType">  -->
+		<sequence>
+			<choice minOccurs="0" maxOccurs="unbounded">
+				<element ref="gml:_TopoPrimitive"/>
+			</choice>
+		</sequence>
+		<!-- 			</restriction>
+		</complexContent> -->
+	</complexType>
+	<!-- ========================================================== -->
+</schema>

@@ -1,0 +1,129 @@
+pt, 
+							suitable for search expansion in information retrieval.</tei:ab>
+						<tei:ab type="label">Concept Identifier</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="term" type="lido:termComplexType" minOccurs="0" maxOccurs="unbounded" id="term">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for a designation, word or phrase, representing the
+							generic concept used for indexing. The term may be obtained from a published
+							vocabulary, preferably Linked Open Data, or added as a local search term for
+							retrieval purposes.</tei:ab>
+						<tei:ab type="label">Term</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:group>
+
+	<xs:attributeGroup name="textAttributesSet" id="textAttributesSet">
+		<xs:attribute ref="xml:lang"/>
+		<xs:attribute ref="lido:encodinganalog"/>
+		<xs:attribute ref="lido:label"/>
+	</xs:attributeGroup>
+
+	<xs:complexType name="conceptMixedComplexType" mixed="true" id="conceptMixedComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines mixed content. Allows either elements as defined in
+					<tei:ref target="#conceptComplexType">Concept complex type</tei:ref> or simple text as
+					described in <tei:ref target="#textComplexType">Text complex type</tei:ref>.<br/>
+					Note that these types are mutually exclusive.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:group ref="lido:conceptElementsSet"/>
+		<xs:attributeGroup ref="lido:textAttributesSet"/>
+	</xs:complexType>
+
+	<xs:element name="titleWrap" id="titleWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about the title or
+					name of an object/work.</tei:ab>
+				<tei:ab type="label">Title Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="titleSet" maxOccurs="unbounded" id="titleSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of structured information about one or more 
+								titles or object names with source information.<br/>
+								Repeated to record different sources for multiple appellations.</tei:ab>
+							<tei:ab type="label">Title Set</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:appellationComplexType">
+								<xs:attribute ref="lido:type" id="titleSet_type">
+									<xs:annotation>
+										<xs:documentation>
+											<tei:ab type="description">An attribute indicating the title or name assigned to an object/work.
+												Examples may include <em>descriptive title</em>, <em>original title</em>, or <em>repository title</em>.
+												If there are multiple titles, it is recommended to mark one of them as preferred,
+												to be used by default in displays.</tei:ab>
+											<tei:ab type="dataValues">Controlled</tei:ab>
+											<tei:ab type="recommendation">Linked open vocabulary for
+												<tei:ref target="../../documents/terminology-recommendation.html#titleSet_type">Type of Title Set</tei:ref>
+											</tei:ab>
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute ref="lido:sortorder"/>
+								<xs:attribute ref="lido:pref"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="type" type="xs:string" id="type">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute for the particular kind of
+					information given in the holding element. Will generally have to be populated
+					with a given value list.</tei:ab>
+				<tei:ab type="dataValues">Controlled Terminology</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="webResourceComplexType" id="webResourceComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines a reference to a URL of a web resource that
+					describes or represents the entity in focus, for example, the object/work,
+					resource or metadata record.<br/>
+					Note that this web reference differs from an identifier for the item itself.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute ref="lido:pref"/>
+				<xs:attribute name="formatResource" type="xs:string" id="formatResource">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An attribute indicating the internet media
+								type of the given web resource.</tei:ab>
+							<tei:ab type="dataValues">Controlled values</tei:ab>
+							<tei:ab type="recommendation">Refer to <tei:ref target="http://www.iana.org/assignments/media-types/">IANA media types</tei:ref>
+							</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+				</xs:attribute>
+				<xs:attributeGroup ref="lido:textAttributesSet"/>
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+</xs:schema>

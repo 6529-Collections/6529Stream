@@ -1,0 +1,95 @@
+section-number">5.2.5.1</span> Event Type</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventType">lido:eventType</a>&gt;</p>
+            <p><strong>Note:</strong> Event Type indicates the kind of
+            an event, whether it is, e.g., the production, acquisition,
+            or use of an object in its lifecycle. Terms for these types
+            are provided by the LIDO Terminology or by application
+            profiles. For related events, and events as subjects of a
+            work, the term for Event Type should be drawn from external
+            authorities.</p>
+            <p>This element is required if &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#event">lido:event</a>&gt;
+            is set.</p>
+            <p>Terms for Event Type in the object’s lifecycle (&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;)
+            are provided by the LIDO <a
+            href="http://terminology.lido-schema.org/eventType">Event
+            Type Vocabulary</a>. If terms of the Event Type Terminology
+            are not sufficient for a specific use case concerning the
+            object’s lifecycle, compatible vocabulary recommendations
+            may be provided within an application profile. Such
+            recommendations should ideally extend the LIDO Event Type
+            vocabulary.</p>
+            <p>Terms for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedEvent">lido:relatedEvent</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectEvent">lido:subjectEvent</a>&gt;
+            should be drawn from external authorities. For suggestions
+            see the LIDO <a
+            href="http://lido-schema.org/documents/terminology-recommendation.html#subjectEvent">Terminology
+            Recommendation</a>.</p>
+            <p><strong>Example:</strong> The following example describes
+            the production of the <em>Mona Lisa</em> as the most notable
+            event. The Event Type is indexed with the concept “<a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>”
+            from the LIDO Terminology. The mapping relation to the AAT
+            descriptor is provided by the LIDO Term.</p>
+            <blockquote>
+            <p><strong>Event:</strong> Painted by Leonardo da Vinci,
+            probably between 1503/1519<br /> <strong>Event
+            Type:</strong> Production
+            <strong><em>Preference:</em></strong> Preferred</p>
+            </blockquote>
+            <div class="sourceCode" id="cb30"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventSet</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:sortorder=</span><span class="st">&quot;2&quot;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:mostNotableEvent=</span><span class="st">&quot;1&quot;</span>&gt;</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayEvent</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        Painted by Leonardo da Vinci, probably between 1503/1519</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayEvent</span>&gt;</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:event</span>&gt;</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="ot">                rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00007&quot;</span>&gt;</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>                    Production</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:event</span>&gt;</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:eventSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.5.2" id="event-actor"><span
+            class="header-section-number">5.2.5.2</span> Event
+            Actor</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventActor">lido:eventActor</a>&gt;</p>
+            <p><strong>Note:</strong> Event Actor contains information
+            about the person or organization involved in the event in
+            focus, including identifying data, names, roles, and
+            possibly biographical details.</p>
+            <p><strong>Example:</strong> The following example describes
+            Leonardo da Vinci in the role of painter. The reference to
+            the painting of the <em>Mona Lisa</em> is provided by the
+            parent element &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">lido:eventSet</a>&gt;
+            with the Event Type “<a
+            href="http://terminology.lido-schema.org/lido00007">Production</a>”.</p>
+            <blockquote>
+            <p><strong>Actor:</strong> Painter: Leonardo da Vinci
+            (1452–1519)<br /> <strong>Name Actor:</strong> Leonardo, da
+            Vinci <strong><em>Preference:</em></strong> Preferred •
+            Leonardo da Vinci <strong><em>Preference:</em></strong>
+            Display<br /> <strong>Role Actor:</strong> painter
+            <strong><em>Preference:</em></strong> Display</p>
+            </blockquote>
+            <div class="sourceCode" id="cb31"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:eventActor</span>&gt;</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayActorInRole</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>        Painter: Leonardo da Vinci (1452–1519)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayActorInRole</span>&gt;</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:actorInRole</span>&gt;</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>       

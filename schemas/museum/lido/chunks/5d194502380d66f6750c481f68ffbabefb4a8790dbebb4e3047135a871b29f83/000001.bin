@@ -1,0 +1,170 @@
+arable part of a 3D coordinate tuple defined in a geographic 3D coordinate reference system. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:usesVerticalCS"/>
+					<element ref="gml:usesVerticalDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesVerticalCS" type="gml:VerticalCSRefType">
+		<annotation>
+			<documentation>Association to the vertical coordinate system used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesVerticalDatum" type="gml:VerticalDatumRefType">
+		<annotation>
+			<documentation>Association to the vertical datum used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="verticalCRSRef" type="gml:VerticalCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="VerticalCRSRefType">
+		<annotation>
+			<documentation>Association to a vertical coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:VerticalCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="GeocentricCRS" type="gml:GeocentricCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="GeocentricCRSType">
+		<annotation>
+			<documentation>A 3D coordinate reference system with the origin at the approximate centre of mass of the earth. A geocentric CRS deals with the earth's curvature by taking a 3D spatial view, which obviates the need to model the earth's curvature. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<choice>
+						<element ref="gml:usesCartesianCS"/>
+						<element ref="gml:usesSphericalCS"/>
+					</choice>
+					<element ref="gml:usesGeodeticDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesCartesianCS" type="gml:CartesianCSRefType">
+		<annotation>
+			<documentation>Association to the Cartesian coordinate system used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesSphericalCS" type="gml:SphericalCSRefType">
+		<annotation>
+			<documentation>Association to the spherical coordinate system used by this CRS.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="geocentricCRSRef" type="gml:GeocentricCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="GeocentricCRSRefType">
+		<annotation>
+			<documentation>Association to a geocentric coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:GeocentricCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="_GeneralDerivedCRS" type="gml:AbstractGeneralDerivedCRSType" abstract="true" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="AbstractGeneralDerivedCRSType" abstract="true">
+		<annotation>
+			<documentation>A coordinate reference system that is defined by its coordinate conversion from another coordinate reference system (not by a datum). This abstract complexType shall not be used, extended, or restricted, in an Application Schema, to define a concrete subtype with a meaning equivalent to a concrete subtype specified in this document. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:baseCRS"/>
+					<element ref="gml:definedByConversion"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="baseCRS" type="gml:CoordinateReferenceSystemRefType">
+		<annotation>
+			<documentation>Association to the coordinate reference system used by this derived CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="definedByConversion" type="gml:GeneralConversionRefType">
+		<annotation>
+			<documentation>Association to the coordinate conversion used to define this derived CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="ProjectedCRS" type="gml:ProjectedCRSType" substitutionGroup="gml:_GeneralDerivedCRS"/>
+	<!-- =================================================== -->
+	<complexType name="ProjectedCRSType">
+		<annotation>
+			<documentation>A 2D coordinate reference system used to approximate the shape of the earth on a planar surface, but in such a way that the distortion that is inherent to the approximation is carefully controlled and known. Distortion correction is commonly applied to calculated bearings and distances to produce values that are a close match to actual field values. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralDerivedCRSType">
+				<sequence>
+					<element ref="gml:usesCartesianCS"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="projectedCRSRef" type="gml:ProjectedCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="ProjectedCRSRefType">
+		<annotation>
+			<documentation>Association to a projected coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:ProjectedCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="DerivedCRS" type="gml:DerivedCRSType" substitutionGroup="gml:_GeneralDerivedCRS"/>
+	<!-- =================================================== -->
+	<complexType name="DerivedCRSType">
+		<annotation>
+			<documentation>A coordinate reference system that is defined by its coordinate conversion from another coordinate reference system but is not a projected coordinate reference system. This category includes coordinate reference systems derived from a projected coordinate reference system. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGeneralDerivedCRSType">
+				<sequence>
+					<element ref="gml:derivedCRSType"/>
+					<element ref="gml:usesCS"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="derivedCRSType" type="gml:DerivedCRSTypeType"/>
+	<!-- =================================================== -->
+	<complexType name="DerivedCRSTypeType">
+		<annotation>
+			<documentation>Type of a derived coordinate reference system. </documentation>
+		</annotation>
+		<simpleContent>
+			<restriction base="gml:CodeType">
+				<attribute name="codeSpace" type="anyURI" use="required">
+					<annotation>
+						<documentation>Reference to a source of information specifying the values and meanings of all the allowed string values for this DerivedCRSTypeType. </documentation>
+					</annotation>
+				</attribute>
+			</restriction>
+		</simpleContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesCS" type="gml:CoordinateSystemRefType">
+		<annotation>
+	

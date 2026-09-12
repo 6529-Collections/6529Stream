@@ -1,0 +1,187 @@
+his definition allows for a nested structure, i.e. a CompositeCurve may use, for example, another CompositeCurve as a curve member.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="RingPropertyType">
+		<annotation>
+			<documentation>Encapsulates a ring to represent properties in features or geometry collections.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:Ring"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<group name="PointGrid">
+		<annotation>
+			<documentation>Reference points which are organised
+   into sequences or grids(sequences of equal length sequences).</documentation>
+		</annotation>
+		<sequence>
+			<element name="row" maxOccurs="unbounded">
+				<complexType>
+					<sequence>
+						<group ref="gml:geometricPositionListGroup"/>
+					</sequence>
+				</complexType>
+			</element>
+		</sequence>
+	</group>
+	<!-- ====================================================== -->
+	<element name="_ParametricCurveSurface" type="gml:AbstractParametricCurveSurfaceType" abstract="true" substitutionGroup="gml:_SurfacePatch"/>
+	<!-- ====================================================== -->
+	<complexType name="AbstractParametricCurveSurfaceType">
+		<annotation>
+			<documentation>
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractSurfacePatchType"/>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="_GriddedSurface" type="gml:AbstractGriddedSurfaceType" abstract="true" substitutionGroup="gml:_ParametricCurveSurface"/>
+	<!-- ======================================================== -->
+	<complexType name="AbstractGriddedSurfaceType">
+		<annotation>
+			<documentation>A gridded surface is a parametric curve
+   surface derived from a rectangular grid in the parameter
+   space. The rows from this grid are control points for
+   horizontal surface curves; the columns are control points
+   for vertical surface curves. The working assumption is that
+   for a pair of parametric co-ordinates (s, t) that the
+   horizontal curves for each integer offset are calculated
+   and evaluated at "s". The defines a sequence of control
+   points:
+   
+   cn(s) : s  1 .....columns 
+
+   From this sequence a vertical curve is calculated for "s",
+   and evaluated at "t". In most cases, the order of
+   calculation (horizontal-vertical vs. vertical-horizontal)
+   does not make a difference. Where it does, the horizontal-   
+   vertical order shall be the one used.
+
+   Logically, any pair of curve interpolation types can lead
+   to a subtype of GriddedSurface. The following clauses
+   define some most commonly encountered surfaces that can
+   be represented in this manner.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractParametricCurveSurfaceType">
+				<sequence>
+					<group ref="gml:PointGrid">
+						<annotation>
+							<documentation>This is the double indexed sequence
+       of control points, given in row major form. 
+       NOTE! There in no assumption made about the shape
+       of the grid. 
+       For example, the positions need not effect a "21/2D"
+       surface, consecutive points may be equal in any or all
+       of the ordinates. Further, the curves in either or both
+       directions may close.</documentation>
+						</annotation>
+					</group>
+					<element name="rows" type="integer" minOccurs="0">
+						<annotation>
+							<documentation>The attribute rows gives the number
+         of rows in the parameter grid.</documentation>
+						</annotation>
+					</element>
+					<element name="columns" type="integer" minOccurs="0">
+						<annotation>
+							<documentation>The attribute columns gives the number
+        of columns in the parameter grid.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="Cone" type="gml:ConeType" substitutionGroup="gml:_GriddedSurface"/>
+	<!-- ======================================================== -->
+	<complexType name="ConeType">
+		<annotation>
+			<documentation>A cone is a gridded surface given as a
+   family of conic sections whose control points vary linearly.
+   NOTE! A 5-point ellipse with all defining positions identical
+   is a point. Thus, a truncated elliptical cone can be given as a
+   2x5 set of control points
+   ((P1, P1, P1, P1, P1), (P2, P3, P4, P5, P6)). P1 is the apex 
+   of the cone. P2, P3,P4, P5 and P6 are any five distinct points
+   around the base ellipse of the cone. If the horizontal curves
+   are circles as opposed to ellipses, the a circular cone can
+   be constructed using ((P1, P1, P1),(P2, P3, P4)). The apex most     
+   not coinside with the other plane.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGriddedSurfaceType">
+				<attribute name="horizontalCurveType" type="gml:CurveInterpolationType" fixed="circularArc3Points"/>
+				<attribute name="verticalCurveType" type="gml:CurveInterpolationType" fixed="linear"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="Cylinder" type="gml:CylinderType" substitutionGroup="gml:_GriddedSurface"/>
+	<!-- ======================================================== -->
+	<complexType name="CylinderType">
+		<annotation>
+			<documentation>A cylinder is a gridded surface given as a
+   family of circles whose positions vary along a set of parallel
+   lines, keeping the cross sectional horizontal curves of a
+   constant shape.
+   NOTE! Given the same working assumptions as in the previous
+   note, a Cylinder can be given by two circles, giving us the
+   control points of the form ((P1, P2, P3),(P4, P5, P6)).</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGriddedSurfaceType">
+				<attribute name="horizontalCurveType" type="gml:CurveInterpolationType" fixed="circularArc3Points"/>
+				<attribute name="verticalCurveType" type="gml:CurveInterpolationType" fixed="linear"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ======================================================== -->
+	<element name="Sphere" type="gml:SphereType" substitutionGroup="gml:_GriddedSurface"/>
+	<!-- ======================================================== -->
+	<complexType name="SphereType">
+		<annotation>
+			<documentation>A sphere is a gridded surface given as a
+   family of circles whose positions vary linearly along the
+   axis of the sphere, and whise radius varies in proportions to
+   the cosine function of the central angle. The horizontal 
+   circles resemble lines of constant latitude, and the vertical
+   arcs resemble lines of constant longitude. 
+   NOTE! If the control points are sorted in terms of increasing
+   longitude, and increasing latitude, the upNormal of a sphere
+   is the outward normal.
+   EXAMPLE If we take a gridded set of latitudes and longitudes
+   in degrees,(u,v) such as
+
+	(-90,-180)  (-90,-90)  (-90,0)  (-90,  90) (-90, 180) 
+	(-45,-180)  (-45,-90)  (-45,0)  (-45,  90) (-45, 180) 
+	(  0,-180)  (  0,-90)  (  0,0)  (  0,  90) (  0, 180)
+	( 45,-180)  ( 45,-90)  ( 45,0)  ( 45, -90) ( 45, 180)
+	( 90,-180)  ( 90,-90)  ( 90,0)  ( 90, -90) ( 90, 180)
+   
+   And map these points to 3D using the usual equations (where R
+   is the radius of the required sphere).
+
+    z = R sin u
+    x = (R cos u)(sin v)
+    y = (R cos u)(cos v)
+
+   We have a sphere of Radius R, centred at (0,0), as a gridded
+   surface. Notice that the entire first row and the entire last
+   row of the control points map to a single point in each 3D
+   Euclidean space, North and South poles respectively, and that
+   each horizontal curve closes back on itself forming a 
+   geometric cycle. This gives us a metrically bounded (of finite
+   size), topologically unbounded (not having a boundary, a
+   cycle) surface.</documentation>
+		</annotation>
+		<comp

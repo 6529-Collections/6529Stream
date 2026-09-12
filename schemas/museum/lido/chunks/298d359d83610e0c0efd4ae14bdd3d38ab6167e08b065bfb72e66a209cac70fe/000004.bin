@@ -1,0 +1,193 @@
+on any point of the curve be in the same, or opposite, 
+       direction as
+       - 
+       t.
+
+       The default value of the refDirection shall be the local
+       co-ordinate axis vector for elevation, which indicates up for
+       the curve in a geographic sense.
+
+       NOTE! If the refDirection is the positive tangent to the
+       local elevation axis ("points upward"), then the offset
+       vector points to the left of the curve when viewed from
+       above.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ====================================================== -->
+	<element name="AffinePlacement" type="gml:AffinePlacementType"/>
+	<!-- ====================================================== -->
+	<complexType name="AffinePlacementType">
+		<annotation>
+			<documentation>A placement takes a standard geometric
+   construction and places it in geographic space. It defines a
+   transformation from a constructive parameter space to the 
+   co-ordinate space of the co-ordinate reference system being used.  
+   Parameter spaces in formulae in this International Standard are 
+   given as (u, v) in 2D and(u, v, w) in 3D. Co-ordinate reference 
+   systems positions are given in formulae, in this International 
+   Standard, by either (x, y) in 2D, or (x, y, z) in 3D.
+
+   Affine placements are defined by linear transformations from 
+   parameter space to the target co-ordiante space. 2-dimensional 
+   Cartesian parameter space,(u,v) transforms into 3-dimensional co-
+   ordinate reference systems,(x,y,z) by using an affine 
+   transformation,(u,v)->(x,y,z) which is defined :
+
+	x	ux vx  	x0
+			 u	  
+	y =	uy vy   + y0
+			 v		
+	x	uz vz	z0
+	
+   Then, given this equation, the location element of the 
+   AffinePlacement is the direct position (x0, y0, z0), which is the
+   target position of the origin in (u, v). The two reference
+   directions (ux, uy, uz) and (vx, vy, vz) are the target     
+   directions of the unit vectors at the origin in (u, v).</documentation>
+		</annotation>
+		<sequence>
+			<element name="location" type="gml:DirectPositionType">
+				<annotation>
+					<documentation>The location property gives 
+     the target of the parameter space origin. This is the vector  
+    (x0, y0, z0) in the formulae above.</documentation>
+				</annotation>
+			</element>
+			<element name="refDirection" type="gml:VectorType" maxOccurs="unbounded">
+				<annotation>
+					<documentation>The attribute refDirection gives the    
+target directions for the co-ordinate basis vectors of the  
+parameter space. These are the columns of the matrix in the 
+formulae given above. The number of directions given shall be 
+inDimension. The dimension of the directions shall be 
+outDimension.</documentation>
+				</annotation>
+			</element>
+			<element name="inDimension" type="positiveInteger">
+				<annotation>
+					<documentation>Dimension of the constructive parameter 
+     space.</documentation>
+				</annotation>
+			</element>
+			<element name="outDimension" type="positiveInteger">
+				<annotation>
+					<documentation>Dimension of the co-ordinate space.</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	<!-- = global element in "_CurveSegment" substitution group ========================== -->
+	<element name="Clothoid" type="gml:ClothoidType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- ======================================================================= -->
+	<complexType name="ClothoidType">
+		<annotation>
+			<documentation>A clothoid, or Cornu's spiral, is plane
+   curve whose curvature is a fixed function of its length.
+   In suitably chosen co-ordinates it is given by Fresnel's
+   integrals.
+
+    x(t) = 0-integral-t cos(AT*T/2)dT    
+    
+    y(t) = 0-integral-t sin(AT*T/2)dT
+   
+   This geometry is mainly used as a transition curve between
+   curves of type straight line to circular arc or circular arc
+   to circular arc. With this curve type it is possible to 
+   achieve a C2-continous transition between the above mentioned
+   curve types. One formula for the Clothoid is A*A = R*t where
+   A is constant, R is the varying radius of curvature along the
+   the curve and t is the length along and given in the Fresnel 
+   integrals.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<sequence>
+					<element name="refLocation">
+						<complexType>
+							<sequence>
+								<element ref="gml:AffinePlacement">
+									<annotation>
+										<documentation>The "refLocation" is an affine mapping 
+          that places  the curve defined by the Fresnel Integrals  
+          into the co-ordinate reference system of this object.</documentation>
+									</annotation>
+								</element>
+							</sequence>
+						</complexType>
+					</element>
+					<element name="scaleFactor" type="decimal">
+						<annotation>
+							<documentation>The element gives the value for the
+       constant in the Fresnel's integrals.</documentation>
+						</annotation>
+					</element>
+					<element name="startParameter" type="double">
+						<annotation>
+							<documentation>The startParameter is the arc length
+       distance from the inflection point that will be the start
+       point for this curve segment. This shall be lower limit
+       used in the Fresnel integral and is the value of the
+       constructive parameter of this curve segment at its start
+       point. The startParameter can either be positive or
+       negative. 
+       NOTE! If 0.0 (zero), lies between the startParameter and
+       the endParameter of the clothoid, then the curve goes
+       through the clothoid's inflection point, and the direction
+       of its radius of curvature, given by the second
+       derivative vector, changes sides with respect to the
+       tangent vector. The term length distance for the</documentation>
+						</annotation>
+					</element>
+					<element name="endParameter" type="double">
+						<annotation>
+							<documentation>The endParameter is the arc length
+       distance from the inflection point that will be the end
+       point for this curve segment. This shall be upper limit
+       used in the Fresnel integral and is the value of the
+       constructive parameter of this curve segment at its
+       start point. The startParameter can either be positive
+       or negative.</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- = global element in "_CurveSegment" substitution group = -->
+	<element name="GeodesicString" type="gml:GeodesicStringType" substitutionGroup="gml:_CurveSegment"/>
+	<!-- ======================================================== -->
+	<complexType name="GeodesicStringType">
+		<annotation>
+			<documentation>A GeodesicString consists of sequence of
+   geodesic segments. The type essentially combines a sequence of
+   Geodesic into a single object.
+   The GeodesicString is computed from two or more positions and an
+   interpolation using geodesics defined from the geoid (or 
+   ellipsoid) of the co-ordinate reference system being used.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractCurveSegmentType">
+				<choice>
+					<element ref="gml:posList"/>
+					<group ref="gml:geometricPositionGroup" minOccurs="2" maxOccurs="unbounded"/>
+				</choice>
+				<attribute name="interpolation" type="gml:CurveInterpolationType" fixed="geodesic">
+					<annotation>
+						<documentation>The attribute "interpolation" specifies the
+     curve interpolation mechanism used for this segment. This
+     mechanism uses the control points and control parameters to
+     determine the position of this curve segment. For an 
+     GeodesicString the interpolation is fixed as "geodesic".</documentation>
+					</annotation>
+				</attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- = global element in "_CurveSegment" substitution group = -->
+	<element name="Geodesic" type="gml:GeodesicType" substitutionGroup="gml:GeodesicString"/>
+	<!-- ======================================================== -->
+	<complexType name="GeodesicType"

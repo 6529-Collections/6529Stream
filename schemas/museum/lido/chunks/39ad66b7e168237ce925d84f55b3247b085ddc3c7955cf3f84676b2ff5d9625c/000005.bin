@@ -1,0 +1,130 @@
+idoc.mini.icom.museum/standards/cidoc-standards-guidelines/">Standards
+            and guidelines</a> provided by the CIDOC community, and the
+            overview in <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/moreinfo.html">CDWA
+            and Other Metadata Standards</a> as well as the <a
+            href="https://www.getty.edu/research/publications/electronic_publications/intrometadata/crosswalks.html">Metadata
+            Standards Crosswalk</a>, both maintained by the Getty
+            Vocabulary Program. </p>
+            </blockquote>
+            <h1 data-number="3" id="design-principles"><span
+            class="header-section-number">3</span> Design
+            principles</h1>
+            <h2 data-number="3.1" id="basic-considerations"><span
+            class="header-section-number">3.1</span> Basic
+            considerations</h2>
+            <p>The design of LIDO was guided by the following
+            considerations:</p>
+            <ul>
+            <li><strong>Reuse existing standards</strong> Preexisting
+            models for representing cultural heritage metadata contain
+            assumptions that are still valid today. These should be
+            preserved and re-used in the design of LIDO. For an overview
+            of preexisting models see section <a
+            href="#background"><em>2.3 Background</em></a>.</li>
+            <li><strong>Use proven technologies</strong> Metadata needs
+            to be processed in a wide range of system environments.
+            Choosing proprietary or poorly supported technologies can
+            result in barriers and unnecessary costs. For a brief
+            summary of the XML family of technologies adopted for LIDO
+            see section <a href="#choice-of-technologies"><em>3.2 Choice
+            of technologies</em></a>.</li>
+            <li><strong>Facilitate interoperability</strong> Metadata is
+            moved, transformed, distributed, and interconnected at an
+            increasing rate. LIDO should therefore facilitate and
+            encourage higher levels of harmonization than in the past.
+            Next to technical and organizational considerations
+            described in section <a
+            href="#supporting-web-principles"><em>3.3 Supporting Web
+            principles</em></a>, mappings between LIDO and standards as
+            well as models from other domains are essential tools for
+            enabling and maintaining such harmonization.</li>
+            <li><strong>Enable adaptability</strong> The information
+            landscape is changing continuously, bringing up new
+            requirements that need to be addressed without invalidating
+            existing data records. Not all future requirements can be
+            anticipated. Well-defined extension points should be
+            provided as parts of the model. Moreover, cultural heritage
+            metadata will continue to be produced in varying degrees of
+            detail and granularity. The model should therefore be
+            amenable to object descriptions of widely different richness
+            by allowing for the introduction of application-specific
+            restrictions (see section <a
+            href="#enabling-adaptability"><em>3.4 Enabling
+            adaptability</em></a>).</li>
+            </ul>
+            <h2 data-number="3.2" id="choice-of-technologies"><span
+            class="header-section-number">3.2</span> Choice of
+            technologies</h2>
+            <h3 data-number="3.2.1" id="an-xml-schema-for-lido"><span
+            class="header-section-number">3.2.1</span> An XML schema for
+            LIDO</h3>
+            <p>The <a href="https://www.w3.org/TR/xml/">Exensible Markup
+            Language (XML)</a> has evolved from a mere markup language
+            for structuring machine-processable text into a major
+            technological ecosystem with a wide range of auxiliary
+            specifications and tools. This long-term evolution justifies
+            the assumption that XML will not become obsolete in the
+            foreseeable future. Nevertheless, it is fair to say that
+            JSON (<a href="https://www.json.org/json-en.html">JavaScript
+            Object Notation</a>) is emerging as a contender in many
+            areas where use of XML is currently prevalent. Moreover, the
+            Linked Data paradigm, briefly described in chapter <a
+            href="#supporting-web-principles"><em>3.3 Supporting Web
+            principles</em></a>, presents a challenge due to the core
+            differences between the XML and RDF data models. Version 1.1
+            of the LIDO schema is an attempt at reconciling some of
+            these differences.</p>
+            <p>Given the maturity of XML and the broad support in the
+            information processing sphere, it is reasonable to expect
+            that this technology is, and will remain, a solid and
+            reliable platform for the LIDO metadata schema.</p>
+            <p>XML itself defines the format of markup elements (often
+            referred to as tags) and how these can be nested to form a
+            tree-like structure. Any XML document that obeys the basic
+            element syntax and has matching start and end tags is said
+            to be well-formed.</p>
+            <p>In order to allow for predictable processing of the
+            document content, the order and occurrence of markup
+            elements is typically restricted by a schema (sometimes
+            referred to as the document grammar). At least three
+            languages (known as
+            <abbr title="Document Type Definition">DTD</abbr>, <a
+            href="https://relaxng.org/">RELAX NG</a>, and XSD) are
+            available for writing XML schema definitions. The LIDO
+            schema is written in the <a
+            href="https://www.w3.org/TR/xmlschema-1/">XML Schema
+            Definition (XSD)</a> language, which can be considered the
+            most expressive of these three.</p>
+            <p>The core specification for LIDO is laid down in an <a
+            href="http://www.lido-schema.org/schema/latest/lido.xsd">XSD
+            document</a>. This schema document can be used by software
+            tools known as validating parsers in order to verify if a
+            LIDO record complies with all rules and restrictions given
+            in the schema. Such validation is essential wherever the
+            LIDO record is to be processed for usage in databases, web
+            portals, or in transformation chains as used in large-scale
+            aggregation portals.</p>
+            <h3 data-number="3.2.2" id="schema-design"><span
+            class="header-section-number">3.2.2</span> Schema
+            design</h3>
+            <p>The XSD language provides some mechanisms for
+            <em>object-oriented</em> design. This means that schema
+            constructs can be defined on an abstract level, acting as
+            types or templates for actual element or attribute
+            definitions. The LIDO schema definition makes extensive use
+            of type declarations for elements composed of more than one
+            element, or of simple data types with attributes. In the XSD
+            language, these type declarations are referred to as complex
+            types. In fact, the entire LIDO record structure is first
+            modeled on the abstract level of complex types, before
+            declaring the derived elements that are actually used in a
+            LIDO record. This design principle offers a clear
+            distinction between the model and its implementation.</p>
+            <p>The basic structure of LIDO is determined by the XML
+            schema specification which defines the building blocks of a
+            LIDO XML document:</p>
+            <ul>
+            <li>the elements and attributes that may occur in a LIDO
+            document,</li>
+            <li>the allowed data types

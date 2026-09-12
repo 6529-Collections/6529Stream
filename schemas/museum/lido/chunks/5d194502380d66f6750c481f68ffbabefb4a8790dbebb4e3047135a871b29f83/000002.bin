@@ -1,0 +1,137 @@
+		<documentation>Association to the coordinate system used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="derivedCRSRef" type="gml:DerivedCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="DerivedCRSRefType">
+		<annotation>
+			<documentation>Association to a non-projected derived coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:DerivedCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="EngineeringCRS" type="gml:EngineeringCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="EngineeringCRSType">
+		<annotation>
+			<documentation>A contextually local coordinate reference system; which can be divided into two broad categories:
+- earth-fixed systems applied to engineering activities on or near the surface of the earth;
+- CRSs on moving platforms such as road vehicles, vessels, aircraft, or spacecraft.
+For further information, see OGC Abstract Specification Topic 2. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:usesCS"/>
+					<element ref="gml:usesEngineeringDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesEngineeringDatum" type="gml:EngineeringDatumRefType">
+		<annotation>
+			<documentation>Association to the engineering datum used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="engineeringCRSRef" type="gml:EngineeringCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="EngineeringCRSRefType">
+		<annotation>
+			<documentation>Association to an engineering coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:EngineeringCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ImageCRS" type="gml:ImageCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="ImageCRSType">
+		<annotation>
+			<documentation>An engineering coordinate reference system applied to locations in images. Image coordinate reference systems are treated as a separate sub-type because a separate user community exists for images with its own terms of reference. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<choice>
+						<element ref="gml:usesCartesianCS"/>
+						<element ref="gml:usesObliqueCartesianCS"/>
+					</choice>
+					<element ref="gml:usesImageDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesObliqueCartesianCS" type="gml:ObliqueCartesianCSRefType">
+		<annotation>
+			<documentation>Association to the oblique Cartesian coordinate system used by this CRS.</documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesImageDatum" type="gml:ImageDatumRefType">
+		<annotation>
+			<documentation>Association to the image datum used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="imageCRSRef" type="gml:ImageCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="ImageCRSRefType">
+		<annotation>
+			<documentation>Association to an image coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:ImageCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="TemporalCRS" type="gml:TemporalCRSType" substitutionGroup="gml:_CoordinateReferenceSystem"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalCRSType">
+		<annotation>
+			<documentation>A 1D coordinate reference system used for the recording of time. </documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractReferenceSystemType">
+				<sequence>
+					<element ref="gml:usesTemporalCS"/>
+					<element ref="gml:usesTemporalDatum"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="usesTemporalCS" type="gml:TemporalCSRefType">
+		<annotation>
+			<documentation>Association to the temporal coordinate system used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="usesTemporalDatum" type="gml:TemporalDatumRefType">
+		<annotation>
+			<documentation>Association to the temporal datum used by this CRS. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="temporalCRSRef" type="gml:TemporalCRSRefType"/>
+	<!-- =================================================== -->
+	<complexType name="TemporalCRSRefType">
+		<annotation>
+			<documentation>Association to a temporal coordinate reference system, either referencing or containing the definition of that reference system. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:TemporalCRS"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+</schema>

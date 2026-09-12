@@ -1,0 +1,168 @@
+:documentation>
+										<tei:ab type="description">An attribute for the kind of source of a resource.<br/>
+											Note that this type attribute is primarily intended for use in application profiles.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">To be determined by application profiles.</tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="rightsResource" minOccurs="0" maxOccurs="unbounded" id="rightsResource">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about rights regarding the image or
+							other resource. Applicable if the holder of the reproduction rights for
+							the resource differs from the holder of rights for the object/work.</tei:ab>
+						<tei:ab type="label">Rights Resource</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:rightsComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="resourceWrap" id="resourceWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about resources that
+					serve as surrogates for an object/work, including digital images, videos or
+					audio files that represent it in an online service.</tei:ab>
+				<tei:ab type="label">Resource Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="resourceSet" minOccurs="0" maxOccurs="unbounded" id="resourceSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of structured information about a resource serving as a surrogate
+								for the object/work in focus, such as a photograph or a digital image; excluding items
+								that are considered object/works in their own right.<br/>
+								Repeated if there is more than one resource associated with the object/work in focus.</tei:ab>
+							<tei:ab type="note">Provides identification of a surrogate of the
+								object/work including digital images, slides, transparencies,
+								photographs, audio, video and moving images, but excluding items
+								that are considered object/works in their own right. For such as
+								drawings, prints, paintings or photographs considered art and other
+								works that themselves contain representations of other works, use
+									<tei:ref target="#relatedWorksWrap">Related Works</tei:ref>
+								and/or <tei:ref target="#subjectWrap">Subjects</tei:ref>.</tei:ab>
+							<tei:ab type="label">Resource Set</tei:ab>
+							
+							
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:resourceSetComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="rightsComplexType" id="rightsComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about rights management. May include
+					copyright and other intellectual property statements as well as license information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="rightsType" minOccurs="0" maxOccurs="unbounded" id="rightsType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for rights information being recorded.
+							This can refer to a generic kind of right, such as copyright or a related right,
+							but also be a specific rights or license statement like a standardized statement
+							on copyright, usage, or access rights.</tei:ab>
+						<tei:ab type="label">Rights Type</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#rightsType">Rights Type</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:rightsType">
+								<sch:extends rule="sch_SKOS"/>
+								<sch:extends rule="sch_rightsType_type"/>
+								<sch:extends rule="sch_rightsType"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:type" id="rightsType_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind of rights type,
+											whether it refers to a generic kind of right, like copyright or performance rights,
+											or is a specific rights or license statement, namely
+											<tei:ref target="https://creativecommons.org/about/cclicenses/">Creative Commons Licenses</tei:ref>
+											and <tei:ref target="https://rightsstatements.org/">Rights Statements</tei:ref>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#rightsType_type">Type of Rights Type</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="rightsDate" type="lido:dateComplexType" minOccurs="0" id="rightsDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for the date on which a right is or was current.</tei:ab>
+						<tei:ab type="label">Rights Date</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="rightsHolder" type="lido:rightsHolderComplexType" minOccurs="0" maxOccurs="unbounded" id="rightsHolder">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of elements identifying the <em>person</em> or the <em>group of persons</em> holding the rights referenced
+							in <tei:ref target="#rightsType">Rights Type</tei:ref>. Often refers to copyright and related rights,
+							such as the right to reproduce, distribute, exhibit or use the entity in focus, for example,
+							the object/work, resource or metadata record.</tei:ab>
+						<tei:ab type="label">Rights Holder</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file, for example, one of those aggregated in
+							<tei:ref target="http://viaf.org/">VIAF</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:rightsHolder">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="creditLine" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="creditLine">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element for a formal acknowledgment or statement related to the object/work, 
+							resource, or record in focus, regarding the roles or intentions of an owner, a benefactor,
+							a producer, or other involved parties. May include, for instance, the name of the benefactor and the kind of 
+							contribution, such as a bequest, gift, or loan.<br/>
+							For resources of copyrighted material, it can explicitly state the intended attribution for a rights
+							holder or that the material has been reproduced with permission.<br/>
+							For metadata and/or resources, it can also comprise an acknowledgment of the funding agency that supported
+							the digitization and indexing.<br/>
+							The text in this element sh

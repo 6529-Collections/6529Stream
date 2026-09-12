@@ -1,0 +1,131 @@
+#event">lido:event</a>&gt;
+            element, reflecting the event-centric approach taken by the
+            CIDOC CRM mentioned below. The Event element not only
+            permits to describe the object history as such, but also the
+            entities (like actors and places) associated with each
+            single event.</p>
+            <p>There is a <a
+            href="https://www.getty.edu/research/publications/electronic_publications/intrometadata/crosswalks.html">Metadata
+            Standards Crosswalk</a> provided by the Getty Vocabulary
+            Program. It departs from the full CDWA standard, comprising
+            a mapping of a partial list of the elements for 15 standards
+            from the museum, library and archive sectors, including CDWA
+            Lite.</p>
+            <blockquote>
+            <p>For more information on the schema, see the publication
+            <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/cdwalite.html">CDWA
+            Lite</a> of the Getty Research Institute. For more
+            information on the standard, see the <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/">CDWA
+            Homepage</a> and <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/moreinfo.html">CDWA
+            and Other Metadata Standards</a>.</p>
+            </blockquote>
+            <h3 data-number="2.3.2" id="cidoc-crm"><span
+            class="header-section-number">2.3.2</span> CIDOC CRM</h3>
+            <p>The <a href="http://www.cidoc-crm.org/">CIDOC Conceptual
+            Reference Model</a> is a formal ontology, published as ISO
+            standard 21127 in 2006 (21127:2006), revised in 2014
+            (21127:2014). The CIDOC CRM provides definitions and a
+            formal structure for describing foundational concepts and
+            relationships used in cultural heritage documentation. It is
+            intended to be a common language for domain experts and
+            implementers when formulating requirements for information
+            systems, and it is also regarded as an example for good
+            practice of conceptual modeling. Development and maintenance
+            work is carried out by the <a
+            href="https://cidoc.mini.icom.museum/working-groups/crm-special-interest-group/">CIDOC
+            CRM Special Interest Group (SIG)</a>, continuously active
+            for more than two decades.</p>
+            <p>It was the CIDOC CRM event-centric modeling that inspired
+            LIDO to introduce an Event element in addition to elements
+            taken from CDWA Lite. Some of the CIDOC CRM classes and its
+            definitions were considered in or aligned with the LIDO
+            Terminology, particularly terms for the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#category">lido:category</a>&gt;
+            and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventType">lido:eventType</a>&gt;
+            elements. A mapping between <a
+            href="https://cidoc-crm.org/Resources/mappings-between-lido-v1.0-and-cidoc-crm-v6.0-in-x3ml-ver.1">LIDO
+            1.0 and the CIDOC CRM version 6.0</a> has been prepared in
+            2017, using the <a
+            href="https://www.ics.forth.gr/isl/x3ml-toolkit">X3ML</a>
+            mapping definition language.</p>
+            <blockquote>
+            <p>For more information on the model and versions of the
+            standard see <a href="http://www.cidoc-crm.org/">CIDOC CRM
+            Home</a>.</p>
+            </blockquote>
+            <h3 data-number="2.3.3" id="spectrum"><span
+            class="header-section-number">2.3.3</span> Spectrum</h3>
+            <p><a
+            href="https://collectionstrust.org.uk/spectrum/">Spectrum</a>
+            is a collections management standard provided by the UK <a
+            href="https://collectionstrust.org.uk/">Collections
+            Trust</a> charity. It describes activities, known as
+            “procedures” in Spectrum, commonly encountered in managing
+            museum collections. The standard also specifies <a
+            href="https://collectionstrust.org.uk/spectrum/information-requirements/">Information
+            requirements</a> to be applied to procedures, for instance,
+            <a
+            href="https://collectionstrust.org.uk/spectrum/information-requirements/object-information-groups/">Object
+            information groups</a>, further containing “Units of
+            information” for documentation purposes, e.g., <a
+            href="https://collectionstrust.org.uk/resource/object-production-information/">Object
+            production information</a>. The Spectrum version 5.0 was
+            published in September 2017, including 21 procedures, nine
+            of which are considered “Primary procedures”.</p>
+            <p>In LIDO, some of the information units defined in
+            Spectrum have been considered, particulary from the <a
+            href="https://collectionstrust.org.uk/resource/object-collection-information/">Object
+            collection information</a>. There is also a list of mappings
+            available in <a
+            href="https://collectionstrust.org.uk/spectrum/mapping-spectrum/">Mapping
+            Spectrum to other standards</a>, including a mapping from <a
+            href="https://collectionstrust.org.uk/resource/mapping-of-lido-to-spectrum-5-0/">Spectrum
+            5.0 to LIDO Version 1.0</a>.</p>
+            <blockquote>
+            <p>For more information on Spectrum see <a
+            href="https://collectionstrust.org.uk/spectrum/spectrum-5/">Introduction
+            to Spectrum 5.0</a> by Collectios Trust.</p>
+            </blockquote>
+            <h2 data-number="2.4" id="related-standards"><span
+            class="header-section-number">2.4</span> Related
+            standards</h2>
+            <p>LIDO builds upon several standards, specifications, and
+            guidelines. A structured view of relevant background
+            information offers the following distinction:</p>
+            <ul>
+            <li>Formal models as reference frameworks for <strong>data
+            integration</strong>, notably the <a
+            href="http://www.cidoc-crm.org/">CIDOC Conceptual Reference
+            Model</a> (CIDOC CRM), the <a
+            href="https://www.ifla.org/publications/node/11412">IFLA
+            Library Reference Model</a> (IFLA LRM), and <a
+            href="https://repository.ifla.org/handle/123456789/659">FRBRoo</a>,
+            a conceptual model for bibliographic information in
+            object-oriented formalism.</li>
+            <li>Rules for <strong>data content</strong> include
+            cataloging guidelines, specifically <a
+            href="http://www.getty.edu/research/publications/electronic_publications/cdwa/index.html">Categories
+            for the Description of Works of Art</a> (CDWA) and <a
+            href="https://www.vraweb.org/cco?rq=cataloging%20cultural%20objects">Cataloging
+            Cultural Objects</a>: A Guide to Describing Cultural Works
+            and Their Images (CCO).</li>
+            <li>Controlled vocabularies for <strong>data
+            values</strong>, such as authority files like the <a
+            href="https://www.getty.edu/research/tools/vocabularies/ulan/">Union
+            List of Artist Names</a> (ULAN) or thesauri like the <a
+            href="http://www.getty.edu/research/tools/vocabularies/aat/">Art
+            &amp; Architecture Thesaurus</a> (AAT).</li>
+            </ul>
+            <figure>
+            <img src="img/figure_related-standards.png"
+            alt="Figure 1: Related standards" />
+            <figcaption aria-hidden="true">Figure 1: Related
+            standards</figcaption>
+            </figure>
+            <blockquote>
+            <p>For more related standards see the list of <a
+            href="https://c

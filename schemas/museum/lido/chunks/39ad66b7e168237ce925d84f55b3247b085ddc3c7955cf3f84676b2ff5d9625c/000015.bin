@@ -1,0 +1,130 @@
+ifier elements</a> defined in LIDO, particularly for
+            named entities, such as &lt;<a href="">lido:actorID</a>&gt;,
+            administrative data, such as &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#recordID">lido:recordID</a>&gt;,
+            or contextual information, such as &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceID">lido:resourceID</a>&gt;.
+            Note that the <a
+            href="https://lido-schema.org/schema/latest/lido.html#type"><em>lido:type</em></a>
+            attribute is required for identifiers. Terms for the type
+            attribute are provided in the LIDO <a
+            href="http://terminology.lido-schema.org/lido00098">Identifier
+            Type-Vocabulary</a>. It is strongly recommended to use an
+            HTTP URI identifier from a LOD vocabulary for the type
+            attribute.</p>
+            <p><strong>Features:</strong> Defined by <a
+            href="https://lido-schema.org/schema/latest/lido.html#identifierComplexType"><em>identifierComplexType</em></a>,
+            an identifier element can have attributes, is repeatable
+            (under conditions), and is populated preferably with URIs.
+            If local identifiers must be used, then use of the source
+            attribute is necessary for making the identifier
+            unambiguous.</p>
+            <p><strong>Example:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#actorID">lido:actorID</a>&gt;
+            holds an identifier for an actor.</p>
+            <blockquote>
+            <p><strong>Actor Identifier:</strong>
+            http://viaf.org/viaf/24604287
+            <strong><em>Type:</em></strong> URI</p>
+            </blockquote>
+            <div class="sourceCode" id="cb16"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:actor</span>&gt;</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:actorID</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        http://viaf.org/viaf/24604287</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:actorID</span>&gt;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:actor</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.3.3"
+            id="display-and-index-elements"><span
+            class="header-section-number">4.3.3</span> Display and index
+            elements</h3>
+            <p>Following CDWA/CCO, LIDO defines elements to allow for
+            recording distinct display information alongside the index
+            entries intended for retrieval. A <strong>display</strong>
+            element presents information in natural language, intended
+            to be easily readable. An <strong>index</strong> element is
+            designed to hold controlled values or descriptors from
+            formal languages, such as thesauri or classification
+            systems, assigned for information retrieval. Compared to
+            index elements, the free-text display elements allow for a
+            less rigid expression of information including subtleties,
+            uncertainties, or fuzziness. In contrast, value-controlled
+            index elements support consistent matching with user queries
+            and reliable feedback for query refinement.</p>
+            <p>Portals can use the information given in display and/or
+            index elements in various ways. If the display element is
+            lacking an associated index element, then free text is the
+            only source for search terms, forsaking the chance for more
+            reliable search results. Where the display element is not
+            used, portal designers will typically present the index
+            terms in some order, perhaps linking them to a new or
+            modified query. If the index terms are from a controlled
+            vocabulary, then search portals may construct hyperlinks for
+            semantically enhanced search and navigation, for example by
+            offering a broader or narrower search focus, or by
+            retrieving definitions and other additional information from
+            the thesaurus or authority file (sometimes referred to as
+            ‘exploring the knowledge graph’).</p>
+            <p>A total of <strong>13 display elements</strong> are
+            available in LIDO Version 1.1. The list below shows all of
+            these elements within their sets and examples of the paired
+            use of display elements with their corresponding index
+            element.</p>
+            <p>Of <strong>33 index elements</strong> in total, 12 are
+            derived from <a
+            href="https://lido-schema.org/schema/latest/lido.html#conceptMixedComplexType"><em>conceptMixedComplexType</em></a>.
+            Elements declared this way can either contain plain text, or
+            sub-elements with structured information, but not both
+            simultaneously. These elements offer a fallback solution for
+            data providers that can only supply textual keywords for
+            indexing.</p>
+            <blockquote>
+            <p>For further information see <a
+            href="https://vraweb.org/wp-content/uploads/2020/04/CatalogingCulturalObjectsFullv2.pdf">Cataloging
+            Cultural Objects</a>, chapter “Display and Indexing”,
+            pp. 24–25. Examples and cataloging rules are provided in the
+            respective chapter describing a category, e.g.,
+            Measurements, pp. 109–120.</p>
+            </blockquote>
+            <p>The following table lists the 13 display elements and
+            shows values for the display element as well as the
+            corresponding index element or elements, if applicable for
+            the painting <em>Mona Lisa</em>.</p>
+            <p><strong>Table 2: List of display elements with examples
+            for display and index data</strong></p>
+            <table>
+            <colgroup>
+            <col style="width: 18%" />
+            <col style="width: 40%" />
+            <col style="width: 40%" />
+            </colgroup>
+            <thead>
+            <tr class="header">
+            <th>Display element</th>
+            <th>Example for display data</th>
+            <th>Example for index data</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="odd">
+            <td>&lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#displayActor">lido:displayActor</a>&gt;</td>
+            <td>Leonardo da Vinci</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/v1.1/lido-v1.1.html#actor_actorInRoleComplexType">lido:actor</a>&gt;
+            <a
+            href="http://terminology.lido-schema.org/lido00163"><em>Person</em></a>:
+            <a
+            href="http://vocab.getty.edu/ulan/500010879"><strong>Leonardo
+            da Vinci</strong></a></td>
+            </tr>
+            <tr class="even">
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#displayActorInRole">lido:displayActorInRole</a>&gt;</td>
+            <td>Painter: Leonardo da Vinci</td>
+            <td>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#roleActor">lido:roleActor</a>&gt;
+            <a
+            href="http://vocab.getty.edu/aat/300025136"><strong>painter</strong></a><br>&lt;<a
+            href="https://lido-schema.org/schema/v1.1/lido-v1.1.html#actor_actorInRoleComplexType">lido:actor</a>&gt;
+            <

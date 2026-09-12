@@ -1,0 +1,65 @@
+ref="#cb39-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:eventID</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>                    http://www.wikidata.org/entity/Q61266859</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:eventID</span>&gt;</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="ot">                        rdf:about=</span><span class="st">&quot;http://www.wikidata.org/entity/Q2727213&quot;</span>&gt;</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="ot">                            xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>                            theft</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:eventType</span>&gt;</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:event</span>&gt;</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:subjectEvent</span>&gt;</span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:subject</span>&gt;</span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:subjectSet</span>&gt;</span></code></pre></div>
+            <h4 data-number="5.2.7.5" id="subject-place"><span
+            class="header-section-number">5.2.7.5</span> Subject
+            Place</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#subjectPlace">lido:subjectPlace</a>&gt;</p>
+            <p><strong>Note:</strong> Subject Place contains information
+            about a particular place the object depicts or is about.
+            Fictitious places are indexed as &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;</p>
+            <p><strong>Example:</strong> The place depicted in
+            Leonardo’s Mona Lisa is possibly Bobbio in the Province of
+            Piacenza. Coordinates are taken from Wikidata. The subject
+            type is “<a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>”.</p>
+            <blockquote>
+            <p><strong>Subject Place:</strong> Possibly Bobbio in the
+            Province of Piacenza<br /> <strong><em>Subject
+            Type:</em></strong> Identification<br /> <strong>Place
+            Name:</strong> Bobbio <strong><em>Preference:</em></strong>
+            Preferred <strong>Coordinates:</strong> 44.7715, 9.3864</p>
+            </blockquote>
+            <div class="sourceCode" id="cb40"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:subjectSet</span>&gt;</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- Identification --&gt;</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:subject</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00136&quot;</span>&gt;</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:subjectPlace</span>&gt;</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:displayPlace</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>                Possibly Bobbio in the Province of Piacenza</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:displayPlace</span>&gt;</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:place</span>&gt;</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:placeID</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>                    http://www.wikidata.org/entity/Q11498</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:placeID</span>&gt;</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:namePlaceSet</span>&gt;</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>                <span class="co">&lt;!-- Preferred name --&gt;</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span>&gt;</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>                    Bobbio</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:sourceAppellation</span></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a><span class="ot">                    xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>                    Glori, Carla. Il paesaggio della Gioconda illustrato. 2022/06/09. URL: https://www.researchgate.net/publication/361190634_Il_paesaggio_della_Gioconda_illustrato [2022-11-08]</span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:sourceAppellation</span>&gt;</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:namePlaceSet</span>&gt;</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:gml</span>&gt;</span>

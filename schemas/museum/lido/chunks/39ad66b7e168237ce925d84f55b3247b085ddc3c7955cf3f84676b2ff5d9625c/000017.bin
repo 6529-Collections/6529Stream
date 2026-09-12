@@ -1,0 +1,147 @@
+    <a
+            href="http://terminology.lido-schema.org/lido00136"><em>Identification</em></a>
+            &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectActor">lido:subjectActor</a>&gt;
+            <a href="http://viaf.org/viaf/50517148"><strong>Lisa del
+            Giocondo</strong></a></td>
+            </tr>
+            </tbody>
+            </table>
+            <h2 data-number="4.4"
+            id="information-areas-and-groups"><span
+            class="header-section-number">4.4</span> Information areas
+            and groups</h2>
+            <p>Descriptive and administrative metadata in LIDO are
+            organized into a total of seven structural elements, called
+            <strong>information areas</strong>. This arrangement
+            reflects basic information about content descriptions of
+            cultural objects, rather than formal or technical
+            requirements. Four of these areas are descriptive, while the
+            other three hold administrative data.</p>
+            <p>Each information area in LIDO is a non-repeatable wrapper
+            and a direct sub-element of the topmost descriptive or
+            administrative metadata element. Being structural elements,
+            the information areas do not hold any content data
+            themselves. The following figure shows the seven areas,
+            listed by their sequence in a LIDO record.</p>
+            <p>The direct sub-elements of the information areas are the
+            main building blocks for structuring data content. These are
+            called <strong>information groups</strong> in LIDO. Note
+            that the information areas and information groups are
+            introduced to provide a quick synopsis of major elements.
+            Information areas and groups are not declared as such in the
+            LIDO schema.</p>
+            <figure>
+            <img src="img/figure_information-areas.png"
+            alt="Figure 7: Overview of the seven information areas in LIDO" />
+            <figcaption aria-hidden="true">Figure 7: Overview of the
+            seven information areas in LIDO</figcaption>
+            </figure>
+            <p><br /></p>
+            <figure>
+            <img src="img/figure_information-groups.png"
+            alt="Figure 8: Overview of information groups in LIDO" />
+            <figcaption aria-hidden="true">Figure 8: Overview of
+            information groups in LIDO</figcaption>
+            </figure>
+            <p><br /> <strong>Table 3: Information areas and information
+            groups</strong></p>
+            <table>
+            <colgroup>
+            <col style="width: 43%" />
+            <col style="width: 56%" />
+            </colgroup>
+            <thead>
+            <tr class="header">
+            <th>Information areas</th>
+            <th>Information groups</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="odd">
+            <td><strong>1. Object Classification</strong><br>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectClassificationWrap">lido:objectClassificationWrap</a>&gt;</td>
+            <td><strong>1.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectWorkTypeWrap">Object/Work
+            Type</a><br> <strong>2.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#classificationWrap">Classification</a></td>
+            </tr>
+            <tr class="even">
+            <td><strong>2. Object Identification</strong><br>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectIdentificationWrap">lido:objectIdentificationWrap</a>&gt;</td>
+            <td><strong>3.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#titleWrap">Title</a><br><strong>4.</strong>
+            <a
+            href="https://lido-schema.org/schema/latest/lido.html#inscriptionsWrap">Inscriptions</a><br><strong>5.</strong>
+            <a
+            href="https://lido-schema.org/schema/latest/lido.html#repositoryWrap">Repository/Location</a><br><strong>6.</strong>
+            <a
+            href="https://lido-schema.org/schema/latest/lido.html#displayStateEditionWrap">State/Edition</a><br><strong>7.</strong>
+            <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectDescriptionWrap">Object
+            Description</a><br><strong>8.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMeasurementsWrap">Object
+            Measurements</a><br><strong>9.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectMaterialsTechWrap">Object/MaterialsTechniques</a></td>
+            </tr>
+            <tr class="odd">
+            <td><strong>3. Event</strong><br>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#eventWrap">lido:eventWrap</a>&gt;</td>
+            <td><strong>10.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#eventSet">Event
+            Set</a></td>
+            </tr>
+            <tr class="even">
+            <td><strong>4. Object Relation</strong><br>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#objectRelationWrap">lido:objectRelationWap</a>&gt;</td>
+            <td><strong>11.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectWrap">Subject</a><br><strong>12.</strong>
+            <a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWorksWrap">Related
+            Works</a></td>
+            </tr>
+            <tr class="odd">
+            <td><strong>5. Rights for Work</strong><br>&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkWrap">lido:rightsWorkWrap</a>&gt;</td>
+            <td><strong>13.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#rightsWorkSet">Rights
+            for Work Set</a></td>
+            </tr>
+            <tr class="even">
+            <td><strong>6. Record</strong><br>&lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#recordWrap">lido:recordWrap</a>&gt;</td>
+            <td><strong>14.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#recordInfoSet">Record
+            Metadata Information Set</a></td>
+            </tr>
+            <tr class="odd">
+            <td><strong>7. Resource</strong><br>&lt;<a
+            href="http://lido-schema.org/schema/latest/lido.html#resourceWrap">lido:resourceWrap</a>&gt;</td>
+            <td><strong>15.</strong> <a
+            href="https://lido-schema.org/schema/latest/lido.html#resourceSet">Resource
+            Set</a></td>
+            </tr>
+            </tbody>
+            </table>
+            <h3 data-number="4.4.1" id="descriptive-metadata-1"><span
+            class="header-section-number">4.4.1</span> Descriptive
+            Metadata</h3>
+            <p><a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveMetadata"><strong>Descriptive
+            Metadata</strong></a> in LIDO hold information about the
+            properties of the described object itself, whether it is
+            analog or digital. These data are essential for searching,
+            finding, and identifying the object in collections or
+            portals. Descriptive information about an object or work
+            includes the following four information areas:</p>
+            <ol type="1">
+            <li><strong>Object Classification</strong></li>
+            <li><strong>Object Identification</strong></li>
+            <li><strong>Event</strong></li>
+            <li><strong>Object Relation</strong></li>
+            </ol>
+            <h4 data-number="4.4.1.1" id="object-classification"><span
+            class="header-section-number">4.4.1.1</span> Object
+            Classification</h4>
+            <p>The <a
+            href="https://lido-schema.org/schema/latest/lido.html#objectClassificatio

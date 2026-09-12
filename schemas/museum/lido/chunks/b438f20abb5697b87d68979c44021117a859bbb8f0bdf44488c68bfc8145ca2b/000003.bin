@@ -1,0 +1,68 @@
+her references a Point via the XLink-attributes or contains the Point element.</documentation>
+		</annotation>
+	</element>
+	<element name="pointMembers" type="gml:PointArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of points. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<element name="curveMembers" type="gml:CurveArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of curves. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<element name="surfaceMember" type="gml:SurfacePropertyType">
+		<annotation>
+			<documentation>This property element either references a surface via the XLink-attributes or contains the surface element. A surface element is any element which is substitutable for "_Surface".</documentation>
+		</annotation>
+	</element>
+	<element name="surfaceMembers" type="gml:SurfaceArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of surfaces. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<element name="solidMember" type="gml:SolidPropertyType">
+		<annotation>
+			<documentation>This property element either references a solid via the XLink-attributes or contains the solid element. A solid element is any element which is substitutable for "_Solid".</documentation>
+		</annotation>
+	</element>
+	<element name="solidMembers" type="gml:SolidArrayPropertyType">
+		<annotation>
+			<documentation>This property element contains a list of solids. The order of the elements is significant and shall be preserved when processing the array.</documentation>
+		</annotation>
+	</element>
+	<!-- some named geometry properties - for backward compatibility with GML2 -->
+	<element name="multiCenterOf" type="gml:MultiPointPropertyType"/>
+	<element name="multiPosition" type="gml:MultiPointPropertyType"/>
+	<element name="multiCenterLineOf" type="gml:MultiCurvePropertyType"/>
+	<element name="multiEdgeOf" type="gml:MultiCurvePropertyType"/>
+	<element name="multiCoverage" type="gml:MultiSurfacePropertyType"/>
+	<element name="multiExtentOf" type="gml:MultiSurfacePropertyType"/>
+	<!-- 
+	
+	The following types and elements are deprecated and should not be used !
+	
+	-->
+	<element name="multiLocation" type="gml:MultiPointPropertyType">
+		<annotation>
+			<appinfo>deprecated</appinfo>
+			<documentation>Deprecated with GML 3.0 and included only for backwards compatibility with GML 2.0. Use "curveMember" instead.
+This property element either references a line string via the XLink-attributes or contains the line string element.</documentation>
+		</annotation>
+	</element>
+	<element name="lineStringMember" type="gml:LineStringPropertyType">
+		<annotation>
+			<appinfo>deprecated</appinfo>
+			<documentation>Deprecated with GML 3.0 and included only for backwards compatibility with GML 2.0. Use "curveMember" instead.
+This property element either references a line string via the XLink-attributes or contains the line string element.</documentation>
+		</annotation>
+	</element>
+	<element name="polygonMember" type="gml:PolygonPropertyType">
+		<annotation>
+			<appinfo>deprecated</appinfo>
+			<documentation>Deprecated with GML 3.0 and included only for backwards compatibility with GML 2.0. Use "surfaceMember" instead.
+This property element either references a polygon via the XLink-attributes or contains the polygon element.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+</schema>

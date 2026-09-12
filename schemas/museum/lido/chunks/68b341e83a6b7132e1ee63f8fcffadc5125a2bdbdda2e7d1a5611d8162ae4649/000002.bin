@@ -1,0 +1,168 @@
+mplexType name="GeodeticDatumRefType">
+		<annotation>
+			<documentation>Association to a geodetic datum, either referencing or containing the definition of that datum. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:GeodeticDatum"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<!-- =================================================== -->
+	<element name="PrimeMeridian" type="gml:PrimeMeridianType" substitutionGroup="gml:Definition"/>
+	<!-- =================================================== -->
+	<complexType name="PrimeMeridianBaseType" abstract="true">
+		<annotation>
+			<documentation>Basic encoding for prime meridian objects, simplifying and restricting the DefinitionType as needed. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:DefinitionType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:meridianName"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="meridianName" type="gml:CodeType" substitutionGroup="gml:name">
+		<annotation>
+			<documentation>The name by which this prime meridian is identified. The meridianName most common value is Greenwich, and that value shall be used when the greenwichLongitude value is zero. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="PrimeMeridianType">
+		<annotation>
+			<documentation>A prime meridian defines the origin from which longitude values are determined.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:PrimeMeridianBaseType">
+				<sequence>
+					<element ref="gml:meridianID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this prime meridian. The first meridianID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this prime meridian, including source information. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:greenwichLongitude"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="meridianID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of a prime meridian. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="greenwichLongitude" type="gml:AngleChoiceType">
+		<annotation>
+			<documentation>Longitude of the prime meridian measured from the Greenwich meridian, positive eastward. The greenwichLongitude most common value is zero, and that value shall be used when the meridianName value is Greenwich. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="primeMeridianRef" type="gml:PrimeMeridianRefType"/>
+	<!-- =================================================== -->
+	<complexType name="PrimeMeridianRefType">
+		<annotation>
+			<documentation>Association to a prime meridian, either referencing or containing the definition of that meridian. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:PrimeMeridian"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="Ellipsoid" type="gml:EllipsoidType" substitutionGroup="gml:Definition"/>
+	<!-- =================================================== -->
+	<complexType name="EllipsoidBaseType" abstract="true">
+		<annotation>
+			<documentation>Basic encoding for ellipsoid objects, simplifying and restricting the DefinitionType as needed. </documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:DefinitionType">
+				<sequence>
+					<element ref="gml:metaDataProperty" minOccurs="0" maxOccurs="unbounded"/>
+					<element ref="gml:ellipsoidName"/>
+				</sequence>
+				<attribute ref="gml:id" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ellipsoidName" type="gml:CodeType" substitutionGroup="gml:name">
+		<annotation>
+			<documentation>The name by which this ellipsoid is identified. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<complexType name="EllipsoidType">
+		<annotation>
+			<documentation>An ellipsoid is a geometric figure that can be used to describe the approximate shape of the earth. In mathematical terms, it is a surface formed by the rotation of an ellipse about its minor axis.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:EllipsoidBaseType">
+				<sequence>
+					<element ref="gml:ellipsoidID" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Set of alternative identifications of this ellipsoid. The first ellipsoidID, if any, is normally the primary identification code, and any others are aliases. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:remarks" minOccurs="0">
+						<annotation>
+							<documentation>Comments on or information about this ellipsoid, including source information. </documentation>
+						</annotation>
+					</element>
+					<element ref="gml:semiMajorAxis"/>
+					<element ref="gml:secondDefiningParameter"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="ellipsoidID" type="gml:IdentifierType">
+		<annotation>
+			<documentation>An identification of an ellipsoid. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="semiMajorAxis" type="gml:MeasureType">
+		<annotation>
+			<documentation>Length of the semi-major axis of the ellipsoid, with its units. Uses the MeasureType with the restriction that the unit of measure referenced by uom must be suitable for a length, such as metres or feet. </documentation>
+		</annotation>
+	</element>
+	<!-- =================================================== -->
+	<element name="ellipsoidRef" type="gml:EllipsoidRefType"/>
+	<!-- =================================================== -->
+	<complexType name="EllipsoidRefType">
+		<annotation>
+			<documentation>Association to an ellipsoid, either referencing or containing the definition of that ellipsoid. </documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:Ellipsoid"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="secondDefiningParameter" type="gml:SecondDefiningParameterType"/>
+	<!-- =================================================== -->
+	<complexType name="SecondDefiningParameterType">
+		<annotation>
+			<documentation>Definition of the second parameter that defines the shape of an ellipsoid. An ellipsoid requires two defining parameters: semi-major axis and inverse flattening or semi-major axis and semi-minor axis. When the reference body is a sphere rather than an ellipsoid, only a single defining parameter is required, namely the radius of the sphere; in that case, the semi-major axis "degenerates" into the radius of the sphere.</documentation>
+		</annotation>
+		<choice>
+			<element ref="gml:inverseFlattening"/>
+			<element ref="gml:semiMinorAxis"/>
+			<element ref="gml:isSphere"/>
+		</choice>
+	</complexType>
+	<!-- =================================================== -->
+	<element name="inverseFlattening" type="gml:MeasureType">
+		<annotation>
+			<documentation>Inverse flattening value of the ellipsoid. Value is a scale factor (o

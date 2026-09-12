@@ -1,0 +1,191 @@
+b>
+									    	<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#vitalDatesActor_type">Type of Vital Dates Actor</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="vitalPlaceActor" minOccurs="0" maxOccurs="unbounded" id="vitalPlaceActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the place where the
+							<em>person</em> was born, died, or is or was active, where applicable; or the
+							location where a <em>group of persons</em> was formed, dissolved or is or was
+							active, respectively.<br/>
+							If the place is in dispute, omit the place.</tei:ab>
+						<tei:ab type="label">Vital Place Actor</tei:ab>
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						
+						
+						<tei:ab type="recommendation">Linked open authority file for
+							<tei:ref target="../../documents/terminology-recommendation.html#place">Place</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:vitalPlaceActor">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:placeComplexType">
+							<xs:attribute ref="lido:type" id="vitalPlaceActor_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind
+											of place with respect to the biography of a <em>person</em>, or
+											the life cycle of a <em>group of persons</em>. Examples may
+											include <em>birth place</em>, <em>death place</em>, or <em>founding place</em>,
+											respectively.</tei:ab>
+									    	<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#vitalPlaceActor_type">Type of Vital Place Actor</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="genderActor" minOccurs="0" maxOccurs="unbounded" id="genderActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the sex assigned at birth
+							or the gender identity of an actor; most often <em>female</em> or <em>male</em>.
+							Usually not applicable to a group of persons.</tei:ab>
+						<tei:ab type="label">Gender Actor</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">LIDO Terminology for
+							<tei:ref target="../../documents/terminology-recommendation.html#genderActor">Gender Actor</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:genderActor">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptMixedComplexType">
+							<xs:attribute ref="lido:type" id="genderActor_type">
+								<xs:annotation>
+								<xs:documentation>
+									<tei:ab type="description">An attribute indicating whether the indexing term refers to either
+										sex as a biological characteristic, or gender as a social or cultural distinction.
+										If a distinction between sex or gender cannot be made or is not relevant,
+										the (default) type attribute <em>Sex or gender</em> is suitable.
+									</tei:ab>
+									<tei:ab type="dataValues">Controlled terminology</tei:ab>
+									<tei:ab type="recommendation">LIDO Terminology for
+										<tei:ref target="../../documents/terminology-recommendation.html#genderActor_type">Type of Gender Actor</tei:ref></tei:ab>
+								</xs:documentation>
+							  </xs:annotation>
+							</xs:attribute>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:type" id="actor_type">
+			<xs:annotation>
+				<xs:documentation>
+					<tei:ab type="description">An attribute indicating whether the actor is an
+						individual <em>person</em> or a <em>group of persons</em>, such as a an <em>organization</em> or a
+						<em>family</em>.</tei:ab>
+					<tei:ab type="dataValues">Controlled terminology</tei:ab>
+					<tei:ab type="recommendation">LIDO Terminology for
+						<tei:ref target="../../documents/terminology-recommendation.html#actor_type">Type of Actor</tei:ref></tei:ab>
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="actorInRoleComplexType" id="actorInRoleComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines actor information with role, attribution and
+					extent, where applicable, related to the event the actor participated in or was
+					present at.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="actor" type="lido:actorComplexType" id="actor_actorInRoleComplexType">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for identifying and indexing information
+							about an actor with role statement.</tei:ab>
+						<tei:ab type="label">Actor</tei:ab>
+						
+						
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:actor">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="roleActor" minOccurs="0" maxOccurs="unbounded" id="roleActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the role or activity
+							performed by an actor in the context of the event in focus.<br/>
+							Examples may include <em>designer</em>, <em>painter</em>, or <em>publisher</em>.</tei:ab>
+						<tei:ab type="label">Role Actor</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#roleActor">Role Actor</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:roleActor">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="attributionQualifierActor" type="lido:conceptMixedComplexType" minOccurs="0" maxOccurs="unbounded" id="attributionQualifierActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element qualifying the attribution of an
+							actor.<br/>
+							Applicable when the attribution is uncertain or in dispute, when
+							there is more than one actor, or when the attribution otherwise requires
+							explanation.<br/>
+							Examples may include <em>attributed to</em>, <em>studio of</em>, or <em>style
+							of</em>.</tei:ab>
+						<tei:ab type="label">Attribution Qualifier Actor</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#attributionQualifierActor">Attribution Qualifier Actor</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:attributionQualifierActor">
+								<sch:extends rule="sch_Mixe

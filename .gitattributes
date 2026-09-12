@@ -38,3 +38,6 @@ test/fixtures/permit2/LICENSE-Solmate text eol=lf
 # Preserve exact upstream IIIF dependency license bytes on Windows.
 schemas/museum/iiif/licenses/cid-LICENSE text eol=lf
 schemas/museum/iiif/licenses/multicodec-LICENSE text eol=lf
+
+# Preserve original whitespace in the pinned W3C license notice.
+schemas/museum/lido/licenses/W3C-SOFTWARE-NOTICE-2002.html whitespace=-blank-at-eol

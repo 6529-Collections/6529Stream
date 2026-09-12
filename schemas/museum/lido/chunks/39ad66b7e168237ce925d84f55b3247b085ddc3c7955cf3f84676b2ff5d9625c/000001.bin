@@ -1,0 +1,167 @@
+li>
+      <li><a href="#basic-structure-of-lido"><span
+      class="toc-section-number">4</span> Basic structure of LIDO</a>
+      <ul>
+      <li><a href="#lido-document-and-lido-record"><span
+      class="toc-section-number">4.1</span> LIDO document and LIDO
+      record</a></li>
+      <li><a href="#top-level-elements"><span
+      class="toc-section-number">4.2</span> Top level elements</a>
+      <ul>
+      <li><a href="#lido-metadata-record-identifier"><span
+      class="toc-section-number">4.2.1</span> LIDO Metadata Record
+      Identifier</a></li>
+      <li><a href="#published-object-identifier"><span
+      class="toc-section-number">4.2.2</span> Published Object
+      Identifier</a></li>
+      <li><a href="#category"><span
+      class="toc-section-number">4.2.3</span> Category</a></li>
+      <li><a href="#application-profile"><span
+      class="toc-section-number">4.2.4</span> Application
+      Profile</a></li>
+      <li><a href="#descriptive-metadata"><span
+      class="toc-section-number">4.2.5</span> Descriptive
+      Metadata</a></li>
+      <li><a href="#administrative-metadata"><span
+      class="toc-section-number">4.2.6</span> Administrative
+      Metadata</a></li>
+      </ul></li>
+      <li><a href="#element-nesting"><span
+      class="toc-section-number">4.3</span> Element nesting</a>
+      <ul>
+      <li><a href="#structural-elements"><span
+      class="toc-section-number">4.3.1</span> Structural
+      elements</a></li>
+      <li><a href="#content-elements"><span
+      class="toc-section-number">4.3.2</span> Content elements</a></li>
+      <li><a href="#display-and-index-elements"><span
+      class="toc-section-number">4.3.3</span> Display and index
+      elements</a></li>
+      </ul></li>
+      <li><a href="#information-areas-and-groups"><span
+      class="toc-section-number">4.4</span> Information areas and
+      groups</a>
+      <ul>
+      <li><a href="#descriptive-metadata-1"><span
+      class="toc-section-number">4.4.1</span> Descriptive
+      Metadata</a></li>
+      <li><a href="#administrative-metadata-1"><span
+      class="toc-section-number">4.4.2</span> Administrative
+      Metadata</a></li>
+      </ul></li>
+      <li><a href="#element-structure"><span
+      class="toc-section-number">4.5</span> Element structure</a>
+      <ul>
+      <li><a href="#overview-of-the-structure-and-the-elements"><span
+      class="toc-section-number">4.5.1</span> Overview of the structure
+      and the elements</a></li>
+      <li><a href="#mandatory-sequence-of-elements"><span
+      class="toc-section-number">4.5.2</span> Mandatory sequence of
+      elements</a></li>
+      </ul></li>
+      </ul></li>
+      <li><a href="#basic-elements-and-attributes"><span
+      class="toc-section-number">5</span> Basic elements and
+      attributes</a>
+      <ul>
+      <li><a href="#mandatory-elements"><span
+      class="toc-section-number">5.1</span> Mandatory elements</a>
+      <ul>
+      <li><a href="#overview"><span
+      class="toc-section-number">5.1.1</span> Overview</a></li>
+      <li><a href="#lido-metadata-record-identifier-1"><span
+      class="toc-section-number">5.1.2</span> LIDO Metadata Record
+      Identifier</a></li>
+      <li><a href="#objectwork-type"><span
+      class="toc-section-number">5.1.3</span> Object/Work Type</a></li>
+      <li><a href="#title-set"><span
+      class="toc-section-number">5.1.4</span> Title Set</a></li>
+      <li><a href="#record-identifier"><span
+      class="toc-section-number">5.1.5</span> Record Identifier</a></li>
+      <li><a href="#record-type"><span
+      class="toc-section-number">5.1.6</span> Record Type</a></li>
+      <li><a href="#record-source"><span
+      class="toc-section-number">5.1.7</span> Record Source</a></li>
+      <li><a href="#example-mandatory-elements"><span
+      class="toc-section-number">5.1.8</span> Example: Mandatory
+      elements</a></li>
+      </ul></li>
+      <li><a href="#recommended-elements"><span
+      class="toc-section-number">5.2</span> Recommended elements</a>
+      <ul>
+      <li><a href="#overview-1"><span
+      class="toc-section-number">5.2.1</span> Overview</a></li>
+      <li><a href="#classification"><span
+      class="toc-section-number">5.2.2</span> Classification</a></li>
+      <li><a href="#measurements"><span
+      class="toc-section-number">5.2.3</span> Measurements</a></li>
+      <li><a href="#materialstechniques"><span
+      class="toc-section-number">5.2.4</span>
+      Materials/Techniques</a></li>
+      <li><a href="#event-1"><span
+      class="toc-section-number">5.2.5</span> Event</a></li>
+      <li><a href="#related-work"><span
+      class="toc-section-number">5.2.6</span> Related Work</a></li>
+      <li><a href="#subject"><span
+      class="toc-section-number">5.2.7</span> Subject</a></li>
+      </ul></li>
+      <li><a href="#elements-from-other-namespaces"><span
+      class="toc-section-number">5.3</span> Elements from other
+      namespaces</a>
+      <ul>
+      <li><a href="#geographic-locations-gml"><span
+      class="toc-section-number">5.3.1</span> Geographic locations
+      (gml)</a></li>
+      <li><a href="#concepts-skos"><span
+      class="toc-section-number">5.3.2</span> Concepts (skos)</a></li>
+      <li><a href="#individuals-owl"><span
+      class="toc-section-number">5.3.3</span> Individuals (owl)</a></li>
+      </ul></li>
+      <li><a href="#attributes"><span
+      class="toc-section-number">5.4</span> Attributes</a>
+      <ul>
+      <li><a href="#type"><span class="toc-section-number">5.4.1</span>
+      <span class="citation" data-cites="type">@type</span></a></li>
+      <li><a href="#addedsearchterm"><span
+      class="toc-section-number">5.4.2</span> <span class="citation"
+      data-cites="addedSearchTerm">@addedSearchTerm</span></a></li>
+      <li><a href="#codecresource"><span
+      class="toc-section-number">5.4.3</span> <span class="citation"
+      data-cites="codecResource">@codecResource</span></a></li>
+      <li><a href="#encodinganalog"><span
+      class="toc-section-number">5.4.4</span> <span class="citation"
+      data-cites="encodingAnalog">@encodingAnalog</span></a></li>
+      <li><a href="#formatresource"><span
+      class="toc-section-number">5.4.5</span> <span class="citation"
+      data-cites="formatResource">@formatResource</span></a></li>
+      <li><a href="#geographicalentity"><span
+      class="toc-section-number">5.4.6</span> <span class="citation"
+      data-cites="geographicalEntity">@geographicalEntity</span></a></li>
+      <li><a href="#label"><span class="toc-section-number">5.4.7</span>
+      <span class="citation" data-cites="label">@label</span></a></li>
+      <li><a href="#measurementsgroup"><span
+      class="toc-section-number">5.4.8</span> <span class="citation"
+      data-cites="measurementsGroup">@measurementsGroup</span></a></li>
+      <li><a href="#mostnotableevent"><span
+      class="toc-section-number">5.4.9</span> <span class="citation"
+      data-cites="mostNotableEvent">@mostNotableEvent</span></a></li>
+      <li><a href="#politicalentity"><span
+      class="toc-section-number">5.4.10</span> <span class="citation"
+      data-cites="politicalEntity">@politicalEntity</span></a></li>
+      <li><a href="#pref"><span class="toc-section-number">5.4.11</span>
+      <span class="citation" data-cites="pref">@pref</span></a></li>
+      <li><a href="#relatedencoding"><span
+      class="toc-section-number">5.4.12</span> <span class="citation"
+      data-cites="relatedEncoding">@relatedEncoding</span></a></li>
+      <li><a href="#sortorder"><span
+      class="toc-section-number">5.4.13</span> <span class="citation"
+      data-cites="sortorder">@sortorder</span></a></li>
+      <li><a href="#source"><span
+      class="toc-section-number">5.4.14</span> <span class="citation"
+      data-cites="source">@source</span></a></li>
+      </ul></li>
+      </ul></li>
+      <li><a href="#checking-metadata-quality"><span
+      class="toc-section-number">6</span> Checking metadata quality</a>
+      <ul>
+      <li><a href="#syntactic-validation"><span

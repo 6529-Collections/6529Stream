@@ -1,0 +1,129 @@
+         further reading</h1>
+            <h2 data-number="7.1" id="lido"><span
+            class="header-section-number">7.1</span> LIDO</h2>
+            <ul>
+            <li>LIDO XML Schema Definition. <a
+            href="http://lido-schema.org/schema/latest/lido.xsd">XSD</a></li>
+            <li>LIDO Documentation. <a
+            href="http://lido-schema.org/schema/latest/lido.html">HTML</a></li>
+            <li>LIDO Terminology Recommendation. <a
+            href="http://lido-schema.org/documents/terminology-recommendation.html">HTML</a></li>
+            <li>LIDO Terminology. <a
+            href="http://terminology.lido-schema.org">Website</a></li>
+            <li>LIDO Terminology LOD Interface Documentation. <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/lido-terminology/">Website</a></li>
+            <li>LIDO Examples. <a
+            href="https://lido-schema.org/examples">Website</a></li>
+            <li>LIDO Application Profiles <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/profiles/">Website</a></li>
+            <li>[LIDO Application Profile Painting and Sculpture] Knaus,
+            Gudrun, Kailus, Angela und Stein, Regine: LIDO-Handbuch für
+            die Erfassung und Publikation von Metadaten zu kulturellen
+            Objekten: Band 2: Malerei und Skulptur, herausgegeben von
+            Deutsches Dokumentationszentrum für Kunstgeschichte –
+            Bildarchiv Foto Marburg und Christian Bracht, Heidelberg:
+            arthistoricum.net, 2022 (LIDO-Handbuch, Band 2). <a
+            href="https://doi.org/10.11588/arthistoricum.1026">Website/PDF</a></li>
+            <li>[LIDO home] LIDO Website. <a
+            href="https://lido-schema.org">Website</a></li>
+            </ul>
+            <h2 data-number="7.2" id="general-introductions"><span
+            class="header-section-number">7.2</span> General
+            introductions</h2>
+            <ul>
+            <li>Baca, Murtha (ed.) (2002). Introduction to Art Image
+            Access: Issues, Tools, Standards, and Strategies. <a
+            href="https://www.getty.edu/research/publications/electronic_publications/intro_aia/index.html">Online
+            Edition</a></li>
+            <li>Baca, Murtha (ed.) (2016). Introduction to Metadata
+            (Third Edition). <a
+            href="https://www.getty.edu/publications/intrometadata/">Online
+            Edition</a></li>
+            <li>Harpring, Patricia (2010). Introduction to Controlled
+            Vocabularies: Terminology for Art, Architecture, and Other
+            Cultural Works. <a
+            href="https://www.getty.edu/research/publications/electronic_publications/intro_controlled_vocab/index.html">Online
+            Edition</a></li>
+            <li>Hyvönen, Eero (2012). Publishing and Using Cultural
+            Heritage Linked Data on the Semantic Web. Morgan &amp;
+            Claypool.</li>
+            <li>Joudrey, Daniel; Taylor, Arlene G. (2018). The
+            Organization of Information. Fourth edition. Libraries
+            Unlimited.</li>
+            <li>Jannidis, Fotis; Kohle, Hubertus; Rehbein, Malte (Hg.)
+            (2017). Digital humanities. Eine Einführung. J. B.
+            Metzler.</li>
+            <li>Lubas, Rebecca; Jackson, Amy; Schneider, Ingrid (2013).
+            The Metadata Manual. A practical workbook. Elsevier
+            Science.</li>
+            <li>Riley, Jenn (2017). Understanding Metadata: What is
+            Metadata, and What is it For? A Primer Publication of the
+            National Information Standards Organization. <a
+            href="https://groups.niso.org/higherlogic/ws/public/download/17446/Understanding%20Metadata.pdf">PDF</a></li>
+            <li>Zeng, Lei Marcia; Qin, Jan (2022). Metadata. Third
+            edition. London: Facet Publishing.</li>
+            </ul>
+            <h2 data-number="7.3"
+            id="metadata-standards-and-guidelines"><span
+            class="header-section-number">7.3</span> Metadata standards
+            and guidelines</h2>
+            <ul>
+            <li>[CDWA-Lite] J. Paul Getty Trust/ARTstor (2006). CDWA
+            Lite. XML Schema Content for Contributing Records via the
+            OAI Harvesting Protocol. <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/cdwalite.html">Website</a></li>
+            <li>[CRM home] CIDOC Conceptual Reference Model (CRM). <a
+            href="https://www.cidoc-crm.org/">Website</a></li>
+            <li>[CRM 2006–] The International Committee for
+            Documentation of the International Council of Museums
+            (ICOM-CIDOC). <a
+            href="https://cidoc-crm.org/versions-of-the-cidoc-crm">Versions
+            of the CIDOC-CRM</a></li>
+            <li>[CRM 2014] ISO 21127:2014. Information and
+            documentation – A reference ontology for the interchange of
+            cultural heritage information. <a
+            href="https://www.iso.org/standard/57832.html">Reference</a></li>
+            <li>[CRM 2014] Oldman, Dominic and CRM Labs (2014). The
+            CIDOC Conceptual Reference Model (CIDOC-CRM): Primer. <a
+            href="https://www.cidoc-crm.org/sites/default/files/CRMPrimer_v1.1_1.pdf">PDF</a></li>
+            <li>[EDM home] Europeana Data Model. <a
+            href="https://pro.europeana.eu/page/edm-documentation">Website</a></li>
+            <li>[EDM 2013] Europenana Data Model Primer (2013). Editor:
+            Antoine Isaac. <a
+            href="https://pro.europeana.eu/files/Europeana_Professional/Share_your_data/Technical_requirements/EDM_Documentation/EDM_Primer_130714.pdf">PDF</a></li>
+            <li>[EDM 2017] Definition of the Europeana Data Model
+            v5.2.8. (2017). Europeana Foundation. <a
+            href="https://pro.europeana.eu/files/Europeana_Professional/Share_your_data/Technical_requirements/EDM_Documentation//EDM_Definition_v5.2.8_102017.pdf">PDF</a></li>
+            <li>[IFLA-FRBRoo] Bekiari, Chryssoula; Doerr, Martin; Le
+            Boeuf, Patrick; Riva, Pat (2015). Definition of FRBRoo: A
+            Conceptual Model for Bibliographic Information in
+            Object-Oriented Formalism. <a
+            href="https://repository.ifla.org/bitstream/123456789/659/1/frbroo_v_2.4.pdf">PDF</a></li>
+            <li>[IFLA-LRM] Riva, Pat; Le Bœuf, Patrick; Žumer, Maja
+            (2017). IFLA Library Reference Model: A Conceptual Model for
+            Bibliographic Information. <a
+            href="https://repository.ifla.org/bitstream/123456789/40/1/ifla-lrm-august-2017_rev201712.pdf">PDF</a></li>
+            <li>[LinkedArt] Linked Art: Networking Digital Collections
+            and Scholarship (2019–). Research Network funded by the UK
+            Arts and Humanities Research Council (AHRC). <a
+            href="https://linked.art/">Website</a> -<a
+            href="#spectrum">Spectrum</a> Collections Trust (2022).
+            Spectrum 5.1. <a
+            href="https://collectionstrust.org.uk/spectrum/">Website</a></li>
+            </ul>
+            <h2 data-number="7.4"
+            id="content-standards-and-guidelines"><span
+            class="header-section-number">7.4</span> Content standards
+            and guidelines</h2>
+            <ul>
+            <li>[CCO 2006] Cataloging Cultural Objects: A Guide to
+            Describing Cultural Works and Their Images. Visual Resources
+            Association. Edited by Murtha Baca et al. (2006). American
+            Library Association, Chicago. <a
+            href="https://static1.squarespace.com/static/64839bcb007bd907faf40da2/t/648682731ae85c00320c7d13/1686536835929/CatalogingCulturalObjectsFullv2.pdf">PDF</a></li>
+            <li>[CDWA] Categories for the Description of Works of Art
+            (2009–). Edited by Murtha Baca and Patricia Harpring. Last
+            revised 2022. <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/index.html">Online
+            Edition</a></li>
+          

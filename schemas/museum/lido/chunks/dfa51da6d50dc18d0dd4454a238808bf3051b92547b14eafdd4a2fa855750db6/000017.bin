@@ -1,0 +1,187 @@
+ype">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines identification and designation of
+					the institution of custody and, possibly, indication of the exact location of
+					the object.</tei:ab>
+				</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayRepository" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayRepository">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for designation and identification of the institution of custody,
+							corresponding to elements contained by the <tei:ref target="#repositorySet">Repository/Location Set</tei:ref> element.<br/> 
+							Possibly includes indication of the exact location of the object.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Repository</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="repositoryName" type="lido:legalBodyRefComplexType" minOccurs="0" id="repositoryName">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for the identification and designation of the institution
+							of custody, possibly with web link.</tei:ab>
+						<tei:ab type="label">Repository Name</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file, for example, one of those aggregated in
+							<tei:ref target="http://viaf.org/">VIAF</tei:ref> or in
+							<tei:ref target="https://www.wikidata.org/">Wikidata</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:repositoryName">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="workID" minOccurs="0" maxOccurs="unbounded" id="workID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An unambiguous numeric or alphanumeric identification number
+							assigned to the object/work by the institution of custody.</tei:ab>
+						<tei:ab type="label">Repository Work Identification Number</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute ref="lido:type" id="workID_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind of custodian identification number,
+											whether it is, for instance, an <em>accession number</em> or an <em>inventory number</em>.
+										</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#workID_type">Type of Work Identification Number</tei:ref>
+										</tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:sortorder"/>
+							<xs:attribute ref="lido:encodinganalog"/>
+							<xs:attribute ref="lido:label"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="repositoryLocation" type="lido:placeComplexType" minOccurs="0" id="repositoryLocation">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper with structured information about the repository location or the geographic place of the object/work;
+							recording the geographic location is especially relevant for stationary works, such as architectural built works,
+							monumental works, or archeological sites.</tei:ab>
+						<tei:ab type="label">Repository/Location</tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:repositoryLocation">
+								<sch:extends rule="sch_OWL"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="sourceRepositorySet" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="sourceRepositorySet">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A text element identifying the source of information about the repository or location
+							of the entity in focus. Whenever possible, a published source should be given.
+						</tei:ab>
+						<tei:ab type="label">Source Repository/Location Set</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+					    
+						
+					    
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute ref="lido:type" id="repositorySet_type">
+			<xs:annotation>
+				<xs:documentation>
+					<tei:ab type="description">An attribute for the kind of repository or location as
+						the current or former one.</tei:ab>
+					<tei:ab type="dataValues">Controlled terminology</tei:ab>
+					<tei:ab type="recommendation">LIDO Terminology for
+						<tei:ref target="../../documents/terminology-recommendation.html#repositorySet_type">Type of Repository Set</tei:ref>
+					</tei:ab>
+				</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute ref="lido:sortorder"/>
+	</xs:complexType>
+	<xs:element name="repositoryWrap" id="repositoryWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about the repository
+					or location.</tei:ab>
+				<tei:ab type="label">Repository/Location Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="repositorySet" type="lido:repositorySetComplexType" minOccurs="0" maxOccurs="unbounded" id="repositorySet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of elements for the identification, name and
+								location of the repository that is responsible for the object/work
+								in focus, or the geographic place where a stationary object/work,
+								such as a building, is currently or was formerly located.<br/>
+								Repeated if there are several designations known, or if former repositories or geographic places
+								should be listed.</tei:ab>							
+							<tei:ab type="label">Repository/Location Set</tei:ab>
+							
+								
+				    	</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="resourceSetComplexType" id="resourceSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines sets of resource information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="resourceID" type="lido:identifierComplexType" minOccurs="0" maxOccurs="unbounded" id="resourceID">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">The unique numeric or alphanumeric identification
+							of the original (digital or analogue) resource.</tei:ab>
+						<tei:ab type="label">Resource Identification Number</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="resourceRepresentation" minOccurs="0" maxOccurs="unbounded" id="resourceRepresentation">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of structured information about the digital representation of a resource for online
+							presentation.<br/>
+							Repeated for variants representing the same resource, such
+							as different sizes of the same image, or a thumbnail representing an
+							audio or video file and the digital audio or video file itself.</tei:ab>
+						<tei:ab type="label">Resource Representation</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="linkResource" id="linkResource">
+							<xs:annotation>
+								<xs:documentation>
+									<tei:ab type="description">A text element providing a reference to the resource in the
+										worldwide

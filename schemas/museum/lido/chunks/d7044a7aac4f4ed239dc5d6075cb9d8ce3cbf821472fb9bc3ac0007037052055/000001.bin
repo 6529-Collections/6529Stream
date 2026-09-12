@@ -1,0 +1,48 @@
+=========== -->
+	<element name="conversionToPreferredUnit" type="gml:ConversionToPreferredUnitType">
+		<annotation>
+			<documentation>This element is included when this unit has an accurate conversion to the preferred unit for this quantity type.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="roughConversionToPreferredUnit" type="gml:ConversionToPreferredUnitType">
+		<annotation>
+			<documentation>This element is included when the correct definition of this unit is unknown, but this unit has a rough or inaccurate conversion to the preferred unit for this quantity type.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<complexType name="ConversionToPreferredUnitType">
+		<annotation>
+			<documentation>Relation of a unit to the preferred unit for this quantity type, specified by an arithmetic conversion (scaling and/or offset). A preferred unit is either a base unit or a derived unit selected for all units of one quantity type. The mandatory attribute "uom" shall reference the preferred unit that this conversion applies to. The conversion is specified by one of two alternative elements: "factor" or "formula".</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:UnitOfMeasureType">
+				<choice>
+					<element name="factor" type="double">
+						<annotation>
+							<documentation>Specification of the scale factor by which a value using this unit of measure can be multiplied to obtain the corresponding value using the preferred unit of measure.</documentation>
+						</annotation>
+					</element>
+					<element name="formula" type="gml:FormulaType">
+						<annotation>
+							<documentation>Specification of the formula by which a value using this unit of measure can be converted to obtain the corresponding value using the preferred unit of measure.</documentation>
+						</annotation>
+					</element>
+				</choice>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="FormulaType">
+		<annotation>
+			<documentation>Paremeters of a simple formula by which a value using this unit of measure can be converted to the corresponding value using the preferred unit of measure. The formula element contains elements a, b, c and d, whose values use the XML Schema type "double". These values are used in the formula y = (a + bx) / (c + dx), where x is a value using this unit, and y is the corresponding value using the preferred unit. The elements a and d are optional, and if values are not provided, those parameters are considered to be zero. If values are not provided for both a and d, the formula is equivalent to a fraction with numerator and denominator parameters.</documentation>
+		</annotation>
+		<sequence>
+			<element name="a" type="double" minOccurs="0"/>
+			<element name="b" type="double"/>
+			<element name="c" type="double"/>
+			<element name="d" type="double" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+</schema>

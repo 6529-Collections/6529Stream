@@ -1,0 +1,196 @@
+ally a
+							published source.</tei:ab>
+						<tei:ab type="label">Source Appellation</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute ref="xml:lang"/>
+							<xs:attribute ref="lido:encodinganalog"/>
+							<xs:attribute ref="lido:label"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="classificationWrap" id="classificationWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for assignments of the object/work in focus to
+					one or more classification schemes, and the type of scheme used.</tei:ab>
+				<tei:ab type="label">Classification Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="classification" minOccurs="0" maxOccurs="unbounded" id="classification">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">An index element assigning an object/work to
+								a classification or other vocabulary scheme that groups similar
+								objects together on the basis of defined characteristics.<br/>
+								Repeated if the object/work is assigned to multiple schemes.</tei:ab>
+							<tei:ab type="label">Classification</tei:ab>
+							<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						    
+							
+							<tei:ab type="recommendation">Linked open vocabulary for
+								<tei:ref target="../../documents/terminology-recommendation.html#classification">Classification</tei:ref>
+							</tei:ab>
+						</xs:documentation>
+
+						<xs:appinfo>
+							<sch:pattern>
+								<sch:rule context="lido:classification">
+									<sch:extends rule="sch_SKOS"/>
+								</sch:rule>
+							</sch:pattern>
+						</xs:appinfo>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:conceptComplexType">
+								<xs:attribute ref="lido:type" id="classification_type">
+									<xs:annotation>
+										<xs:documentation>
+											<tei:ab type="description">An attribute for the particular kind of scheme
+												used for the classification of an object/work, whether it is, for instance,
+												based on object genres or subject categories.</tei:ab>
+											<tei:ab type="dataValues">Controlled terminology</tei:ab>
+											<tei:ab type="recommendation">LIDO Terminology for
+												<tei:ref target="../../documents/terminology-recommendation.html#classification_type">Type of Classification</tei:ref></tei:ab>
+										</xs:documentation>
+									</xs:annotation>
+								</xs:attribute>
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="conceptComplexType" mixed="false" id="conceptComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines identifiers and terms for a generic concept.<br/>
+					A concept is an abstract entity existing in the mind as a unit of thought,
+					expressed by one or more terms.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+
+		<xs:complexContent>
+			<xs:restriction base="lido:conceptMixedComplexType">
+				<xs:group ref="lido:conceptElementsSet"/>
+			</xs:restriction>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="dateComplexType" id="dateComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines an expression of the date.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="earliestDate" minOccurs="0" id="earliestDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the expression of an exact or estimated date, for
+							instance a year or calendar date, that delimits the beginning of a date span.
+						</tei:ab>
+						<tei:ab type="label">Earliest Date</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled format</tei:ab>
+						<tei:ab type="recommendation"><tei:ref target="https://www.iso.org/iso-8601-date-and-time-format.html">ISO 8601: Representation of dates and times</tei:ref>.
+						</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute ref="lido:type" id="earliestDate_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind of earliest date,
+											whether it is <em>exact</em> or <em>estimated</em>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for <tei:ref target="../../documents/terminology-recommendation.html#earliestDate_type">Type of Earliest Date</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:source"/>
+							<xs:attribute ref="lido:encodinganalog"/>
+							<xs:attribute ref="lido:label"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="latestDate" minOccurs="0" id="latestDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the expression of the exact or approximate date, for
+							instance a year or calendar date, that delimits the end of a date span.</tei:ab>
+					    <tei:ab type="label">Latest Date</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled format</tei:ab>
+						<tei:ab type="recommendation"><tei:ref target="https://www.iso.org/iso-8601-date-and-time-format.html">
+							ISO 8601: Representation of dates and times</tei:ref>.</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute ref="lido:type" id="latestDate_type">
+								<xs:annotation>
+									<xs:documentation>
+										<tei:ab type="description">An attribute for the kind
+											of latest date, whether it is, for instance, <em>exact</em> or
+											<em>estimated</em>.</tei:ab>
+										<tei:ab type="dataValues">Controlled terminology</tei:ab>
+										<tei:ab type="recommendation">LIDO Terminology for
+											<tei:ref target="../../documents/terminology-recommendation.html#latestDate_type">Type of Latest Date</tei:ref></tei:ab>
+									</xs:documentation>
+								</xs:annotation>
+							</xs:attribute>
+							<xs:attribute ref="lido:source"/>
+							<xs:attribute ref="lido:encodinganalog"/>
+							<xs:attribute ref="lido:label"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="dateSetComplexType" id="dateSetComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description"> Defines display and index elements for date
+					information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="displayDate" type="lido:textComplexType" minOccurs="0" maxOccurs="unbounded" id="displayDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A display element for date information, corresponding to the subsequent <tei:ref target="#date">Date</tei:ref> element.<br/>
+							Repeated for language variants only.</tei:ab>
+						<tei:ab type="label">Display Date</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Free text</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="date" type="lido:dateComplexType" minOccurs="0" id="date">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A wrapper for the expression of a date by providing a set of years as earliest and latest date
+							delimiting the respective span of time, usually given in the proleptic Gregorian calendar.<br/>
+							If it is an exact date, possibly with time, repeat the same date (and time) in

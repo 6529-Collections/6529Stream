@@ -1,0 +1,127 @@
+      </ul>
+            <h1 data-number="2" id="about-lido"><span
+            class="header-section-number">2</span> About LIDO</h1>
+            <h2 data-number="2.1" id="what-is-lido"><span
+            class="header-section-number">2.1</span> What is LIDO?</h2>
+            <p>LIDO is a <strong>metadata schema</strong>, formally
+            defined in the <strong>XML schema</strong> language. It
+            enables a representation of data about a variety of objects
+            of material culture, originating in heterogenous cataloging
+            or collection management systems. The multitude of objects
+            cover a wide range of objects including natural objects,
+            works of fine art, items from decorative arts, archaeology,
+            technology, life sciences, and other domains. Below, the
+            term “cultural objects” refers to all these kinds of
+            objects, following the <a
+            href="https://uis.unesco.org/en/glossary-term/cultural-heritage">UNESCO
+            definition</a> of cultural heritage.</p>
+            <p>Among other features, LIDO is able to represent
+            contextual information as events occurring in the lifetime
+            of an object. This approach is highly flexible, easy to
+            follow, and consistent with internationally agreed
+            recommendations for museum documentation (see sections <a
+            href="#background"><em>2.3 Background</em></a> and <a
+            href="#related-standards"><em>2.4 Related
+            standards</em></a>). Events can also connect an object
+            description to the wider knowledge sphere, using <a
+            href="https://www.w3.org/standards/semanticweb/data">Linked
+            Data</a> principles.</p>
+            <p>A single object or work, or a group of objects, is
+            described in a <strong>LIDO record</strong> using XML
+            syntax. A <strong>LIDO document</strong> can contain one or
+            several LIDO records. The representation of the LIDO schema
+            in LIDO XML documents is referred to as the <strong>LIDO
+            format</strong>.</p>
+            <p>There are many use cases for a LIDO based data exchange
+            and transfer in provider/consumer scenarios. LIDO was
+            initially designed as a data <strong>harvesting
+            standard</strong> and still serves this function in heritage
+            institutions where metadata is often made available through
+            the <a href="https://www.openarchives.org/pmh/">OAI Protocol
+            for Metadata Harvesting</a> (OAI-PMH). Harvesting refers to
+            the process of collecting and updating metadata by
+            aggregation portals.</p>
+            <p>Next to descriptive metadata, a LIDO record contains
+            administrative metadata that may include rights information
+            and links to resource representations. Aggregation portals
+            can use these links for guiding the user to media items
+            (such as facsimiles, images, audio or video files, or 3D
+            models) representing the collection object described in the
+            metadata record. While accessing and obtaining such media
+            items may be the actual goal of interacting with a portal,
+            the metadata record is essential for making them findable,
+            comprehensible, and to aid in their discovery.</p>
+            <h2 data-number="2.2" id="why-lido"><span
+            class="header-section-number">2.2</span> Why LIDO?</h2>
+            <p>LIDO is designed to allow for object descriptions at
+            different levels of granularity or specificity. Few elements
+            are considered mandatory in order to facilitate the
+            recording of objects where detailed information is not
+            available, while a great number of possible elements enables
+            a fine-grained account of an object. The latter supports,
+            for instance, a deeper exploration of data, possibly
+            encouraging and facilitating research questions and the
+            reuse of research data. By improving interoperability
+            through the support of Linked Data principles and by
+            providing data via interfaces or APIs, resources and
+            research data become more visible and accessible.</p>
+            <p>The LIDO XML schema is designed to</p>
+            <ul>
+            <li>allow the description of objects or works, including
+            non-artistic and natural objects, to the level desired;</li>
+            <li>allow a data provider to decide how extensive the
+            metadata sets they provide in a particular reuse context
+            are, i.e., they can vary in different scenarios;</li>
+            <li>enable the provision of metadata about digital
+            surrogates representing the object in focus;</li>
+            <li>provide links back to records in their home context,
+            i.e., on an organization’s website;</li>
+            <li>enable the display of (detailed) information about an
+            object in a reader-friendly form, while the record content
+            is equally well prepared for retrieval;</li>
+            <li>support the identification of an associated entity such
+            as an actor, an event, a place, or a concept, by allowing
+            for references to authority files and controlled
+            vocabularies;</li>
+            <li>provide full support for multilingual records, either at
+            the structural element level or at the individual term or
+            appellation element level, or both;</li>
+            <li>distinguish between the identifiers of the documented
+            object, the web page containing a description of the object,
+            its online digital surrogates and the LIDO record
+            itself.</li>
+            </ul>
+            <p>Representing metadata in LIDO enables efficient
+            processing for public information portals where collection
+            objects can be discovered, searched, viewed and
+            contextualised.</p>
+            <h2 data-number="2.3" id="background"><span
+            class="header-section-number">2.3</span> Background</h2>
+            <p>LIDO builds upon several pre-existing standards and
+            guidelines for the description of cultural objects and
+            metadata exchange. The LIDO schema integrates and extends
+            CDWA Lite, is underpinned by the CIDOC Conceptual Reference
+            Model (CIDOC CRM), and incorporates some information units
+            from Spectrum definitions.</p>
+            <h3 data-number="2.3.1" id="cdwa-lite"><span
+            class="header-section-number">2.3.1</span> CDWA Lite</h3>
+            <p><a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/cdwalite.pdf">CDWA
+            Lite</a> is an XML schema derived from the <a
+            href="https://www.getty.edu/research/publications/electronic_publications/cdwa/">Categories
+            for the Description of Works of Art</a> (CDWA), following
+            the data content standard <a
+            href="https://www.vraweb.org/cco?rq=cataloging%20cultural%20objects">Cataloging
+            Cultural Objects</a> (CCO), published by the <a
+            href="https://www.getty.edu/about/">J. Paul Getty Trust</a>
+            and <a href="https://www.artstor.org/">ARTstor</a>. It is
+            intended as a low-barrier way for institutions to contribute
+            their collection metadata to union catalogs using the Open
+            Archives Initiatives Protocol for Metadata Harvesting
+            (OAI/PMH).</p>
+            <p>CDWA Lite defines 96 elements and sub-elements, most of
+            which are integrated in LIDO. Note that the CDWA Lite schema
+            is replaced by LIDO Version 1.0 since 2010.</p>
+            <p>The most important extension to CDWA Lite is the
+            introduction of the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html

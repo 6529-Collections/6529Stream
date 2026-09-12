@@ -1,0 +1,78 @@
+osed of text and XPath expressions used to extract the useful information from the feature.</documentation>
+		</annotation>
+		<sequence>
+			<element name="LabelExpression" type="string" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+		<attribute ref="gml:transform" use="optional"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<attribute name="transform" type="string">
+		<annotation>
+			<documentation>Defines the geometric transformation of entities. There is no particular grammar defined for this value.</documentation>
+		</annotation>
+	</attribute>
+	<!-- =========================================================== -->
+	<complexType name="StyleVariationType">
+		<annotation>
+			<documentation>Used to vary individual graphic parameters and attributes of the style, symbol or text.</documentation>
+		</annotation>
+		<simpleContent>
+			<extension base="string">
+				<attribute name="styleProperty" type="string" use="required"/>
+				<attribute name="featurePropertyRange" type="string" use="optional"/>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- ==============================================================
+       Graph parameters types
+	============================================================== -->
+	<simpleType name="GraphTypeType">
+		<annotation>
+			<documentation>Graph-specific styling property.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="TREE"/>
+			<enumeration value="BICONNECTED"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<simpleType name="DrawingTypeType">
+		<annotation>
+			<documentation>Graph-specific styling property.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="POLYLINE"/>
+			<enumeration value="ORTHOGONAL"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<simpleType name="LineTypeType">
+		<annotation>
+			<documentation>Graph-specific styling property.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="STRAIGHT"/>
+			<enumeration value="BENT"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<simpleType name="AesheticCriteriaType">
+		<annotation>
+			<documentation>Graph-specific styling property.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="MIN_CROSSINGS"/>
+			<enumeration value="MIN_AREA"/>
+			<enumeration value="MIN_BENDS"/>
+			<enumeration value="MAX_BENDS"/>
+			<enumeration value="UNIFORM_BENDS"/>
+			<enumeration value="MIN_SLOPES"/>
+			<enumeration value="MIN_EDGE_LENGTH"/>
+			<enumeration value="MAX_EDGE_LENGTH"/>
+			<enumeration value="UNIFORM_EDGE_LENGTH"/>
+			<enumeration value="MAX_ANGULAR_RESOLUTION"/>
+			<enumeration value="MIN_ASPECT_RATIO"/>
+			<enumeration value="MAX_SYMMETRIES"/>
+		</restriction>
+	</simpleType>
+</schema>

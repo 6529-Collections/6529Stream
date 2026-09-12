@@ -1,0 +1,124 @@
+4-33" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:relatedWorkRelType</span>&gt;</span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:relatedWorkSet</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.2.7" id="subject"><span
+            class="header-section-number">5.2.7</span> Subject</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subject">lido:subject</a>&gt;</p>
+            <p><strong>Note:</strong> Subject contains information about
+            what is shown in an object or what is a theme of the work in
+            focus. Indexing subject matter is strongly recommended,
+            since it is a primary access point in retrieval, and users
+            quite often perform topical searches. Subject may occur as
+            depicted items, themes, or narrative content, and refers to
+            abstract concepts and equally refers to abstract concepts
+            and named entities.</p>
+            <p>Terms designating a generic notion are indexed in &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectConcept">lido:subjectConcept</a>&gt;.
+            Examples for concepts in the role of subject may be
+            perceivable things, such as bridges or bicycles, or abstract
+            ideas, like love or fear. In the context of works of art,
+            what is depicted is referred to as the <em>ofness</em> of an
+            object, e.g., a sitting woman, a landscape, an armrest. For
+            this kind of subject, the type is “<a
+            href="http://terminology.lido-schema.org/lido00525">Description</a>”.
+            Beyond this, cultural objects most often have content
+            calling for interpretation, e.g., when a picture conveys
+            allegorical meaning or relates to a mythological narrative.
+            This kind of knowledgeable information is called the
+            <em>aboutness</em> of an object. Here, the type of subject
+            is “<a
+            href="http://terminology.lido-schema.org/lido00524">Interpretation</a>”.
+            In the library context aboutness refers to the totality of
+            subjects explicitly or implicitly addressed in the text of a
+            document. Note that indexing values for
+            &lt;lido:subjectConcept&gt; drawn from Iconclass are of type
+            “<a
+            href="http://terminology.lido-schema.org/lido00745">Iconclass
+            notation</a>”.</p>
+            <p>Content referring to named entities, such as a certain
+            person or a particular place, is indexed in distinct LIDO
+            elements: &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectActor">lido:subjectActor</a>&gt;
+            for individual persons or organizations, whether alive or
+            historical, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectDate">lido:subjectDate</a>&gt;
+            for date values,&lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectEvent">lido:subjectEvent</a>&gt;
+            for named historical events, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectPlace">lido:subjectPlace</a>&gt;
+            for real places, and &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;
+            for a named object that is shown or described in or by the
+            object at hand. Please note, that named objects comprise not
+            only material objects, but also immaterial ones, that are
+            documented as single units or serve as topic of discourse.
+            These include fictitious actors, fictitious places and
+            fictitious events, for instance, from legends, religion,
+            mythology, or literature and performing arts. They are all
+            indexed as &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectObject">lido:subjectObject</a>&gt;.</p>
+            <p>The subject type for named entities is “<a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>”.
+            Note that indexing values from Iconclass belong to a type of
+            its own, labelled “<a
+            href="http://terminology.lido-schema.org/lido00745">Iconclass
+            notation</a>”.</p>
+            <p>The usage of subject for, e.g., natural objects,
+            buildings, or utilitarian items, should be specifically
+            elaborated for respective areas of collection. In the
+            following element descriptions, &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectDate">lido:subjectDate</a>&gt;
+            is omitted since the value recommendations are the same as
+            for &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#date">lido:date</a>&gt;
+            in general.</p>
+            <h4 data-number="5.2.7.1" id="type-of-subject"><span
+            class="header-section-number">5.2.7.1</span> Type of
+            Subject</h4>
+            <p>The type of &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subject">lido:subject</a>&gt;,
+            also called “indexing type”, indicates whether the indexing
+            term is an impartial <em>description</em> of what is
+            depicted, a more subjective <em>interpretation</em> of the
+            topic, or an <em>identification</em> of a named entity. The
+            following types are the most common ones:</p>
+            <ul>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00525">Description</a>
+            relates to the <em>ofness</em> of an object. It states what
+            the depicted content is.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00524">Interpretation</a>
+            relates to the <em>aboutness</em> of an object, stating what
+            the thematic, iconographical, or symbolic meaning is.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00136">Identification</a>
+            relates to named individuals that the object at hand is of
+            or about.</li>
+            <li><a
+            href="http://terminology.lido-schema.org/lido00745">Iconclass
+            notation</a> is used for all subjects, whether concepts or
+            named entities, that are indexed with an Iconclass
+            notation.</li>
+            </ul>
+            <p>For subject types see terms in the LIDO <a
+            href="https://lido-schema.org/documents/terminology-recommendation.html#subject_type">Subject
+            Type-Vocabulary</a>.</p>
+            <h4 data-number="5.2.7.2" id="subject-concept"><span
+            class="header-section-number">5.2.7.2</span> Subject
+            Concept</h4>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#subjectConcept">lido:subjectConcept</a>&gt;</p>
+            <p><strong>Note:</strong> Subject Concept contains generic
+            concepts describing what the object depicts or what it is
+            about.</p>
+            <p><strong>Example for “Description”:</strong> The following
+            example refers to a term used as subject for Leonardo’s
+            painting in the <a
+            href="https://pro.europeana.eu/files/Europeana_Professional/Share_your_data/Technical_requirements/EDM_Documentation/EDM_Primer_130714.pdf">EDM
+            Primer</a>, showing the possible inference of broader
+            concepts when using controlled structured vocabularies (see
+            Fig. 9 Mona Lisa – enriched using contextual entities, page
+            15). In the example below, it is concluded from the Wikidata
+            subclass relation for “<a
+            href="http://www.wikidata.org/entity/Q467">woman</a>” th

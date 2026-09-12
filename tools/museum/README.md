@@ -163,3 +163,10 @@ dependencies. Exact target decimals use a separate encoder; Stream source
 canonicalization stays unchanged. The visible named Sound supplement and
 content-addressed media require a compatible resolver; no viewer, media
 availability or chain-authentication claim follows from offline validation.
+
+The [LIDO correspondence](../../docs/museum-lido-correspondence.md) adds an
+explicit work/creation/creator description and the same media resources under
+the original LIDO1.1 XSD and its complete pinned import closure. Check it with
+`python -m tools.museum.lido_model --check`; no new dependencies are needed.
+Exact source attribution, export-language assertions and final XML path evidence
+remain separate from creator truth, chain authority and institutional acceptance.

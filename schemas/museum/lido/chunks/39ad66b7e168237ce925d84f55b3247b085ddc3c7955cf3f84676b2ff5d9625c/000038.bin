@@ -1,0 +1,76 @@
+idden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:earliestDate</span>&gt;</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:latestDate</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="ot">            lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00529&quot;</span>&gt;</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>            1519</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:latestDate</span>&gt;</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:date</span>&gt;</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:eventDate</span>&gt;</span></code></pre></div>
+            <h3 data-number="5.2.6" id="related-work"><span
+            class="header-section-number">5.2.6</span> Related Work</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#relatedWork">lido:relatedWork</a>&gt;</p>
+            <p><strong>Note</strong>: Related Work contains information
+            about an object that is directly associated with the object
+            in focus. An extensive list of such relationships can be
+            found in the LIDO Terminology for <a
+            href="http://terminology.lido-schema.org/lido00138">Relationship
+            Type</a>. Examples are <a
+            href="http://terminology.lido-schema.org/lido00586">preparatory</a>
+            and <a href="">derivative</a> relationhips, or associations
+            between <a
+            href="http://terminology.lido-schema.org/lido00579">companion
+            pieces</a>. However, there is no general answer to whether
+            or not a work should be linked as associated. The decision
+            will depend on how the benefits in retrieval are estimated.
+            Will retrieving both objects at one go be meaningful to
+            users? Or will the relation of the objects lead to a deluge
+            of unwanted search results? These questions should be
+            weighed when establishing an associative relation between
+            works.</p>
+            <p><strong>Example:</strong> The following example describes
+            the ready made “L.H.O.O.Q” by Marcel Duchamp as a related
+            work to Leonardo’s <em>Mona Lisa</em>. Although these works
+            are not directly associated, they are contextually connected
+            in such a way that users may want to become aware of both in
+            one search session.</p>
+            <blockquote>
+            <p><strong>Related Work:</strong> Marcel Duchamp,
+            L.H.O.O.Q., Ready-made 1919<br /> <strong>Note:</strong>
+            L.H.O.O.Q; photographic reproduction; Marcel Duchamp; 1919;
+            Israel Museum<br /> <strong>Relationship Type:</strong> is
+            reproduction of</p>
+            </blockquote>
+            <div class="sourceCode" id="cb34"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:relatedWorkSet</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:sortorder=</span><span class="st">&quot;3&quot;</span>&gt;</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:displayRelatedWork</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        Marcel Duchamp, L.H.O.O.Q., Ready-made 1919</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:displayRelatedWork</span>&gt;</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:relatedWork</span>&gt;</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:object</span>&gt;</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:objectWebResource</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:formatResource=</span><span class="st">&quot;text/html&quot;</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>                https://www.imj.org.il/en/collections/199796-0</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:objectWebResource</span>&gt;</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:objectID</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:source=</span><span class="st">&quot;Israel Museum, Jerusalem&quot;</span>&gt;</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>                B99.0575</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:objectID</span>&gt;</span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:objectNote</span></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>                L.H.O.O.Q; photographic reproduction; Marcel Duchamp; 1919; Israel Museum</span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:objectNote</span>&gt;</span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:object</span>&gt;</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:relatedWork</span>&gt;</span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:relatedWorkRelType</span>&gt;</span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a><span class="ot">            rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00607&quot;</span>&gt;</span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a><span class="ot">                xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>                is reproduction of</span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb34-33"><a href="#cb3

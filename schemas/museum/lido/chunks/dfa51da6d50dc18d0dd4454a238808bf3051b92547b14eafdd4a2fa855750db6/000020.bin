@@ -1,0 +1,202 @@
+ould be used verbatim and can be expected to be displayed as such to support
+							legal requirements for attribution.<br/>
+							Note that legal information, such as URIs for license statements, should be recorded in the respective
+							element <tei:ref target="#rightsType">Rights Type</tei:ref>.</tei:ab>
+						<tei:ab type="label">Credit Line</tei:ab>
+						<tei:ab type="dataValues">Free text</tei:ab>
+						
+						
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="rightsHolderComplexType" id="rightsHolderComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines information about the <em>person</em> or <em>group of persons</em>,
+					referred to as legal body, holding the described right.</tei:ab>
+				<tei:ab type="label">Rights Holder</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexContent>
+			<xs:extension base="lido:legalBodyRefComplexType">
+				<xs:attribute ref="lido:sortorder"/>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="rightsWorkWrap" id="rightsWorkWrap">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">A wrapper for structured information about rights
+					associated with the object/work in focus. Rights information about the record
+					and the resource is recorded in the respective rights elements.</tei:ab>
+				<tei:ab type="note">Rights information for the record and for resources is recorded
+					in the respective rights elements <tei:ref target="#recordRights">Rights for Record</tei:ref> and <tei:ref target="#rightsResource">Rights for Resource</tei:ref>.</tei:ab>
+				<tei:ab type="label">Rights for Work Wrapper</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="rightsWorkSet" minOccurs="0" maxOccurs="unbounded" id="rightsWorkSet">
+					<xs:annotation>
+						<xs:documentation>
+							<tei:ab type="description">A set of structured information about rights
+								management. May include copyright and other intellectual property
+								statements as well as license information about the object/work.</tei:ab>
+							<tei:ab type="label">Rights for Work Set</tei:ab>
+						</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="lido:rightsComplexType">
+								<xs:attribute ref="lido:sortorder"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:attribute name="sortorder" type="xs:integer" id="sortorder">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute assigning a priority order for online presentation of the
+					element in focus.</tei:ab>
+				<tei:ab type="dataValues">Type-checked</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:attribute name="source" type="xs:string" id="source">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">An attribute indicating the source of the information given in the holding
+					element.</tei:ab>
+				<tei:ab type="dataValues">Free text</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+	</xs:attribute>
+	<xs:complexType name="subjectComplexType" id="subjectComplexType">
+		<xs:annotation>
+			<xs:documentation>
+				<tei:ab type="description">Defines a set of subject indexing information.</tei:ab>
+			</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:element name="extentSubject" type="lido:conceptMixedComplexType" minOccurs="0" maxOccurs="unbounded" id="extentSubject">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element specifying the part of the
+							object/work to which the respective subject term or terms apply, when
+							there are multiple subjects.<br/>
+							Examples may include <em>side A</em>, <em>side B</em>, <em>recto</em>, <em>verso</em>.</tei:ab>
+						<tei:ab type="label">Extent Subject</tei:ab>
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#extentSubject">Extent Subject</tei:ref></tei:ab>
+					</xs:documentation>
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:extentConcept">
+								<sch:extends rule="sch_MixedContent"/>
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="subjectConcept" minOccurs="0" maxOccurs="unbounded" id="subjectConcept">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">An index element for the subject matter of the
+							object/work expressed by generic concepts. May include concepts to
+							describe iconographical themes, literary topics, or the material world.
+							References to individual entities, for instance actors or places, are
+							indicated in the respective sub-elements.<br/>
+							Repeated for each single or typed subject concept referred to
+							by the object/work in focus.</tei:ab>
+						<tei:ab type="label">Subject Concept</tei:ab>
+						
+						
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open vocabulary for
+							<tei:ref target="../../documents/terminology-recommendation.html#subjectConcept">Subject Concept</tei:ref></tei:ab>
+					</xs:documentation>
+
+					<xs:appinfo>
+						<sch:pattern>
+							<sch:rule context="lido:subjectConcept">
+								<sch:extends rule="sch_SKOS"/>
+							</sch:rule>
+						</sch:pattern>
+					</xs:appinfo>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:conceptComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="subjectActor" minOccurs="0" maxOccurs="unbounded" id="subjectActor">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for a <em>person</em>, or a <em>group of persons</em>, depicted by an object/work, or
+							what it is about.<br/>
+						    Repeated if there are multiple actors.</tei:ab>
+						<tei:ab type="label">Subject Actor</tei:ab>
+						
+						
+						
+						
+						<tei:ab type="dataValues">Controlled terminology</tei:ab>
+						<tei:ab type="recommendation">Linked open authority file for
+							<tei:ref target="../../documents/terminology-recommendation.html#subjectActor">Subject Actor</tei:ref>
+						</tei:ab>
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:actorSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="subjectDate" minOccurs="0" maxOccurs="unbounded" id="subjectDate">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for the date or range of dates
+							referred to by an object/work, or what it is about.<br/>
+							Repeated if there are multiple dates.</tei:ab>
+						<tei:ab type="label">Subject Date</tei:ab>
+						<tei:ab type="dataValues">Controlled format</tei:ab>
+						
+						
+					</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="lido:dateSetComplexType">
+							<xs:attribute ref="lido:sortorder"/>
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="subjectEvent" minOccurs="0" maxOccurs="unbounded" id="subjectEvent">
+				<xs:annotation>
+					<xs:documentation>
+						<tei:ab type="description">A set of display and index elements for an event depicted by the object/work in focus,
+							or what it is about.<br/>
+							Repeated if there are multiple events.</tei:ab>
+						<tei:ab type="label">Subject Event</tei:ab>
+						
+						
+						<tei:ab type="d

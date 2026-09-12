@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v2004 rel. 2 U (http://www.xmlspy.com) by David Burggraf (Galdos Systems Inc) -->
+<schema targetNamespace="http://www.opengis.net/gml" elementFormDefault="qualified" version="3.1.1.2" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:sch="http://www.ascc.net/xml/schematron"
+        xmlns="http://www.w3.org/2001/XMLSchema">
+	<annotation>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:geometryBasic0d1d:v3.1.1">geometryBasic0d1d.xsd</appinfo>
+		<appinfo source="urn:opengis:specification:gml:schema-xsd:geometryBasic0d1d:v3.1.1">
+			<sch:title>Schematron validation</sch:title>
+			<sch:pattern name="Check SRS tags">
+				<sch:rule abstract="true" id="CRSLabels">
+					<sch:report test="not(@srsDimension) or @srsName">The presence of a dimension attribute implies the presence of the srsName attribute.</sch:report>
+					<sch:report test="not(@axisLabels) or @srsName">The presence of an axisLabels attribute implies the presence of the srsName attribute.</sch:report>
+					<sch:report test="not(@uomLabels) or @srsName">The presence of an uomLabels attribute implies the presence of the srsName attribute.</sch:report>
+					<sch:report test="(not(@uomLabels) and not(@axisLabels)) or (@uomLabels and @axisLabels)">The presence of an uomLabels attribute implies the presence of the axisLabels attribute and vice versa.</sch:report>
+				</sch:rule>
+			</sch:pattern>
+			<sch:pattern name="Check Dimension">
+				<sch:rule abstract="true" id="Count">
+					<sch:report test="not(@count) or @srsDimension">The presence of a count attribute implies the presence of the dimension attribute.</sch:report>
+				</sch:rule>
+			</sch:pattern>
+		</appinfo>
+		<documentation>
+			GML is an OGC Standard.
+			Copyright (c) 2001,2005,2010 Open Geospatial Consortium.
+			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
+		</documentation>
+	</annotation>
+	<!-- ============================================================== -->
+	<include schemaLocation="gml.xsd"/>
+	<include schemaLocation="measures.xsd">
+		<annotation>
+			<documentation>This includes not only measures.xsd, but also units.xsd, gmlBase.xsd and basicTypes.xsd.</documentation>
+		</annotation>
+	</include>
+	<!-- ============================================================== -->
+	<!-- ===========  abstract supertype for geometry objects =================== -->
+	<!-- ============================================================== -->
+	<element name="_Geometry" type="gml:AbstractGeometryType" abstract="true" substitutionGroup="gml:_GML">
+		<annotation>
+			<documentation>The "_Geometry" element is the abstract head of the substituition group for all geometry elements of GML 3. This 
+			includes pre-defined and user-defined geometry elements. Any geometry element must be a direct or indirect extension/restriction 
+			of AbstractGeometryType and must be directly or indirectly in the substitution group of "_Geometry".</documentation>
+			<appinfo>
+				<sch:pattern name="Check SRS tags">
+					<sch:rule context="gml:_Geometry">
+						<sch:extends rule="CRSLabels"/>
+					</sch:rule>
+				</sch:pattern>
+			</appinfo>
+		</annotation>
+	</element>
+	<!-- ============================================================== -->
+	<complexType name="GeometryPropertyType">
+		<annotation>
+			<documentation>A geometric property can either be any geometry element encapsulated in an element of this type or an XLink reference 
+			to a remote geometry element (where remote includes geometry elements located elsewhere in the same document). Note that either 
+			the reference or the contained element must be given, but not both or none.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<element ref="gml:_Geometry"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup">
+			<annotation>
+				<documentation>This attribute group includes the XLink attributes (see xlinks.xsd). XLink is used in GML to reference 
+				remote resources (including those elsewhere in the same document). A simple link element can be constructed by 
+				including a specific set of XLink attributes. The XML Linking Language (XLink) is currently a Proposed Recommendation 
+				of the World Wide Web Consortium. XLink allows elements to be inserted into XML documents so as to create 
+				sophisticated links between resources; such links can be used to reference remote properties. A simple link element 
+				can be used to implement pointer functionality, and this functionality has been built into various GML 3 elements by 
+				including the gml:AssociationAttributeGroup.</documentation>
+			</annotation>
+		</attributeGroup>
+	</complexType>
+	<!-- ============================================================== -->
+	<complexType name="GeometryArrayPropertyType">
+		<annotation>
+			<documentation>A container for an array of geometry elements. The elements are always contained in the array property, 
+			referencing geometry elements or arrays of geometry elements is not supported.</documentation>
+		</annotation>
+		<sequence>
+			<element ref="gml:_Geometry" minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	<!-- ============================================================== -->
+	<complexType name="AbstractGeometryType" abstract="true">
+		<annotation>
+			<documentation>All geometry elements are derived directly or indirectly from this abstract supertype. A geometry element may 
+			have an identifying attribute ("gml:id"), a name (attribute "name") and a description (attribute "description"). It may be associated 
+			with a spatial reference system (attribute "srsName"). The following rules shall be adhered: - Every geometry type shall derive 
+			from this abstract type. - Every geometry element (i.e. an element of a geometry type) shall be directly or indirectly in the 
+			substitution group of _Geometry.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:AbstractGMLType">
+				<attribute name="gid" type="string" use="optional">
+					<annotation>
+						<documentation>This attribute is included for backward compatibility with GML 2 and is deprecated with GML 3. 
+						This identifer is superceded by "gml:id" inherited from AbstractGMLType. The attribute "gid" should not be used 
+						anymore and may be deleted in future versions of GML without further notice.</documentation>
+					</annotation>
+				</attribute>
+				<attributeGroup ref="gml:SRSReferenceGroup"/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- ============================================================== -->
+	<attributeGroup name="SRSReferenceGroup">
+		<annotation>
+			<documentation>Optional reference to the CRS used by this geometry, with optional additional information to simplify use when 
+			a more complete definition of the CRS is not needed.</documentation>
+		</annotation>
+		<attribute name="srsName" type="anyURI" use="optional">
+			<annotation>
+				<documentation>In general this reference points to a CRS instance of gml:CoordinateReferenceSystemType 
+				(see coordinateReferenceSystems.xsd). For well known references it is not required that the CRS description exists at the 
+				location the URI points to. If no srsName attribute is given, the CRS must be specified as part of the larger context this 
+				geometry element is part of, e.g. a geometric element like point, curve, etc. It is expected that this attribute will be specified 
+				at the direct position level only in rare cases.</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="srsDimension" type="positiveInteger" use="optional">
+			<annotation>
+				<documentation>The "srsDimension" is the length of coordinate sequence (the number of entries in the list). This dimension is 
+				specified by the coordinate reference system. When the srsName attribute is omitted, this attribute shall be omitted.</documentation>
+			</annotation>
+		</attribute>
+		<attributeGroup ref="gml:SRSInformationGroup"/>
+	</attributeGroup>
+	<!-- =================================================== -->
+	<attributeGroup name="SRSInformationGroup">
+		<annotation>
+			<documentation>

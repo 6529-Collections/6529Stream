@@ -1,0 +1,111 @@
+opulated with
+            high-level classes of the CIDOC CRM, particularly
+            sub-classes of <a
+            href="https://cidoc-crm.org/html/cidoc_crm_v7.1.1_with_translations.html#E18">E18
+            Physical Thing</a>, there is now a <a
+            href="http://terminology.lido-schema.org/lido00092">Category
+            Vocabulary</a> available from the LIDO Terminology for use
+            in this element. Note that a &lt;lido:category&gt; statement
+            must be logically and semantically consistent with what is
+            said in the more specific &lt;lido:objectWorkType&gt; and
+            &lt;lido:classification&gt; elements.</p>
+            <p><strong>Example:</strong> In the following example, the
+            category statement is fully expressed by the LIDO
+            Terminology identifier, <a
+            href="http://terminology.lido-schema.org/lido00096">“lido00096”</a>.
+            The term in &lt;skos:prefLabel&gt; is given here both for
+            human readability and for use by processing systems that are
+            not prepared for fetching data using a vocabulary URI.</p>
+            <blockquote>
+            <p><strong>Category:</strong> Human-made object
+            <strong><em>Preference:</em></strong> Preferred</p>
+            </blockquote>
+            <div class="sourceCode" id="cb8"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:category</span>&gt;</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">skos:Concept</span><span class="ot"> rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00096&quot;</span>&gt;</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">skos:prefLabel</span><span class="ot"> xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;Human-made object&lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:category</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.2.4" id="application-profile"><span
+            class="header-section-number">4.2.4</span> Application
+            Profile</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#applicationProfile">lido:applicationProfile</a>&gt;</p>
+            <p><strong>Note:</strong> The LIDO schema may not cover all
+            metadata needs of the user community. To accommodate
+            specialized user requirements, the LIDO schema can be
+            complemented with application profiles. Whenever an
+            application profile has been used in the preparation of a
+            LIDO record, the &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#applicationProfile">lido:applicationProfile</a>&gt;
+            element should carry the public identifier (URI or
+            equivalent) of the respective document(s). For further
+            information on LIDO profiles, see section <a
+            href="#application-profiles"><em>3.4.3 Application
+            Profiles</em></a> and <a
+            href="https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/profiles/"
+            class="uri">https://cidoc.mini.icom.museum/working-groups/lido/lido-overview/profiles/</a>.</p>
+            <p><strong>Example:</strong> In the following example the
+            Application Profile Element contains the URI of the XML
+            Schema Definition Document of the <a
+            href="https://doi.org/10.11588/arthistoricum.1026">LIDO
+            Application Profile Painting and Sculpture</a>.</p>
+            <blockquote>
+            <p><strong>Application Profile:</strong> <a
+            href="https://lido-schema.org/profiles/v1.1/lido-v1.1-profile-paintingandsculpture-v1.0.xsd"
+            class="uri">https://lido-schema.org/profiles/v1.1/lido-v1.1-profile-paintingandsculpture-v1.0.xsd</a>
+            <strong><em>Type:</em></strong> URI</p>
+            </blockquote>
+            <div class="sourceCode" id="cb9"><pre
+            class="sourceCode xml"><code class="sourceCode xml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">lido:applicationProfile</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ot">    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    https://lido-schema.org/profiles/v1.1/lido-v1.1-profile-paintingandsculpture-v1.0.xsd</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:applicationProfile</span>&gt;</span></code></pre></div>
+            <h3 data-number="4.2.5" id="descriptive-metadata"><span
+            class="header-section-number">4.2.5</span> Descriptive
+            Metadata</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#descriptiveMetadata">lido:descriptiveMetadata</a>&gt;</p>
+            <p><strong>Note:</strong> Descriptive metadata are intended
+            to facilitate the discovery and identification of objects or
+            works. They are most visible to end-users, guiding them
+            through the physical or virtual shelves and enabling them to
+            find what they need. Descriptive metadata comprise
+            information on object properties, such as its type, title,
+            physical features, or participation in an event. Note, that
+            the use of &lt;lido:descriptiveMetadata&gt; provided with an
+            xml:lang attribute is mandatory.</p>
+            <figure>
+            <img src="img/figure_descriptiveMetadata.png"
+            alt="Figure 4: Descriptive Metadata and its immediate sub-elements" />
+            <figcaption aria-hidden="true">Figure 4: Descriptive
+            Metadata and its immediate sub-elements</figcaption>
+            </figure>
+            <h3 data-number="4.2.6" id="administrative-metadata"><span
+            class="header-section-number">4.2.6</span> Administrative
+            Metadata</h3>
+            <p><strong>Element name:</strong> &lt;<a
+            href="https://lido-schema.org/schema/latest/lido.html#administrativeMetadata">lido:administrativeMetadata</a>&gt;</p>
+            <p><strong>Note:</strong> Administrative metadata are
+            intended to facilitate the management of the data provided,
+            particularly holding information about rights and
+            restrictions on the access or use of the described object or
+            work, the provided record or any supplied resource. Note,
+            that the use of &lt;lido:administrativeMetadata&gt; provided
+            with an xml:lang attribute is mandatory.</p>
+            <figure>
+            <img src="img/figure_administrativeMetadata.png"
+            alt="Figure 5: Administrative Metadata and its immediate sub-elements" />
+            <figcaption aria-hidden="true">Figure 5: Administrative
+            Metadata and its immediate sub-elements</figcaption>
+            </figure>
+            <h2 data-number="4.3" id="element-nesting"><span
+            class="header-section-number">4.3</span> Element
+            nesting</h2>
+            <p>Element nesting means that elements contain other
+            elements that contain still other elements, and so forth. A
+            nested structure of so called parent elements and child
+            elements is a basic feature of XML. As with CDWA Lite, LIDO
+            consists of wrapper and set elements that only serve to
+            structure the data, and data elements for the actual data
+ 

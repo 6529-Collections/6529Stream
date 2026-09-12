@@ -1,0 +1,55 @@
+14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="ot">                            xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>                            oil paintings (visual works)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:objectWorkType</span>&gt;</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:objectWorkTypeWrap</span>&gt;</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:objectClassificationWrap</span>&gt;</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:objectIdentificationWrap</span>&gt;</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:titleWrap</span>&gt;</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a><span class="ot">                        lido:pref=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00169&quot;</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>                        Mona Lisa</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:titleSet</span>&gt;</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:titleWrap</span>&gt;</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:objectIdentificationWrap</span>&gt;</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:descriptiveMetadata</span>&gt;</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">lido:administrativeMetadata</span></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a><span class="ot">        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">lido:recordWrap</span>&gt;</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordID</span></span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:source=</span><span class="st">&quot;ld.zdb-services.de/resource/organisations/DE-Mb112&quot;</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a><span class="ot">                lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00100&quot;</span>&gt;</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>                obj00076417</span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:recordID</span>&gt;</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordType</span>&gt;</span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">skos:Concept</span></span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a><span class="ot">                    rdf:about=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00141&quot;</span>&gt;</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">skos:prefLabel</span></span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;en&quot;</span>&gt;</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>                        Item-level record</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">skos:prefLabel</span>&gt;</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">skos:Concept</span>&gt;</span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:recordType</span>&gt;</span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">lido:recordSource</span>&gt;</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:legalBodyID</span></span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a><span class="ot">                    lido:type=</span><span class="st">&quot;http://terminology.lido-schema.org/lido00099&quot;</span>&gt;</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>                    ld.zdb-services.de/resource/organisations/DE-Mb112</span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:legalBodyID</span>&gt;</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">lido:legalBodyName</span>&gt;</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">lido:appellationValue</span></span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a><span class="ot">                        xml:lang=</span><span class="st">&quot;de&quot;</span>&gt;</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>                        Deutsches Dokumentationszentrum für Kunstgeschichte - Bildarchiv Foto Marburg</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">lido:appellationValue</span>&gt;</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">lido:legalBodyName</span>&gt;</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">lido:recordSource</span>&gt;</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">lido:recordWrap</span>&gt;</span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">lido:administrativeMetadata</span>&gt;</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">lido:lido</span>&gt;</span></code></pre></div>
+            <h2 data-number="5.2" id="recommended-elements"><span
+            class="header-section-number">5.2</span> Recommended
+            elements</h2>
+            <h3 data-number="5.2.1" id="overv

@@ -1,0 +1,169 @@
+ileValueModelType">
+		<annotation>
+			<documentation>List of codes that identifies the file structure model for records stored in files.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="Record Interleaved"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<element name="rangeParameters" type="gml:RangeParametersType"/>
+	<!-- =========================================================== -->
+	<complexType name="RangeParametersType">
+		<annotation>
+			<documentation>Metadata about the rangeSet.  Definition of record structure.   
+      This is required if the rangeSet is encoded in a DataBlock.  
+      We use a gml:_Value with empty values as a map of the composite value structure.</documentation>
+		</annotation>
+		<sequence minOccurs="0">
+			<group ref="gml:ValueObject"/>
+		</sequence>
+		<attributeGroup ref="gml:AssociationAttributeGroup"/>
+	</complexType>
+	<!-- =========================================================== -->
+	<!-- ============= Components for coverageFunctions ================ -->
+	<!-- =========================================================== -->
+	<element name="MappingRule" type="gml:StringOrRefType">
+		<annotation>
+			<documentation>Description of a rule for associating members from the domainSet with members of the rangeSet.</documentation>
+		</annotation>
+	</element>
+	<!-- =========================================================== -->
+	<element name="GridFunction" type="gml:GridFunctionType"/>
+	<!-- =========================================================== -->
+	<complexType name="GridFunctionType">
+		<annotation>
+			<documentation>Defines how values in the domain are mapped to the range set. The start point and the sequencing rule are specified here.</documentation>
+		</annotation>
+		<sequence>
+			<element name="sequenceRule" type="gml:SequenceRuleType" minOccurs="0">
+				<annotation>
+					<documentation>If absent, the implied value is "Linear".</documentation>
+				</annotation>
+			</element>
+			<element name="startPoint" type="gml:integerList" minOccurs="0">
+				<annotation>
+					<documentation>Index position of the first grid post, which must lie somwhere in the GridEnvelope.  If absent, the startPoint is equal to the value of gridEnvelope::low from the grid definition.</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="IndexMap" type="gml:IndexMapType" substitutionGroup="gml:GridFunction"/>
+	<!-- =========================================================== -->
+	<complexType name="IndexMapType">
+		<annotation>
+			<documentation>Exends GridFunctionType with a lookUpTable.  This contains a list of indexes of members within the rangeSet corresponding with the members of the domainSet.  The domainSet is traversed in list order if it is enumerated explicitly, or in the order specified by a SequenceRule if the domain is an implicit set.    The length of the lookUpTable corresponds with the length of the subset of the domainSet for which the coverage is defined.</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="gml:GridFunctionType">
+				<sequence>
+					<element name="lookUpTable" type="gml:integerList"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<complexType name="SequenceRuleType">
+		<simpleContent>
+			<extension base="gml:SequenceRuleNames">
+				<attribute name="order" type="gml:IncrementOrder" use="optional"/>
+			</extension>
+		</simpleContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<simpleType name="SequenceRuleNames">
+		<annotation>
+			<documentation>List of codes (adopted from ISO 19123 Annex C) that identifies the rule for traversing a grid to correspond with the sequence of members of the rangeSet.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="Linear"/>
+			<enumeration value="Boustrophedonic"/>
+			<enumeration value="Cantor-diagonal"/>
+			<enumeration value="Spiral"/>
+			<enumeration value="Morton"/>
+			<enumeration value="Hilbert"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<simpleType name="IncrementOrder">
+		<annotation>
+			<documentation>The enumeration value here indicates the incrementation order  to be used on the first 2 axes, i.e. "+x-y" means that the points on the first axis are to be traversed from lowest to highest and  the points on the second axis are to be traversed from highest to lowest. The points on all other axes (if any) beyond the first 2 are assumed to increment from lowest to highest.</documentation>
+		</annotation>
+		<restriction base="string">
+			<enumeration value="+x+y"/>
+			<enumeration value="+y+x"/>
+			<enumeration value="+x-y"/>
+			<enumeration value="-x-y"/>
+		</restriction>
+	</simpleType>
+	<!-- =========================================================== -->
+	<!-- == Specialised Coverage types - typed by the structure of the domain set == -->
+	<!-- =========================================================== -->
+	<element name="MultiPointCoverage" type="gml:MultiPointCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiPointCoverageType">
+		<annotation>
+			<documentation>A discrete coverage type whose domain is defined by a collection of point</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:multiPointDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiPointDomain" type="gml:MultiPointDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiPointDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:MultiPoint"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="MultiCurveCoverage" type="gml:MultiCurveCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiCurveCoverageType">
+		<annotation>
+			<documentation>A discrete coverage type whose domain is defined by a collection of curves.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:multiCurveDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiCurveDomain" type="gml:MultiCurveDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiCurveDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:MultiCurve"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="MultiSurfaceCoverage" type="gml:MultiSurfaceCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiSu

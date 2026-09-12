@@ -1,0 +1,121 @@
+rfaceCoverageType">
+		<annotation>
+			<documentation>A discrete coverage type whose domain is defined by a collection of surface patches (includes polygons, triangles, rectangles, etc).</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:multiSurfaceDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiSurfaceDomain" type="gml:MultiSurfaceDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiSurfaceDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:MultiSurface"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="MultiSolidCoverage" type="gml:MultiSolidCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiSolidCoverageType">
+		<annotation>
+			<documentation>A discrete coverage type whose domain is defined by a collection of Solids.</documentation>
+		</annotation>
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:multiSolidDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="multiSolidDomain" type="gml:MultiSolidDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="MultiSolidDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:MultiSolid"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="GridCoverage" type="gml:GridCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="GridCoverageType">
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:gridDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="gridDomain" type="gml:GridDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="GridDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:Grid"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="RectifiedGridCoverage" type="gml:RectifiedGridCoverageType" substitutionGroup="gml:_DiscreteCoverage"/>
+	<!-- =========================================================== -->
+	<complexType name="RectifiedGridCoverageType">
+		<complexContent>
+			<restriction base="gml:AbstractDiscreteCoverageType">
+				<sequence>
+					<group ref="gml:StandardObjectProperties"/>
+					<element ref="gml:boundedBy" minOccurs="0"/>
+					<element ref="gml:rectifiedGridDomain"/>
+					<element ref="gml:rangeSet"/>
+					<element ref="gml:coverageFunction" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+	<element name="rectifiedGridDomain" type="gml:RectifiedGridDomainType" substitutionGroup="gml:domainSet"/>
+	<!-- =========================================================== -->
+	<complexType name="RectifiedGridDomainType">
+		<complexContent>
+			<restriction base="gml:DomainSetType">
+				<sequence minOccurs="0">
+					<element ref="gml:RectifiedGrid"/>
+				</sequence>
+				<attributeGroup ref="gml:AssociationAttributeGroup"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- =========================================================== -->
+</schema>
