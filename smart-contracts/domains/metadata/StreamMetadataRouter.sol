@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../interfaces/stream/core/IStreamCore.sol";
 import "../../interfaces/stream/core/IStreamCorePointers.sol";
 import "../../interfaces/stream/metadata/IStreamMetadataRouter.sol";
+import "../../interfaces/stream/metadata/IStreamMetadataServingFacts.sol";
 import "../../interfaces/stream/entropy/IStreamEntropyView.sol";
 import "../../interfaces/stream/artist/IStreamCollectionArtistRegistry.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttribution.sol";
@@ -16,20 +17,19 @@ import {
 import {
     StreamArtistContentTypes
 } from "../../interfaces/stream/artist/StreamArtistContentTypes.sol";
-import "../../vendor/openzeppelin/Strings.sol";
-import "../../vendor/openzeppelin/Base64.sol";
 import "../modules/StreamModuleBase.sol";
 import "./StreamMetadataRenderer.sol";
+import "./StreamMetadataArtistPresentation.sol";
+import "./StreamMetadataTokenRenderer.sol";
 
 /// @notice Serves current-Core identities and their original coordinator's canonical entropy.
 contract StreamMetadataRouter is
     StreamModuleBase,
     IStreamMetadataRouter,
     IStreamArtistContentFacts,
-    IStreamArtistContentMutationFacts
+    IStreamArtistContentMutationFacts,
+    IStreamMetadataServingFacts
 {
-    using Strings for uint256;
-
     struct CollectionMetadata {
         string name;
         string description;
@@ -70,11 +70,17 @@ contract StreamMetadataRouter is
     mapping(uint256 => bytes32) private _evolutionRatification;
     mapping(uint256 => bytes32) private _evolutionContent;
     mapping(bytes32 => bool) public consumedArtistContentConsent;
+    mapping(uint256 => ArtistPresentation) private _artistPresentation;
+    mapping(uint256 => bool) private _displayMetadataLocked;
 
     bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
     bytes32 public constant CONTENT_MEDIA = keccak256("MEDIA_MANIFEST");
     bytes32 public constant LOCK_BASE_URI = keccak256("BASE_URI");
     bytes32 public constant LOCK_DEPENDENCIES = keccak256("DEPENDENCIES");
+    bytes32 public constant LOCK_ARTIST_IDENTITY = keccak256("ARTIST_IDENTITY");
+    bytes32 public constant LOCK_DISPLAY_METADATA = keccak256("DISPLAY_METADATA");
+    bytes32 public constant PRESENTATION_PROFILE =
+        keccak256("6529STREAM_ROUTER_STABLE_PRESENTATION_V1");
 
     error Unauthorized(address caller);
     error InvalidCore(address supplied);
@@ -90,6 +96,9 @@ contract StreamMetadataRouter is
     error InvalidArtistContentFreeze(bytes32 recordHash);
     error ArtistContentConsentConsumed(bytes32 recordHash);
     error ArtistContentEvolutionBroken(uint256 collectionId);
+    error PresentationAlreadyLocked(uint256 collectionId, bytes32 lockId);
+    error DisplayMetadataUnconfigured(uint256 collectionId);
+    error TokenEntropyNotFinalized(uint256 tokenId);
     event CollectionMetadataConfigured(uint256 indexed collectionId, bytes32 metadataHash);
     event CollectionScriptConfigured(uint256 indexed collectionId, bytes32 scriptHash);
     event ContractMetadataConfigured(bytes32 uriHash);
@@ -106,6 +115,12 @@ contract StreamMetadataRouter is
         address actor,
         uint8 authorityClass,
         bytes32 freezeAuthorizationHash,
+        uint16 schemaVersion
+    );
+    event ArtistPresentationLocked(
+        uint256 indexed collectionId,
+        bytes32 indexed snapshotHash,
+        ArtistPresentation snapshot,
         uint16 schemaVersion
     );
 
@@ -161,6 +176,7 @@ contract StreamMetadataRouter is
         returns (bool)
     {
         return id == type(IStreamMetadataRouter).interfaceId
+            || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
             || super.supportsInterface(id);
@@ -174,6 +190,12 @@ contract StreamMetadataRouter is
         string calldata animationBaseURI
     ) external {
         _requireMutable(collectionId);
+        if (
+            _displayMetadataLocked[collectionId]
+                && (keccak256(bytes(name)) != keccak256(bytes(_collections[collectionId].name))
+                    || keccak256(bytes(description))
+                        != keccak256(bytes(_collections[collectionId].description)))
+        ) revert ArtistContentLocked(collectionId, LOCK_DISPLAY_METADATA);
         StreamMetadataRenderer.requireValidUtf8Bytes("name", name, 256);
         StreamMetadataRenderer.requireValidUtf8Bytes("description", description, 2048);
         StreamMetadataRenderer.requireValidUtf8ContentUri("image", image, 2048, true);
@@ -233,6 +255,102 @@ contract StreamMetadataRouter is
         returns (CollectionMetadata memory)
     {
         return _collections[collectionId];
+    }
+
+    function lockArtistIdentity(uint256 collectionId) external override returns (bytes32) {
+        _requirePresentationAuthority(collectionId);
+        if (_artistPresentation[collectionId].locked) {
+            revert PresentationAlreadyLocked(collectionId, LOCK_ARTIST_IDENTITY);
+        }
+        ArtistPresentation memory snapshot = StreamMetadataArtistPresentation.snapshot(
+            address(core), address(artistRegistry), collectionId
+        );
+        _artistPresentation[collectionId] = snapshot;
+        emit CollectionMetadataLocked(collectionId, LOCK_ARTIST_IDENTITY, msg.sender, 0, 0, 1);
+        emit ArtistPresentationLocked(collectionId, snapshot.snapshotHash, snapshot, 1);
+        return snapshot.snapshotHash;
+    }
+
+    function lockDisplayMetadata(uint256 collectionId) external override {
+        _requirePresentationAuthority(collectionId);
+        if (_displayMetadataLocked[collectionId]) {
+            revert PresentationAlreadyLocked(collectionId, LOCK_DISPLAY_METADATA);
+        }
+        if (!_collections[collectionId].configured) {
+            revert DisplayMetadataUnconfigured(collectionId);
+        }
+        _displayMetadataLocked[collectionId] = true;
+        emit CollectionMetadataLocked(collectionId, LOCK_DISPLAY_METADATA, msg.sender, 0, 0, 1);
+    }
+
+    function _requirePresentationAuthority(uint256 collectionId) private view {
+        if (msg.sender != authority) revert Unauthorized(msg.sender);
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+    }
+
+    function artistPresentation(uint256 collectionId)
+        external
+        view
+        override
+        returns (ArtistPresentation memory)
+    {
+        return _artistPresentation[collectionId];
+    }
+
+    function collectionServingFacts(uint256 collectionId)
+        external
+        view
+        override
+        returns (ServingFacts memory result)
+    {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        CollectionMetadata storage metadata = _collections[collectionId];
+        result.presentationProfile = PRESENTATION_PROFILE;
+        result.configured = metadata.configured;
+        uint256 length = bytes(metadata.animationScript).length;
+        result.mode = length == 0 ? keccak256("OFFCHAIN") : keccak256("ONCHAIN");
+        result.renderer = address(StreamMetadataTokenRenderer);
+        result.rendererCodeHash = result.renderer.codehash;
+        result.scriptHash = keccak256(bytes(metadata.animationScript));
+        result.scriptBytes = uint32(length); // Writes enforce the 8192-byte bound.
+        result.imageURIHash = keccak256(bytes(metadata.image));
+        result.animationBaseURIHash = keccak256(bytes(metadata.animationBaseURI));
+        result.scriptLocked = _artistContentLocks[collectionId][CONTENT_SCRIPT];
+        result.mediaLocked = _artistContentLocks[collectionId][CONTENT_MEDIA];
+        result.baseURILocked = _artistContentLocks[collectionId][LOCK_BASE_URI];
+        result.dependenciesLocked = true; // No mutable renderer/library assignment exists.
+        result.artistIdentityLocked = _artistPresentation[collectionId].locked;
+        result.displayMetadataLocked = _displayMetadataLocked[collectionId];
+        result.coreFrozen = core.collectionFreezeStatus(collectionId);
+    }
+
+    function collectionServingSource(uint256 collectionId)
+        external
+        view
+        override
+        returns (ServingSource memory)
+    {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        CollectionMetadata storage metadata = _collections[collectionId];
+        return ServingSource(
+            metadata.name,
+            metadata.description,
+            metadata.image,
+            metadata.animationBaseURI,
+            metadata.animationScript
+        );
+    }
+
+    function collectionLiveArtistStatus(uint256 collectionId)
+        external
+        view
+        override
+        returns (LiveArtistStatus memory)
+    {
+        if (!core.collectionExists(collectionId)) revert InvalidCollection(collectionId);
+        return StreamMetadataArtistPresentation.live(
+            address(core), address(artistRegistry), collectionId
+        );
     }
 
     /// @notice Exact current-router ONCHAIN content profile for first-release ratification.
@@ -519,35 +637,68 @@ contract StreamMetadataRouter is
         override
         returns (string memory)
     {
-        return _dataURI(tokenMetadataJSON(core_, tokenId));
+        _requireCore(core_);
+        return _renderToken(_tokenFacts(tokenId, false), true);
     }
 
     function tokenMetadataJSON(address core_, uint256 tokenId) public view returns (string memory) {
         _requireCore(core_);
-        TokenFacts memory facts = _tokenFacts(tokenId);
-        PreparedMetadata storage metadata = _prepared[facts.collectionId];
-        bool onchainAnimation = facts.finalized && bytes(metadata.animationScript).length != 0;
-        string memory animation = facts.finalized ? _animation(metadata, tokenId, facts.seed) : "";
-        bytes memory animationField = bytes(animation).length == 0
-            ? bytes("")
-            : abi.encodePacked(',"animation_url":"', animation, '"');
-        return string(
-            abi.encodePacked(
-                "{",
-                _identityJSON(metadata, facts.collectionId, facts.serial),
-                _propertiesJSON(facts, onchainAnimation),
-                _artistJSON(facts.collectionId),
-                animationField,
-                "}"
-            )
-        );
+        return _renderToken(_tokenFacts(tokenId, false), false);
     }
 
-    function _tokenFacts(uint256 tokenId) private view returns (TokenFacts memory facts) {
+    function historicalTokenMetadataJSON(address core_, uint256 tokenId)
+        external
+        view
+        override
+        returns (string memory)
+    {
+        _requireCore(core_);
+        TokenFacts memory facts = _tokenFacts(tokenId, true);
+        if (!facts.finalized) revert TokenEntropyNotFinalized(tokenId);
+        return _renderToken(facts, false);
+    }
+
+    function _renderToken(TokenFacts memory facts, bool asURI)
+        private
+        view
+        returns (string memory)
+    {
+        PreparedMetadata storage prepared = _prepared[facts.collectionId];
+        ServingSource memory metadata = ServingSource(
+            prepared.name,
+            prepared.description,
+            prepared.image,
+            prepared.animationBaseURI,
+            prepared.animationScript
+        );
+        StreamMetadataRenderTypes.Token memory token = StreamMetadataRenderTypes.Token(
+            facts.tokenId,
+            facts.collectionId,
+            facts.serial,
+            facts.seed,
+            facts.finalized,
+            facts.state,
+            core.tokenData(facts.tokenId),
+            _collections[facts.collectionId].configured
+        );
+        bytes memory artist = _artistJSON(facts.collectionId);
+        return asURI
+            ? StreamMetadataTokenRenderer.renderURI(token, metadata, artist)
+            : StreamMetadataTokenRenderer.render(token, metadata, artist);
+    }
+
+    function _tokenFacts(uint256 tokenId, bool allowBurned)
+        private
+        view
+        returns (TokenFacts memory facts)
+    {
         (bool exists, uint256 collectionId, uint256 serial, bool burned) =
             core.tokenCollectionIdentity(tokenId);
-        if (!exists || burned || core.tokenLifecycle(tokenId) != uint8(StreamTokenLifecycle.MINTED))
-        {
+        if (!exists || (burned && !allowBurned)) revert InvalidToken(tokenId);
+        uint8 lifecycle = core.tokenLifecycle(tokenId);
+        if (burned
+                ? lifecycle != uint8(StreamTokenLifecycle.BURNED)
+                : lifecycle != uint8(StreamTokenLifecycle.MINTED)) {
             revert InvalidToken(tokenId);
         }
         address coordinator = core.coordinatorAtMint(tokenId);
@@ -563,101 +714,18 @@ contract StreamMetadataRouter is
     }
 
     function _artistJSON(uint256 collectionId) private view returns (bytes memory) {
+        ArtistPresentation storage snapshot = _artistPresentation[collectionId];
+        if (snapshot.locked) {
+            return StreamMetadataTokenRenderer.artistFields(
+                snapshot.nominatedArtist, snapshot.identityRecordHash, snapshot.acceptanceRecordHash
+            );
+        }
         IStreamCollectionArtistRegistry.Attribution memory record =
             artistRegistry.attribution(collectionId);
         if (record.artist == address(0)) return ',"artist_attribution":"unaccepted"';
-        return abi.encodePacked(
-            ',"artist":"',
-            uint256(uint160(record.artist)).toHexString(20),
-            '","artist_identity_hash":"',
-            uint256(record.identityHash).toHexString(32),
-            '","artist_acceptance_hash":"',
-            uint256(record.acceptanceHash).toHexString(32),
-            '"'
+        return StreamMetadataTokenRenderer.artistFields(
+            record.artist, record.identityHash, record.acceptanceHash
         );
-    }
-
-    function _identityJSON(PreparedMetadata storage metadata, uint256 collectionId, uint256 serial)
-        private
-        view
-        returns (bytes memory)
-    {
-        string memory name = _collections[collectionId].configured ? metadata.name : "6529 Stream";
-        return abi.encodePacked(
-            '"name":"',
-            name,
-            " #",
-            serial.toString(),
-            '","description":"',
-            metadata.description,
-            '","image":"',
-            metadata.image,
-            '"'
-        );
-    }
-
-    function _propertiesJSON(TokenFacts memory facts, bool onchainAnimation)
-        private
-        view
-        returns (bytes memory)
-    {
-        // Final onchain HTML already carries the complete token data. Duplicating its Base64
-        // in JSON would exceed Core's bounded response for a valid 16 KiB token payload.
-        bytes memory tokenDataField = onchainAnimation
-            ? bytes(',"token_data_location":"animation_url:tokenDataBase64"')
-            : abi.encodePacked(
-                ',"token_data_base64":"', Base64.encode(core.tokenData(facts.tokenId)), '"'
-            );
-        return abi.encodePacked(
-            ',"metadata_schema_version":"6529stream-v1","metadata_state":"',
-            facts.state,
-            '","token_id":',
-            facts.tokenId.toString(),
-            ',"collection_id":',
-            facts.collectionId.toString(),
-            ',"collection_serial":',
-            facts.serial.toString(),
-            ',"hash":"',
-            uint256(facts.seed).toHexString(32),
-            '"',
-            tokenDataField,
-            ',"attributes":[]'
-        );
-    }
-
-    function _animation(PreparedMetadata storage metadata, uint256 tokenId, bytes32 seed)
-        private
-        view
-        returns (string memory)
-    {
-        if (bytes(metadata.animationScript).length != 0) {
-            string memory script = string(
-                abi.encodePacked(
-                    "const tokenId=",
-                    tokenId.toString(),
-                    ";const tokenHash='",
-                    uint256(seed).toHexString(32),
-                    "';const tokenDataBase64='",
-                    Base64.encode(core.tokenData(tokenId)),
-                    "';",
-                    metadata.animationScript
-                )
-            );
-            // All dynamic values are decimal/hex/Base64 or pre-escaped script. The resulting
-            // Base64 data URI has no JSON-sensitive characters and needs no second escape pass.
-            return string(
-                abi.encodePacked(
-                    "data:text/html;base64,",
-                    Base64.encode(
-                        abi.encodePacked(
-                            "<html><head></head><body><script>", script, "</script></body></html>"
-                        )
-                    )
-                )
-            );
-        }
-        if (bytes(metadata.animationBaseURI).length == 0) return "";
-        return string(abi.encodePacked(metadata.animationBaseURI, tokenId.toString()));
     }
 
     function contractURIForCore(address core_) external view override returns (string memory) {
@@ -701,7 +769,7 @@ contract StreamMetadataRouter is
     }
 
     function _dataURI(string memory json) private pure returns (string memory) {
-        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+        return StreamMetadataTokenRenderer.dataURI(json);
     }
 
     function _prepareCollectionMetadata(
