@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added pinned LIDO correspondence for the same four-media source used by
+  Linked Art, PREMIS and IIIF, with original schema closure, exact provenance
+  and preserved previous outputs. All 202 tests and eight generators pass;
+  actual chain-record input and complete institutional conformance remain open.
 - Added current-content evidence reads that join the exact artist-approved root
   record, fixed deployment route, complete token checkpoint and preserved leaf
   bytes. Full typed record interpretation and finality composition remain open.

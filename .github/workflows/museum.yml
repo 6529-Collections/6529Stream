@@ -36,7 +36,8 @@ jobs:
           - os: windows-latest
             python: "3.12.10"
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    # The retained 202-case cohort takes about 24 minutes on the development host.
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -67,3 +68,5 @@ jobs:
         run: python -m tools.museum.premis --check
       - name: Check IIIF Presentation 3 correspondence generation
         run: python -m tools.museum.iiif_model --check
+      - name: Check LIDO correspondence generation
+        run: python -m tools.museum.lido_model --check
