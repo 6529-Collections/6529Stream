@@ -8,6 +8,7 @@ import "../../interfaces/stream/artist/IStreamArtistIdentityBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorBindingOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistCollaboratorRecordsOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentBindingOwner.sol";
 
 /// @notice Linked typed pending-binding recipes behind the Coordinator's authentication, code checks and lock.
 /// @dev Owns no semantic state. Hash functions use the explicit immutable registry environment.
@@ -31,25 +32,34 @@ library StreamArtistBindingOperations {
         if (b.accepted || b.bindingHash == bytes32(0) || state != 1 || generation != b.generation) {
             revert T.InvalidAttribution(collectionId);
         }
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
         if (expected) {
             if (b.generation != expectedGeneration || b.bindingHash != expectedHash) {
                 revert T.InvalidAttribution(collectionId);
             }
-        } else if (actor == b.artistAddress && a.signature.length == 0 && b.generation != 1) {
+        } else if (
+            actor == authority.authorityAddress && a.signature.length == 0 && b.generation != 1
+        ) {
             revert T.InvalidAttribution(collectionId);
         }
         T.SignerApproval memory proof = _verify(
             x,
             actor,
-            b.artistAddress,
+            authority.authorityAddress,
             StreamArtistHashes.acceptanceDigest(_environment(x), collectionId, b, a),
             a.signature
         );
         record = IStreamArtistIdentityOwner(x.suite.owners[2])
             .consumeAcceptance(T.ActionContext(2, actor, before_[2]), collectionId, b, a, proof);
-        bytes32 actual = IStreamArtistAcceptanceOwner(x.suite.owners[3])
-            .recordAcceptance(
-                T.ActionContext(2, actor, before_[3]), collectionId, b, proof.signer, a.nonce
+        bytes32 actual = IStreamArtistCurrentAcceptanceOwner(x.suite.owners[3])
+            .recordAcceptanceWithAuthority(
+                T.ActionContext(2, actor, before_[3]),
+                collectionId,
+                b,
+                authority,
+                proof.signer,
+                a.nonce
             );
         if (actual != record) revert T.InvalidRecord();
         uint32 required =
@@ -63,13 +73,16 @@ library StreamArtistBindingOperations {
         if (complete) {
             IStreamArtistBindingOwner(x.suite.owners[0])
                 .accept(T.ActionContext(2, actor, before_[0]), collectionId, b.bindingHash, record);
-            IStreamArtistAttributionOwner(x.suite.owners[4])
-                .accept(T.ActionContext(2, actor, before_[4]), collectionId, b, record);
+            IStreamArtistCurrentAttributionOwner(x.suite.owners[4])
+                .acceptWithAuthority(
+                    T.ActionContext(2, actor, before_[4]), collectionId, b, record, authority
+                );
         }
         bytes memory payload = expected
             ? abi.encode(collectionId, b, a, proof, expectedGeneration, expectedHash)
             : abi.encode(collectionId, b, a, proof);
         if (required != 0) payload = abi.encode(payload, required, accepted, complete);
+        payload = abi.encode(payload, authority);
         _archive(x, 2, actor, record, before_, payload);
     }
 
@@ -154,18 +167,29 @@ library StreamArtistBindingOperations {
     ) public returns (bytes32 record) {
         T.Snapshot[7] memory before_ = _snapshots(x, 3);
         T.Binding memory b = _pending(x, p);
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
         bytes32 digest = refusalDigest(_environment(x), p, a);
-        T.SignerApproval memory proof = _verify(x, actor, b.artistAddress, digest, a.signature);
+        T.SignerApproval memory proof =
+            _verify(x, actor, authority.authorityAddress, digest, a.signature);
         record = IStreamArtistIdentityBindingOwner(x.suite.owners[2])
             .consumeRefusal(T.ActionContext(3, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistBindingTerminationOwner(x.suite.owners[0])
-            .refuse(T.ActionContext(3, actor, before_[0]), p, proof.signer, a.nonce);
-        if (actual != record) revert T.InvalidRecord();
-        IStreamArtistAttributionBindingOwner(x.suite.owners[4])
-            .recordRefusal(
-                T.ActionContext(3, actor, before_[4]), b, p, proof.signer, a.nonce, record
+        bytes32 actual = IStreamArtistCurrentBindingOwner(x.suite.owners[0])
+            .refuseWithAuthority(
+                T.ActionContext(3, actor, before_[0]), p, authority, proof.signer, a.nonce
             );
-        _archive(x, 3, actor, record, before_, abi.encode(b, p, a, proof));
+        if (actual != record) revert T.InvalidRecord();
+        IStreamArtistCurrentAttributionOwner(x.suite.owners[4])
+            .recordRefusalWithAuthority(
+                T.ActionContext(3, actor, before_[4]),
+                b,
+                p,
+                authority,
+                proof.signer,
+                a.nonce,
+                record
+            );
+        _archive(x, 3, actor, record, before_, abi.encode(b, p, a, proof, authority));
     }
 
     function withdraw(D.CoordinatorContext memory x, address actor, L.Termination memory p) public {

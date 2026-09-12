@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistAuthorizationState.sol";
+import "./StreamArtistCurrentAuthorityFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentConsentOwner.sol";
 
 import "./StreamArtistOnboardingReads.sol";
 import "./StreamArtistEconomicsHashes.sol";
@@ -116,7 +118,9 @@ library StreamArtistEconomicOperations {
         bytes memory candidateEvidence
     ) private returns (bytes32 record) {
         D.Record memory prior;
-        address signer = b.artistAddress;
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
+        address signer = authority.authorityAddress;
         if (delegation != bytes32(0)) {
             prior = IStreamArtistDelegationOwner(x.suite.owners[2]).delegationRecord(delegation);
             signer = prior.grant.delegate;
@@ -134,9 +138,15 @@ library StreamArtistEconomicOperations {
                 .consumeEconomics(
                     T.ActionContext(15, actor, before_[2]), b, p, payout.recordHash, a, proof
                 );
-            actual = IStreamArtistConsentOwner(x.suite.owners[6])
-                .recordEconomics(
-                    T.ActionContext(15, actor, before_[6]), b, p, payout, proof.signer, a.nonce
+            actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])
+                .recordEconomicsWithAuthority(
+                    T.ActionContext(15, actor, before_[6]),
+                    b,
+                    p,
+                    payout,
+                    proof.signer,
+                    a.nonce,
+                    authority
                 );
         } else {
             record = IStreamArtistDelegationOwner(x.suite.owners[2])
@@ -177,11 +187,13 @@ library StreamArtistEconomicOperations {
     ) public returns (bytes32 record) {
         T.Snapshot[7] memory before_ = _snapshots(x, 20);
         StreamArtistOnboardingReads reads = StreamArtistOnboardingReads(x.reads);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
+        T.Binding memory b = reads.defensiveBinding(p.collectionId);
         _collection(x, p.collectionId);
         reads.requireRoyaltyFreezeProposal(p);
         D.Record memory prior;
-        address signer = b.artistAddress;
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, true);
+        address signer = authority.authorityAddress;
         if (delegation != bytes32(0)) {
             prior = IStreamArtistDelegationOwner(x.suite.owners[2]).delegationRecord(delegation);
             signer = prior.grant.delegate;
@@ -197,9 +209,9 @@ library StreamArtistEconomicOperations {
         if (delegation == bytes32(0)) {
             record = IStreamArtistIdentityOwner(x.suite.owners[2])
                 .consumeRoyaltyFreeze(T.ActionContext(20, actor, before_[2]), b, p, a, proof);
-            actual = IStreamArtistConsentOwner(x.suite.owners[6])
-                .authorizeRoyaltyFreeze(
-                    T.ActionContext(20, actor, before_[6]), b, p, proof.signer, a.nonce
+            actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])
+                .authorizeRoyaltyFreezeWithAuthority(
+                    T.ActionContext(20, actor, before_[6]), b, p, proof.signer, a.nonce, authority
                 );
         } else {
             record = IStreamArtistDelegationOwner(x.suite.owners[2])
@@ -223,7 +235,7 @@ library StreamArtistEconomicOperations {
         returns (T.Payout memory payout)
     {
         (payout.account, payout.recordHash) =
-            IStreamArtistPayoutOwner(x.suite.owners[5]).artistPayoutAccount(artistId);
+            StreamArtistOnboardingReads(x.reads).artistPayoutAccount(artistId);
         if (payout.account == address(0) || payout.recordHash == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
         }

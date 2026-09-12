@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistCollaboratorHashes.sol";
+import "./StreamArtistCurrentAuthorityFacts.sol";
 import {
     StreamArtistOnboardingTypes as T
 } from "../../interfaces/stream/artist/StreamArtistOnboardingTypes.sol";
@@ -63,7 +64,31 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
         uint256 nonce
     ) external returns (bytes32 record) {
         _check(c, 2);
-        if (b.accepted || b.bindingHash == bytes32(0) || signer != b.artistAddress) {
+        if (signer != b.artistAddress) revert T.InvalidRecord();
+        return _recordAcceptance(c, collectionId, b, signer, nonce);
+    }
+
+    function recordAcceptanceWithAuthority(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        T.Binding calldata b,
+        R.AuthorityFact calldata authority,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32) {
+        _check(c, 2);
+        StreamArtistCurrentAuthorityFacts.requirePrincipal(b.artistId, signer, authority, false);
+        return _recordAcceptance(c, collectionId, b, signer, nonce);
+    }
+
+    function _recordAcceptance(
+        T.ActionContext calldata c,
+        uint256 collectionId,
+        T.Binding calldata b,
+        address signer,
+        uint256 nonce
+    ) private returns (bytes32 record) {
+        if (b.accepted || b.bindingHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
         record = StreamArtistHashes.acceptanceRecord(

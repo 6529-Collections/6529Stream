@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistRegistryWriterExtension.sol";
+import "./StreamArtistRegistryReadExtension.sol";
 import {
     IStreamArtistContentAuthority
 } from "../../interfaces/stream/artist/IStreamArtistContentAuthority.sol";
@@ -36,12 +38,16 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistAuthorizationRevocation,
     IStreamArtistContentAuthority,
     IStreamArtistIdentityRevision,
+    IStreamArtistRotation,
+    IStreamArtistWindows,
     StreamModuleBase,
     StreamGasParameterHost
 {
     address public immutable override(IStreamArtistMintConsent, IStreamArtistAttribution) core;
     address public immutable override mintManager;
     address public immutable operationCoordinator;
+    address public immutable registryWriterExtension;
+    address public immutable registryReadExtension;
 
     constructor(
         address core_,
@@ -68,6 +74,10 @@ contract StreamArtistOnboardingRegistry is
         core = core_;
         mintManager = manager_;
         operationCoordinator = coordinator_;
+        registryWriterExtension =
+            address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
+        registryReadExtension =
+            address(new StreamArtistRegistryReadExtension(address(this), coordinator_));
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
     }
 
@@ -97,7 +107,9 @@ contract StreamArtistOnboardingRegistry is
             || id == type(IStreamArtistContentAuthority).interfaceId
             || id == type(IStreamArtistIdentityRevision).interfaceId
             || id == type(IStreamArtistIdentityRevisionReads).interfaceId
-            || super.supportsInterface(id);
+            || id == type(IStreamArtistRotation).interfaceId
+            || id == type(IStreamArtistRotationReads).interfaceId
+            || id == type(IStreamArtistWindows).interfaceId || super.supportsInterface(id);
     }
 
     function recordIdentityRevision(
@@ -106,8 +118,181 @@ contract StreamArtistOnboardingRegistry is
         bytes calldata document,
         string calldata displayName
     ) external returns (bytes32) {
-        return IStreamArtistIdentityRevisionCoordinator(operationCoordinator)
-            .coordinateRecordIdentityRevision(msg.sender, p, a, document, displayName);
+        _forwardRegistryWriter();
+    }
+
+    function setArtistGuardians(R.GuardianSet calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function rotateArtistAddress(
+        R.Rotation calldata p,
+        T.Authorization calldata oldAuthorization,
+        T.Authorization calldata newAuthorization
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function approveArtistRotation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function vetoArtistRotation(bytes32 artistId, bytes32 expected, bytes32 reasonHash) external {
+        _forwardRegistryWriter();
+    }
+
+    function executeArtistRotation(bytes32 artistId, bytes32 expected) external {
+        _forwardRegistryWriter();
+    }
+
+    function revokePriorAddressStanding(R.StandingRevocation calldata p, T.Authorization calldata a)
+        external
+        returns (bytes32)
+    {
+        _forwardRegistryWriter();
+    }
+
+    function guardianSetDigest(R.GuardianSet calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.guardianDigest(_environment(), p, a);
+    }
+
+    function rotationDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.rotationDigest(_environment(), p, a);
+    }
+
+    function rotationAcceptanceDigest(R.Rotation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.acceptanceDigest(_environment(), p, a);
+    }
+
+    function standingRevocationDigest(R.StandingRevocation calldata p, T.Authorization calldata a)
+        external
+        view
+        returns (bytes32)
+    {
+        return StreamArtistRotationHashes.standingDigest(_environment(), p, a);
+    }
+
+    function _rotationOwner() private view returns (IStreamArtistRotationOwner) {
+        return IStreamArtistRotationOwner(_contentSuite().owners[2]);
+    }
+
+    function guardianSet(bytes32 artistId)
+        external
+        view
+        returns (address[] memory, uint32, uint64, bytes32)
+    {
+        return _rotationOwner().guardianSet(artistId);
+    }
+
+    function pendingRotation(bytes32 artistId)
+        external
+        view
+        returns (address, address, uint64, uint32, bytes32)
+    {
+        return _rotationOwner().pendingRotation(artistId);
+    }
+
+    function priorAddressStandingRevoked(bytes32 artistId, address account)
+        external
+        view
+        returns (bool, bytes32)
+    {
+        return _rotationOwner().priorAddressStandingRevoked(artistId, account);
+    }
+
+    function guardianSetRecord(bytes32 record) external view returns (R.GuardianRecord memory) {
+        _forwardRegistryRead();
+    }
+
+    function rotationRecord(bytes32 record) external view returns (R.RotationRecord memory) {
+        _forwardRegistryRead();
+    }
+
+    function standingRevocationRecord(bytes32 record)
+        external
+        view
+        returns (R.StandingRecord memory)
+    {
+        _forwardRegistryRead();
+    }
+
+    function artistTransitionState(bytes32 record)
+        external
+        view
+        returns (R.TransitionState memory)
+    {
+        return _rotationOwner().artistTransitionState(record);
+    }
+
+    function lastArtistTransition(bytes32 artistId) external view returns (bytes32) {
+        return _rotationOwner().lastArtistTransition(artistId);
+    }
+
+    function identityRevisionProvisionalAssociation(bytes32 record)
+        external
+        view
+        returns (R.ProvisionalAssociation memory)
+    {
+        return _rotationOwner().identityRevisionProvisionalAssociation(record);
+    }
+
+    function payoutDesignationProvisionalAssociation(bytes32 record)
+        external
+        view
+        returns (R.ProvisionalAssociation memory)
+    {
+        T.SuiteConfiguration memory s =
+            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
+        return IStreamArtistPayoutTransitionOwner(s.owners[5])
+            .payoutDesignationProvisionalAssociation(record);
+    }
+
+    function activeAuthorityWindow(bytes32 artistId) external view returns (bytes32, uint64, bool) {
+        return _rotationOwner().activeAuthorityWindow(artistId);
+    }
+
+    function rotationAcceptanceNonceState(bytes32 artistId, address account, uint256 nonce)
+        external
+        view
+        returns (bool, uint256)
+    {
+        return _rotationOwner().rotationAcceptanceNonceState(artistId, account, nonce);
+    }
+
+    function artistWindowInfo(bytes32 parameter) external view returns (uint64, uint64, uint64) {
+        return IStreamArtistWindows(address(_rotationOwner())).artistWindowInfo(parameter);
+    }
+
+    function artistWindowScope(bytes32 parameter) external view returns (bytes32) {
+        return IStreamArtistWindows(address(_rotationOwner())).artistWindowScope(parameter);
+    }
+
+    function artistWindowStateHash(bytes32 parameter, uint64 value, uint64 revision)
+        external
+        view
+        returns (bytes32)
+    {
+        return IStreamArtistWindows(address(_rotationOwner()))
+            .artistWindowStateHash(parameter, value, revision);
+    }
+
+    function setArtistWindow(bytes32 parameter, uint64 value, uint64 expectedRevision) external {
+        _forwardRegistryWriter();
     }
 
     function identityRevisionDigest(
@@ -128,15 +313,15 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function identityRecordBytes(bytes32 artistId) external view returns (bytes memory) {
-        return _identityOwner().identityRecordBytes(artistId);
+        _forwardRegistryRead();
     }
 
     function identityDocumentBytes(bytes32 hash) external view returns (bytes memory) {
-        return _identityOwner().identityDocumentBytes(hash);
+        _forwardRegistryRead();
     }
 
     function artistDisplayName(bytes32 artistId) external view returns (string memory, bytes32) {
-        return _identityOwner().artistDisplayName(artistId);
+        _forwardRegistryRead();
     }
 
     function identityRevisionRecord(bytes32 record)
@@ -144,15 +329,14 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (StreamArtistIdentityRevisionTypes.Record memory)
     {
-        return _identityOwner().identityRevisionRecord(record);
+        _forwardRegistryRead();
     }
 
     function revokeArtistAuthorization(
         StreamArtistAuthorizationTypes.Revocation calldata p,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistAuthorizationCoordinator(operationCoordinator)
-            .coordinateRevokeArtistAuthorization(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function authorizationRevocationDigest(
@@ -167,15 +351,11 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (StreamArtistAuthorizationTypes.State memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistAuthorizationOwner(s.owners[2])
-            .artistAuthorizationState(artistId, digest, nonce);
+        _forwardRegistryRead();
     }
 
     function proposeCollaboratorIdentity(C.IdentityProposal calldata p) external returns (bytes32) {
-        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
-            .coordinateProposeCollaboratorIdentity(msg.sender, p);
+        _forwardRegistryWriter();
     }
 
     function acceptCollaboratorIdentity(
@@ -185,18 +365,14 @@ contract StreamArtistOnboardingRegistry is
         bytes calldata document,
         string calldata displayName
     ) external returns (bytes32) {
-        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
-            .coordinateAcceptCollaboratorIdentity(
-                msg.sender, account, identityRecordHash, a, document, displayName
-            );
+        _forwardRegistryWriter();
     }
 
     function acceptCollaborator(C.BindingAcceptance calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistCollaboratorCoordinator(operationCoordinator)
-            .coordinateAcceptCollaborator(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function collaboratorIdentityDigest(
@@ -221,10 +397,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (C.IdentityProposalState memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistCollaboratorRecordsOwner(s.owners[1])
-            .identityProposal(account, identityRecordHash);
+        _forwardRegistryRead();
     }
 
     function collaboratorRegistrationNonceState(address account, uint256 nonce)
@@ -255,7 +428,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (C.Row memory)
     {
-        return _reads().collaboratorAt(collectionId, generation, index);
+        _forwardRegistryRead();
     }
 
     function collaboratorPayoutAccount(bytes32 artistId, address account)
@@ -270,16 +443,14 @@ contract StreamArtistOnboardingRegistry is
         external
         returns (bytes32)
     {
-        return IStreamArtistDelegationCoordinator(operationCoordinator)
-            .coordinateGrantArtistDelegation(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function revokeArtistDelegation(D.Revocation calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistDelegationCoordinator(operationCoordinator)
-            .coordinateRevokeArtistDelegation(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function recordDelegatedEconomicsConsent(
@@ -287,8 +458,7 @@ contract StreamArtistOnboardingRegistry is
         bytes32 grant,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistDelegationCoordinator(operationCoordinator)
-            .coordinateRecordDelegatedEconomicsConsent(msg.sender, p, grant, a);
+        _forwardRegistryWriter();
     }
 
     function recordDelegatedProspectiveEconomicsConsent(
@@ -297,10 +467,7 @@ contract StreamArtistOnboardingRegistry is
         bytes32 grant,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistDelegationCoordinator(operationCoordinator)
-            .coordinateRecordDelegatedProspectiveEconomicsConsent(
-                msg.sender, p, candidate, grant, a
-            );
+        _forwardRegistryWriter();
     }
 
     function authorizeDelegatedRoyaltyFreeze(
@@ -308,8 +475,7 @@ contract StreamArtistOnboardingRegistry is
         bytes32 grant,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistDelegationCoordinator(operationCoordinator)
-            .coordinateAuthorizeDelegatedRoyaltyFreeze(msg.sender, p, grant, a);
+        _forwardRegistryWriter();
     }
 
     function delegationGrantDigest(D.Grant calldata p, T.Authorization calldata a)
@@ -329,9 +495,7 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function delegationRecord(bytes32 grant) public view returns (D.Record memory) {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistDelegationOwner(s.owners[2]).delegationRecord(grant);
+        _forwardRegistryRead();
     }
 
     function delegationState(bytes32 grant)
@@ -339,21 +503,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bool, address, uint256, uint32, uint64, uint64, uint64)
     {
-        D.Record memory item = delegationRecord(grant);
-        uint64 remaining = item.grantor == address(0)
-            ? 0
-            : item.grant.maxUses == 0
-                ? type(uint64).max
-                : uint64(uint256(item.grant.maxUses) - item.uses);
-        return (
-            StreamArtistDelegationState.active(item),
-            item.grant.delegate,
-            item.grant.collectionId,
-            item.grant.capabilities,
-            item.grant.notBefore,
-            item.grant.expiresAt,
-            remaining
-        );
+        _forwardRegistryRead();
     }
 
     function delegatedNonceState(bytes32 artistId, address delegate, uint256 nonce)
@@ -379,16 +529,14 @@ contract StreamArtistOnboardingRegistry is
         bytes calldata document,
         string calldata displayName
     ) external returns (bytes32, bytes32) {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateProposeArtistBinding(msg.sender, collectionId, p, document, displayName);
+        _forwardRegistryWriter();
     }
 
     function acceptArtistBinding(uint256 collectionId, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateAcceptArtistBinding(msg.sender, collectionId, a);
+        _forwardRegistryWriter();
     }
 
     function acceptArtistBindingExpected(
@@ -397,23 +545,18 @@ contract StreamArtistOnboardingRegistry is
         bytes32 bindingHash,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
-            .coordinateAcceptArtistBindingExpected(
-                msg.sender, collectionId, generation, bindingHash, a
-            );
+        _forwardRegistryWriter();
     }
 
     function refuseArtistBinding(L.Termination calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
-            .coordinateRefuseArtistBinding(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function withdrawArtistBinding(L.Termination calldata p) external {
-        IStreamArtistBindingLifecycleCoordinator(operationCoordinator)
-            .coordinateWithdrawArtistBinding(msg.sender, p);
+        _forwardRegistryWriter();
     }
 
     function bindingRefusalDigest(L.Termination calldata p, T.Authorization calldata a)
@@ -429,34 +572,28 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (L.Terminal memory)
     {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistBindingTerminationOwner(s.owners[0])
-            .bindingTermination(collectionId, generation);
+        _forwardRegistryRead();
     }
 
     function recordPolicyConsent(T.PolicyConsent calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateRecordPolicyConsent(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function recordEconomicsConsent(T.EconomicsConsent calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateRecordEconomicsConsent(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function recordPayoutDesignation(T.PayoutDesignation calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateRecordPayoutDesignation(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function recordProspectiveEconomicsConsent(
@@ -464,16 +601,14 @@ contract StreamArtistOnboardingRegistry is
         T.FixedEconomicsCandidate calldata candidate,
         T.Authorization calldata a
     ) external returns (bytes32) {
-        return IStreamArtistEconomicsCoordinator(operationCoordinator)
-            .coordinateRecordProspectiveEconomicsConsent(msg.sender, p, candidate, a);
+        _forwardRegistryWriter();
     }
 
     function authorizeArtistRoyaltyFreeze(T.RoyaltyFreeze calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistEconomicsCoordinator(operationCoordinator)
-            .coordinateAuthorizeArtistRoyaltyFreeze(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function isRoyaltyFreezeAuthorized(uint256 collectionId, bytes32 expectedAssignmentHash)
@@ -497,24 +632,21 @@ contract StreamArtistOnboardingRegistry is
         T.Authorization calldata a,
         bytes calldata statement
     ) external returns (bytes32) {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateRecordArtistAttestation(msg.sender, p, a, statement);
+        _forwardRegistryWriter();
     }
 
     function recordContentConsent(Content.Consent calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistContentCoordinator(operationCoordinator)
-            .coordinateRecordContentConsent(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function authorizeArtistContentFreeze(Content.Freeze calldata p, T.Authorization calldata a)
         external
         returns (bytes32)
     {
-        return IStreamArtistContentCoordinator(operationCoordinator)
-            .coordinateAuthorizeArtistContentFreeze(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function contentConsentDigest(Content.Consent calldata p, T.Authorization calldata a)
@@ -579,8 +711,7 @@ contract StreamArtistOnboardingRegistry is
         external
         returns (bytes32)
     {
-        return IStreamArtistOnboardingCoordinator(operationCoordinator)
-            .coordinateRecordContentRatification(msg.sender, p, a);
+        _forwardRegistryWriter();
     }
 
     function consentMode(uint256 collectionId) external view returns (uint8) {
@@ -636,9 +767,7 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function artistPayoutAccount(bytes32 artistId) external view returns (address, bytes32) {
-        T.SuiteConfiguration memory s =
-            StreamArtistOnboardingCoordinator(operationCoordinator).suiteConfiguration();
-        return IStreamArtistPayoutOwner(s.owners[5]).artistPayoutAccount(artistId);
+        return _reads().artistPayoutAccount(artistId);
     }
 
     function requireEconomicsConsent(
@@ -722,5 +851,29 @@ contract StreamArtistOnboardingRegistry is
 
     function _reads() private view returns (StreamArtistOnboardingReads) {
         return StreamArtistOnboardingCoordinator(operationCoordinator).reads();
+    }
+
+    function _forwardRegistryWriter() private {
+        address target = registryWriterExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := delegatecall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
+    }
+
+    function _forwardRegistryRead() private view {
+        address target = registryReadExtension;
+        assembly ("memory-safe") {
+            let pointer := mload(0x40)
+            calldatacopy(pointer, 0, calldatasize())
+            let success := staticcall(gas(), target, pointer, calldatasize(), 0, 0)
+            returndatacopy(pointer, 0, returndatasize())
+            if iszero(success) { revert(pointer, returndatasize()) }
+            return(pointer, returndatasize())
+        }
     }
 }

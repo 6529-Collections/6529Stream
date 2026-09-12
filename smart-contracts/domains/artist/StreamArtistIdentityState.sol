@@ -82,8 +82,7 @@ library StreamArtistIdentityState {
             record,
             identity.identities[p.artistId].authorityAddress
         );
-        bytes32 key =
-            _consume(
+        bytes32 key = _consume(
             replay, o, keccak256("identity_authority.replay.delegation_key"), record, record
         );
         m = Mutation(
@@ -265,7 +264,12 @@ library StreamArtistIdentityState {
         address expectedSigner
     ) public returns (Mutation memory) {
         T.Identity storage item = state.identities[artistId];
-        if (item.status != 1 || item.authorityClass != 1 || item.authorityAddress == address(0)) {
+        bool defensive = c.operationId == 20 || c.operationId == 21 || c.operationId == 27
+            || c.operationId == 54;
+        if (
+            (item.status != 1 && !(defensive && item.status == 4)) || item.authorityClass != 1
+                || item.authorityAddress == address(0)
+        ) {
             revert T.InvalidIdentity(artistId);
         }
         if (
@@ -347,8 +351,9 @@ library StreamArtistIdentityState {
     ) public returns (Mutation memory) {
         T.Identity storage item = state.identities[b.artistId];
         if (
-            !b.accepted || b.consentMode != 1 || item.status != 1 || item.authorityClass != 1
-                || item.authorityAddress != b.artistAddress
+            !b.accepted || b.consentMode != 1
+                || (item.status != 1 && !(c.operationId == 20 && item.status == 4))
+                || item.authorityClass != 1 || item.authorityAddress == address(0)
         ) revert T.InvalidIdentity(b.artistId);
         bytes32 lane = StreamArtistDelegationState.lane(b.artistId, proof.signer);
         bytes32 identityDeny = _key(

@@ -45,3 +45,9 @@ non-goals, and accepted risks.
 [ADR 0024: Append-only governance catalog evolution](0024-append-only-governance-catalog.md)
 is accepted for the current pre-genesis implementation. It permits delayed,
 root-proposed exact-target extensions without changing existing catalog entries.
+
+[ADR 0025: Artist authority windows and fixed typed extensions](0025-artist-authority-windows-and-fixed-extensions.md)
+is accepted as the undeployed full-v1 artist design: one active transition
+window, bounded provisional-record selection, and constructor-fixed typed
+extensions that preserve each semantic owner's storage and authority.
+Implementation and integration evidence remain separate acceptance gates.

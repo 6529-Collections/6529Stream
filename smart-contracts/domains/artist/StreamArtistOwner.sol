@@ -71,15 +71,18 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     function ownerStateSnapshotV2()
         public
         view
+        virtual
         returns (StreamArtistOnboardingTypes.Snapshot memory)
     {
-        return
-            StreamArtistOnboardingTypes.Snapshot(domainId, _revision, _stateRoot, _recordChainTip);
+        return StreamArtistOnboardingTypes.Snapshot(
+            domainId, _revision, _stateRoot, _recordChainTip
+        );
     }
 
     function replayCell(bytes32 key)
-        external
+        public
         view
+        virtual
         returns (StreamArtistOnboardingTypes.ReplayCell memory)
     {
         return _replay[key];

@@ -10,6 +10,8 @@ import "../../interfaces/stream/artist/IStreamArtistIdentityRevision.sol";
 import "../../interfaces/stream/artist/IStreamArtistAcceptanceOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistAttributionOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistPayoutOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistPayoutTransitionOwner.sol";
+import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistConsentOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
@@ -38,17 +40,47 @@ contract StreamArtistOnboardingReads {
     }
 
     function acceptedBinding(uint256 collectionId) public view returns (T.Binding memory b) {
+        return _acceptedBinding(collectionId, false);
+    }
+
+    function defensiveBinding(uint256 collectionId) public view returns (T.Binding memory b) {
+        return _acceptedBinding(collectionId, true);
+    }
+
+    function _acceptedBinding(uint256 collectionId, bool defensive)
+        private
+        view
+        returns (T.Binding memory b)
+    {
         b = IStreamArtistBindingOwner(_suite.owners[0]).binding(collectionId);
         (uint8 state, uint64 generation) =
             IStreamArtistAttributionOwner(_suite.owners[4]).attributionState(collectionId);
         (address authority, uint8 authorityClass, uint8 identityStatus,) =
             IStreamArtistIdentityOwner(_suite.owners[2]).authorityState(b.artistId);
         if (
-            !b.accepted || state != 2 || generation != b.generation || identityStatus != 1
-                || authorityClass != 1 || authority != b.artistAddress
+            !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
+                || (identityStatus != 1 && !(defensive && identityStatus == 4))
+                || authorityClass != 1 || authority == address(0)
         ) {
             revert T.InvalidAttribution(collectionId);
         }
+    }
+
+    /// @notice Canonical payout selection composes Payout records with actual Identity transition facts.
+    function artistPayoutAccount(bytes32 artistId) public view returns (address, bytes32) {
+        (
+            T.Payout memory stable,
+            T.Payout memory candidate,
+            R.ProvisionalAssociation memory association
+        ) = IStreamArtistPayoutTransitionOwner(_suite.owners[5]).payoutCandidates(artistId);
+        if (
+            candidate.recordHash != bytes32(0)
+                && IStreamArtistRotationOwner(_suite.owners[2])
+                    .provisionalRecordEligible(artistId, association)
+        ) {
+            return (candidate.account, candidate.recordHash);
+        }
+        return (stable.account, stable.recordHash);
     }
 
     function collectionArtistBeneficiary(uint256 collectionId)
@@ -59,8 +91,7 @@ contract StreamArtistOnboardingReads {
         _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
         T.Binding memory b = acceptedBinding(collectionId);
         artistId = b.artistId;
-        (payoutAccount, designationRecordHash) =
-            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
+        (payoutAccount, designationRecordHash) = artistPayoutAccount(artistId);
         if (payoutAccount == address(0) || designationRecordHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
@@ -94,7 +125,7 @@ contract StreamArtistOnboardingReads {
     {
         if (!IStreamArtistCollaboratorRecordsOwner(_suite.owners[1])
                 .identityLinked(artistId, account)) return (address(0), bytes32(0));
-        return IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(artistId);
+        return artistPayoutAccount(artistId);
     }
 
     function consentMode(uint256 collectionId) external view returns (uint8) {
@@ -262,7 +293,7 @@ contract StreamArtistOnboardingReads {
         if (block.chainid != _chainId) revert T.InvalidBinding();
         _requireSelected(keccak256("ARTIST_REGISTRY"), _suite.registry);
         _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
-        T.Binding memory b = acceptedBinding(collectionId);
+        T.Binding memory b = defensiveBinding(collectionId);
         T.RoyaltyFreeze memory p = T.RoyaltyFreeze(
             _suite.royaltyResolver,
             collectionId,
@@ -289,8 +320,7 @@ contract StreamArtistOnboardingReads {
         if (consents.policyRecord(collectionId, phaseId, policyHash) == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("policy"));
         }
-        (address payout, bytes32 designation) =
-            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(b.artistId);
+        (address payout, bytes32 designation) = artistPayoutAccount(b.artistId);
         if (payout == address(0) || designation == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
         }
@@ -372,8 +402,7 @@ contract StreamArtistOnboardingReads {
                 || _suite.primaryRevenueClass != keccak256("PRIMARY_SALE")
         ) revert T.UnsupportedProfile();
         T.Binding memory binding_ = acceptedBinding(collectionId);
-        (address operative, bytes32 designation) =
-            IStreamArtistPayoutOwner(_suite.owners[5]).artistPayoutAccount(binding_.artistId);
+        (address operative, bytes32 designation) = artistPayoutAccount(binding_.artistId);
         if (payout == address(0) || payout != operative || designation == bytes32(0)) {
             revert T.MissingMintPrerequisite(keccak256("payout"));
         }

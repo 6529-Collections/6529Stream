@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "./StreamArtistCurrentAuthorityFacts.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistBindingOperations.sol";
@@ -245,6 +246,29 @@ contract StreamArtistBindingLifecycle is StreamArtistOwner {
         _check(c, 3);
         T.Binding memory b = _pending(p);
         if (signer != b.artistAddress) revert T.InvalidSignature();
+        return _refuse(c, p, b, signer, nonce);
+    }
+
+    function refuseWithAuthority(
+        T.ActionContext calldata c,
+        L.Termination calldata p,
+        R.AuthorityFact calldata authority,
+        address signer,
+        uint256 nonce
+    ) external returns (bytes32) {
+        _check(c, 3);
+        T.Binding memory b = _pending(p);
+        StreamArtistCurrentAuthorityFacts.requirePrincipal(b.artistId, signer, authority, false);
+        return _refuse(c, p, b, signer, nonce);
+    }
+
+    function _refuse(
+        T.ActionContext calldata c,
+        L.Termination calldata p,
+        T.Binding memory b,
+        address signer,
+        uint256 nonce
+    ) private returns (bytes32 record) {
         record = StreamArtistBindingOperations.refusalRecord(
             _environment(), p, b.artistId, signer, nonce, _now()
         );

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicsHashes.sol";
+import "./StreamArtistCurrentAuthorityFacts.sol";
 import "./StreamArtistContentHashes.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
 
@@ -152,8 +153,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentRecordPolicy(
+            c, b, p, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function recordPolicyWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentRecordPolicy(c, b, p, signer, nonce, authority);
+    }
+
+    function _currentRecordPolicy(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.PolicyConsent calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 14);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         if (p.phaseId == bytes32(0) || p.policyHash == bytes32(0)) revert T.InvalidRecord();
         record =
             StreamArtistHashes.policyRecord(_environment(), p, b.artistId, signer, nonce, _now());
@@ -181,8 +206,34 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentRecordEconomics(
+            c, b, p, designation, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function recordEconomicsWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.EconomicsConsent calldata p,
+        T.Payout calldata designation,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentRecordEconomics(c, b, p, designation, signer, nonce, authority);
+    }
+
+    function _currentRecordEconomics(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.EconomicsConsent calldata p,
+        T.Payout calldata designation,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 15);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         return _recordEconomics(c, b, p, designation, signer, nonce, bytes32(0));
     }
 
@@ -268,8 +319,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentRecordRatification(
+            c, b, p, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function recordRatificationWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Ratification calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentRecordRatification(c, b, p, signer, nonce, authority);
+    }
+
+    function _currentRecordRatification(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.Ratification calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 52);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         if (p.metadataContract == address(0) || p.contentStateHash == bytes32(0)) {
             revert T.InvalidRecord();
         }
@@ -317,8 +392,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentAuthorizeRoyaltyFreeze(
+            c, b, p, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function authorizeRoyaltyFreezeWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentAuthorizeRoyaltyFreeze(c, b, p, signer, nonce, authority);
+    }
+
+    function _currentAuthorizeRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 20);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, true);
         return _authorizeRoyaltyFreeze(c, b, p, signer, nonce, bytes32(0));
     }
 
@@ -430,8 +529,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentRecordContentConsent(
+            c, b, p, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function recordContentConsentWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Consent calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentRecordContentConsent(c, b, p, signer, nonce, authority);
+    }
+
+    function _currentRecordContentConsent(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Consent calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 17);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, false);
         StreamArtistContentHashes.validateConsent(p);
         record = StreamArtistContentHashes.consentRecord(
             _environment(), p, b.artistId, signer, 1, nonce, _now()
@@ -466,8 +589,32 @@ contract StreamArtistConsentFinalityLifecycle is StreamArtistOwner {
         address signer,
         uint256 nonce
     ) external returns (bytes32 record) {
+        return _currentAuthorizeContentFreeze(
+            c, b, p, signer, nonce, R.AuthorityFact(b.artistId, b.artistAddress, 1, 1)
+        );
+    }
+
+    function authorizeContentFreezeWithAuthority(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Freeze calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact calldata authority
+    ) external returns (bytes32 record) {
+        return _currentAuthorizeContentFreeze(c, b, p, signer, nonce, authority);
+    }
+
+    function _currentAuthorizeContentFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        Content.Freeze calldata p,
+        address signer,
+        uint256 nonce,
+        R.AuthorityFact memory authority
+    ) private returns (bytes32 record) {
         _check(c, 21);
-        _requireAccepted(b, signer);
+        StreamArtistCurrentAuthorityFacts.requireAccepted(b, signer, authority, true);
         StreamArtistContentHashes.validateFreeze(p);
         record = StreamArtistContentHashes.freezeRecord(
             _environment(), p, b.artistId, signer, 1, nonce, _now()

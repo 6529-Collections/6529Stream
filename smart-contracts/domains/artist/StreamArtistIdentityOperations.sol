@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./StreamArtistEconomicOperations.sol";
 import "./StreamArtistIdentityRevisionState.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentBindingOwner.sol";
 
 /// @notice Typed identity recipes in the guarded Coordinator's delegatecall context.
 library StreamArtistIdentityOperations {
@@ -74,11 +75,13 @@ library StreamArtistIdentityOperations {
         if (!IStreamCoreCollectionView(x.suite.core).collectionExists(p.collectionId)) {
             revert T.InvalidAttribution(p.collectionId);
         }
-        T.Authorization memory effective = _directTime(actor, b.artistAddress, submitted);
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
+        T.Authorization memory effective = _directTime(actor, authority.authorityAddress, submitted);
         T.SignerApproval memory proof = _verify(
             x,
             actor,
-            b.artistAddress,
+            authority.authorityAddress,
             StreamArtistHashes.attestationDigest(_environment(x), p, effective),
             effective.signature
         );
@@ -89,36 +92,24 @@ library StreamArtistIdentityOperations {
         }
         record = IStreamArtistIdentityOwner(x.suite.owners[2])
             .consumeAttestation(T.ActionContext(24, actor, before_[2]), b, p, effective, proof);
-        bytes32 actual;
-        if (p.subjectKind == 10) {
-            actual = IStreamArtistIdentityAttestationOwner(x.suite.owners[4])
-                .recordIdentityAttestation(
-                    T.ActionContext(24, actor, before_[4]),
-                    b,
-                    p,
-                    operative,
-                    proof.signer,
-                    effective.nonce,
-                    effective.time,
-                    statement
-                );
-        } else {
-            actual = IStreamArtistAttributionOwner(x.suite.owners[4])
-                .recordAttestation(
-                    T.ActionContext(24, actor, before_[4]),
-                    b,
-                    p,
-                    proof.signer,
-                    effective.nonce,
-                    effective.time,
-                    statement
-                );
-        }
+        bytes32 actual = IStreamArtistCurrentAttributionOwner(x.suite.owners[4])
+            .recordAttestationWithAuthority(
+                T.ActionContext(24, actor, before_[4]),
+                b,
+                p,
+                operative,
+                authority,
+                proof.signer,
+                effective.nonce,
+                effective.time,
+                statement
+            );
         if (actual != record) revert T.InvalidRecord();
         bytes memory payload = submitted.time == effective.time
             ? abi.encode(b, p, submitted, statement, proof)
             : abi.encode(b, p, submitted, statement, proof, effective);
         if (p.subjectKind == 10) payload = abi.encode(payload, operative);
+        payload = abi.encode(payload, authority);
         _archive(x, 24, actor, record, before_, payload);
     }
 

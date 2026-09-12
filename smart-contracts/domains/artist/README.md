@@ -7,7 +7,8 @@ remains the earlier immutable directory; it does not own these new records.
 
 The supported profile is `ARTIST_SIGNED_POLICY`, `PRIMARY_ONLY`, up to 32
 collaborator rows, no capability overrides, and operator-set sale parameters.
-Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 25, 26, 27, 52, and 54 have typed entrypoints.
+Operations 1, 2, 3, 4, 5, 6, 7, 14, 15, 17, 18, 20, 21, 24, 25, 26, 27,
+28, 29, 30, 31, 32, 51, 52, and 54 have typed entrypoints.
 The full 57-operation API is not
 advertised, and this implementation does not provide recovery,
 estate administration, platform works, collaborator changes, or terminal
@@ -25,6 +26,8 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 | Prospective fixed economics and exact defensive royalty freeze | `IStreamArtistEconomicsAuthority` |
 | Preventive identity-scoped nonce or digest cancellation | `IStreamArtistAuthorizationRevocation` |
 | Append-only identity revision and operative or historical document reads | `IStreamArtistIdentityRevision` |
+| Guardians, two-sided address rotation and prior-address standing | `IStreamArtistRotation` |
+| Exact governed artist seconds parameters | `IStreamArtistWindows` |
 | Scoped economics/freeze delegation, revocation and exact grant witnesses | `IStreamArtistDelegation` |
 | Refuse or withdraw a pending proposal; accept exact queued proposal terms | `IStreamArtistBindingLifecycle` |
 | Accepted artist identity and current explicit payout designation | `IStreamArtistBeneficiaryFacts` |
@@ -34,7 +37,7 @@ Use the caller interfaces under `interfaces/stream/artist/`:
 
 `StreamArtistOnboardingTypes` owns the shared payloads. The `Authorization.time`
 field is a deadline for acceptance, policy, economics, content consent, freezes, and ratification; it is
-the signed timestamp for payout, attestations and identity revisions. These direct calls
+the signed timestamp for payout, attestations, identity revisions and guardian sets. These direct calls
 can set it to zero to record the eventual inclusion timestamp, so a queued Safe
 transaction need not predict its execution time. This convention applies only
 when the original caller is the artist and the signature is empty; signed relays,
@@ -75,8 +78,57 @@ Coordinator-snapshotted Identity fact to Attribution without owner-to-owner call
 Revision signatures bind document hashes, so an unused signature may apply if its
 exact previous document becomes operative again. Permanent revision records also
 retain the prior revision-record reference to distinguish repeated document content.
-Successor authority, provisional/adjudicated revisions and archival admission
+Successor authority, adjudicated revisions and archival admission
 remain separate implementation seams.
+
+Current-principal rotation preserves the identity, historical Binding, recorded
+consents, attestations and split-wallet rights. Both old and new addresses must
+authorize staging. `rotationAcceptanceNonceState` exposes the new address's
+persistent acceptance lane, distinct from the identity's principal nonce lane;
+returning to an earlier address does not reset either. Guardian approvals can
+enable early execution, or anyone can execute at the captured deadline. Approval
+itself does not execute. Use `lastArtistTransition` for the exact predecessor
+guard and `rotationRecord` for the captured guardian record, threshold and times.
+Every new authority proof verifies the current address, while the proposal's
+original address remains historical evidence. Already recorded consent and
+delegations survive; a delegation's stored grantor retains its narrow revoke
+right without becoming the new principal or advancing that principal's liveness.
+
+[ADR 0025](../../../docs/adr/0025-artist-authority-windows-and-fixed-extensions.md)
+permits one active authority-transition window, including the post-execution
+period. During that post-window, guardian, identity and payout records are real
+authenticated records but remain provisional. Reads select them at exact
+uncontested expiry without a maintenance transaction. Guardian selection uses
+the highest eligible nonce; identity and payout chains reject a competing child
+of a still-provisional predecessor. Their historical record/association reads
+retain the transition and deadline. Canonical payout reads are on the facade
+and composed Reads contract; an owner-local payout getter explicitly rejects
+when a candidate requires Identity's transition context.
+
+A valid pending-rotation veto sets contested status. Time never clears that
+status. Authorization revocation, defensive royalty/content freezes and stored
+grantor revocation remain available; ordinary authority changes and mint consent
+remain closed. Prior-address standing outlives the window until an eligible
+explicit revocation after the captured standing tail; independent guardian
+membership remains. The current implementation does not provide operation 33
+compromise filing, adjudication or recovery. Its test-only post-execution contest
+harness proves the selection seam and does not implement those operations.
+
+`setArtistWindow(bytes32,uint64,uint64)` is an operational configuration call,
+not an additional artist-record operation. It requires the constructor-pinned
+canonical Executor's exact in-flight context through the facade and locked
+Coordinator. The scope names Identity, the chain and the parameter; a separate
+timing revision detects stale configuration. Raises admit class 0 or 1; lowering
+requires class 1. These AA seconds are outside GGP/GTP, and changing them never
+rewrites already captured transition windows or artist liveness.
+
+Identity and facade writer extensions are constructor-fixed targets behind
+explicit typed methods. Identity retains its semantic storage, snapshots,
+events and EIP712 identity; direct extension state reads/writes reject. The
+facade's fixed read helper uses `staticcall` for selected caller-independent
+reads. No public dispatcher, mutable target or fallback is provided. Deployment
+inventory must include the child CREATE addresses, immutable code and linked
+libraries as well as parent runtime and complete initcode sizes.
 
 Collaborator identities are staged by an admin and allocated only after the
 named account accepts with a direct call or verified signature. Identity stores
@@ -100,6 +152,14 @@ use authoritative attribution/binding state for readiness, not the timestamp.
 The facade's generation-scoped `collaboratorCount` and `collaboratorAt` expose
 actual rows. The owner's older no-argument empty/zero getters are bootstrap
 compatibility sentinels, not a live inventory.
+
+Rotation of an already linked collaborator preserves its artist ID and payout
+join. An unaccepted row still names its exact account/role/label: a new address
+cannot silently replace that account. If the old address has rotated away and
+has no active identity, acceptance fails; a partial `CLAIMED` generation can
+be terminated and reproposed with the intended new tuple. If that old account
+later registers a different identity, acceptance links the identity active at
+acceptance under AA-COLLAB, not a guessed previous identity.
 
 A nonzero collaborator share label must appear in the actual static economics
 profile and pay that collaborator's explicit designation when consent is

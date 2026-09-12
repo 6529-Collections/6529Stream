@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistContentHashes.sol";
+import "./StreamArtistCurrentAuthorityFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistCurrentConsentOwner.sol";
 import "./StreamArtistRegistryValidatorBase.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
@@ -27,6 +29,8 @@ library StreamArtistContentOperations {
     ) public returns (bytes32 record) {
         T.Snapshot[7] memory before_ = _snapshots(x.suite);
         T.Binding memory b = _binding(x.suite, p.collectionId, false);
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, false);
         StreamArtistContentHashes.validateConsent(p);
         _host(x.suite, p.metadataContract);
         (bool supported, bytes32 current) = IStreamArtistContentMutationFacts(p.metadataContract)
@@ -37,15 +41,15 @@ library StreamArtistContentOperations {
         T.SignerApproval memory proof = _verify(
             x.suite,
             actor,
-            b.artistAddress,
+            authority.authorityAddress,
             StreamArtistContentHashes.consentDigest(_environment(x.suite), p, a),
             a.signature
         );
         record = IStreamArtistContentIdentityOwner(x.suite.owners[2])
             .consumeContentConsent(T.ActionContext(17, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistContentRecordsOwner(x.suite.owners[6])
-            .recordContentConsent(
-                T.ActionContext(17, actor, before_[6]), b, p, proof.signer, a.nonce
+        bytes32 actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])
+            .recordContentConsentWithAuthority(
+                T.ActionContext(17, actor, before_[6]), b, p, proof.signer, a.nonce, authority
             );
         if (actual != record) revert T.InvalidRecord();
         _archive(x, 17, actor, record, before_, abi.encode(b, p, a, proof, current));
@@ -59,6 +63,8 @@ library StreamArtistContentOperations {
     ) public returns (bytes32 record) {
         T.Snapshot[7] memory before_ = _snapshots(x.suite);
         T.Binding memory b = _binding(x.suite, p.collectionId, true);
+        R.AuthorityFact memory authority =
+            StreamArtistCurrentAuthorityFacts.read(x.suite.owners[2], b.artistId, true);
         StreamArtistContentHashes.validateFreeze(p);
         _host(x.suite, p.metadataContract);
         IStreamArtistContentMutationFacts host =
@@ -74,15 +80,15 @@ library StreamArtistContentOperations {
         T.SignerApproval memory proof = _verify(
             x.suite,
             actor,
-            b.artistAddress,
+            authority.authorityAddress,
             StreamArtistContentHashes.freezeDigest(_environment(x.suite), p, a),
             a.signature
         );
         record = IStreamArtistContentIdentityOwner(x.suite.owners[2])
             .consumeContentFreeze(T.ActionContext(21, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistContentRecordsOwner(x.suite.owners[6])
-            .authorizeContentFreeze(
-                T.ActionContext(21, actor, before_[6]), b, p, proof.signer, a.nonce
+        bytes32 actual = IStreamArtistCurrentConsentOwner(x.suite.owners[6])
+            .authorizeContentFreezeWithAuthority(
+                T.ActionContext(21, actor, before_[6]), b, p, proof.signer, a.nonce, authority
             );
         if (actual != record) revert T.InvalidRecord();
         _archive(x, 21, actor, record, before_, abi.encode(b, p, a, proof));
@@ -152,7 +158,8 @@ library StreamArtistContentOperations {
             IStreamArtistIdentityOwner(suite.owners[2]).authorityState(b.artistId);
         if (
             !b.accepted || (state != 2 && !(defensive && state == 4)) || generation != b.generation
-                || b.consentMode != 1 || status != 1 || class_ != 1 || authority != b.artistAddress
+                || b.consentMode != 1 || (status != 1 && !(defensive && status == 4)) || class_ != 1
+                || authority == address(0)
         ) revert T.InvalidAttribution(collectionId);
         C.BindingTerms memory terms = IStreamArtistCollaboratorBindingOwner(suite.owners[0])
             .bindingTerms(collectionId, generation);

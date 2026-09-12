@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityOperations.sol";
+import "./StreamArtistOnboardingOperations.sol";
+import "./StreamArtistRotationOperations.sol";
 
 import "./StreamArtistEconomicsHashes.sol";
 import "./StreamArtistEconomicOperations.sol";
@@ -40,6 +42,10 @@ contract StreamArtistOnboardingCoordinator is
     error MissingMintPrerequisite(bytes32 prerequisite);
     /// @notice Retained for errors propagated by the linked identity recipes.
     error InvalidIdentity(bytes32 artistId);
+    // Preserve the public ABI of errors now propagated by extracted typed recipes.
+    error InvalidRecord();
+    error InvalidSignature();
+    error InvalidAttribution(uint256 collectionId);
     T.SuiteConfiguration private _suite;
     address[16] private _targets;
     bytes32[16] private _runtimeHashes;
@@ -129,6 +135,12 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(25),
                 uint16(26),
                 uint16(27),
+                uint16(28),
+                uint16(29),
+                uint16(30),
+                uint16(31),
+                uint16(32),
+                uint16(51),
                 uint16(52),
                 uint16(54)
             )
@@ -152,6 +164,68 @@ contract StreamArtistOnboardingCoordinator is
         return _suite;
     }
 
+    function coordinateSetArtistGuardians(
+        address actor,
+        R.GuardianSet calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistRotationOperations.guardians(_economicContext(), actor, p, a);
+    }
+
+    function coordinateRotateArtistAddress(
+        address actor,
+        R.Rotation calldata p,
+        T.Authorization calldata oldAuthorization,
+        T.Authorization calldata newAuthorization
+    ) external operation returns (bytes32) {
+        return StreamArtistRotationOperations.stage(
+            _economicContext(), actor, p, oldAuthorization, newAuthorization
+        );
+    }
+
+    function coordinateApproveArtistRotation(address actor, bytes32 artistId, bytes32 expected)
+        external
+        operation
+    {
+        StreamArtistRotationOperations.approve(_economicContext(), actor, artistId, expected);
+    }
+
+    function coordinateVetoArtistRotation(
+        address actor,
+        bytes32 artistId,
+        bytes32 expected,
+        bytes32 reasonHash
+    ) external operation {
+        StreamArtistRotationOperations.veto(
+            _economicContext(), actor, artistId, expected, reasonHash
+        );
+    }
+
+    function coordinateExecuteArtistRotation(address actor, bytes32 artistId, bytes32 expected)
+        external
+        operation
+    {
+        StreamArtistRotationOperations.execute(_economicContext(), actor, artistId, expected);
+    }
+
+    function coordinateRevokePriorAddressStanding(
+        address actor,
+        R.StandingRevocation calldata p,
+        T.Authorization calldata a
+    ) external operation returns (bytes32) {
+        return StreamArtistRotationOperations.revokeStanding(_economicContext(), actor, p, a);
+    }
+
+    function coordinateSetArtistWindow(
+        address actor,
+        bytes32 parameter,
+        uint64 newValue,
+        uint64 expectedRevision
+    ) external operation {
+        IStreamArtistWindowOwner(_suite.owners[2])
+            .configureArtistWindow(actor, parameter, newValue, expectedRevision);
+    }
+
     function coordinateProposeArtistBinding(
         address actor,
         uint256 collectionId,
@@ -159,42 +233,8 @@ contract StreamArtistOnboardingCoordinator is
         bytes calldata document,
         string calldata displayName
     ) external operation returns (bytes32 artistId, bytes32 bindingHash) {
-        bytes32 role = keccak256("ROLE_ARTIST_REGISTRY_ADMIN");
-        if (!IStreamRoleRegistry(_suite.roleRegistry).hasRole(role, actor)) {
-            revert T.Unauthorized(actor);
-        }
-        (bytes32 roleHash, uint64 roleRevision) =
-            IStreamRoleRegistry(_suite.roleRegistry).roleMutationState(role);
-        T.Snapshot[7] memory before_ = _snapshots(1);
-        _collection(collectionId);
-        IStreamArtistIdentityOwner identity = IStreamArtistIdentityOwner(_suite.owners[2]);
-        artistId = p.artistId;
-        bool reused = artistId != bytes32(0);
-        if (reused) {
-            StreamArtistIdentityOperations.validateProposalIdentity(
-                _suite.owners[2], p, document, displayName
-            );
-        } else {
-            artistId = identity.registerIdentity(
-                _context(1, actor, before_[2]),
-                p.artistAddress,
-                p.identityRecordHash,
-                p.identityRecordURI,
-                document,
-                displayName
-            );
-        }
-        T.Binding memory b = IStreamArtistBindingOwner(_suite.owners[0])
-            .propose(_context(1, actor, before_[0]), collectionId, artistId, p);
-        bindingHash = b.bindingHash;
-        IStreamArtistAttributionOwner(_suite.owners[4])
-            .claim(_context(1, actor, before_[4]), collectionId, b, p.reasonHash, p.reasonURI);
-        _archive(
-            1,
-            actor,
-            bindingHash,
-            before_,
-            abi.encode(collectionId, p, document, displayName, reused, roleHash, roleRevision)
+        return StreamArtistOnboardingOperations.propose(
+            _economicContext(), actor, collectionId, p, document, displayName
         );
     }
 
@@ -277,21 +317,7 @@ contract StreamArtistOnboardingCoordinator is
         T.PolicyConsent calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(14);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistHashes.policyDigest(_environment(), p, a),
-            a.signature
-        );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumePolicy(_context(14, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
-            .recordPolicy(_context(14, actor, before_[6]), b, p, proof.signer, a.nonce);
-        if (actual != record) revert T.InvalidRecord();
-        _archive(14, actor, record, before_, abi.encode(b, p, a, proof));
+        return StreamArtistOnboardingOperations.policy(_economicContext(), actor, p, a);
     }
 
     function coordinateRecordEconomicsConsent(
@@ -382,29 +408,7 @@ contract StreamArtistOnboardingCoordinator is
         T.PayoutDesignation calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(18);
-        T.Identity memory artist = IStreamArtistIdentityOwner(_suite.owners[2]).identity(p.artistId);
-        T.Authorization memory effective = _directObservedTime(actor, artist.authorityAddress, a);
-        T.SignerApproval memory proof = _verify(
-            actor,
-            artist.authorityAddress,
-            StreamArtistHashes.payoutDigest(_environment(), p, effective),
-            effective.signature
-        );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumePayout(_context(18, actor, before_[2]), p, effective, proof);
-        bytes32 actual = IStreamArtistPayoutOwner(_suite.owners[5])
-            .recordDesignation(
-                _context(18, actor, before_[5]), p, proof.signer, effective.nonce, effective.time
-            );
-        if (actual != record) revert T.InvalidRecord();
-        _archive(
-            18,
-            actor,
-            record,
-            before_,
-            a.time == effective.time ? abi.encode(p, a, proof) : abi.encode(p, a, proof, effective)
-        );
+        return StreamArtistOnboardingOperations.payout(_economicContext(), actor, p, a);
     }
 
     function coordinateRecordArtistAttestation(
@@ -449,118 +453,6 @@ contract StreamArtistOnboardingCoordinator is
         T.Ratification calldata p,
         T.Authorization calldata a
     ) external operation returns (bytes32 record) {
-        T.Snapshot[7] memory before_ = _snapshots(52);
-        T.Binding memory b = reads.acceptedBinding(p.collectionId);
-        _collection(p.collectionId);
-        (address metadata, bytes32 state) = reads.currentContent(p.collectionId);
-        if (p.metadataContract != metadata || p.contentStateHash != state) {
-            revert T.InvalidRecord();
-        }
-        T.SignerApproval memory proof = _verify(
-            actor,
-            b.artistAddress,
-            StreamArtistHashes.ratificationDigest(_environment(), p, a),
-            a.signature
-        );
-        record = IStreamArtistIdentityOwner(_suite.owners[2])
-            .consumeRatification(_context(52, actor, before_[2]), b, p, a, proof);
-        bytes32 actual = IStreamArtistConsentOwner(_suite.owners[6])
-            .recordRatification(_context(52, actor, before_[6]), b, p, proof.signer, a.nonce);
-        if (actual != record) revert T.InvalidRecord();
-        _archive(52, actor, record, before_, abi.encode(b, p, a, proof));
-    }
-
-    function _directObservedTime(address actor, address signer, T.Authorization calldata submitted)
-        private
-        view
-        returns (T.Authorization memory effective)
-    {
-        effective = submitted;
-        if (
-            actor == signer && actor != address(0) && submitted.signature.length == 0
-                && submitted.time == 0
-        ) {
-            if (block.timestamp > type(uint64).max) revert T.InvalidRecord();
-            effective.time = uint64(block.timestamp);
-        }
-    }
-
-    function _verify(address actor, address signer, bytes32 digest, bytes memory signature)
-        private
-        view
-        returns (T.SignerApproval memory proof)
-    {
-        if (actor == address(0) || signer == address(0)) revert T.InvalidSignature();
-        bool direct = actor == signer && signature.length == 0;
-        if (!direct) {
-            (uint256 cap,, uint8 failureClass, uint64 revision) = IStreamGasParameterHost(
-                    _suite.registry
-                ).gasParameterInfo(keccak256("6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS"));
-            if (
-                revision == 0 || failureClass != 2
-                    || !StreamArtistRegistryValidatorBase(_suite.validator)
-                        .validateSignerProof(signer, digest, signature, cap)
-            ) revert T.InvalidSignature();
-        }
-        return T.SignerApproval(signer, digest, direct);
-    }
-
-    function _collection(uint256 collectionId) private view {
-        if (!IStreamCoreCollectionView(_suite.core).collectionExists(collectionId)) {
-            revert T.InvalidAttribution(collectionId);
-        }
-    }
-
-    function _environment() private view returns (StreamArtistHashes.Environment memory) {
-        return StreamArtistHashes.Environment(
-            deploymentChainId, _suite.registry, _suite.core, _suite.mintManager
-        );
-    }
-
-    function _context(uint16 operationId, address actor, T.Snapshot memory prior)
-        private
-        pure
-        returns (T.ActionContext memory)
-    {
-        return T.ActionContext(operationId, actor, prior);
-    }
-
-    function _snapshots(uint16 op) private view returns (T.Snapshot[7] memory result) {
-        // acceptedBinding also consumes Attribution's state/generation. Commit
-        // that read for every recipe using it, without adding an owner mutation.
-        uint256 mask = op == 1
-            ? 0x15
-            : op == 2 ? 0x1f : op == 15 ? 0x77 : op == 18 ? 0x24 : op == 24 ? 0x17 : 0x57;
-        for (uint256 i; i < 7; ++i) {
-            if ((mask & (1 << i)) != 0) {
-                result[i] = IStreamArtistOwner(_suite.owners[i]).ownerStateSnapshotV2();
-            }
-        }
-    }
-
-    function _archive(
-        uint16 op,
-        address actor,
-        bytes32 record,
-        T.Snapshot[7] memory prior,
-        bytes memory payload
-    ) private {
-        T.Snapshot[7] memory after_ = _snapshots(op);
-        bytes32 id = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
-                deploymentChainId,
-                _suite.registry,
-                address(this),
-                op,
-                actor,
-                record
-            )
-        );
-        bytes memory evidence =
-            abi.encode(uint16(1), configurationHash, op, actor, record, prior, after_, payload);
-        (bytes32 hash,, bool appended) =
-            IStreamArtistArchiveV2(_suite.archive).appendArtistEvidenceV2(id, 1, evidence);
-        if (!appended || hash != keccak256(evidence)) revert T.InvalidRecord();
+        return StreamArtistOnboardingOperations.ratify(_economicContext(), actor, p, a);
     }
 }

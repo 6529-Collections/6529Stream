@@ -86,6 +86,7 @@ contract ArtistUnitGovernance {
     bytes32 private scope;
     bytes32 private oldState;
     bytes32 private newState;
+    uint8 private selectedClass = 1;
 
     function isStreamGovernedParameterAuthority() external pure returns (bool) {
         return true;
@@ -99,7 +100,7 @@ contract ArtistUnitGovernance {
         return (
             active,
             active ? keccak256("unit authority gas raise") : bytes32(0),
-            active ? 1 : 0,
+            active ? selectedClass : 0,
             scope,
             oldState,
             newState
@@ -108,6 +109,7 @@ contract ArtistUnitGovernance {
 
     /// @dev Exact host-context unit double, not proof of actual delayed governance.
     function raise(IStreamGasParameterHost host, bytes32 id, uint256 value) external {
+        selectedClass = 1;
         (uint256 previous, uint256 floor, uint8 failure, uint64 revision) =
             host.gasParameterInfo(id);
         scope = keccak256(
@@ -123,6 +125,29 @@ contract ArtistUnitGovernance {
         newState = keccak256(abi.encode(domain, scope, value, floor, failure, revision + 1));
         active = true;
         host.raiseGasParameter(id, value);
+        active = false;
+        scope = bytes32(0);
+        oldState = bytes32(0);
+        newState = bytes32(0);
+    }
+
+    /// @dev Exact AA seconds-host context only; this is not an actual timelock/governance proof.
+    function configureWindow(
+        IStreamArtistWindows host,
+        bytes32 parameter,
+        uint64 value,
+        uint64 expectedRevision,
+        uint8 actionClass,
+        bool wrongScope
+    ) external {
+        (uint64 previous,, uint64 revision) = host.artistWindowInfo(parameter);
+        scope =
+            wrongScope ? keccak256("wrong artist window scope") : host.artistWindowScope(parameter);
+        oldState = host.artistWindowStateHash(parameter, previous, revision);
+        newState = host.artistWindowStateHash(parameter, value, revision + 1);
+        selectedClass = actionClass;
+        active = true;
+        host.setArtistWindow(parameter, value, expectedRevision);
         active = false;
         scope = bytes32(0);
         oldState = bytes32(0);
@@ -332,6 +357,30 @@ contract ArtistCollaboratorAccountReplayHarness {
 /// @notice Real artist owners, both economics providers, split profiles and official Safe signatures.
 /// @dev Core, metadata and governance boundaries are explicit unit doubles;
 ///      a separate current-stack test owns integration and eligible token mint proof.
+/// @dev Test-only simulation of the future operation33 state seam. No public compromise filing is claimed.
+contract ArtistRotationContestHarness is StreamArtistIdentityAuthority {
+    constructor(
+        address registry_,
+        address coordinator_,
+        address archive_,
+        address core_,
+        address manager_
+    ) StreamArtistIdentityAuthority(registry_, coordinator_, archive_, core_, manager_) { }
+
+    function simulateExecutedTransitionContest(bytes32 record) external {
+        R.TransitionState storage transition = _rotations.rotations[record].transition;
+        require(
+            transition.phase == 2 && transition.contestedAt == 0, "qualified transition fixture"
+        );
+        transition.contestedAt = _now();
+        _identity.identities[transition.artistId].status = 4;
+        ++_revision;
+        _stateRoot = keccak256(
+            abi.encode(keccak256("TEST_ONLY_COMPROMISE_STATE_SEAM"), _stateRoot, transition)
+        );
+    }
+}
+
 contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFixture {
     event CollaboratorBoundMeasurement(uint256 rows, uint256 entries, uint256 gasUsed);
     ArtistTestVm private constant avm =
@@ -359,6 +408,7 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
     bytes32 private collaboratorId;
     uint8 private templateFixtureKind;
     bytes32 private templateFixtureId;
+    bool private rotationContestFixture;
 
     function _freshTemplateFixture(uint8 kind) private {
         // A separate deployment with a prebinding template; no existing assignment or history is reset.
@@ -1710,6 +1760,12 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 uint16(25),
                 uint16(26),
                 uint16(27),
+                uint16(28),
+                uint16(29),
+                uint16(30),
+                uint16(31),
+                uint16(32),
+                uint16(51),
                 uint16(52),
                 uint16(54)
             )
@@ -3532,6 +3588,13 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
             "attestation observed inclusion time"
         );
         payload = _operationPayload(24, account, actual.recordHash);
+        R.AuthorityFact memory currentAuthority;
+        (payload, currentAuthority) = abi.decode(payload, (bytes, R.AuthorityFact));
+        require(
+            currentAuthority.artistId == artistId && currentAuthority.authorityAddress == account
+                && currentAuthority.authorityClass == 1 && currentAuthority.status == 1,
+            "actual current authority snapshot"
+        );
         bytes32 operative;
         (payload, operative) = abi.decode(payload, (bytes, bytes32));
         require(operative == ingress.operativeIdentityRecord(artistId), "snapshotted identity fact");
@@ -4207,6 +4270,1238 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
         );
     }
 
+    uint256[] private rotationKeys;
+    OfficialSafe private rotationSafe;
+
+    function _rotateCollaboratorToNewSafe() private returns (bytes32 record) {
+        R.Rotation memory p = R.Rotation(
+            collaboratorId,
+            address(delegateSafe),
+            address(rotationSafe),
+            keccak256("collaborator rotates"),
+            bytes32(0)
+        );
+        T.Authorization memory oldA = T.Authorization(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(collaboratorId).nonceHint,
+            uint64(block.timestamp + 1 days),
+            ""
+        );
+        oldA.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(delegateSafe, abi.encode(ingress.rotationDigest(p, oldA)))
+        );
+        T.Authorization memory newA = T.Authorization(0, oldA.time, "");
+        newA.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(rotationSafe, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+        record = ingress.rotateArtistAddress(p, oldA, newA);
+        vm.warp(ingress.rotationRecord(record).transition.contestEndsAt);
+        ingress.executeArtistRotation(collaboratorId, record);
+    }
+
+    function testRotationAcceptedCollaboratorKeepsIdentityJoinAndActualFixedWallet() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        _payout();
+        _collaboratorPayout(address(delegateSafe));
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _collaboratorCandidate(address(primary), address(delegateSafe));
+        _prospectiveConsent(p, candidate);
+        vm.prank(primary.owner());
+        primary.setPrimaryProfileAssignment(PRIMARY, 1, 1, candidate.profileHash, bytes32(0));
+        address wallet = factory.walletFor(candidate.profileHash);
+        (p, candidate) = _collaboratorCandidate(address(royalty), address(delegateSafe));
+        _prospectiveConsent(p, candidate);
+        vm.prank(royalty.owner());
+        royalty.configureCollectionRoyalty(1, candidate.profileHash, 500);
+        _policy();
+        _ratify();
+        _attestations();
+        bytes32 priorRow = keccak256(abi.encode(ingress.collaboratorAt(1, row.generation, 0)));
+        _newRotationSafe(9018);
+        bytes32 transition = _rotateCollaboratorToNewSafe();
+        (address account, bytes32 priorPayout) =
+            ingress.collaboratorPayoutAccount(collaboratorId, address(delegateSafe));
+        require(
+            account == address(delegateSafe) && priorPayout != bytes32(0),
+            "accepted row joins identity, not current authority address"
+        );
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(collaboratorId, address(rotationSafe), priorPayout);
+        T.Authorization memory a = T.Authorization(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(collaboratorId).nonceHint,
+            uint64(block.timestamp),
+            ""
+        );
+        a.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(rotationSafe, abi.encode(ingress.payoutDesignationDigest(payout, a)))
+        );
+        bytes32 fresh = ingress.recordPayoutDesignation(payout, a);
+        (account,) = ingress.collaboratorPayoutAccount(collaboratorId, address(delegateSafe));
+        require(account == address(delegateSafe), "provisional designation not operative");
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        vm.warp(ingress.rotationRecord(transition).transition.postWindowEndsAt);
+        (account, priorPayout) =
+            ingress.collaboratorPayoutAccount(collaboratorId, address(delegateSafe));
+        require(
+            account == address(rotationSafe) && priorPayout == fresh,
+            "same accepted identity now resolves matured payout"
+        );
+        require(
+            keccak256(abi.encode(ingress.collaboratorAt(1, row.generation, 0))) == priorRow,
+            "historical row immutable"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        vm.deal(address(this), 1 ether);
+        (bool sent,) = wallet.call{ value: 1 ether }("");
+        require(sent, "fund prior concrete profile");
+        uint256 beforeBalance = address(delegateSafe).balance;
+        IStreamSplitWallet(wallet)
+            .release(address(0), address(delegateSafe), payable(address(delegateSafe)));
+        require(
+            address(delegateSafe).balance == beforeBalance + 0.2 ether
+                && IStreamSplitWallet(wallet).aggregateSharePpm(address(rotationSafe)) == 0,
+            "fixed wallet preserves consent-time collaborator recipient"
+        );
+    }
+
+    function testRotationPendingCollaboratorTupleCannotSubstituteNewAuthorityButCanRepropose()
+        public
+    {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(false);
+        _accept();
+        T.Authorization memory prepared = T.Authorization(1, uint64(block.timestamp + 30 days), "");
+        prepared.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(
+                delegateSafe, abi.encode(ingress.collaboratorAcceptanceDigest(row, prepared))
+            )
+        );
+        _newRotationSafe(9019);
+        _rotateCollaboratorToNewSafe();
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, bytes32(0)));
+        ingress.acceptCollaborator(row, prepared);
+        C.BindingAcceptance memory substitute = C.BindingAcceptance(
+            row.collectionId,
+            row.generation,
+            row.bindingHash,
+            address(rotationSafe),
+            row.role,
+            row.shareLabelId
+        );
+        T.Authorization memory a = T.Authorization(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(collaboratorId).nonceHint,
+            uint64(block.timestamp + 1 days),
+            ""
+        );
+        a.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(
+                rotationSafe, abi.encode(ingress.collaboratorAcceptanceDigest(substitute, a))
+            )
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.acceptCollaborator(substitute, a);
+        require(
+            _roots() == roots && !ingress.collaboratorAt(1, row.generation, 0).accepted,
+            "pending tuple and old proof stay exact"
+        );
+        delegateSafe = rotationSafe;
+        delegateKeys = rotationKeys;
+        C.BindingAcceptance memory replacement = _collaborativeProposal(false);
+        require(
+            replacement.generation == row.generation + 1
+                && replacement.account == address(rotationSafe),
+            "new generation names exact current account"
+        );
+        a.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(
+                rotationSafe, abi.encode(ingress.collaboratorAcceptanceDigest(replacement, a))
+            )
+        );
+        ingress.acceptCollaborator(replacement, a);
+        _accept();
+        require(
+            ingress.acceptedArtist(1) == address(artist), "reproposed row completes actual binding"
+        );
+    }
+
+    function testRotationRetiredAccountNewIdentityLinksPendingTupleWithoutReusingOldIdentity()
+        public
+    {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(false);
+        _accept();
+        bytes32 formerIdentity = collaboratorId;
+        _newRotationSafe(9020);
+        _rotateCollaboratorToNewSafe();
+        bytes memory document = bytes("new identity at retired account");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            address(delegateSafe),
+            keccak256(document),
+            "urn:reused",
+            keccak256("new identity"),
+            "urn:reason"
+        );
+        ingress.proposeCollaboratorIdentity(p);
+        T.Authorization memory a = T.Authorization(1, uint64(block.timestamp + 1 days), "");
+        a.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(
+                delegateSafe,
+                abi.encode(ingress.collaboratorIdentityDigest(p.account, p.identityRecordHash, a))
+            )
+        );
+        bytes32 newIdentity = ingress.acceptCollaboratorIdentity(
+            p.account, p.identityRecordHash, a, document, "Retired account identity"
+        );
+        require(
+            newIdentity != formerIdentity
+                && IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(address(rotationSafe))
+                    == formerIdentity,
+            "distinct actual identities"
+        );
+        a.nonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(newIdentity).nonceHint;
+        a.signature = safeThresholdSignature(
+            delegateKeys,
+            safeMessageDigest(
+                delegateSafe, abi.encode(ingress.collaboratorAcceptanceDigest(row, a))
+            )
+        );
+        ingress.acceptCollaborator(row, a);
+        require(
+            ingress.collaboratorAt(1, row.generation, 0).collaboratorArtistId == newIdentity,
+            "unaccepted row joins active identity at exact account"
+        );
+        require(
+            ingress.acceptedArtist(1) == address(artist),
+            "primary history completes with actual new join"
+        );
+    }
+
+    function testRotationExecutionRejectsDestinationRegisteredAfterStageAndRollsBack() public {
+        _newRotationSafe(9021);
+        bytes32 record = _stageRotation(bytes32(0));
+        bytes memory document = bytes("independent destination identity");
+        C.IdentityProposal memory p = C.IdentityProposal(
+            address(rotationSafe),
+            keccak256(document),
+            "urn:occupied",
+            keccak256("registration"),
+            "urn:reason"
+        );
+        ingress.proposeCollaboratorIdentity(p);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp + 1 days), "");
+        a.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(
+                rotationSafe,
+                abi.encode(ingress.collaboratorIdentityDigest(p.account, p.identityRecordHash, a))
+            )
+        );
+        bytes32 otherIdentity = ingress.acceptCollaboratorIdentity(
+            p.account, p.identityRecordHash, a, document, "Destination identity"
+        );
+        vm.warp(ingress.rotationRecord(record).transition.contestEndsAt);
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(T.AddressAlreadyRegistered.selector, address(rotationSafe))
+        );
+        ingress.executeArtistRotation(artistId, record);
+        require(
+            _roots() == roots && ingress.rotationRecord(record).transition.phase == 1,
+            "execution effects rollback while stage persists"
+        );
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(address(artist)) == artistId
+                && IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(address(rotationSafe))
+                == otherIdentity,
+            "both actual active-address owners preserved"
+        );
+    }
+
+    function testRotationBothSafeSidesSupportPreapprovedEmptyProofs() public {
+        _newRotationSafe(9022);
+        R.Rotation memory p = _rotationTerms(bytes32(0));
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        oldA.signature = "";
+        newA.signature = "";
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        ingress.rotateArtistAddress(p, oldA, newA);
+        _approveMessage(ingress.rotationDigest(p, oldA));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidSignature.selector));
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(_roots() == roots, "both contract approvals required before replay effects");
+        bytes32 digest = ingress.rotationAcceptanceDigest(p, newA);
+        require(
+            executeSafe(
+                rotationSafe,
+                rotationKeys,
+                safeComponents.signMessage,
+                0,
+                abi.encodeWithSignature("signMessage(bytes)", abi.encode(digest)),
+                1
+            ),
+            "new Safe approves exact Stream digest"
+        );
+        bytes32 record = ingress.rotateArtistAddress(p, oldA, newA);
+        require(
+            ingress.rotationRecord(record).oldNonce == oldA.nonce
+                && ingress.rotationRecord(record).newNonce == newA.nonce,
+            "both approved-empty signatures recorded in exact lanes"
+        );
+    }
+
+    function testRotationMaximumGuardianSetDirectOldSafeAndDuplicateApproval() public {
+        address[] memory guardians_ = new address[](9);
+        for (uint256 i; i < 8; ++i) {
+            guardians_[i] = address(uint160(i + 1));
+        }
+        guardians_[8] = address(artist);
+        R.GuardianSet memory p = R.GuardianSet(artistId, guardians_, 1, 0);
+        T.Authorization memory a = T.Authorization(0, uint64(block.timestamp), "");
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidGuardianSet.selector));
+        ingress.setArtistGuardians(p, a);
+        p.guardians = new address[](8);
+        for (uint256 i; i < 7; ++i) {
+            p.guardians[i] = address(uint160(i + 1));
+        }
+        p.guardians[7] = address(artist);
+        p.guardians[1] = p.guardians[0];
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidGuardianSet.selector));
+        ingress.setArtistGuardians(p, a);
+        p.guardians[1] = address(2);
+        p.approvalThreshold = 9;
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidGuardianSet.selector));
+        ingress.setArtistGuardians(p, a);
+        p.approvalThreshold = 1;
+        p.minContestSeconds = 31 days;
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidGuardianSet.selector));
+        ingress.setArtistGuardians(p, a);
+        require(_roots() == roots, "invalid guardian terms leave replay and roots untouched");
+        p.minContestSeconds = 0;
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        bytes32 guardianRecord = ingress.setArtistGuardians(p, a);
+        nextNonce = 1;
+        _newRotationSafe(9023);
+        R.Rotation memory terms = _rotationTerms(bytes32(0));
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(terms);
+        oldA.signature = "";
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistRotation.rotateArtistAddress, (terms, oldA, newA)),
+                0
+            ),
+            "old Safe directly stages with signed new threshold Safe"
+        );
+        (bytes32 record,,) = ingress.activeAuthorityWindow(artistId);
+        require(
+            ingress.rotationRecord(record).guardianSetRecordHash == guardianRecord,
+            "maximum set captured"
+        );
+        bytes memory approval =
+            abi.encodeCall(IStreamArtistRotation.approveArtistRotation, (artistId, record));
+        require(
+            executeSafe(artist, keys, address(ingress), 0, approval, 0),
+            "actual guardian Safe approves"
+        );
+        bytes32 key = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.guardian_approval_key"),
+            keccak256(abi.encode(record, address(artist)))
+        );
+        roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, key));
+        vm.prank(address(artist));
+        ingress.approveArtistRotation(artistId, record);
+        require(
+            _roots() == roots && ingress.rotationRecord(record).guardianApprovals == 1,
+            "exact duplicate approval replay rolls back"
+        );
+        ingress.executeArtistRotation(artistId, record);
+    }
+
+    function _newRotationSafe(uint256 salt) private {
+        rotationKeys = new uint256[](2);
+        rotationKeys[0] = 0xCA1100 + salt;
+        rotationKeys[1] = 0xCA2200 + salt;
+        rotationSafe = createOfficialSafe(safeComponents, safeOwnerAddresses(rotationKeys), 2, salt);
+    }
+
+    function _rotationTerms(bytes32 previous) private view returns (R.Rotation memory) {
+        return R.Rotation(
+            artistId, address(artist), address(rotationSafe), keccak256("artist rotation"), previous
+        );
+    }
+
+    function _rotationAuthorizations(R.Rotation memory p)
+        private
+        returns (T.Authorization memory oldA, T.Authorization memory newA)
+    {
+        oldA = _authorization(false);
+        oldA.signature = safeThresholdSignature(
+            keys, safeMessageDigest(artist, abi.encode(ingress.rotationDigest(p, oldA)))
+        );
+        (, uint256 hint) = ingress.rotationAcceptanceNonceState(artistId, p.newAddress, 0);
+        newA = T.Authorization(hint, uint64(block.timestamp + 1 days), "");
+        newA.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(rotationSafe, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+    }
+
+    function _stageRotation(bytes32 previous) private returns (bytes32 record) {
+        R.Rotation memory p = _rotationTerms(previous);
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        record = ingress.rotateArtistAddress(p, oldA, newA);
+    }
+
+    function _executeTimedRotation(bytes32 record) private {
+        R.RotationRecord memory r = ingress.rotationRecord(record);
+        vm.warp(r.transition.contestEndsAt);
+        ingress.executeArtistRotation(artistId, record);
+    }
+
+    function _adoptRotatedSafe() private {
+        artist = rotationSafe;
+        keys = rotationKeys;
+        nextNonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+    }
+
+    function _guardianRecord(
+        address[] memory guardians_,
+        uint32 threshold,
+        uint64 floor,
+        uint256 nonce
+    ) private returns (bytes32 record) {
+        R.GuardianSet memory p = R.GuardianSet(artistId, guardians_, threshold, floor);
+        T.Authorization memory a = T.Authorization(nonce, uint64(block.timestamp), "");
+        a.signature = safeThresholdSignature(
+            keys, safeMessageDigest(artist, abi.encode(ingress.guardianSetDigest(p, a)))
+        );
+        record = ingress.setArtistGuardians(p, a);
+        nextNonce = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).nonceHint;
+    }
+
+    function testRotationTwoRealSafesTimedExecutionKeepsBindingAndStoredConsent() public {
+        _all();
+        T.Binding memory beforeBinding = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        bytes32 payoutBefore;
+        (, payoutBefore) = ingress.artistPayoutAccount(artistId);
+        address retired = address(artist);
+        _newRotationSafe(9001);
+        bytes32 record = _stageRotation(bytes32(0));
+        R.RotationRecord memory staged = ingress.rotationRecord(record);
+        require(
+            staged.transition.phase == 1 && staged.effectiveWindow == 7 days, "real staged window"
+        );
+        require(ingress.acceptedArtist(1) == retired, "staging does not rotate");
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(R.RotationNotExecutable.selector, record));
+        ingress.executeArtistRotation(artistId, record);
+        require(_roots() == roots, "premature execute rollback");
+        T.Identity memory identityBefore =
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        _executeTimedRotation(record);
+        T.Identity memory identityAfter =
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            identityAfter.authorityAddress == address(rotationSafe), "current authority rotated"
+        );
+        require(
+            identityAfter.lastAuthorityActionAt == identityBefore.lastAuthorityActionAt,
+            "execute no liveness"
+        );
+        require(
+            keccak256(abi.encode(beforeBinding))
+                == keccak256(abi.encode(IStreamArtistBindingOwner(suite.owners[0]).binding(1))),
+            "binding immutable"
+        );
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).activeIdentity(retired) == bytes32(0),
+            "old active lane cleared"
+        );
+        require(
+            ingress.acceptedArtist(1) == address(rotationSafe), "accepted read current principal"
+        );
+        (, bytes32 payoutAfter) = ingress.artistPayoutAccount(artistId);
+        require(
+            payoutAfter == payoutBefore && !_closed(_mintCall()),
+            "stored consent and payout survive"
+        );
+        require(
+            ingress.lastArtistTransition(artistId) == record, "concurrency guard remains readable"
+        );
+        R.RotationRecord memory executed = ingress.rotationRecord(record);
+        require(
+            executed.transition.postWindowEndsAt == block.timestamp + 7 days, "captured post window"
+        );
+    }
+
+    function testRotationRealSafeGuardianQuorumAndCapturedSet() public {
+        _newRotationSafe(9002);
+        address[] memory guardians_ = new address[](2);
+        guardians_[0] = address(artist);
+        guardians_[1] = address(rotationSafe);
+        if (guardians_[0] > guardians_[1]) {
+            (guardians_[0], guardians_[1]) = (guardians_[1], guardians_[0]);
+        }
+        bytes32 setRecord = _guardianRecord(guardians_, 2, 8 days, 0);
+        bytes32 record = _stageRotation(bytes32(0));
+        uint64 beforeTime = uint64(block.timestamp);
+        bytes memory approval =
+            abi.encodeCall(IStreamArtistRotation.approveArtistRotation, (artistId, record));
+        address guardianOwner = vm.addr(keys[0]);
+        vm.prank(guardianOwner);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, guardianOwner));
+        ingress.approveArtistRotation(artistId, record);
+        require(executeSafe(artist, keys, address(ingress), 0, approval, 0), "old guardian Safe");
+        vm.expectRevert(abi.encodeWithSelector(R.RotationNotExecutable.selector, record));
+        ingress.executeArtistRotation(artistId, record);
+        require(
+            executeSafe(rotationSafe, rotationKeys, address(ingress), 0, approval, 0),
+            "second guardian Safe"
+        );
+        ingress.executeArtistRotation(artistId, record);
+        R.RotationRecord memory r = ingress.rotationRecord(record);
+        require(
+            r.guardianSetRecordHash == setRecord && r.guardianApprovals == 2,
+            "captured threshold facts"
+        );
+        require(
+            r.transition.executedAt == beforeTime
+                && r.transition.postWindowEndsAt == beforeTime + 8 days,
+            "quorum exact fast path"
+        );
+    }
+
+    function testRotationVetoRemainsContestedAndDefensiveOperationsStayUsable() public {
+        _all();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, uint64(1000 + 500 days), 0));
+        _newRotationSafe(9003);
+        bytes32 record = _stageRotation(bytes32(0));
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistRotation.vetoArtistRotation,
+                    (artistId, record, keccak256("compromise"))
+                ),
+                0
+            ),
+            "actual Safe veto"
+        );
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "contested status"
+        );
+        vm.warp(block.timestamp + 365 days);
+        require(_closed(_mintCall()), "no contested timeout bypass");
+        bytes32 roots = _roots();
+        R.GuardianSet memory p = R.GuardianSet(artistId, new address[](0), 0, 0);
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        a.signature = _signature(ingress.guardianSetDigest(p, a));
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidIdentity.selector, artistId));
+        ingress.setArtistGuardians(p, a);
+        require(_roots() == roots, "normal mutation blocked");
+        _authorizeFreeze();
+        _contentFreeze();
+        _revoke(grant);
+        T.Authorization memory revokeA = _authorization(false);
+        StreamArtistAuthorizationTypes.Revocation memory revokeP =
+            StreamArtistAuthorizationTypes.Revocation(
+                artistId, keccak256("unused contested authorization"), 0
+            );
+        revokeA.signature = _signature(ingress.authorizationRevocationDigest(revokeP, revokeA));
+        ingress.revokeArtistAuthorization(revokeP, revokeA);
+        require(
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "defense does not unfreeze"
+        );
+    }
+
+    function testRotationDirectNewSafeAcceptanceAndLateArchiveRollback() public {
+        _newRotationSafe(9004);
+        R.Rotation memory p = _rotationTerms(bytes32(0));
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        newA.signature = "";
+        bytes memory callData =
+            abi.encodeCall(IStreamArtistRotation.rotateArtistAddress, (p, oldA, newA));
+        bytes32 roots = _roots();
+        bytes32 expected = StreamArtistRotationHashes.rotationRecord(
+            StreamArtistHashes.Environment(
+                block.chainid, address(ingress), suite.core, suite.mintManager
+            ),
+            p,
+            oldA.nonce,
+            uint64(block.timestamp),
+            uint64(block.timestamp + 7 days)
+        );
+        bytes32 evidenceId = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(29),
+                address(rotationSafe),
+                expected
+            )
+        );
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeRotationNewSafe(callData);
+        avm.clearMockedCalls();
+        (bool used, uint256 hint) =
+            ingress.rotationAcceptanceNonceState(artistId, address(rotationSafe), 0);
+        require(!used && hint == 0 && _roots() == roots, "both lanes rollback");
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "ArtistArchiveEvidenceUnavailable(bytes32,uint64)", evidenceId, uint64(1)
+            )
+        );
+        archive.artistEvidenceMetadataV2(evidenceId, 1);
+        require(
+            executeSafe(rotationSafe, rotationKeys, address(ingress), 0, callData, 0),
+            "new side actual direct Safe"
+        );
+        (used, hint) = ingress.rotationAcceptanceNonceState(artistId, address(rotationSafe), 0);
+        require(used && hint == 1, "independent new side consumed");
+    }
+
+    function executeRotationNewSafe(bytes calldata data) external returns (bool) {
+        require(msg.sender == address(this), "test only");
+        return executeSafe(rotationSafe, rotationKeys, address(ingress), 0, data, 0);
+    }
+
+    function testRotationProvisionalFactsMatureWithoutMaintenanceAtExactBoundary() public {
+        _all();
+        bytes32 initialDocument = ingress.operativeIdentityRecord(artistId);
+        (address oldPayout, bytes32 oldDesignation) = ingress.artistPayoutAccount(artistId);
+        bytes32 oldGuardian = _guardianRecord(new address[](0), 0, 0, nextNonce);
+        _newRotationSafe(9005);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        _adoptRotatedSafe();
+        uint64 end = ingress.rotationRecord(transition).transition.postWindowEndsAt;
+        bytes memory document = bytes("rotated provisional identity");
+        StreamArtistIdentityRevisionTypes.Revision memory revision =
+            StreamArtistIdentityRevisionTypes.Revision(
+                artistId, initialDocument, keccak256(document), "urn:rotated"
+            );
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(revision, a));
+        bytes32 identityRecord =
+            ingress.recordIdentityRevision(revision, a, document, "Rotated Safe");
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(artistId, address(artist), oldDesignation);
+        a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(payout, a));
+        bytes32 payoutRecord = ingress.recordPayoutDesignation(payout, a);
+        address[] memory newGuardians = new address[](1);
+        newGuardians[0] = address(artist);
+        bytes32 guardian = _guardianRecord(newGuardians, 1, 9 days, nextNonce);
+        require(
+            ingress.identityRevisionProvisionalAssociation(identityRecord).transitionRecordHash
+                == transition,
+            "identity cohort"
+        );
+        require(
+            ingress.payoutDesignationProvisionalAssociation(payoutRecord).windowEndsAt == end,
+            "payout cohort"
+        );
+        require(
+            ingress.guardianSetRecord(guardian).provisional.windowEndsAt == end, "guardian cohort"
+        );
+        vm.warp(end - 1);
+        require(
+            ingress.operativeIdentityRecord(artistId) == initialDocument, "identity provisional"
+        );
+        (address currentPayout,) = ingress.artistPayoutAccount(artistId);
+        (,,, bytes32 currentGuardian) = ingress.guardianSet(artistId);
+        require(
+            currentPayout == oldPayout && currentGuardian == oldGuardian && !_closed(_mintCall()),
+            "prior operative floors"
+        );
+        bytes32 roots = _roots();
+        vm.warp(end);
+        require(
+            ingress.operativeIdentityRecord(artistId) == keccak256(document),
+            "identity matures at equality"
+        );
+        (currentPayout,) = ingress.artistPayoutAccount(artistId);
+        (,,, currentGuardian) = ingress.guardianSet(artistId);
+        require(
+            currentPayout == address(artist) && currentGuardian == guardian,
+            "payout and guardians mature"
+        );
+        require(
+            _roots() == roots
+                && ingress.rotationRecord(transition).transition.postWindowEndsAt == end,
+            "time-only no maintenance or extension"
+        );
+        require(_closed(_mintCall()), "personhood tracks operative hash");
+        _attest(
+            10, artistId, keccak256(document), keccak256("6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1")
+        );
+        require(!_closed(_mintCall()), "restored personhood and old static consents");
+    }
+
+    function testRotationSingleActiveWindowAndPriorStandingTail() public {
+        _newRotationSafe(9006);
+        address oldAddress = address(artist);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        _adoptRotatedSafe();
+        R.RotationRecord memory r = ingress.rotationRecord(transition);
+        _newRotationSafe(9007);
+        R.Rotation memory p = _rotationTerms(transition);
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                R.ActiveAuthorityWindow.selector, transition, r.transition.postWindowEndsAt
+            )
+        );
+        ingress.rotateArtistAddress(p, oldA, newA);
+        --nextNonce;
+        R.StandingRevocation memory revocation =
+            R.StandingRevocation(artistId, oldAddress, keccak256("retired"), transition);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(revocation, a));
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidPriorStanding.selector, oldAddress));
+        ingress.revokePriorAddressStanding(revocation, a);
+        --nextNonce;
+        vm.warp(uint256(r.transition.postWindowEndsAt) + r.standingTail);
+        (bool revoked,) = ingress.priorAddressStandingRevoked(artistId, oldAddress);
+        require(!revoked, "standing survives time alone");
+        a = _authorization(false);
+        a.signature = _signature(ingress.standingRevocationDigest(revocation, a));
+        bytes32 record = ingress.revokePriorAddressStanding(revocation, a);
+        (revoked,) = ingress.priorAddressStandingRevoked(artistId, oldAddress);
+        require(
+            revoked
+                && ingress.standingRevocationRecord(record).terms.retiredTransitionRecordHash
+                    == transition,
+            "exact recorded standing retirement"
+        );
+        require(_stageRotation(transition) != bytes32(0), "second rotation after window");
+    }
+
+    function testRotationNewPrincipalAcceptsHistoricalProposalAndOldProofStopsVerifying() public {
+        T.Authorization memory stale = T.Authorization(200, uint64(block.timestamp + 30 days), "");
+        stale.signature = _signature(ingress.acceptanceDigest(1, stale));
+        bytes32 beforeBinding =
+            keccak256(abi.encode(IStreamArtistBindingOwner(suite.owners[0]).binding(1)));
+        _newRotationSafe(9008);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.acceptArtistBinding(1, stale);
+        require(_roots() == roots, "stale old-key payload rollback");
+        _adoptRotatedSafe();
+        _accept();
+        T.Binding memory b = IStreamArtistBindingOwner(suite.owners[0]).binding(1);
+        require(
+            b.accepted && b.artistAddress != address(artist)
+                && ingress.acceptedArtist(1) == address(artist),
+            "historical proposal current acceptance"
+        );
+        b.accepted = false;
+        require(keccak256(abi.encode(b)) == beforeBinding, "only acceptance bit advanced");
+    }
+
+    function testRotationActualExtensionPinsViewsAndOwnerCallerBoundaries() public {
+        _all();
+        StreamArtistIdentityAuthority identity = StreamArtistIdentityAuthority(suite.owners[2]);
+        address writer = identity.identityWriterExtension();
+        require(writer == avm.computeCreateAddress(address(identity), 1), "Identity child CREATE");
+        require(
+            ingress.registryWriterExtension() == avm.computeCreateAddress(address(ingress), 1),
+            "facade writer CREATE"
+        );
+        require(
+            ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2),
+            "facade reader CREATE"
+        );
+        require(
+            address(identity).code.length <= 24576 && writer.code.length <= 24576
+                && address(ingress).code.length <= 24576,
+            "production runtimes"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistIdentityWriterExtension.ExtensionWrongHost.selector, writer
+            )
+        );
+        StreamArtistIdentityWriterExtension(writer).ownerStateSnapshotV2();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistIdentityWriterExtension.ExtensionWrongHost.selector, writer
+            )
+        );
+        StreamArtistIdentityWriterExtension(writer).replayCell(bytes32(0));
+        T.ActionContext memory context =
+            T.ActionContext(18, address(artist), identity.ownerStateSnapshotV2());
+        T.Authorization memory a = T.Authorization(nextNonce, uint64(block.timestamp), "");
+        T.PayoutDesignation memory p = T.PayoutDesignation(artistId, address(123), bytes32(0));
+        T.SignerApproval memory proof;
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        identity.consumePayout(context, p, a, proof);
+        address registryWriter = ingress.registryWriterExtension();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistRegistryWriterExtension.ExtensionWrongHost.selector, registryWriter
+            )
+        );
+        StreamArtistRegistryWriterExtension(registryWriter).recordPayoutDesignation(p, a);
+        address reader = ingress.registryReadExtension();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistRegistryReadExtension.ExtensionWrongHost.selector, address(this)
+            )
+        );
+        StreamArtistRegistryReadExtension(reader).identityRecordBytes(artistId);
+    }
+
+    function testRotationDelayedDirectGuardianSafePreservesSubmittedSentinelAndExactEvent() public {
+        R.GuardianSet memory p = R.GuardianSet(artistId, new address[](1), 1, 9 days);
+        p.guardians[0] = address(artist);
+        T.Authorization memory submitted = T.Authorization(0, 0, "");
+        bytes memory data = abi.encodeCall(IStreamArtistRotation.setArtistGuardians, (p, submitted));
+        vm.warp(1042);
+        vm.recordLogs();
+        require(executeSafe(artist, keys, address(ingress), 0, data, 0), "delayed guardian Safe");
+        (,,, bytes32 record) = ingress.guardianSet(artistId);
+        R.GuardianSet memory archivedTerms;
+        T.SignerApproval memory proof;
+        T.Authorization memory effective;
+        R.GuardianRecord memory archivedRecord;
+        (archivedTerms, submitted, proof, effective, archivedRecord) = abi.decode(
+            _operationPayload(28, address(artist), record),
+            (R.GuardianSet, T.Authorization, T.SignerApproval, T.Authorization, R.GuardianRecord)
+        );
+        require(
+            submitted.time == 0 && effective.time == 1042 && proof.direct,
+            "original sentinel and effective time distinct"
+        );
+        bytes32 domain = keccak256(
+            abi.encode(
+                keccak256(
+                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+                ),
+                keccak256("6529StreamArtistRegistry"),
+                keccak256("1"),
+                block.chainid,
+                address(ingress)
+            )
+        );
+        bytes32 message = keccak256(
+            abi.encode(
+                keccak256(
+                    "StreamArtistGuardianSet(bytes32 artistId,address[] guardians,uint32 approvalThreshold,uint64 minContestSeconds,uint256 nonce,uint64 signedAt)"
+                ),
+                artistId,
+                keccak256(abi.encodePacked(p.guardians)),
+                uint32(1),
+                uint64(9 days),
+                uint256(0),
+                uint64(1042)
+            )
+        );
+        require(
+            proof.digest == keccak256(abi.encodePacked(hex"1901", domain, message)),
+            "independent facade domain and permanent fields"
+        );
+        require(
+            record
+                == keccak256(
+                    abi.encode(
+                        bytes32(0xfb979fce9edd361cf23ba8baee900f7054451db7b563ba0ab11a5ef3621cd297),
+                        block.chainid,
+                        address(ingress),
+                        artistId,
+                        p.guardians,
+                        uint32(1),
+                        uint64(9 days),
+                        uint256(0),
+                        uint64(1042)
+                    )
+                ),
+            "canonical guardian record"
+        );
+        require(
+            archivedRecord.recordHash == record
+                && keccak256(abi.encode(archivedTerms)) == keccak256(abi.encode(p)),
+            "retained terms"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 found;
+        bytes32 topic = keccak256(
+            "ArtistGuardianSetUpdated(uint16,bytes32,address[],uint32,uint64,uint8,uint256,uint64,bytes32)"
+        );
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].topics[0] == topic) {
+                require(
+                    logs[i].emitter == suite.owners[2] && logs[i].topics[1] == artistId,
+                    "Identity remains emitter"
+                );
+                (
+                    uint16 schema,
+                    address[] memory members,
+                    uint32 threshold,
+                    uint64 floor,
+                    uint8 class_,
+                    uint256 nonce,
+                    uint64 time,
+                    bytes32 emitted
+                ) = abi.decode(
+                    logs[i].data,
+                    (uint16, address[], uint32, uint64, uint8, uint256, uint64, bytes32)
+                );
+                require(
+                    schema == 1 && members[0] == address(artist) && threshold == 1
+                        && floor == 9 days && class_ == 1 && nonce == 0 && time == 1042
+                        && emitted == record,
+                    "exact guardian event"
+                );
+                ++found;
+            }
+        }
+        require(found == 1, "one normative event");
+    }
+
+    function testRotationWindowConfigurationUsesExactExecutorAndKeepsCapturedValues() public {
+        _newRotationSafe(9101);
+        bytes32 transition = _stageRotation(bytes32(0));
+        R.RotationRecord memory captured = ingress.rotationRecord(transition);
+        bytes32 parameter = keccak256("ARTIST_ROTATION_CONTEST_SECONDS");
+        bytes32 roots = _roots();
+        T.Identity memory identityBefore =
+            IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        authority.configureWindow(ingress, parameter, 10 days, 1, 0, false);
+        (uint64 value, uint64 floor, uint64 revision) = ingress.artistWindowInfo(parameter);
+        require(
+            value == 10 days && floor == 72 hours && revision == 2, "actual seconds configuration"
+        );
+        require(
+            _roots() == roots
+                && IStreamArtistIdentityOwner(suite.owners[2])
+                    .identity(artistId)
+                    .lastAuthorityActionAt == identityBefore.lastAuthorityActionAt,
+            "separate config revision no artist liveness/history"
+        );
+        require(
+            ingress.artistWindowScope(parameter)
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ARTIST_WINDOW_SCOPE_V1"),
+                        block.chainid,
+                        suite.owners[2],
+                        parameter
+                    )
+                ),
+            "scope is Identity host"
+        );
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindow.selector, parameter));
+        authority.configureWindow(ingress, parameter, 11 days, 1, 0, false);
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindowContext.selector));
+        authority.configureWindow(ingress, parameter, 9 days, 2, 0, false);
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindowContext.selector));
+        authority.configureWindow(ingress, parameter, 11 days, 2, 1, true);
+        authority.configureWindow(ingress, parameter, 9 days, 2, 1, false);
+        vm.warp(captured.transition.contestEndsAt);
+        ingress.executeArtistRotation(artistId, transition);
+        R.RotationRecord memory executed = ingress.rotationRecord(transition);
+        require(
+            executed.timingRevision == 1 && executed.effectiveWindow == 7 days
+                && executed.standingTail == 90 days
+                && executed.transition.postWindowEndsAt == block.timestamp + 7 days,
+            "captured parameters never changed"
+        );
+    }
+
+    function testRotationWindowRejectsSafeOwnerFallbackNoopFloorAndOverflow() public {
+        bytes32 parameter = keccak256("ARTIST_ROTATION_CONTEST_SECONDS");
+        ArtistUnitGovernance authority = ArtistUnitGovernance(manager.governanceAuthority());
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        ingress.setArtistWindow(parameter, 8 days, 1);
+        bytes memory data = abi.encodeCall(
+            IStreamArtistWindows.setArtistWindow, (parameter, uint64(8 days), uint64(1))
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeArtistSafe(data);
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindow.selector, parameter));
+        authority.configureWindow(ingress, parameter, 7 days, 1, 1, false);
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindow.selector, parameter));
+        authority.configureWindow(ingress, parameter, 71 hours, 1, 1, false);
+        vm.expectRevert(abi.encodeWithSelector(R.InvalidArtistWindow.selector, parameter));
+        authority.configureWindow(ingress, parameter, type(uint64).max, 1, 1, false);
+        (uint64 value,, uint64 revision) = ingress.artistWindowInfo(parameter);
+        require(value == 7 days && revision == 1, "all config failures rollback");
+    }
+
+    function _rotationContestMaturityCase(uint256 boundary) private {
+        rotationContestFixture = true;
+        setUp();
+        _all();
+        bytes32 priorIdentity = ingress.operativeIdentityRecord(artistId);
+        (address priorPayout, bytes32 priorDesignation) = ingress.artistPayoutAccount(artistId);
+        bytes32 priorGuardians = _guardianRecord(new address[](0), 0, 0, nextNonce);
+        _newRotationSafe(9200 + boundary);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        _adoptRotatedSafe();
+        uint64 end = ingress.rotationRecord(transition).transition.postWindowEndsAt;
+        bytes memory document = bytes("provisional contested document");
+        StreamArtistIdentityRevisionTypes.Revision memory p =
+            StreamArtistIdentityRevisionTypes.Revision(
+                artistId, priorIdentity, keccak256(document), "urn:contested"
+            );
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.identityRevisionDigest(p, a));
+        bytes32 revisionRecord = ingress.recordIdentityRevision(p, a, document, "Provisional");
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(artistId, address(artist), priorDesignation);
+        a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(payout, a));
+        bytes32 payoutRecord = ingress.recordPayoutDesignation(payout, a);
+        address[] memory members = new address[](1);
+        members[0] = address(artist);
+        bytes32 guardianRecord = _guardianRecord(members, 1, 0, nextNonce);
+        vm.warp(uint256(end) + boundary - 1);
+        ArtistRotationContestHarness(suite.owners[2]).simulateExecutedTransitionContest(transition);
+        vm.warp(uint256(end) + 2);
+        bool mature = boundary != 0;
+        require(
+            ingress.operativeIdentityRecord(artistId)
+                == (mature ? keccak256(document) : priorIdentity),
+            "contest identity maturity boundary"
+        );
+        (address actualPayout,) = ingress.artistPayoutAccount(artistId);
+        (,,, bytes32 actualGuardians) = ingress.guardianSet(artistId);
+        require(actualPayout == (mature ? address(artist) : priorPayout), "contest payout boundary");
+        require(
+            actualGuardians == (mature ? guardianRecord : priorGuardians),
+            "contest guardian boundary"
+        );
+        require(
+            ingress.identityRevisionRecord(revisionRecord).recordHash == revisionRecord
+                && IStreamArtistPayoutOwner(suite.owners[5])
+                    .designationRecord(payoutRecord)
+                    .artistId == artistId,
+            "provisional history never erased"
+        );
+        require(
+            _closed(_mintCall())
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "maturity never clears actual contested status"
+        );
+    }
+
+    function testRotationQualifiedCompromiseBeforeExpiryPreventsAllCandidateMaturity() public {
+        _rotationContestMaturityCase(0);
+    }
+
+    function testRotationQualifiedCompromiseAtExpiryDoesNotRewindMatureFacts() public {
+        _rotationContestMaturityCase(1);
+    }
+
+    function testRotationQualifiedCompromiseAfterExpiryDoesNotRewindMatureFacts() public {
+        _rotationContestMaturityCase(2);
+    }
+
+    function testRotationGuardianMaximumNonceAndProvisionalForkProtection() public {
+        _payout();
+        bytes32 priorGuardian = _guardianRecord(new address[](0), 0, 0, 100);
+        _newRotationSafe(9301);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        _adoptRotatedSafe();
+        address[] memory members = new address[](1);
+        members[0] = address(artist);
+        bytes32 lowRecord = _guardianRecord(members, 1, 0, nextNonce);
+        (,,, bytes32 actual) = ingress.guardianSet(artistId);
+        require(
+            actual == priorGuardian && ingress.guardianSetRecord(lowRecord).nonce < 100,
+            "lower nonce never replaces stable guardian"
+        );
+        (address oldPayout, bytes32 priorDesignation) = ingress.artistPayoutAccount(artistId);
+        T.PayoutDesignation memory payout =
+            T.PayoutDesignation(artistId, address(artist), priorDesignation);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(payout, a));
+        bytes32 record = ingress.recordPayoutDesignation(payout, a);
+        payout.payoutAccount = address(0xCAFE);
+        a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(payout, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(R.ProvisionalChainOccupied.selector, record));
+        ingress.recordPayoutDesignation(payout, a);
+        require(_roots() == roots, "fork nonce and payout rollback");
+        (address currentPayout,) = ingress.artistPayoutAccount(artistId);
+        require(currentPayout == oldPayout, "previous payout remains operative");
+        vm.warp(ingress.rotationRecord(transition).transition.postWindowEndsAt);
+        (,,, actual) = ingress.guardianSet(artistId);
+        require(actual == priorGuardian, "highest stable nonce wins after maturity");
+    }
+
+    function testRotationRetiredGrantorKeepsRevocationWithoutCurrentLiveness() public {
+        _accept();
+        _payout();
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, uint64(1000 + 40 days), 0));
+        OfficialSafe grantor = artist;
+        uint256[] memory grantorKeys = keys;
+        _newRotationSafe(9302);
+        bytes32 transition = _stageRotation(bytes32(0));
+        _executeTimedRotation(transition);
+        _adoptRotatedSafe();
+        T.Identity memory before_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        D.Revocation memory p = D.Revocation(
+            artistId, address(delegateSafe), grant, keccak256("retired grantor revoke")
+        );
+        T.Authorization memory a =
+            T.Authorization(before_.nonceHint, uint64(block.timestamp + 1 days), "");
+        vm.warp(block.timestamp + 1);
+        require(
+            executeSafe(
+                grantor,
+                grantorKeys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistDelegation.revokeArtistDelegation, (p, a)),
+                0
+            ),
+            "actual retired grantor Safe revoke"
+        );
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            ingress.delegationRecord(grant).revoked && after_.authorityAddress == address(artist)
+                && after_.lastAuthorityActionAt == before_.lastAuthorityActionAt,
+            "only grant revocation authority retained"
+        );
+    }
+
+    function testRotationPersistentNewSideReplayAcrossReturnToEarlierSafe() public {
+        OfficialSafe first = artist;
+        uint256[] memory firstKeys = keys;
+        _newRotationSafe(9401);
+        OfficialSafe second = rotationSafe;
+        uint256[] memory secondKeys = rotationKeys;
+        bytes32 firstTransition = _stageRotation(bytes32(0));
+        _executeTimedRotation(firstTransition);
+        _adoptRotatedSafe();
+        vm.warp(ingress.rotationRecord(firstTransition).transition.postWindowEndsAt);
+        rotationSafe = first;
+        rotationKeys = firstKeys;
+        bytes32 secondTransition = _stageRotation(firstTransition);
+        _executeTimedRotation(secondTransition);
+        _adoptRotatedSafe();
+        vm.warp(ingress.rotationRecord(secondTransition).transition.postWindowEndsAt);
+        rotationSafe = second;
+        rotationKeys = secondKeys;
+        (bool used, uint256 hint) =
+            ingress.rotationAcceptanceNonceState(artistId, address(second), 0);
+        require(used && hint == 1, "return to address keeps acceptance index");
+        R.Rotation memory p = _rotationTerms(secondTransition);
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        newA.nonce = 0;
+        newA.signature = safeThresholdSignature(
+            secondKeys,
+            safeMessageDigest(second, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+        bytes32 replayKey = _identityRevisionReplayKey(
+            keccak256("identity_authority.replay.nonce_allocator"),
+            keccak256(
+                abi.encode(keccak256("rotation_acceptance"), artistId, address(second), uint256(0))
+            )
+        );
+        bytes32 roots = _roots();
+        vm.expectRevert(abi.encodeWithSelector(T.Replay.selector, replayKey));
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, oldA.nonce),
+            "new-side replay rolls back old side"
+        );
+        newA.nonce = hint;
+        newA.signature = safeThresholdSignature(
+            secondKeys,
+            safeMessageDigest(second, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+        bytes32 third = ingress.rotateArtistAddress(p, oldA, newA);
+        require(
+            third != firstTransition && ingress.rotationRecord(third).newNonce == 1,
+            "fresh lane nonce stages"
+        );
+    }
+
+    function testRotationBothActualSafeThresholdsWrongDomainAndExpiredSideRollback() public {
+        _newRotationSafe(9402);
+        R.Rotation memory p = _rotationTerms(bytes32(0));
+        (T.Authorization memory oldA, T.Authorization memory newA) = _rotationAuthorizations(p);
+        bytes memory correct = newA.signature;
+        uint256[] memory oneKey = new uint256[](1);
+        oneKey[0] = rotationKeys[0];
+        newA.signature = safeThresholdSignature(
+            oneKey,
+            safeMessageDigest(rotationSafe, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+        bytes32 roots = _roots();
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(_roots() == roots, "missing new Safe threshold");
+        newA.signature = safeThresholdSignature(
+            rotationKeys,
+            safeMessageDigest(artist, abi.encode(ingress.rotationAcceptanceDigest(p, newA)))
+        );
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(_roots() == roots, "wrong actual Safe domain");
+        newA.signature = correct;
+        oldA.signature = safeThresholdSignature(
+            oneKey, safeMessageDigest(artist, abi.encode(ingress.rotationDigest(p, oldA)))
+        );
+        avm.expectRevert(T.InvalidSignature.selector);
+        ingress.rotateArtistAddress(p, oldA, newA);
+        oldA.signature = _signature(ingress.rotationDigest(p, oldA));
+        vm.warp(uint256(newA.time) + 1);
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, oldA.time));
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(_roots() == roots, "expired before either replay lane");
+        oldA.time = uint64(block.timestamp + 1 days);
+        oldA.signature = _signature(ingress.rotationDigest(p, oldA));
+        vm.expectRevert(abi.encodeWithSelector(T.ExpiredAuthorization.selector, newA.time));
+        ingress.rotateArtistAddress(p, oldA, newA);
+        require(_roots() == roots, "live old side cannot waive expired new-side acceptance");
+    }
+
     function setUp() public {
         nextNonce = 0;
         directArtistCalls = false;
@@ -4277,15 +5572,27 @@ contract StreamArtistOnboardingTest is CharacterizationTestBase, OfficialSafeFix
                 suite.mintManager
             )
         );
-        suite.owners[2] = address(
-            new StreamArtistIdentityAuthority(
-                predictedRegistry,
-                predictedCoordinator,
-                predictedArchive,
-                suite.core,
-                suite.mintManager
-            )
-        );
+        if (rotationContestFixture) {
+            suite.owners[2] = address(
+                new ArtistRotationContestHarness(
+                    predictedRegistry,
+                    predictedCoordinator,
+                    predictedArchive,
+                    suite.core,
+                    suite.mintManager
+                )
+            );
+        } else {
+            suite.owners[2] = address(
+                new StreamArtistIdentityAuthority(
+                    predictedRegistry,
+                    predictedCoordinator,
+                    predictedArchive,
+                    suite.core,
+                    suite.mintManager
+                )
+            );
+        }
         suite.owners[3] = address(
             new StreamArtistAcceptanceLifecycle(
                 predictedRegistry,
