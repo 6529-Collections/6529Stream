@@ -1,0 +1,217 @@
+ions/used_specific_objectProp"
+                },
+                "influenced_by": {
+                    "$ref": "#/definitions/influenced_byProp"
+                },
+                "technique": {
+                    "$ref": "#/definitions/techniqueProp"
+                },
+                "part_of": {
+                    "$ref": "#/definitions/EventRefOrActivityRef"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "AttributeAssignment": {
+            "title": "crm:E13_Attribute_Assignment",
+            "description": "An activity which involves the assignment of some value to some entity, often with an explicit relationship between value and entity",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "AttributeAssignment"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "took_place_at": {
+                    "$ref": "#/definitions/took_place_atProp"
+                },
+                "timespan": {
+                    "$ref": "#/definitions/timespanProp"
+                },
+                "caused_by": {
+                    "$ref": "#/definitions/caused_byProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/definitions/carried_out_byProp"
+                },
+                "used_specific_object": {
+                    "$ref": "#/definitions/used_specific_objectProp"
+                },
+                "influenced_by": {
+                    "$ref": "#/definitions/influenced_byProp"
+                },
+                "technique": {
+                    "$ref": "#/definitions/techniqueProp"
+                },
+                "part_of": {
+                    "$ref": "#/definitions/EventRefOrActivityRef"
+                },
+                "assigned": {
+                    "title": "*",
+                    "description": "Attribute Assignments can assign any entity, structure or value"
+                },
+                "assigned_property": {
+                    "title": "crm:P177_assigned_property_type",
+                    "description": "The relationship from the attributed entity to the assigned entity, given as a string which resolves to a relationship in the context definition",
+                    "type": "string"
+
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "RelationshipAssignment": {
+            "title": "crm:E13_Attribute_Assignment",
+            "description": "An activity which relates two entities together, optionally with a specific relationship",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "AttributeAssignment"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "timespan": {
+                    "$ref": "#/definitions/timespanProp"
+                },
+                "carried_out_by": {
+                    "$ref": "#/definitions/carried_out_byProp"
+                },
+                "assigned": {
+                    "title": "*",
+                    "description": "Attribute Assignments can assign any entity or structure",
+                    "type": "array",
+                    "items": { "$ref": "#/definitions/AnyRef"}
+                },
+                "assigned_property": {
+                    "title": "crm:P177_assigned_property_type",
+                    "description": "The relationship from the attributed entity to the assigned entity, given as a string which resolves to a relationship in the context definition",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type",
+                "assigned"
+            ],
+            "additionalProperties": false
+        },
+
+        "DigitalService": {
+            "title": "la:DigitalService",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalService"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "access_point": {
+                    "$ref": "#/definitions/access_pointProp"
+                },
+                "conforms_to": {
+                    "$ref": "#/definitions/conforms_toProp"                    
+                }
+            }
+        },
+
+        "DigitalObjectEmbed": {
+            "title": "dig:D1_Digital_Object",
+            "description": "An embedded Digital Object, such as a home page reference",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "access_point": {
+                    "$ref": "#/definitions/access_pointProp"
+                },
+                "format": {
+                    "$ref": "#/definitions/formatProp"
+                },
+                "conforms_

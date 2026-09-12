@@ -1,0 +1,245 @@
+"*",
+            "description": "Reference to another primary entity\nSee: [API](https://linked.art/api/1.0/shared/reference/) | [Model]()",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "Title": "Specific",
+                            "type": "string",
+                            "enum": [
+                                "HumanMadeObject",
+                                "Person",
+                                "Group",
+                                "VisualItem",
+                                "LinguisticObject",
+                                "Set",
+                                "Place",
+                                "DigitalObject",
+                                "Type",
+                                "Event",
+                                "Activity",
+                                "Period"
+                            ]
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "PlaceRef": {
+            "title": "crm:E53_Place",
+            "description": "Reference to a `Place` entity\nSee: [Schema](place.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Place"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "PersonRef": {
+            "title": "E21_Person",
+            "description": "Reference to a `Person`\nSee: [Schema](person.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Person"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "GroupRef": {
+            "title": "crm:E74_Group",
+            "description": "Reference to a `Group`\nSee: [Schema](group.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "Group"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "HumanMadeObjectRef": {
+            "title": "crm:E22_Human-Made_Object",
+            "description": "Reference to a `HumanMadeObject`\nSee: [Schema](object.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "HumanMadeObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "DigitalObjectRef": {
+            "title": "dig:D1_Digital_Object\nSee: [Schema](digital.html)",
+            "description": "Reference to a `DigitalObject`",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "DigitalObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "LinguisticObjectRef": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "Reference to a `LinguisticObject`\nSee: [Schema](text.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "SetRef": {
+            "title": "la:Set",
+            "description": "Reference to a `Set`\nSee: [Schema](set.html)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Set"
+          

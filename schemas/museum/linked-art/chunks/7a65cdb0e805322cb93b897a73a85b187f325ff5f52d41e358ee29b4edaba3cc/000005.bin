@@ -1,0 +1,250 @@
+to": {
+                    "$ref": "#/definitions/conforms_toProp"                    
+                }                                
+            }
+        },
+
+        "VisualItemEmbed": {
+            "title": "crm:E36_Visual_Item",
+            "description": "An embedded Visual Item, such as the content of a digital image",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "VisualItem"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "digitally_shown_by": {
+                    "$ref": "#/definitions/digitally_shown_byProp"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false  
+        },
+
+        "LinguisticObjectEmbed": {
+            "title": "crm:E33_Linguistic_Object",
+            "description": "An embedded Linguistic Object, such as the content of a web page",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "title": "Specific",
+                            "type": "string",
+                            "const": "LinguisticObject"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                },
+                "identified_by": {
+                    "$ref": "#/definitions/identified_byProp"
+                },
+                "classified_as": {
+                    "$ref": "#/definitions/classified_asProp"
+                },
+                "referred_to_by": {
+                    "$ref": "#/definitions/referred_to_byProp"
+                },
+                "language": {
+                    "$ref": "#/definitions/languageProp"
+                },
+                "digitally_carried_by": {
+                    "$ref": "#/definitions/digitally_carried_byProp"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false            
+        },
+
+        "HumanMadeObjectPart": {
+            "title": "crm:E22_Human-Made_Object",
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "HumanMadeObject"
+                },
+                "_label": {
+                    "type": "string"
+                },
+                "identified_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/NameOrIdentifier"
+                    }
+                },
+                "classified_as": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Concept"
+                    }
+                },
+                "referred_to_by": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LingObjOrStatement"
+                    }
+                },
+                "dimension": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Dimension"
+                    }
+                },
+                "made_of": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MaterialRef"
+                    }
+                },
+                "part": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/HumanMadeObjectPart"
+                    }
+                },
+                "shows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/VisualItemRef"
+                    }
+                },
+                "carries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/LinguisticObjectRef"
+                    }
+                },
+                "representation": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/VisualItemRef"
+                    }
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "NameOrIdentifier": {
+            "description": "A Name or an Identifier",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/Name"
+                },
+                {
+                    "$ref": "#/definitions/Identifier"
+                }
+            ]
+        },
+        "LingObjOrStatement": {
+            "description": "A Linguistic Object Reference or Statement",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/Statement"
+                },
+                {
+                    "$ref": "#/definitions/LinguisticObjectRef"
+                }
+            ]
+        },
+        "LingObjOrDigitalObjOrStatement": {
+            "description": "A Linguistic Object Reference, Digitial Object Reference or Statement",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/Statement"
+                },
+                {
+                    "$ref": "#/definitions/DigitalObjectRef"
+                },
+                {
+                    "$ref": "#/definitions/LinguisticObjectRef"
+                }
+            ]
+        },
+        "PersonRefOrGroupRef": {
+            "description": "A Reference to a Person or Group",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/PersonRef"
+                },
+                {
+                    "$ref": "#/definitions/GroupRef"
+                }
+            ]
+        },
+        "EventRefOrActivityRef": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/EventRef"
+                },
+                {
+                    "$ref": "#/definitions/ActivityRef"
+                }
+            ]
+        },
+        "HumanMadeObjectRefOrSetRef": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/HumanMadeObjectRef"
+                },
+                {
+                    "$ref": "#/definitions/SetRef"
+                }
+            ]
+        },
+        "ContextStringOrArray": {
+            "title": "JSON-LD Context",
+            "description": "Either an array of contexts, or a string containing the Linked Art context URI",
+            "anyOf": [
+                {
+                    "title": "Linked Art",
+                    "type": "string",
+                    "const": "https://linked.art/ns/v1/linked-art.json"
+                },
+                {
+                    "title": "Linked Art with Extensions",
+                    "type": "array",
+                    "items": [
+                        {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    ]
+                }
+            ]
+        },
+        "AnyRef": {
+            "title": 

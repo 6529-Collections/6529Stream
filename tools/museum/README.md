@@ -1,14 +1,36 @@
 # Museum offline tooling
 
-Run from the repository root with Python 3.11 or later. Dependencies are pinned
-in `requirements.txt`; the development host already provides those versions.
+Run from the repository root with Python 3.11 or later. Create an isolated
+environment and install the Museum dependency set; the repository's general
+tools lock alone does not include `rfc8785` or the JSON-LD processor. The full
+set, including transitive dependencies and explicit URI/date-time validators,
+is pinned in `requirements-jsonld.txt` (which includes `requirements.txt`).
+
+On Windows PowerShell, no activation or execution-policy change is needed:
+
+```powershell
+python -m venv .venv-tools/museum
+.\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art -v
+```
+
+On Linux or macOS:
+
+```sh
+python3 -m venv .venv-tools/museum
+.venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art -v
+```
+
+Use that environment's Python for the following commands. Dependency installation
+needs package-index access; verification itself uses only retained local bytes.
 
 ```text
 python -m tools.museum.schemas --check
 python -m tools.museum.fixtures --check
-python -m unittest tools.museum.test_foundation tools.museum.test_publication -v
 python -m tools.museum export-fixture --schema schemas/museum/fixtures/source.schema.json --source schemas/museum/fixtures/photograph.json --output <empty-output-directory>
 python -m tools.museum verify-fixture <output-directory>
+python -m tools.museum.linked_art schemas/museum/linked-art/examples/digital.json --policy-hash 0xb0fa483a5e25eda775095980c7b677c252568774b3d6b8944c6294cff3a1f54e
 ```
 
 `schemas` and `fixtures` regenerate their deterministic files when `--check` is
@@ -56,10 +78,28 @@ The dependency reader checks exact SHA-256 transport fixity, provenance,
 deterministic 8,192-byte chunks, complete encoded candidate-carrier size,
 acyclic bounded dependency edges, and local paths. Protocol `HashRef` numeric
 algorithm/canonicalization catalog resolution remains a separate registration
-and recorded-source obligation. The current capture is the exact published
-Linked Art context, equal to its pinned upstream Git blob. It is only the
-context closure; the complete CRM/Linked Art ontology, validation, crosswalk and
-classification closure is still required before profile registration.
+and recorded-source obligation. Captures include the exact published Linked Art
+context, three vocabulary documents and thirteen original Linked Art schemas.
+Their pinned interpretation policies remain candidates. Complete selected-term,
+crosswalk and classification closure is still required before profile registration.
+
+`PinnedLinkedArt` performs actual offline expansion using PyLD 3.3.0, with a fresh
+context cache for each operation and explicit URI/date-time validators. It first
+checks shape using a pinned derived interpretation of the upstream schemas.
+One legacy `items` syntax repair and two exact rights-reference repairs are documented in
+[the validation boundary](../../docs/museum-linked-art-validation.md); original
+schema bytes remain untouched. Shape and expansion do not establish source
+authority or complete model semantics. The vocabulary checker separately tests
+explicit class/domain/range relations under
+[its pinned interpretation](../../docs/museum-vocabulary-interpretation.md).
+These checks are exercised by focused tests; `export-fixture` still emits the
+source/coverage diagnostic package, not a complete Linked Art museum export.
+The `linked_art` command prints expanded data, original/derived hashes and an
+explicit candidate/unregistered report. Its policy hash is a required caller
+pin; changing the versioned interpretation requires changing that pin as well.
+Every retained derived-schema reference must resolve locally at construction,
+including unused definitions. The exact format profile rejects trailing
+whitespace and does not support leap seconds; it never trims original values.
 
 `python -m tools.museum.publication <local-file> --name <exact-versioned-name>
 --kind DEPENDENCY --canonicalization-id <exact-definition-id>` prints prospective
@@ -70,12 +110,3 @@ original bytes and whole-document hashes, including the 434,213-byte CRM
 document's 54-chunk shape. It never uploads or registers, and does not establish
 the referenced canonicalization definition's actual admission or correctness.
 Permissionless chunk upload alone would not establish registered inventory.
-
-The first cohort failed because the inventory rejected scalar `enum`/`const`
-schemas used by the fixture source. After that correction, independent review
-of the preserved 24-test checkpoint found omitted selector fields, review reuse
-across identical-byte revisions and identity selection depending on arrival order.
-The follow-up binds full selectors/revisions, admits declaration agents and
-rejects ambiguous reuse. It also rejects nonfinite/invalid Unicode/deep JSON-LD
-while preserving legitimate context numbers. No earlier result is represented as
-full museum conformance. Original fixture scenario meanings remain unchanged.

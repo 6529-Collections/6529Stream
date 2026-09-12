@@ -1,0 +1,54 @@
+e": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "const": "Type"
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "AnyTypeRef": {
+            "title": "crm:E55_Type, or subclass",
+            "description": "Reference to a Type or any subclass (Language, Material, Currency, MeasurementUnit)",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/definitions/idProp"
+                },
+                "type": {
+                    "allOf": [
+                        {
+                            "title": "General",
+                            "$ref": "#/definitions/typeProp"
+                        },
+                        {
+                            "type": "string",
+                            "enum": ["Type", "Language", "Material", "Currency", "MeasurementUnit"]
+                        }
+                    ]
+                },
+                "_label": {
+                    "$ref": "#/definitions/labelProp"
+                }
+            },
+            "required": [
+                "id",
+                "type"
+            ],
+            "additionalProperties": false            
+        }
+    }        
+}
