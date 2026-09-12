@@ -20,6 +20,33 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+Signed artist sanctions and canonical finality admission are integrated as
+`50bd3935`, followed by the separate historical-test migration `cb332bc7`.
+Independent review binds all 293 artist test names: 292 passing original cases
+plus one corrected configuration-hash oracle against unchanged production.
+The correction adds the actual finality/provider runtime pins and operation 12
+to the expected configuration. The separate migration passes 101 cases in both
+compiler modes: 79 preserved historical lifecycle cases and 22 current read or
+retirement checks. The old local-clock lifecycle is explicitly historical;
+current preview replacement and archive-proof finalization remain required.
+All reviewed production products fit, with prior artist ABI and storage
+compatibility retained. Root-owned current fixtures and deployment constructors
+still need migration before whole-stack acceptance.
+
+The [content leaf manifest verifier](../docs/integrations/content-leaf-manifests.md)
+passes 13 focused cases and two 256-input fuzz properties in both compiler modes.
+It compares every field with the actual checkpoint and reads complete preserved
+manifest bytes through the actual artifact aggregator and document store.
+Final admission rechecks membership and current archival coverage while retaining
+the original completion identity. Actual Safe 1.4.1 exercises both writes and
+all public reads; immutable gas mutation rejects a Safe caller. Archival receipt,
+schema, Core/router and finality boundaries remain explicit in this fixture.
+Independent review accepts the bounded verifier and exact compiler artifacts.
+Authoritative root publication needs the
+Router's exact artist-content consent path and registered interpretation
+documents. The existing 64-chunk artifact limit allows 2,729 leaves here;
+larger composed manifests remain required, with no new collection supply cap.
+
 Stable router presentation is integrated as `f445ac79` from the independently
 reviewed `89dc713d` handoff. Its retained 40-case rendering cohort, two actual
 current-contract Safe cases and exact-context cold-rendering check pass. The
@@ -28,8 +55,9 @@ for that captured source, before the subsequent Base64 repair.
 
 The artist owner/acceptance stack repair is integrated as `1e3087a2`, retaining
 exact commitment preimages, event arguments and the prior ABI/storage. The
-complete compilation result remains open. Latest remote CI at `90c8fdcf` is
-red; its source predates this repair. Independent execution probes also reject
+complete compilation result remains open. Latest observed CI at `4c7cc4b6`
+has passing client/wrapper jobs, running current/smoke compilation and failing
+release-artifact/Slither jobs. Independent execution probes also reject
 the deployment script's self-view calls under default Foundry protection.
 Moving a self-call outside broadcast did not solve that issue. A compatible
 planning boundary was therefore extracted into a stateless local helper. Six
@@ -78,7 +106,8 @@ The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
 previous 132 tests and both public output versions, joins exact source fields
 to the pinned PREMIS 3 schema, and distinguishes asserted fixity from a fresh
 check of actual file bytes. Full PREMIS and the other formats remain in scope.
-The preceding 132-test version passes Windows/Linux CI at `d8f0eef2`.
+The 149-test version and all six generators pass Windows/Linux CI at `4c7cc4b6`
+([run 34708017861](https://github.com/6529-Collections/6529Stream/actions/runs/34708017861)).
 
 The dedicated [independent-attestor host](../docs/integrations/independent-attestations.md)
 is integrated as `4673f248` from `4c277b0e`. Its 22 reviewed cases and 256 fuzz

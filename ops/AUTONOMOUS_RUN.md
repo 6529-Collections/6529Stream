@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Complete inline content computation/composition `d8f0eef2`, museum PREMIS149 `9f6afe60`, artist compiler repair `1e3087a2` and Base64 repair `164f867b` are integrated. Actual typed finality and full deployment-script acceptance remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Signed sanction/finality admission `50bd3935` and separate historical migration `cb332bc7` are integrated. Complete leaf-list verification passes independent review. Actual authoritative finality composition and full deployment-script acceptance remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -22,13 +22,31 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 
 ## Active work
 
+Signed sanctions and canonical finality admission are integrated as `50bd3935`,
+with the separate historical migration `cb332bc7`. Independent review accepts
+the exact 293-name pass union (292 original plus one corrected test oracle),
+all production sizes and prior artist ABI/storage bridges. The separate 101-case
+migration retains 79 historical tests and 22 current read/retirement cases.
+Full archive-proof finalization, operation 13 confirmation, current preview and
+root-owned deployment/current constructor migration remain open.
+
+The integrator's complete leaf-list manifest verifier passes 13 cases and two
+256-input fuzz properties in both compiler modes, including actual checkpoint,
+document store, artifact aggregator and Safe calls. Independent review binds
+the exact source and compiler artifacts. It establishes preserved manifest
+contents; authoritative root adoption
+still needs artist consent and governed interpretation registration. Larger
+manifests beyond the existing 64-chunk artifact bound remain required. The
+reviewer's small explicit-library artifact CREATE probe passes default Foundry
+protection; the actual deployment/link graph is the next script task.
+
 Exact artist publication authorization is integrated as `a7114aeb`, with the
 complete 271-test artist cohort independently reviewed. Actual registry-to-
 metadata-host publication passes four reviewed cases and is integrated as
 `85f44fbd`; Core and Executor remain explicit unit boundaries. The dedicated
 independent-attestor host is integrated as `4673f248`, with 22 reviewed cases,
-256 fuzz inputs and both production profiles fitting. Artist finality/sanction
-is the artist builder's current task. Stable router presentation is integrated
+256 fuzz inputs and both production profiles fitting. Artist signed-sanction
+admission is integrated in the latest handoff above. Stable router presentation is integrated
 as `f445ac79`; the second builder resumes the remaining museum mappings.
 The integrator's 17-case checkpoint suite and seven actual Core/router cases
 pass, including Safe custody, burns and atomic retry. Inline-image admission
@@ -37,7 +55,8 @@ The corrected Router fits both compiler modes; the retained renderer cohort
 passes 61 IR cases. The typed evidence producer and full finality remain open.
 
 The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
-149 tests and six generators passing again locally. Exact source assertions
+149 tests and six generators passing locally and on Windows/Linux CI at
+`4c7cc4b6` (run 34708017861). Exact source assertions
 remain distinct from actual file-byte verification. The preceding faithful
 abstract/nonvisual projections (`db3c8153`) pass Windows/Linux CI at `d8f0eef2`.
 The builder continues IIIF correspondence; both prior package versions remain exact.
@@ -49,9 +68,10 @@ root authority, ordinary-proposer rejection and multi-call execution. Actual
 artist publication, typed finality and discovery still need composition.
 
 The artist owner/acceptance compiler repair is integrated as `1e3087a2`, with
-exact preimage/event checks and matching owner interfaces/storage. Latest remote
-CI at `90c8fdcf` predates that repair and still fails compilation. Deployment
-planning remains unresolved: the catalog self-view call helps minimal compiler
+exact preimage/event checks and matching owner interfaces/storage. Latest CI at
+`4c7cc4b6` passes client/wrapper jobs; current/smoke compilation is running and
+release-artifact/Slither jobs fail. Complete deployment remains unresolved:
+the catalog self-view call helps minimal compiler
 probes but fails current Foundry execution protection, even outside broadcasting.
 The separate helper now passes six plan/catalog tests with 256 fuzz inputs and
 a real Core/Executor/registry/manifest script rehearsal under default protection.

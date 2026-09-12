@@ -3,8 +3,9 @@
 `StreamOnchainContentCheckpoint` computes and retains a complete collection
 content root from actual Core membership and the metadata router's served
 bytes. Anyone can do the computation, including a Safe. Publishing an
-authoritative root record, preserving its leaf manifest and accepting finality
-are separate operations still being integrated.
+authoritative root record and accepting finality are separate operations still
+being integrated. The [leaf manifest verifier](content-leaf-manifests.md)
+checks complete preserved leaf-list bytes against the checkpoint.
 
 Use the [caller interface](../../smart-contracts/interfaces/stream/finality/IStreamOnchainContentCheckpoint.sol).
 The constructor pins Core, router, token inventory, their runtime hashes and

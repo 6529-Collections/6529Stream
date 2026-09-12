@@ -69,6 +69,9 @@ explicit XML/RDF datatype handling retain one file's size, format and fixity
 assertions, linked to four Linked Art resources and 353 source rows. These are
 assertion-preserving exports, not a new verification of the file's actual bytes.
 Full PREMIS events/agents/rights, IIIF, LIDO and authenticated capture remain.
+The complete 149-test cohort and six generators also pass Windows and Linux CI
+at `4c7cc4b6`
+([run 34708017861](https://github.com/6529-Collections/6529Stream/actions/runs/34708017861)).
 
 The abstract/nonvisual increment is integrated as `db3c8153` with independent
 review. All 132 tests and five generators pass again in the integration

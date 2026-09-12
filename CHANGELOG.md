@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added incremental verification of complete content-leaf manifests against
+  actual checkpoint fields and preserved artifact bytes, with stable archival
+  completion identity, historical reads and Safe calls. Authoritative root
+  publication and larger composed manifests remain in development.
 - Added a pinned PREMIS 3 file-object export linked to the same source assertions
   as Linked Art, with exact datatype, size, format and fixity-field checks.
   The reviewed museum cohort contains 149 tests; this first file profile does
