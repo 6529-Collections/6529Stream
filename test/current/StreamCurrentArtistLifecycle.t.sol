@@ -68,7 +68,7 @@ contract StreamCurrentArtistLifecycleTest is StreamCurrentSafeGovernanceFixture 
     function testCurrentSafeSuccessionRecordsUseObservedNonceAndPreserveReplay() public {
         uint256 nonce = _authorization(true).nonce;
         LifeSuccession.Designation memory p = _successorTerms(address(nextSafe), 2);
-        T.Authorization memory direct = T.Authorization(0, 0, "");
+        T.Authorization memory direct = T.Authorization(nonce, 0, "");
         bytes memory callData = abi.encodeCall(artists.recordSuccessorDesignation, (p, direct));
         this.executeLifecycleSafe(currentSafe, currentKeys, callData);
         bytes32 record = artists.operativeSuccessorRecord(fixtureArtistId);
