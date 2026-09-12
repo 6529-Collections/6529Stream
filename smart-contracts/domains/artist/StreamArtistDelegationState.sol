@@ -92,7 +92,19 @@ library StreamArtistDelegationState {
             old.grantor != address(0) && !old.revoked && block.timestamp < old.grant.expiresAt
                 && (old.grant.maxUses == 0 || old.uses < old.grant.maxUses)
         ) revert D.ConflictingDelegation(prior);
-        record = keccak256(
+        record = _grantRecord(e, p, nonce);
+        if (s.records[record].grantor != address(0)) revert D.InvalidDelegation(record);
+        s.records[record] = D.Record(p, grantor, nonce, 0, false, bytes32(0));
+        s.current[scope] = record;
+        delta = keccak256(abi.encode(scope, prior, record, s.records[record]));
+    }
+
+    function _grantRecord(StreamArtistHashes.Environment memory e, D.Grant memory p, uint256 nonce)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
             abi.encode(
                 keccak256("6529STREAM_ARTIST_DELEGATION_RECORD_V1"),
                 e.chainId,
@@ -108,10 +120,6 @@ library StreamArtistDelegationState {
                 nonce
             )
         );
-        if (s.records[record].grantor != address(0)) revert D.InvalidDelegation(record);
-        s.records[record] = D.Record(p, grantor, nonce, 0, false, bytes32(0));
-        s.current[scope] = record;
-        delta = keccak256(abi.encode(scope, prior, record, s.records[record]));
     }
 
     function revoke(
@@ -186,14 +194,25 @@ library StreamArtistDelegationState {
         ) revert T.InvalidSignature();
         if (a.signature.length > 4096) revert T.BoundExceeded(a.signature.length, 4096);
         replayLane = lane(artistId, proof.signer);
-        if (proof.direct && a.nonce != s.hints[replayLane]) revert T.InvalidRecord();
-        bytes32 availabilityDelta = s.availability[replayLane].consume(a.nonce);
-        if (a.nonce == s.hints[replayLane]) {
+        delta = _consume(s, record, replayLane, a.nonce, proof.direct);
+    }
+
+    function _consume(
+        State storage s,
+        bytes32 record,
+        bytes32 replayLane,
+        uint256 nonce,
+        bool direct
+    ) private returns (bytes32 delta) {
+        if (direct && nonce != s.hints[replayLane]) revert T.InvalidRecord();
+        bytes32 availabilityDelta = s.availability[replayLane].consume(nonce);
+        if (nonce == s.hints[replayLane]) {
             (, s.hints[replayLane]) = s.availability[replayLane].firstUnused();
         }
+        D.Record storage item = s.records[record];
         ++item.uses;
         delta = keccak256(
-            abi.encode(record, item, replayLane, a.nonce, s.hints[replayLane], availabilityDelta)
+            abi.encode(record, item, replayLane, nonce, s.hints[replayLane], availabilityDelta)
         );
     }
 }
