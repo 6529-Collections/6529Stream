@@ -10,6 +10,13 @@ import {
 
 /// @notice Sole owner of acceptance records and acceptance-domain events.
 contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
+    struct CollaboratorEventContext {
+        bytes32 artistId;
+        uint8 authorityClass;
+        uint256 nonce;
+        bytes32 record;
+    }
+
     mapping(bytes32 => bytes32) public acceptanceRecord;
     mapping(bytes32 => uint64) public acceptedAt;
     mapping(bytes32 => bytes32) private _collaboratorRecords;
@@ -189,18 +196,27 @@ contract StreamArtistAcceptanceLifecycle is StreamArtistOwner {
             keccak256(abi.encode(key, record)),
             record
         );
+        _emitCollaboratorAcceptance(
+            p, CollaboratorEventContext(artistId, authorityClass, nonce, record)
+        );
+    }
+
+    function _emitCollaboratorAcceptance(
+        C.BindingAcceptance calldata p,
+        CollaboratorEventContext memory eventContext
+    ) private {
         emit CollaboratorAccepted(
             1,
             p.collectionId,
             p.account,
-            artistId,
+            eventContext.artistId,
             p.generation,
             p.role,
             p.shareLabelId,
-            authorityClass,
-            nonce,
+            eventContext.authorityClass,
+            eventContext.nonce,
             _now(),
-            record,
+            eventContext.record,
             p.bindingHash
         );
     }

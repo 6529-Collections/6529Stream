@@ -8,6 +8,24 @@ import "./StreamArtistHashes.sol";
 /// @dev No owner may call another owner. The coordinator snapshots cross-domain facts
 ///      before mutations. Only typed concrete owner methods can advance this prefix.
 abstract contract StreamArtistOwner is IStreamArtistOwner {
+    /// @dev All fields are static, preserving the original fourteen-word abi.encode preimage.
+    struct StateTransitionPreimage {
+        bytes32 tag;
+        uint256 chainId;
+        address registry;
+        address coordinator;
+        address archive;
+        address owner;
+        bytes32 domain;
+        uint64 previousRevision;
+        uint64 nextRevision;
+        bytes32 previousState;
+        bytes32 action;
+        bytes32 nextState;
+        bytes32 replayDelta;
+        bytes32 recordDelta;
+    }
+
     uint64 internal _revision;
     uint64 internal _recordSequence;
     bytes32 internal _stateRoot;
@@ -142,24 +160,22 @@ abstract contract StreamArtistOwner is IStreamArtistOwner {
     ) internal {
         uint64 nextRevision = _revision + 1;
         bytes32 recordDelta = keccak256(abi.encode(record));
-        _stateRoot = keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2"),
-                deploymentChainId,
-                artistRegistry,
-                operationCoordinator,
-                archiveV2,
-                address(this),
-                domainId,
-                _revision,
-                nextRevision,
-                _stateRoot,
-                keccak256(abi.encode(context.operationId, context.actor, action)),
-                nextState,
-                replayDelta,
-                recordDelta
-            )
-        );
+        StateTransitionPreimage memory preimage;
+        preimage.tag = keccak256("6529STREAM_ARTIST_OWNER_STATE_TRANSITION_V2");
+        preimage.chainId = deploymentChainId;
+        preimage.registry = artistRegistry;
+        preimage.coordinator = operationCoordinator;
+        preimage.archive = archiveV2;
+        preimage.owner = address(this);
+        preimage.domain = domainId;
+        preimage.previousRevision = _revision;
+        preimage.nextRevision = nextRevision;
+        preimage.previousState = _stateRoot;
+        preimage.action = keccak256(abi.encode(context.operationId, context.actor, action));
+        preimage.nextState = nextState;
+        preimage.replayDelta = replayDelta;
+        preimage.recordDelta = recordDelta;
+        _stateRoot = keccak256(abi.encode(preimage));
         if (record != bytes32(0)) {
             uint64 nextSequence = _recordSequence + 1;
             _recordChainTip = keccak256(
