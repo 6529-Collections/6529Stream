@@ -18,6 +18,7 @@ import "../../interfaces/stream/artist/IStreamArtistEconomicsEvidence.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistContentMutationFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistRoyaltyFacts.sol";
+import "../../interfaces/stream/artist/IStreamArtistRoyaltyScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryScopeFacts.sol";
 import "../../interfaces/stream/artist/IStreamArtistPrimaryTemplateFacts.sol";
@@ -214,7 +215,8 @@ contract StreamArtistOnboardingReads {
         primary = T.AssignmentFact(
             _suite.primaryResolver, _suite.primaryRevenueClass, p.scope, p.scopeId, p.assignmentHash
         );
-        royalty = currentRoyaltyAssignment(collectionId);
+        (royalty,) = _rawSelectedCollectionRoyalty(collectionId);
+        if (royalty.assignmentHash == bytes32(0)) revert T.InvalidRecord();
     }
 
     /// @notice Reads royalty independently of primary or mint floors for defensive artist rights.
@@ -255,14 +257,26 @@ contract StreamArtistOnboardingReads {
         T.FixedEconomicsCandidate memory candidate,
         address payout
     ) private view returns (T.AssignmentFact memory fact, bytes32 previousHash) {
-        if (p.resolver == _suite.primaryResolver && p.assignmentHash == bytes32(0)) {
+        if (
+            (p.resolver == _suite.primaryResolver || p.resolver == _suite.royaltyResolver)
+                && p.assignmentHash == bytes32(0)
+        ) {
             if (
-                p.revenueClass != _suite.primaryRevenueClass || candidate.profileHash != bytes32(0)
-                    || candidate.policyHash != bytes32(0) || candidate.royaltyBps != 0
-                    || candidate.frozen
+                p.revenueClass
+                        != (p.resolver == _suite.primaryResolver
+                                ? _suite.primaryRevenueClass
+                                : keccak256("ROYALTY_ERC2981"))
+                    || candidate.profileHash != bytes32(0) || candidate.policyHash != bytes32(0)
+                    || candidate.royaltyBps != 0 || candidate.frozen
             ) revert T.UnsupportedProfile();
-            (fact, previousHash) = IStreamArtistPrimaryScopeFacts(p.resolver)
-                .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);
+            if (p.resolver == _suite.primaryResolver) {
+                (fact, previousHash) = IStreamArtistPrimaryScopeFacts(p.resolver)
+                    .previewArtistPrimaryClear(p.collectionId, p.scope, p.scopeId);
+            } else {
+                _requireSelected(keccak256("ROYALTY_RESOLVER"), p.resolver);
+                (fact, previousHash) = IStreamArtistRoyaltyScopeFacts(p.resolver)
+                    .previewArtistRoyaltyClear(p.collectionId, p.scope, p.scopeId);
+            }
             if (
                 fact.resolver != p.resolver || fact.revenueClass != p.revenueClass
                     || fact.scope != p.scope || fact.scopeId != p.scopeId
@@ -274,11 +288,14 @@ contract StreamArtistOnboardingReads {
             return (fact, previousHash);
         }
         if (
-            candidate.profileHash == bytes32(0) || candidate.policyHash != bytes32(0)
-                || (p.scope != 1 && p.scope != 2) || (p.scope == 1 && p.scopeId != p.collectionId)
+            candidate.policyHash != bytes32(0) || (p.scope != 1 && p.scope != 2)
+                || (p.scope == 1 && p.scopeId != p.collectionId)
         ) revert T.UnsupportedProfile();
         if (p.resolver == _suite.primaryResolver) {
-            if (candidate.royaltyBps != 0 || p.revenueClass != _suite.primaryRevenueClass) {
+            if (
+                candidate.profileHash == bytes32(0) || candidate.royaltyBps != 0
+                    || p.revenueClass != _suite.primaryRevenueClass
+            ) {
                 revert T.UnsupportedProfile();
             }
             fact = IStreamArtistPrimaryScopeFacts(p.resolver)
@@ -292,12 +309,17 @@ contract StreamArtistOnboardingReads {
                 );
         } else if (p.resolver == _suite.royaltyResolver) {
             _requireSelected(keccak256("ROYALTY_RESOLVER"), p.resolver);
-            if (p.revenueClass != keccak256("ROYALTY_ERC2981") || p.scope != 1) {
+            if (p.revenueClass != keccak256("ROYALTY_ERC2981")) {
                 revert T.UnsupportedProfile();
             }
-            fact = IStreamArtistRoyaltyPreview(p.resolver)
-                .previewArtistRoyaltyAssignment(
-                    p.collectionId, candidate.profileHash, candidate.royaltyBps, candidate.frozen
+            fact = IStreamArtistRoyaltyScopeFacts(p.resolver)
+                .previewArtistRoyaltyAssignmentForScope(
+                    p.collectionId,
+                    p.scope,
+                    p.scopeId,
+                    candidate.profileHash,
+                    candidate.royaltyBps,
+                    candidate.frozen
                 );
         } else {
             revert T.UnsupportedProfile();
@@ -308,6 +330,10 @@ contract StreamArtistOnboardingReads {
                 || fact.assignmentHash == bytes32(0) || fact.assignmentHash != p.assignmentHash
         ) {
             revert T.InvalidRecord();
+        }
+        if (p.resolver == _suite.royaltyResolver && candidate.profileHash == bytes32(0)) {
+            _requireCollaboratorDesignations(p.collectionId, payout);
+            return (fact, previousHash);
         }
         // Both admitted resolvers expose the same splitFactory() ABI. Read this
         // resolver's actual factory, never substitute the primary factory for royalty.
@@ -477,14 +503,80 @@ contract StreamArtistOnboardingReads {
             ) revert T.InvalidRecord();
             return _requireCurrentPrimary(p.collectionId, current, payout);
         }
-        T.AssignmentFact memory expected = currentRoyaltyAssignment(p.collectionId);
+        if (p.resolver != _suite.royaltyResolver || p.revenueClass != keccak256("ROYALTY_ERC2981"))
+        {
+            revert T.InvalidRecord();
+        }
+        (T.AssignmentFact memory expected, IStreamRoyaltyResolver.RoyaltyConfig memory config) =
+            _royaltyFacts(p.collectionId, p.scope, p.scopeId);
         if (
             p.resolver != expected.resolver || p.revenueClass != expected.revenueClass
                 || p.scope != expected.scope || p.scopeId != expected.scopeId
-                || p.assignmentHash != expected.assignmentHash
+                || p.assignmentHash == bytes32(0) || p.assignmentHash != expected.assignmentHash
         ) revert T.InvalidRecord();
-        requireStaticArtistPayout(p.collectionId, p.resolver, payout);
-        return "";
+        return _requireCurrentRoyalty(p.collectionId, expected, config, payout);
+    }
+
+    function _royaltyFacts(uint256 collectionId, uint8 scope, uint256 scopeId)
+        private
+        view
+        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)
+    {
+        _requireSelected(keccak256("ROYALTY_RESOLVER"), _suite.royaltyResolver);
+        (fact, config) = IStreamArtistRoyaltyScopeFacts(_suite.royaltyResolver)
+            .royaltyEconomicsFacts(collectionId, scope, scopeId);
+        if (
+            fact.resolver != _suite.royaltyResolver
+                || fact.revenueClass != keccak256("ROYALTY_ERC2981") || fact.scope != scope
+                || fact.scopeId != scopeId
+                || (config.configured == (fact.assignmentHash == bytes32(0)))
+        ) revert T.InvalidRecord();
+    }
+
+    function _rawSelectedCollectionRoyalty(uint256 collectionId)
+        private
+        view
+        returns (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config)
+    {
+        (fact, config) = _royaltyFacts(collectionId, 1, collectionId);
+        if (!config.configured) (fact, config) = _royaltyFacts(collectionId, 0, 0);
+    }
+
+    function _requireCurrentRoyalty(
+        uint256 collectionId,
+        T.AssignmentFact memory fact,
+        IStreamRoyaltyResolver.RoyaltyConfig memory config,
+        address payout
+    ) private view returns (bytes memory) {
+        if (!config.configured || fact.assignmentHash == bytes32(0)) {
+            revert T.InvalidRecord();
+        }
+        T.AssignmentFact memory rebuilt = IStreamArtistRoyaltyScopeFacts(_suite.royaltyResolver)
+            .previewArtistRoyaltyAssignmentForScope(
+                collectionId,
+                fact.scope,
+                fact.scopeId,
+                config.profileId,
+                config.royaltyBps,
+                config.frozen
+            );
+        if (keccak256(abi.encode(rebuilt)) != keccak256(abi.encode(fact))) {
+            revert T.InvalidRecord();
+        }
+        if (config.profileId == bytes32(0)) {
+            if (config.wallet != address(0) || config.royaltyBps != 0) revert T.InvalidRecord();
+            _requireCollaboratorDesignations(collectionId, payout);
+        } else {
+            address factory = IStreamRevenueResolver(_suite.royaltyResolver).splitFactory();
+            if (IStreamSplitFactory(factory).walletFor(config.profileId) != config.wallet) {
+                revert T.InvalidRecord();
+            }
+            _requireProfilePayout(
+                collectionId, _suite.royaltyResolver, factory, config.profileId, payout
+            );
+        }
+        return
+            abi.encode(keccak256("6529STREAM_CURRENT_ROYALTY_ECONOMICS_EVIDENCE_V1"), fact, config);
     }
 
     function _rawSelectedCollectionPrimary(uint256 collectionId)
@@ -593,14 +685,10 @@ contract StreamArtistOnboardingReads {
             profileId = p.profileId;
             factory = IStreamRevenueResolver(resolver).splitFactory();
         } else if (resolver == _suite.royaltyResolver) {
-            IStreamRoyaltyResolver.RoyaltyConfig memory p =
-                IStreamRoyaltyResolver(resolver).collectionRoyalty(collectionId);
-            if (!p.configured || p.profileId == bytes32(0)) revert T.UnsupportedProfile();
-            profileId = p.profileId;
-            factory = IStreamRevenueResolver(resolver).splitFactory();
-            if (IStreamSplitFactory(factory).walletFor(profileId) != p.wallet) {
-                revert T.InvalidRecord();
-            }
+            (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config) =
+                _rawSelectedCollectionRoyalty(collectionId);
+            _requireCurrentRoyalty(collectionId, fact, config, payout);
+            return;
         } else {
             revert T.UnsupportedProfile();
         }

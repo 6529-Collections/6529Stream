@@ -10271,6 +10271,868 @@ contract StreamArtistOnboardingTest is
         );
     }
 
+    function _literalRoyaltyHash(uint8 scope, uint256 id, bytes32 profile, uint16 bps, bool frozen_)
+        private
+        view
+        returns (bytes32)
+    {
+        IStreamSplitFactory splits = royalty.splitFactory();
+        bytes32 profileContext = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1"),
+                profile == 0 ? address(0) : splits.walletFor(profile),
+                profile == 0 ? bytes32(0) : splits.profileEntriesHash(profile),
+                profile == 0 ? bytes32(0) : splits.profileMetadataURIHash(profile)
+            )
+        );
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1"),
+                block.chainid,
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
+                        address(royalty),
+                        address(splits),
+                        address(splits.assetPolicyRegistry()),
+                        splits.splitWalletRuntimeCodeHash()
+                    )
+                ),
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1"),
+                        keccak256("ROYALTY_ERC2981"),
+                        scope,
+                        id,
+                        uint8(1)
+                    )
+                ),
+                keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ROYALTY_ASSIGNMENT_POINTER_CONTEXT_V1"),
+                        profile,
+                        profileContext,
+                        bps
+                    )
+                ),
+                bytes32(0),
+                frozen_
+            )
+        );
+    }
+
+    function _royaltyEvent(Vm.Log[] memory logs, bytes32 topic, uint256 id, bytes memory data)
+        private
+        view
+    {
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(royalty) || logs[i].topics[0] != topic) continue;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == keccak256("ROYALTY_ERC2981")
+                    && logs[i].topics[2] == bytes32(uint256(2)) && logs[i].topics[3] == bytes32(id)
+                    && keccak256(logs[i].data) == keccak256(data),
+                "exact royalty event"
+            );
+            ++count;
+        }
+        require(count == 1, "one royalty event");
+    }
+
+    function _royaltyContextEvent(
+        Vm.Log[] memory logs,
+        uint256 id,
+        bytes32 oldHash,
+        bytes32 newHash,
+        bytes32 policy,
+        address actor
+    ) private view {
+        bytes32 topic = keccak256(
+            "RoyaltyAssignmentContext(uint16,uint256,uint256,bytes32,uint8,uint256,bytes32,bytes32,address)"
+        );
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(royalty) || logs[i].topics[0] != topic) continue;
+            require(
+                logs[i].topics.length == 4 && logs[i].topics[1] == bytes32(uint256(1))
+                    && logs[i].topics[2] == bytes32(id) && logs[i].topics[3] == newHash
+                    && keccak256(logs[i].data)
+                        == keccak256(abi.encode(uint16(1), uint8(2), id, oldHash, policy, actor)),
+                "exact key context including clear0"
+            );
+            ++count;
+        }
+        require(count == 1, "one royalty context");
+    }
+
+    function testRoyaltyLiteralHashesDisabledNoProfileCallsAndHealthyFactoryRetry() public {
+        core.setTokenCollection(55, 1);
+        bytes32 profile = royalty.collectionRoyalty(1).profileId;
+        for (uint8 scope; scope < 3; ++scope) {
+            uint256 id = scope == 0 ? 0 : scope == 1 ? 1 : 55;
+            require(
+                royalty.previewArtistRoyaltyAssignmentForScope(1, scope, id, profile, 321, true)
+                .assignmentHash == _literalRoyaltyHash(scope, id, profile, 321, true),
+                "exact literal configured profile context for each scope"
+            );
+            require(
+                royalty.previewArtistRoyaltyAssignmentForScope(1, scope, id, 0, 0, false)
+                .assignmentHash == _literalRoyaltyHash(scope, id, 0, 0, false),
+                "exact literal disabled context for each scope"
+            );
+        }
+        address splits = address(royalty.splitFactory());
+        bytes32 disabled = _literalRoyaltyHash(2, 55, 0, 0, false);
+        avm.mockCallRevert(
+            splits,
+            abi.encodeCall(IStreamSplitFactory.splitWalletExists, (bytes32(0))),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.mockCallRevert(
+            splits,
+            abi.encodeCall(IStreamSplitFactory.walletFor, (bytes32(0))),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.mockCallRevert(
+            splits,
+            abi.encodeCall(IStreamSplitFactory.profileEntriesHash, (bytes32(0))),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        avm.mockCallRevert(
+            splits,
+            abi.encodeCall(IStreamSplitFactory.profileMetadataURIHash, (bytes32(0))),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        require(
+            royalty.previewArtistRoyaltyAssignmentForScope(1, 2, 55, 0, 0, false).assignmentHash
+                == disabled,
+            "disabled makes no fictitious profile observations"
+        );
+        avm.mockCallRevert(
+            splits,
+            abi.encodeCall(IStreamSplitFactory.profileEntriesHash, (profile)),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        royalty.previewArtistRoyaltyAssignmentForScope(1, 2, 55, profile, 321, true);
+        avm.clearMockedCalls();
+        require(
+            royalty.previewArtistRoyaltyAssignmentForScope(1, 2, 55, profile, 321, true)
+                .assignmentHash == _literalRoyaltyHash(2, 55, profile, 321, true),
+            "same factory read restored"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRoyaltyResolver.InvalidRoyaltySplitProfile.selector, bytes32(0)
+            )
+        );
+        royalty.previewArtistRoyaltyAssignment(1, 0, 0, false);
+    }
+
+    function testRoyaltyBpsChangeClearReuseFreezeAndExactProviderEvents() public {
+        directArtistCalls = true;
+        _accept();
+        _payout();
+        core.setTokenCollection(55, 1);
+        IStreamRoyaltyResolver.RoyaltyConfig memory old = royalty.collectionRoyalty(1);
+        address governance = royalty.owner();
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, old.profileId, 250, false);
+        _prospectiveConsent(p, candidate);
+        vm.recordLogs();
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, old.profileId, 250);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        (, IStreamRoyaltyResolver.RoyaltyConfig memory installed, bytes32 policy) =
+            royalty.resolveRoyaltyAssignment(1, 55);
+        _royaltyEvent(
+            logs,
+            keccak256(
+                "RevenueAssignmentSet(bytes32,uint8,uint256,uint16,address,bytes32,address,uint16,bytes32,address,uint16,bool,bool,bytes32)"
+            ),
+            55,
+            abi.encode(
+                uint16(1),
+                governance,
+                bytes32(0),
+                address(0),
+                uint16(0),
+                old.profileId,
+                installed.wallet,
+                uint16(250),
+                false,
+                false,
+                bytes32(0)
+            )
+        );
+        _royaltyContextEvent(logs, 55, 0, p.assignmentHash, policy, governance);
+        bytes32 first = p.assignmentHash;
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, old.profileId, 251);
+        (p, candidate) = _royaltyScopePayload(2, 55, old.profileId, 251, false);
+        require(p.assignmentHash != first, "bps-only change has distinct consent");
+        _prospectiveConsent(p, candidate);
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, old.profileId, 251);
+        T.EconomicsConsent memory clear =
+            T.EconomicsConsent(1, address(royalty), keccak256("ROYALTY_ERC2981"), 2, 55, 0);
+        _prospectiveConsent(clear, T.FixedEconomicsCandidate(0, 0, 0, false));
+        vm.recordLogs();
+        vm.prank(governance);
+        royalty.clearTokenRoyalty(55);
+        logs = vm.getRecordedLogs();
+        _royaltyEvent(
+            logs,
+            keccak256(
+                "RevenueAssignmentCleared(bytes32,uint8,uint256,uint16,address,bytes32,address,uint16,bool)"
+            ),
+            55,
+            abi.encode(uint16(1), governance, old.profileId, old.wallet, uint16(251), false)
+        );
+        _royaltyContextEvent(logs, 55, p.assignmentHash, 0, 0, governance);
+        (T.AssignmentFact memory selected,, bytes32 inherited) =
+            royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            selected.scope == 1 && selected.assignmentHash != 0 && inherited != 0,
+            "clear context0 does not erase selected ancestor policy"
+        );
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, old.profileId, 251);
+        vm.prank(governance);
+        royalty.clearTokenRoyalty(55);
+        require(
+            royalty.tokenRoyalty(55).revision == 5,
+            "same association set and clear reuse with monotonic revision"
+        );
+        (p, candidate) = _royaltyScopePayload(2, 55, old.profileId, old.royaltyBps, true);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        royalty.freezeTokenRoyalty(55);
+        _prospectiveConsent(p, candidate);
+        vm.recordLogs();
+        vm.prank(governance);
+        royalty.freezeTokenRoyalty(55);
+        logs = vm.getRecordedLogs();
+        (selected, installed, policy) = royalty.resolveRoyaltyAssignment(1, 55);
+        _royaltyEvent(
+            logs,
+            keccak256("RevenueAssignmentFrozen(bytes32,uint8,uint256,uint16,bool,uint8)"),
+            55,
+            abi.encode(uint16(1), true, uint8(1))
+        );
+        _royaltyEvent(
+            logs,
+            keccak256(
+                "RevenueAssignmentSet(bytes32,uint8,uint256,uint16,address,bytes32,address,uint16,bytes32,address,uint16,bool,bool,bytes32)"
+            ),
+            55,
+            abi.encode(
+                uint16(1),
+                governance,
+                bytes32(0),
+                address(0),
+                uint16(0),
+                old.profileId,
+                old.wallet,
+                old.royaltyBps,
+                false,
+                false,
+                bytes32(0)
+            )
+        );
+        _royaltyContextEvent(logs, 55, 0, p.assignmentHash, policy, governance);
+        require(
+            installed.frozen && installed.revision == 6
+                && selected.assignmentHash == p.assignmentHash,
+            "materialized exact frozen key"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTokenRoyaltyResolver.RoyaltyAssignmentFrozen.selector, uint8(2), uint256(55)
+            )
+        );
+        vm.prank(governance);
+        royalty.clearTokenRoyalty(55);
+    }
+
+    function testRoyaltyDisabledAndClearNeedPrimaryAndPaidCollaboratorDesignations() public {
+        _collaboratorIdentity(false);
+        C.BindingAcceptance memory row = _collaborativeProposal(true);
+        _accept();
+        _collaboratorAcceptance(row, false);
+        core.setTokenCollection(55, 1);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, 0, 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("payout"))
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "missing primary payout consumes nothing"
+        );
+        _payout();
+        // Payout consumes another nonce. The original explicitly selected nonce remains unused.
+        roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                T.MissingMintPrerequisite.selector, keccak256("collaborator_payout")
+            )
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        T.EconomicsConsent memory clear =
+            T.EconomicsConsent(1, address(royalty), keccak256("ROYALTY_ERC2981"), 1, 1, 0);
+        T.Authorization memory ca = _authorization(false);
+        ca.signature = _signature(ingress.economicsConsentDigest(clear, ca));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                T.MissingMintPrerequisite.selector, keccak256("collaborator_payout")
+            )
+        );
+        ingress.recordProspectiveEconomicsConsent(
+            clear, T.FixedEconomicsCandidate(0, 0, 0, false), ca
+        );
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, ca.nonce),
+            "both zero-paying outcomes require collaborator designation"
+        );
+        _collaboratorPayout(address(delegateSafe));
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(
+                IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent, (p, candidate, a)
+            )
+        );
+        this.executeTargetSafe(
+            address(ingress),
+            abi.encodeCall(
+                IStreamArtistEconomicsAuthority.recordProspectiveEconomicsConsent,
+                (clear, T.FixedEconomicsCandidate(0, 0, 0, false), ca)
+            )
+        );
+        vm.prank(royalty.owner());
+        royalty.configureTokenRoyalty(55, 0, 0);
+        vm.prank(royalty.owner());
+        royalty.clearCollectionRoyalty(1);
+        require(
+            royalty.tokenRoyalty(55).configured && !royalty.collectionRoyalty(1).configured,
+            "same authorizations succeed after real designation"
+        );
+    }
+
+    function testRoyaltyZeroCandidateValidationAndWrongHashPreserveAuthorization() public {
+        _accept();
+        _payout();
+        core.setTokenCollection(55, 1);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, 0, 0, false);
+        T.Authorization memory a = _authorization(false);
+        a.signature = _signature(ingress.economicsConsentDigest(p, a));
+        bytes32 roots = _roots();
+        candidate.royaltyBps = 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamRoyaltyResolver.InvalidRoyaltyConfiguration.selector)
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.royaltyBps = 0;
+        candidate.profileHash = royalty.collectionRoyalty(1).profileId;
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamRoyaltyResolver.InvalidRoyaltyConfiguration.selector)
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.profileHash = 0;
+        candidate.frozen = true;
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.frozen = false;
+        candidate.policyHash = keccak256("not supported");
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        candidate.policyHash = 0;
+        require(
+            _roots() == roots
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce),
+            "all malformed candidates leave same authorization available"
+        );
+        ingress.recordProspectiveEconomicsConsent(p, candidate, a);
+        vm.prank(royalty.owner());
+        royalty.configureTokenRoyalty(55, 0, 0);
+        T.EconomicsConsent memory clear =
+            T.EconomicsConsent(1, address(royalty), keccak256("ROYALTY_ERC2981"), 2, 55, 0);
+        T.Authorization memory ca = _authorization(false);
+        ca.signature = _signature(ingress.economicsConsentDigest(clear, ca));
+        candidate.frozen = true;
+        vm.expectRevert(abi.encodeWithSelector(T.UnsupportedProfile.selector));
+        ingress.recordProspectiveEconomicsConsent(clear, candidate, ca);
+        candidate.frozen = false;
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordEconomicsConsent(clear, ca);
+        ingress.recordProspectiveEconomicsConsent(clear, candidate, ca);
+        vm.prank(royalty.owner());
+        royalty.clearTokenRoyalty(55);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTokenRoyaltyResolver.RoyaltyAssignmentMissing.selector, uint8(2), uint256(55)
+            )
+        );
+        royalty.previewArtistRoyaltyClear(1, 2, 55);
+    }
+
+    function testRoyaltyDefaultProofHasOneUnsignedCollectionAdmission() public {
+        _all();
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        bytes32 profile = royalty.collectionRoyalty(1).profileId;
+        vm.prank(royalty.owner());
+        royalty.configureDefaultRoyalty(profile, 300);
+        _clearRoyalty(1, 1);
+        (T.AssignmentFact memory fact,) = royalty.royaltyEconomicsFacts(1, 0, 0);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, address(royalty), keccak256("ROYALTY_ERC2981"), 0, 0, fact.assignmentHash
+        );
+        T.Authorization memory a = _authorization(false);
+        bytes32 digest = ingress.economicsConsentDigest(p, a);
+        a.signature = _signature(digest);
+        ingress.recordEconomicsConsent(p, a);
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        ingress.proposeArtistBinding(
+            2, _proposal(artistId), bytes("unit identity document"), "Artist Safe"
+        );
+        T.Authorization memory acceptance = _authorization(false);
+        acceptance.signature = _signature(ingress.acceptanceDigest(2, acceptance));
+        ingress.acceptArtistBinding(2, acceptance);
+        p.collectionId = 2;
+        require(
+            ingress.economicsConsentDigest(p, a) == digest,
+            "default signature does not bind collection"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        avm.expectPartialRevert(T.Replay.selector);
+        ingress.recordEconomicsConsent(p, a);
+        _scopeRecord(p);
+        reads.requireEconomicsConsent(p);
+        (fact,) = reads.currentAssignments(1);
+        require(
+            fact.resolver == address(primary), "independent primary current prerequisite retained"
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        reads.currentRoyaltyAssignment(1);
+    }
+
+    function testRoyaltyCorrectedBindingRequiresFreshTokenConsentAndPreservesOldHistory() public {
+        address governance = royalty.owner();
+        _accept();
+        _payout();
+        core.setTokenCollection(55, 1);
+        bytes32 profile = royalty.collectionRoyalty(1).profileId;
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, profile, 300, false);
+        _prospectiveConsent(p, candidate);
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, profile, 300);
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        bytes32 first = IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p);
+        bytes32 key = _economicsReplayKey(keccak256(abi.encode(p)));
+        bytes32 cell = keccak256(abi.encode(IStreamArtistOwner(suite.owners[6]).replayCell(key)));
+        T.Binding memory b = _correctEconomicsBinding(address(artist));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, profile, 300);
+        vm.recordLogs();
+        bytes32 second = _scopeRecord(p);
+        _associationEvent(vm.getRecordedLogs(), second, p, b, first);
+        require(
+            second != 0 && second != first
+                && owner.economicsRecordAssociation(second).originalRecord == first,
+            "actual corrected artist continuation"
+        );
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, profile, 300);
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == first
+                && keccak256(abi.encode(IStreamArtistOwner(suite.owners[6]).replayCell(key)))
+                    == cell,
+            "old raw record and replay cell retained"
+        );
+        b.generation = 3;
+        b.bindingHash = keccak256("royalty corrected generation3");
+        _mockEconomicsBinding(b);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        reads.requireEconomicsConsent(p);
+        bytes32 third = _scopeRecord(p);
+        require(
+            third != second && owner.economicsRecordAssociation(third).originalRecord == first,
+            "third association anchors original"
+        );
+        reads.requireEconomicsConsent(p);
+    }
+
+    function testRoyaltySavedTokenConsentSurvivesPayoutRotationAndZeroCapEstate() public {
+        _all();
+        core.setTokenCollection(55, 1);
+        IStreamRoyaltyResolver.RoyaltyConfig memory collection = royalty.collectionRoyalty(1);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, collection.profileId, 300, false);
+        _prospectiveConsent(p, candidate);
+        vm.prank(royalty.owner());
+        royalty.configureTokenRoyalty(55, collection.profileId, 300);
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        T.Binding memory b = reads.acceptedBinding(1);
+        IStreamArtistEconomicsEvidence owner = IStreamArtistEconomicsEvidence(suite.owners[6]);
+        bytes32 record = owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash);
+        bytes32 evidence = keccak256(abi.encode(owner.economicsRecordAssociation(record)));
+        _newRotationSafe(24781);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        reads.requireEconomicsConsent(p);
+        vm.warp(ingress.artistTransitionState(rotation).postWindowEndsAt);
+        (, bytes32 previous) = ingress.artistPayoutAccount(artistId);
+        T.PayoutDesignation memory update = T.PayoutDesignation(artistId, address(0xCAFE), previous);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.payoutDesignationDigest(update, a));
+        ingress.recordPayoutDesignation(update, a);
+        _estateActivateAndAdopt(0);
+        Estate.AuthorityCapabilities memory rights = ingress.currentAuthorityCapabilities(artistId);
+        require(
+            rights.authorityClass == 3 && rights.status == 3 && rights.effectiveCapabilities == 0,
+            "actual zero-cap successor"
+        );
+        reads.requireEconomicsConsent(p);
+        vm.prank(royalty.owner());
+        royalty.configureTokenRoyalty(55, collection.profileId, 300);
+        (T.AssignmentFact memory selected, IStreamRoyaltyResolver.RoyaltyConfig memory current,) =
+            royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            selected.assignmentHash == p.assignmentHash && current.wallet == collection.wallet,
+            "historical static payout and exact existing consent remain usable"
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        require(
+            owner.economicsRecordForBinding(p, b.artistId, b.generation, b.bindingHash) == record
+                && keccak256(abi.encode(owner.economicsRecordAssociation(record))) == evidence
+                && keccak256(abi.encode(reads.acceptedBinding(1))) == keccak256(abi.encode(b)),
+            "association unchanged by authority and payout transitions"
+        );
+    }
+
+    function _assertRoyaltyCurrentArchive(
+        T.EconomicsConsent memory p,
+        T.Authorization memory a,
+        bytes32 record,
+        T.Binding memory b,
+        bytes memory expectedEvidence
+    ) private view {
+        bytes32 id = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(15),
+                address(artist),
+                record
+            )
+        );
+        (
+            uint16 schema,
+            bytes32 configuration,
+            uint16 op,
+            address actor,
+            bytes32 archived,
+            T.Snapshot[7] memory before_,
+            T.Snapshot[7] memory after_,
+            bytes memory payload
+        ) = abi.decode(
+            archive.artistEvidenceBytesV2(id, 1),
+            (uint16, bytes32, uint16, address, bytes32, T.Snapshot[7], T.Snapshot[7], bytes)
+        );
+        (
+            T.Binding memory captured,
+            T.EconomicsConsent memory terms,
+            T.Payout memory payout,
+            T.Authorization memory authorization,
+            T.SignerApproval memory proof,
+            bytes memory current,
+            IStreamArtistEconomicsEvidence.Association memory association
+        ) = abi.decode(
+            payload,
+            (
+                T.Binding,
+                T.EconomicsConsent,
+                T.Payout,
+                T.Authorization,
+                T.SignerApproval,
+                bytes,
+                IStreamArtistEconomicsEvidence.Association
+            )
+        );
+        require(
+            schema == 1 && configuration == coordinator.configurationHash() && op == 15
+                && actor == address(artist) && archived == record
+                && before_[6].revision + 1 == after_[6].revision
+                && before_[2].revision + 1 == after_[2].revision
+                && keccak256(abi.encode(captured)) == keccak256(abi.encode(b))
+                && keccak256(abi.encode(terms)) == keccak256(abi.encode(p))
+                && payout.recordHash != 0 && authorization.nonce == a.nonce && proof.direct
+                && proof.signer == address(artist)
+                && keccak256(current) == keccak256(expectedEvidence)
+                && association.originalRecord == record && association.bindingHash == b.bindingHash
+                && association.payloadHash == keccak256(abi.encode(p)),
+            "exact current disabled evidence and one owner commit archived"
+        );
+    }
+
+    function testRoyaltyCurrentDisabledEvidenceSafeReadsAndLateArchiveRetry() public {
+        _accept();
+        _payout();
+        core.setTokenCollection(55, 1);
+        StreamArtistOnboardingReads reads = coordinator.reads();
+        vm.prank(royalty.owner());
+        royalty.configureDefaultRoyalty(0, 0);
+        _clearRoyalty(1, 1);
+        (T.AssignmentFact memory fact, IStreamRoyaltyResolver.RoyaltyConfig memory config) =
+            royalty.royaltyEconomicsFacts(1, 0, 0);
+        T.EconomicsConsent memory p = T.EconomicsConsent(
+            1, address(royalty), keccak256("ROYALTY_ERC2981"), 0, 0, fact.assignmentHash
+        );
+        bytes memory expected =
+            abi.encode(keccak256("6529STREAM_CURRENT_ROYALTY_ECONOMICS_EVIDENCE_V1"), fact, config);
+        _economicsSafeRead(
+            address(reads),
+            abi.encodeCall(
+                StreamArtistOnboardingReads.requireCurrentEconomics, (p, address(artist))
+            ),
+            abi.encode(expected)
+        );
+        (T.EconomicsConsent memory token, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, 0, 0, false);
+        T.AssignmentFact memory prospective =
+            T.AssignmentFact(token.resolver, token.revenueClass, 2, 55, token.assignmentHash);
+        _economicsSafeRead(
+            address(reads),
+            abi.encodeCall(
+                StreamArtistOnboardingReads.requireProspectiveEconomicsWithEvidence,
+                (token, candidate, address(artist))
+            ),
+            abi.encode(prospective, bytes32(0))
+        );
+        require(
+            IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == 0,
+            "preparation reads create no consent"
+        );
+        T.Authorization memory a = _authorization(false);
+        a.signature = "";
+        bytes memory data = abi.encodeCall(IStreamArtistOnboarding.recordEconomicsConsent, (p, a));
+        bytes32 roots = _roots();
+        uint256 safeNonce = artist.nonce();
+        T.Binding memory b = reads.acceptedBinding(1);
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodePacked(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeTargetSafe(address(ingress), data);
+        require(
+            _roots() == roots && artist.nonce() == safeNonce
+                && !IStreamArtistIdentityOwner(suite.owners[2]).nonceUsed(artistId, a.nonce)
+                && IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p) == 0,
+            "late Archive rollback includes actual Safe and both owners"
+        );
+        avm.clearMockedCalls();
+        vm.recordLogs();
+        this.executeTargetSafe(address(ingress), data);
+        bytes32 record = IStreamArtistConsentOwner(suite.owners[6]).economicsRecord(p);
+        _associationEvent(vm.getRecordedLogs(), record, p, b, record);
+        require(record != 0 && artist.nonce() == safeNonce + 1, "same Safe calldata healthy retry");
+        _assertRoyaltyCurrentArchive(p, a, record, b, expected);
+        reads.requireEconomicsConsent(p);
+    }
+
+    function _royaltyScopePayload(
+        uint8 scope,
+        uint256 id,
+        bytes32 profile,
+        uint16 bps,
+        bool frozen_
+    )
+        private
+        view
+        returns (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate)
+    {
+        T.AssignmentFact memory
+            fact = royalty.previewArtistRoyaltyAssignmentForScope(
+            1, scope, id, profile, bps, frozen_
+        );
+        p = T.EconomicsConsent(
+            1, address(royalty), keccak256("ROYALTY_ERC2981"), scope, id, fact.assignmentHash
+        );
+        candidate = T.FixedEconomicsCandidate(profile, 0, bps, frozen_);
+    }
+
+    function _clearRoyalty(uint8 scope, uint256 id) private {
+        T.EconomicsConsent memory p =
+            T.EconomicsConsent(1, address(royalty), keccak256("ROYALTY_ERC2981"), scope, id, 0);
+        _prospectiveConsent(p, T.FixedEconomicsCandidate(0, 0, 0, false));
+        vm.prank(royalty.owner());
+        if (scope == 2) royalty.clearTokenRoyalty(id);
+        else royalty.clearCollectionRoyalty(id);
+    }
+
+    function testRoyaltyTokenDisabledClearAndDefaultActualSafeFlow() public {
+        directArtistCalls = true;
+        _all();
+        core.setTokenCollection(55, 1);
+        address governance = royalty.owner();
+        IStreamRoyaltyResolver.RoyaltyConfig memory original = royalty.collectionRoyalty(1);
+        (T.EconomicsConsent memory p, T.FixedEconomicsCandidate memory candidate) =
+            _royaltyScopePayload(2, 55, original.profileId, 250, false);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, original.profileId, 250);
+        _prospectiveConsent(p, candidate);
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, original.profileId, 250);
+        (
+            T.AssignmentFact memory fact,
+            IStreamRoyaltyResolver.RoyaltyConfig memory config,
+            bytes32 policy
+        ) = royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            fact.scope == 2 && fact.scopeId == 55 && fact.assignmentHash == p.assignmentHash
+                && config.royaltyBps == 250,
+            "actual consented token key selected"
+        );
+        require(
+            policy
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ROYALTY_POLICY_V1"),
+                        block.chainid,
+                        address(royalty),
+                        uint256(1),
+                        uint256(55),
+                        config.profileId,
+                        config.wallet,
+                        uint16(250),
+                        fact.assignmentHash
+                    )
+                ),
+            "canonical token royalty policy hash"
+        );
+        (p, candidate) = _royaltyScopePayload(2, 55, 0, 0, false);
+        require(
+            p.assignmentHash != 0 && p.assignmentHash != fact.assignmentHash,
+            "disabled is nonzero distinct commitment"
+        );
+        _prospectiveConsent(p, candidate);
+        vm.prank(governance);
+        royalty.configureTokenRoyalty(55, 0, 0);
+        (address receiver, uint16 bps) =
+            royalty.royaltyReceiverAndBps(address(core), 55, 10_000, 1, true);
+        require(receiver == address(0) && bps == 0, "disabled token suppresses collection fallback");
+        (fact, config, policy) = royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            config.configured && config.profileId == 0 && fact.assignmentHash == p.assignmentHash
+                && policy != 0,
+            "disabled selected fact remains configured and hashed"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("economics"))
+        );
+        vm.prank(governance);
+        royalty.clearTokenRoyalty(55);
+        _clearRoyalty(2, 55);
+        (fact, config, policy) = royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            fact.scope == 1 && config.royaltyBps == original.royaltyBps && policy != 0,
+            "clear exposes separately consented collection key"
+        );
+        (T.AssignmentFact memory empty, IStreamRoyaltyResolver.RoyaltyConfig memory absent) =
+            royalty.royaltyEconomicsFacts(1, 2, 55);
+        require(
+            empty.assignmentHash == 0 && !absent.configured,
+            "raw token clear never relabels inherited policy"
+        );
+        vm.prank(governance);
+        royalty.configureDefaultRoyalty(original.profileId, 300);
+        _clearRoyalty(1, 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("ROYALTY_ERC2981"))
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        (fact, config, policy) = royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            fact.scope == 0 && fact.scopeId == 0 && config.royaltyBps == 300,
+            "real default selected after both clears"
+        );
+        require(
+            policy
+                == keccak256(
+                    abi.encode(
+                        keccak256("6529STREAM_ROYALTY_POLICY_V1"),
+                        block.chainid,
+                        address(royalty),
+                        uint256(0),
+                        uint256(0),
+                        config.profileId,
+                        config.wallet,
+                        uint16(300),
+                        fact.assignmentHash
+                    )
+                ),
+            "ancestor default policy uses default context"
+        );
+        _scopeRecord(
+            T.EconomicsConsent(
+                1, address(royalty), keccak256("ROYALTY_ERC2981"), 0, 0, fact.assignmentHash
+            )
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        vm.prank(governance);
+        royalty.configureDefaultRoyalty(0, 0);
+        vm.expectRevert(
+            abi.encodeWithSelector(T.MissingMintPrerequisite.selector, keccak256("ROYALTY_ERC2981"))
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+        (fact, config,) = royalty.resolveRoyaltyAssignment(1, 55);
+        require(
+            fact.assignmentHash != 0 && config.configured && config.profileId == 0,
+            "default disabled also needs own consent"
+        );
+        _scopeRecord(
+            T.EconomicsConsent(
+                1, address(royalty), keccak256("ROYALTY_ERC2981"), 0, 0, fact.assignmentHash
+            )
+        );
+        ingress.requireMintConsent(1, PHASE, POLICY);
+    }
+
     function setUp() public {
         nextNonce = 0;
         directArtistCalls = false;
