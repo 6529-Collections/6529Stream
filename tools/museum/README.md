@@ -11,7 +11,7 @@ On Windows PowerShell, no activation or execution-policy change is needed:
 ```powershell
 python -m venv .venv-tools/museum
 .\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
-.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection -v
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package -v
 ```
 
 On Linux or macOS:
@@ -19,7 +19,7 @@ On Linux or macOS:
 ```sh
 python3 -m venv .venv-tools/museum
 .venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
-.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection -v
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory tools.museum.test_review tools.museum.test_semantic_selection tools.museum.test_projection tools.museum.test_package -v
 ```
 
 Use that environment's Python for the following commands. Dependency installation
@@ -125,3 +125,18 @@ original bytes and whole-document hashes, including the 434,213-byte CRM
 document's 54-chunk shape. It never uploads or registers, and does not establish
 the referenced canonicalization definition's actual admission or correctness.
 Permissionless chunk upload alone would not establish registered inventory.
+
+
+The [resource projection](../../docs/museum-resource-projection.md) composes
+canonical source/review selection with explicit entity declarations, source
+coverage and pinned model validation. The [offline package guide](../../docs/museum-offline-resource-package.md)
+provides exact example inputs and commands to build and verify a candidate
+resource archive. Verification checks the external manifest hash, all copied
+source/dependency bytes, and a complete recomputation of the projection. These
+commands currently require wholly public synthetic fixtures; actual chain
+admission and complete Museum/dossier conformance remain separate work.
+
+```text
+python -m tools.museum.projection --check
+python -m unittest tools.museum.test_projection tools.museum.test_package -v
+```
