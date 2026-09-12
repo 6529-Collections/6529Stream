@@ -23,8 +23,6 @@ library StreamArtistFinalityAdmission {
         if (finality.code.length == 0 || finality == address(this)) revert T.InvalidBinding();
         if (
             _address(finality, IStreamFinalityDeploymentBindings.coreReads.selector) != suite.core
-                || _address(finality, IStreamFinalityDeploymentBindings.metadataReads.selector)
-                    != suite.metadata
                 || _address(finality, IStreamFinalityDeploymentBindings.sanctionReads.selector)
                     != suite.registry
                 || _address(
@@ -39,13 +37,20 @@ library StreamArtistFinalityAdmission {
                 || _word(finality, IStreamModule.streamModuleInterfaceId.selector)
                     != bytes32(type(IStreamArtworkFinalityRegistry).interfaceId)
         ) revert T.InvalidBinding();
+        // Suite.metadata is the content Router. Finality separately pins the generic record host.
+        address metadataHost =
+            _address(finality, IStreamFinalityDeploymentBindings.metadataReads.selector);
+        if (
+            metadataHost.code.length == 0
+                || _address(metadataHost, IStreamFinalityScopeEvidence.core.selector) != suite.core
+        ) revert T.InvalidBinding();
         provider =
             _address(finality, IStreamFinalityDeploymentBindings.scopeEvidenceProvider.selector);
         if (
             provider.code.length == 0
                 || _address(provider, IStreamFinalityScopeEvidence.core.selector) != suite.core
                 || _address(provider, IStreamFinalityEvidenceProvider.metadataHost.selector)
-                    != suite.metadata
+                    != metadataHost
         ) revert T.InvalidBinding();
         address artifact =
             _address(finality, IStreamFinalityDeploymentBindings.artifactCoverage.selector);
