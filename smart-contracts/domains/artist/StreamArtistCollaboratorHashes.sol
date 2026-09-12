@@ -10,6 +10,27 @@ import {
 
 /// @notice Exact permanent collaborator preimages and explicit non-record lookup commitments.
 library StreamArtistCollaboratorHashes {
+    /// @dev All fields are static: encoding this tuple is exactly the original sixteen words.
+    ///      The collaborator policy mode and threshold intentionally retain their zero values.
+    struct BindingPreimage {
+        bytes32 domain;
+        uint256 chainId;
+        address registry;
+        address core;
+        uint256 collectionId;
+        uint64 generation;
+        bytes32 artistId;
+        address artistAddress;
+        bytes32 identityRecordHash;
+        uint8 consentMode;
+        uint8 saleConsentScope;
+        uint8 registryImmutabilityElection;
+        uint8 collabPolicyMode;
+        uint32 collabThreshold;
+        bytes32 collaboratorSetHash;
+        bytes32 capabilityPolicySetHash;
+    }
+
     function identityDigest(
         StreamArtistHashes.Environment memory e,
         address account,
@@ -137,26 +158,22 @@ library StreamArtistCollaboratorHashes {
         T.Binding memory b,
         T.CollaboratorRecord[] memory rows
     ) public pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                keccak256("6529STREAM_ARTIST_BINDING_V1"),
-                e.chainId,
-                e.registry,
-                e.core,
-                collectionId,
-                b.generation,
-                b.artistId,
-                b.artistAddress,
-                b.identityRecordHash,
-                b.consentMode,
-                b.saleConsentScope,
-                b.registryImmutabilityElection,
-                uint8(0),
-                uint32(0),
-                collaboratorSetHash(rows),
-                StreamArtistHashes.emptyCapabilities()
-            )
-        );
+        BindingPreimage memory p;
+        p.domain = keccak256("6529STREAM_ARTIST_BINDING_V1");
+        p.chainId = e.chainId;
+        p.registry = e.registry;
+        p.core = e.core;
+        p.collectionId = collectionId;
+        p.generation = b.generation;
+        p.artistId = b.artistId;
+        p.artistAddress = b.artistAddress;
+        p.identityRecordHash = b.identityRecordHash;
+        p.consentMode = b.consentMode;
+        p.saleConsentScope = b.saleConsentScope;
+        p.registryImmutabilityElection = b.registryImmutabilityElection;
+        p.collaboratorSetHash = collaboratorSetHash(rows);
+        p.capabilityPolicySetHash = StreamArtistHashes.emptyCapabilities();
+        return keccak256(abi.encode(p));
     }
 
     function collaboratorSetHash(T.CollaboratorRecord[] memory rows) public pure returns (bytes32) {
