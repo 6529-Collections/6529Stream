@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../../smart-contracts/core/StreamCore.sol";
 import "./StreamArtistSuiteDeployment.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "./StreamArtistActivationPlan.sol";
 import "./StreamRevealActivationPlan.sol";
 import "../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
@@ -558,7 +559,7 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
     }
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
-        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 71 : 72);
+        rows = new GovernanceActionPolicyEntry[](localDevelopment ? 73 : 74);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -660,6 +661,8 @@ abstract contract StreamCurrentStackDeployment is StreamArtistSuiteDeployment {
         rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
         rows[i++] = _operatingPolicy(1, address(artistRegistry), IStreamArtistIdentityContest.contestArtistIdentity.selector);
         rows[i++] = _operatingPolicy(2, address(artistRegistry), IStreamArtistIdentityContest.contestArtistIdentity.selector);
+        rows[i++] = _operatingPolicy(1, address(artistRegistry), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
+        rows[i++] = _operatingPolicy(2, address(artistRegistry), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
         // Metadata/entropy configuration is also collected from genesis.
         assert(i == rows.length);
     }

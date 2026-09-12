@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamArtistSuiteFixture.sol";
+import "../../smart-contracts/interfaces/stream/artist/IStreamArtistIdentityDismissal.sol";
 import "../../smart-contracts/core/StreamCore.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceExecutor.sol";
 import "../../smart-contracts/domains/governance/StreamGovernanceActor.sol";
@@ -789,7 +790,7 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
 
     function _operatingPolicies() private view returns (GovernanceActionPolicyEntry[] memory rows) {
         GovernanceActionPolicyEntry[] memory additional = _additionalOperatingPolicies();
-        rows = new GovernanceActionPolicyEntry[](64 + additional.length);
+        rows = new GovernanceActionPolicyEntry[](66 + additional.length);
         rows[0] = _operatingPolicy(address(manager), manager.configurePhase.selector);
         rows[1] = _operatingPolicy(address(manager), manager.setPhaseExecutor.selector);
         rows[2] = _operatingPolicy(address(manager), manager.setPhasePaused.selector);
@@ -876,6 +877,8 @@ abstract contract StreamCurrentStackFixture is StreamArtistSuiteFixture {
         rows[i++] = _operatingPolicy(address(entropy), entropy.raiseTimeParameter.selector);
         rows[i++] = _operatingPolicy(1, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector);
         rows[i++] = _operatingPolicy(2, address(artists), IStreamArtistIdentityContest.contestArtistIdentity.selector);
+        rows[i++] = _operatingPolicy(1, address(artists), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
+        rows[i++] = _operatingPolicy(2, address(artists), IStreamArtistIdentityDismissal.dismissArtistIdentityContest.selector);
         // Metadata, economics and entropy configuration are also collected from genesis.
         for (uint256 j; j < additional.length; ++j) {
             rows[i++] = additional[j];
