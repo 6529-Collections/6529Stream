@@ -686,7 +686,9 @@ library StreamArtistRotationState {
         delete identity.activeIdentity[r.terms.oldAddress];
         identity.activeIdentity[r.terms.newAddress] = artistId;
         principal.authorityAddress = r.terms.newAddress;
-        // Permissionless execution, approvals and vetoes never count as artist activity.
+        // Permissionless execution and guardian approvals do not establish artist activity.
+        // The owner separately records finding-only activity for an authenticated current-principal
+        // veto; neither veto branch is a living-principal estate cancellation.
         m = StreamArtistIdentityState.Mutation(
             bytes32(0),
             keccak256(abi.encode(artistId, expected, c.actor)),

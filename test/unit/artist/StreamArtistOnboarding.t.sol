@@ -9,6 +9,7 @@ import "./ArtistPublicationHostFixture.sol";
 import "./ArtistCanonicalPublicationFixture.sol";
 import "./ArtistSanctionFinalityFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
+import "./ArtistRecoveryIntentFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../../smart-contracts/domains/revenue/StreamRevenueEscrow.sol";
@@ -553,6 +554,684 @@ contract StreamArtistOnboardingTest is
     uint8 private saleScopeFixture;
     StreamModuleRegistry private saleModules;
     StreamNativeFixedPriceSaleAdapter private nativeSale;
+
+    function _unavailabilityFixture()
+        private
+        returns (Recovery.FindingRequest memory request, U.Target memory target)
+    {
+        _accept();
+        address authority = StreamArtistIdentityAuthority(suite.owners[2]).artistWindowAuthority();
+        ArtistUnitRoles(suite.roleRegistry).setArbiter(address(this), true);
+        request = Recovery.FindingRequest(
+            artistId, 1, keccak256("inability evidence"), keccak256("finding reason")
+        );
+        ArtistUnitGovernance(authority)
+            .configureContestReads(
+                suite.roleRegistry, address(this), request.reasonHash, "urn:finding"
+            );
+        target = U.Target(
+            address(
+                new ArtistRecoveryIntentFixture(
+                    address(core),
+                    coordinator.finalityRegistry(),
+                    keccak256("original executed finality"),
+                    keccak256("exact recovery manifest")
+                )
+            ),
+            keccak256("future scheduled recovery"),
+            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 1, 0, 0),
+            keccak256("original executed finality"),
+            keccak256("exact recovery manifest")
+        );
+        core.set(keccak256("ARTWORK_FINALITY_RECOVERY"), target.recoveryRegistry, false);
+        _unavailabilityModule(
+            keccak256("ARTIST_REGISTRY"),
+            address(ingress),
+            keccak256("ARTIST_REGISTRY"),
+            type(IStreamArtistMintConsent).interfaceId
+        );
+        _unavailabilityModule(
+            keccak256("ARTWORK_FINALITY_RECOVERY"),
+            target.recoveryRegistry,
+            keccak256("STREAM_ARTWORK_FINALITY_RECOVERY"),
+            0x83685f5c
+        );
+        GovernanceAction memory action;
+        action.status = GovernanceActionStatus.SCHEDULED;
+        action.actionClass = 2;
+        action.target = address(0x1234); // Deliberately the unrelated first batch call.
+        action.selector = 0x12345678;
+        action.scopeHash = keccak256("first batch scope");
+        action.notBefore = uint64(block.timestamp + 91 days);
+        action.expiresAfter = uint64(block.timestamp + 100 days);
+        action.proposer = address(this);
+        action.reasonURI = "urn:scheduled-recovery";
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.governanceAction, (target.recoveryActionId)),
+            abi.encode(action)
+        );
+    }
+
+    function _unavailabilityModule(bytes32 key, address target, bytes32 kind, bytes4 interfaceId)
+        private
+    {
+        address modules = address(manager.moduleRegistry());
+        avm.mockCall(
+            address(core),
+            abi.encodeCall(IStreamCorePointers.getSatellitePointer, (key)),
+            abi.encode(
+                target,
+                target.codehash,
+                false,
+                kind,
+                interfaceId,
+                modules,
+                uint8(1),
+                keccak256("unit module manifest"),
+                keccak256("unit deployment manifest"),
+                uint64(1)
+            )
+        );
+        avm.mockCall(
+            modules,
+            abi.encodeCall(IStreamModuleRegistry.isModuleEligible, (target, kind, interfaceId)),
+            abi.encode(true)
+        );
+    }
+
+    function _recordUnavailability(Recovery.FindingRequest memory request, U.Target memory target)
+        private
+        returns (bytes32 hash)
+    {
+        U.Context memory context_ = ingress.unavailabilityFindingContext(request, target);
+        ArtistUnitGovernance(StreamArtistIdentityAuthority(suite.owners[2]).artistWindowAuthority())
+            .executeModuleContext(
+                address(ingress),
+                abi.encodeCall(
+                    IStreamArtistUnavailability.recordUnavailabilityFinding, (request, target)
+                ),
+                2,
+                context_.scopeHash,
+                context_.oldValueHash,
+                context_.newValueHash
+            );
+        hash =
+            StreamArtistIdentityAuthority(suite.owners[2]).latestUnavailabilityFinding(artistId, 1);
+    }
+
+    function testUnavailabilityActualIdentityExactRecordReplayEventAndArchive() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        StreamArtistIdentityAuthority owner = StreamArtistIdentityAuthority(suite.owners[2]);
+        T.Snapshot memory before_ = owner.ownerStateSnapshotV2();
+        T.Identity memory principal = owner.identity(artistId);
+        vm.recordLogs();
+        bytes32 hash = _recordUnavailability(request, target);
+        (Recovery.FindingRecord memory saved, U.Admission memory admission) =
+            ingress.unavailabilityFindingRecord(hash);
+        bytes32 expected = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_UNAVAILABILITY_FINDING_RECORD_V1"),
+                block.chainid,
+                address(ingress),
+                artistId,
+                uint256(1),
+                request.evidenceHash,
+                request.reasonHash,
+                keccak256("unit authority gas raise"),
+                uint64(1000 + 90 days),
+                uint64(1000)
+            )
+        );
+        require(
+            hash == expected && saved.noticeSeconds == 90 days && saved.timingRevision == 1,
+            "literal permanent ten words and captured timing"
+        );
+        require(
+            saved.governanceActionId != target.recoveryActionId
+                && keccak256(abi.encode(admission.target)) == keccak256(abi.encode(target)),
+            "separate finding and recovery actions"
+        );
+        require(
+            owner.ownerStateSnapshotV2().revision == before_.revision + 1
+                && owner.identity(artistId).nonceHint == principal.nonceHint
+                && owner.identity(artistId).lastAuthorityActionAt
+                    == principal.lastAuthorityActionAt,
+            "one finding commit without signer activity"
+        );
+        bytes32 key = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_OWNER_REPLAY_KEY_V2"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                address(archive),
+                address(owner),
+                owner.domainId(),
+                keccak256("identity_authority.replay.governance_action_id"),
+                keccak256(abi.encode(saved.governanceActionId))
+            )
+        );
+        T.ReplayCell memory cell = owner.replayCell(key);
+        require(
+            cell.commitment == hash && cell.touchedRevision == before_.revision + 1
+                && cell.kind == 1 && cell.status == 2,
+            "actual permanent finding action replay cell"
+        );
+        uint256 events;
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == address(owner) && logs[i].topics.length != 0
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistUnavailabilityFindingRecorded(uint16,bytes32,uint256,uint64,uint64,bytes32,bytes32,bytes32,bytes32)"
+                        )
+            ) {
+                ++events;
+                require(
+                    logs[i].topics.length == 3 && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(1))
+                        && keccak256(logs[i].data)
+                            == keccak256(
+                                abi.encode(
+                                    uint16(1),
+                                    saved.noticeEndsAt,
+                                    saved.recordedAt,
+                                    request.evidenceHash,
+                                    request.reasonHash,
+                                    hash,
+                                    saved.governanceActionId
+                                )
+                            ),
+                    "exact permanent event"
+                );
+            }
+        }
+        require(events == 1, "one real Identity finding event");
+        address actor = owner.artistWindowAuthority();
+        bytes32 id = keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ARTIST_ONBOARDING_OPERATION_EVIDENCE_V1"),
+                block.chainid,
+                address(ingress),
+                address(coordinator),
+                uint16(23),
+                actor,
+                hash
+            )
+        );
+        ConfirmationEnvelope memory envelope = abi.decode(
+            bytes.concat(bytes32(uint256(32)), archive.artistEvidenceBytesV2(id, 1)),
+            (ConfirmationEnvelope)
+        );
+        require(
+            envelope.operation == 23 && envelope.actor == actor && envelope.transitionHash == hash
+                && envelope.configuration == coordinator.configurationHash(),
+            "actual operation23 Archive provenance"
+        );
+        (bool valid, bytes32 observed, bytes32 id_, uint64 end) =
+            ingress.verifyRecoveryUnavailability(target);
+        require(
+            valid && observed == hash && id_ == artistId && end == saved.noticeEndsAt,
+            "read exposes notice without consuming recovery"
+        );
+        require(
+            owner.identityWriterExtension() == avm.computeCreateAddress(address(owner), 1)
+                && owner.identityEstateExtension() == avm.computeCreateAddress(address(owner), 2)
+                && ingress.registryWriterExtension()
+                    == avm.computeCreateAddress(address(ingress), 1)
+                && ingress.registryReadExtension() == avm.computeCreateAddress(address(ingress), 2)
+                && ingress.registryFinalityReadExtension()
+                    == avm.computeCreateAddress(address(ingress), 3)
+                && address(coordinator.reads())
+                    == avm.computeCreateAddress(address(coordinator), 1),
+            "actual original creator and child nonce pins"
+        );
+        require(
+            address(ingress).code.length <= 24576 && address(coordinator).code.length <= 24576
+                && address(owner).code.length <= 24576
+                && owner.identityWriterExtension().code.length <= 24576
+                && owner.identityEstateExtension().code.length <= 24576,
+            "actual deployable artist products"
+        );
+    }
+
+    function testUnavailabilityActualCurrentSafeActivityAfterNoticeCancelsPendingOnly() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        (Recovery.FindingRecord memory saved, U.Admission memory admission) =
+            ingress.unavailabilityFindingRecord(hash);
+        vm.warp(uint256(saved.noticeEndsAt) + 1);
+        directArtistCalls = true;
+        _policy();
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            !valid && observed == hash,
+            "current Safe-authorized policy cancels still unconsumed fallback after notice"
+        );
+        (Recovery.FindingRecord memory historical, U.Admission memory prior) =
+            ingress.unavailabilityFindingRecord(hash);
+        require(
+            keccak256(abi.encode(historical, prior)) == keccak256(abi.encode(saved, admission)),
+            "permanent finding and admission history untouched"
+        );
+    }
+
+    function testUnavailabilitySelectedModuleEligibilityAndPrimaryInterfaceRestore() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        U.Context memory healthy = ingress.unavailabilityFindingContext(request, target);
+        address modules = address(manager.moduleRegistry());
+        bytes memory query = abi.encodeCall(
+            IStreamModuleRegistry.isModuleEligible,
+            (
+                target.recoveryRegistry,
+                keccak256("STREAM_ARTWORK_FINALITY_RECOVERY"),
+                bytes4(0x83685f5c)
+            )
+        );
+        avm.mockCall(modules, query, abi.encode(false));
+        vm.expectRevert(
+            abi.encodeWithSelector(T.ComponentChanged.selector, target.recoveryRegistry)
+        );
+        ingress.unavailabilityFindingContext(request, target);
+        avm.mockCall(modules, query, abi.encode(true));
+        _unavailabilityModule(
+            keccak256("ARTWORK_FINALITY_RECOVERY"),
+            target.recoveryRegistry,
+            keccak256("STREAM_ARTWORK_FINALITY_RECOVERY"),
+            type(IStreamArtistRecoveryIntent).interfaceId
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(T.ComponentChanged.selector, target.recoveryRegistry)
+        );
+        ingress.unavailabilityFindingContext(request, target);
+        _unavailabilityModule(
+            keccak256("ARTWORK_FINALITY_RECOVERY"),
+            target.recoveryRegistry,
+            keccak256("STREAM_ARTWORK_FINALITY_RECOVERY"),
+            0x83685f5c
+        );
+        U.Context memory restored = ingress.unavailabilityFindingContext(request, target);
+        require(
+            keccak256(abi.encode(healthy)) == keccak256(abi.encode(restored)),
+            "healthy primary module restores same preparation"
+        );
+        _recordUnavailability(request, target);
+    }
+
+    function testUnavailabilityCurrentActivitySameBlockCancelsFinding() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        _policy();
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            !valid && observed == hash, "same-block authenticated activity invalidates by epoch"
+        );
+    }
+
+    function testUnavailabilityCurrentActivityAtNoticeEqualityCancelsFinding() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        (Recovery.FindingRecord memory saved,) = ingress.unavailabilityFindingRecord(hash);
+        vm.warp(saved.noticeEndsAt);
+        _policy();
+        (bool valid,,,) = ingress.verifyRecoveryUnavailability(target);
+        require(!valid, "notice equality does not make unconsumed fallback irrevocable");
+    }
+
+    function testUnavailabilityGuardianRoleOnCurrentSafeDoesNotCancelFinding() public {
+        _selfGuardian();
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual op33 guardian path"
+        );
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            valid && observed == hash
+                && IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId).status == 4,
+            "role-only contest by same account is not current-principal authorization"
+        );
+    }
+
+    function testUnavailabilityFindingAdmittedWhileIdentityAlreadyContested() public {
+        _selfGuardian();
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        require(
+            executeSafe(artist, keys, address(ingress), 0, _contestData(0), 0),
+            "actual contested identity"
+        );
+        bytes32 hash = _recordUnavailability(request, target);
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(valid && observed == hash, "actual Identity4 permits governed inability finding");
+    }
+
+    function testUnavailabilityPrincipalVetoCountsButGuardianApprovalDoesNot() public {
+        _selfGuardian();
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        _newRotationSafe(492);
+        bytes32 rotation = _stageRotation(0);
+        bytes32 hash = _recordUnavailability(request, target);
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(IStreamArtistRotation.approveArtistRotation, (artistId, rotation)),
+                0
+            ),
+            "actual op30 guardian approval"
+        );
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(valid && observed == hash, "guardian approval remains role-specific");
+        require(
+            executeSafe(
+                artist,
+                keys,
+                address(ingress),
+                0,
+                abi.encodeCall(
+                    IStreamArtistRotation.vetoArtistRotation,
+                    (artistId, rotation, keccak256("current principal veto"))
+                ),
+                0
+            ),
+            "actual current principal veto"
+        );
+        (valid, observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            !valid && observed == hash,
+            "independently admitted current-principal veto cancels finding"
+        );
+    }
+
+    function testUnavailabilityFailedActivityAndLateArchivePreserveFindingThenExactProofRetry()
+        public
+    {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        T.PolicyConsent memory policy = T.PolicyConsent(1, PHASE, POLICY);
+        T.Authorization memory auth = _authorization(false);
+        auth.signature = hex"0102";
+        bytes32 roots = _roots();
+        (bool ok,) = address(ingress)
+            .call(abi.encodeCall(IStreamArtistOnboarding.recordPolicyConsent, (policy, auth)));
+        require(!ok && _roots() == roots, "failed signature leaves finding and nonce unchanged");
+        auth.signature = _signature(ingress.policyConsentDigest(policy, auth));
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtistArchiveV2.ArtistArchiveBlockNumberOverflow.selector,
+                uint256(type(uint64).max) + 1
+            )
+        );
+        ingress.recordPolicyConsent(policy, auth);
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            valid && observed == hash && _roots() == roots,
+            "late Archive rolls back nonce and activity cancellation"
+        );
+        vm.roll(1);
+        ingress.recordPolicyConsent(policy, auth);
+        (valid, observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            !valid && observed == hash, "same signed Safe proof succeeds and cancels exactly once"
+        );
+    }
+
+    function testUnavailabilityPreviewRejectsOwnerCodeDriftAndRestoresExactContext() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        U.Context memory before_ = ingress.unavailabilityFindingContext(request, target);
+        bytes memory code = suite.owners[0].code;
+        vm.etch(suite.owners[0], hex"00");
+        vm.expectRevert(abi.encodeWithSelector(T.ComponentChanged.selector, suite.owners[0]));
+        ingress.unavailabilityFindingContext(request, target);
+        vm.etch(suite.owners[0], code);
+        U.Context memory after_ = ingress.unavailabilityFindingContext(request, target);
+        require(
+            keccak256(abi.encode(before_)) == keccak256(abi.encode(after_)),
+            "all owner pins required for honest preparation"
+        );
+    }
+
+    function testUnavailabilityTimingGovernanceCapturesNoticeAndLaterRaiseDoesNotRewrite() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        ArtistUnitGovernance authority = ArtistUnitGovernance(
+            StreamArtistIdentityAuthority(suite.owners[2]).artistWindowAuthority()
+        );
+        bytes32 parameter = keccak256("ARTIST_UNAVAILABILITY_RECOVERY_NOTICE_SECONDS");
+        (uint64 value, uint64 floor, uint64 revision) = ingress.artistWindowInfo(parameter);
+        require(
+            value == 90 days && floor == 30 days && revision == 1, "actual notice window defaults"
+        );
+        authority.configureWindow(ingress, parameter, 30 days, revision, 1, false);
+        bytes32 hash = _recordUnavailability(request, target);
+        (Recovery.FindingRecord memory saved,) = ingress.unavailabilityFindingRecord(hash);
+        require(
+            saved.noticeSeconds == 30 days && saved.timingRevision == 2
+                && saved.noticeEndsAt == 1000 + 30 days,
+            "record snapshots actual governed duration/revision"
+        );
+        authority.configureWindow(ingress, parameter, 90 days, 2, 0, false);
+        (Recovery.FindingRecord memory unchanged,) = ingress.unavailabilityFindingRecord(hash);
+        require(
+            keccak256(abi.encode(saved)) == keccak256(abi.encode(unchanged)),
+            "later operational raise preserves notice"
+        );
+    }
+
+    function testUnavailabilityNewTargetRequiresAuthoritativePriorActionTerminality() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 oldHash = _recordUnavailability(request, target);
+        (Recovery.FindingRecord memory oldRecord,) = ingress.unavailabilityFindingRecord(oldHash);
+        address authority = StreamArtistIdentityAuthority(suite.owners[2]).artistWindowAuthority();
+        bytes32 oldAction = target.recoveryActionId;
+        target.recoveryActionId = keccak256("second future scheduled recovery");
+        GovernanceAction memory action;
+        action.status = GovernanceActionStatus.SCHEDULED;
+        action.actionClass = 2;
+        action.notBefore = uint64(block.timestamp + 91 days);
+        action.expiresAfter = uint64(block.timestamp + 100 days);
+        action.proposer = address(this);
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.governanceAction, (target.recoveryActionId)),
+            abi.encode(action)
+        );
+        vm.expectRevert(abi.encodeWithSelector(U.UnavailabilityFindingActive.selector, oldHash));
+        ingress.unavailabilityFindingContext(request, target);
+        action.status = GovernanceActionStatus.CANCELLED;
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.governanceAction, (oldAction)),
+            abi.encode(action)
+        );
+        U.Context memory context_ = ingress.unavailabilityFindingContext(request, target);
+        bytes32 findingAction = keccak256("second exact finding governance action");
+        avm.mockCall(
+            authority,
+            abi.encodeCall(IStreamGovernanceReads.currentAction, ()),
+            abi.encode(
+                true,
+                findingAction,
+                uint8(2),
+                context_.scopeHash,
+                context_.oldValueHash,
+                context_.newValueHash
+            )
+        );
+        bytes32 next = _recordUnavailability(request, target);
+        require(next != oldHash, "fresh finding and governance action for new recovery action");
+        (Recovery.FindingRecord memory saved, U.Admission memory admitted) =
+            ingress.unavailabilityFindingRecord(next);
+        require(
+            saved.governanceActionId == findingAction
+                && admitted.target.recoveryActionId == target.recoveryActionId
+                && saved.noticeSeconds == 90 days && saved.noticeEndsAt == 1000 + 90 days,
+            "new full notice and separate action association"
+        );
+        (Recovery.FindingRecord memory prior,) = ingress.unavailabilityFindingRecord(oldHash);
+        require(
+            keccak256(abi.encode(prior)) == keccak256(abi.encode(oldRecord)),
+            "prior finding stays immutable"
+        );
+    }
+
+    function _unavailabilityActivityEvent(
+        Vm.Log[] memory logs,
+        address signer,
+        uint8 class_,
+        uint16 operation
+    ) private view {
+        uint256 count;
+        for (uint256 i; i < logs.length; ++i) {
+            if (
+                logs[i].emitter == suite.owners[2] && logs[i].topics.length != 0
+                    && logs[i].topics[0]
+                        == keccak256(
+                            "ArtistUnavailabilityActivityRecorded(uint16,bytes32,address,uint8,uint16,uint256,uint256)"
+                        )
+            ) {
+                ++count;
+                require(
+                    logs[i].topics.length == 3 && logs[i].topics[1] == artistId
+                        && logs[i].topics[2] == bytes32(uint256(uint160(signer)))
+                        && keccak256(logs[i].data)
+                            == keccak256(
+                                abi.encode(uint16(1), class_, operation, uint256(0), uint256(1))
+                            ),
+                    "exact authenticated activity provenance"
+                );
+            }
+        }
+        require(count == 1, "one owner activity event");
+    }
+
+    function testUnavailabilitySuccessorPolicyCapabilityCancelsFindingWithClassThree() public {
+        _estateActivateAndAdopt(2);
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 hash = _recordUnavailability(request, target);
+        vm.recordLogs();
+        _policy();
+        _unavailabilityActivityEvent(vm.getRecordedLogs(), address(artist), 3, 14);
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        require(
+            !valid && observed == hash, "authenticated activated successor cancels pending fallback"
+        );
+    }
+
+    function testUnavailabilityDelegateEconomicsCancelsFindingWithoutPrincipalLiveness() public {
+        _delegateSetup();
+        bytes32 grant = _grant(_delegation(1, 4, 1000, 2000, 2));
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        _payout();
+        bytes32 hash = _recordUnavailability(request, target);
+        T.Identity memory prior = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        T.EconomicsConsent memory economics = _currentEconomics(address(primary));
+        vm.recordLogs();
+        bytes32 record = _delegateEconomics(economics, grant, 0);
+        _unavailabilityActivityEvent(vm.getRecordedLogs(), address(delegateSafe), 2, 15);
+        (bool valid, bytes32 observed,,) = ingress.verifyRecoveryUnavailability(target);
+        T.Identity memory after_ = IStreamArtistIdentityOwner(suite.owners[2]).identity(artistId);
+        require(
+            !valid && observed == hash && ingress.recordDelegation(record) == grant
+                && ingress.delegationRecord(grant).uses == 1,
+            "actual delegated authorization cancels with truthful provenance"
+        );
+        require(
+            after_.nonceHint == prior.nonceHint
+                && after_.lastAuthorityActionAt == prior.lastAuthorityActionAt,
+            "finding activity is separate from principal nonce and living-only estate marker"
+        );
+    }
+
+    function testUnavailabilityNewOwnerAndFixedChildrenRejectDirectCalls() public {
+        T.ActionContext memory c;
+        U.Input memory input;
+        StreamArtistIdentityAuthority owner = StreamArtistIdentityAuthority(suite.owners[2]);
+        StreamArtistIdentityEstateExtension writer =
+            StreamArtistIdentityEstateExtension(owner.identityEstateExtension());
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistIdentityEstateExtension.ExtensionWrongHost.selector, address(writer)
+            )
+        );
+        writer.recordUnavailability(c, input);
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        owner.recordUnavailability(c, input);
+        StreamArtistRegistryFinalityReadExtension reader =
+            StreamArtistRegistryFinalityReadExtension(ingress.registryFinalityReadExtension());
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtistRegistryFinalityReadExtension.ExtensionWrongHost.selector, address(this)
+            )
+        );
+        reader.unavailabilityFindingRecord(0);
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes memory call_ = abi.encodeCall(
+            IStreamArtistUnavailability.unavailabilityFindingContext, (request, target)
+        );
+        _economicsSafeRead(
+            address(ingress),
+            call_,
+            abi.encode(ingress.unavailabilityFindingContext(request, target))
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.Unauthorized.selector, address(this)));
+        ingress.recordUnavailabilityFinding(request, target);
+        _recordUnavailability(request, target);
+    }
+
+    function testUnavailabilityActualArchiveFailureRollsFindingReplayAndSameContextRetry() public {
+        (Recovery.FindingRequest memory request, U.Target memory target) = _unavailabilityFixture();
+        bytes32 before_ = _roots();
+        U.Context memory context_ = ingress.unavailabilityFindingContext(request, target);
+        address authority = StreamArtistIdentityAuthority(suite.owners[2]).artistWindowAuthority();
+        bytes memory data = abi.encodeCall(
+            IStreamArtistUnavailability.recordUnavailabilityFinding, (request, target)
+        );
+        vm.roll(uint256(type(uint64).max) + 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtistArchiveV2.ArtistArchiveBlockNumberOverflow.selector,
+                uint256(type(uint64).max) + 1
+            )
+        );
+        ArtistUnitGovernance(authority)
+            .executeModuleContext(
+                address(ingress),
+                data,
+                2,
+                context_.scopeHash,
+                context_.oldValueHash,
+                context_.newValueHash
+            );
+        require(
+            _roots() == before_
+                && StreamArtistIdentityAuthority(suite.owners[2])
+                        .latestUnavailabilityFinding(artistId, 1) == 0,
+            "late actual Archive rollback"
+        );
+        vm.roll(1);
+        U.Context memory restored = ingress.unavailabilityFindingContext(request, target);
+        require(
+            keccak256(abi.encode(context_)) == keccak256(abi.encode(restored)),
+            "same exact governance commitments retry"
+        );
+        ArtistUnitGovernance(authority)
+            .executeModuleContext(
+                address(ingress),
+                data,
+                2,
+                context_.scopeHash,
+                context_.oldValueHash,
+                context_.newValueHash
+            );
+        (bool valid, bytes32 hash,,) = ingress.verifyRecoveryUnavailability(target);
+        require(valid && hash != 0, "same exact call completes after healthy Archive");
+    }
 
     function _canonicalPublicationHost() private returns (ArtistCanonicalPublicationFixture f) {
         actualSaleRegistryFixture = true;
@@ -3189,6 +3868,7 @@ contract StreamArtistOnboardingTest is
                 uint16(18),
                 uint16(20),
                 uint16(21),
+                uint16(23),
                 uint16(24),
                 uint16(25),
                 uint16(26),

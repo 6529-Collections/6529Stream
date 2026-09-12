@@ -20,6 +20,8 @@ import "./StreamArtistSuccessionState.sol";
 import "./StreamArtistIdentityResolutionState.sol";
 import "./StreamArtistTimingState.sol";
 import "./StreamArtistEstateState.sol";
+import "./StreamArtistUnavailabilityState.sol";
+import "./StreamArtistIdentityActivity.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import {
     StreamArtistOnboardingTypes as T
@@ -38,19 +40,50 @@ abstract contract StreamArtistIdentityData {
     StreamArtistIdentityResolutionState.State internal _resolutions;
     // Estate state is appended after every prior Identity root; existing nested structs stay fixed.
     StreamArtistEstateState.State internal _estate;
+    StreamArtistUnavailabilityState.State internal _unavailability;
 
     function _noteLiving(
         StreamArtistIdentityState.OwnerContext memory o,
         mapping(bytes32 => T.ReplayCell) storage replay,
         bytes32 artistId,
         address signer,
+        uint16 operation,
         StreamArtistIdentityState.Mutation memory m
     ) internal {
-        (bytes32 stateDelta, bytes32 replayDelta) = StreamArtistEstateState.livingAction(
-            _estate, _identity, replay, o, artistId, signer
+        (bytes32 stateDelta, bytes32 replayDelta, bytes32 findingDelta) = StreamArtistIdentityActivity.note(
+            _estate, _identity, _unavailability, replay, o, artistId, signer, operation
         );
         if (stateDelta != bytes32(0)) m.state = keccak256(abi.encode(m.state, stateDelta));
         if (replayDelta != bytes32(0)) m.replay = keccak256(abi.encode(m.replay, replayDelta));
+        if (findingDelta != bytes32(0)) m.state = keccak256(abi.encode(m.state, findingDelta));
+    }
+
+    /// @dev Separate from the estate living-only predicate. The original callback must have
+    ///      authenticated this current principal and rolls the delta back on any later failure.
+    function _noteCurrentAuthority(
+        bytes32 artistId,
+        address signer,
+        uint16 operation,
+        StreamArtistIdentityState.Mutation memory m
+    ) internal {
+        bytes32 delta = StreamArtistUnavailabilityState.notePrincipalActivity(
+            _unavailability, _identity.identities[artistId], artistId, signer, operation
+        );
+        if (delta != bytes32(0)) m.state = keccak256(abi.encode(m.state, delta));
+    }
+
+    function _noteFindingActivity(
+        bytes32 artistId,
+        address signer,
+        uint8 authorityClass,
+        uint16 operation,
+        StreamArtistIdentityState.Mutation memory m
+    ) internal {
+        bytes32 delta =
+            StreamArtistUnavailabilityState.noteActivity(
+                _unavailability, artistId, signer, authorityClass, operation
+            );
+        if (delta != bytes32(0)) m.state = keccak256(abi.encode(m.state, delta));
     }
 
     function _identityContestResolution(bytes32 artistId, bytes32 subject)

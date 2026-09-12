@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 import "./StreamArtistIdentityDismissalOperations.sol";
+import "./StreamArtistUnavailabilityOperations.sol";
+import "./StreamArtistOnboardingReadDeployment.sol";
 import "./StreamArtistFinalityAdmission.sol";
 import "./StreamArtistSanctionOperations.sol";
 import "./StreamArtistSanctionConfirmationOperations.sol";
@@ -159,6 +161,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(18),
                 uint16(20),
                 uint16(21),
+                uint16(23),
                 uint16(24),
                 uint16(25),
                 uint16(26),
@@ -180,7 +183,7 @@ contract StreamArtistOnboardingCoordinator is
                 uint16(58)
             )
         );
-        reads = new StreamArtistOnboardingReads(suite);
+        reads = StreamArtistOnboardingReadDeployment.deployReader(suite);
     }
 
     modifier operation() {
@@ -207,6 +210,47 @@ contract StreamArtistOnboardingCoordinator is
         return StreamArtistSanctionOperations.record(
             _economicContext(), _sanctionPins(), actor, p, a
         );
+    }
+
+    function coordinateRecordUnavailabilityFinding(
+        address actor,
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external operation returns (bytes32) {
+        _unavailabilityPins();
+        return StreamArtistUnavailabilityOperations.record(
+            _economicContext(), finalityRegistry, actor, p, target
+        );
+    }
+
+    function prepareUnavailabilityFinding(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external view returns (U.Context memory) {
+        _unavailabilityPins();
+        return StreamArtistRecoveryAdmission.prepare(_suite, finalityRegistry, p, target).context_;
+    }
+
+    function verifyRecoveryUnavailability(U.Target calldata target)
+        external
+        view
+        returns (bool, bytes32, bytes32, uint64)
+    {
+        _unavailabilityPins();
+        return StreamArtistRecoveryAdmission.verify(_suite, finalityRegistry, target);
+    }
+
+    function _unavailabilityPins() private view {
+        for (uint256 i; i < 16; ++i) {
+            if (_targets[i].codehash != _runtimeHashes[i]) revert T.ComponentChanged(_targets[i]);
+        }
+        if (
+            _suite.core.codehash != _runtimeHashes[9]
+                || _suite.registry.codehash != _runtimeHashes[7]
+                || finalityRegistry.code.length == 0
+                || finalityRegistry.codehash != finalityRegistryCodeHash
+                || block.chainid != deploymentChainId
+        ) revert T.InvalidBinding();
     }
 
     function coordinateConfirmSanctionFinalized(address actor, uint256 collectionId)

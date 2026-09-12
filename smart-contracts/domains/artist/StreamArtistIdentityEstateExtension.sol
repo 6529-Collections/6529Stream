@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
+import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 
 import "./StreamArtistContentHashes.sol";
 
@@ -34,7 +35,8 @@ import "./StreamArtistTimingState.sol";
 contract StreamArtistIdentityEstateExtension is
     StreamArtistOwner,
     StreamArtistIdentityData,
-    IStreamArtistEstateEvents
+    IStreamArtistEstateEvents,
+    IStreamArtistUnavailabilityEvents
 {
     error ExtensionWrongHost(address actual);
     address private immutable _host;
@@ -65,6 +67,113 @@ contract StreamArtistIdentityEstateExtension is
         _;
     }
 
+    function consumeDelegatedEconomics(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.EconomicsConsent calldata p,
+        bytes32 designation,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 15);
+        _deadline(a.time);
+        if (designation == bytes32(0)) revert T.InvalidRecord();
+        record = StreamArtistEconomicsHashes.economicsRecordForAuthority(
+            _environment(), p, designation, b.artistId, proof.signer, 2, a.nonce, _now()
+        );
+        _authorizeDelegate(
+            c,
+            b,
+            p.collectionId,
+            D.ECONOMICS,
+            grant,
+            a,
+            proof,
+            StreamArtistEconomicsHashes.economicsDigest(_environment(), p, a.nonce, a.time),
+            record
+        );
+    }
+
+    function consumeDelegatedRoyaltyFreeze(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        T.RoyaltyFreeze calldata p,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof
+    ) external onlyHost returns (bytes32 record) {
+        _check(c, 20);
+        _deadline(a.time);
+        record = StreamArtistEconomicsHashes.royaltyFreezeRecordForAuthority(
+            _environment(), p, b.artistId, proof.signer, 2, a.nonce, _now()
+        );
+        _authorizeDelegate(
+            c,
+            b,
+            p.collectionId,
+            D.ROYALTY_FREEZE,
+            grant,
+            a,
+            proof,
+            StreamArtistEconomicsHashes.royaltyFreezeDigest(_environment(), p, a.nonce, a.time),
+            record
+        );
+    }
+
+    function _authorizeDelegate(
+        T.ActionContext calldata c,
+        T.Binding calldata b,
+        uint256 collectionId,
+        uint32 capability,
+        bytes32 grant,
+        T.Authorization calldata a,
+        T.SignerApproval calldata proof,
+        bytes32 digest,
+        bytes32 record
+    ) private {
+        if (_estate.grantEpoch[grant] != _estate.delegationEpoch[b.artistId]) {
+            revert D.DelegationUnavailable(grant);
+        }
+        StreamArtistSuccessionState.requireAllowed(_succession, _rotations, b.artistId, capability);
+        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.authorizeDelegate(
+            _identity,
+            _replay,
+            _delegations,
+            _ownerContext(),
+            c,
+            b,
+            collectionId,
+            capability,
+            grant,
+            a,
+            proof,
+            digest,
+            record
+        );
+        _noteFindingActivity(b.artistId, proof.signer, 2, c.operationId, m);
+        _commit(c, m.action, m.state, m.replay, m.record);
+    }
+
+    function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)
+        external
+        onlyHost
+        returns (bytes32)
+    {
+        _check(c, 23);
+        address executor = IStreamArtistIdentityContestOwner(address(this)).artistWindowAuthority();
+        if (c.actor != executor) revert T.Unauthorized(c.actor);
+        StreamArtistUnavailabilityState.OwnerContext memory o =
+            StreamArtistUnavailabilityState.OwnerContext(
+                _environment(), operationCoordinator, archiveV2, domainId, _revision
+            );
+        StreamArtistUnavailabilityState.Mutation memory m = StreamArtistUnavailabilityState.record(
+            _unavailability, _replay, o, _identity.identities[p.terms.artistId], p
+        );
+        _commit(c, m.action, m.state, m.replay, m.record);
+        return m.record;
+    }
+
     function consumeSanction(
         T.ActionContext calldata c,
         T.Binding calldata b,
@@ -77,7 +186,7 @@ contract StreamArtistIdentityEstateExtension is
         (m, record) = StreamArtistIdentityConsentState.sanction(
             _identity, _replay, _ownerContext(), c, b, p, a, proof
         );
-        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, m);
+        _noteLiving(_ownerContext(), _replay, b.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -100,7 +209,7 @@ contract StreamArtistIdentityEstateExtension is
                 proof,
                 _currentIdentityClosure(p.artistId)
             );
-        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -117,7 +226,9 @@ contract StreamArtistIdentityEstateExtension is
         // This authenticated living transition supersedes a pending estate request.
         // Any later old/new proof or archive failure rolls the cancellation back.
         StreamArtistIdentityState.Mutation memory cancellation;
-        _noteLiving(_ownerContext(), _replay, p.artistId, oldProof.signer, cancellation);
+        _noteLiving(
+            _ownerContext(), _replay, p.artistId, oldProof.signer, c.operationId, cancellation
+        );
         StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.stageWithResolution(
             _rotations,
             _identity,
@@ -171,6 +282,7 @@ contract StreamArtistIdentityEstateExtension is
             expected,
             reasonHash
         );
+        _noteCurrentAuthority(artistId, c.actor, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -199,7 +311,7 @@ contract StreamArtistIdentityEstateExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistRotationState.revokeStanding(
             _rotations, _identity, _replay, _ownerContext(), c, p, a, proof
         );
-        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
+        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
         return m.record;
     }
@@ -266,6 +378,7 @@ contract StreamArtistIdentityEstateExtension is
         StreamArtistIdentityState.Mutation memory m = StreamArtistEstateState.cancel(
             _estate, _identity, _replay, _ownerContext(), c, artistId, expected
         );
+        _noteCurrentAuthority(artistId, c.actor, c.operationId, m);
         _commit(c, m.action, m.state, m.replay, m.record);
     }
 
@@ -343,6 +456,10 @@ contract StreamArtistIdentityEstateExtension is
 
     function replayCell(bytes32 key) public view override onlyHost returns (T.ReplayCell memory) {
         return _replay[key];
+    }
+
+    function _deadline(uint64 deadline) private view {
+        if (block.timestamp > deadline) revert T.ExpiredAuthorization(deadline);
     }
 
     function _ownerContext() private view returns (StreamArtistIdentityState.OwnerContext memory) {

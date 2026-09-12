@@ -321,6 +321,147 @@ from preserved historical sanction/current consumption, and separately prove
 that a real collection dispute stops consumption. Rotation/estate continuity
 must preserve both the recorded sanction and its permanent subject preimage.
 
+## Recovery approval and unavailability admission
+
+The integrator authorized the canonical recovery companion and artist operations
+22/23 implementation on 12 September 2026. This supersedes ADR 0020's historical
+unassigned-owner/source-authorization block for this implementation lane; it
+does not turn that proposal's unimplemented interfaces into release evidence.
+The integrator owns actual OwnerRecords notice/evidence and Core/router wiring.
+The artist/finality builder owns approval, finding and companion mechanics.
+
+Operation 22 preserves the original seven-field `StreamArtistRecoveryApproval`
+typed payload and twelve-word permanent approval record. Its original Finality
+address, record hash and recovery-manifest hash are exact. Fresh admission must
+validate the actual staged canonical recovery intent and current sanction-class
+authority, including each applicable collaborator or delegation rule. Identity
+association, deadline, digest and retained proof are separate immutable evidence;
+they do not enter the permanent record preimage. Saved approval verification
+does not repeat current signer/capability, deadline or digest-revocation checks.
+Same-association rotation/estate preserves consumed approval. Adjudicated
+association supersession remains distinct from ordinary authority succession.
+
+The scoped-authority sentence in AA-RECOVERY is clarified in the context of
+its explicit first requirement and ADR 0013 U4: living `AUTH_ARTIST` remains
+eligible for supported scopes. The exclusion for TOKEN, RELEASE, SEASON and
+VIEW applies to `AUTH_STEWARD`; successor/delegation still requires
+`CAP_SANCTION` and the applicable collaborator policy. The parallel sanction
+text describes scoped *posthumous* finality. This is an explicit pre-genesis
+clarification of the recovery sentence's omitted lifetime-artist case, not a
+claim that its literal abbreviated list already says the same thing. Approval
+binds the original Finality record and manifest, without a new action-ID field;
+the companion binds and records its selected evidence separately per action.
+
+The proof backlink in AA-RECOVERY requirement 3 is represented by ADR 0020's
+immutable executed recovery record: it stores the original staged manifest and
+the exact eleven-field evidence snapshot, and the executed `recoveryRouteHash`
+commits to both. The original signed/staged intent remains proof-free; it does
+not contain a future approval or finding hash. An optional serialized execution
+evidence document must use its own schema, content hash and URI while referencing
+those exact stored facts and the original manifest. It must never reuse the
+staged manifest's content hash or URI to imply that these are identical bytes.
+
+Operation 22 resolves the previously unspecified
+`consent_finality.replay.recovery_approval_key` scope as
+`keccak256(abi.encode(keccak256("6529STREAM_ARTIST_RECOVERY_APPROVAL_KEY_V1"), artistId, bindingGeneration, bindingHash, ApprovalTerms))`
+inside the existing OwnerReplayV2 envelope. This is a new implementation
+definition, not a retroactive claim that the foundation packet already pinned
+the key. An exact association and terms select one immutable record; a global
+latest record across different artists or associations cannot shadow it.
+Any corrective association or adjudicated supersession must be established
+through its actual authorized record path. A differing generation or binding
+hash alone is not proof of adjudication. Historical approval records and
+already executed recovery evidence remain available after such transitions.
+
+Operation 23 preserves the original ten-word permanent finding record. Its
+`governanceActionId` is the actual class-2 arbiter action that records the
+finding, never the separate recovery action. Supplemental immutable admission
+binds one actual recovery companion/runtime, one canonical scope, one original
+Finality record, one recovery manifest and one recovery action. It also retains
+the actual binding association, notice duration/revision, authority-activity
+epoch and governance witness. These fields are archived with the finding but
+do not alter its original hash or event. The default artist notice is 90 days
+with the existing 30-day immutable floor; observed inclusion time determines
+the exact notice end. Later timing changes cannot rewrite it.
+
+Two previously unspecified edges are explicitly decided for this pre-genesis
+implementation. Successful authenticated CURRENT artist-authority activity
+invalidates unexecuted fallback use both during the notice and after its end.
+This extends AA-RECOVERY's literal during-notice rule to pending use; it is not
+claimed as unchanged packet semantics. Same-block activity must invalidate the
+finding, and any later owner/Archive failure must roll that invalidation back.
+The activity predicate is separately authenticated current authority, including
+an actually eligible successor or delegation path. It is not inferred from a
+nonce change, an arbitrary owner commit, a permissionless confirmation, a
+guardian/governance action, a passive read or a failed authorization. The estate
+living-principal cancellation rule remains separate.
+
+A finding is not a reusable blanket recovery permit. It can authorize only its
+one immutable companion/action/scope/intent association. The companion's exact
+canonical action replay supplies single consumption; a duplicate Artist
+consume operation is unnecessary. Executed recovery history retains the saved
+finding and notice end without repeating current activity or readiness reads.
+An earlier live finding cannot be replaced merely by asserting its recovery is
+terminal: admission must read authoritative action terminality or prove its
+activity cancellation. Each new recovery action needs a new bound finding and
+full notice, including after veto, cancellation or expiry of the earlier action.
+
+The recovery action is scheduled with a future `notBefore` after the prospective
+artist notice, then the finding is recorded for that exact action. Governance
+already permits a future start, requires a seven-day open interval for delayed
+classes, and bounds expiry to 365 days from scheduling. Finding admission checks
+the actual scheduled action and enough remaining time for its observed notice;
+an action scheduled too early does not borrow elapsed notice. A longer configured
+notice must still fit the canonical action window. Recovery request/intent and
+action commitments exclude future finding/approval/owner-evidence heads, so this
+ordering creates no hash cycle. OwnerRecords retains its distinct action-bound
+72-hour notice and expiry/new-action rule.
+
+The narrow `IStreamArtistRecoveryIntent` read must derive the exact three
+governance commitments and request hash from retained canonical intent bytes,
+original Finality and route lineage on the selected companion. Its inputs are
+the canonical scope, original record and manifest hash. It does not accept
+caller-supplied ready flags or replace validation with a detached hash. The
+artist ingress and the final companion execution independently repeat current
+pins and exact fact joins. The six encoding and six state-harness tests are
+bounded prerequisites; they do not establish this actual producer, artist
+ingress, canonical governance, fallback execution or owner-notice composition.
+
+The admitted finding additionally commits to the exact four-word recovery-intent
+facts hash (scope, old state, new state and request), separately from the manifest.
+Current-use reads recompute it. Scheduling evidence in the artist layer establishes
+an actual class-2 scheduled action and its window; the action header's target and
+selector identify only the first batch call and do not prove a later call's contents.
+The companion must match the actual executing action and per-call context to all
+four saved intent facts before consuming fallback evidence. No batch-membership
+claim is made from the header alone.
+
+Current candidate preparation checks all immutable artist suite code pins and
+current Core-selected artist/recovery target code, primary module identity and
+current ModuleRegistry eligibility. The recovery discovery identity remains
+ADR 0020's `STREAM_ARTWORK_FINALITY_RECOVERY` / `0x83685f5c`, never the additive
+intent caller subset. Incident suspension stops admission and current use;
+immutable executed history remains separate. Operation 23 is included in the
+Coordinator's supported-operation configuration commitment.
+
+Size-driven extraction preserves explicit selectors and constructor topology.
+Identity registration and delegation revocation execute in its existing first
+writer; the two delegated economics/freeze callbacks execute directly in its
+second writer, while the first writer retains compatibility forwarding through
+the Identity's immutable second-child getter. Every callback validates its fixed
+host and retains one owner check/commit. The facade's third reader and the
+Coordinator's original Reads child use linked constructor helpers with CREATE
+in the original creator context, preserving their nonces and arguments. The
+facade policy digest remains in its fixed reader with the same environment and
+preimage. No mutable binding, storage routing table or new constructor argument
+is introduced.
+
+Guardian-only approval 30 and role-only contest 33 do not establish activity,
+even when the account also holds current artist authority. Rotation veto 31
+has an independent current-principal admission branch; only that successful
+branch invalidates a pending finding. This finding-only exception does not
+change the separate estate living-principal cancellation rule.
+
 ## Acceptance and remaining work
 
 Required tests include an actual threshold-Safe/Executor class-2 path, direct

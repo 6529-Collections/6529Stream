@@ -8,6 +8,7 @@ import "./StreamArtistRegistryWriterExtension.sol";
 import "./StreamArtistRegistryReadExtension.sol";
 import "./StreamArtistRegistryFinalityReadExtension.sol";
 import "./StreamArtistRegistryExtensionDeployment.sol";
+import "./StreamArtistFinalityReadDeployment.sol";
 import "./StreamArtistEstateCoverage.sol";
 import "../../interfaces/stream/artist/IStreamArtistCommercialAuthority.sol";
 import "../../interfaces/stream/artist/IStreamArtistRecordPublication.sol";
@@ -60,6 +61,7 @@ contract StreamArtistOnboardingRegistry is
     IStreamArtistFinalityBinding,
     IStreamArtistSanction,
     IStreamArtistSanctionConfirmation,
+    IStreamArtistUnavailability,
     IStreamArtworkFinalityComponent,
     IStreamArtworkScopedFinalityComponent,
     StreamModuleBase,
@@ -74,6 +76,36 @@ contract StreamArtistOnboardingRegistry is
     address public immutable override archivalCoverage;
     bytes32 public immutable override archivalCoverageCodeHash;
     bytes32 public immutable override archivalCoverageConfigurationHash;
+
+    function recordUnavailabilityFinding(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external returns (bytes32) {
+        _forwardRegistryWriter();
+    }
+
+    function unavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, U.Admission memory)
+    {
+        _forwardFinalityRead();
+    }
+
+    function unavailabilityFindingContext(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external view returns (U.Context memory) {
+        _forwardFinalityRead();
+    }
+
+    function verifyRecoveryUnavailability(U.Target calldata target)
+        external
+        view
+        returns (bool, bytes32, bytes32, uint64)
+    {
+        _forwardFinalityRead();
+    }
 
     function recordArtistSanction(Q.Request calldata p, T.Authorization calldata a)
         external
@@ -186,7 +218,7 @@ contract StreamArtistOnboardingRegistry is
             address(new StreamArtistRegistryWriterExtension(address(this), coordinator_));
         registryReadExtension = StreamArtistRegistryExtensionDeployment.deployReader(coordinator_);
         registryFinalityReadExtension =
-            address(new StreamArtistRegistryFinalityReadExtension(address(this), coordinator_));
+            StreamArtistFinalityReadDeployment.deployReader(coordinator_);
         _registerGasParameter(GasParameterConfig("ARTIST_ERC1271_VERIFY_GAS", 150_000, 90_000, 2));
         _registerGasParameter(GasParameterConfig("ARTIST_SALE_FACTS_READ_GAS", 150_000, 50_000, 2));
         _registerGasParameter(
@@ -211,7 +243,8 @@ contract StreamArtistOnboardingRegistry is
     }
 
     function supportsInterface(bytes4 id) public view override returns (bool) {
-        return id == type(IStreamArtistMintConsent).interfaceId
+        return id == type(IStreamArtistUnavailability).interfaceId
+            || id == type(IStreamArtistMintConsent).interfaceId
             || id == type(IStreamArtistAttribution).interfaceId
             || id == type(IStreamArtistOnboarding).interfaceId
             || id == type(IStreamArtistContentRatification).interfaceId
@@ -1222,7 +1255,7 @@ contract StreamArtistOnboardingRegistry is
         view
         returns (bytes32)
     {
-        return StreamArtistHashes.policyDigest(_environment(), p, a);
+        _forwardFinalityRead();
     }
 
     function economicsConsentDigest(T.EconomicsConsent calldata p, T.Authorization calldata a)

@@ -42,6 +42,34 @@ contract StreamArtistRegistryFinalityReadExtension {
         _;
     }
 
+    function unavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        onlyHost
+        returns (Recovery.FindingRecord memory, U.Admission memory)
+    {
+        return IStreamArtistUnavailabilityOwner(_contentSuite().owners[2])
+            .unavailabilityFindingRecord(hash);
+    }
+
+    function unavailabilityFindingContext(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external view onlyHost returns (U.Context memory) {
+        return IStreamArtistUnavailabilityCoordinator(operationCoordinator)
+            .prepareUnavailabilityFinding(p, target);
+    }
+
+    function verifyRecoveryUnavailability(U.Target calldata target)
+        external
+        view
+        onlyHost
+        returns (bool, bytes32, bytes32, uint64)
+    {
+        return StreamArtistOnboardingCoordinator(operationCoordinator)
+            .verifyRecoveryUnavailability(target);
+    }
+
     function prepareArtistSanction(Q.Request calldata p)
         external
         view
@@ -108,6 +136,15 @@ contract StreamArtistRegistryFinalityReadExtension {
         returns (StreamFinalityComponentState memory)
     {
         return StreamArtistSanctionReads.component(_contentSuite(), scope);
+    }
+
+    function policyConsentDigest(T.PolicyConsent calldata p, T.Authorization calldata a)
+        external
+        view
+        onlyHost
+        returns (bytes32)
+    {
+        return StreamArtistHashes.policyDigest(_environment(), p, a);
     }
 
     function sanctionDigest(S.Terms calldata p, T.Authorization calldata a)

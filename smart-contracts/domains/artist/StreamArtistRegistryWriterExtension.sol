@@ -42,6 +42,14 @@ contract StreamArtistRegistryWriterExtension {
         _;
     }
 
+    function recordUnavailabilityFinding(
+        Recovery.FindingRequest calldata p,
+        U.Target calldata target
+    ) external onlyHost returns (bytes32) {
+        return IStreamArtistUnavailabilityCoordinator(operationCoordinator)
+            .coordinateRecordUnavailabilityFinding(msg.sender, p, target);
+    }
+
     function recordArtistSanction(Q.Request calldata p, T.Authorization calldata a)
         external
         onlyHost

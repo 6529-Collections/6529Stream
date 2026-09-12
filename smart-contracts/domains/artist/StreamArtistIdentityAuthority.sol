@@ -7,6 +7,7 @@ import "./StreamArtistEconomicsHashes.sol";
 
 import "./StreamArtistOwner.sol";
 import "./StreamArtistIdentityData.sol";
+import "../../interfaces/stream/artist/IStreamArtistUnavailability.sol";
 import "./StreamArtistIdentityWriterExtension.sol";
 import "./StreamArtistIdentityExtensionDeployment.sol";
 import "./StreamArtistEstateExtensionDeployment.sol";
@@ -26,6 +27,7 @@ import "./StreamArtistTimingState.sol";
 import "./StreamArtistEstateReads.sol";
 import "./StreamArtistEstateReadEncoding.sol";
 import "./StreamArtistEstateTiming.sol";
+import "./StreamArtistWindowConfiguration.sol";
 import "../../interfaces/stream/artist/IStreamArtistEstateOwner.sol";
 import "../../interfaces/stream/artist/IStreamArtistRotationOwner.sol";
 import {
@@ -38,7 +40,8 @@ contract StreamArtistIdentityAuthority is
     StreamArtistOwner,
     StreamArtistIdentityData,
     IStreamArtistIdentityDismissalEvents,
-    IStreamArtistEstateEvents
+    IStreamArtistEstateEvents,
+    IStreamArtistUnavailabilityEvents
 {
     // Retain the owner ABI for errors propagated by the linked mechanics.
     error InvalidPriorStanding(address priorAddress);
@@ -51,10 +54,68 @@ contract StreamArtistIdentityAuthority is
     error InvalidTimestamp(uint64 timestamp);
     error InvalidRecord();
     error Replay(bytes32 replayKey);
+    error StaleOwnerSnapshot(bytes32 domainId);
+    error InvalidOperation(uint16 operationId);
+    error ExpiredAuthorization(uint64 deadline);
     using StreamArtistNonceAvailability for StreamArtistNonceAvailability.Index;
     address public immutable artistWindowAuthority;
     address public immutable identityWriterExtension;
     address public immutable identityEstateExtension;
+
+    function recordUnavailability(T.ActionContext calldata c, U.Input calldata p)
+        external
+        returns (bytes32)
+    {
+        _forwardEstateWriter();
+    }
+
+    function unavailabilityFindingRecord(bytes32 hash)
+        external
+        view
+        returns (Recovery.FindingRecord memory, U.Admission memory)
+    {
+        _returnResolution(StreamArtistUnavailabilityState.recordEncodedRead(_unavailability, hash));
+    }
+
+    function latestUnavailabilityFinding(bytes32 artistId, uint256 collectionId)
+        external
+        view
+        returns (bytes32)
+    {
+        return _unavailability.latest[
+            StreamArtistUnavailabilityState.associationKey(artistId, collectionId)
+        ];
+    }
+
+    function unavailabilityFindingContext(U.Input calldata p)
+        external
+        view
+        returns (U.Context memory)
+    {
+        _returnResolution(
+            StreamArtistUnavailabilityState.contextEncodedRead(
+                _unavailability, _unavailabilityContext(), _identity.identities[p.terms.artistId], p
+            )
+        );
+    }
+
+    function unavailabilityFindingLive(bytes32 hash, T.Binding calldata b)
+        external
+        view
+        returns (bool)
+    {
+        return StreamArtistUnavailabilityState.live(_unavailability, hash, b);
+    }
+
+    function _unavailabilityContext()
+        private
+        view
+        returns (StreamArtistUnavailabilityState.OwnerContext memory)
+    {
+        return StreamArtistUnavailabilityState.OwnerContext(
+            _environment(), operationCoordinator, archiveV2, domainId, _revision
+        );
+    }
 
     function consumeSanction(
         T.ActionContext calldata c,
@@ -690,17 +751,12 @@ contract StreamArtistIdentityAuthority is
     }
 
     function artistWindowInfo(bytes32 parameter) external view returns (uint64, uint64, uint64) {
-        if (parameter == keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) {
-            return StreamArtistEstateState.timing(_estate);
-        }
-        return StreamArtistTimingState.info(_rotations, parameter);
+        return StreamArtistWindowConfiguration.info(_rotations, _estate, _unavailability, parameter);
     }
 
     function artistWindowScope(bytes32 parameter) external view returns (bytes32) {
-        if (parameter != keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) {
-            StreamArtistTimingState.info(_rotations, parameter);
-        }
-        return StreamArtistTimingState.scope(parameter);
+        return
+            StreamArtistWindowConfiguration.scope(_rotations, _estate, _unavailability, parameter);
     }
 
     function artistWindowStateHash(bytes32 parameter, uint64 value, uint64 revision)
@@ -708,10 +764,9 @@ contract StreamArtistIdentityAuthority is
         view
         returns (bytes32)
     {
-        uint64 floor;
-        if (parameter == keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) floor = 90 days;
-        else (, floor,) = StreamArtistTimingState.info(_rotations, parameter);
-        return StreamArtistTimingState.stateHash(parameter, value, floor, revision);
+        return StreamArtistWindowConfiguration.stateHash(
+            _rotations, _estate, _unavailability, parameter, value, revision
+        );
     }
 
     function configureArtistWindow(
@@ -722,14 +777,15 @@ contract StreamArtistIdentityAuthority is
     ) external {
         if (msg.sender != operationCoordinator) revert T.Unauthorized(msg.sender);
         if (block.chainid != deploymentChainId) revert T.InvalidBinding();
-        if (parameter == keccak256("ARTIST_ESTATE_ACTIVATION_NOTICE_SECONDS")) {
-            StreamArtistEstateTiming.configure(
-                _estate, artistWindowAuthority, actor, newValue, expectedRevision
-            );
-            return;
-        }
-        StreamArtistTimingState.configure(
-            _rotations, artistWindowAuthority, actor, parameter, newValue, expectedRevision
+        StreamArtistWindowConfiguration.configure(
+            _rotations,
+            _estate,
+            _unavailability,
+            artistWindowAuthority,
+            actor,
+            parameter,
+            newValue,
+            expectedRevision
         );
     }
 
@@ -858,14 +914,7 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
-        _check(c, 27);
-        _deadline(a.time);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.revokeDelegation(
-            _identity, _replay, _delegations, _ownerContext(), c, p, a, proof
-        );
-        _noteLiving(_ownerContext(), _replay, p.artistId, proof.signer, m);
-        _commit(c, m.action, m.state, m.replay, m.record);
-        return m.record;
+        _forwardIdentityWriter();
     }
 
     function consumeDelegatedEconomics(
@@ -877,7 +926,7 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
-        _forwardIdentityWriter();
+        _forwardEstateWriter();
     }
 
     function consumeDelegatedRoyaltyFreeze(
@@ -888,7 +937,7 @@ contract StreamArtistIdentityAuthority is
         T.Authorization calldata a,
         T.SignerApproval calldata proof
     ) external returns (bytes32 record) {
-        _forwardIdentityWriter();
+        _forwardEstateWriter();
     }
 
     function registerIdentity(
@@ -899,12 +948,7 @@ contract StreamArtistIdentityAuthority is
         bytes calldata document,
         string calldata displayName
     ) external returns (bytes32) {
-        _check(c, 1);
-        StreamArtistIdentityState.Mutation memory m = StreamArtistIdentityState.register(
-            _identity, _replay, _ownerContext(), artist, documentHash, uri, document, displayName
-        );
-        _commit(c, m.action, m.state, m.replay, m.record);
-        return m.record;
+        _forwardIdentityWriter();
     }
 
     function consumeAcceptance(
