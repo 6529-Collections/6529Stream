@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added native secondary private offers and custody sales with exact typed
+  revocation, buyer binding, royalty settlement and pull credits. Forty-two
+  domain cases, fuzzing and both production compiler profiles pass independent
+  review; actual-current Core/royalty composition remains pending.
+- Added saved governance stage planning for Safe callers, with seven reviewed
+  tests covering real delays, exact action matching, catalog changes and
+  idempotent execution. Full operator activation remains in development.
 - Adopted the complete museum semantic specification under ADR 0036, including
   CIDOC CRM/Linked Art, Getty TGN, attributed records and offline dossier exports.
   Tightened review authority, identity, bounded documents and exact field
@@ -16,11 +23,14 @@ the release policy in `docs/release-policy.md`.
   buyer rebates, separate supplemental settlement and bounded refund escape.
   The subsequent compressed-aggregate and sparse-record optimization passes
   70 domain cases and six fuzz properties with independent review. Updated
-  current-contract composition is running; collector gas exceeds the required
+  current-contract composition passes the reviewed nine-case clearing/catalog/
+  archival run; collector gas exceeds the required
   ceiling and remains a candidate gate under ADR 0033.
 - Added estate activation and successor authority with immutable archival
   coverage dependencies. All 234 artist-domain cases pass independent review;
-  current-contract estate execution and operator migration remain pending.
+  three current-contract estate/Safe cases now pass independent review. Live
+  archival quorum, commercial mint after activation and operator migration
+  remain pending.
 - Distinguished test-asset engineering rehearsals from conforming candidates
   in ADR 0033, preserving all numerical collector-gas ceilings and failed gates.
 - Added a network-derived Arweave inclusion fixture with exact source provenance,
@@ -32,7 +42,8 @@ the release policy in `docs/release-policy.md`.
   Arweave checkpoints, native inclusion, independent storing-family receipts
   and current fixity records. Twenty-nine tests, two fuzz properties and separate
   default compiler products pass independent review. Real-network rehearsal and
-  estate composition remain pending under ADR 0031.
+  live quorum acceptance remain pending under ADR 0031; current estate
+  composition is covered by the three cases described above.
 
 - Added native supplemental clearing settlement tied to the original paid mint,
   with independent replay protection, current revenue rights and no second NFT.

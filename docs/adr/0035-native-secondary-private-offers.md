@@ -1,8 +1,10 @@
 # Native secondary private offers and custody authorization
 
 Status: implementation decision authorized by the integrator on 12 September
-2026. The source and focused runtime are in development; this document does not
-claim full sales conformance or release acceptance.
+2026. Source is integrated with 42 independently reviewed domain tests and
+fuzzing; both production compiler profiles fit the runtime limit. Actual-current
+Core/royalty composition, full sales conformance and release acceptance remain
+separate requirements.
 
 This increment implements buyer-bound `PRIVATE_SALE` (5) and atomic `OFFER_SALE`
 (6) over previously delivered Core tokens. It follows SSA-PRIVATE, SSA-OFFER,

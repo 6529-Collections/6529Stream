@@ -26,25 +26,35 @@ and historical interface/storage checks are retained. The optimized clearing
 increment is integrated as `73ae34c3` from `1407caf3`: 70 domain cases and six
 fuzz properties pass. These results are scoped to their captured inputs.
 
-The shared current fixture now initializes the canonical governance foundation
-before constructing the archival provider and artist facade. Ordinary governed
-catalog admission and product activation follow. Nine current clearing,
-catalog and archival-governance cases are compiling against the combined code.
-Three new actual-current estate/Safe cases have source review and a clean ABI
-preflight; their runtime remains pending. Persistent operator deployment still
-needs the same staged migration before the new system can be rehearsed.
+The shared current fixture initializes the canonical governance foundation
+before constructing the archival provider and artist facade. Nine current
+clearing, catalog and archival-governance cases pass independent review
+(`b2e33422`). Three estate cases now execute through the actual current
+contracts and Safe wallets, including notice, activation, cancellation and
+retry (`d4e73f1a`). Their observers are local test signers; the tests do not
+claim a live archival quorum or a commercial mint after estate activation.
 
-The artist builder is implementing primary token economics and a reviewed
-consent association fix for corrected artist bindings. The revenue builder is
-implementing native private offers and consignment. Complete metadata, finality,
-recovery, other sales and the full Safe call matrix retain their ledger scope.
+Native secondary private offers and custody sales are integrated (`7139688b`)
+with 42 reviewed domain cases and fuzzing. These use an actual registry and
+ERC-721 with Core/royalty doubles; full-current secondary delivery remains open.
+Seven Safe governance planning cases also pass independent review (`d0695608`):
+exact saved actions, real delays, stale-catalog rejection and idempotent resume.
+Operator deployment and catalog chunking are being rehearsed separately;
+neither has completed end-to-end activation. Each catalog extension invalidates
+older scheduled actions, so chunk preparation requires observed execution and
+fresh scheduling against the resulting catalog.
+
+The artist builder has completed the reviewed primary token economics and
+corrected-binding consent increment; its coherent commit is awaiting integration.
+Royalty token assignments are next. The revenue builder is implementing full
+ticket and offer revocation at the Manager/Ledger boundary. Complete metadata,
+finality, recovery, other sales and the full Safe call matrix retain their scope.
 
 Collector gas remains above its specified ceiling. ADR 0033 permits identified
 test-asset engineering deployments while preserving the failed candidate gate;
 it does not authorize a conforming-candidate claim from domain tests or a small
 rehearsal. The owner adopted the full museum semantic profile with reviewed
-refinements
-on 12 September (ADR 0036). Its [delivery plan](MUSEUM_DELIVERY.md) runs profile,
+refinements on 12 September (ADR 0036). Its [delivery plan](MUSEUM_DELIVERY.md) runs profile,
 record and exporter work alongside contract engineering; all twelve museum
 gates remain required for full-v1 acceptance. Adoption is not implementation
 or institutional-conformance evidence.
@@ -143,9 +153,9 @@ commits, tests and retained results in the evidence column when advancing it.
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
 | SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs and REQUIRED consent have separately captured current/Safe acceptance. Refund source `ea107e58` has 63 reviewed domain cases and two fuzz properties; actual refund4 plus retained dispute4 now pass independent review on the pre-dismissal snapshot. Wider variants and candidate acceptance remain |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Building: standard native Dutch and supplemental settlement have independently reviewed current composition. Clearing consumer `d807421e` has 59 reviewed domain cases, five fuzz properties and both compiler profiles; two actual-current Safe clearing cases pass independent review (`d9d7d46b`). A qualified full-current trace measures 8,755,856 gas in the first consumer call versus the 500,000 ceiling. Aggregate/storage optimization and shared mint/rights/settlement costs remain open; no cold gas or deployment acceptance |
-| SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Queued |
+| SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Building: `7139688b` implements native secondary PRIVATE_SALE and OFFER_SALE, with 42 reviewed domain cases and fuzzing. Prior collector delivery, actual-current Core/royalty composition and broader inventory sale kinds remain |
 | SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Queued |
-| MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / freed builder; shared artist/payment interfaces | Queued |
+| MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / revenue builder; shared artist/payment interfaces | Building: full-payload ticket/offer revocation at the Manager/Ledger boundary is assigned; other listed behaviors retain their acceptance scope |
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |
 | META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Queued |

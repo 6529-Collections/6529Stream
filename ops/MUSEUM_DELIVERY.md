@@ -9,9 +9,10 @@ exporters and institutional conformance are not claimed complete.
 ## Delivery and ownership
 
 The integrator owns delivery, design decisions, interfaces and acceptance.
-The current artist and revenue builders continue their contract assignments.
-The integrator starts the profile/data work alongside them; a builder slot
-transfers to the exporter after its current coherent contract handoff. The
+The artist builder continues royalty and finality work. After its coherent
+Manager/Ledger revocation handoff, the revenue builder takes the profile,
+fixtures and offline exporter. The integrator owns the shared record interface
+and onchain metadata integration alongside operator deployment. The
 independent reviewer challenges both the profile and actual export behavior.
 This is an assignment plan within the existing team, not a claim that extra
 agents or an external institution are already working.
@@ -23,9 +24,9 @@ No third-party authority match or museum review becomes a mint/finality gate.
 
 | Work package | Concrete output and completion check | Dependency | Owner | Status |
 | --- | --- | --- | --- | --- |
-| MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Integrator, then assigned profile builder | Specification allocated; executable bytes pending |
+| MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder after revocation handoff; integrator owns shared record interface | Specification allocated; executable bytes pending |
 | MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Metadata builder with integrator | Pending |
-| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Next available builder; integrator starts fixtures in parallel | Pending |
+| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder after revocation handoff | Pending |
 | MUSEUM-04 Cross-format and capture | LIDO/PREMIS/IIIF correspondence tests; draft-preview and confirmed-record adapters preserving artist text, stable IDs and attribution | MUSEUM-01; compose with MUSEUM-03 | Export/capture builder | Pending |
 | MUSEUM-05 Institutional evidence | Both existing named repository-family ingests and both external practitioner roles examine semantic packages and coverage; at least one review covers CRM/Linked Art and authority reconciliation | Reproducible MUSEUM-03/04 outputs | Integrator coordinates external evidence | Pending; no institution or reviewer engagement claimed |
 

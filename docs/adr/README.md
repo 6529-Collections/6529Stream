@@ -78,9 +78,17 @@ financial processing with terminal refund escape.
 [ADR 0031: Quorum-anchored estate archival profile](0031-quorum-anchored-estate-archival-profile.md)
 defines archival evidence and immutable dependencies for estate authority.
 
+[ADR 0032: Governance foundation before product activation](0032-governance-foundation-before-product-activation.md)
+defines the minimal canonical foundation followed by ordinary delayed catalog
+admission, registration and product selection.
+
 [ADR 0033: Engineering rehearsals and collector gas](0033-engineering-rehearsals-and-collector-gas.md)
 permits identified test-asset engineering deployments while failed collector
 gas gates remain visible and continue to constrain candidate acceptance.
+
+[ADR 0035: Native secondary private offers](0035-native-secondary-private-offers.md)
+defines exact sale/offer/custody authority, secondary treatment, permanent
+revocation and royalty settlement for the native private-sale increment.
 
 [ADR 0036: Adopt the museum semantic profile](0036-museum-semantic-profile.md)
 records owner adoption of the complete museum profile, review and identity
