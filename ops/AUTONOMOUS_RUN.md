@@ -47,8 +47,10 @@ accepted handoffs. The ten-case explicit-capability correction is integrated as 
 The next current snapshot passed all fourteen prior cases, including the final
 unique-holder activation planner. Its three new REQUIRED purchase tests failed
 in their direct artist-approval nonce setup; the corrected two-file fixture
-change has independent source review and a separate runtime run is pending.
-The original fourteen-pass/three-fail result is retained.
+change has independent source review and its separate three-case runtime now
+passes. Final artifact review is pending; the original fourteen-pass/three-fail
+result is retained. This captured composition predates governed entropy timing
+and the later operation-33 artist source.
 
 The reveal-fee increment has independently reviewed 44-case domain and
 30-case actual-Core metadata results, plus six planner regressions using the

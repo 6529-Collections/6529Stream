@@ -5,6 +5,7 @@ import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/OfficialSafeFixture.sol";
 import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
+import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 
 contract CurrentNativeRecipient is IERC721Receiver {
     error CurrentNativeRejected();
@@ -40,6 +41,11 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
     bytes32 private pwywProgram;
     bytes32 private openProgram;
     bool private useTemplate;
+    bool private requireSaleConsent;
+
+    function _fixtureSaleConsentScope() internal view override returns (uint8) {
+        return requireSaleConsent ? 1 : 0;
+    }
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -198,6 +204,103 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
                     : primaryResolver.resolvePrimaryAssignment(1, 0, PRIMARY_REVENUE_CLASS)
                     .assignmentHash
             )
+        );
+    }
+
+    function testRequiredFixedSaleRejectsSafeUntilArtistSafeRecordsExactTerms() public {
+        requireSaleConsent = true;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        require(artists.saleConsentScope(1) == 1, "actual immutable REQUIRED election");
+        IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e =
+            _signedExecution(61, address(payerSafe));
+        bytes memory data = abi.encodeCall(nativeSale.purchase, (e));
+        uint256 balance = address(payerSafe).balance;
+        uint256 safeNonce = payerSafe.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeRequiredNativeSafe(data, PRICE);
+        require(
+            payerSafe.nonce() == safeNonce && address(payerSafe).balance == balance
+                && core.totalSupply() == 0 && manager.nextOperationNonce() == 0
+                && !nativeSale.authorizationUsed(address(artistSafe), e.authorization.nonce)
+                && recorder.totalOfficialSettled(address(0)) == 0 && wallet.balance == 0,
+            "missing sale consent rolls back the actual Safe and money/mint ledgers"
+        );
+        _consentToNativeSale(saleId, nativeSale.saleRecord(saleId).configHash);
+        StreamNativeSettlementTypes.NativeSettlementCandidate memory c =
+            nativeSale.previewExecution(e);
+        require(executeSafe(payerSafe, keys, address(nativeSale), PRICE, data, 0), "exact Safe retry");
+        _settled(c, address(payerSafe), balance);
+        _claim();
+    }
+
+    function testRequiredFreePayWhatYouWantAndOpenProgramsNeedSeparateArtistConsents() public {
+        requireSaleConsent = true;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        bytes32[3] memory ids = [zeroProgram, pwywProgram, openProgram];
+        uint256[3] memory prices = [uint256(0), uint256(2000), PRICE];
+        uint256 initialBalance = address(payerSafe).balance;
+        for (uint256 i; i < ids.length; ++i) {
+            IStreamNativePricePrograms.PriceProgramExecution memory e =
+                _programExecution(ids[i], 70 + i, prices[i], prices[i]);
+            bytes memory data = abi.encodeCall(nativeSale.executePriceProgram, (e));
+            uint256 safeNonce = payerSafe.nonce();
+            uint256 supply = core.totalSupply();
+            uint256 revenue = recorder.totalOfficialSettled(address(0));
+            vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+            this.executeRequiredNativeSafe(data, prices[i]);
+            require(
+                payerSafe.nonce() == safeNonce && core.totalSupply() == supply
+                    && recorder.totalOfficialSettled(address(0)) == revenue
+                    && !nativeSale.authorizationUsed(address(artistSafe), e.authorization.nonce),
+                "each exact program needs its own consent, including zero-price"
+            );
+            _consentToNativeSale(ids[i], nativeSale.priceProgramRecord(ids[i]).configHash);
+            require(
+                executeSafe(payerSafe, keys, address(nativeSale), prices[i], data, 0),
+                "artist-approved price program succeeds through Safe"
+            );
+            require(
+                nativeSale.priceProgramRecord(ids[i]).mintedQuantity == 1
+                    && core.ownerOf(core.lastAllocatedTokenId()) == address(payerSafe),
+                "real recorded program mint"
+            );
+        }
+        require(
+            core.totalSupply() == 3 && manager.nextOperationNonce() == 3
+                && recorder.totalOfficialSettled(address(0)) == 3000 && wallet.balance == 3000
+                && address(payerSafe).balance == initialBalance - 3000,
+            "consent preserves free mint and exact paid accounting"
+        );
+    }
+
+    /// @dev External void boundary ensures expectRevert covers execTransaction, not a Safe getter.
+    function executeRequiredNativeSafe(bytes calldata data, uint256 value) external {
+        require(msg.sender == address(this), "fixture caller");
+        require(executeSafe(payerSafe, keys, address(nativeSale), value, data, 0), "Safe execution");
+    }
+
+    function _consentToNativeSale(bytes32 id, bytes32 configHash) private {
+        SaleTerms.Consent memory terms = SaleTerms.Consent(1, address(nativeSale), id, configHash);
+        T.Authorization memory authorization = T.Authorization(
+            IStreamArtistAuthorizationRevocation(address(artists))
+                .artistAuthorizationState(fixtureArtistId, bytes32(0), 0).nextUnusedNonce,
+            uint64(block.timestamp + 1 days),
+            ""
+        );
+        require(
+            executeSafe(
+                artistSafe, keys, address(artists), 0,
+                abi.encodeCall(IStreamArtistSaleAuthority.recordSaleConsent, (terms, authorization)), 0
+            ),
+            "actual artist Safe records exact sale terms"
+        );
+        (bool consented, bytes32 recordHash) = artists.isSaleConsented(1, id, configHash);
+        SaleTerms.Record memory record = artists.saleConsentRecord(recordHash);
+        require(
+            consented && record.signer == address(artistSafe) && record.artistId == fixtureArtistId
+                && record.terms.saleAdapter == address(nativeSale) && record.terms.saleId == id
+                && record.terms.saleConfigHash == configHash,
+            "actual owner record binds Safe artist and exact adapter configuration"
         );
     }
 
@@ -518,6 +621,14 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
             StreamNativeSettlementTypes.NativeSettlementCandidate memory c
         )
     {
+        e = _signedExecution(nonce, recipient);
+        c = nativeSale.previewExecution(e);
+    }
+
+    function _signedExecution(uint256 nonce, address recipient)
+        private
+        returns (IStreamNativeFixedPriceSaleAdapter.SaleExecutionData memory e)
+    {
         e.tokenData = TOKEN_DATA;
         e.authorization = IStreamNativeFixedPriceSaleAdapter.SaleAuthorization(
             saleId,
@@ -537,7 +648,6 @@ contract StreamCurrentNativeSettlementTest is StreamCurrentStackFixture, Officia
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
         e.platformSignature = abi.encodePacked(r, s, v);
         e.artistSignature = _artistProof(digest);
-        c = nativeSale.previewExecution(e);
     }
 
     function _settled(

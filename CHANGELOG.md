@@ -15,8 +15,9 @@ the release policy in `docs/release-policy.md`.
   and uses a new storage layout for new deployments.
 - Added exact artist sale-parameter consent across native and universal sales,
   with explicit capability admission and REQUIRED rejection in legacy consumers.
-  Focused consent and Safe tests pass; three new current purchase scenarios are
-  being rerun after correcting their artist nonce setup.
+  Focused consent and Safe tests pass. Three actual-current REQUIRED purchase
+  scenarios also pass after correcting their direct artist-approval nonce setup;
+  the original partial run is retained separately.
 - Added artist identity-compromise filings by eligible guardians, prior
   authorities and a staged arbiter, with immutable contest records and
   provisional-cohort consequences. The 159-case domain suite passes independent

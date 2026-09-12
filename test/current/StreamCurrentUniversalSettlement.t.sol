@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../helpers/StreamCurrentStackFixture.sol";
 import "../helpers/StreamCurrentAssetPolicy.sol";
 import "../helpers/OfficialSafeFixture.sol";
+import { StreamArtistSaleTypes as SaleTerms } from "../../smart-contracts/interfaces/stream/artist/StreamArtistSaleTypes.sol";
 import "../mocks/MockStreamPaymentToken.sol";
 import "../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
 import "../../smart-contracts/domains/revenue/StreamERC20PrimarySettlementAdapter.sol";
@@ -39,6 +40,11 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
     OfficialSafe private payerSafe;
     uint256[] private keys;
     bytes32 private saleId;
+    bool private requireSaleConsent;
+
+    function _fixtureSaleConsentScope() internal view override returns (uint8) {
+        return requireSaleConsent ? 1 : 0;
+    }
 
     function setUp() public {
         keys.push(0x5AFE01);
@@ -222,6 +228,68 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
         executor.executeGovernanceBatch(actionId, calls, data);
     }
 
+    function testRequiredUniversalSaleReadRejectsBeforeConsentAndSafePaymentThenSucceeds() public {
+        requireSaleConsent = true;
+        _deployCurrentStack(address(artistSafe), vm.addr(PLATFORM_KEY));
+        require(artists.saleConsentScope(1) == 1, "actual immutable REQUIRED election");
+        IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e =
+            _signedExecution(61, address(payerSafe), address(payerSafe));
+        bytes memory preview = abi.encodeCall(universalSale.previewExecution, (e));
+        uint256 safeNonce = payerSafe.nonce();
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "GS013"));
+        this.executeRequiredUniversalRead(preview);
+        require(
+            payerSafe.nonce() == safeNonce && core.totalSupply() == 0
+                && token.rawBalance(address(payerSafe)) == 10_000
+                && recorder.totalOfficialSettled(address(token)) == 0,
+            "actual Safe cannot obtain an executable preview without artist sale consent"
+        );
+        SaleTerms.Consent memory terms = SaleTerms.Consent(
+            1, address(universalSale), saleId, universalSale.saleRecord(saleId).configHash
+        );
+        T.Authorization memory authorization = T.Authorization(
+            IStreamArtistAuthorizationRevocation(address(artists))
+                .artistAuthorizationState(fixtureArtistId, bytes32(0), 0).nextUnusedNonce,
+            uint64(block.timestamp + 1 days),
+            ""
+        );
+        require(
+            executeSafe(
+                artistSafe, keys, address(artists), 0,
+                abi.encodeCall(IStreamArtistSaleAuthority.recordSaleConsent, (terms, authorization)), 0
+            ),
+            "actual artist Safe approves the registered ERC20 sale terms"
+        );
+        (bool consented, bytes32 recordHash) =
+            artists.isSaleConsented(1, saleId, terms.saleConfigHash);
+        SaleTerms.Record memory record = artists.saleConsentRecord(recordHash);
+        require(
+            consented && record.signer == address(artistSafe) && record.artistId == fixtureArtistId
+                && record.terms.saleAdapter == address(universalSale),
+            "canonical sale consent evidence"
+        );
+        require(
+            executeSafe(payerSafe, keys, address(universalSale), 0, preview, 0),
+            "identical Safe read succeeds after consent"
+        );
+        StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c =
+            universalSale.previewExecution(e);
+        require(
+            executeSafe(
+                payerSafe, keys, address(payment), 0,
+                abi.encodeCall(payment.settleERC20PrimarySaleByPayer, (c, abi.encode(e))), 0
+            ),
+            "actual Safe payer completes the artist-approved ERC20 purchase"
+        );
+        _assertSettled(c, address(payerSafe));
+    }
+
+    /// @dev External void boundary includes the real Safe transaction and its nonce rollback.
+    function executeRequiredUniversalRead(bytes calldata data) external {
+        require(msg.sender == address(this), "fixture caller");
+        require(executeSafe(payerSafe, keys, address(universalSale), 0, data, 0), "Safe read");
+    }
+
     function testActualSafeDirectPaymentMintsRevealsAndClaimsOfficialRevenue() public {
         (
             IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e,
@@ -370,6 +438,14 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
             StreamPrimarySettlementTypes.ERC20SettlementCandidate memory c
         )
     {
+        e = _signedExecution(nonce, caller, recipient);
+        c = universalSale.previewExecution(e);
+    }
+
+    function _signedExecution(uint256 nonce, address caller, address recipient)
+        private
+        returns (IStreamUniversalFixedPriceSaleAdapter.SaleExecutionData memory e)
+    {
         e.tokenData = TOKEN_DATA;
         e.authorization = IStreamUniversalFixedPriceSaleAdapter.SaleAuthorization(
             saleId,
@@ -388,7 +464,6 @@ contract StreamCurrentUniversalSettlementTest is StreamCurrentStackFixture, Offi
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(PLATFORM_KEY, digest);
         e.platformSignature = abi.encodePacked(r, s, v);
         e.artistSignature = _artistProof(digest);
-        c = universalSale.previewExecution(e);
     }
 
     function _intent(uint256 nonce)

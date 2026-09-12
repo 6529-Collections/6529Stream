@@ -131,6 +131,7 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         p.identityRecordHash = keccak256(document);
         p.identityRecordURI = "urn:6529stream:fixture:artist-identity";
         p.consentMode = 1;
+        p.saleConsentScope = _fixtureSaleConsentScope();
         p.collaborators = new T.CollaboratorRecord[](0);
         p.capabilityPolicyOverrides = new T.CapabilityPolicyOverride[](0);
         (fixtureArtistId,) = artists.proposeArtistBinding(1, p, document, "Stream Artist");
@@ -207,7 +208,12 @@ abstract contract StreamArtistSuiteFixture is CharacterizationTestBase {
         artists.recordPolicyConsent(p, a);
     }
 
-    function _artistAuthorization(bool signedAt) private returns (T.Authorization memory) {
+    /// @dev A scenario chooses the immutable binding election before proposing the artist.
+    function _fixtureSaleConsentScope() internal view virtual returns (uint8) {
+        return 0;
+    }
+
+    function _artistAuthorization(bool signedAt) internal returns (T.Authorization memory) {
         return T.Authorization(
             _artistAuthorizationNonce++,
             uint64(signedAt ? block.timestamp : block.timestamp + 1 days),
