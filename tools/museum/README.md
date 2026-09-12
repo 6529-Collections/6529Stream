@@ -11,7 +11,7 @@ On Windows PowerShell, no activation or execution-policy change is needed:
 ```powershell
 python -m venv .venv-tools/museum
 .\.venv-tools\museum\Scripts\python.exe -m pip install -r tools/museum/requirements-jsonld.txt
-.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art -v
+.\.venv-tools\museum\Scripts\python.exe -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory -v
 ```
 
 On Linux or macOS:
@@ -19,7 +19,7 @@ On Linux or macOS:
 ```sh
 python3 -m venv .venv-tools/museum
 .venv-tools/museum/bin/python -m pip install -r tools/museum/requirements-jsonld.txt
-.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art -v
+.venv-tools/museum/bin/python -m unittest tools.museum.test_foundation tools.museum.test_publication tools.museum.test_vocabulary tools.museum.test_linked_art tools.museum.test_schema_inventory -v
 ```
 
 Use that environment's Python for the following commands. Dependency installation
@@ -60,12 +60,18 @@ Ambiguous reuse of one IRI by two selected declarations rejects even when kinds
 match. An explicit compatible-reuse/continuation policy remains required before
 that case is supported; arrival order never selects an owner or declaration.
 
-The initial source-schema inventory accepts closed objects, homogeneous arrays,
+The original fixture-package inventory accepts closed objects, homogeneous arrays,
 typed scalars, scalar enums/constants and nullable values. It records container
 structure, absent optional fields, nulls, array indices/order and exact scalar
-bytes. Unimplemented schema combinators and references fail before validation;
-there is no remote schema loader. This limitation is an explicit implementation
-backlog, not permission to omit a source family or reduce the coverage denominator.
+bytes. Unimplemented schema combinators and references fail before validation in
+that original package path. The additive `schema_inventory` engine supports exact
+local references and applicable `allOf`/`oneOf`/`anyOf` branches, including the
+three candidate Museum schemas. It requires independent schema/source/evaluation
+hashes, validates the whole source first and emits every applicable branch and
+coverage row. See [the inventory boundary and command](../../docs/museum-schema-inventory.md).
+Both engines fail closed on unsupported constructs and have no remote schema
+loader. Remaining profiles are an implementation backlog, not permission to omit
+a source family or reduce its coverage denominator.
 
 New Stream JSON values are a JCS-compatible restricted profile: protocol integers
 and exact decimals use typed strings; floats are rejected. This restriction is
