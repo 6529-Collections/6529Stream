@@ -76,6 +76,13 @@ contract ERC20SaleArtistBoundary {
         artist = value;
     }
 
+    /// @dev This domain fixture explicitly elects NONE; the separate legacy guard suite
+    /// exercises REQUIRED, malformed reads and callback changes at this authority boundary.
+    function saleConsentScope(uint256 collectionId) external pure returns (uint8) {
+        require(collectionId == 1, "unknown collection");
+        return 0;
+    }
+
     function approveAssignmentRead(address resolver, bytes32 assignment) external {
         _consentedResolver = resolver;
         _consentedAssignment = assignment;

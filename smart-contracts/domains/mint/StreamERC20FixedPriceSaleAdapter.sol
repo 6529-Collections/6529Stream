@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamLegacySaleConsent.sol";
 import "./StreamSaleFunding.sol";
 import "./StreamSaleTemplate.sol";
 
@@ -289,7 +290,7 @@ contract StreamERC20FixedPriceSaleAdapter is
         proceeds[execution.profileId][execution.config.asset] += execution.config.price;
         totalProceeds[execution.config.asset] += execution.config.price;
         execution.escrowed = _pay(authorization.payer, execution);
-        StreamSaleArtist.requireArtist(
+        StreamLegacySaleConsent.requireNone(
             artistRegistry,
             artistRegistryCodeHash,
             execution.config.collectionId,
@@ -303,6 +304,12 @@ contract StreamERC20FixedPriceSaleAdapter is
                 || operationIds.length != 1 || operationIds[0] != execution.operationId
         ) revert SaleMintResultInvalid();
         tokenId = tokenIds[0];
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry,
+            artistRegistryCodeHash,
+            execution.config.collectionId,
+            authorization.artist
+        );
         _emitSale(authorization, execution, tokenId);
         emit SaleRevenueFunded(
             1,
@@ -340,7 +347,7 @@ contract StreamERC20FixedPriceSaleAdapter is
             revert SaleAuthorizationUsed(authorization.artist, authorization.nonce);
         }
         e.config = record.config;
-        StreamSaleArtist.requireArtist(
+        StreamLegacySaleConsent.requireNone(
             artistRegistry, artistRegistryCodeHash, e.config.collectionId, authorization.artist
         );
         e.digest = authorizationDigest(authorization);

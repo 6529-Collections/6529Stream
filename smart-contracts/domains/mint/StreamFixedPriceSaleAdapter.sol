@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./StreamSaleArtist.sol";
+import "./StreamLegacySaleConsent.sol";
 import "./StreamSaleFunding.sol";
 import "./StreamSaleTemplate.sol";
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
@@ -225,7 +226,7 @@ contract StreamFixedPriceSaleAdapter is
     ) external payable override nonReentrant returns (uint256 tokenId, bytes32 operationRoot) {
         if (paused) revert SalesPaused();
         _validateSale(sale, tokenData);
-        StreamSaleArtist.requireArtist(
+        StreamLegacySaleConsent.requireNone(
             artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
         );
         Execution memory e;
@@ -260,7 +261,7 @@ contract StreamFixedPriceSaleAdapter is
         );
         if (e.selected.templateId == bytes32(0)) _requirePrimaryPolicy(sale);
         else StreamSaleTemplate.requireCurrent(revenueResolver, sale.collectionId, e.selected);
-        StreamSaleArtist.requireArtist(
+        StreamLegacySaleConsent.requireNone(
             artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
         );
         uint256[] memory tokenIds;
@@ -271,6 +272,9 @@ contract StreamFixedPriceSaleAdapter is
                 || operationIds.length != 1 || operationIds[0] != e.operationId
         ) revert SaleMintResultInvalid();
         tokenId = tokenIds[0];
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, sale.collectionId, sale.artist
+        );
         _emitSale(sale, e.id, e.digest, tokenId, operationRoot, e.wallet);
         emit SaleRevenueFunded(
             1, e.id, operationRoot, sale.profileId, e.wallet, address(0), msg.value, e.escrowed

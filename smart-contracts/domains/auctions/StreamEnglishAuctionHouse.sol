@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "../mint/StreamSaleArtist.sol";
+import "../mint/StreamLegacySaleConsent.sol";
 import "../mint/StreamSaleFunding.sol";
 
 import "../../interfaces/stream/mint/IStreamMintReads.sol";
@@ -195,7 +196,7 @@ contract StreamEnglishAuctionHouse is
     ) external override nonReentrant returns (uint256 tokenId) {
         if (paused) revert AuctionsPaused();
         _validateAuthorization(authorization, tokenData);
-        StreamSaleArtist.requireArtist(
+        StreamLegacySaleConsent.requireNone(
             artistRegistry, artistRegistryCodeHash, authorization.collectionId, authorization.artist
         );
         bytes32 digest = authorizationDigest(authorization);
@@ -205,6 +206,9 @@ contract StreamEnglishAuctionHouse is
         bytes32 id = authorizationId(authorization.artist, authorization.nonce);
         bytes32 operationRoot;
         (tokenId, operationRoot) = _mintAuctionToken(authorization, tokenData, digest, id);
+        StreamLegacySaleConsent.requireNone(
+            artistRegistry, artistRegistryCodeHash, authorization.collectionId, authorization.artist
+        );
         _storeAuction(tokenId, authorization, wallet, id, operationRoot);
         _emitAuctionCreated(tokenId, authorization, id, operationRoot, digest, wallet);
     }
