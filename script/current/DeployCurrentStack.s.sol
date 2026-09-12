@@ -65,37 +65,35 @@ contract DeployCurrentStack is StreamCurrentStackDeployment {
         vm.startBroadcast(deployer);
         _deployCurrentStack(selectedArtist, platform);
         vm.stopBroadcast();
-        deployed = DeploymentAddresses(
-            address(core),
-            address(executor),
-            address(governanceRoot),
-            address(registry),
-            address(manifest),
-            address(manager),
-            address(ledger),
-            address(sale),
-            address(auction),
-            address(factory),
-            wallet,
-            address(entropy),
-            address(provider),
-            address(router),
-            address(royalty),
-            address(artistRegistry),
-            profile,
-            localDevelopment,
-            address(erc20Sale),
-            address(primaryRevenue),
-            address(revenueEscrow),
-            address(artistCoordinator),
-            artistSuite.archive,
-            artistSuite.validator,
-            address(artistCoordinator.reads()),
-            artistSuite.owners,
-            artistActivationId,
-            artistActivationNotBefore,
-            encodedArtistActivationPlan
-        );
+        deployed.core = address(core);
+        deployed.executor = address(executor);
+        deployed.governanceRoot = address(governanceRoot);
+        deployed.registry = address(registry);
+        deployed.manifest = address(manifest);
+        deployed.manager = address(manager);
+        deployed.ledger = address(ledger);
+        deployed.sale = address(sale);
+        deployed.auction = address(auction);
+        deployed.splitFactory = address(factory);
+        deployed.splitWallet = wallet;
+        deployed.entropy = address(entropy);
+        deployed.provider = address(provider);
+        deployed.metadata = address(router);
+        deployed.royalty = address(royalty);
+        deployed.artistRegistry = address(artistRegistry);
+        deployed.splitProfile = profile;
+        deployed.developmentEntropy = localDevelopment;
+        deployed.erc20Sale = address(erc20Sale);
+        deployed.primaryRevenueResolver = address(primaryRevenue);
+        deployed.revenueEscrow = address(revenueEscrow);
+        deployed.artistCoordinator = address(artistCoordinator);
+        deployed.artistArchive = artistSuite.archive;
+        deployed.artistValidator = artistSuite.validator;
+        deployed.artistReads = address(artistCoordinator.reads());
+        deployed.artistOwners = artistSuite.owners;
+        deployed.activationActionId = artistActivationId;
+        deployed.activationNotBefore = artistActivationNotBefore;
+        deployed.activationPlan = encodedArtistActivationPlan;
     }
 
     function _artistActivationTimestamp() internal view override returns (uint64) {
