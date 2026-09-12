@@ -14,7 +14,7 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Clearing consumer `d807421e` with current Safe composition `d9d7d46b`; archival Safe governance `c980f8d6`; governance foundation planner/tests `97599d12`; corrected lifecycle13 `d98650ba`. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Primary token economics `e7250886` and full-payload revocation `37f57cf6`, with seven actual-current Safe mint regressions passing. Staged operator foundation `266fc055` and catalog11 `1ef25f34` independently reviewed. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
@@ -29,9 +29,9 @@ contract call, including owner actions, payments, NFT custody and reads.
 
 | Lane | Branch | Current deliverable |
 | --- | --- | --- |
-| Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
-| Artist | `codex/v1-artist-authority` | Dismissal and cohort closure integrated `3489d360` / `09afe2b8`; estate activation, archival prerequisites and dependent successor authority now being built |
-| Revenue | `codex/v1-revenue` | Clearing consumer `d807421e` with 59 reviewed domain cases and two actual-current Safe cases; aggregate/storage optimization handoff precedes private offers and consignment |
+| Integrator | `codex/v1-integration` | Schema document registry, actual metadata/finality producers, staged product/operator activation, combined compiler/CI repairs, client and release |
+| Artist | `codex/v1-artist-authority` | Royalty262 integrated as `763944c2`; exact-preimage compiler repair and actual finality/sanction/recovery integration next |
+| Revenue | `codex/v1-revenue` | Revocation integrated; museum schemas, bounded offline fixtures, prospective publication planner and exporter in progress |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,

@@ -86,6 +86,10 @@ admission, registration and product selection.
 permits identified test-asset engineering deployments while failed collector
 gas gates remain visible and continue to constrain candidate acceptance.
 
+[ADR 0034: Economics consent binding associations](0034-economics-consent-binding-associations.md)
+defines token/default primary scope commitments and exact consent associations
+after a corrected artist binding, preserving earlier permanent decisions.
+
 [ADR 0035: Native secondary private offers](0035-native-secondary-private-offers.md)
 defines exact sale/offer/custody authority, secondary treatment, permanent
 revocation and royalty settlement for the native private-sale increment.
@@ -94,3 +98,11 @@ revocation and royalty settlement for the native private-sale increment.
 records owner adoption of the complete museum profile, review and identity
 boundaries, bounded deterministic exports, and parallel delivery with separate
 testnet-engineering and full museum acceptance checks.
+
+[ADR 0037: Full-payload mint authorization revocation](0037-full-payload-mint-authorization-revocation.md)
+defines permanent ticket and offer revocation from the complete signed payload
+and canonical Manager/Ledger authorization identity.
+
+[ADR 0038: Token royalties and disabled assignment representation](0038-token-royalties-and-disabled-assignment-representation.md)
+defines token precedence, explicit disabled assignment commitments and
+clear-to-inheritance behavior with preserved consent and revision history.

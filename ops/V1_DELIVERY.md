@@ -39,15 +39,37 @@ with 42 reviewed domain cases and fuzzing. These use an actual registry and
 ERC-721 with Core/royalty doubles; full-current secondary delivery remains open.
 Seven Safe governance planning cases also pass independent review (`d0695608`):
 exact saved actions, real delays, stale-catalog rejection and idempotent resume.
-Operator deployment and catalog chunking are being rehearsed separately;
-neither has completed end-to-end activation. Each catalog extension invalidates
+Eleven catalog-stage cases pass independent review (`1ef25f34`), including
+complete inventory validation before the first admission. The version-2 local
+deployment dry run (`266fc055`) also passes independent review: 287 exact source
+inputs, 104 CREATEs and one CREATE2 bind the actual constructor arguments,
+library links and initialization order. Governance initializes before archival
+and artist construction. The returned seven old-product registrations and
+70 catalog additions still need staged activation; this is not a complete v1
+inventory or a broadcast. Each catalog extension invalidates
 older scheduled actions, so chunk preparation requires observed execution and
 fresh scheduling against the resulting catalog.
 
-The artist builder has completed the reviewed primary token economics and
-corrected-binding consent increment; its coherent commit is awaiting integration.
-Royalty token assignments are next. The revenue builder is implementing full
-ticket and offer revocation at the Manager/Ledger boundary. Complete metadata,
+Primary token economics and corrected-binding consent are integrated as
+`e7250886`, with 249 distinct reviewed domain cases. Full-payload ticket and
+offer revocation at the Manager/Ledger boundary is integrated as `37f57cf6`:
+49 domain cases with fuzzing and two actual Executor/Safe governance cases.
+Seven actual current Safe setup/mint/reveal cases pass on the combined source;
+that composition does not itself execute the ticket-gate revocation path.
+Royalty token assignments are integrated as `763944c2`, with 262 distinct
+reviewed artist/provider cases. Both resolver compiler profiles fit; explicit
+disabled royalties retain a nonzero assignment, while clear restores inherited
+selection. Full-current composition of those new royalty paths remains pending.
+The first museum
+schema/fixture/exporter foundation is integrated as `c7752f11`, with 32 reviewed
+tests and both deterministic generators passing again in the integration
+checkout. Its publication plans and synthetic sources remain explicitly
+unregistered. The interpretation-document registry passes 18 reviewed current
+governance/document cases with 256 fuzz inputs plus an exact-event/Safe-call
+case; both production profiles fit and exact-source artifact review is clear. It retains complete documents up to
+524,288 bytes and does not yet constitute registered museum schemas or complete
+metadata integration.
+Complete metadata,
 finality, recovery, other sales and the full Safe call matrix retain their scope.
 
 Collector gas remains above its specified ceiling. ADR 0033 permits identified
@@ -58,6 +80,13 @@ refinements on 12 September (ADR 0036). Its [delivery plan](MUSEUM_DELIVERY.md) 
 record and exporter work alongside contract engineering; all twelve museum
 gates remain required for full-v1 acceptance. Adoption is not implementation
 or institutional-conformance evidence.
+
+The latest remote CI on `266fc055` remains red. It identified a default-mode
+artist hash-helper stack limit and a separate full current-profile Yul compiler
+failure; Slither provenance and release bundles also need their planned refresh.
+Passing focused runtime cohorts does not replace resolving this complete-build
+failure. The artist builder owns the hash helper; the integrator owns the full
+compile, CI and final matching artifact pass.
 
 ## Team and ownership
 

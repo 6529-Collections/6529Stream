@@ -25,6 +25,7 @@ not select a different contract or grant a caller additional authority.
 | Entropy status and final seed | [entropy/IStreamEntropyView.sol](entropy/IStreamEntropyView.sol) | The token's coordinator at mint |
 | External randomness provider | [entropy/IStreamEntropyProvider.sol](entropy/IStreamEntropyProvider.sol) | [StreamEntropyProviderVRF](../../domains/entropy/StreamEntropyProviderVRF.sol) |
 | Token metadata routing | [metadata/IStreamMetadataRouter.sol](metadata/IStreamMetadataRouter.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol) |
+| Retained schema, canonicalization, catalog and dependency bytes | [metadata/IStreamSchemaRegistry.sol](metadata/IStreamSchemaRegistry.sol) | [StreamSchemaRegistry](../../domains/metadata/StreamSchemaRegistry.sol); see [publication and reconstruction](../../../docs/schema-registry.md) |
 | Immutable split profiles and withdrawals | [IStreamSplitFactory](revenue/IStreamSplitFactory.sol), [IStreamSplitWallet](revenue/IStreamSplitWallet.sol) | [StreamSplitFactory](../../domains/revenue/StreamSplitFactory.sol) and its wallets |
 | Royalty receiver and rate | [revenue/IStreamRoyaltyResolver.sol](revenue/IStreamRoyaltyResolver.sol) | [StreamRoyaltyResolver](../../domains/revenue/StreamRoyaltyResolver.sol), exposed through Core's ERC-2981 API |
 | Governance action lifecycle | [governance/IStreamGovernanceExecution.sol](governance/IStreamGovernanceExecution.sol) | [StreamGovernanceExecutor](../../domains/governance/StreamGovernanceExecutor.sol) |

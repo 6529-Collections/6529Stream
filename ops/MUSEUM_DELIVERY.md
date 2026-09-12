@@ -9,9 +9,9 @@ exporters and institutional conformance are not claimed complete.
 ## Delivery and ownership
 
 The integrator owns delivery, design decisions, interfaces and acceptance.
-The artist builder continues royalty and finality work. After its coherent
-Manager/Ledger revocation handoff, the revenue builder takes the profile,
-fixtures and offline exporter. The integrator owns the shared record interface
+The artist builder continues royalty and finality work. The Manager/Ledger
+revocation handoff is integrated, and the revenue builder is implementing the
+profile, fixtures and offline exporter. The integrator owns the shared record interface
 and onchain metadata integration alongside operator deployment. The
 independent reviewer challenges both the profile and actual export behavior.
 This is an assignment plan within the existing team, not a claim that extra
@@ -24,9 +24,9 @@ No third-party authority match or museum review becomes a mint/finality gate.
 
 | Work package | Concrete output and completion check | Dependency | Owner | Status |
 | --- | --- | --- | --- | --- |
-| MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder after revocation handoff; integrator owns shared record interface | Specification allocated; executable bytes pending |
+| MUSEUM-01 Profile and fixtures | Three exact schemas, five record allocations, pinned offline dependency closure, machine-readable crosswalk, explicit bounds and eight fixture scenarios; validate positive and negative vectors | Adopted specification | Revenue builder; integrator owns shared record interface | Reviewed first foundation integrated as `c7752f11`: 32 tests and both generators pass; complete mapping/conformance pending |
 | MUSEUM-02 Record integration | Registered documents and payload writes/reads through existing artist, curator, institution, independent and archive authority lanes; Safe direct/relayed paths, replay and renderer isolation tested | MUSEUM-01 interfaces; actual metadata hosts | Metadata builder with integrator | Pending |
-| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder after revocation handoff | Pending |
+| MUSEUM-03 Offline exporter | Deterministic package, identity/provenance indexes, exact values, policy-bound conflict presentation, TGN snapshots and field coverage; regenerate with no network | MUSEUM-01 fixture/schema boundary; real-chain acceptance also needs MUSEUM-02 | Revenue builder | Reviewed synthetic fixture export/verification integrated; recorded-chain and complete format mappings pending |
 | MUSEUM-04 Cross-format and capture | LIDO/PREMIS/IIIF correspondence tests; draft-preview and confirmed-record adapters preserving artist text, stable IDs and attribution | MUSEUM-01; compose with MUSEUM-03 | Export/capture builder | Pending |
 | MUSEUM-05 Institutional evidence | Both existing named repository-family ingests and both external practitioner roles examine semantic packages and coverage; at least one review covers CRM/Linked Art and authority reconciliation | Reproducible MUSEUM-03/04 outputs | Integrator coordinates external evidence | Pending; no institution or reviewer engagement claimed |
 
@@ -35,6 +35,23 @@ adapter so it can proceed before all metadata hosts are implemented. A fixture
 or draft adapter must remain visibly distinct from verified chain inputs;
 end-to-end acceptance uses the actual contracts. Profile publication and
 contract writers share one reviewed payload interface before implementation.
+
+The integrator's [document registry](../docs/schema-registry.md) passes 19
+independently reviewed cases, including 256 fuzz inputs and actual Safe/Executor
+governance. It retains up to 64 canonical 8,192-byte chunks per logical
+document, so the captured 434,213-byte CRM dependency fits as 54 chunks with
+one whole-file identity. The builder's publication plan remains explicitly
+prospective until actual governance registration and readback. Synthetic
+fixtures cannot be promoted to authenticated onchain source records.
+
+The first [offline tooling](../tools/museum/README.md) increment retains three
+candidate schemas, eight synthetic fixture scenarios and the exact Linked Art
+context bytes. Source selection binds complete selectors and review revisions;
+unselected hostile identity assertions remain diagnostic. The prospective
+publication planner retains original whole-file hashes. The full CRM/Linked Art
+mapping and dependency closure, real recorded-state adapter and institutional
+evidence remain required; passing 32 foundation tests closes none of those
+larger acceptance gates by itself.
 
 ## Acceptance evidence
 

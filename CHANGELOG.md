@@ -7,6 +7,30 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the immutable interpretation-document registry and bounded chunk store,
+  with canonical payload reconstruction, versioned identities, governed
+  retirement and retained history. Eighteen current governance/document cases
+  with 256 fuzz inputs and an additional exact-event/Safe-call test pass;
+  both production compiler profiles fit. Official schema publication and
+  complete metadata integration remain separate delivery steps.
+- Added token royalty assignments, explicit disabled royalties and clear-to-
+  inheritance semantics under ADR 0038. The reviewed 262-case artist/provider
+  corpus passes, preserving prior operations and consent history; full-current
+  composition of the new royalty paths remains pending.
+- Added the first museum offline schema and fixture foundation, with three
+  candidate schemas, eight synthetic scenarios, exact retained context bytes
+  and a prospective onchain document publication planner. Thirty-two tests
+  and both deterministic generators pass independent review. Full format
+  mappings, authenticated recorded-state exports and institutional evidence
+  remain in development.
+- Added token-level primary revenue assignments and corrected-binding consent
+  with 249 reviewed domain cases. Added full-payload mint-ticket and sale-offer
+  revocation with 49 domain cases, fuzzing and two actual Executor/Safe cases.
+  Seven combined current Safe setup/mint/reveal regressions also pass.
+- Added the version-2 staged deployment foundation and reviewed catalog
+  inventory chunking. The local deployment dry run verifies actual product
+  construction after governance initialization; complete staged product
+  activation and the full-v1 deployment inventory remain in development.
 - Added native secondary private offers and custody sales with exact typed
   revocation, buyer binding, royalty settlement and pull credits. Forty-two
   domain cases, fuzzing and both production compiler profiles pass independent

@@ -14,6 +14,7 @@ their own scope and must not be read as a list of installed features.
 | Find source or a caller capability | [Source map](../smart-contracts/README.md), [interface map](../smart-contracts/interfaces/stream/README.md) |
 | Sign, buy, bid, index, withdraw, or render | [Integration guide](integrations/README.md) |
 | Use typed calls and export selected state | [TypeScript client](integrations/typescript-client.md) |
+| Publish and reconstruct interpretation documents | [Schema registry](schema-registry.md) |
 | Run a second artist through sales and auctions | [Product scenarios](integrations/product-demo.md) |
 | Complete a collection and retain its artwork | [Collector package](integrations/collector-package.md) |
 | Choose a command or compiler profile | [Tooling](tooling.md) |
