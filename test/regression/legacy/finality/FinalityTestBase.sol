@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol";
-import "../../smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol";
-import "../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import "../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
-import "./Assertions.sol";
-import "../regression/legacy/helpers/CharacterizationTestBase.sol";
-import "./FinalityMocks.sol";
+import { LegacyLocalClockArtworkFinalityPreview as StreamArtworkFinalityPreview } from "./contracts/LegacyLocalClockArtworkFinalityPreview.sol";
+import { LegacyLocalClockArtworkFinalityRegistry as StreamArtworkFinalityRegistry } from "./contracts/LegacyLocalClockArtworkFinalityRegistry.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import { LegacyLocalClockCoreFinalityAdapter as StreamCoreFinalityAdapter } from "./contracts/LegacyLocalClockCoreFinalityAdapter.sol";
+import "../../../helpers/Assertions.sol";
+import "../helpers/CharacterizationTestBase.sol";
+import "../../../helpers/FinalityMocks.sol";
 
 /// @notice Shared harness for the artwork finality registry tests: deploys the registry and
 ///         its consumer-seam mocks and builds spec-conformant happy-path fixtures per scope.

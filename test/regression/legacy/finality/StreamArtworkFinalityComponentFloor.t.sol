@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
-import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import "../../helpers/Assertions.sol";
-import "../../helpers/FinalityMocks.sol";
-import "../../helpers/FinalityTestBase.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import "../../../helpers/Assertions.sol";
+import "../../../helpers/FinalityMocks.sol";
+import "./FinalityTestBase.sol";
 
 /// @notice Mandatory-component-floor and snapshot-manifest-gate coverage
 ///         ([LTA-FINALITY] requirement 1/6, MRR-FINALITY rules 6-9, [CMC-FINALITY-INPUTS]

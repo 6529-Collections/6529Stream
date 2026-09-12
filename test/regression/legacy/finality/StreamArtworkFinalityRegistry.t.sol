@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
-import "../../../smart-contracts/vendor/openzeppelin/IERC165.sol";
-import "../../../smart-contracts/interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
-import "../../../smart-contracts/domains/finality/StreamArtworkFinalityPreview.sol";
-import "../../../smart-contracts/domains/finality/StreamArtworkFinalityRegistry.sol";
-import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import "../../../smart-contracts/domains/finality/StreamCoreFinalityAdapter.sol";
-import "../../helpers/Assertions.sol";
-import "../../helpers/FinalityMocks.sol";
-import "../../helpers/FinalityTestBase.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityComponents.sol";
+
+import "../../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
+import "../../../../smart-contracts/vendor/openzeppelin/IERC165.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/IStreamCoreFinalityAdapter.sol";
+import { LegacyLocalClockArtworkFinalityPreview as StreamArtworkFinalityPreview } from "./contracts/LegacyLocalClockArtworkFinalityPreview.sol";
+import { LegacyLocalClockArtworkFinalityRegistry as StreamArtworkFinalityRegistry } from "./contracts/LegacyLocalClockArtworkFinalityRegistry.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import { LegacyLocalClockCoreFinalityAdapter as StreamCoreFinalityAdapter } from "./contracts/LegacyLocalClockCoreFinalityAdapter.sol";
+import "../../../helpers/Assertions.sol";
+import "../../../helpers/FinalityMocks.sol";
+import "./FinalityTestBase.sol";
 
 contract AdversarialFinalityAdapterERC165 {
     address private _core;

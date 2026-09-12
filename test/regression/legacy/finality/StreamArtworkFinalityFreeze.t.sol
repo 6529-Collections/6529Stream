@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
-import "../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
-import "../../helpers/Assertions.sol";
-import "../../helpers/FinalityTestBase.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/IStreamArtworkFinalityRegistry.sol";
+import "../../../../smart-contracts/interfaces/stream/finality/StreamArtworkFinalityTypes.sol";
+import "../../../helpers/Assertions.sol";
+import "./FinalityTestBase.sol";
 
 /// @notice Freeze-machine coverage: the single governed TERMINAL_FREEZE path with its delay
 ///         classes ([LTA-FREEZE] rule 4, [GOV-WINDOWS]) and the freeze-mode vocabulary report.
