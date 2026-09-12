@@ -102,7 +102,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | ART-01 | Identity, binding, acceptance, exact mint consent and independent pause; actual economics, first-release and attestation prerequisites make an eligible mint possible | Artist; internal typed/storage decision | Building |
 | ART-02 | Collaborators, scoped delegation, payout/economics consent and royalty rights; stale or revoked grants cannot authorize mutations | Artist + integrator; ART-01 | Building: prospective fixed-profile economics and exact defensive royalty freeze integrated through actual providers and Safe; scoped economics/freeze delegation source integrated; refusal/withdrawal and collaborators active |
 | ART-03 | Sanction, disputes, attribution/content authority and record-family authority work through actual consuming modules | Artist; ART-01/02, FOUND-01; extend with META-01 | Building: actual content consent/freeze owners and metadata host; wider sanction/dispute/finality admission still pending |
-| ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Building: guardian/rotation and provisional-record slice; initial runtime exceeds size caps, immutable typed-extension prototype under review; wider recovery/estate/dormancy pending |
+| ART-04 | Rotation contests, guardians, recovery, estate and dormancy complete their real lifecycle and replay rules | Artist; ART-01/02 | Building: rotation, guardian contests and provisional records integrated `c71003dc`; 133 focused tests and actual constructor/size proofs independently accepted; updated current-stack integration and wider recovery/estate/dormancy pending |
 | ART-05 | History import/archive and all 57 operation rows have explicit implementation and test evidence | Artist; ART-01..04 | Queued |
 | PAY-01 | Stateless claimMany/syncAndClaimMany across 20 real wallets, event-based discovery, atomic and continue-on-failure cases | Revenue; existing factory/wallet | Integrated: `f6cac4ef`, 21 focused tests in both compiler profiles; candidate validation pending |
 | SAFE-01 | Every supported public/external ABI function is classified and covered for correctly authorized Safe calls, reads or intentional protocol-only restrictions; real signatures, claims, NFT custody and client workflows pass the [Safe acceptance matrix](SAFE_ACCEPTANCE.md) | Integrator + both builders; shared fixtures first, verification accompanies each feature | Building |
@@ -110,13 +110,13 @@ commits, tests and retained results in the evidence column when advancing it.
 | PAY-03 | Revenue escrow records exact owed assets, captures the destination binding and supports permissionless flush/recovery | Revenue; typed settlement decision | Building: deferred registration/discovery and single-factory exact-credit/flush source integrated; fixed-sale and auction adoption source integrated; current acceptance and recovery still pending |
 | PAY-04 | One ERC-20 payer boundary, official settlement owner, exact typed mint orchestration and execution-bound replay, including specified permit branches | Revenue + integrator; PAY-03, ADR 0019 reconciliation | Building: universal ERC-20 recorder/payer/consumer integrated `18dbe54c`, 29 tests plus fuzzing independently accepted; canonical authorization fix `5ecae362` accepted with two tests; `4e9a41b1` actual-Core universal/content/Safe ten-case composition independently accepted; native and broader orchestration pending |
 | PAY-05 | Required primary/royalty assignment profiles, templates, token overrides and freeze behavior work through current resolvers | Revenue; artist economics, PAY-04 | Building: immutable primary artist binding integrated as `8eb37037`; 38 focused tests per profile; remaining semantics and current-stack acceptance pending |
-| SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs after native domain handoff; refund-window lifecycle follows; unsigned programs still require canonical artist sale-parameter consent |
+| SALE-01 | Fixed/open-edition sale variants, zero/PWYW pricing and refund-window custody obey drift, cancellation, reveal and pause rules | Revenue; PAY-04 and artist consent | Building: signed free/open/PWYW programs integrated `9eae0d67`, 72 focused tests plus fuzzing independently accepted; refund-window lifecycle and canonical artist sale consent in progress; updated current-stack composition pending |
 | SALE-02 | Dutch schedule, clearing rebates and maximum-price excess credits conserve funds | Revenue; PAY-04 | Queued |
 | SALE-03 | Private sales/offers and owner-signed consignment grants have exact revocation and secondary-settlement semantics | Revenue; PAY-04 and artist consent | Queued |
 | SALE-04 | Remaining English-auction branches, including first-bid-starts and mint-at-settlement, use shared authority and settlement | Revenue; PAY-04 | Queued |
 | MINT-01 | Signed tickets, burn-to-mint and delegate gates, counter/nullifier continuity and required content-selection behavior | Integrator / freed builder; shared artist/payment interfaces | Queued |
-| ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Queued |
-| ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Queued |
+| ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and focused Safe retry/custody tests; independent final review and actual current-stack composition pending; safe-mode and deployed upstream acceptance remain |
+| ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: typed reveal-fee interface published to the refund-window builder; actual coordinator policy, funding and spending endpoint next |
 | META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Queued |
 | META-02 | Rendering-input manifests, offchain first-sale binding, archive receipt/fixity semantics and required museum schemas round-trip | Integrator / freed builder; META-01 | Queued |
 | FIN-01 | Collection/token/release/season/view finality binds actual Core, metadata, discovery, entropy and artist sanction | Artist + integrator; ART-03, META-01/02, ENT-02 | Queued |
@@ -353,9 +353,27 @@ all 218 Solidity sources and three Safe fixtures to `4e9a41b1`, all 237 relevant
 artifacts to retained compiler outputs, and confirms all 90 nonempty production
 runtimes fit. Later native and rotation changes require their own acceptance.
 
-The latest whole-repository ABI-only check covers 488 Solidity sources with zero
+The retained whole-repository ABI-only check covers 488 Solidity sources with zero
 errors, including the operator and native setup tests. Broad compilation and candidate
 validation remain pending; focused results apply only to their retained snapshots.
+
+The next artist increment (`c71003dc`, from `72bafbf4`) adds rotation, guardian
+contests, provisional records and governed timing windows. Independent review
+accepted 133 focused cases plus two extension prototypes, all 153 compiler inputs,
+60 nonempty production artifacts, preservation of 15 prior ABI/storage prefixes,
+and seven actual constructor CREATE traces. Identity and facade runtimes are
+21,128 and 21,463 bytes; the largest Consent runtime is 24,501 bytes. The prior
+size failures are resolved through typed libraries and constructor-fixed
+extensions. Actual current-stack execution of these new paths remains the next
+integration test; this does not complete recovery, estate, dormancy or finality.
+
+The signed native price-program increment (`9eae0d67`, from `0ede006a`) adds open,
+zero-price and pay-what-you-want sales. Its 72 cases and four 256-input fuzz
+properties passed independent review, with complete compiler outputs in both
+production profiles. The original 37 native ABI selectors remain present. These
+new formats still need actual current-stack composition; the earlier six-case
+native/ERC-20 result at `1b41cff4` does not prove these later changes. Sale consent,
+explicit attribution facts and refund-window custody now proceed in parallel.
 
 The client Safe helpers preserve exact CALL payloads and distinguish an outer
 receipt from actual Safe execution. The full client suite passes 47 tests; three

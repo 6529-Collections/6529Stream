@@ -7,6 +7,17 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the ARRNG provider adapter with pinned source authority, exact fees,
+  stored-output retry, a governed coordinator-call gas cap and contract treasury
+  withdrawals. Seventeen focused tests plus fuzzing pass with independent review;
+  actual current-stack composition and deployed upstream acceptance remain open.
+- Added artist rotation, guardian contests, provisional records and governed
+  timing windows through typed libraries and fixed extensions. The 133-case
+  domain suite and constructor/size checks pass independent review; wider
+  recovery and finality remain in progress.
+- Added signed native open, zero-price and pay-what-you-want programs, preserving
+  existing sale selectors. Seventy-two focused cases plus fuzzing pass independent
+  review; current-stack composition, sale consent and refund windows continue.
 - Added native fixed-price PROFILE and COLLECTION_ARTIST sales through the shared
   official settlement recorder, with exact payment, deferred wallet escrow and
   replay protection. Domain tests and fuzzing pass with real Safe wallets;

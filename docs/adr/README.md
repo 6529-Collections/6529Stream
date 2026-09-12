@@ -51,3 +51,8 @@ is accepted as the undeployed full-v1 artist design: one active transition
 window, bounded provisional-record selection, and constructor-fixed typed
 extensions that preserve each semantic owner's storage and authority.
 Implementation and integration evidence remain separate acceptance gates.
+
+[ADR 0026: ARRNG callback and custody boundaries](0026-arrng-callback-and-custody-boundaries.md)
+defines the adapter's enforceable coordinator-call cap, persisted-output retry,
+source pins and governed treasury custody. Incoming oracle gas and deployed
+upstream acceptance remain separate requirements.
