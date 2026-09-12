@@ -12,9 +12,9 @@ import "../../smart-contracts/interfaces/stream/preservation/StreamArchivalTypes
 /// @notice Real five-leaf governance bootstrap removes the archive/artist constructor cycle.
 /// @dev This foundation is not the full product inventory or final estate activation.
 contract StreamCurrentGovernanceBootstrapTest is CharacterizationTestBase, OfficialSafeFixture {
-    StreamGovernanceGenesisPlan.Configuration private configuration;
-    OfficialSafe private governor;
-    uint256[] private signers;
+    StreamGovernanceGenesisPlan.Configuration internal configuration;
+    OfficialSafe internal governor;
+    uint256[] internal signers;
     bytes private encodedPlan;
     StreamArweaveCheckpointVerifier private checkpoint;
 
@@ -171,7 +171,7 @@ contract StreamCurrentGovernanceBootstrapTest is CharacterizationTestBase, Offic
     }
 
     function _plan()
-        private
+        internal
         view
         returns (SystemManifestBootstrapBinding memory, GenesisBatch[] memory)
     {
