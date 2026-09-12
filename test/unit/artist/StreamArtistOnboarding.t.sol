@@ -6,6 +6,7 @@ import "../../helpers/OfficialSafeFixture.sol";
 import "./ArtistEstateArchivalFixture.sol";
 import "./ArtistSaleRegistryFixture.sol";
 import "./ArtistPublicationHostFixture.sol";
+import "./ArtistCanonicalPublicationFixture.sol";
 import "./ArtistIdentityReadEncodingFixture.sol";
 import "../../../smart-contracts/domains/mint/StreamNativeFixedPriceSaleAdapter.sol";
 import "../../../smart-contracts/domains/revenue/StreamPrimarySaleSettlement.sol";
@@ -501,6 +502,356 @@ contract StreamArtistOnboardingTest is
     uint8 private saleScopeFixture;
     StreamModuleRegistry private saleModules;
     StreamNativeFixedPriceSaleAdapter private nativeSale;
+
+    function _canonicalPublicationHost() private returns (ArtistCanonicalPublicationFixture f) {
+        actualSaleRegistryFixture = true;
+        setUp();
+        _accept();
+        f = new ArtistCanonicalPublicationFixture();
+        f.deploy(address(core), address(ingress));
+        StreamCollectionMetadataV1 host = f.metadata();
+        _saleRegister(
+            saleModules,
+            factory.governanceAuthority(),
+            address(host),
+            keccak256("COLLECTION_METADATA"),
+            type(IStreamCollectionMetadataV1).interfaceId
+        );
+        core.set(keccak256("COLLECTION_METADATA"), address(host), false);
+    }
+
+    function _canonicalAttestation(P.Publication memory pub, string memory uri)
+        private
+        pure
+        returns (T.Attestation memory p, bytes memory statement)
+    {
+        statement = abi.encode(uint16(1), pub);
+        bool intent = pub.recordType == keccak256("ARTIST_INTENT");
+        p = T.Attestation(
+            1,
+            intent ? 7 : 8,
+            pub.subjectId,
+            intent ? pub.candidateRecordHash : bytes32(0),
+            keccak256("6529STREAM_ARTIST_RECORD_PUBLICATION_V1"),
+            keccak256(statement),
+            uri
+        );
+    }
+
+    function _canonicalRecordHash(
+        IStreamPreservationRecords.CollectionRecord memory r,
+        P.Publication memory pub
+    ) private view returns (bytes32) {
+        bytes32[14] memory words;
+        words[0] = keccak256("6529stream.preservation-record.v2");
+        words[1] = bytes32(block.chainid);
+        words[2] = bytes32(uint256(uint160(pub.metadataHost)));
+        words[3] = bytes32(uint256(uint160(address(core))));
+        words[4] = bytes32(uint256(uint160(pub.recorder)));
+        words[5] = bytes32(uint256(1));
+        words[6] = r.recordType;
+        words[7] = r.subjectId;
+        words[8] = keccak256(
+            abi.encode(
+                r.contentHash.algorithm,
+                keccak256(r.contentHash.digest),
+                r.contentHash.canonicalizationId
+            )
+        );
+        words[9] = keccak256(bytes(r.uri));
+        words[10] = r.schemaId;
+        words[11] = r.signatureScheme;
+        words[12] = keccak256(
+            abi.encode(
+                r.signatureHash.algorithm,
+                keccak256(r.signatureHash.digest),
+                r.signatureHash.canonicalizationId
+            )
+        );
+        words[13] = bytes32(uint256(r.effectiveAt));
+        return keccak256(abi.encode(words));
+    }
+
+    function testActualPublicationSafeSignerRelayerExactBytesRecordAndEvents() public {
+        ArtistCanonicalPublicationFixture f = _canonicalPublicationHost();
+        StreamCollectionMetadataV1 host = f.metadata();
+        bytes memory payload = bytes('{"statement":"The artist reviewed these exact bytes."}');
+        (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://actual-intent"
+        );
+        require(
+            pub.candidateRecordHash == _canonicalRecordHash(r, pub),
+            "independent generic14 preimage"
+        );
+        (T.Attestation memory p, bytes memory statement) = _canonicalAttestation(pub, r.uri);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 authorization = ingress.recordArtistAttestation(p, a, statement);
+        require(authorization == _publicationExpected(p, a, 1), "independent artist16 preimage");
+        vm.recordLogs();
+        require(
+            host.recordArtistCollectionRecordWithPayload(
+                address(artist), 1, r, payload, authorization
+            ) == pub.candidateRecordHash,
+            "actual two-sided publication"
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 recordEvents;
+        uint256 authorizationEvents;
+        (bytes32 chain, uint64 count) = host.recordChainHash(1, r.recordType);
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(host) || logs[i].topics.length == 0) continue;
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "ArtistRecordAuthorizationConsumed(bytes32,bytes32,address,address)"
+                    )
+            ) {
+                ++authorizationEvents;
+                require(
+                    logs[i].topics.length == 4 && logs[i].topics[1] == authorization
+                        && logs[i].topics[2] == pub.candidateRecordHash
+                        && logs[i].topics[3] == bytes32(uint256(uint160(address(artist))))
+                        && keccak256(logs[i].data) == keccak256(abi.encode(address(this))),
+                    "exact signer and separate relayer event"
+                );
+            }
+            if (
+                logs[i].topics[0]
+                    == keccak256(
+                        "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,bytes32,address,bytes32,uint16)"
+                    )
+            ) {
+                ++recordEvents;
+                require(
+                    logs[i].topics.length == 4 && logs[i].topics[1] == bytes32(uint256(1))
+                        && logs[i].topics[2] == r.recordType && logs[i].topics[3] == r.subjectId
+                        && keccak256(logs[i].data)
+                            == keccak256(
+                                abi.encode(
+                                    r,
+                                    pub.candidateRecordHash,
+                                    chain,
+                                    address(artist),
+                                    bytes32(uint256(1)),
+                                    uint16(1)
+                                )
+                            ),
+                    "exact generic record event"
+                );
+            }
+        }
+        require(
+            recordEvents == 1 && authorizationEvents == 1 && count == 1,
+            "one accepted record and consumed proof"
+        );
+        (
+            IStreamPreservationRecords.CollectionRecord memory saved,
+            IStreamCollectionMetadataV1.RecordReceipt memory receipt
+        ) = host.collectionRecord(pub.candidateRecordHash);
+        require(
+            keccak256(abi.encode(saved)) == keccak256(abi.encode(r))
+                && receipt.recorder == address(artist)
+                && receipt.artistAuthorization == authorization && receipt.authorizationClass == 1,
+            "exact tuple and ARTIST family provenance"
+        );
+        (address pointer, bytes memory body) = host.recordPayload(pub.candidateRecordHash);
+        require(
+            keccak256(body) == keccak256(payload) && pointer.code.length == payload.length + 1
+                && host.consumedArtistAuthorization(authorization),
+            "actual indexed byte coverage"
+        );
+        this.executePublicationSafe(
+            address(host),
+            abi.encodeCall(IStreamCollectionMetadataV1.collectionRecord, (pub.candidateRecordHash))
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionMetadataV1.MetadataAuthorizationConsumed.selector, authorization
+            )
+        );
+        host.recordArtistCollectionRecordWithPayload(address(artist), 1, r, payload, authorization);
+    }
+
+    function testActualPublicationEstateIntent64WithoutAttestAndNoStatementPermit() public {
+        ArtistCanonicalPublicationFixture f = _canonicalPublicationHost();
+        _estateActivateAndAdopt(64);
+        bytes memory payload =
+            bytes('{"statement":"The designated successor records this intent."}');
+        (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://successor-intent"
+        );
+        (T.Attestation memory p, bytes memory statement) = _canonicalAttestation(pub, r.uri);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 authorization = ingress.recordArtistAttestation(p, a, statement);
+        P.Evidence memory evidence = ingress.requireRecordPublication(authorization, pub);
+        require(
+            evidence.authorityClass == 3 && evidence.requiredCapability == 64
+                && evidence.signer == address(artist),
+            "actual successor64 evidence"
+        );
+        StreamCollectionMetadataV1 host = f.metadata();
+        this.executePublicationSafe(
+            address(host),
+            abi.encodeCall(
+                IStreamCollectionMetadataV1.recordArtistCollectionRecordWithPayload,
+                (address(artist), uint256(1), r, payload, authorization)
+            )
+        );
+        require(
+            host.consumedArtistAuthorization(authorization), "successor Safe publishes exact permit"
+        );
+        (r, pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_STATEMENT"),
+            keccak256("STREAM_ARTIST_INTERVIEW_V1"),
+            payload,
+            "ipfs://successor-interview"
+        );
+        (p, statement) = _canonicalAttestation(pub, r.uri);
+        a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 roots = _roots();
+        vm.expectRevert(
+            abi.encodeWithSelector(Estate.EstateCapabilityUnavailable.selector, artistId, uint32(1))
+        );
+        ingress.recordArtistAttestation(p, a, statement);
+        require(
+            _roots() == roots && !host.consumedArtistAuthorization(_publicationExpected(p, a, 3)),
+            "intent alone cannot publish interview"
+        );
+    }
+
+    function testActualPublicationRotationInvalidatesUnusedPermitButKeepsPublishedHistory() public {
+        ArtistCanonicalPublicationFixture f = _canonicalPublicationHost();
+        StreamCollectionMetadataV1 host = f.metadata();
+        bytes memory payload = bytes('{"statement":"Original principal authorship."}');
+        (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://before-rotation"
+        );
+        (T.Attestation memory p, bytes memory statement) = _canonicalAttestation(pub, r.uri);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 publishedPermit = ingress.recordArtistAttestation(p, a, statement);
+        bytes32 published = host.recordArtistCollectionRecordWithPayload(
+            address(artist), 1, r, payload, publishedPermit
+        );
+        (
+            IStreamPreservationRecords.CollectionRecord memory saved,
+            IStreamCollectionMetadataV1.RecordReceipt memory receipt
+        ) = host.collectionRecord(published);
+        bytes32 historical = keccak256(abi.encode(saved, receipt));
+        (r, pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://unused-before-rotation"
+        );
+        (p, statement) = _canonicalAttestation(pub, r.uri);
+        a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 unused = ingress.recordArtistAttestation(p, a, statement);
+        _newRotationSafe(17201);
+        bytes32 rotation = _stageRotation(0);
+        _executeTimedRotation(rotation);
+        _adoptRotatedSafe();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionMetadataV1.MetadataReadFailed.selector, address(ingress)
+            )
+        );
+        host.recordArtistCollectionRecordWithPayload(pub.recorder, 1, r, payload, unused);
+        require(
+            !host.consumedArtistAuthorization(unused), "retired unused permit remains unconsumed"
+        );
+        (saved, receipt) = host.collectionRecord(published);
+        require(
+            keccak256(abi.encode(saved, receipt)) == historical, "published authorship unchanged"
+        );
+        (r, pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://unused-before-rotation"
+        );
+        (p, statement) = _canonicalAttestation(pub, r.uri);
+        a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 fresh = ingress.recordArtistAttestation(p, a, statement);
+        require(
+            host.recordArtistCollectionRecordWithPayload(address(artist), 1, r, payload, fresh)
+                    == pub.candidateRecordHash && fresh != unused,
+            "fresh principal same document path"
+        );
+    }
+
+    function testActualPublicationLateArtistArchiveAndMetadataAppendRollbackExactRetries() public {
+        ArtistCanonicalPublicationFixture f = _canonicalPublicationHost();
+        StreamCollectionMetadataV1 host = f.metadata();
+        bytes memory payload = bytes('{"statement":"Atomic publication evidence."}');
+        (IStreamPreservationRecords.CollectionRecord memory r, P.Publication memory pub) = f.prepare(
+            address(artist),
+            keccak256("ARTIST_INTENT"),
+            keccak256("STREAM_ARTIST_INTENT_V1"),
+            payload,
+            "ipfs://atomic-publication"
+        );
+        (T.Attestation memory p, bytes memory statement) = _canonicalAttestation(pub, r.uri);
+        T.Authorization memory a = _authorization(true);
+        a.signature = _signature(ingress.attestationDigest(p, a));
+        bytes32 expected = _publicationExpected(p, a, 1);
+        bytes32 roots = _roots();
+        avm.mockCallRevert(
+            address(archive),
+            abi.encodeWithSelector(IStreamArtistArchiveV2.appendArtistEvidenceV2.selector),
+            abi.encodeWithSelector(T.InvalidRecord.selector)
+        );
+        vm.expectRevert(abi.encodeWithSelector(T.InvalidRecord.selector));
+        ingress.recordArtistAttestation(p, a, statement);
+        require(
+            _roots() == roots && !host.consumedArtistAuthorization(expected),
+            "artist late append rollback"
+        );
+        avm.clearMockedCalls();
+        require(
+            ingress.recordArtistAttestation(p, a, statement) == expected,
+            "same signed artist proof retries"
+        );
+        uint256 originalTime = r.effectiveAt;
+        vm.warp(uint256(type(uint64).max) + 1);
+        // The real _append timestamp bound is checked after the detached authorization consumption.
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamCollectionMetadataV1.InvalidMetadataRecord.selector)
+        );
+        host.recordArtistCollectionRecordWithPayload(address(artist), 1, r, payload, expected);
+        require(
+            !host.consumedArtistAuthorization(expected)
+                && host.latestCollectionRecordHashFor(1, r.recordType, r.subjectId, address(artist))
+                    == 0,
+            "metadata late append restores consumption and index"
+        );
+        vm.warp(originalTime);
+        require(
+            host.recordArtistCollectionRecordWithPayload(address(artist), 1, r, payload, expected)
+                == pub.candidateRecordHash,
+            "same immutable metadata calldata retries"
+        );
+    }
 
     function _publicationHost() private returns (ArtistPublicationHostFixture host) {
         actualSaleRegistryFixture = true;
