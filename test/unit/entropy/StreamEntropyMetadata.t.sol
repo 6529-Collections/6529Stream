@@ -774,11 +774,27 @@ contract StreamEntropyMetadataTest is CharacterizationTestBase, OfficialSafeFixt
         IStreamMetadataServingFacts.ServingFacts memory facts = router.collectionServingFacts(1);
         require(facts.renderer != address(0), "renderer must be configured");
         require(facts.renderer.codehash == facts.rendererCodeHash, "renderer code hash must match");
+        // Establish that the account cooled below is an actual PUSH20 library binding in this
+        // Router runtime, rather than relying on the test contract's own dynamic-link address.
+        bytes memory runtime = address(router).code;
+        address tokenReads = address(StreamMetadataTokenReads);
+        bool linked;
+        for (uint256 i; i + 21 <= runtime.length; ++i) {
+            if (runtime[i] != 0x73) continue;
+            address candidate;
+            assembly ("memory-safe") { candidate := shr(96, mload(add(add(runtime, 33), i))) }
+            if (candidate == tokenReads) {
+                linked = true;
+                break;
+            }
+        }
+        require(linked, "cool the actual Router token-read library");
         EntropyGasMeasurementVm(address(vm)).cool(address(router));
         EntropyGasMeasurementVm(address(vm)).cool(address(entropy));
         EntropyGasMeasurementVm(address(vm)).cool(address(artistRegistry));
         EntropyGasMeasurementVm(address(vm)).cool(address(core));
         EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataTokenRenderer));
+        EntropyGasMeasurementVm(address(vm)).cool(tokenReads);
         EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataArtistPresentation));
         EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataRenderer));
         EntropyGasMeasurementVm(address(vm)).cool(address(StreamMetadataImageURI));

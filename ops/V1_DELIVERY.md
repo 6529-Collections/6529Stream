@@ -20,6 +20,36 @@ percentage-based progress reporting with concrete capabilities and evidence.
 
 ## Latest integration: 12 September
 
+The Router now implements [artist-approved content-root publication](../docs/integrations/content-root-publication.md).
+Seventeen focused cases and 256 fuzz inputs pass in both compiler modes. Four
+cases compose actual Router rendering, schema/store, inventory, checkpoint,
+leaf verification and archival artifact aggregation, including threshold Safe
+publication. Core membership, governance execution, artist approvals, archival
+receipts/families and Finality/provider bindings remain explicit boundaries.
+Exact registered definition bytes, publisher/grant revision, artist association,
+lineage, full events, late rollback and nested gas headroom are checked.
+The final Router fits at 24,248 bytes default and 23,666 IR; its original ABI
+and storage prefix are preserved. The retained 61 rendering cases pass. Two
+maximum-content cases also pass with the actual TokenReads library binding
+verified and cooled: Router 11,909,000 gas, Core 12,725,439 and complete
+63,193-byte URI. These remain fixture account-cooling measurements.
+
+The delegation compiler repair (`54087312`) preserves its signed commitments;
+the separate admission fix (`c7de0ad6`) distinguishes Router from the generic
+metadata record host. Both have independent focused reviews. Operation 13's
+full 303-name artist cohort is running; actual finality execution, typed scope
+provider/discovery and complete constructor/deployment migration remain open.
+
+Museum IIIF correspondence is integrated as `22318d25`. Independent root
+readback accepts 108 exact files plus preserved/added license line-ending rules,
+all seven generators and all 28 four-media example outputs. The reviewed test
+union has 183 distinct cases (182 original plus 34 after one corrected identity
+predicate); this is not a single latest-source 183-case run. Windows/Linux CI
+passes the preceding 149-test revision at `d0094ca6`, run 34709755563. The new
+CI step checks IIIF and allows 25 minutes for the expanded cohort. LIDO and the
+remaining museum formats, packaging, chain authentication and institutional
+acceptance continue in parallel.
+
 Signed artist sanctions and canonical finality admission are integrated as
 `50bd3935`, followed by the separate historical-test migration `cb332bc7`.
 Independent review binds all 293 artist test names: 292 passing original cases
@@ -56,8 +86,9 @@ for that captured source, before the subsequent Base64 repair.
 The artist owner/acceptance stack repair is integrated as `1e3087a2`, retaining
 exact commitment preimages, event arguments and the prior ABI/storage. The
 complete compilation result remains open. Latest observed CI at `4c7cc4b6`
-has passing client/wrapper jobs, running current/smoke compilation and failing
-release-artifact/Slither jobs. Independent execution probes also reject
+has passing client/wrapper jobs, running smoke compilation, cancelled current
+integration and failing release-artifact/Slither jobs. The later `d0094ca6` CI
+run is pending while its museum workflow passes. Independent execution probes also reject
 the deployment script's self-view calls under default Foundry protection.
 Moving a self-call outside broadcast did not solve that issue. A compatible
 planning boundary was therefore extracted into a stateless local helper. Six
@@ -74,8 +105,8 @@ Seven additional composition cases pass with actual Core, router, inventory and
 checkpoint contracts, including Safe custody/burns, complete odd-sized roots,
 maximum script/token data and atomic retry. Governance, module registry,
 Manager, artist and external entropy remain explicit boundaries in that fixture.
-Authoritative root publication, typed scope inputs, archive and full finality
-remain implementation work.
+Root publication is now implemented in the scoped increment above. Typed scope
+inputs, complete archival receipts and full finality remain implementation work.
 
 Actual composition found that the router could not admit inline images; a fixed
 image-only helper now supports canonical Base64 PNG/JPEG/GIF/WebP admission
@@ -366,7 +397,7 @@ commits, tests and retained results in the evidence column when advancing it.
 | ENT-01 | Reviewed non-VRF provider and safe-mode fallback instances are installed; actual provider failure/recovery follows the specified lifecycle | Integrator / freed builder; provider docs and exact interfaces | Building: ARRNG adapter and four actual-current Safe/Executor cases accepted in `72c208f2`; safe-mode, full recovery and deployed upstream acceptance remain |
 | ENT-02 | Scope/reveal policies, fee escrow, keeper/SLO fallback and recovery preserve committed entropy without discretionary rerolls | Integrator / freed builder; ENT-01 | Building: policy/escrow/typed quote source integrated `66d70e04`, with 44 focused cases, 30 metadata regressions and six planner cases; separate 14-case actual current/Safe composition independently accepted with its captured pre-unique-holder planner; governed timing/SLO source has 54 accepted domain cases and 30 metadata regressions, with a separately accepted seven-case actual governance/Safe run captured before operation 33; AT_MINT attempts and recovery remain |
 | META-01 | Schema, owner records, attestations, views and preservation modules cover required genesis metadata and authority | Integrator / freed builder; FOUND-01 and typed ART-03 interface, build owners in parallel with ART-03 | Building: immutable document registry and reviewed content/subject primitives are integrated; actual record hosts, schema admission and remaining families continue |
-| META-02 | Rendering-input manifests, offchain first-sale binding, archive receipt/fixity semantics and required museum schemas round-trip | Integrator / freed builder; META-01 | Queued |
+| META-02 | Rendering-input manifests, offchain first-sale binding, archive receipt/fixity semantics and required museum schemas round-trip | Integrator / museum builder; META-01 | Building: actual checkpoint, preserved leaf manifest and artist-approved root publication with 17 focused cases; museum IIIF183 union and seven generators reviewed. Other profiles, full receipt/artist/finality composition and remaining museum targets continue |
 | FIN-01 | Collection/token/release/season/view finality binds actual Core, metadata, discovery, entropy and artist sanction | Artist + integrator; ART-03, META-01/02, ENT-02 | Building: fixed-host adapters reviewed; canonical governance registry and actual metadata/sanction evidence are in progress, with no full finality-flow acceptance yet |
 | FIN-02 | Governance-owned recovery, owner notice/objection, recovered-route lineage and bounded refresh/cutover work end to end | Artist + integrator; FIN-01, owner records, ADR 0020 reconciliation | Queued |
 | ARCH-01 | Complete state/event reconstruction and export preservation can rebuild required records, lineage and artwork without relying on the app | Integrator / freed builder; current publisher, META/ART/FIN | Queued |

@@ -29,6 +29,7 @@ deployment evidence.
 | Lock artwork presentation while retaining live artist authority | [Stable router presentation](stable-router-presentation.md) |
 | Index completed mints and compute exact onchain content roots | [Token inventory](collection-token-inventory.md) and [content checkpoints](onchain-content-checkpoints.md) |
 | Verify the preserved list behind a content root | [Content leaf manifests](content-leaf-manifests.md) |
+| Adopt a verified root with artist consent and governed publisher authority | [Content-root publication](content-root-publication.md) |
 | Publish full-byte collection records and recover attributed history | [Developing metadata record host](metadata-records.md) |
 | Withdraw proceeds or bid refunds | [Payments and withdrawals](withdrawals-and-credits.md) |
 | Run the complete flow locally | [Current deployment demo](../../script/current/README.md) |

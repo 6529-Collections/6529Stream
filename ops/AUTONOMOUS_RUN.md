@@ -14,13 +14,31 @@ delivery. [V1_DELIVERY.md](V1_DELIVERY.md) is the active execution ledger.
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/743` |
 | Active PR | Draft [#744](https://github.com/6529-Collections/6529Stream/pull/744) |
 | Next issue | `TBD` |
-| Source checkpoint | Signed sanction/finality admission `50bd3935` and separate historical migration `cb332bc7` are integrated. Complete leaf-list verification passes independent review. Actual authoritative finality composition and full deployment-script acceptance remain active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
+| Source checkpoint | Delegation compiler `54087312`, split-host admission `c7de0ad6` and IIIF `22318d25` integrated. Root publication passes final 17-case/fuzz and actual preservation composition; full artist/provider/Finality/deployment acceptance remains active. RC1 remains `569bf87f1fa808787d324f6e1582924b5ccf1d40` |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
 | Last updated | `2026-09-12 UTC` |
 
 ## Active work
+
+The integrator has completed the focused content-root publication increment:
+17 cases and 256 fuzz inputs pass both compiler modes, alongside 61 retained
+renderer cases and two maximum-content gas checks. Actual Router/schema/store,
+inventory, checkpoint, leaf verifier, archival aggregator and threshold Safe
+are composed. Exact artist/provider/Finality execution remains the next join;
+the fixture boundaries are explicit in the
+[publication guide](../docs/integrations/content-root-publication.md). Router
+runtime is 24,248 default / 23,666 IR, preserving the existing ABI/storage prefix.
+
+The IIIF increment is integrated as `22318d25`, with independently verified
+seven generators, 28 example outputs and the 183-name test union. The preceding
+149-case revision passes Windows/Linux CI at `d0094ca6` (34709755563). LIDO is
+being built in parallel. Delegation compiler and split-metadata admission fixes
+are integrated as `54087312` and `c7de0ad6`; the artist builder's corrected
+303-name confirmation cohort is still compiling. Full deployment construction,
+complete finality and candidate freeze remain open. No new testnet broadcast
+is required at this point.
 
 Signed sanctions and canonical finality admission are integrated as `50bd3935`,
 with the separate historical migration `cb332bc7`. Independent review accepts
@@ -34,8 +52,8 @@ The integrator's complete leaf-list manifest verifier passes 13 cases and two
 256-input fuzz properties in both compiler modes, including actual checkpoint,
 document store, artifact aggregator and Safe calls. Independent review binds
 the exact source and compiler artifacts. It establishes preserved manifest
-contents; authoritative root adoption
-still needs artist consent and governed interpretation registration. Larger
+contents; the separate root consumer above now enforces artist consent and
+governed interpretation registration. Full artist/provider composition and larger
 manifests beyond the existing 64-chunk artifact bound remain required. The
 reviewer's small explicit-library artifact CREATE probe passes default Foundry
 protection; the actual deployment/link graph is the next script task.
@@ -59,7 +77,7 @@ The first PREMIS file-object correspondence is integrated as `9f6afe60`, with
 `4c7cc4b6` (run 34708017861). Exact source assertions
 remain distinct from actual file-byte verification. The preceding faithful
 abstract/nonvisual projections (`db3c8153`) pass Windows/Linux CI at `d8f0eef2`.
-The builder continues IIIF correspondence; both prior package versions remain exact.
+IIIF is integrated above; the builder continues LIDO. All prior package versions remain exact.
 Full authenticated-chain exports and institutional acceptance remain open.
 Complete archival artifact coverage is integrated as `880bac6d`, with 26
 reviewed domain tests and fuzzing. The corrected metadata host/adapter cohort
@@ -69,8 +87,9 @@ artist publication, typed finality and discovery still need composition.
 
 The artist owner/acceptance compiler repair is integrated as `1e3087a2`, with
 exact preimage/event checks and matching owner interfaces/storage. Latest CI at
-`4c7cc4b6` passes client/wrapper jobs; current/smoke compilation is running and
-release-artifact/Slither jobs fail. Complete deployment remains unresolved:
+`4c7cc4b6` passes client/wrapper jobs; smoke compilation remains running, current
+integration is cancelled and release-artifact/Slither jobs fail. The `d0094ca6`
+CI run is pending; its museum workflow passes. No complete CI pass is claimed. Complete deployment remains unresolved:
 the catalog self-view call helps minimal compiler
 probes but fails current Foundry execution protection, even outside broadcasting.
 The separate helper now passes six plan/catalog tests with 256 fuzz inputs and
@@ -91,7 +110,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Actual metadata/finality producers and discovery, staged product/operator activation, whole-current compiler diagnostic, client and release |
 | Artist | `codex/v1-artist-authority` | Archival artifact coverage integrated; full artist publication regression, actual finality/sanction/recovery and typed preparation |
-| Revenue | `codex/v1-revenue` | Museum PREMIS149 integrated; IIIF, remaining formats and chain-adapter work |
+| Revenue | `codex/v1-revenue` | Museum IIIF183 union integrated; LIDO, remaining formats and chain-adapter work |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,

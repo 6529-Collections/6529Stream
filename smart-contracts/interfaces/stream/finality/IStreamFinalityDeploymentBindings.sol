@@ -6,6 +6,7 @@ interface IStreamFinalityDeploymentBindings {
     function coreReads() external view returns (address);
     function metadataReads() external view returns (address);
     function scopeEvidenceProvider() external view returns (address);
+    function scopeEvidenceProviderCodeHash() external view returns (bytes32);
     function sanctionReads() external view returns (address);
     function artifactCoverage() external view returns (address);
     function finalityRoleRegistry() external view returns (address);

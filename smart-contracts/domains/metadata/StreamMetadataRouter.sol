@@ -21,7 +21,14 @@ import "../modules/StreamModuleBase.sol";
 import "./StreamMetadataRenderer.sol";
 import "./StreamMetadataArtistPresentation.sol";
 import "./StreamMetadataTokenRenderer.sol";
+import "./StreamMetadataTokenReads.sol";
 import "./StreamMetadataImageURI.sol";
+import "./StreamMetadataContentRoot.sol";
+import "./StreamMetadataContentLocks.sol";
+import "./StreamMetadataContentAuthorization.sol";
+import {
+    IStreamContentRootPublication
+} from "../../interfaces/stream/metadata/IStreamContentRootPublication.sol";
 
 /// @notice Serves current-Core identities and their original coordinator's canonical entropy.
 contract StreamMetadataRouter is
@@ -29,7 +36,8 @@ contract StreamMetadataRouter is
     IStreamMetadataRouter,
     IStreamArtistContentFacts,
     IStreamArtistContentMutationFacts,
-    IStreamMetadataServingFacts
+    IStreamMetadataServingFacts,
+    IStreamContentRootPublication
 {
     struct CollectionMetadata {
         string name;
@@ -38,15 +46,6 @@ contract StreamMetadataRouter is
         string animationBaseURI;
         string animationScript;
         bool configured;
-    }
-
-    struct TokenFacts {
-        uint256 tokenId;
-        uint256 collectionId;
-        uint256 serial;
-        bytes32 seed;
-        bool finalized;
-        string state;
     }
 
     struct PreparedMetadata {
@@ -73,9 +72,11 @@ contract StreamMetadataRouter is
     mapping(bytes32 => bool) public consumedArtistContentConsent;
     mapping(uint256 => ArtistPresentation) private _artistPresentation;
     mapping(uint256 => bool) private _displayMetadataLocked;
+    StreamMetadataContentRoot.State private _contentRoots;
 
     bytes32 public constant CONTENT_SCRIPT = keccak256("SCRIPT");
     bytes32 public constant CONTENT_MEDIA = keccak256("MEDIA_MANIFEST");
+    bytes32 public constant CONTENT_ROOT = keccak256("CONTENT_ROOT");
     bytes32 public constant LOCK_BASE_URI = keccak256("BASE_URI");
     bytes32 public constant LOCK_DEPENDENCIES = keccak256("DEPENDENCIES");
     bytes32 public constant LOCK_ARTIST_IDENTITY = keccak256("ARTIST_IDENTITY");
@@ -177,6 +178,7 @@ contract StreamMetadataRouter is
         returns (bool)
     {
         return id == type(IStreamMetadataRouter).interfaceId
+            || id == type(IStreamContentRootPublication).interfaceId
             || id == type(IStreamMetadataServingFacts).interfaceId
             || id == type(IStreamArtistContentFacts).interfaceId
             || id == type(IStreamArtistContentMutationFacts).interfaceId
@@ -379,6 +381,12 @@ contract StreamMetadataRouter is
         returns (bool supported, bytes32 currentStateHash)
     {
         _requireContentCollection(collectionId);
+        if (familyId == CONTENT_ROOT) {
+            return (
+                true,
+                StreamMetadataContentRoot.familyState(_contentRoots, address(core), collectionId)
+            );
+        }
         CollectionMetadata storage metadata = _collections[collectionId];
         if (familyId == CONTENT_SCRIPT) {
             return (true, _scriptState(collectionId, metadata.animationScript));
@@ -464,7 +472,7 @@ contract StreamMetadataRouter is
 
     function _contentState(uint256 collectionId) private view returns (bytes32) {
         CollectionMetadata storage metadata = _collections[collectionId];
-        return keccak256(
+        bytes32 serving = keccak256(
             abi.encode(
                 keccak256("6529STREAM_ROUTER_ONCHAIN_CONTENT_V1"),
                 _contentHostContext(collectionId),
@@ -473,6 +481,72 @@ contract StreamMetadataRouter is
                 keccak256(bytes(metadata.animationScript))
             )
         );
+        bytes32 rootHead = _contentRoots.heads[collectionId];
+        if (rootHead == 0) return serving;
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_ROUTER_CONTENT_WITH_ROOT_V1"),
+                serving,
+                _contentRoots.records[rootHead].stateHash
+            )
+        );
+    }
+
+    function previewContentRootPublication(Publication calldata publication, address publisher)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        _requireContentCollection(publication.collectionId);
+        return StreamMetadataContentRoot.prepare(
+            _contentRoots,
+            StreamMetadataContentRoot.Context(address(core), address(artistRegistry)),
+            publication,
+            publisher
+        )
+        .stateHash;
+    }
+
+    function publishVerifiedTokenContentRoot(Publication calldata publication)
+        external
+        override
+        returns (bytes32 recordHash)
+    {
+        _requireContentCollection(publication.collectionId);
+        StreamMetadataContentRoot.Context memory ctx =
+            StreamMetadataContentRoot.Context(address(core), address(artistRegistry));
+        Record memory prepared =
+            StreamMetadataContentRoot.prepare(_contentRoots, ctx, publication, msg.sender);
+        (bytes32 consent, bytes32 ratification) =
+            _authorizeContentWrite(publication.collectionId, CONTENT_ROOT, prepared.stateHash);
+        recordHash =
+            StreamMetadataContentRoot.publish(_contentRoots, ctx, publication, prepared, consent);
+        _recordContentApplication(publication.collectionId, CONTENT_ROOT, consent, ratification);
+    }
+
+    function tokenContentRoot(uint256 collectionId, bytes32 subject)
+        external
+        view
+        override
+        returns (bytes32, uint64, bytes32)
+    {
+        return StreamMetadataContentRoot.readRoot(
+            _contentRoots, address(core), collectionId, subject
+        );
+    }
+
+    function contentRootRecord(bytes32 hash) external view override returns (Record memory) {
+        return StreamMetadataContentRoot.readRecord(_contentRoots, hash);
+    }
+
+    function collectionContentRootHead(uint256 collectionId)
+        external
+        view
+        override
+        returns (bytes32)
+    {
+        return _contentRoots.heads[collectionId];
     }
 
     function _scriptState(uint256 collectionId, string memory script)
@@ -509,42 +583,13 @@ contract StreamMetadataRouter is
     /// @notice Anyone may apply the artist's exact, current defensive freeze without editing content.
     function applyArtistContentFreeze(uint256 collectionId, bytes32 freezeRecordHash) external {
         _requireContentCollection(collectionId);
-        IStreamArtistContentAuthority authority_ =
-            IStreamArtistContentAuthority(address(artistRegistry));
-        StreamArtistContentTypes.FreezeRecord memory record =
-            authority_.contentFreezeAuthorization(freezeRecordHash);
-        if (
-            freezeRecordHash == bytes32(0) || record.recordHash != freezeRecordHash
-                || record.artistId == bytes32(0) || record.metadataContract != address(this)
-                || record.authorityClass == 0 || record.lockClasses.length == 0
-                || record.lockClasses.length > 16
-                || record.expectedStateHash != _contentState(collectionId)
-        ) revert InvalidArtistContentFreeze(freezeRecordHash);
-        bytes32 previous;
-        for (uint256 i; i < record.lockClasses.length; ++i) {
-            bytes32 lockClass = record.lockClasses[i];
-            if (
-                lockClass <= previous
-                    || (lockClass != CONTENT_SCRIPT
-                        && lockClass != CONTENT_MEDIA
-                        && lockClass != LOCK_BASE_URI
-                        && lockClass != LOCK_DEPENDENCIES)
-            ) revert InvalidArtistContentFreeze(freezeRecordHash);
-            (bool authorized, bytes32 operative) =
-                authority_.isContentFreezeAuthorized(collectionId, lockClass);
-            if (!authorized || operative != freezeRecordHash) {
-                revert InvalidArtistContentFreeze(freezeRecordHash);
-            }
-            previous = lockClass;
-        }
-        for (uint256 i; i < record.lockClasses.length; ++i) {
-            bytes32 lockClass = record.lockClasses[i];
-            if (_artistContentLocks[collectionId][lockClass]) continue;
-            _artistContentLocks[collectionId][lockClass] = true;
-            emit CollectionMetadataLocked(
-                collectionId, lockClass, msg.sender, record.authorityClass, freezeRecordHash, 1
-            );
-        }
+        StreamMetadataContentLocks.applyFreeze(
+            _artistContentLocks,
+            address(artistRegistry),
+            collectionId,
+            freezeRecordHash,
+            _contentState(collectionId)
+        );
     }
 
     function _requireContentUnlocked(uint256 collectionId, bytes32 lockClass) private view {
@@ -573,37 +618,16 @@ contract StreamMetadataRouter is
         returns (bytes32 consent, bytes32 ratification)
     {
         _requireSelectedArtistRegistry();
-        (bool ratified, bytes32 ratifiedState, bytes32 record) = IStreamArtistContentRatification(
-                address(artistRegistry)
-            ).firstReleaseRatification(collectionId);
-        if (!ratified) {
-            if (
-                core.collectionMintedEver(collectionId) == 0
-                    || artistRegistry.attribution(collectionId).nominatedArtist == address(0)
-            ) return (0, 0);
-        } else {
-            bytes32 current = _contentState(collectionId);
-            if (
-                record == bytes32(0)
-                    || (current != ratifiedState
-                        && (_evolutionRatification[collectionId] != record
-                            || _evolutionContent[collectionId] != current))
-            ) {
-                revert ArtistContentEvolutionBroken(collectionId);
-            }
-            ratification = record;
-        }
-        try IStreamArtistContentAuthority(address(artistRegistry))
-            .contentConsentEvidence(collectionId, familyId, newStateHash) returns (
-            bytes32 evidence
-        ) {
-            consent = evidence;
-        } catch {
-            revert ArtistContentAuthorizationRequired(collectionId);
-        }
-        if (consent == bytes32(0)) revert ArtistContentAuthorizationRequired(collectionId);
-        if (consumedArtistContentConsent[consent]) revert ArtistContentConsentConsumed(consent);
-        consumedArtistContentConsent[consent] = true;
+        return StreamMetadataContentAuthorization.authorize(
+            consumedArtistContentConsent,
+            _evolutionRatification,
+            _evolutionContent,
+            StreamMetadataContentAuthorization.Context(
+                address(core), address(artistRegistry), collectionId, _contentState(collectionId)
+            ),
+            familyId,
+            newStateHash
+        );
     }
 
     function _recordContentApplication(
@@ -613,12 +637,15 @@ contract StreamMetadataRouter is
         bytes32 ratification
     ) private {
         if (consent == bytes32(0)) return;
-        bytes32 current = _contentState(collectionId);
-        if (ratification != bytes32(0)) {
-            _evolutionRatification[collectionId] = ratification;
-            _evolutionContent[collectionId] = current;
-        }
-        emit ArtistContentConsentApplied(collectionId, familyId, consent, current, 1);
+        StreamMetadataContentAuthorization.recordApplication(
+            _evolutionRatification,
+            _evolutionContent,
+            collectionId,
+            familyId,
+            consent,
+            ratification,
+            _contentState(collectionId)
+        );
     }
 
     function _requireSelectedArtistRegistry() private view {
@@ -654,12 +681,12 @@ contract StreamMetadataRouter is
         returns (string memory)
     {
         _requireCore(core_);
-        TokenFacts memory facts = _tokenFacts(tokenId, true);
+        StreamMetadataTokenReads.TokenFacts memory facts = _tokenFacts(tokenId, true);
         if (!facts.finalized) revert TokenEntropyNotFinalized(tokenId);
         return _renderToken(facts, false);
     }
 
-    function _renderToken(TokenFacts memory facts, bool asURI)
+    function _renderToken(StreamMetadataTokenReads.TokenFacts memory facts, bool asURI)
         private
         view
         returns (string memory)
@@ -691,41 +718,14 @@ contract StreamMetadataRouter is
     function _tokenFacts(uint256 tokenId, bool allowBurned)
         private
         view
-        returns (TokenFacts memory facts)
+        returns (StreamMetadataTokenReads.TokenFacts memory facts)
     {
-        (bool exists, uint256 collectionId, uint256 serial, bool burned) =
-            core.tokenCollectionIdentity(tokenId);
-        if (!exists || (burned && !allowBurned)) revert InvalidToken(tokenId);
-        uint8 lifecycle = core.tokenLifecycle(tokenId);
-        if (burned
-                ? lifecycle != uint8(StreamTokenLifecycle.BURNED)
-                : lifecycle != uint8(StreamTokenLifecycle.MINTED)) {
-            revert InvalidToken(tokenId);
-        }
-        address coordinator = core.coordinatorAtMint(tokenId);
-        (bytes32 seed, bool finalized) = IStreamEntropyView(coordinator).tokenSeed(tokenId);
-        StreamEntropyStatus entropyStatus =
-            IStreamEntropyView(coordinator).tokenEntropyStatus(tokenId);
-        string memory state = finalized
-            ? "final"
-            : entropyStatus == StreamEntropyStatus.STALE
-                ? "stale"
-                : entropyStatus == StreamEntropyStatus.FAILED ? "failed" : "pending";
-        return TokenFacts(tokenId, collectionId, serial, seed, finalized, state);
+        return StreamMetadataTokenReads.facts(address(core), tokenId, allowBurned);
     }
 
     function _artistJSON(uint256 collectionId) private view returns (bytes memory) {
-        ArtistPresentation storage snapshot = _artistPresentation[collectionId];
-        if (snapshot.locked) {
-            return StreamMetadataTokenRenderer.artistFields(
-                snapshot.nominatedArtist, snapshot.identityRecordHash, snapshot.acceptanceRecordHash
-            );
-        }
-        IStreamCollectionArtistRegistry.Attribution memory record =
-            artistRegistry.attribution(collectionId);
-        if (record.artist == address(0)) return ',"artist_attribution":"unaccepted"';
-        return StreamMetadataTokenRenderer.artistFields(
-            record.artist, record.identityHash, record.acceptanceHash
+        return StreamMetadataTokenReads.artistJSON(
+            _artistPresentation, address(artistRegistry), collectionId
         );
     }
 

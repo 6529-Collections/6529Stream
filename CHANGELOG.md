@@ -7,6 +7,17 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added artist-approved collection-root publication backed by verified preserved
+  manifests, exact governed interpretation bytes and publisher grants, with
+  append-only history, atomic consent/evolution and Safe calls. The complete
+  artist/provider/Finality deployment and additional scope profiles remain open.
+- Added pinned IIIF Presentation 3 correspondence for four media types, exact
+  numeric/identity handling and original-source provenance. Seven generators
+  and all 28 example outputs pass integration readback; the reviewed test union
+  contains 183 distinct cases. Complete museum conformance remains open.
+- Corrected artist Finality admission to distinguish the metadata renderer from
+  the generic record host, and reduced delegation compiler stack lifetimes
+  without changing signed commitments.
 - Added incremental verification of complete content-leaf manifests against
   actual checkpoint fields and preserved artifact bytes, with stable archival
   completion identity, historical reads and Safe calls. Authoritative root

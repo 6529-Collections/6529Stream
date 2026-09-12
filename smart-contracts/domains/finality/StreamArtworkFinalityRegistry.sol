@@ -84,6 +84,10 @@ contract StreamArtworkFinalityRegistry is
     IStreamCoreFinalityAdapter public immutable coreFinalityAdapter;
     IStreamFinalityMetadataReads public immutable metadataReads;
     address public immutable scopeEvidenceProvider;
+    /// @notice Original provider runtime pin for publication before a content root exists.
+    function scopeEvidenceProviderCodeHash() external view returns (bytes32) {
+        return _providerCodeHash;
+    }
     address public immutable override artifactCoverage;
     bytes32 private immutable _artifactCodeHash;
     IStreamFinalitySanctionReads public immutable sanctionReads;

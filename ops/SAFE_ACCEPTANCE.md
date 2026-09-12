@@ -36,6 +36,17 @@ The integrator owns the combined inventory; each builder supplies its domain's
 rows and executable evidence. Final acceptance requires no unclassified or
 uncovered supported ABI functions, rather than a sample of wallet workflows.
 
+## Content-root publication increment
+
+The focused [root-publication tests](../test/unit/metadata/StreamContentRootPublication.t.sol)
+use a real two-owner, two-signature Safe 1.4.1 for every newly introduced caller
+function: preview, publication, current head, retained record and scoped root.
+They also call the extended `artistContentFamilyState`. A separate
+[composition test](../test/unit/metadata/StreamContentRootComposition.t.sol)
+executes actual preserved-root publication through that Safe. Both classes of
+publisher grant are exercised. This is scoped evidence; the complete ABI,
+version, nested-wallet and rejection matrix above remains required.
+
 ## Shared foundation
 
 Use the [pinned official Safe fixtures](../test/fixtures/safe/README.md) and

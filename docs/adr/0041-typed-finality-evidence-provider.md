@@ -75,6 +75,37 @@ does not by itself complete that renderer conformance or permit hiding later
 disputes. The corresponding schema and public presentation behavior must be
 explicit before accepting the complete profile.
 
+## Authoritative collection-root publication
+
+The fixed Router owns the authoritative root that changes its `CONTENT_ROOT`
+artist-content family. The generic metadata host retains interpretation and
+publisher-grant ownership. An immutable provider exposes its metadata host,
+schema registry and complete-leaf verifier with their original runtime hashes;
+the Finality registry exposes its original provider hash. Root preparation
+checks the selected Core pointers and all reciprocal bindings, including the
+artist facade's fixed Finality registry. The approved route commits ten actual
+component addresses and runtime hashes, including Core and artist facade.
+
+Collection metadata administration maps to the existing `SNAPSHOT` family
+class-7 grant at that collection; global administration maps to its class-8
+grant at scope zero. Class 7 takes precedence when both grants apply. The chosen
+publisher, class and nonzero revision enter the exact artist-approved state.
+This mapping adds no numbered genesis role and does not allow a generic record
+to claim typed root authority. Both root and leaf definition pairs must be
+active and contain the exact fixed document bytes registered under `RAW_BYTES`.
+
+Publication always needs exact operation-17 artist consent, including when
+ordinary pre-mint content configuration would be allowed without consent.
+The append-only record binds its predecessor and original manifest verification.
+Current manifest validity is checked again after consent handling, before any
+new root becomes authoritative. Consent, lineage and ratification evolution
+roll back together on failure. Historical reads do not require new-publication
+eligibility. The serving-source commitment excludes the root aggregate to avoid
+a self-invalidating checkpoint. See the
+[caller guide](../integrations/content-root-publication.md) for profile and gas
+boundaries. The complete normative publication facade, scope profiles and actual
+artist/provider/Finality composition remain required.
+
 ## Delivery boundaries
 
 This design neither changes permanent artist signing preimages nor grants

@@ -47,10 +47,12 @@ The verifier compares all six fields byte for byte with the checkpoint's stored
 leaves. It does not accept a caller's separately supplied token list or replace
 the existing ordered content tree with the manifest hash.
 
-These identifiers specify the implemented encoding. Governed schema and
-canonicalization registration, exact definition checks at authoritative root
-publication, and the artist association remain delivery requirements. A
-permissionless artifact carrying these identifiers does not satisfy them.
+These identifiers specify the implemented encoding. The
+[root-publication consumer](content-root-publication.md) checks governed exact
+schema/canonicalization definitions, current artist association and consent.
+A permissionless artifact carrying these identifiers does not satisfy those
+checks by itself. Complete producer/artist/Finality deployment acceptance remains
+separate from these focused implementations.
 
 ## Preserve, verify and consume
 

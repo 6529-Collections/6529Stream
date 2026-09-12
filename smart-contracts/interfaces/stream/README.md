@@ -7,6 +7,7 @@ not select a different contract or grant a caller additional authority.
 | Operation | Import | Implementation |
 | --- | --- | --- |
 | Current collection record bytes, family grants and attributed history | [IStreamCollectionMetadataV1](metadata/IStreamCollectionMetadataV1.sol) | [StreamCollectionMetadataV1](../../domains/metadata/StreamCollectionMetadataV1.sol); see [record guide](../../../docs/integrations/metadata-records.md) |
+| Artist-approved publication of a verified collection content root | [IStreamContentRootPublication](metadata/IStreamContentRootPublication.sol) | [StreamMetadataRouter](../../domains/metadata/StreamMetadataRouter.sol); see [publication guide](../../../docs/integrations/content-root-publication.md) |
 | Token ownership and complete permanent Core API | [core/IStreamCore.sol](core/IStreamCore.sol) | [StreamCore](../../core/StreamCore.sol) |
 | Native fixed-price mint | [mint/IStreamFixedPriceSaleAdapter.sol](mint/IStreamFixedPriceSaleAdapter.sol) | [StreamFixedPriceSaleAdapter](../../domains/mint/StreamFixedPriceSaleAdapter.sol) |
 | Current shared-settlement native sales and price programs | [IStreamNativeFixedPriceSaleAdapter](mint/IStreamNativeFixedPriceSaleAdapter.sol), [IStreamNativePricePrograms](mint/IStreamNativePricePrograms.sol) | [StreamNativeFixedPriceSaleAdapter](../../domains/mint/StreamNativeFixedPriceSaleAdapter.sol) |
