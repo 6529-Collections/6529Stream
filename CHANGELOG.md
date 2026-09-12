@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Retained the pinned CRM and Linked Art vocabulary bytes and explicit
+  interpretation policy, with seven independently reviewed hierarchy and
+  domain/range tests. Complete JSON-LD and Linked Art validation remain separate.
 - Reworked collaborator binding serialization to avoid the default compiler's
   stack limit while preserving the exact sixteen-word preimage, ABI and
   selectors. Independent literal vectors and 256 fuzz inputs pass against the

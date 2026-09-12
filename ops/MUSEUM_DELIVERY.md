@@ -53,6 +53,13 @@ mapping and dependency closure, real recorded-state adapter and institutional
 evidence remain required; passing 32 foundation tests closes none of those
 larger acceptance gates by itself.
 
+Pinned [vocabulary interpretation](../docs/museum-vocabulary-interpretation.md)
+is integrated as `d1aa3652`, with seven reviewed cases passing again locally.
+The original CRM, Linked Art and enhancement bytes remain unchanged; a separate
+explicit policy adds the six missing class declarations needed by the current
+closed vocabulary. This proves the named hierarchy/domain/range rules used by
+that implementation, not full RDF/OWL reasoning or Linked Art model acceptance.
+
 ## Acceptance evidence
 
 All twelve gates in [MSM-CONFORMANCE](../docs/museum-semantic-mapping.md) and
