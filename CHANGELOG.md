@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the native clearing-sale consumer with immediate floor mints, permanent
+  buyer rebates, separate supplemental settlement and bounded refund escape.
+  Fifty-nine domain cases and fuzzing pass independent review. Current-contract
+  composition is running; collector gas exceeds the required ceiling and
+  optimization remains mandatory before deployment.
+- Added a network-derived Arweave inclusion fixture with exact source provenance,
+  positive and rejection tests, and changed-payload fuzzing in both compiler
+  profiles. This tests native inclusion without claiming consensus or independent
+  observer authentication.
+
 - Added the public archival-coverage prerequisite with quorum-authenticated
   Arweave checkpoints, native inclusion, independent storing-family receipts
   and current fixity records. Twenty-nine tests, two fuzz properties and separate

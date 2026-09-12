@@ -31,7 +31,7 @@ contract call, including owner actions, payments, NFT custody and reads.
 | --- | --- | --- |
 | Integrator | `codex/v1-integration` | Reveal policy/escrow, canonical role activation, current-stack composition, remaining entropy/recovery, operator/client migration and release |
 | Artist | `codex/v1-artist-authority` | Dismissal and cohort closure integrated `3489d360` / `09afe2b8`; estate activation, archival prerequisites and dependent successor authority now being built |
-| Revenue | `codex/v1-revenue` | Refund, standard Dutch and supplemental settlement `f49e7bc1` integrated; actual clearing consumer and rebate lifecycle being built |
+| Revenue | `codex/v1-revenue` | Clearing consumer `d807421e` integrated with 59 reviewed functional cases; current composition runs while aggregate/storage gas optimization continues |
 | Reviewer | Read-only across the above | Independent source, adversarial behavior, interface compatibility and matching runtime acceptance |
 
 Signing-domain discovery is integrated as `134e0f58`. The native fixed,
@@ -71,7 +71,12 @@ source/configuration gate remains separate work.
 Supplemental clearing settlement is integrated as `f49e7bc1`, with 21 new tests,
 103 prior regressions, five 256-input fuzz properties and both production
 compiler profiles independently accepted. This is a financial primitive tied
-to an original paid mint; the complete clearing consumer remains under construction.
+to an original paid mint. The complete clearing consumer is now integrated as
+`d807421e`: 59 domain cases, five fuzz properties and both compiler profiles
+pass independent review. Two current-contract Safe cases are running. Its first
+measured purchase costs 6,843,542 gas, above the 500,000 collector ceiling even
+before full cold composition; compression and shared-path slimming are active
+implementation work, and no deployment gas acceptance is claimed.
 The new fixed linked libraries are documented in its
 [integration guide](../docs/integrations/native-clearing-supplemental-settlement.md).
 
@@ -80,15 +85,20 @@ tests and 15 coverage tests, two fuzz properties and separate default compiler
 products pass independent review. Its explicit observer-quorum profile, native
 inclusion checks and independent storage/fixity records are described in
 [ADR 0031](../docs/adr/0031-quorum-anchored-estate-archival-profile.md).
-Estate/current-stack composition, actual-network rehearsal and the full call
-gas budget remain open. The artist builder owns estate activation next.
+The network-derived native inclusion fixture in `352e3e26` passes four cases
+and fuzzing in both profiles with independent review. It verifies a historical
+four-byte public payload and real native paths retrieved through one gateway;
+quorum and consensus authentication remain distinct. Five new current-contract
+2-of-3 Safe governance cases pass runtime and await final independent artifact
+review. Estate/current-stack composition, complete network rehearsal and the
+full call gas budget remain open. The artist builder owns estate activation.
 
 The deployment script's large positional return expression caused the isolated
 CI compiler failure. Named return fields fix that exact reproduction without
 changing its ABI or compiler settings (`fa52a5b3`). The separate compile against
 260 integrated deployment inputs also passes independent review; this is script
 code generation, not a deployment or full CI pass. Shared sale/permit interfaces
-are separated in `c2332e48`. The active source inventory now contains 383 files
+are separated in `c2332e48`. The active source inventory now contains 392 files
 and the layout check passes; the refresher's 46 tests passed at its earlier
 365-file checkpoint. Scoped formatting still identifies three artist collaborator
 files and the entropy coordinator for their owners to format at the next source
